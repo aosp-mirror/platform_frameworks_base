@@ -38,7 +38,7 @@ import android.app.PackageInstallObserver;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.StorageStatsManager;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -60,6 +60,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.util.AndroidException;
@@ -596,6 +597,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int MODULE_APEX_NAME = 0x00000001;
 
     /** @hide */
@@ -1986,10 +1988,11 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device supports a Context Hub.
+     * {@link #hasSystemFeature}: The device supports a Context Hub, used to expose the
+     * functionalities in {@link android.hardware.location.ContextHubManager}.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_CONTEXTHUB = "android.hardware.context_hub";
+    public static final String FEATURE_CONTEXT_HUB = "android.hardware.context_hub";
 
     /** {@hide} */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -2997,6 +3000,18 @@ public abstract class PackageManager {
     public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the requisite kernel support to support incremental delivery aka Incremental FileSystem.
+     *
+     * @see IncrementalManager#isEnabled
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_INCREMENTAL_DELIVERY =
+            "android.software.incremental_delivery";
+
+    /**
      * Extra field name for the URI to a verification file. Passed to a package
      * verifier.
      *
@@ -3359,15 +3374,24 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    public static final int FLAG_PERMISSION_DONT_AUTO_REVOKE = 1 << 17;
+    public static final int FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED = 1 << 17;
 
     /**
-     * Permission flag: Whether {@link #FLAG_PERMISSION_DONT_AUTO_REVOKE} state was set by user.
+     * Permission flag: Whether {@link #FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED} state was set by
+     * user.
      *
      * @hide
      */
     @SystemApi
-    public static final int FLAG_PERMISSION_DONT_AUTO_REVOKE_USER_SET = 1 << 18;
+    public static final int FLAG_PERMISSION_AUTO_REVOKE_USER_SET = 1 << 18;
+
+    /**
+     * Permission flag: Whether permission was revoked by auto-revoke.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_AUTO_REVOKED = 1 << 20;
 
     /**
      * Permission flags: Reserved for use by the permission controller.
@@ -3421,8 +3445,9 @@ public abstract class PackageManager {
             | FLAG_PERMISSION_GRANTED_BY_ROLE
             | FLAG_PERMISSION_REVOKED_COMPAT
             | FLAG_PERMISSION_ONE_TIME
-            | FLAG_PERMISSION_DONT_AUTO_REVOKE
-            | FLAG_PERMISSION_DONT_AUTO_REVOKE_USER_SET;
+            | FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED
+            | FLAG_PERMISSION_AUTO_REVOKE_USER_SET
+            | FLAG_PERMISSION_AUTO_REVOKED;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -3566,7 +3591,7 @@ public abstract class PackageManager {
      * @hide
      */
     @ChangeId
-    @Disabled
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     public static final long FILTER_APPLICATION_QUERY = 135549675L;
 
     /** {@hide} */
@@ -4246,7 +4271,9 @@ public abstract class PackageManager {
             FLAG_PERMISSION_GRANTED_BY_ROLE,
             FLAG_PERMISSION_REVOKED_COMPAT,
             FLAG_PERMISSION_ONE_TIME,
-            FLAG_PERMISSION_DONT_AUTO_REVOKE
+            FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED,
+            FLAG_PERMISSION_AUTO_REVOKE_USER_SET,
+            FLAG_PERMISSION_AUTO_REVOKED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
@@ -7383,8 +7410,9 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_GRANTED_BY_ROLE: return "GRANTED_BY_ROLE";
             case FLAG_PERMISSION_REVOKED_COMPAT: return "REVOKED_COMPAT";
             case FLAG_PERMISSION_ONE_TIME: return "ONE_TIME";
-            case FLAG_PERMISSION_DONT_AUTO_REVOKE: return "DONT_AUTO_REVOKE";
-            case FLAG_PERMISSION_DONT_AUTO_REVOKE_USER_SET: return "DONT_AUTO_REVOKE_USER_SET";
+            case FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED: return "AUTO_REVOKE_IF_UNUSED";
+            case FLAG_PERMISSION_AUTO_REVOKE_USER_SET: return "AUTO_REVOKE_USER_SET";
+            case FLAG_PERMISSION_AUTO_REVOKED: return "AUTO_REVOKED";
             default: return Integer.toString(flag);
         }
     }

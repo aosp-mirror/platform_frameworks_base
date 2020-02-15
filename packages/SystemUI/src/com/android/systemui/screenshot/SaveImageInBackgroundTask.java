@@ -38,7 +38,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -123,10 +122,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         if (isCancelled()) {
             return null;
         }
-
-        // By default, AsyncTask sets the worker thread to have background thread priority,
-        // so bump it back up so that we save a little quicker.
-        Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
         ContentResolver resolver = mContext.getContentResolver();
         Bitmap image = mParams.image;
@@ -222,11 +217,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mParams.clearImage();
             mParams.errorMsgResId = R.string.screenshot_failed_to_save_text;
             mParams.mActionsReadyListener.onActionsReady(null, null, null);
-        }
-
-        // Recycle the bitmap data
-        if (image != null) {
-            image.recycle();
         }
 
         return null;

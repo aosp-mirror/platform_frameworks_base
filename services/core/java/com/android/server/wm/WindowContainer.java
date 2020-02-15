@@ -365,6 +365,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // build a surface.
             setSurfaceControl(makeSurface().build());
             getPendingTransaction().show(mSurfaceControl);
+            onSurfaceShown(getPendingTransaction());
             updateSurfacePosition();
         } else {
             // If we have a surface but a new parent, we just need to perform a reparent. Go through
@@ -381,6 +382,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Either way we need to ask the parent to assign us a Z-order.
         mParent.assignChildLayers();
         scheduleAnimation();
+    }
+
+    /**
+     * Called when the surface is shown for the first time.
+     */
+    void onSurfaceShown(Transaction t) {
+        // do nothing
     }
 
     // Temp. holders for a chain of containers we are currently processing.
@@ -1425,6 +1433,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    void forAllTasks(Consumer<Task> callback, boolean traverseTopToBottom, Task excludedTask) {
+        final int count = mChildren.size();
+        if (traverseTopToBottom) {
+            for (int i = count - 1; i >= 0; --i) {
+                mChildren.get(i).forAllTasks(callback, traverseTopToBottom, excludedTask);
+            }
+        } else {
+            for (int i = 0; i < count; i++) {
+                mChildren.get(i).forAllTasks(callback, traverseTopToBottom, excludedTask);
+            }
+        }
+    }
+
     Task getTaskAbove(Task t) {
         return getTask(
                 (above) -> true, t, false /*includeBoundary*/, false /*traverseTopToBottom*/);
@@ -1895,7 +1916,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     @Override
     public Builder makeAnimationLeash() {
-        return makeSurface();
+        return makeSurface().setContainerLayer();
     }
 
     @Override
@@ -2294,6 +2315,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     RemoteToken getRemoteToken() {
         return mRemoteToken;
+    }
+
+    static WindowContainer fromBinder(IBinder binder) {
+        return RemoteToken.fromBinder(binder).getContainer();
     }
 
     static class RemoteToken extends IWindowContainer.Stub {

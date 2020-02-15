@@ -761,11 +761,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public int addAccessibilityInteractionConnection(IWindow windowToken,
+    public int addAccessibilityInteractionConnection(IWindow windowToken, IBinder leashToken,
             IAccessibilityInteractionConnection connection, String packageName,
             int userId) throws RemoteException {
         return mA11yWindowManager.addAccessibilityInteractionConnection(
-                windowToken, connection, packageName, userId);
+                windowToken, leashToken, connection, packageName, userId);
     }
 
     @Override
@@ -2639,6 +2639,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mWindowMagnificationMgr = new WindowMagnificationManager();
             }
             return mWindowMagnificationMgr;
+        }
+    }
+
+    @Override
+    public void associateEmbeddedHierarchy(@NonNull IBinder host, @NonNull IBinder embedded) {
+        synchronized (mLock) {
+            mA11yWindowManager.associateEmbeddedHierarchyLocked(host, embedded);
+        }
+    }
+
+    @Override
+    public void disassociateEmbeddedHierarchy(@NonNull IBinder token) {
+        synchronized (mLock) {
+            mA11yWindowManager.disassociateEmbeddedHierarchyLocked(token);
         }
     }
 

@@ -142,16 +142,6 @@ public class IncrementalManagerService extends IIncrementalManager.Stub  {
         }
     }
 
-    // TODO: remove this
-    @Override
-    public void newFileForDataLoader(int mountId, byte[] fileId, byte[] metadata) {
-        IDataLoader dataLoader = mDataLoaderManager.getDataLoader(mountId);
-        if (dataLoader == null) {
-            Slog.e(TAG, "Failed to retrieve data loader for ID=" + mountId);
-            return;
-        }
-    }
-
     @Override
     public void showHealthBlockedUI(int mountId) {
         // TODO(b/136132412): implement this

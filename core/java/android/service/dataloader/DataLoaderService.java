@@ -90,7 +90,7 @@ public abstract class DataLoaderService extends Service {
      * @hide
      */
     @SystemApi
-    public @Nullable DataLoader onCreateDataLoader() {
+    public @Nullable DataLoader onCreateDataLoader(@NonNull DataLoaderParams dataLoaderParams) {
         return null;
     }
 
@@ -240,7 +240,7 @@ public abstract class DataLoaderService extends Service {
     private native boolean nativeDestroyDataLoader(int storageId);
 
     private native boolean nativePrepareImage(int storageId,
-            Collection<InstallationFile> addedFiles, Collection<String> removedFiles);
+            List<InstallationFile> addedFiles, List<String> removedFiles);
 
     private static native void nativeWriteData(long nativeInstance, String name, long offsetBytes,
             long lengthBytes, ParcelFileDescriptor incomingFd);

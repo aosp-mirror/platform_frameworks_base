@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ungependa kuwasha wasifu wa kazini?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Hatua hii itawasha data, arifa, programu za kazini, arifa na vipengele vingine vya wasifu wa kazini"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Washa"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Programu haipatikani"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> haipatikani hivi sasa."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Programu hii iliundwa kwa ajili ya toleo la zamani la Android na huenda isifanye kazi vizuri. Jaribu kuangalia masasisho au uwasiliane na msanidi programu."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Angalia masasisho"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Una ujumbe mpya"</string>

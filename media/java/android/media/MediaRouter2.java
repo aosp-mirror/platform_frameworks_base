@@ -446,7 +446,7 @@ public class MediaRouter2 {
      * @param volume The new volume value between 0 and {@link MediaRoute2Info#getVolumeMax}.
      * @hide
      */
-    public void requestSetVolume(@NonNull MediaRoute2Info route, int volume) {
+    public void setRouteVolume(@NonNull MediaRoute2Info route, int volume) {
         Objects.requireNonNull(route, "route must not be null");
 
         Client2 client;
@@ -455,7 +455,7 @@ public class MediaRouter2 {
         }
         if (client != null) {
             try {
-                mMediaRouterService.requestSetVolume2(client, route, volume);
+                mMediaRouterService.setRouteVolume2(client, route, volume);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
             }
@@ -471,7 +471,8 @@ public class MediaRouter2 {
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getId(), route);
-                if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
+                if (route.isSystemRoute()
+                        || route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
                     addedRoutes.add(route);
                 }
             }
@@ -487,7 +488,8 @@ public class MediaRouter2 {
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.remove(route.getId());
-                if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
+                if (route.isSystemRoute()
+                        || route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
                     removedRoutes.add(route);
                 }
             }
@@ -503,7 +505,8 @@ public class MediaRouter2 {
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getId(), route);
-                if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
+                if (route.isSystemRoute()
+                        || route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
                     changedRoutes.add(route);
                 }
             }
@@ -643,8 +646,8 @@ public class MediaRouter2 {
     private List<MediaRoute2Info> filterRoutes(List<MediaRoute2Info> routes,
             RouteDiscoveryPreference discoveryRequest) {
         return routes.stream()
-                .filter(
-                        route -> route.hasAnyFeatures(discoveryRequest.getPreferredFeatures()))
+                .filter(route -> route.isSystemRoute()
+                        || route.hasAnyFeatures(discoveryRequest.getPreferredFeatures()))
                 .collect(Collectors.toList());
     }
 
@@ -872,12 +875,49 @@ public class MediaRouter2 {
         }
 
         /**
-         * @return the unmodifiable list of transferrable routes for the session.
+         * @return the unmodifiable list of transferable routes for the session.
          */
         @NonNull
-        public List<MediaRoute2Info> getTransferrableRoutes() {
+        public List<MediaRoute2Info> getTransferableRoutes() {
             synchronized (mControllerLock) {
-                return getRoutesWithIdsLocked(mSessionInfo.getTransferrableRoutes());
+                return getRoutesWithIdsLocked(mSessionInfo.getTransferableRoutes());
+            }
+        }
+
+        /**
+         * Gets information about how volume is handled on the session.
+         *
+         * @return {@link MediaRoute2Info#PLAYBACK_VOLUME_FIXED} or
+         * {@link MediaRoute2Info#PLAYBACK_VOLUME_VARIABLE}
+         */
+        @MediaRoute2Info.PlaybackVolume
+        public int getVolumeHandling() {
+            synchronized (mControllerLock) {
+                return mSessionInfo.getVolumeHandling();
+            }
+        }
+
+        /**
+         * Gets the maximum volume of the session.
+         */
+        public int getVolumeMax() {
+            synchronized (mControllerLock) {
+                return mSessionInfo.getVolumeMax();
+            }
+        }
+
+        /**
+         * Gets the current volume of the session.
+         * <p>
+         * When it's available, it represents the volume of routing session, which is a group
+         * of selected routes. To get the volume of a route,
+         * use {@link MediaRoute2Info#getVolume()}.
+         * </p>
+         * @see MediaRoute2Info#getVolume()
+         */
+        public int getVolume() {
+            synchronized (mControllerLock) {
+                return mSessionInfo.getVolume();
             }
         }
 
@@ -993,12 +1033,12 @@ public class MediaRouter2 {
          * all of the following conditions:
          * <ul>
          * <li>ID should not be included in {@link #getSelectedRoutes()}</li>
-         * <li>ID should be included in {@link #getTransferrableRoutes()}</li>
+         * <li>ID should be included in {@link #getTransferableRoutes()}</li>
          * </ul>
          * If the route doesn't meet any of above conditions, it will be ignored.
          *
          * @see #getSelectedRoutes()
-         * @see #getTransferrableRoutes()
+         * @see #getTransferableRoutes()
          * @see RoutingControllerCallback#onControllerUpdated
          */
         public void transferToRoute(@NonNull MediaRoute2Info route) {
@@ -1017,9 +1057,9 @@ public class MediaRouter2 {
                 return;
             }
 
-            List<MediaRoute2Info> transferrableRoutes = getTransferrableRoutes();
-            if (!checkRouteListContainsRouteId(transferrableRoutes, route.getId())) {
-                Log.w(TAG, "Ignoring transferring to a non-transferrable route=" + route);
+            List<MediaRoute2Info> transferableRoutes = getTransferableRoutes();
+            if (!checkRouteListContainsRouteId(transferableRoutes, route.getId())) {
+                Log.w(TAG, "Ignoring transferring to a non-transferable route=" + route);
                 return;
             }
 
@@ -1032,6 +1072,42 @@ public class MediaRouter2 {
                     mMediaRouterService.transferToRoute(client, getId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to transfer to route for session.", ex);
+                }
+            }
+        }
+
+        /**
+         * Requests a volume change for the remote session asynchronously.
+         *
+         * @param volume The new volume value between 0 and {@link RoutingController#getVolumeMax}
+         *               (inclusive).
+         * @see #getVolume()
+         */
+        public void setVolume(int volume) {
+            if (getVolumeHandling() == MediaRoute2Info.PLAYBACK_VOLUME_FIXED) {
+                Log.w(TAG, "setVolume: the routing session has fixed volume. Ignoring.");
+                return;
+            }
+            if (volume < 0 || volume > getVolumeMax()) {
+                Log.w(TAG, "setVolume: the target volume is out of range. Ignoring");
+                return;
+            }
+
+            synchronized (mControllerLock) {
+                if (mIsReleased) {
+                    Log.w(TAG, "setVolume is called on released controller. Ignoring.");
+                    return;
+                }
+            }
+            Client2 client;
+            synchronized (sRouterLock) {
+                client = mClient;
+            }
+            if (client != null) {
+                try {
+                    mMediaRouterService.setSessionVolume2(client, getId(), volume);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "setVolume: Failed to deliver request.", ex);
                 }
             }
         }
@@ -1080,7 +1156,7 @@ public class MediaRouter2 {
                     .map(MediaRoute2Info::getId).collect(Collectors.toList());
             List<String> deselectableRoutes = getDeselectableRoutes().stream()
                     .map(MediaRoute2Info::getId).collect(Collectors.toList());
-            List<String> transferrableRoutes = getTransferrableRoutes().stream()
+            List<String> transferableRoutes = getTransferableRoutes().stream()
                     .map(MediaRoute2Info::getId).collect(Collectors.toList());
 
             StringBuilder result = new StringBuilder()
@@ -1095,8 +1171,8 @@ public class MediaRouter2 {
                     .append(", deselectableRoutes={")
                     .append(deselectableRoutes)
                     .append("}")
-                    .append(", transferrableRoutes={")
-                    .append(transferrableRoutes)
+                    .append(", transferableRoutes={")
+                    .append(transferableRoutes)
                     .append("}")
                     .append(" }");
             return result.toString();

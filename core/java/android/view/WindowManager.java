@@ -3687,6 +3687,8 @@ public interface WindowManager extends ViewManager {
                     return "always";
                 case LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER:
                     return "never";
+                case LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES:
+                    return "shortEdges";
                 default:
                     return "unknown(" + mode + ")";
             }

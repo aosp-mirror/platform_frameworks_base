@@ -16,6 +16,7 @@
 
 #include "BinderIncrementalService.h"
 
+#include <android-base/logging.h>
 #include <binder/IResultReceiver.h>
 #include <binder/PermissionCache.h>
 #include <incfs.h>
@@ -24,7 +25,6 @@
 #include "jni.h"
 #include "nativehelper/JNIHelp.h"
 #include "path.h"
-#include <android-base/logging.h>
 
 using namespace std::literals;
 using namespace android::incremental;
@@ -117,10 +117,9 @@ binder::Status BinderIncrementalService::openStorage(const std::string& path,
 
 binder::Status BinderIncrementalService::createStorage(const std::string& path,
                                                        const DataLoaderParamsParcel& params,
+                                                       const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& listener,
                                                        int32_t createMode, int32_t* _aidl_return) {
-    *_aidl_return = mImpl.createStorage(path, const_cast<DataLoaderParamsParcel&&>(params),
-                                        android::incremental::IncrementalService::CreateOptions(
-                                                createMode));
+    *_aidl_return = mImpl.createStorage(path, const_cast<DataLoaderParamsParcel&&>(params), listener, android::incremental::IncrementalService::CreateOptions(createMode));
     return ok();
 }
 
@@ -274,6 +273,13 @@ binder::Status BinderIncrementalService::makeDirectories(int32_t storageId, cons
 
 binder::Status BinderIncrementalService::startLoading(int32_t storageId, bool* _aidl_return) {
     *_aidl_return = mImpl.startLoading(storageId);
+    return ok();
+}
+
+binder::Status BinderIncrementalService::configureNativeBinaries(
+        int32_t storageId, const std::string& apkFullPath, const std::string& libDirRelativePath,
+        const std::string& abi, bool* _aidl_return) {
+    *_aidl_return = mImpl.configureNativeBinaries(storageId, apkFullPath, libDirRelativePath, abi);
     return ok();
 }
 

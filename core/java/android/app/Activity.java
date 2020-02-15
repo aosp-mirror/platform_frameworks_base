@@ -126,6 +126,7 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
+import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.widget.AdapterView;
@@ -1056,7 +1057,10 @@ public class Activity extends ContextThemeWrapper
         } catch (RemoteException re) {
             re.rethrowFromSystemServer();
         }
-        // TODO(b/147750355): Pass locusId and bundle to the Content Capture.
+        // If locusId is not null pass it to the Content Capture.
+        if (locusId != null) {
+            setLocusContextToContentCapture(locusId, bundle);
+        }
     }
 
     /** Return the application that owns this activity. */
@@ -1207,6 +1211,19 @@ public class Activity extends ContextThemeWrapper
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
+    }
+
+    private void setLocusContextToContentCapture(LocusId locusId, @Nullable Bundle bundle) {
+        final ContentCaptureManager cm = getContentCaptureManager();
+        if (cm == null) return;
+
+        ContentCaptureContext.Builder contentCaptureContextBuilder =
+                new ContentCaptureContext.Builder(locusId);
+        if (bundle != null) {
+            contentCaptureContextBuilder.setExtras(bundle);
+        }
+        cm.getMainContentCaptureSession().setContentCaptureContext(
+                contentCaptureContextBuilder.build());
     }
 
     @Override
@@ -5810,9 +5827,9 @@ public class Activity extends ContextThemeWrapper
                 intent.prepareToLeaveProcess(this);
                 result = ActivityTaskManager.getService()
                     .startActivity(mMainThread.getApplicationThread(), getBasePackageName(),
-                            intent, intent.resolveTypeIfNeeded(getContentResolver()), mToken,
-                            mEmbeddedID, requestCode, ActivityManager.START_FLAG_ONLY_IF_NEEDED,
-                            null, options);
+                            getFeatureId(), intent,
+                            intent.resolveTypeIfNeeded(getContentResolver()), mToken, mEmbeddedID,
+                            requestCode, ActivityManager.START_FLAG_ONLY_IF_NEEDED, null, options);
             } catch (RemoteException e) {
                 // Empty
             }
@@ -6606,8 +6623,8 @@ public class Activity extends ContextThemeWrapper
         try {
             data.prepareToLeaveProcess(this);
             IIntentSender target =
-                ActivityManager.getService().getIntentSender(
-                        ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName,
+                ActivityManager.getService().getIntentSenderWithFeature(
+                        ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName, getFeatureId(),
                         mParent == null ? mToken : mParent.mToken,
                         mEmbeddedID, requestCode, new Intent[] { data }, null, flags, null,
                         getUserId());

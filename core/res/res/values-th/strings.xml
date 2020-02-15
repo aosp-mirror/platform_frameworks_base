@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"เปิดโปรไฟล์งานไหม"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"ระบบจะเปิดแอปงาน การแจ้งเตือน ข้อมูล และฟีเจอร์อื่นๆ ในโปรไฟล์งาน"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"เปิด"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"แอปไม่พร้อมใช้งาน"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่พร้อมใช้งานในขณะนี้"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"แอปนี้สร้างขึ้นเพื่อ Android เวอร์ชันเก่าและอาจทำงานผิดปกติ โปรดลองตรวจหาการอัปเดตหรือติดต่อนักพัฒนาซอฟต์แวร์"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ตรวจสอบอัปเดต"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"คุณมีข้อความใหม่"</string>

@@ -84,7 +84,7 @@ public class TestAccessPointBuilder {
         bundle.putParcelable(AccessPoint.KEY_NETWORKINFO, mNetworkInfo);
         bundle.putParcelable(AccessPoint.KEY_WIFIINFO, mWifiInfo);
         if (mFqdn != null) {
-            bundle.putString(AccessPoint.KEY_FQDN, mFqdn);
+            bundle.putString(AccessPoint.KEY_PASSPOINT_UNIQUE_ID, mFqdn);
         }
         if (mProviderFriendlyName != null) {
             bundle.putString(AccessPoint.KEY_PROVIDER_FRIENDLY_NAME, mProviderFriendlyName);

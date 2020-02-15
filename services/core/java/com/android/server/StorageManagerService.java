@@ -224,6 +224,7 @@ class StorageManagerService extends IStorageManager.Stub
      * disables FuseDaemon. If {@code 0}, uses the default value from the build system.
      */
     private static final String FUSE_ENABLED = "fuse_enabled";
+    private static final boolean DEFAULT_FUSE_ENABLED = true;
 
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
@@ -342,9 +343,43 @@ class StorageManagerService extends IStorageManager.Stub
      */
     private final Object mPackagesLock = new Object();
 
+    /**
+     * mLocalUnlockedUsers affects the return value of isUserUnlocked.  If
+     * any value in the array changes, then the binder cache for
+     * isUserUnlocked must be invalidated.  When adding mutating methods to
+     * WatchedLockedUsers, be sure to invalidate the cache in the new
+     * methods.
+     */
+    private class WatchedLockedUsers {
+        private int[] users = EmptyArray.INT;
+        public WatchedLockedUsers() {
+        }
+        public void append(int userId) {
+            users = ArrayUtils.appendInt(users, userId);
+            invalidateIsUserUnlockedCache();
+        }
+        public void remove(int userId) {
+            users = ArrayUtils.removeInt(users, userId);
+            invalidateIsUserUnlockedCache();
+        }
+        public boolean contains(int userId) {
+            return ArrayUtils.contains(users, userId);
+        }
+        public int[] all() {
+            return users;
+        }
+        @Override
+        public String toString() {
+            return Arrays.toString(users);
+        }
+        private void invalidateIsUserUnlockedCache() {
+            UserManager.invalidateIsUserUnlockedCache();
+        }
+    }
+
     /** Set of users that we know are unlocked. */
     @GuardedBy("mLock")
-    private int[] mLocalUnlockedUsers = EmptyArray.INT;
+    private WatchedLockedUsers mLocalUnlockedUsers = new WatchedLockedUsers();
     /** Set of users that system knows are unlocked. */
     @GuardedBy("mLock")
     private int[] mSystemUnlockedUsers = EmptyArray.INT;
@@ -1265,13 +1300,6 @@ class StorageManagerService extends IStorageManager.Stub
                     vol.state = newState;
                     onVolumeStateChangedLocked(vol, oldState, newState);
                 }
-                try {
-                    if (vol.type == VolumeInfo.TYPE_PRIVATE && state == VolumeInfo.STATE_MOUNTED) {
-                        mInstaller.onPrivateVolumeMounted(vol.getFsUuid());
-                    }
-                } catch (Installer.InstallerException e) {
-                    Slog.i(TAG, "Failed when private volume mounted " + vol, e);
-                }
             }
         }
 
@@ -1623,7 +1651,7 @@ class StorageManagerService extends IStorageManager.Stub
         // If there is no value in the property yet (first boot after data wipe), this value may be
         // incorrect until #updateFusePropFromSettings where we set the correct value and reboot if
         // different
-        mIsFuseEnabled = SystemProperties.getBoolean(PROP_FUSE, false);
+        mIsFuseEnabled = SystemProperties.getBoolean(PROP_FUSE, DEFAULT_FUSE_ENABLED);
         mContext = context;
         mResolver = mContext.getContentResolver();
         mCallbacks = new Callbacks(FgThread.get().getLooper());
@@ -1686,23 +1714,17 @@ class StorageManagerService extends IStorageManager.Stub
      *  and updates PROP_FUSE (reboots if changed).
      */
     private void updateFusePropFromSettings() {
-        boolean defaultFuseFlag = false;
-        boolean settingsFuseFlag = SystemProperties.getBoolean(PROP_SETTINGS_FUSE, defaultFuseFlag);
-        Slog.d(TAG, "FUSE flags. Settings: " + settingsFuseFlag + ". Default: " + defaultFuseFlag);
-
-        if (TextUtils.isEmpty(SystemProperties.get(PROP_SETTINGS_FUSE))) {
-            // Set default value of PROP_SETTINGS_FUSE and PROP_FUSE if it
-            // is unset (neither true nor false).
-            // This happens only on the first boot after wiping data partition
-            SystemProperties.set(PROP_SETTINGS_FUSE, Boolean.toString(defaultFuseFlag));
-            SystemProperties.set(PROP_FUSE, Boolean.toString(defaultFuseFlag));
-            return;
-        }
+        boolean settingsFuseFlag = SystemProperties.getBoolean(PROP_SETTINGS_FUSE,
+                DEFAULT_FUSE_ENABLED);
+        Slog.d(TAG, "FUSE flags. Settings: " + settingsFuseFlag
+                + ". Default: " + DEFAULT_FUSE_ENABLED);
 
         if (mIsFuseEnabled != settingsFuseFlag) {
             Slog.i(TAG, "Toggling persist.sys.fuse to " + settingsFuseFlag);
+            // Set prop_fuse to match prop_settings_fuse because it is used by native daemons like
+            // init, zygote, installd and vold
             SystemProperties.set(PROP_FUSE, Boolean.toString(settingsFuseFlag));
-            // Perform hard reboot to kick policy into place
+            // Then perform hard reboot to kick policy into place
             mContext.getSystemService(PowerManager.class).reboot("fuse_prop");
         }
     }
@@ -3042,7 +3064,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         synchronized (mLock) {
-            mLocalUnlockedUsers = ArrayUtils.appendInt(mLocalUnlockedUsers, userId);
+            mLocalUnlockedUsers.append(userId);
         }
     }
 
@@ -3058,14 +3080,14 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         synchronized (mLock) {
-            mLocalUnlockedUsers = ArrayUtils.removeInt(mLocalUnlockedUsers, userId);
+            mLocalUnlockedUsers.remove(userId);
         }
     }
 
     @Override
     public boolean isUserKeyUnlocked(int userId) {
         synchronized (mLock) {
-            return ArrayUtils.contains(mLocalUnlockedUsers, userId);
+            return mLocalUnlockedUsers.contains(userId);
         }
     }
 
@@ -3081,6 +3103,15 @@ class StorageManagerService extends IStorageManager.Stub
 
         try {
             mVold.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
+            // After preparing user storage, we should check if we should mount data mirror again,
+            // and we do it for user 0 only as we only need to do once for all users.
+            if (volumeUuid != null) {
+                final StorageManager storage = mContext.getSystemService(StorageManager.class);
+                VolumeInfo info = storage.findVolumeByUuid(volumeUuid);
+                if (info != null && userId == 0 && info.type == VolumeInfo.TYPE_PRIVATE) {
+                    mInstaller.tryMountDataMirror(volumeUuid);
+                }
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -3242,7 +3273,7 @@ class StorageManagerService extends IStorageManager.Stub
                         + " does not match calling user id " + userId);
             }
             try {
-                mVold.setupAppDir(appPath, matcher.group(1), callingUid);
+                mVold.setupAppDir(appPath, callingUid);
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed to prepare " + appPath + ": " + e);
             }
@@ -4177,7 +4208,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             pw.println();
-            pw.println("Local unlocked users: " + Arrays.toString(mLocalUnlockedUsers));
+            pw.println("Local unlocked users: " + mLocalUnlockedUsers);
             pw.println("System unlocked users: " + Arrays.toString(mSystemUnlockedUsers));
 
             final ContentResolver cr = mContext.getContentResolver();

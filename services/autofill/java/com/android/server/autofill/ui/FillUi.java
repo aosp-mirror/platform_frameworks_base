@@ -313,6 +313,8 @@ final class FillUi {
                         Slog.e(TAG, "Error inflating remote views", e);
                         continue;
                     }
+                    // TODO: Extract the shared filtering logic here and in FillUi to a common
+                    //  method.
                     final DatasetFieldFilter filter = dataset.getFilter(index);
                     Pattern filterPattern = null;
                     String valueText = null;
@@ -602,6 +604,7 @@ final class FillUi {
          * Returns whether this item matches the value input by the user so it can be included
          * in the filtered datasets.
          */
+        // TODO: Extract the shared filtering logic here and in FillUi to a common method.
         public boolean matches(CharSequence filterText) {
             if (TextUtils.isEmpty(filterText)) {
                 // Always show item when the user input is empty

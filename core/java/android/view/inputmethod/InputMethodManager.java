@@ -664,8 +664,6 @@ public final class InputMethodManager {
          */
         @Override
         public void setCurrentRootView(ViewRootImpl rootView) {
-            // If the mCurRootView is losing window focus, release the strong reference to it
-            // so as not to prevent it from being garbage-collected.
             if (mWindowFocusGainFuture != null) {
                 mWindowFocusGainFuture.cancel(false /* mayInterruptIfRunning */);
                 mWindowFocusGainFuture = null;

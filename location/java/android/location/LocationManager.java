@@ -22,6 +22,8 @@ import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
@@ -57,6 +59,7 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledRunnable;
 
 import java.util.Collections;
 import java.util.List;
@@ -81,8 +84,6 @@ import java.util.function.Consumer;
 @RequiresFeature(PackageManager.FEATURE_LOCATION)
 public class LocationManager {
 
-    private static final String TAG = "LocationManager";
-
     /**
      * For apps targeting Android K and above, supplied {@link PendingIntent}s must be targeted to a
      * specific package.
@@ -91,7 +92,7 @@ public class LocationManager {
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.JELLY_BEAN)
-    public static final long TARGETED_PENDING_INTENT = 148963590L;
+    private static final long TARGETED_PENDING_INTENT = 148963590L;
 
     /**
      * For apps targeting Android K and above, incomplete locations may not be passed to
@@ -251,7 +252,7 @@ public class LocationManager {
      * @hide
      */
     public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
-        "android.location.HIGH_POWER_REQUEST_CHANGE";
+            "android.location.HIGH_POWER_REQUEST_CHANGE";
 
     /**
      * Broadcast intent action for Settings app to inject a footer at the bottom of location
@@ -310,6 +311,8 @@ public class LocationManager {
             new GnssMeasurementsListenerManager();
     private final GnssNavigationMessageListenerManager mGnssNavigationMessageListenerTransport =
             new GnssNavigationMessageListenerManager();
+    private final GnssAntennaInfoListenerManager mGnssAntennaInfoListenerManager =
+            new GnssAntennaInfoListenerManager();
 
     /**
      * @hide
@@ -478,13 +481,11 @@ public class LocationManager {
     @TestApi
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public void setLocationEnabledForUser(boolean enabled, @NonNull UserHandle userHandle) {
-        Settings.Secure.putIntForUser(
-                mContext.getContentResolver(),
-                Settings.Secure.LOCATION_MODE,
-                enabled
-                        ? Settings.Secure.LOCATION_MODE_ON
-                        : Settings.Secure.LOCATION_MODE_OFF,
-                userHandle.getIdentifier());
+        try {
+            mService.setLocationEnabledForUser(enabled, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1217,7 +1218,7 @@ public class LocationManager {
      * the first fix.
      *
      * @param location newly available {@link Location} object
-     * @return true if the location was successfully injected, false otherwise
+     * @return true if the location was injected, false otherwise
      *
      * @throws IllegalArgumentException if location is null
      * @throws SecurityException if permissions are not present
@@ -1231,7 +1232,8 @@ public class LocationManager {
                 "incomplete location object, missing timestamp or accuracy?");
 
         try {
-            return mService.injectLocation(location);
+            mService.injectLocation(location);
+            return true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2196,6 +2198,35 @@ public class LocationManager {
     }
 
     /**
+     * Registers a GNSS Measurement callback.
+     *
+     * @param request  extra parameters to pass to GNSS measurement provider. For example, if {@link
+     *                 GnssRequest#isFullTracking()} is true, GNSS chipset switches off duty
+     *                 cycling.
+     * @param executor the executor that the callback runs on.
+     * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
+     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     * @throws IllegalArgumentException if request is null
+     * @throws IllegalArgumentException if executor is null
+     * @throws IllegalArgumentException if callback is null
+     * @throws SecurityException        if the ACCESS_FINE_LOCATION permission is not present
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, LOCATION_HARDWARE})
+    public boolean registerGnssMeasurementsCallback(
+            @NonNull GnssRequest request,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull GnssMeasurementsEvent.Callback callback) {
+        Preconditions.checkArgument(request != null, "invalid null request");
+        try {
+            return mGnssMeasurementsListenerManager.addListener(request, callback, executor);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Injects GNSS measurement corrections into the GNSS chipset.
      *
      * @param measurementCorrections a {@link GnssMeasurementCorrections} object with the GNSS
@@ -2227,6 +2258,41 @@ public class LocationManager {
             @NonNull GnssMeasurementsEvent.Callback callback) {
         try {
             mGnssMeasurementsListenerManager.removeListener(callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers a Gnss Antenna Info callback.
+     *
+     * @param executor the executor that the callback runs on.
+     * @param callback a {@link GnssAntennaInfo.Callback} object to register.
+     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if executor is null
+     * @throws IllegalArgumentException if callback is null
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
+     */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean registerAntennaInfoCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull GnssAntennaInfo.Callback callback) {
+        try {
+            return mGnssAntennaInfoListenerManager.addListener(callback, executor);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters a GNSS Antenna Info callback.
+     *
+     * @param callback a {@link GnssAntennaInfo.Callback} object to remove.
+     */
+    public void unregisterAntennaInfoCallback(@NonNull GnssAntennaInfo.Callback callback) {
+        try {
+            mGnssAntennaInfoListenerManager.removeListener(callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2539,18 +2605,28 @@ public class LocationManager {
                 return;
             }
 
-            mExecutor.execute(() -> {
-                Consumer<Location> consumer;
-                synchronized (GetCurrentLocationTransport.this) {
-                    if (mConsumer == null) {
-                        return;
-                    }
-                    consumer = mConsumer;
-                    cancel();
-                }
+            PooledRunnable runnable =
+                    obtainRunnable(GetCurrentLocationTransport::acceptResult, this, location)
+                            .recycleOnUse();
+            try {
+                mExecutor.execute(runnable);
+            } catch (RejectedExecutionException e) {
+                runnable.recycle();
+                throw e;
+            }
+        }
 
-                consumer.accept(location);
-            });
+        private void acceptResult(Location location) {
+            Consumer<Location> consumer;
+            synchronized (this) {
+                if (mConsumer == null) {
+                    return;
+                }
+                consumer = mConsumer;
+                cancel();
+            }
+
+            consumer.accept(location);
         }
     }
 
@@ -2584,27 +2660,33 @@ public class LocationManager {
                 return;
             }
 
+            PooledRunnable runnable =
+                    obtainRunnable(LocationListenerTransport::acceptLocation, this, currentExecutor,
+                            location).recycleOnUse();
             try {
-                currentExecutor.execute(() -> {
-                    try {
-                        if (currentExecutor != mExecutor) {
-                            return;
-                        }
-
-                        // we may be under the binder identity if a direct executor is used
-                        long identity = Binder.clearCallingIdentity();
-                        try {
-                            mListener.onLocationChanged(location);
-                        } finally {
-                            Binder.restoreCallingIdentity(identity);
-                        }
-                    } finally {
-                        locationCallbackFinished();
-                    }
-                });
+                currentExecutor.execute(runnable);
             } catch (RejectedExecutionException e) {
+                runnable.recycle();
                 locationCallbackFinished();
                 throw e;
+            }
+        }
+
+        private void acceptLocation(Executor currentExecutor, Location location) {
+            try {
+                if (currentExecutor != mExecutor) {
+                    return;
+                }
+
+                // we may be under the binder identity if a direct executor is used
+                long identity = Binder.clearCallingIdentity();
+                try {
+                    mListener.onLocationChanged(location);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            } finally {
+                locationCallbackFinished();
             }
         }
 
@@ -2615,25 +2697,13 @@ public class LocationManager {
                 return;
             }
 
+            PooledRunnable runnable =
+                    obtainRunnable(LocationListenerTransport::acceptProviderChange, this,
+                            currentExecutor, provider, true).recycleOnUse();
             try {
-                currentExecutor.execute(() -> {
-                    try {
-                        if (currentExecutor != mExecutor) {
-                            return;
-                        }
-
-                        // we may be under the binder identity if a direct executor is used
-                        long identity = Binder.clearCallingIdentity();
-                        try {
-                            mListener.onProviderEnabled(provider);
-                        } finally {
-                            Binder.restoreCallingIdentity(identity);
-                        }
-                    } finally {
-                        locationCallbackFinished();
-                    }
-                });
+                currentExecutor.execute(runnable);
             } catch (RejectedExecutionException e) {
+                runnable.recycle();
                 locationCallbackFinished();
                 throw e;
             }
@@ -2646,27 +2716,38 @@ public class LocationManager {
                 return;
             }
 
+            PooledRunnable runnable =
+                    obtainRunnable(LocationListenerTransport::acceptProviderChange, this,
+                            currentExecutor, provider, false).recycleOnUse();
             try {
-                currentExecutor.execute(() -> {
-                    try {
-                        if (currentExecutor != mExecutor) {
-                            return;
-                        }
-
-                        // we may be under the binder identity if a direct executor is used
-                        long identity = Binder.clearCallingIdentity();
-                        try {
-                            mListener.onProviderDisabled(provider);
-                        } finally {
-                            Binder.restoreCallingIdentity(identity);
-                        }
-                    } finally {
-                        locationCallbackFinished();
-                    }
-                });
+                currentExecutor.execute(runnable);
             } catch (RejectedExecutionException e) {
+                runnable.recycle();
                 locationCallbackFinished();
                 throw e;
+            }
+        }
+
+        private void acceptProviderChange(Executor currentExecutor, String provider,
+                boolean enabled) {
+            try {
+                if (currentExecutor != mExecutor) {
+                    return;
+                }
+
+                // we may be under the binder identity if a direct executor is used
+                long identity = Binder.clearCallingIdentity();
+                try {
+                    if (enabled) {
+                        mListener.onProviderEnabled(provider);
+                    } else {
+                        mListener.onProviderDisabled(provider);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            } finally {
+                locationCallbackFinished();
             }
         }
 
@@ -2739,8 +2820,7 @@ public class LocationManager {
     }
 
     private class GnssStatusListenerManager extends
-            AbstractListenerManager<GnssStatus.Callback> {
-
+            AbstractListenerManager<Void, GnssStatus.Callback> {
         @Nullable
         private IGnssStatusListener mListenerTransport;
 
@@ -2758,19 +2838,19 @@ public class LocationManager {
 
         public boolean addListener(@NonNull GpsStatus.Listener listener, @NonNull Executor executor)
                 throws RemoteException {
-            return addInternal(listener, executor);
+            return addInternal(null, listener, executor);
         }
 
         public boolean addListener(@NonNull OnNmeaMessageListener listener,
                 @NonNull Handler handler)
                 throws RemoteException {
-            return addInternal(listener, handler);
+            return addInternal(null, listener, handler);
         }
 
         public boolean addListener(@NonNull OnNmeaMessageListener listener,
                 @NonNull Executor executor)
                 throws RemoteException {
-            return addInternal(listener, executor);
+            return addInternal(null, listener, executor);
         }
 
         @Override
@@ -2809,7 +2889,7 @@ public class LocationManager {
         }
 
         @Override
-        protected boolean registerService() throws RemoteException {
+        protected boolean registerService(Void ignored) throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
             GnssStatusListener transport = new GnssStatusListener();
@@ -2869,17 +2949,17 @@ public class LocationManager {
     }
 
     private class GnssMeasurementsListenerManager extends
-            AbstractListenerManager<GnssMeasurementsEvent.Callback> {
+            AbstractListenerManager<GnssRequest, GnssMeasurementsEvent.Callback> {
 
         @Nullable
         private IGnssMeasurementsListener mListenerTransport;
 
         @Override
-        protected boolean registerService() throws RemoteException {
+        protected boolean registerService(GnssRequest request) throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
             GnssMeasurementsListener transport = new GnssMeasurementsListener();
-            if (mService.addGnssMeasurementsListener(transport, mContext.getPackageName(),
+            if (mService.addGnssMeasurementsListener(request, transport, mContext.getPackageName(),
                     mContext.getFeatureId(), "gnss measurement callback")) {
                 mListenerTransport = transport;
                 return true;
@@ -2896,6 +2976,18 @@ public class LocationManager {
             mListenerTransport = null;
         }
 
+        @Override
+        @Nullable
+        protected GnssRequest merge(@NonNull GnssRequest[] requests) {
+            Preconditions.checkArgument(requests.length > 0);
+            for (GnssRequest request : requests) {
+                if (request.isFullTracking()) {
+                    return request;
+                }
+            }
+            return requests[0];
+        }
+
         private class GnssMeasurementsListener extends IGnssMeasurementsListener.Stub {
             @Override
             public void onGnssMeasurementsReceived(final GnssMeasurementsEvent event) {
@@ -2910,13 +3002,13 @@ public class LocationManager {
     }
 
     private class GnssNavigationMessageListenerManager extends
-            AbstractListenerManager<GnssNavigationMessage.Callback> {
+            AbstractListenerManager<Void, GnssNavigationMessage.Callback> {
 
         @Nullable
         private IGnssNavigationMessageListener mListenerTransport;
 
         @Override
-        protected boolean registerService() throws RemoteException {
+        protected boolean registerService(Void ignored) throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
             GnssNavigationMessageListener transport = new GnssNavigationMessageListener();
@@ -2950,19 +3042,61 @@ public class LocationManager {
         }
     }
 
+    private class GnssAntennaInfoListenerManager extends
+            AbstractListenerManager<Void, GnssAntennaInfo.Callback> {
+
+        @Nullable
+        private IGnssAntennaInfoListener mListenerTransport;
+
+        @Override
+        protected boolean registerService(Void ignored) throws RemoteException {
+            Preconditions.checkState(mListenerTransport == null);
+
+            GnssAntennaInfoListener transport = new GnssAntennaInfoListener();
+            if (mService.addGnssAntennaInfoListener(transport, mContext.getPackageName(),
+                    mContext.getFeatureId(), "gnss antenna info callback")) {
+                mListenerTransport = transport;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        protected void unregisterService() throws RemoteException {
+            Preconditions.checkState(mListenerTransport != null);
+
+            mService.removeGnssAntennaInfoListener(mListenerTransport);
+            mListenerTransport = null;
+        }
+
+        private class GnssAntennaInfoListener extends IGnssAntennaInfoListener.Stub {
+            @Override
+            public void onGnssAntennaInfoReceived(final List<GnssAntennaInfo> gnssAntennaInfos) {
+                execute((callback) -> callback.onGnssAntennaInfoReceived(gnssAntennaInfos));
+            }
+
+            @Override
+            public void onStatusChanged(int status) {
+                execute((listener) -> listener.onStatusChanged(status));
+            }
+        }
+
+    }
+
     private class BatchedLocationCallbackManager extends
-            AbstractListenerManager<BatchedLocationCallback> {
+            AbstractListenerManager<Void, BatchedLocationCallback> {
 
         @Nullable
         private IBatchedLocationCallback mListenerTransport;
 
         @Override
-        protected boolean registerService() throws RemoteException {
+        protected boolean registerService(Void ignored) throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
             BatchedLocationCallback transport = new BatchedLocationCallback();
             if (mService.addGnssBatchingCallback(transport, mContext.getPackageName(),
-                     mContext.getFeatureId(), "batched location callback")) {
+                    mContext.getFeatureId(), "batched location callback")) {
                 mListenerTransport = transport;
                 return true;
             } else {

@@ -258,13 +258,13 @@ public class Surface implements Parcelable {
      */
     public void release() {
         synchronized (mLock) {
-            if (mNativeObject != 0) {
-                nativeRelease(mNativeObject);
-                setNativeObjectLocked(0);
-            }
             if (mHwuiContext != null) {
                 mHwuiContext.destroy();
                 mHwuiContext = null;
+            }
+            if (mNativeObject != 0) {
+                nativeRelease(mNativeObject);
+                setNativeObjectLocked(0);
             }
         }
     }

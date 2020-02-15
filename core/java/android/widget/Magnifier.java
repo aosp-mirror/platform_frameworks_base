@@ -45,6 +45,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.PixelCopy;
@@ -76,6 +77,8 @@ public final class Magnifier {
     // the Handler of this Thread when the copy is finished.
     private static final HandlerThread sPixelCopyHandlerThread =
             new HandlerThread("magnifier pixel copy result handler");
+    // The width of the ramp region in DP on the left & right sides of the fish-eye effect.
+    private static final float FISHEYE_RAMP_WIDTH = 12f;
 
     // The view to which this magnifier is attached.
     private final View mView;
@@ -151,6 +154,8 @@ public final class Magnifier {
     // The horizontal bounds of the content source in pixels, relative to the view.
     private int mLeftBound = Integer.MIN_VALUE;
     private int mRightBound = Integer.MAX_VALUE;
+    // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
+    private final int mRamp;
 
     /**
      * Initializes a magnifier.
@@ -232,6 +237,8 @@ public final class Magnifier {
         mBottomContentBound = params.mBottomContentBound;
         // The view's surface coordinates will not be updated until the magnifier is first shown.
         mViewCoordinatesInSurface = new int[2];
+        mRamp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, FISHEYE_RAMP_WIDTH,
+                mView.getContext().getResources().getDisplayMetrics());
     }
 
     static {
@@ -303,16 +310,54 @@ public final class Magnifier {
             // The magnifier center is the same as source center in new style.
             magnifierCenterX = mClampedCenterZoomCoords.x - mViewCoordinatesInSurface[0];
             magnifierCenterY = mClampedCenterZoomCoords.y - mViewCoordinatesInSurface[1];
+
+            // mLeftBound & mRightBound (typically the text line left/right) is for magnified
+            // content. However the PixelCopy requires the pre-magnified bounds.
+            // The below logic calculates the leftBound & rightBound for the pre-magnified bounds.
+            final float rampPre =
+                    (mSourceWidth - (mSourceWidth - 2 * mRamp) / mZoom) / 2;
+
+            // Calculates the pre-zoomed left edge.
+            // The leftEdge moves from the left of view towards to sourceCenterX, considering the
+            // fisheye-like zooming.
+            final float x0 = sourceCenterX - mSourceWidth / 2;
+            final float rampX0 = x0 + mRamp;
+            float leftEdge = 0;
+            if (leftEdge > rampX0) {
+                // leftEdge is in the zoom range, the distance from leftEdge to sourceCenterX
+                // should reduce per mZoom.
+                leftEdge = sourceCenterX - (sourceCenterX - leftEdge) / mZoom;
+            } else if (leftEdge > x0) {
+                // leftEdge is in the ramp range, the distance from leftEdge to rampX0 should
+                // increase per ramp zoom (ramp / rampPre).
+                leftEdge = x0 + rampPre - (rampX0 - leftEdge) * rampPre / mRamp;
+            }
+            int leftBound = Math.min(Math.max((int) leftEdge, mLeftBound), mRightBound);
+
+            // Calculates the pre-zoomed right edge.
+            // The rightEdge moves from the right of view towards to sourceCenterX, considering the
+            // fisheye-like zooming.
+            final float x1 = sourceCenterX + mSourceWidth / 2;
+            final float rampX1 = x1 - mRamp;
+            float rightEdge = mView.getWidth();
+            if (rightEdge < rampX1) {
+                // rightEdge is in the zoom range, the distance from rightEdge to sourceCenterX
+                // should reduce per mZoom.
+                rightEdge = sourceCenterX + (rightEdge - sourceCenterX) / mZoom;
+            } else if (rightEdge < x1) {
+                // rightEdge is in the ramp range, the distance from rightEdge to rampX1 should
+                // increase per ramp zoom (ramp / rampPre).
+                rightEdge = x1 - rampPre + (rightEdge - rampX1) * rampPre / mRamp;
+            }
+            int rightBound = Math.max(leftBound, Math.min((int) rightEdge, mRightBound));
+
             // Gets the startX for new style, which should be bounded by the horizontal bounds.
             // Also calculates the left/right cut width for pixel copy.
-            final int left = startX;
-            final int right = startX + mSourceWidth;
-            final int leftBound = mViewCoordinatesInSurface[0] + Math.max(0, mLeftBound);
-            final int rightBound =
-                    mViewCoordinatesInSurface[0] + Math.min(mView.getWidth(), mRightBound);
-            startX = Math.max(left, leftBound);
-            mLeftCutWidth = Math.max(0, leftBound - left);
-            mRightCutWidth = Math.max(0, right - rightBound);
+            leftBound += mViewCoordinatesInSurface[0];
+            rightBound += mViewCoordinatesInSurface[0];
+            mLeftCutWidth = Math.max(0, leftBound - startX);
+            mRightCutWidth = Math.max(0, startX + mSourceWidth - rightBound);
+            startX = Math.max(startX, leftBound);
         }
         obtainWindowCoordinates(magnifierCenterX, magnifierCenterY);
 
@@ -322,7 +367,7 @@ public final class Magnifier {
                 synchronized (mLock) {
                     mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
                             mParentSurface.mSurfaceControl, mWindowWidth, mWindowHeight, mZoom,
-                            mWindowElevation, mWindowCornerRadius,
+                            mRamp, mWindowElevation, mWindowCornerRadius,
                             mOverlay != null ? mOverlay : new ColorDrawable(Color.TRANSPARENT),
                             Handler.getMain() /* draw the magnifier on the UI thread */, mLock,
                             mCallback, mIsFishEyeStyle);
@@ -854,8 +899,6 @@ public final class Magnifier {
         // The z of the magnifier surface, defining its z order in the list of
         // siblings having the same parent surface (usually the main app surface).
         private static final int SURFACE_Z = 5;
-        // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
-        private static final int FISHEYE_RAMP_WIDTH = 30;
 
         // Display associated to the view the magnifier is attached to.
         private final Display mDisplay;
@@ -905,6 +948,8 @@ public final class Magnifier {
         private Bitmap mCurrentContent;
 
         private final float mZoom;
+        // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
+        private final int mRamp;
         // Whether is in the new magnifier style.
         private boolean mIsFishEyeStyle;
         // The mesh matrix for the fish-eye effect.
@@ -915,7 +960,7 @@ public final class Magnifier {
 
         InternalPopupWindow(final Context context, final Display display,
                 final SurfaceControl parentSurfaceControl, final int width, final int height,
-                final float zoom, final float elevation, final float cornerRadius,
+                final float zoom, final int ramp, final float elevation, final float cornerRadius,
                 final Drawable overlay, final Handler handler, final Object lock,
                 final Callback callback, final boolean isFishEyeStyle) {
             mDisplay = display;
@@ -926,6 +971,7 @@ public final class Magnifier {
             mContentWidth = width;
             mContentHeight = height;
             mZoom = zoom;
+            mRamp = ramp;
             mOffsetX = (int) (1.05f * elevation);
             mOffsetY = (int) (1.05f * elevation);
             // Setup the surface we will use for drawing the content and shadow.
@@ -995,14 +1041,13 @@ public final class Magnifier {
             final float h = mContentHeight;
             final float h0 = h / mZoom;
             final float dh = h - h0;
-            final float ramp = FISHEYE_RAMP_WIDTH;
             mMeshLeft = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
             mMeshRight = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
             for (int i = 0; i < 2 * (mMeshWidth + 1) * (mMeshHeight + 1); i += 2) {
                 // Calculates X value.
                 final int colIndex = i % (2 * (mMeshWidth + 1)) / 2;
-                mMeshLeft[i] = (float) colIndex * ramp / mMeshWidth;
-                mMeshRight[i] = w - ramp + colIndex * ramp / mMeshWidth;
+                mMeshLeft[i] = (float) colIndex * mRamp / mMeshWidth;
+                mMeshRight[i] = w - mRamp + colIndex * mRamp / mMeshWidth;
 
                 // Calculates Y value.
                 final int rowIndex = i / 2 / (mMeshWidth + 1);
@@ -1174,14 +1219,13 @@ public final class Magnifier {
                     final Paint paint = new Paint();
                     paint.setFilterBitmap(true);
                     if (mIsFishEyeStyle) {
-                        final int ramp = FISHEYE_RAMP_WIDTH;
                         final int margin =
-                            (int)((mContentWidth - (mContentWidth - 2 * ramp) / mZoom) / 2);
+                            (int)((mContentWidth - (mContentWidth - 2 * mRamp) / mZoom) / 2);
 
                         // Draws the middle part.
                         final Rect srcRect = new Rect(margin, 0, w - margin, h);
                         final Rect dstRect = new Rect(
-                            ramp, 0, mContentWidth - ramp, mContentHeight);
+                            mRamp, 0, mContentWidth - mRamp, mContentHeight);
                         canvas.drawBitmap(mBitmap, srcRect, dstRect, paint);
 
                         // Draws the left/right parts with mesh matrixes.

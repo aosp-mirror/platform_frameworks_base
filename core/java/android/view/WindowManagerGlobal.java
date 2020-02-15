@@ -56,13 +56,7 @@ import java.util.ArrayList;
 public final class WindowManagerGlobal {
     private static final String TAG = "WindowManager";
 
-    private static final String WM_USE_BLAST_ADAPTER_FLAG = "wm_use_blast_adapter";
-
-    /**
-     * This flag controls whether ViewRootImpl will utilize the Blast Adapter
-     * to send buffer updates to SurfaceFlinger
-     */
-    public static final boolean USE_BLAST_ADAPTER = false;
+    private static boolean sUseBLASTAdapter = false;
 
     /**
      * The user is navigating with keys (not the touch screen), so
@@ -192,6 +186,7 @@ public final class WindowManagerGlobal {
                     if (sWindowManagerService != null) {
                         ValueAnimator.setDurationScale(
                                 sWindowManagerService.getCurrentAnimatorScale());
+                        sUseBLASTAdapter = sWindowManagerService.useBLAST();
                     }
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -231,6 +226,13 @@ public final class WindowManagerGlobal {
         synchronized (WindowManagerGlobal.class) {
             return sWindowSession;
         }
+    }
+
+    /**
+     * Whether or not to use BLAST for ViewRootImpl
+     */
+    public static boolean useBLAST() {
+        return sUseBLASTAdapter;
     }
 
     @UnsupportedAppUsage

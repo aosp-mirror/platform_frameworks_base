@@ -65,6 +65,7 @@ static const char* const OutOfResourcesException =
 static struct {
     jclass clazz;
     jmethodID ctor;
+    jfieldID isInternal;
     jfieldID density;
     jfieldID secure;
 } gDisplayInfoClassInfo;
@@ -781,6 +782,8 @@ static jobject nativeGetDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj)
     }
 
     jobject object = env->NewObject(gDisplayInfoClassInfo.clazz, gDisplayInfoClassInfo.ctor);
+    env->SetBooleanField(object, gDisplayInfoClassInfo.isInternal,
+                         info.connectionType == DisplayConnectionType::Internal);
     env->SetFloatField(object, gDisplayInfoClassInfo.density, info.density);
     env->SetBooleanField(object, gDisplayInfoClassInfo.secure, info.secure);
     return object;
@@ -1528,6 +1531,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     jclass infoClazz = FindClassOrDie(env, "android/view/SurfaceControl$DisplayInfo");
     gDisplayInfoClassInfo.clazz = MakeGlobalRefOrDie(env, infoClazz);
     gDisplayInfoClassInfo.ctor = GetMethodIDOrDie(env, infoClazz, "<init>", "()V");
+    gDisplayInfoClassInfo.isInternal = GetFieldIDOrDie(env, infoClazz, "isInternal", "Z");
     gDisplayInfoClassInfo.density = GetFieldIDOrDie(env, infoClazz, "density", "F");
     gDisplayInfoClassInfo.secure = GetFieldIDOrDie(env, infoClazz, "secure", "Z");
 

@@ -182,7 +182,10 @@ public final class SharedUserSetting extends SettingBase {
     public void updateProcesses() {
         processes = null;
         for (int i = packages.size() - 1; i >= 0; i--) {
-            addProcesses(packages.valueAt(i).pkg.getProcesses());
+            final AndroidPackage pkg = packages.valueAt(i).pkg;
+            if (pkg != null) {
+                addProcesses(pkg.getProcesses());
+            }
         }
     }
 

@@ -946,9 +946,9 @@ public class DisplayModeDirector {
      * {@link R.array#config_ambientThresholdsOfPeakRefreshRate}.
      */
     private class BrightnessObserver extends ContentObserver {
+        // TODO: brightnessfloat: change this to the float setting
         private final Uri mDisplayBrightnessSetting =
                 Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS);
-
         private final static int LIGHT_SENSOR_RATE_MS = 250;
         private int[] mDisplayBrightnessThresholds;
         private int[] mAmbientBrightnessThresholds;
@@ -1174,7 +1174,7 @@ public class DisplayModeDirector {
 
             return false;
         }
-
+        // TODO: brightnessfloat: make it use float not int
         private void onBrightnessChangedLocked() {
             int brightness = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.SCREEN_BRIGHTNESS, -1);

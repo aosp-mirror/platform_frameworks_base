@@ -53,6 +53,7 @@ public class NotifCoordinators implements Dumpable {
             RankingCoordinator rankingCoordinator,
             ForegroundCoordinator foregroundCoordinator,
             DeviceProvisionedCoordinator deviceProvisionedCoordinator,
+            BubbleCoordinator bubbleCoordinator,
             PreparationCoordinator preparationCoordinator) {
         dumpController.registerDumpable(TAG, this);
 
@@ -61,6 +62,7 @@ public class NotifCoordinators implements Dumpable {
         mCoordinators.add(rankingCoordinator);
         mCoordinators.add(foregroundCoordinator);
         mCoordinators.add(deviceProvisionedCoordinator);
+        mCoordinators.add(bubbleCoordinator);
         if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
             mCoordinators.add(preparationCoordinator);
         }

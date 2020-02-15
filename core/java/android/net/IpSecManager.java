@@ -51,7 +51,7 @@ import java.net.Socket;
  *
  * <p>Note that not all aspects of IPsec are permitted by this API. Applications may create
  * transport mode security associations and apply them to individual sockets. Applications looking
- * to create a VPN should use {@link VpnService}.
+ * to create an IPsec VPN should use {@link VpnManager} and {@link Ikev2VpnProfile}.
  *
  * @see <a href="https://tools.ietf.org/html/rfc4301">RFC 4301, Security Architecture for the
  *     Internet Protocol</a>

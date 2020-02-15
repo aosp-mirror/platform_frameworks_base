@@ -51,6 +51,7 @@ public final class PeopleServiceTest {
     private static final String APP_PREDICTION_SHARE_UI_SURFACE = "share";
     private static final int APP_PREDICTION_TARGET_COUNT = 4;
     private static final String TEST_PACKAGE_NAME = "com.example";
+    private static final int USER_ID = 0;
 
     private PeopleServiceInternal mServiceInternal;
     private PeopleService.LocalService mLocalService;
@@ -73,7 +74,7 @@ public final class PeopleServiceTest {
         mServiceInternal = LocalServices.getService(PeopleServiceInternal.class);
         mLocalService = (PeopleService.LocalService) mServiceInternal;
 
-        mSessionId = new AppPredictionSessionId("abc");
+        mSessionId = new AppPredictionSessionId("abc", USER_ID);
         mPredictionContext = new AppPredictionContext.Builder(mContext)
                 .setUiSurface(APP_PREDICTION_SHARE_UI_SURFACE)
                 .setPredictedTargetCount(APP_PREDICTION_TARGET_COUNT)

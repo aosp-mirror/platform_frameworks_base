@@ -16,7 +16,9 @@
 
 package com.android.server.pm;
 
+import android.Manifest.permission;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -305,6 +307,10 @@ public class LauncherAppsService extends SystemService {
             final int callingUserId = injectCallingUserId();
 
             if (targetUserId == callingUserId) return true;
+            if (mContext.checkCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS_FULL)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
 
             long ident = injectClearCallingIdentity();
             try {
@@ -661,6 +667,23 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
+        private void ensureStrictAccessShortcutsPermission(@NonNull String callingPackage) {
+            verifyCallingPackage(callingPackage);
+            if (!injectHasAccessShortcutsPermission(injectBinderCallingPid(),
+                    injectBinderCallingUid())) {
+                throw new SecurityException("Caller can't access shortcut information");
+            }
+        }
+
+        /**
+         * Returns true if the caller has the "ACCESS_SHORTCUTS" permission.
+         */
+        @VisibleForTesting
+        boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
+            return mContext.checkPermission(android.Manifest.permission.ACCESS_SHORTCUTS,
+                    callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
+        }
+
         @Override
         public ParceledListSlice getShortcuts(String callingPackage, long changedSince,
                 String packageName, List shortcutIds, List<LocusId> locusIds,
@@ -710,6 +733,30 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        public void cacheShortcuts(String callingPackage, String packageName, List<String> ids,
+                UserHandle targetUser) {
+            ensureStrictAccessShortcutsPermission(callingPackage);
+            if (!canAccessProfile(targetUser.getIdentifier(), "Cannot cache shortcuts")) {
+                return;
+            }
+
+            mShortcutServiceInternal.cacheShortcuts(getCallingUserId(),
+                    callingPackage, packageName, ids, targetUser.getIdentifier());
+        }
+
+        @Override
+        public void uncacheShortcuts(String callingPackage, String packageName, List<String> ids,
+                UserHandle targetUser) {
+            ensureStrictAccessShortcutsPermission(callingPackage);
+            if (!canAccessProfile(targetUser.getIdentifier(), "Cannot uncache shortcuts")) {
+                return;
+            }
+
+            mShortcutServiceInternal.uncacheShortcuts(getCallingUserId(),
+                    callingPackage, packageName, ids, targetUser.getIdentifier());
+        }
+
+        @Override
         public int getShortcutIconResId(String callingPackage, String packageName, String id,
                 int targetUserId) {
             ensureShortcutPermission(callingPackage);
@@ -741,8 +788,9 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public boolean startShortcut(String callingPackage, String packageName, String shortcutId,
-                Rect sourceBounds, Bundle startActivityOptions, int targetUserId) {
+        public boolean startShortcut(String callingPackage, String packageName, String featureId,
+                String shortcutId, Rect sourceBounds, Bundle startActivityOptions,
+                int targetUserId) {
             verifyCallingPackage(callingPackage);
             if (!canAccessProfile(targetUserId, "Cannot start activity")) {
                 return false;
@@ -766,15 +814,16 @@ public class LauncherAppsService extends SystemService {
             intents[0].setSourceBounds(sourceBounds);
 
             return startShortcutIntentsAsPublisher(
-                    intents, packageName, startActivityOptions, targetUserId);
+                    intents, packageName, featureId, startActivityOptions, targetUserId);
         }
 
         private boolean startShortcutIntentsAsPublisher(@NonNull Intent[] intents,
-                @NonNull String publisherPackage, Bundle startActivityOptions, int userId) {
+                @NonNull String publisherPackage, @Nullable String publishedFeatureId,
+                Bundle startActivityOptions, int userId) {
             final int code;
             try {
                 code = mActivityTaskManagerInternal.startActivitiesAsPackage(publisherPackage,
-                        userId, intents, startActivityOptions);
+                        publishedFeatureId, userId, intents, startActivityOptions);
                 if (ActivityManager.isStartResultSuccessful(code)) {
                     return true; // Success
                 } else {
@@ -829,8 +878,8 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public void startSessionDetailsActivityAsUser(IApplicationThread caller,
-                String callingPackage, SessionInfo sessionInfo, Rect sourceBounds,
-                Bundle opts, UserHandle userHandle) throws RemoteException {
+                String callingPackage, String callingFeatureId, SessionInfo sessionInfo,
+                Rect sourceBounds, Bundle opts, UserHandle userHandle) throws RemoteException {
             int userId = userHandle.getIdentifier();
             if (!canAccessProfile(userId, "Cannot start details activity")) {
                 return;
@@ -846,13 +895,13 @@ public class LauncherAppsService extends SystemService {
                             .authority(callingPackage).build());
             i.setSourceBounds(sourceBounds);
 
-            mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage, i, opts,
-                    userId);
+            mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
+                    callingFeatureId, i, opts, userId);
         }
 
         @Override
         public void startActivityAsUser(IApplicationThread caller, String callingPackage,
-                ComponentName component, Rect sourceBounds,
+                String callingFeatureId, ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
                 return;
@@ -906,12 +955,12 @@ public class LauncherAppsService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    launchIntent, opts, user.getIdentifier());
+                    callingFeatureId, launchIntent, opts, user.getIdentifier());
         }
 
         @Override
         public void showAppDetailsAsUser(IApplicationThread caller,
-                String callingPackage, ComponentName component,
+                String callingPackage, String callingFeatureId, ComponentName component,
                 Rect sourceBounds, Bundle opts, UserHandle user) throws RemoteException {
             if (!canAccessProfile(user.getIdentifier(), "Cannot show app details")) {
                 return;
@@ -929,7 +978,7 @@ public class LauncherAppsService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    intent, opts, user.getIdentifier());
+                    callingFeatureId, intent, opts, user.getIdentifier());
         }
 
         /** Checks if user is a profile of or same as listeningUser.

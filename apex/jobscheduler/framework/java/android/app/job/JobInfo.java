@@ -896,7 +896,7 @@ public class JobInfo implements Parcelable {
          * @param flags Flags for the observer.
          */
         public TriggerContentUri(@NonNull Uri uri, @Flags int flags) {
-            mUri = uri;
+            mUri = Objects.requireNonNull(uri);
             mFlags = flags;
         }
 

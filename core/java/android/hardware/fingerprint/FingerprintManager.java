@@ -918,7 +918,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (mEnrollmentCallback != null) {
             mEnrollmentCallback.onEnrollmentHelp(clientInfo, msg);
         } else if (mAuthenticationCallback != null) {
-            mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
+            if (acquireInfo != BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START) {
+                mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
+            }
         }
     }
 
@@ -1009,6 +1011,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             case FINGERPRINT_ERROR_HW_NOT_PRESENT:
                 return context.getString(
                         com.android.internal.R.string.fingerprint_error_hw_not_present);
+            case BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED:
+                return context.getString(
+                        com.android.internal.R.string.fingerprint_error_security_update_required);
             case FINGERPRINT_ERROR_VENDOR: {
                     String[] msgArray = context.getResources().getStringArray(
                             com.android.internal.R.array.fingerprint_error_vendor);
@@ -1050,6 +1055,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                         return msgArray[vendorCode];
                     }
                 }
+                break;
+            case FINGERPRINT_ACQUIRED_START:
+                return null;
         }
         Slog.w(TAG, "Invalid acquired message: " + acquireInfo + ", " + vendorCode);
         return null;

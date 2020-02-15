@@ -96,6 +96,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 /** @hide */
 public class ApkParseUtils {
@@ -1817,6 +1818,25 @@ public class ApkParseUtils {
                     );
                 }
                 parsingPackage.addQueriesPackage(packageName.intern());
+            } else if (parser.getName().equals("provider")) {
+                final TypedArray sa = res.obtainAttributes(parser,
+                        R.styleable.AndroidManifestQueriesProvider);
+                try {
+                    final String authorities =
+                            sa.getString(R.styleable.AndroidManifestQueriesProvider_authorities);
+                    if (TextUtils.isEmpty(authorities)) {
+                        return parseInput.error(
+                                PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                                "Authority missing from provider tag."
+                        );
+                    }
+                    StringTokenizer authoritiesTokenizer = new StringTokenizer(authorities, ";");
+                    while (authoritiesTokenizer.hasMoreElements()) {
+                        parsingPackage.addQueriesProvider(authoritiesTokenizer.nextToken());
+                    }
+                } finally {
+                    sa.recycle();
+                }
             }
         }
         return parseInput.success(parsingPackage);
@@ -2077,6 +2097,9 @@ public class ApkParseUtils {
             parsingPackage.setRequestLegacyExternalStorage(sa.getBoolean(
                     R.styleable.AndroidManifestApplication_requestLegacyExternalStorage,
                     parsingPackage.getTargetSdkVersion() < Build.VERSION_CODES.Q));
+
+            parsingPackage.setAllowNativeHeapPointerTagging(sa.getBoolean(
+                    R.styleable.AndroidManifestApplication_allowNativeHeapPointerTagging, true));
 
             parsingPackage
                     .setMaxAspectRatio(

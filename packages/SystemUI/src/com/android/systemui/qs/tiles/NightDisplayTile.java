@@ -190,6 +190,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
 
     @Override
     protected void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
         mIsListening = listening;
         if (listening) {
             mListener.setCallback(this);

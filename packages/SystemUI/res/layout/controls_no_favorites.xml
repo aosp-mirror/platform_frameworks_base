@@ -1,18 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2020, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
 <merge
     xmlns:android="http://schemas.android.com/apk/res/android">
-  <TextView
-      android:id="@+id/controls_title"
-      android:text="@string/quick_controls_title"
+  <LinearLayout
+      android:id="@+id/controls_no_favorites_group"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:singleLine="true"
-      android:gravity="center"
-      android:textSize="25dp"
+      android:orientation="vertical"
       android:paddingTop="40dp"
       android:paddingBottom="40dp"
       android:layout_marginLeft="10dp"
       android:layout_marginRight="10dp"
-      android:textColor="@*android:color/foreground_material_dark"
-      android:fontFamily="@*android:string/config_headlineFontFamily"
-      android:background="@drawable/control_no_favorites_background"/>
+      android:background="@drawable/control_no_favorites_background">
+
+    <LinearLayout
+        android:id="@+id/controls_icon_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp" />
+
+    <TextView
+        android:id="@+id/controls_title"
+        android:text="@string/quick_controls_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:layout_gravity="center"
+        android:textSize="25sp"
+        android:textColor="@*android:color/foreground_material_dark"
+        android:fontFamily="@*android:string/config_headlineFontFamily" />
+  </LinearLayout>
 </merge>

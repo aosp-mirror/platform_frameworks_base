@@ -22,6 +22,8 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.media.session.MediaController;
+import android.media.session.MediaSessionManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -52,6 +54,8 @@ public class MediaRouter2Manager {
 
     @GuardedBy("sLock")
     private static MediaRouter2Manager sInstance;
+
+    private final MediaSessionManager mMediaSessionManager;
 
     final String mPackageName;
 
@@ -89,6 +93,8 @@ public class MediaRouter2Manager {
         mContext = context.getApplicationContext();
         mMediaRouterService = IMediaRouterService.Stub.asInterface(
                 ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
+        mMediaSessionManager = (MediaSessionManager) context
+                .getSystemService(Context.MEDIA_SESSION_SERVICE);
         mPackageName = mContext.getPackageName();
         mHandler = new Handler(context.getMainLooper());
     }
@@ -150,6 +156,23 @@ public class MediaRouter2Manager {
         }
     }
 
+    /**
+     * Gets a {@link android.media.session.MediaController} associated with the
+     * given routing session.
+     * If there is no matching media session, {@code null} is returned.
+     */
+    @Nullable
+    public MediaController getMediaControllerForRoutingSession(
+            @NonNull RoutingSessionInfo sessionInfo) {
+        for (MediaController controller : mMediaSessionManager.getActiveSessions(null)) {
+            String volumeControlId = controller.getPlaybackInfo().getVolumeControlId();
+            if (TextUtils.equals(sessionInfo.getId(), volumeControlId)) {
+                return controller;
+            }
+        }
+        return null;
+    }
+
     //TODO: Use cache not to create array. For now, it's unclear when to purge the cache.
     //Do this when we finalize how to set control categories.
     /**
@@ -178,24 +201,24 @@ public class MediaRouter2Manager {
     }
 
     /**
-     * Gets routing controllers of an application with the given package name.
+     * Gets routing sessions of an application with the given package name.
      * The first element of the returned list is the system routing controller.
      *
      * @see MediaRouter2#getSystemController()
      */
     @NonNull
-    public List<RoutingController> getRoutingControllers(@NonNull String packageName) {
+    public List<RoutingSessionInfo> getRoutingSessions(@NonNull String packageName) {
         Objects.requireNonNull(packageName, "packageName must not be null");
 
-        List<RoutingController> controllers = new ArrayList<>();
+        List<RoutingSessionInfo> sessions = new ArrayList<>();
 
         for (RoutingSessionInfo sessionInfo : getActiveSessions()) {
             if (sessionInfo.isSystemSession()
                     || TextUtils.equals(sessionInfo.getClientPackageName(), packageName)) {
-                controllers.add(new RoutingController(sessionInfo));
+                sessions.add(sessionInfo);
             }
         }
-        return controllers;
+        return sessions;
     }
 
     /**
@@ -236,7 +259,7 @@ public class MediaRouter2Manager {
     /**
      * Selects media route for the specified package name.
      *
-     * If the given route is {@link RoutingController#getTransferrableRoutes() a transferrable
+     * If the given route is {@link RoutingController#getTransferableRoutes() a transferable
      * route} of a routing session of the application, the session will be transferred to
      * the route. If not, a new routing session will be created.
      *
@@ -247,11 +270,20 @@ public class MediaRouter2Manager {
         Objects.requireNonNull(packageName, "packageName must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
-        for (RoutingController controller : getRoutingControllers(packageName)) {
-            if (controller.getSessionInfo().getTransferrableRoutes().contains(route.getId())) {
-                controller.transferToRoute(route);
-                return;
+        boolean transferred = false;
+        //TODO: instead of release all controllers, add an API to specify controllers that
+        // should be released (or is the system controller).
+        for (RoutingSessionInfo sessionInfo : getRoutingSessions(packageName)) {
+            if (!transferred && sessionInfo.getTransferableRoutes().contains(route.getId())) {
+                new RoutingController(sessionInfo).transferToRoute(route);
+                transferred = true;
+            } else if (!sessionInfo.isSystemSession()) {
+                new RoutingController(sessionInfo).release();
             }
+        }
+
+        if (transferred) {
+            return;
         }
 
         Client client;
@@ -272,14 +304,32 @@ public class MediaRouter2Manager {
 
     /**
      * Requests a volume change for a route asynchronously.
+     */
+    //TODO: remove this.
+    public void requestSetVolume(MediaRoute2Info route, int volume) {
+        setRouteVolume(route, volume);
+    }
+
+    /**
+     * Requests a volume change for a route asynchronously.
      * <p>
      * It may have no effect if the route is currently not selected.
      * </p>
      *
-     * @param volume The new volume value between 0 and {@link MediaRoute2Info#getVolumeMax}.
+     * @param volume The new volume value between 0 and {@link MediaRoute2Info#getVolumeMax}
+     *               (inclusive).
      */
-    public void requestSetVolume(@NonNull MediaRoute2Info route, int volume) {
+    public void setRouteVolume(@NonNull MediaRoute2Info route, int volume) {
         Objects.requireNonNull(route, "route must not be null");
+
+        if (route.getVolumeHandling() == MediaRoute2Info.PLAYBACK_VOLUME_FIXED) {
+            Log.w(TAG, "setRouteVolume: the route has fixed volume. Ignoring.");
+            return;
+        }
+        if (volume < 0 || volume > route.getVolumeMax()) {
+            Log.w(TAG, "setRouteVolume: the target volume is out of range. Ignoring");
+            return;
+        }
 
         Client client;
         synchronized (sLock) {
@@ -287,7 +337,39 @@ public class MediaRouter2Manager {
         }
         if (client != null) {
             try {
-                mMediaRouterService.requestSetVolume2Manager(client, route, volume);
+                mMediaRouterService.setRouteVolume2Manager(client, route, volume);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to send control request.", ex);
+            }
+        }
+    }
+
+    /**
+     * Requests a volume change for a routing session asynchronously.
+     *
+     * @param volume The new volume value between 0 and {@link RoutingSessionInfo#getVolumeMax}
+     *               (inclusive).
+     */
+    public void setSessionVolume(@NonNull RoutingSessionInfo sessionInfo, int volume) {
+        Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
+
+        if (sessionInfo.getVolumeHandling() == MediaRoute2Info.PLAYBACK_VOLUME_FIXED) {
+            Log.w(TAG, "setSessionVolume: the route has fixed volume. Ignoring.");
+            return;
+        }
+        if (volume < 0 || volume > sessionInfo.getVolumeMax()) {
+            Log.w(TAG, "setSessionVolume: the target volume is out of range. Ignoring");
+            return;
+        }
+
+        Client client;
+        synchronized (sLock) {
+            client = mClient;
+        }
+        if (client != null) {
+            try {
+                mMediaRouterService.setSessionVolume2Manager(
+                        client, sessionInfo.getId(), volume);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
             }
@@ -461,13 +543,13 @@ public class MediaRouter2Manager {
         }
 
         /**
-         * @return the unmodifiable list of transferrable routes for the session.
+         * @return the unmodifiable list of transferable routes for the session.
          */
         @NonNull
-        public List<MediaRoute2Info> getTransferrableRoutes() {
+        public List<MediaRoute2Info> getTransferableRoutes() {
             List<String> routeIds;
             synchronized (mControllerLock) {
-                routeIds = mSessionInfo.getTransferrableRoutes();
+                routeIds = mSessionInfo.getTransferableRoutes();
             }
             return getRoutesWithIds(routeIds);
         }
@@ -561,12 +643,12 @@ public class MediaRouter2Manager {
          * all of the following conditions:
          * <ul>
          * <li>ID should not be included in {@link #getSelectedRoutes()}</li>
-         * <li>ID should be included in {@link #getTransferrableRoutes()}</li>
+         * <li>ID should be included in {@link #getTransferableRoutes()}</li>
          * </ul>
          * If the route doesn't meet any of above conditions, it will be ignored.
          *
          * @see #getSelectedRoutes()
-         * @see #getTransferrableRoutes()
+         * @see #getTransferableRoutes()
          */
         public void transferToRoute(@NonNull MediaRoute2Info route) {
             Objects.requireNonNull(route, "route must not be null");
@@ -581,8 +663,8 @@ public class MediaRouter2Manager {
                 return;
             }
 
-            if (!sessionInfo.getTransferrableRoutes().contains(route.getId())) {
-                Log.w(TAG, "Ignoring transferring to a non-transferrable route=" + route);
+            if (!sessionInfo.getTransferableRoutes().contains(route.getId())) {
+                Log.w(TAG, "Ignoring transferring to a non-transferable route=" + route);
                 return;
             }
 

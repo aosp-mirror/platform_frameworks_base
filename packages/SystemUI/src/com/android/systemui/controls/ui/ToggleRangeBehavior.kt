@@ -19,17 +19,23 @@ package com.android.systemui.controls.ui
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.util.Log
+import android.view.GestureDetector
+import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import android.service.controls.Control
-import android.service.controls.actions.BooleanAction
 import android.service.controls.actions.FloatAction
 import android.service.controls.templates.RangeTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.util.TypedValue
 
 import com.android.systemui.R
+import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
+import com.android.systemui.controls.ui.ControlActionCoordinator.MAX_LEVEL
+
+import java.util.IllegalFormatException
 
 class ToggleRangeBehavior : Behavior {
     lateinit var clipLayer: Drawable
@@ -40,6 +46,10 @@ class ToggleRangeBehavior : Behavior {
     lateinit var statusExtra: TextView
     lateinit var status: TextView
     lateinit var context: Context
+
+    companion object {
+        private const val DEFAULT_FORMAT = "%.1f"
+    }
 
     override fun apply(cvh: ControlViewHolder, cws: ControlWithState) {
         this.control = cws.control!!
@@ -52,10 +62,25 @@ class ToggleRangeBehavior : Behavior {
 
         context = status.getContext()
 
-        cvh.layout.setOnTouchListener(ToggleRangeTouchListener())
+        val gestureListener = ToggleRangeGestureListener(cvh.layout)
+        val gestureDetector = GestureDetector(context, gestureListener)
+        cvh.layout.setOnTouchListener({ v: View, e: MotionEvent ->
+            if (gestureDetector.onTouchEvent(e)) {
+                return@setOnTouchListener true
+            }
+
+            if (e.getAction() == MotionEvent.ACTION_UP && gestureListener.isDragging) {
+                gestureListener.isDragging = false
+                endUpdateRange()
+                return@setOnTouchListener true
+            }
+
+            return@setOnTouchListener false
+        })
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
+        clipLayer.setLevel(MIN_LEVEL)
 
         template = control.getControlTemplate() as ToggleRangeTemplate
         rangeTemplate = template.getRange()
@@ -63,17 +88,12 @@ class ToggleRangeBehavior : Behavior {
         val checked = template.isChecked()
         val deviceType = control.getDeviceType()
 
-        updateRange((rangeTemplate.getCurrentValue() / 100.0f), checked)
+        val currentRatio = rangeTemplate.getCurrentValue() /
+                (rangeTemplate.getMaxValue() - rangeTemplate.getMinValue())
+        updateRange(currentRatio, checked)
 
         cvh.setEnabled(checked)
         cvh.applyRenderInfo(RenderInfo.lookup(deviceType, checked))
-    }
-
-    fun toggle() {
-        cvh.action(BooleanAction(template.getTemplateId(), !template.isChecked()))
-
-        val nextLevel = if (template.isChecked()) MIN_LEVEL else MAX_LEVEL
-        clipLayer.setLevel(nextLevel)
     }
 
     fun beginUpdateRange() {
@@ -82,11 +102,17 @@ class ToggleRangeBehavior : Behavior {
                 .getDimensionPixelSize(R.dimen.control_status_expanded).toFloat())
     }
 
-    fun updateRange(f: Float, checked: Boolean) {
-        clipLayer.setLevel(if (checked) (MAX_LEVEL * f).toInt() else MIN_LEVEL)
+    fun updateRange(ratioDiff: Float, checked: Boolean) {
+        val changeAmount = if (checked) (MAX_LEVEL * ratioDiff).toInt() else MIN_LEVEL
+        val newLevel = Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, clipLayer.getLevel() + changeAmount))
+        clipLayer.setLevel(newLevel)
 
-        if (checked && f < 100.0f && f > 0.0f) {
-            statusExtra.setText("" + (f * 100.0).toInt() + "%")
+        if (checked) {
+            val newValue = levelToRangeValue()
+            val formattedNewValue = format(rangeTemplate.getFormatString().toString(),
+                    DEFAULT_FORMAT, newValue)
+
+            statusExtra.setText(formattedNewValue)
             statusExtra.setVisibility(View.VISIBLE)
         } else {
             statusExtra.setText("")
@@ -94,17 +120,30 @@ class ToggleRangeBehavior : Behavior {
         }
     }
 
-    fun endUpdateRange(f: Float) {
-        statusExtra.setText(" - " + (f * 100.0).toInt() + "%")
+    private fun format(primaryFormat: String, backupFormat: String, value: Float): String {
+        return try {
+            String.format(primaryFormat, value)
+        } catch (e: IllegalFormatException) {
+            Log.w(ControlsUiController.TAG, "Illegal format in range template", e)
+            if (backupFormat == "") {
+                ""
+            } else {
+                format(backupFormat, "", value)
+            }
+        }
+    }
 
-        val newValue = rangeTemplate.getMinValue() +
-            (f * (rangeTemplate.getMaxValue() - rangeTemplate.getMinValue()))
+    private fun levelToRangeValue(): Float {
+        val ratio = clipLayer.getLevel().toFloat() / MAX_LEVEL
+        return rangeTemplate.getMinValue() +
+            (ratio * (rangeTemplate.getMaxValue() - rangeTemplate.getMinValue()))
+    }
 
+    fun endUpdateRange() {
         statusExtra.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_normal).toFloat())
         status.setVisibility(View.VISIBLE)
-
-        cvh.action(FloatAction(rangeTemplate.getTemplateId(), findNearestStep(newValue)))
+        cvh.action(FloatAction(rangeTemplate.getTemplateId(), findNearestStep(levelToRangeValue())))
     }
 
     fun findNearestStep(value: Float): Float {
@@ -125,59 +164,39 @@ class ToggleRangeBehavior : Behavior {
         return rangeTemplate.getMaxValue()
     }
 
-    inner class ToggleRangeTouchListener() : View.OnTouchListener {
-        private var initialTouchX: Float = 0.0f
-        private var initialTouchY: Float = 0.0f
-        private var isDragging: Boolean = false
-        private val minDragDiff = 20
+    inner class ToggleRangeGestureListener(
+        val v: View
+    ) : SimpleOnGestureListener() {
+        var isDragging: Boolean = false
 
-        override fun onTouch(v: View, e: MotionEvent): Boolean {
-            when (e.getActionMasked()) {
-                MotionEvent.ACTION_DOWN -> setupTouch(e)
-                MotionEvent.ACTION_MOVE -> detectDrag(v, e)
-                MotionEvent.ACTION_UP -> endTouch(v, e)
-            }
-
+        override fun onDown(e: MotionEvent): Boolean {
             return true
         }
 
-        private fun setupTouch(e: MotionEvent) {
-            initialTouchX = e.getX()
-            initialTouchY = e.getY()
+        override fun onLongPress(e: MotionEvent) {
+            ControlActionCoordinator.longPress(this@ToggleRangeBehavior.cvh)
         }
 
-        private fun detectDrag(v: View, e: MotionEvent) {
-            val xDiff = Math.abs(e.getX() - initialTouchX)
-            val yDiff = Math.abs(e.getY() - initialTouchY)
-
-            if (xDiff < minDragDiff) {
-                isDragging = false
-            } else {
-                if (!isDragging) {
-                    this@ToggleRangeBehavior.beginUpdateRange()
-                }
-                v.getParent().requestDisallowInterceptTouchEvent(true)
-                isDragging = true
-                if (yDiff > xDiff) {
-                    endTouch(v, e)
-                } else {
-                    val percent = Math.max(0.0f, Math.min(1.0f, e.getX() / v.getWidth()))
-                    this@ToggleRangeBehavior.updateRange(percent, true)
-                }
-            }
-        }
-
-        private fun endTouch(v: View, e: MotionEvent) {
+        override fun onScroll(
+            e1: MotionEvent,
+            e2: MotionEvent,
+            xDiff: Float,
+            yDiff: Float
+        ): Boolean {
             if (!isDragging) {
-                this@ToggleRangeBehavior.toggle()
-            } else {
-                val percent = Math.max(0.0f, Math.min(1.0f, e.getX() / v.getWidth()))
-                this@ToggleRangeBehavior.endUpdateRange(percent)
+                this@ToggleRangeBehavior.beginUpdateRange()
+                isDragging = true
             }
 
-            initialTouchX = 0.0f
-            initialTouchY = 0.0f
-            isDragging = false
+            this@ToggleRangeBehavior.updateRange(-xDiff / v.getWidth(), true)
+            return true
+        }
+
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
+            val th = this@ToggleRangeBehavior
+            ControlActionCoordinator.toggle(th.cvh, th.template.getTemplateId(),
+                    th.template.isChecked())
+            return true
         }
     }
 }

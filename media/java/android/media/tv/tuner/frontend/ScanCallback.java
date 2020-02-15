@@ -67,7 +67,7 @@ public interface ScanCallback {
     /** Frontend hierarchy. */
     void onHierarchy(@DvbtFrontendSettings.Hierarchy int hierarchy);
 
-    /** Frontend hierarchy. */
+    /** Frontend signal type. */
     void onSignalType(@AnalogFrontendSettings.SignalType int signalType);
 
 }

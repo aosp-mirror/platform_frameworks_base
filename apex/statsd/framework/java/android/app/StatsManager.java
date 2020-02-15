@@ -32,7 +32,7 @@ import android.os.IStatsd;
 import android.os.RemoteException;
 import android.os.StatsFrameworkInitializer;
 import android.util.AndroidException;
-import android.util.Slog;
+import android.util.Log;
 import android.util.StatsEvent;
 import android.util.StatsEventParcel;
 
@@ -155,7 +155,7 @@ public final class StatsManager {
                 // can throw IllegalArgumentException
                 service.addConfiguration(configKey, config, mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsmanager when adding configuration");
+                Log.e(TAG, "Failed to connect to statsmanager when adding configuration");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);
@@ -191,7 +191,7 @@ public final class StatsManager {
                 IStatsManagerService service = getIStatsManagerServiceLocked();
                 service.removeConfiguration(configKey, mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsmanager when removing configuration");
+                Log.e(TAG, "Failed to connect to statsmanager when removing configuration");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);
@@ -258,7 +258,7 @@ public final class StatsManager {
                             mContext.getOpPackageName());
                 }
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsmanager when adding broadcast subscriber",
+                Log.e(TAG, "Failed to connect to statsmanager when adding broadcast subscriber",
                         e);
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
@@ -311,7 +311,7 @@ public final class StatsManager {
                 }
 
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsmanager when registering data listener.");
+                Log.e(TAG, "Failed to connect to statsmanager when registering data listener.");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);
@@ -348,7 +348,7 @@ public final class StatsManager {
                 }
 
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsmanager "
+                Log.e(TAG, "Failed to connect to statsmanager "
                         + "when registering active configs listener.");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
@@ -387,7 +387,7 @@ public final class StatsManager {
                 IStatsManagerService service = getIStatsManagerServiceLocked();
                 return service.getData(configKey, mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsmanager when getting data");
+                Log.e(TAG, "Failed to connect to statsmanager when getting data");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);
@@ -424,7 +424,7 @@ public final class StatsManager {
                 IStatsManagerService service = getIStatsManagerServiceLocked();
                 return service.getMetadata(mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsmanager when getting metadata");
+                Log.e(TAG, "Failed to connect to statsmanager when getting metadata");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);
@@ -464,7 +464,7 @@ public final class StatsManager {
                 return service.getRegisteredExperimentIds();
             } catch (RemoteException e) {
                 if (DEBUG) {
-                    Slog.d(TAG,
+                    Log.d(TAG,
                             "Failed to connect to StatsManagerService when getting "
                                     + "registered experiment IDs");
                 }
@@ -555,7 +555,7 @@ public final class StatsManager {
                     try {
                         resultReceiver.pullFinished(atomTag, success, parcels);
                     } catch (RemoteException e) {
-                        Slog.w(TAG, "StatsPullResultReceiver failed for tag " + mAtomId);
+                        Log.w(TAG, "StatsPullResultReceiver failed for tag " + mAtomId);
                     }
                 });
             } finally {

@@ -21,6 +21,7 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -41,6 +42,7 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
@@ -89,6 +91,8 @@ class AutomaticBrightnessController {
     // The minimum and maximum screen brightnesses.
     private final int mScreenBrightnessRangeMinimum;
     private final int mScreenBrightnessRangeMaximum;
+    private final float mScreenBrightnessRangeMinimumFloat;
+    private final float mScreenBrightnessRangeMaximumFloat;
 
     // How much to scale doze brightness by (should be (0, 1.0]).
     private final float mDozeScaleFactor;
@@ -174,7 +178,7 @@ class AutomaticBrightnessController {
     // that we can quickly revert to the previous auto-brightness level
     // while the light sensor warms up.
     // Use -1 if there is no current auto-brightness value available.
-    private int mScreenAutoBrightness = -1;
+    private int mScreenAutoBrightness = PowerManager.BRIGHTNESS_INVALID;
 
     // The current display policy. This is useful, for example,  for knowing when we're dozing,
     // where the light sensor may not be available.
@@ -204,39 +208,44 @@ class AutomaticBrightnessController {
     private TaskStackListenerImpl mTaskStackListener;
     private IActivityTaskManager mActivityTaskManager;
     private PackageManager mPackageManager;
+    private Context mContext;
 
     private final Injector mInjector;
 
     AutomaticBrightnessController(Callbacks callbacks, Looper looper,
             SensorManager sensorManager, Sensor lightSensor, BrightnessMappingStrategy mapper,
-            int lightSensorWarmUpTime, int brightnessMin, int brightnessMax, float dozeScaleFactor,
-            int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
-            long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
-            HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds,
-            PackageManager packageManager) {
+            int lightSensorWarmUpTime, float brightnessMin, float brightnessMax,
+            float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
+            long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
+            boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
+            HysteresisLevels screenBrightnessThresholds, Context context) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor, mapper,
                 lightSensorWarmUpTime, brightnessMin, brightnessMax, dozeScaleFactor,
                 lightSensorRate, initialLightSensorRate, brighteningLightDebounceConfig,
                 darkeningLightDebounceConfig, resetAmbientLuxAfterWarmUpConfig,
-                ambientBrightnessThresholds, screenBrightnessThresholds, packageManager);
+                ambientBrightnessThresholds, screenBrightnessThresholds, context);
     }
 
     @VisibleForTesting
     AutomaticBrightnessController(Injector injector, Callbacks callbacks, Looper looper,
             SensorManager sensorManager, Sensor lightSensor, BrightnessMappingStrategy mapper,
-            int lightSensorWarmUpTime, int brightnessMin, int brightnessMax, float dozeScaleFactor,
-            int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
-            long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
-            HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds,
-            PackageManager packageManager) {
+            int lightSensorWarmUpTime, float brightnessMin, float brightnessMax,
+            float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
+            long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
+            boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
+            HysteresisLevels screenBrightnessThresholds, Context context) {
         mInjector = injector;
+        mContext = context;
         mCallbacks = callbacks;
         mSensorManager = sensorManager;
         mBrightnessMapper = mapper;
-        mScreenBrightnessRangeMinimum = brightnessMin;
-        mScreenBrightnessRangeMaximum = brightnessMax;
+        mScreenBrightnessRangeMinimum =
+                BrightnessSynchronizer.brightnessFloatToInt(mContext, brightnessMin);
+        mScreenBrightnessRangeMaximum =
+                com.android.internal.BrightnessSynchronizer.brightnessFloatToInt(
+                        mContext, brightnessMax);
+        mScreenBrightnessRangeMinimumFloat = brightnessMin;
+        mScreenBrightnessRangeMaximumFloat = brightnessMax;
         mLightSensorWarmUpTimeConfig = lightSensorWarmUpTime;
         mDozeScaleFactor = dozeScaleFactor;
         mNormalLightSensorRate = lightSensorRate;
@@ -261,7 +270,7 @@ class AutomaticBrightnessController {
         }
 
         mActivityTaskManager = ActivityTaskManager.getService();
-        mPackageManager = packageManager;
+        mPackageManager = mContext.getPackageManager();
         mTaskStackListener = new TaskStackListenerImpl();
         mForegroundAppPackageName = null;
         mPendingForegroundAppPackageName = null;
@@ -291,7 +300,7 @@ class AutomaticBrightnessController {
             return -1;
         }
         if (mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE) {
-            return (int) (mScreenAutoBrightness * mDozeScaleFactor);
+            return Math.round(mScreenAutoBrightness * mDozeScaleFactor);
         }
         return mScreenAutoBrightness;
     }
@@ -473,7 +482,7 @@ class AutomaticBrightnessController {
         } else if (mLightSensorEnabled) {
             mLightSensorEnabled = false;
             mAmbientLuxValid = !mResetAmbientLuxAfterWarmUpConfig;
-            mScreenAutoBrightness = -1;
+            mScreenAutoBrightness = PowerManager.BRIGHTNESS_INVALID;
             mRecentLightSamples = 0;
             mAmbientLightRingBuffer.clear();
             mCurrentLightSensorRate = -1;
@@ -722,10 +731,8 @@ class AutomaticBrightnessController {
 
         float value = mBrightnessMapper.getBrightness(mAmbientLux, mForegroundAppPackageName,
                 mForegroundAppCategory);
-
-        int newScreenAutoBrightness = Math.round(clampScreenBrightness(
-                value * PowerManager.BRIGHTNESS_ON));
-
+        int newScreenAutoBrightness = BrightnessSynchronizer.brightnessFloatToInt(
+                mContext, clampScreenBrightnessFloat(value));
         // If screenAutoBrightness is set, we should have screen{Brightening,Darkening}Threshold,
         // in which case we ignore the new screen brightness if it doesn't differ enough from the
         // previous one.
@@ -759,9 +766,17 @@ class AutomaticBrightnessController {
         }
     }
 
+    // Clamps values with float range [1.0-255.0]
+    // TODO(brightnessfloat): convert everything that uses this to float system
     private float clampScreenBrightness(float value) {
         return MathUtils.constrain(value,
                 mScreenBrightnessRangeMinimum, mScreenBrightnessRangeMaximum);
+    }
+
+    // Clamps values with float range [0.0-1.0]
+    private float clampScreenBrightnessFloat(float value) {
+        return MathUtils.constrain(value,
+                mScreenBrightnessRangeMinimumFloat, mScreenBrightnessRangeMaximumFloat);
     }
 
     private void prepareBrightnessAdjustmentSample() {

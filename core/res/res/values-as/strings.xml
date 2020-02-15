@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"কৰ্মস্থানৰ প্ৰ\'ফাইল অন কৰিবনে?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"আপোনাৰ কৰ্মস্থানৰ এপসমূহ, জাননীসমূহ, ডেটা আৰু কৰ্মস্থানৰ প্ৰ\'ফাইলৰ অইন সুবিধাসমূহ অন কৰা হ\'ব"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"অন কৰক"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"এপ্‌টো উপলব্ধ নহয়"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূৰ্তত <xliff:g id="APP_NAME">%1$s</xliff:g> উপলব্ধ নহয়।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"এই এপটো Androidৰ এটা পুৰণা সংস্কৰণৰ বাবে প্ৰস্তুত কৰা হৈছিল, আৰু ই বিচৰাধৰণে কাম নকৰিবও পাৰে। ইয়াৰ আপডে’ট আছে নেকি চাওক, বা বিকাশকৰ্তাৰ সৈতে যোগাযোগ কৰক।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"আপডে’ট আছে নেকি চাওক"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"আপুনি নতুন বার্তা লাভ কৰিছে"</string>

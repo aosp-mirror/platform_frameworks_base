@@ -66,8 +66,10 @@ import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
@@ -104,6 +106,9 @@ public final class NotificationEntry extends ListEntry {
     /** List of lifetime extenders that are extending the lifetime of this notification. */
     final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
 
+    /** List of dismiss interceptors that are intercepting the dismissal of this notification. */
+    final List<NotifDismissInterceptor> mDismissInterceptors = new ArrayList<>();
+
     /** If this notification was filtered out, then the filter that did the filtering. */
     @Nullable NotifFilter mExcludingFilter;
 
@@ -116,9 +121,6 @@ public final class NotificationEntry extends ListEntry {
      * notifications will have this set even though they are still in the active notification set.
      */
     @CancellationReason int mCancellationReason = REASON_NOT_CANCELED;
-
-    /** @see #hasInflationError() */
-    private boolean mHasInflationError;
 
     /** @see #getDismissState() */
     @NonNull private DismissState mDismissState = DismissState.NOT_DISMISSED;
@@ -149,6 +151,7 @@ public final class NotificationEntry extends ListEntry {
 
     private NotificationEntry parent; // our parent (if we're in a group)
     private ExpandableNotificationRow row; // the outer expanded view
+    private ExpandableNotificationRowController mRowController;
 
     private int mCachedContrastColor = COLOR_INVALID;
     private int mCachedContrastColorIsFor = COLOR_INVALID;
@@ -266,23 +269,6 @@ public final class NotificationEntry extends ListEntry {
     /*
      * Bookkeeping getters and setters
      */
-
-    /**
-     * Whether this notification had an error when attempting to inflate. This is only used in
-     * the NewNotifPipeline
-     */
-    public boolean hasInflationError() {
-        return mHasInflationError;
-    }
-
-    /**
-     * Set whether the notification has an error while inflating.
-     *
-     * TODO: Move this into an inflation error manager class.
-     */
-    public void setHasInflationError(boolean hasError) {
-        mHasInflationError = hasError;
-    }
 
     /**
      * Set if the user has dismissed this notif but we haven't yet heard back from system server to
@@ -418,6 +404,14 @@ public final class NotificationEntry extends ListEntry {
     //TODO: This will go away when we have a way to bind an entry to a row
     public void setRow(ExpandableNotificationRow row) {
         this.row = row;
+    }
+
+    public ExpandableNotificationRowController getRowController() {
+        return mRowController;
+    }
+
+    public void setRowController(ExpandableNotificationRowController controller) {
+        mRowController = controller;
     }
 
     @Nullable

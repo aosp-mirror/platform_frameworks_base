@@ -20,6 +20,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -69,8 +70,12 @@ public abstract class LoggableMonitor {
 
     protected final void logOnAcquired(Context context, int acquiredInfo, int vendorCode,
             int targetUserId) {
-        if (statsModality() == BiometricsProtoEnums.MODALITY_FACE) {
-            if (acquiredInfo == FaceManager.FACE_ACQUIRED_START) {
+
+        final boolean isFace = statsModality() == BiometricsProtoEnums.MODALITY_FACE;
+        final boolean isFingerprint = statsModality() == BiometricsProtoEnums.MODALITY_FINGERPRINT;
+        if (isFace || isFingerprint) {
+            if ((isFingerprint && acquiredInfo == FingerprintManager.FINGERPRINT_ACQUIRED_START)
+                    || (isFace && acquiredInfo == FaceManager.FACE_ACQUIRED_START)) {
                 mFirstAcquireTimeMs = System.currentTimeMillis();
             }
         } else if (acquiredInfo == BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
@@ -124,7 +129,7 @@ public abstract class LoggableMonitor {
                 error,
                 vendorCode,
                 Utils.isDebugEnabled(context, targetUserId),
-                latency);
+                sanitizeLatency(latency));
     }
 
     protected final void logOnAuthenticated(Context context, boolean authenticated,
@@ -165,7 +170,7 @@ public abstract class LoggableMonitor {
                 statsClient(),
                 requireConfirmation,
                 authState,
-                latency,
+                sanitizeLatency(latency),
                 Utils.isDebugEnabled(context, targetUserId));
     }
 
@@ -183,8 +188,16 @@ public abstract class LoggableMonitor {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ENROLLED,
                 statsModality(),
                 targetUserId,
-                latency,
+                sanitizeLatency(latency),
                 enrollSuccessful);
+    }
+
+    private long sanitizeLatency(long latency) {
+        if (latency < 0) {
+            Slog.w(TAG, "found a negative latency : " + latency);
+            return -1;
+        }
+        return latency;
     }
 
 }

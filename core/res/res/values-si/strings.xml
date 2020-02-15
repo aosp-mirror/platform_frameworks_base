@@ -1855,6 +1855,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන්නද?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"ඔබගේ වැඩ යෙදුම්, දැනුම්දීම්, දත්ත සහ වෙනත් කාර්යාල පැතිකඩ විශේෂාංග ක්‍රියාත්මක කරනු ඇත"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ක්‍රියාත්මක කරන්න"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"යෙදුම ලබා ගත නොහැකිය"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> මේ දැන් ලබා ගත නොහැකිය."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"මෙම යෙදුම Android හි පැරණි අනුවාදයක් සඳහා තනා ඇති අතර නිසියාකාරව ක්‍රියා නොකරනු ඇත. යාවත්කාලීන සඳහා පරික්ෂා කිරීම උත්සාහ කරන්න, නැතහොත් සංවර්ධක අමතන්න."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"යාවත්කාලීන සඳහා පරික්ෂා කරන්න"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ඔබට නව පණිවිඩ තිබේ"</string>

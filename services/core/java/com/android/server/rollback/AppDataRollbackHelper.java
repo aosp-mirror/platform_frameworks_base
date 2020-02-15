@@ -224,6 +224,13 @@ public class AppDataRollbackHelper {
     }
 
     /**
+     * Deletes all device-encrypted apex data snapshots for the given rollback id.
+     */
+    public void destroyApexDeSnapshots(int rollbackId) {
+        mApexManager.destroyDeSnapshots(rollbackId);
+    }
+
+    /**
      * Commits the pending backups and restores for a given {@code userId} and {@code rollback}. If
      * the rollback has a pending backup, it is updated with a mapping from {@code userId} to inode
      * of the CE user data snapshot.

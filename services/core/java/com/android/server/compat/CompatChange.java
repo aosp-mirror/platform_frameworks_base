@@ -17,6 +17,7 @@
 package com.android.server.compat;
 
 import android.annotation.Nullable;
+import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.pm.ApplicationInfo;
 
@@ -37,6 +38,13 @@ import java.util.Map;
  * <p>Note, this class is not thread safe so callers must ensure thread safety.
  */
 public final class CompatChange extends CompatibilityChangeInfo {
+
+    /**
+     * A change ID to be used only in the CTS test for this SystemApi
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = 1234) // Needs to be > test APK targetSdkVersion.
+    private static final long CTS_SYSTEM_API_CHANGEID = 149391281; // This is a bug id.
 
     /**
      * Callback listener for when compat changes are updated for a package.

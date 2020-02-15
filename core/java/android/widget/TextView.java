@@ -422,9 +422,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     static final int PROCESS_TEXT_REQUEST_CODE = 100;
 
-    // Accessibility action to send IME custom action for CTS testing.
-    public static final int ACCESSIBILITY_ACTION_IME_ENTER = R.id.accessibilityActionImeEnter;
-
     /**
      *  Return code of {@link #doKeyDown}.
      */
@@ -8285,9 +8282,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (getKeyListener() != null && !mSingleLine && mEditor != null
                 && (mEditor.mInputType & EditorInfo.TYPE_MASK_CLASS)
                         == EditorInfo.TYPE_CLASS_TEXT) {
-            int variation = mEditor.mInputType & EditorInfo.TYPE_MASK_VARIATION;
-            if (variation == EditorInfo.TYPE_TEXT_FLAG_IME_MULTI_LINE
-                    || variation == EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE) {
+            int multilineFlags = EditorInfo.TYPE_TEXT_FLAG_IME_MULTI_LINE
+                    | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
+            if ((mEditor.mInputType & multilineFlags) != 0) {
                 return false;
             }
         }
@@ -11758,7 +11755,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
                 AccessibilityNodeInfo.AccessibilityAction action =
                         new AccessibilityNodeInfo.AccessibilityAction(
-                                ACCESSIBILITY_ACTION_IME_ENTER, imeActionLabel);
+                                R.id.accessibilityActionImeEnter, imeActionLabel);
                 info.addAction(action);
             }
         }
@@ -12072,7 +12069,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
             } return true;
-            case ACCESSIBILITY_ACTION_IME_ENTER: {
+            case R.id.accessibilityActionImeEnter: {
                 if (isFocused() && isTextEditable()) {
                     final int imeActionId = (arguments != null) ? arguments.getInt(
                             AccessibilityNodeInfo.ACTION_ARGUMENT_IME_ACTION_ID_INT,

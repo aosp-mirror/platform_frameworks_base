@@ -788,6 +788,10 @@ public class ZygoteInit {
             Zygote.applyDebuggerSystemProperty(parsedArgs);
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
+            /* Enable pointer tagging in the system server unconditionally. Hardware support for
+             * this is present in all ARMv8 CPUs; this flag has no effect on other platforms. */
+            parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
+
             if (shouldProfileSystemServer()) {
                 parsedArgs.mRuntimeFlags |= Zygote.PROFILE_SYSTEM_SERVER;
             }
@@ -914,10 +918,6 @@ public class ZygoteInit {
             bootTimingsTraceLog.traceEnd(); // PostZygoteInitGC
 
             bootTimingsTraceLog.traceEnd(); // ZygoteInit
-            // Disable tracing so that forked processes do not inherit stale tracing tags from
-            // Zygote.
-            Trace.setTracingEnabled(false, 0);
-
 
             Zygote.initNativeState(isPrimaryZygote);
 

@@ -63,10 +63,12 @@ public class RuleIndexingController {
                 searchIndexingKeysRangeContainingKey(
                         sPackageNameBasedIndexes, appInstallMetadata.getPackageName()));
 
-        // Add the range for app certificate indexes rules.
-        indexRanges.add(
-                searchIndexingKeysRangeContainingKey(
-                        sAppCertificateBasedIndexes, appInstallMetadata.getAppCertificate()));
+        // Add the range for app certificate indexes rules of all certificates.
+        for (String appCertificate : appInstallMetadata.getAppCertificates()) {
+            indexRanges.add(
+                    searchIndexingKeysRangeContainingKey(
+                            sAppCertificateBasedIndexes, appCertificate));
+        }
 
         // Add the range for unindexed rules.
         indexRanges.add(

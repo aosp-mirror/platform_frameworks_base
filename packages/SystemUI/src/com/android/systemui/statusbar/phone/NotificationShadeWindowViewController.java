@@ -45,7 +45,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
-import com.android.systemui.statusbar.StatusBarWindowBlurController;
+import com.android.systemui.statusbar.NotificationShadeWindowBlurController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -81,7 +81,7 @@ public class NotificationShadeWindowViewController {
     private final CommandQueue mCommandQueue;
     private final NotificationShadeWindowView mView;
     private final ShadeController mShadeController;
-    private final StatusBarWindowBlurController mBlurController;
+    private final NotificationShadeWindowBlurController mBlurController;
 
     private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
@@ -123,7 +123,7 @@ public class NotificationShadeWindowViewController {
             CommandQueue commandQueue,
             ShadeController shadeController,
             DockManager dockManager,
-            @Nullable StatusBarWindowBlurController blurController,
+            @Nullable NotificationShadeWindowBlurController blurController,
             NotificationShadeWindowView statusBarWindowView,
             NotificationPanelViewController notificationPanelViewController) {
         mInjectionInflationController = injectionInflationController;

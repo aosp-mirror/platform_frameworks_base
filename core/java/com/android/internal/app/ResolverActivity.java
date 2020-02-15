@@ -387,6 +387,11 @@ public class ResolverActivity extends Activity implements
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             rdl.setOnApplyWindowInsetsListener(this::onApplyWindowInsets);
 
+            rdl.setMaxCollapsedHeight(hasWorkProfile() && ENABLE_TABBED_VIEW
+                    ? getResources().getDimensionPixelSize(
+                            R.dimen.resolver_empty_state_height_with_tabs)
+                    : getResources().getDimensionPixelSize(R.dimen.resolver_empty_state_height));
+
             mResolverDrawerLayout = rdl;
         }
 
@@ -546,13 +551,6 @@ public class ResolverActivity extends Activity implements
         // Need extra padding so the list can fully scroll up
         if (shouldAddFooterView()) {
             applyFooterView(mSystemWindowInsets.bottom);
-        }
-
-        View emptyView = findViewById(R.id.empty);
-        if (emptyView != null) {
-            emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
-                                 + getResources().getDimensionPixelSize(
-                                         R.dimen.chooser_edge_margin_normal) * 2);
         }
 
         return insets.consumeSystemWindowInsets();
@@ -941,9 +939,12 @@ public class ResolverActivity extends Activity implements
     }
 
     @Override // ResolverListCommunicator
-    public void onPostListReady(ResolverListAdapter listAdapter, boolean doPostProcessing) {
+    public final void onPostListReady(ResolverListAdapter listAdapter, boolean doPostProcessing) {
         if (isAutolaunching() || maybeAutolaunchActivity()) {
             return;
+        }
+        if (shouldShowEmptyState(listAdapter)) {
+            mMultiProfilePagerAdapter.showEmptyState(listAdapter);
         }
         if (doPostProcessing) {
             if (mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
@@ -1277,10 +1278,9 @@ public class ResolverActivity extends Activity implements
             throw new IllegalStateException("mMultiProfilePagerAdapter.getCurrentListAdapter() "
                     + "cannot be null.");
         }
-        boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
-
         // We partially rebuild the inactive adapter to determine if we should auto launch
-        mMultiProfilePagerAdapter.rebuildInactiveTab(false);
+        boolean rebuildActiveCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
+        boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false);
 
         if (useLayoutWithDefault()) {
             mLayoutId = R.layout.resolver_list_with_default;
@@ -1289,7 +1289,7 @@ public class ResolverActivity extends Activity implements
         }
         setContentView(mLayoutId);
         mMultiProfilePagerAdapter.setupViewPager(findViewById(R.id.profile_pager));
-        return postRebuildList(rebuildCompleted);
+        return postRebuildList(rebuildActiveCompleted && rebuildInactiveCompleted);
     }
 
     /**
@@ -1337,10 +1337,11 @@ public class ResolverActivity extends Activity implements
         int numberOfProfiles = mMultiProfilePagerAdapter.getItemCount();
         if (numberOfProfiles == 1 && maybeAutolaunchIfSingleTarget()) {
             return true;
-        } else if (numberOfProfiles == 2 && maybeAutolaunchIfCrossProfileSupported()) {
-            // note that autolaunching when we have 2 profiles, 1 resolved target on the active
-            // tab and 0 resolved targets on the inactive tab, is already handled before launching
-            // ResolverActivity
+        } else if (numberOfProfiles == 2
+                && mMultiProfilePagerAdapter.getActiveListAdapter().isListLoaded()
+                && mMultiProfilePagerAdapter.getInactiveListAdapter().isListLoaded()
+                && (maybeAutolaunchIfNoAppsOnInactiveTab()
+                        || maybeAutolaunchIfCrossProfileSupported())) {
             return true;
         }
         return false;
@@ -1361,6 +1362,23 @@ public class ResolverActivity extends Activity implements
             return true;
         }
         return false;
+    }
+
+    private boolean maybeAutolaunchIfNoAppsOnInactiveTab() {
+        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
+        if (count != 1) {
+            return false;
+        }
+        ResolverListAdapter inactiveListAdapter =
+                mMultiProfilePagerAdapter.getInactiveListAdapter();
+        if (inactiveListAdapter.getUnfilteredCount() != 0) {
+            return false;
+        }
+        TargetInfo target = mMultiProfilePagerAdapter.getActiveListAdapter()
+                .targetInfoForPosition(0, false);
+        safelyStartActivity(target);
+        finish();
+        return true;
     }
 
     /**
@@ -1487,7 +1505,6 @@ public class ResolverActivity extends Activity implements
         for (int i = 0; i < tabWidget.getChildCount(); i++) {
             TextView title = tabWidget.getChildAt(i).findViewById(android.R.id.title);
             title.setTextColor(getColor(R.color.resolver_tabs_inactive_color));
-            title.setAllCaps(false);
         }
     }
 
@@ -1498,13 +1515,15 @@ public class ResolverActivity extends Activity implements
     }
 
     private void setupViewVisibilities() {
-        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
-        boolean shouldShowEmptyState = count == 0
-                && mMultiProfilePagerAdapter.getActiveListAdapter().getPlaceholderCount() == 0;
-        //TODO(arangelov): Handle empty state
-        if (!shouldShowEmptyState) {
-            addUseDifferentAppLabelIfNecessary(mMultiProfilePagerAdapter.getActiveListAdapter());
+        ResolverListAdapter activeListAdapter = mMultiProfilePagerAdapter.getActiveListAdapter();
+        if (!shouldShowEmptyState(activeListAdapter)) {
+            addUseDifferentAppLabelIfNecessary(activeListAdapter);
         }
+    }
+
+    private boolean shouldShowEmptyState(ResolverListAdapter listAdapter) {
+        int count = listAdapter.getUnfilteredCount();
+        return count == 0 && listAdapter.getPlaceholderCount() == 0;
     }
 
     /**

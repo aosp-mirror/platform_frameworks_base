@@ -24,7 +24,8 @@ import android.os.Binder;
 import android.os.IPendingIntentRef;
 import android.os.Process;
 import android.os.StatsDimensionsValue;
-import android.util.Slog;
+import android.os.StatsDimensionsValueParcel;
+import android.util.Log;
 
 import com.android.server.SystemService;
 
@@ -39,6 +40,9 @@ public class StatsCompanion {
     private static final boolean DEBUG = false;
 
     private static final int AID_STATSD = 1066;
+
+    private static final String STATS_COMPANION_SERVICE = "statscompanion";
+    private static final String STATS_MANAGER_SERVICE = "statsmanager";
 
     static void enforceStatsdCallingUid() {
         if (Binder.getCallingPid() == Process.myPid()) {
@@ -68,14 +72,12 @@ public class StatsCompanion {
             mStatsManagerService.setStatsCompanionService(mStatsCompanionService);
 
             try {
-                publishBinderService(Context.STATS_COMPANION_SERVICE,
-                        mStatsCompanionService);
-                if (DEBUG) Slog.d(TAG, "Published " + Context.STATS_COMPANION_SERVICE);
-                publishBinderService(Context.STATS_MANAGER_SERVICE,
-                        mStatsManagerService);
-                if (DEBUG) Slog.d(TAG, "Published " + Context.STATS_MANAGER_SERVICE);
+                publishBinderService(STATS_COMPANION_SERVICE, mStatsCompanionService);
+                if (DEBUG) Log.d(TAG, "Published " + STATS_COMPANION_SERVICE);
+                publishBinderService(STATS_MANAGER_SERVICE, mStatsManagerService);
+                if (DEBUG) Log.d(TAG, "Published " + STATS_MANAGER_SERVICE);
             } catch (Exception e) {
-                Slog.e(TAG, "Failed to publishBinderService", e);
+                Log.e(TAG, "Failed to publishBinderService", e);
             }
         }
 
@@ -124,7 +126,7 @@ public class StatsCompanion {
             try {
                 mPendingIntent.send(mContext, CODE_DATA_BROADCAST, intent, null, null);
             } catch (PendingIntent.CanceledException e) {
-                Slog.w(TAG, "Unable to send PendingIntent");
+                Log.w(TAG, "Unable to send PendingIntent");
             }
         }
 
@@ -136,17 +138,19 @@ public class StatsCompanion {
             try {
                 mPendingIntent.send(mContext, CODE_ACTIVE_CONFIGS_BROADCAST, intent, null, null);
                 if (DEBUG) {
-                    Slog.d(TAG, "Sent broadcast with config ids " + Arrays.toString(configIds));
+                    Log.d(TAG, "Sent broadcast with config ids " + Arrays.toString(configIds));
                 }
             } catch (PendingIntent.CanceledException e) {
-                Slog.w(TAG, "Unable to send active configs changed broadcast using PendingIntent");
+                Log.w(TAG, "Unable to send active configs changed broadcast using PendingIntent");
             }
         }
 
         @Override
         public void sendSubscriberBroadcast(long configUid, long configId, long subscriptionId,
-                long subscriptionRuleId, String[] cookies, StatsDimensionsValue dimensionsValue) {
+                long subscriptionRuleId, String[] cookies,
+                StatsDimensionsValueParcel dimensionsValueParcel) {
             enforceStatsdCallingUid();
+            StatsDimensionsValue dimensionsValue = new StatsDimensionsValue(dimensionsValueParcel);
             Intent intent =
                     new Intent()
                             .putExtra(StatsManager.EXTRA_STATS_CONFIG_UID, configUid)
@@ -162,7 +166,7 @@ public class StatsCompanion {
                     StatsManager.EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES, cookieList);
 
             if (DEBUG) {
-                Slog.d(TAG,
+                Log.d(TAG,
                         String.format(
                                 "Statsd sendSubscriberBroadcast with params {%d %d %d %d %s %s}",
                                 configUid, configId, subscriptionId, subscriptionRuleId,
@@ -172,7 +176,7 @@ public class StatsCompanion {
             try {
                 mPendingIntent.send(mContext, CODE_SUBSCRIBER_BROADCAST, intent, null, null);
             } catch (PendingIntent.CanceledException e) {
-                Slog.w(TAG,
+                Log.w(TAG,
                         "Unable to send using PendingIntent from uid " + configUid
                                 + "; presumably it had been cancelled.");
             }

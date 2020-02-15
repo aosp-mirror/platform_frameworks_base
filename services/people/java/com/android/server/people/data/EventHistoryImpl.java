@@ -78,6 +78,17 @@ class EventHistoryImpl implements EventHistory {
         mRecentEvents.add(event);
     }
 
+    void onDestroy() {
+        mEventIndexArray.clear();
+        mRecentEvents.clear();
+        // TODO: STOPSHIP: Delete the data files.
+    }
+
+    /** Deletes the events data that exceeds the retention period. */
+    void pruneOldEvents(long currentTimeMillis) {
+        // TODO: STOPSHIP: Delete the old events data files.
+    }
+
     @VisibleForTesting
     static class Injector {
 

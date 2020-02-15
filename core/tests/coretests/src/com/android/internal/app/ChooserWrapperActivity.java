@@ -16,15 +16,10 @@
 
 package com.android.internal.app;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
-import android.app.prediction.AppPredictionContext;
-import android.app.prediction.AppPredictionManager;
-import android.app.prediction.AppPredictor;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -35,7 +30,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Size;
 
@@ -45,8 +39,7 @@ import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
-import org.mockito.Mockito;
-
+import java.util.List;
 import java.util.function.Function;
 
 public class ChooserWrapperActivity extends ChooserActivity {
@@ -55,6 +48,15 @@ public class ChooserWrapperActivity extends ChooserActivity {
      */
     static final OverrideData sOverrides = new OverrideData();
     private UsageStatsManager mUsm;
+
+    @Override
+    protected AbstractMultiProfilePagerAdapter createMultiProfilePagerAdapter(
+            Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed) {
+        AbstractMultiProfilePagerAdapter multiProfilePagerAdapter =
+                super.createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
+        multiProfilePagerAdapter.setInjector(sOverrides.multiPagerAdapterInjector);
+        return multiProfilePagerAdapter;
+    }
 
     ChooserListAdapter getAdapter() {
         return mChooserMultiProfilePagerAdapter.getActiveListAdapter();
@@ -206,6 +208,9 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public int alternateProfileSetting;
         public Resources resources;
         public UserHandle workProfileUserHandle;
+        public boolean hasCrossProfileIntents;
+        public boolean isQuietModeEnabled;
+        public AbstractMultiProfilePagerAdapter.Injector multiPagerAdapterInjector;
 
         public void reset() {
             onSafelyStartCallback = null;
@@ -221,6 +226,26 @@ public class ChooserWrapperActivity extends ChooserActivity {
             alternateProfileSetting = 0;
             resources = null;
             workProfileUserHandle = null;
+            hasCrossProfileIntents = true;
+            isQuietModeEnabled = false;
+            multiPagerAdapterInjector = new AbstractMultiProfilePagerAdapter.Injector() {
+                @Override
+                public boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId,
+                        int targetUserId) {
+                    return hasCrossProfileIntents;
+                }
+
+                @Override
+                public boolean isQuietModeEnabled(UserHandle workProfileUserHandle) {
+                    return isQuietModeEnabled;
+                }
+
+                @Override
+                public void requestQuietModeEnabled(boolean enabled,
+                        UserHandle workProfileUserHandle) {
+                    isQuietModeEnabled = enabled;
+                }
+            };
         }
     }
 }

@@ -96,6 +96,7 @@
     <protected-broadcast android:name="android.intent.action.OVERLAY_PRIORITY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_UNSUSPENDED" />
+    <protected-broadcast android:name="android.intent.action.LOAD_DATA" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGING" />
@@ -1535,7 +1536,7 @@
          @hide
     -->
     <permission android:name="android.permission.ACCESS_CONTEXT_HUB"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|privileged" />
     <uses-permission android:name="android.permission.ACCESS_CONTEXT_HUB"/>
 
     <!-- @SystemApi Allows an application to create mock location providers for testing.
@@ -1639,7 +1640,7 @@
 
     <!-- Allows network stack services (Connectivity and Wifi) to coordinate
          <p>Not for use by third-party or privileged applications.
-         @SystemApi
+         @SystemApi @TestApi
          @hide This should only be used by Connectivity and Wifi Services.
     -->
     <permission android:name="android.permission.NETWORK_STACK"
@@ -1911,6 +1912,15 @@
     <permission android:name="android.permission.VIBRATE_ALWAYS_ON"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows access to the vibrator state.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.ACCESS_VIBRATOR_STATE"
+        android:label="@string/permdesc_vibrator_state"
+        android:description="@string/permdesc_vibrator_state"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows using PowerManager WakeLocks to keep processor from sleeping or screen
          from dimming.
          <p>Protection level: normal
@@ -1998,17 +2008,17 @@
     <permission android:name="android.permission.REMOTE_AUDIO_PLAYBACK"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows TvInputService to access underlying TV input hardware such as
+    <!-- Allows TvInputService to access underlying TV input hardware such as
          built-in tuners and HDMI-in's.
-         @hide This should only be used by OEM's TvInputService's.
-    -->
+         <p>This should only be used by OEM's TvInputService's.
+         @hide @SystemApi -->
     <permission android:name="android.permission.TV_INPUT_HARDWARE"
         android:protectionLevel="signature|privileged|vendorPrivileged" />
 
-    <!-- @SystemApi Allows to capture a frame of TV input hardware such as
+    <!-- Allows to capture a frame of TV input hardware such as
          built-in tuners and HDMI-in's.
-         @hide <p>Not for use by third-party applications.
-    -->
+         <p>Not for use by third-party applications.
+         @hide @SystemApi -->
     <permission android:name="android.permission.CAPTURE_TV_INPUT"
         android:protectionLevel="signature|privileged" />
 
@@ -2376,10 +2386,17 @@
          @hide -->
     <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
         android:protectionLevel="signature|installer|telephony" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
     <!-- Allows interaction across profiles in the same profile group. -->
     <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
         android:protectionLevel="signature|appop|documenter|wellbeing" />
+
+    <!-- Allows configuring apps to have the INTERACT_ACROSS_PROFILES permission so that they can
+         interact across profiles in the same profile group.
+         @hide -->
+    <permission android:name="android.permission.CONFIGURE_INTERACT_ACROSS_PROFILES"
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi @hide Allows an application to call APIs that allow it to query and manage
          users on the device. This permission is not available to
@@ -3433,10 +3450,10 @@
     <permission android:name="android.permission.READ_CONTENT_RATING_SYSTEMS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi Allows an application to notify TV inputs by sending broadcasts.
+    <!-- Allows an application to notify TV inputs by sending broadcasts.
          <p>Protection level: signature|privileged
          <p>Not for use by third-party applications.
-         @hide -->
+         @hide @SystemApi -->
     <permission android:name="android.permission.NOTIFY_TV_INPUTS"
          android:protectionLevel="signature|privileged" />
 
@@ -4029,6 +4046,15 @@
     <permission android:name="android.permission.PACKAGE_USAGE_STATS"
         android:protectionLevel="signature|privileged|development|appop|retailDemo" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+
+    <!-- Allows a data loader to read a package's access logs. The access logs contain the
+         set of pages referenced over time.
+         <p>Declaring the permission implies intention to use the API and the user of the
+         device can grant permission through the Settings application.
+         <p>Protection level: signature|privileged|appop -->
+    <permission android:name="android.permission.LOADER_USAGE_STATS"
+        android:protectionLevel="signature|privileged|appop" />
+    <uses-permission android:name="android.permission.LOADER_USAGE_STATS" />
 
     <!-- @hide @SystemApi Allows an application to observe usage time of apps. The app can register
          for callbacks when apps reach a certain usage time limit, etc. -->
@@ -4915,7 +4941,17 @@
          <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.ACCESS_TV_TUNER"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
+
+    <!-- @SystemApi Allows an application to access descrambler of TV tuner HAL
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.ACCESS_TV_DESCRAMBLER"
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
+
+    <!-- @hide @SystemApi Allows an application to access locusId events in the usage stats. -->
+    <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
+                android:protectionLevel="signature|appPredictor" />
 
     <application android:process="system"
                  android:persistent="true"
@@ -5311,6 +5347,10 @@
         </service>
 
         <service android:name="com.android.server.display.BrightnessIdleJob"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
+        <service android:name="com.android.server.people.data.DataMaintenanceService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 

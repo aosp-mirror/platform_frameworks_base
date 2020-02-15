@@ -25,11 +25,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.os.CancellationSignal;
 
-import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 
 import java.util.Map;
@@ -75,11 +74,15 @@ import javax.inject.Singleton;
 @Singleton
 public final class NotifBindPipeline {
     private final Map<NotificationEntry, BindEntry> mBindEntries = new ArrayMap<>();
+    private final NotifBindPipelineLogger mLogger;
     private BindStage mStage;
 
     @Inject
-    NotifBindPipeline(NotificationEntryManager entryManager) {
-        entryManager.addNotificationEntryListener(mEntryListener);
+    NotifBindPipeline(
+            CommonNotifCollection collection,
+            NotifBindPipelineLogger logger) {
+        collection.addCollectionListener(mCollectionListener);
+        mLogger = logger;
     }
 
     /**
@@ -87,6 +90,8 @@ public final class NotifBindPipeline {
      */
     public void setStage(
             BindStage stage) {
+        mLogger.logStageSet(stage.getClass().getName());
+
         mStage = stage;
         mStage.setBindRequestListener(this::onBindRequested);
     }
@@ -97,6 +102,8 @@ public final class NotifBindPipeline {
     public void manageRow(
             @NonNull NotificationEntry entry,
             @NonNull ExpandableNotificationRow row) {
+        mLogger.logManagedRow(entry.getKey());
+
         final BindEntry bindEntry = getBindEntry(entry);
         bindEntry.row = row;
         if (bindEntry.invalidated) {
@@ -131,6 +138,8 @@ public final class NotifBindPipeline {
      * callbacks when the run finishes. If a run is already in progress, it is restarted.
      */
     private void startPipeline(NotificationEntry entry) {
+        mLogger.logStartPipeline(entry.getKey());
+
         if (mStage == null) {
             throw new IllegalStateException("No stage was ever set on the pipeline");
         }
@@ -148,28 +157,26 @@ public final class NotifBindPipeline {
 
     private void onPipelineComplete(NotificationEntry entry) {
         final BindEntry bindEntry = getBindEntry(entry);
+        final Set<BindCallback> callbacks = bindEntry.callbacks;
+
+        mLogger.logFinishedPipeline(entry.getKey(), callbacks.size());
 
         bindEntry.invalidated = false;
-
-        final Set<BindCallback> callbacks = bindEntry.callbacks;
         for (BindCallback cb : callbacks) {
             cb.onBindFinished(entry);
         }
         callbacks.clear();
     }
 
-    //TODO: Move this to onManageEntry hook when we split that from add/remove
-    private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
+    private final NotifCollectionListener mCollectionListener = new NotifCollectionListener() {
         @Override
-        public void onPendingEntryAdded(NotificationEntry entry) {
+        public void onEntryInit(NotificationEntry entry) {
             mBindEntries.put(entry, new BindEntry());
             mStage.createStageParams(entry);
         }
 
         @Override
-        public void onEntryRemoved(NotificationEntry entry,
-                @Nullable NotificationVisibility visibility,
-                boolean removedByUser) {
+        public void onEntryCleanUp(NotificationEntry entry) {
             BindEntry bindEntry = mBindEntries.remove(entry);
             ExpandableNotificationRow row = bindEntry.row;
             if (row != null) {

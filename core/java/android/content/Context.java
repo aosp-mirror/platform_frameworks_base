@@ -3457,6 +3457,7 @@ public abstract class Context {
             CONSUMER_IR_SERVICE,
             //@hide: TRUST_SERVICE,
             TV_INPUT_SERVICE,
+            //@hide: TV_TUNER_RESOURCE_MGR_SERVICE,
             //@hide: NETWORK_SCORE_SERVICE,
             USAGE_STATS_SERVICE,
             MEDIA_SESSION_SERVICE,
@@ -4063,16 +4064,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.net.wifi.WifiCondManager} for handling management of the Wi-Fi control
-     * daemon.
+     * {@link android.net.wifi.wificond.WifiNl80211Manager} for handling management of the
+     * Wi-Fi nl802.11 daemon (wificond).
      *
      * @see #getSystemService(String)
-     * @see android.net.wifi.WifiCondManager
+     * @see android.net.wifi.wificond.WifiNl80211Manager
      * @hide
      */
     @SystemApi
     @SuppressLint("ServiceName")
-    public static final String WIFI_COND_SERVICE = "wificond";
+    public static final String WIFI_NL80211_SERVICE = "wifinl80211";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
@@ -4757,6 +4758,17 @@ public abstract class Context {
     public static final String TV_INPUT_SERVICE = "tv_input";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.tv.TunerResourceManager} for interacting with TV
+     * tuner resources on the device.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.tv.TunerResourceManager
+     * @hide
+     */
+    public static final String TV_TUNER_RESOURCE_MGR_SERVICE = "tv_tuner_resource_mgr";
+
+    /**
      * {@link android.net.NetworkScoreManager} for managing network scoring.
      * @see #getSystemService(String)
      * @see android.net.NetworkScoreManager
@@ -5086,10 +5098,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * AppSearchManager for indexing and querying app data managed
-     * by the system.
+     * {@link android.app.appsearch.AppSearchManager} for
+     * indexing and querying app data managed by the system.
      *
      * @see #getSystemService(String)
+     * @hide
      */
     public static final String APP_SEARCH_SERVICE = "app_search";
 

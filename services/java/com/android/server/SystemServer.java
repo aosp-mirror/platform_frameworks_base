@@ -41,6 +41,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
+import android.graphics.GraphicsStatsService;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityModuleConnector;
 import android.net.ITetheringConnector;
@@ -161,6 +162,7 @@ import com.android.server.textservices.TextServicesManagerService;
 import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.tv.TvRemoteService;
+import com.android.server.tv.tuner.TunerResourceManagerService;
 import com.android.server.twilight.TwilightService;
 import com.android.server.uri.UriGrantsManagerService;
 import com.android.server.usage.UsageStatsService;
@@ -1739,7 +1741,7 @@ public final class SystemServer {
             mSystemServiceManager.startService(SensorNotificationService.class);
             t.traceEnd();
 
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_CONTEXTHUB)) {
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_CONTEXT_HUB)) {
                 t.traceBegin("StartContextHubSystemService");
                 mSystemServiceManager.startService(ContextHubSystemService.class);
                 t.traceEnd();
@@ -1853,6 +1855,8 @@ public final class SystemServer {
                     || mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
                 t.traceBegin("StartTvInputManager");
                 mSystemServiceManager.startService(TvInputManagerService.class);
+                t.traceBegin("StartTunerResourceManager");
+                mSystemServiceManager.startService(TunerResourceManagerService.class);
                 t.traceEnd();
             }
 

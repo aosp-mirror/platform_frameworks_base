@@ -36,6 +36,9 @@
         },
         {
           "include-filter": "android.permission2.cts.RestrictedStoragePermissionSharedUidTest"
+        },
+        {
+          "include-filter": "android.permission2.cts.RestrictedStoragePermissionTest"
         }
       ]
     },

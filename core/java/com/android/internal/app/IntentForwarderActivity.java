@@ -26,6 +26,7 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
@@ -108,7 +109,8 @@ public class IntentForwarderActivity extends Activity  {
         }
 
         final int callingUserId = getUserId();
-        final Intent newIntent = canForward(intentReceived, targetUserId);
+        final Intent newIntent = canForward(intentReceived, getUserId(), targetUserId,
+                mInjector.getIPackageManager(), getContentResolver());
         if (newIntent != null) {
             if (Intent.ACTION_CHOOSER.equals(newIntent.getAction())) {
                 Intent innerIntent = newIntent.getParcelableExtra(Intent.EXTRA_INTENT);
@@ -191,7 +193,8 @@ public class IntentForwarderActivity extends Activity  {
      * Check whether the intent can be forwarded to target user. Return the intent used for
      * forwarding if it can be forwarded, {@code null} otherwise.
      */
-    Intent canForward(Intent incomingIntent, int targetUserId)  {
+    static Intent canForward(Intent incomingIntent, int sourceUserId, int targetUserId,
+            IPackageManager packageManager, ContentResolver contentResolver)  {
         Intent forwardIntent = new Intent(incomingIntent);
         forwardIntent.addFlags(
                 Intent.FLAG_ACTIVITY_FORWARD_RESULT | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
@@ -220,11 +223,11 @@ public class IntentForwarderActivity extends Activity  {
         if (forwardIntent.getSelector() != null) {
             intentToCheck = forwardIntent.getSelector();
         }
-        String resolvedType = intentToCheck.resolveTypeIfNeeded(getContentResolver());
+        String resolvedType = intentToCheck.resolveTypeIfNeeded(contentResolver);
         sanitizeIntent(intentToCheck);
         try {
-            if (mInjector.getIPackageManager().
-                    canForwardTo(intentToCheck, resolvedType, getUserId(), targetUserId)) {
+            if (packageManager.canForwardTo(
+                    intentToCheck, resolvedType, sourceUserId, targetUserId)) {
                 return forwardIntent;
             }
         } catch (RemoteException e) {
@@ -267,7 +270,7 @@ public class IntentForwarderActivity extends Activity  {
     /**
      * Sanitize the intent in place.
      */
-    private void sanitizeIntent(Intent intent) {
+    private static void sanitizeIntent(Intent intent) {
         // Apps should not be allowed to target a specific package/ component in the target user.
         intent.setPackage(null);
         intent.setComponent(null);

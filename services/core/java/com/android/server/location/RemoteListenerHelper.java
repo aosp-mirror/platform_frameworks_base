@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.Handler;
@@ -32,9 +33,10 @@ import java.util.Objects;
 /**
  * A helper class that handles operations in remote listeners.
  *
+ * @param <TRequest> the type of request.
  * @param <TListener> the type of GNSS data listener.
  */
-public abstract class RemoteListenerHelper<TListener extends IInterface> {
+public abstract class RemoteListenerHelper<TRequest, TListener extends IInterface> {
 
     protected static final int RESULT_SUCCESS = 0;
     protected static final int RESULT_NOT_AVAILABLE = 1;
@@ -47,7 +49,7 @@ public abstract class RemoteListenerHelper<TListener extends IInterface> {
     protected final Handler mHandler;
     private final String mTag;
 
-    private final Map<IBinder, IdentifiedListener> mListenerMap = new HashMap<>();
+    protected final Map<IBinder, IdentifiedListener> mListenerMap = new HashMap<>();
 
     protected final Context mContext;
     protected final AppOpsManager mAppOps;
@@ -75,7 +77,8 @@ public abstract class RemoteListenerHelper<TListener extends IInterface> {
     /**
      * Adds GNSS data listener {@code listener} with caller identify {@code callerIdentify}.
      */
-    public void addListener(@NonNull TListener listener, CallerIdentity callerIdentity) {
+    public void addListener(@Nullable TRequest request, @NonNull TListener listener,
+            CallerIdentity callerIdentity) {
         Objects.requireNonNull(listener, "Attempted to register a 'null' listener.");
         IBinder binder = listener.asBinder();
         synchronized (mListenerMap) {
@@ -84,7 +87,7 @@ public abstract class RemoteListenerHelper<TListener extends IInterface> {
                 return;
             }
 
-            IdentifiedListener identifiedListener = new IdentifiedListener(listener,
+            IdentifiedListener identifiedListener = new IdentifiedListener(request, listener,
                     callerIdentity);
             mListenerMap.put(binder, identifiedListener);
 
@@ -257,13 +260,21 @@ public abstract class RemoteListenerHelper<TListener extends IInterface> {
         return RESULT_SUCCESS;
     }
 
-    private class IdentifiedListener {
+    protected class IdentifiedListener {
+        @Nullable private final TRequest mRequest;
         private final TListener mListener;
         private final CallerIdentity mCallerIdentity;
 
-        private IdentifiedListener(@NonNull TListener listener, CallerIdentity callerIdentity) {
+        private IdentifiedListener(@Nullable TRequest request, @NonNull TListener listener,
+                CallerIdentity callerIdentity) {
             mListener = listener;
+            mRequest = request;
             mCallerIdentity = callerIdentity;
+        }
+
+        @Nullable
+        protected TRequest getRequest() {
+            return mRequest;
         }
     }
 

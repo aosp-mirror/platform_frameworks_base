@@ -119,7 +119,7 @@ class ResourceLoaderAssetsTest : ResourceLoaderTestBase() {
 
         val loader = ResourcesLoader()
         loader.providers = listOf(one, two)
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
 
         assertOpenedAsset()
         inOrder(two.assetsProvider, one.assetsProvider).apply {
@@ -149,7 +149,7 @@ class ResourceLoaderAssetsTest : ResourceLoaderTestBase() {
         val loader2 = ResourcesLoader()
         loader2.addProvider(two)
 
-        resources.loaders = listOf(loader1, loader2)
+        resources.addLoaders(loader1, loader2)
 
         assertOpenedAsset()
         inOrder(two.assetsProvider, one.assetsProvider).apply {
@@ -170,7 +170,7 @@ class ResourceLoaderAssetsTest : ResourceLoaderTestBase() {
         val loader = ResourcesLoader()
         val one = ResourcesProvider.empty(assetsProvider1)
         val two = ResourcesProvider.empty(assetsProvider2)
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
         loader.providers = listOf(one, two)
 
         assertOpenedAsset()
@@ -186,7 +186,7 @@ class ResourceLoaderAssetsTest : ResourceLoaderTestBase() {
         val loader = ResourcesLoader()
         val one = ResourcesProvider.empty(assetsProvider1)
         val two = ResourcesProvider.empty(assetsProvider2)
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
         loader.providers = listOf(one, two)
 
         assertOpenedAsset()
@@ -202,7 +202,7 @@ class ResourceLoaderAssetsTest : ResourceLoaderTestBase() {
         val loader = ResourcesLoader()
         val one = ResourcesProvider.empty(assetsProvider1)
         val two = ResourcesProvider.empty(assetsProvider2)
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
         loader.providers = listOf(one, two)
 
         assertOpenedAsset()

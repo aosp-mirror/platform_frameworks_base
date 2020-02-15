@@ -909,7 +909,8 @@ public final class NotificationRecord {
     /**
      * Set the visibility of the notification.
      */
-    public void setVisibility(boolean visible, int rank, int count) {
+    public void setVisibility(boolean visible, int rank, int count,
+            NotificationRecordLogger notificationRecordLogger) {
         final long now = System.currentTimeMillis();
         mVisibleSinceMs = visible ? now : mVisibleSinceMs;
         stats.onVisibilityChanged(visible);
@@ -927,6 +928,7 @@ public final class NotificationRecord {
                 getFreshnessMs(now),
                 0, // exposure time
                 rank);
+        notificationRecordLogger.logNotificationVisibility(this, visible);
     }
 
     /**

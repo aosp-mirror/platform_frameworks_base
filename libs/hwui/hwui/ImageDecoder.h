@@ -43,6 +43,7 @@ public:
 
     bool setUnpremultipliedRequired(bool unpremultipliedRequired);
 
+    sk_sp<SkColorSpace> getDefaultColorSpace() const;
     void setOutColorSpace(sk_sp<SkColorSpace> cs);
 
     // The size is the final size after scaling and cropping.

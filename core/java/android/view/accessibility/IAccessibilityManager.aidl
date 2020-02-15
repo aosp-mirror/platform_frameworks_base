@@ -47,7 +47,7 @@ interface IAccessibilityManager {
     @UnsupportedAppUsage
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType, int userId);
 
-    int addAccessibilityInteractionConnection(IWindow windowToken,
+    int addAccessibilityInteractionConnection(IWindow windowToken, IBinder leashToken,
             in IAccessibilityInteractionConnection connection,
             String packageName, int userId);
 
@@ -88,4 +88,8 @@ interface IAccessibilityManager {
     oneway void registerSystemAction(in RemoteAction action, int actionId);
     oneway void unregisterSystemAction(int actionId);
     oneway void setWindowMagnificationConnection(in IWindowMagnificationConnection connection);
+
+    void associateEmbeddedHierarchy(IBinder host, IBinder embedded);
+
+    void disassociateEmbeddedHierarchy(IBinder token);
 }

@@ -58,14 +58,12 @@ class BubbleTouchHandler implements View.OnTouchListener {
     private final PointF mViewPositionOnTouchDown = new PointF();
     private final BubbleStackView mStack;
     private final BubbleData mBubbleData;
-    private final Context mContext;
 
     private BubbleController mController = Dependency.get(BubbleController.class);
 
     private boolean mMovedEnough;
     private int mTouchSlopSquared;
     private VelocityTracker mVelocityTracker;
-    private Runnable mShowBubbleMenuRunnable;
 
     /** View that was initially touched, when we received the first ACTION_DOWN event. */
     private View mTouchedView;
@@ -78,7 +76,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
         mTouchSlopSquared = touchSlop * touchSlop;
         mBubbleData = bubbleData;
         mStack = stackView;
-        mContext = context;
     }
 
     @Override
@@ -95,15 +92,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
         // anything, collapse the stack.
         if (action == MotionEvent.ACTION_OUTSIDE || mTouchedView == null) {
             mBubbleData.setExpanded(false);
-            mStack.hideBubbleMenu();
             resetForNextGesture();
-            return false;
-        }
-
-        if (mTouchedView instanceof BubbleMenuView) {
-            mStack.hideBubbleMenu();
-            resetForNextGesture();
-            mStack.sendScreenshotToBubble(mBubbleData.getSelectedBubble());
             return false;
         }
 
@@ -116,7 +105,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
             }
             // Not touching anything touchable, but we shouldn't collapse (e.g. touching edge
             // of expanded view).
-            mStack.hideBubbleMenu();
             resetForNextGesture();
             return false;
         }
@@ -139,12 +127,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 if (isStack) {
                     mViewPositionOnTouchDown.set(mStack.getStackPosition());
                     mStack.onDragStart();
-                    if (!mStack.isShowingBubbleMenu() && !mStack.isExpanded()
-                            && BubbleExperimentConfig.allowBubbleScreenshotMenu(mContext)) {
-                        mShowBubbleMenuRunnable = mStack::showBubbleMenu;
-                        mStack.postDelayed(mShowBubbleMenuRunnable,
-                                ViewConfiguration.getLongPressTimeout());
-                    }
                 } else if (isFlyout) {
                     mStack.onFlyoutDragStart();
                 } else {
@@ -155,10 +137,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
 
                 break;
             case MotionEvent.ACTION_MOVE:
-                // block all further touch inputs once the menu is open
-                if (mStack.isShowingBubbleMenu()) {
-                    return true;
-                }
                 trackMovement(event);
                 final float deltaX = rawX - mTouchDown.x;
                 final float deltaY = rawY - mTouchDown.y;
@@ -168,7 +146,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 }
 
                 if (mMovedEnough) {
-                    mStack.removeCallbacks(mShowBubbleMenuRunnable);
                     if (isStack) {
                         mStack.onDragged(viewX, viewY);
                     } else if (isFlyout) {
@@ -199,12 +176,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 break;
 
             case MotionEvent.ACTION_UP:
-                if (mStack.isShowingBubbleMenu()) {
-                    resetForNextGesture();
-                    return true;
-                } else {
-                    mStack.removeCallbacks(mShowBubbleMenuRunnable);
-                }
                 trackMovement(event);
                 mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);
                 final float velX = mVelocityTracker.getXVelocity();
@@ -227,9 +198,14 @@ class BubbleTouchHandler implements View.OnTouchListener {
                                 if (isStack) {
                                     mController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
                                 } else {
-                                    mController.removeBubble(
-                                            individualBubbleKey,
-                                            BubbleController.DISMISS_USER_GESTURE);
+                                    final Bubble bubble =
+                                            mBubbleData.getBubbleWithKey(individualBubbleKey);
+                                    // bubble can be null if the user is in the middle of
+                                    // dismissing the bubble, but the app also sent a cancel
+                                    if (bubble != null) {
+                                        mController.removeBubble(bubble.getEntry(),
+                                                BubbleController.DISMISS_USER_GESTURE);
+                                    }
                                 }
                             });
                 } else if (isFlyout) {

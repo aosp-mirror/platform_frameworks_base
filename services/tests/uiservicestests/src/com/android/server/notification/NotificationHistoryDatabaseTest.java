@@ -44,6 +44,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.matchers.Not;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -237,6 +238,52 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
 
         verify(af, times(1)).openRead();
         verify(af2, never()).openRead();
+    }
+
+    @Test
+    public void testRemoveNotificationRunnable() throws Exception {
+        NotificationHistory nh = mock(NotificationHistory.class);
+        NotificationHistoryDatabase.RemoveNotificationRunnable rnr =
+                mDataBase.new RemoveNotificationRunnable("pkg", 123);
+        rnr.setNotificationHistory(nh);
+
+        AtomicFile af = mock(AtomicFile.class);
+        when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
+        mDataBase.mHistoryFiles.addLast(af);
+
+        when(nh.removeNotificationFromWrite("pkg", 123)).thenReturn(true);
+
+        mDataBase.mBuffer = mock(NotificationHistory.class);
+
+        rnr.run();
+
+        verify(mDataBase.mBuffer).removeNotificationFromWrite("pkg", 123);
+        verify(af).openRead();
+        verify(nh).removeNotificationFromWrite("pkg", 123);
+        verify(af).startWrite();
+    }
+
+    @Test
+    public void testRemoveNotificationRunnable_noChanges() throws Exception {
+        NotificationHistory nh = mock(NotificationHistory.class);
+        NotificationHistoryDatabase.RemoveNotificationRunnable rnr =
+                mDataBase.new RemoveNotificationRunnable("pkg", 123);
+        rnr.setNotificationHistory(nh);
+
+        AtomicFile af = mock(AtomicFile.class);
+        when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
+        mDataBase.mHistoryFiles.addLast(af);
+
+        when(nh.removeNotificationFromWrite("pkg", 123)).thenReturn(false);
+
+        mDataBase.mBuffer = mock(NotificationHistory.class);
+
+        rnr.run();
+
+        verify(mDataBase.mBuffer).removeNotificationFromWrite("pkg", 123);
+        verify(af).openRead();
+        verify(nh).removeNotificationFromWrite("pkg", 123);
+        verify(af, never()).startWrite();
     }
 
     private class TestFileAttrProvider implements NotificationHistoryDatabase.FileAttrProvider {

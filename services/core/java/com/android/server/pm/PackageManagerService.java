@@ -3627,7 +3627,7 @@ public class PackageManagerService extends IPackageManager.Stub
             try {
                 handle = NativeLibraryHelper.Handle.create(dstCodePath);
                 ret = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
-                        null /*abiOverride*/);
+                        null /*abiOverride*/, false /*isIncremental*/);
             } catch (IOException e) {
                 logCriticalInfo(Log.ERROR, "Failed to extract native libraries"
                         + "; pkg: " + packageName);
@@ -4600,7 +4600,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             final AndroidPackage p = mPackages.get(packageName);
             if (p != null && p.isMatch(flags)) {
-                PackageSetting ps = getPackageSetting(p.getPackageName());
+                PackageSetting ps = getPackageSettingInternal(p.getPackageName(), callingUid);
                 if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                     return -1;
                 }
@@ -5924,7 +5924,10 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @Override
     public String[] getPackagesForUid(int uid) {
-        final int callingUid = Binder.getCallingUid();
+        return getPackagesForUidInternal(uid, Binder.getCallingUid());
+    }
+
+    private String[] getPackagesForUidInternal(int uid, int callingUid) {
         final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
         final int userId = UserHandle.getUserId(uid);
         final int appId = UserHandle.getAppId(uid);
@@ -6298,10 +6301,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
             Intent origIntent, String resolvedType, String callingPackage,
-            boolean isRequesterInstantApp, Bundle verificationBundle, int userId) {
+            @Nullable String callingFeatureId, boolean isRequesterInstantApp,
+            Bundle verificationBundle, int userId) {
         final Message msg = mHandler.obtainMessage(INSTANT_APP_RESOLUTION_PHASE_TWO,
                 new InstantAppRequest(responseObj, origIntent, resolvedType,
-                        callingPackage, isRequesterInstantApp, userId, verificationBundle,
+                        callingPackage, callingFeatureId, isRequesterInstantApp, userId, verificationBundle,
                         false /*resolveForStart*/, responseObj.hostDigestPrefixSecure,
                         responseObj.token));
         mHandler.sendMessage(msg);
@@ -6987,10 +6991,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
                 String token = UUID.randomUUID().toString();
                 InstantAppDigest digest = InstantAppResolver.parseDigest(intent);
-                final InstantAppRequest requestObject = new InstantAppRequest(
-                        null /*responseObj*/, intent /*origIntent*/, resolvedType,
-                        null /*callingPackage*/, isRequesterInstantApp,
-                        userId, null /*verificationBundle*/, resolveForStart,
+                final InstantAppRequest requestObject = new InstantAppRequest(null /*responseObj*/,
+                        intent /*origIntent*/, resolvedType, null /*callingPackage*/,
+                        null /*callingFeatureId*/, isRequesterInstantApp, userId,
+                        null /*verificationBundle*/, resolveForStart,
                         digest.getDigestPrefixSecure(), token);
                 auxiliaryResponse = InstantAppResolver.doInstantAppResolutionPhaseOne(
                         mInstantAppResolverConnection, requestObject);
@@ -12206,7 +12210,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         + intent.toShortString(false, true, false, false)
                         + " " + intent.getExtras(), here);
             }
-            am.broadcastIntent(null, intent, null, finishedReceiver,
+            am.broadcastIntentWithFeature(null, null, intent, null, finishedReceiver,
                     0, null, null, requiredPermissions, android.app.AppOpsManager.OP_NONE,
                     null, finishedReceiver != null, false, id);
         }
@@ -12368,8 +12372,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 lockedBcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             }
             final String[] requiredPermissions = {Manifest.permission.RECEIVE_BOOT_COMPLETED};
-            am.broadcastIntent(null, lockedBcIntent, null, null, 0, null, null, requiredPermissions,
-                    android.app.AppOpsManager.OP_NONE, null, false, false, userId);
+            am.broadcastIntentWithFeature(null, null, lockedBcIntent, null, null, 0, null, null,
+                    requiredPermissions, android.app.AppOpsManager.OP_NONE, null, false, false,
+                    userId);
 
             // Deliver BOOT_COMPLETED only if user is unlocked
             if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
@@ -12377,8 +12382,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (includeStopped) {
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 }
-                am.broadcastIntent(null, bcIntent, null, null, 0, null, null, requiredPermissions,
-                        android.app.AppOpsManager.OP_NONE, null, false, false, userId);
+                am.broadcastIntentWithFeature(null, null, bcIntent, null, null, 0, null, null,
+                        requiredPermissions, android.app.AppOpsManager.OP_NONE, null, false, false,
+                        userId);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -13350,12 +13356,9 @@ public class PackageManagerService extends IPackageManager.Stub
      *
      * @return true if verification should be performed
      */
-    private boolean isVerificationEnabled(int userId, int installFlags, int installerUid) {
+    private boolean isVerificationEnabled(
+            PackageInfoLite pkgInfoLite, int userId, int installFlags, int installerUid) {
         if (!DEFAULT_VERIFY_ENABLE) {
-            return false;
-        }
-
-        if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
             return false;
         }
 
@@ -13364,28 +13367,42 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
                 return true;
             }
-            // Check if the developer does not want package verification for ADB installs
+            // Check if the developer wants to skip verification for ADB installs
+            if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
+                synchronized (mLock) {
+                    if (mSettings.mPackages.get(pkgInfoLite.packageName) == null) {
+                        // Always verify fresh install
+                        return true;
+                    }
+                }
+                // Only skip when apk is debuggable
+                return !pkgInfoLite.debuggable;
+            }
             return Global.getInt(mContext.getContentResolver(),
                     Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
-        } else {
-            // only when not installed from ADB, skip verification for instant apps when
-            // the installer and verifier are the same.
-            if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                if (mInstantAppInstallerActivity != null
-                        && mInstantAppInstallerActivity.packageName.equals(
-                                mRequiredVerifierPackage)) {
-                    try {
-                        mInjector.getAppOpsManager()
-                                .checkPackage(installerUid, mRequiredVerifierPackage);
-                        if (DEBUG_VERIFY) {
-                            Slog.i(TAG, "disable verification for instant app");
-                        }
-                        return false;
-                    } catch (SecurityException ignore) { }
-                }
-            }
-            return true;
         }
+
+        if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
+            return false;
+        }
+
+        // only when not installed from ADB, skip verification for instant apps when
+        // the installer and verifier are the same.
+        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
+            if (mInstantAppInstallerActivity != null
+                    && mInstantAppInstallerActivity.packageName.equals(
+                            mRequiredVerifierPackage)) {
+                try {
+                    mInjector.getAppOpsManager()
+                            .checkPackage(installerUid, mRequiredVerifierPackage);
+                    if (DEBUG_VERIFY) {
+                        Slog.i(TAG, "disable verification for instant app");
+                    }
+                    return false;
+                } catch (SecurityException ignore) { }
+            }
+        }
+        return true;
     }
 
     /**
@@ -14549,7 +14566,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     verificationInfo == null ? -1 : verificationInfo.installerUid;
             if (!origin.existing && requiredUid != -1
                     && isVerificationEnabled(
-                    verifierUser.getIdentifier(), installFlags, installerUid)) {
+                            pkgLite, verifierUser.getIdentifier(), installFlags, installerUid)) {
                 final Intent verification = new Intent(
                         Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
                 verification.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -14690,8 +14707,7 @@ public class PackageManagerService extends IPackageManager.Stub
         void handleVerificationFinished() {
             if (!mVerificationCompleted) {
                 mVerificationCompleted = true;
-                if (mIntegrityVerificationCompleted || mRet != INSTALL_SUCCEEDED) {
-                    mIntegrityVerificationCompleted = true;
+                if (mIntegrityVerificationCompleted) {
                     handleReturnCode();
                 }
                 // integrity verification still pending.
@@ -14701,8 +14717,7 @@ public class PackageManagerService extends IPackageManager.Stub
         void handleIntegrityVerificationFinished() {
             if (!mIntegrityVerificationCompleted) {
                 mIntegrityVerificationCompleted = true;
-                if (mVerificationCompleted || mRet != INSTALL_SUCCEEDED) {
-                    mVerificationCompleted = true;
+                if (mVerificationCompleted) {
                     handleReturnCode();
                 }
                 // verifier still pending
@@ -14959,12 +14974,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 return ret;
             }
 
+            final boolean isIncremental = isIncrementalPath(codeFile.getAbsolutePath());
             final File libraryRoot = new File(codeFile, LIB_DIR_NAME);
             NativeLibraryHelper.Handle handle = null;
             try {
                 handle = NativeLibraryHelper.Handle.create(codeFile);
                 ret = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
-                        abiOverride);
+                        abiOverride, isIncremental);
             } catch (IOException e) {
                 Slog.e(TAG, "Copying native libraries failed", e);
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
@@ -17365,6 +17381,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mLock")
     private String resolveInternalPackageNameLPr(String packageName, long versionCode) {
+        final int callingUid = Binder.getCallingUid();
+        return resolveInternalPackageNameInternalLocked(packageName, versionCode,
+                callingUid);
+    }
+
+    private String resolveInternalPackageNameInternalLocked(
+            String packageName, long versionCode, int callingUid) {
         // Handle renamed packages
         String normalizedPackageName = mSettings.getRenamedPackageLPr(packageName);
         packageName = normalizedPackageName != null ? normalizedPackageName : packageName;
@@ -17378,12 +17401,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Figure out which lib versions the caller can see
         LongSparseLongArray versionsCallerCanSee = null;
-        final int callingAppId = UserHandle.getAppId(Binder.getCallingUid());
+        final int callingAppId = UserHandle.getAppId(callingUid);
         if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.SHELL_UID
                 && callingAppId != Process.ROOT_UID) {
             versionsCallerCanSee = new LongSparseLongArray();
             String libName = versionedLib.valueAt(0).getName();
-            String[] uidPackages = getPackagesForUid(Binder.getCallingUid());
+            String[] uidPackages = getPackagesForUidInternal(callingUid, callingUid);
             if (uidPackages != null) {
                 for (String uidPackage : uidPackages) {
                     PackageSetting ps = mSettings.getPackageLPr(uidPackage);
@@ -18769,7 +18792,7 @@ public class PackageManagerService extends IPackageManager.Stub
             intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             try {
-                am.broadcastIntent(null, intent, null, null,
+                am.broadcastIntentWithFeature(null, null, intent, null, null,
                         0, null, null, null, android.app.AppOpsManager.OP_NONE,
                         null, false, false, userId);
             } catch (RemoteException e) {
@@ -22988,7 +23011,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public AndroidPackage getPackage(int uid) {
             synchronized (mLock) {
-                final String[] packageNames = getPackagesForUid(uid);
+                final String[] packageNames = getPackagesForUidInternal(uid, Process.SYSTEM_UID);
                 AndroidPackage pkg = null;
                 final int numPackages = packageNames == null ? 0 : packageNames.length;
                 for (int i = 0; pkg == null && i < numPackages; i++) {
@@ -23413,9 +23436,10 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
                 Intent origIntent, String resolvedType, String callingPackage,
-                boolean isRequesterInstantApp, Bundle verificationBundle, int userId) {
-            PackageManagerService.this.requestInstantAppResolutionPhaseTwo(
-                    responseObj, origIntent, resolvedType, callingPackage, isRequesterInstantApp,
+                @Nullable String callingFeatureId, boolean isRequesterInstantApp,
+                Bundle verificationBundle, int userId) {
+            PackageManagerService.this.requestInstantAppResolutionPhaseTwo(responseObj, origIntent,
+                    resolvedType, callingPackage, callingFeatureId, isRequesterInstantApp,
                     verificationBundle, userId);
         }
 
@@ -24001,9 +24025,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Nullable
     public PackageSetting getPackageSetting(String packageName) {
+        return getPackageSettingInternal(packageName, Binder.getCallingUid());
+    }
+
+    private PackageSetting getPackageSettingInternal(String packageName, int callingUid) {
         synchronized (mLock) {
-            packageName = resolveInternalPackageNameLPr(
-                    packageName, PackageManager.VERSION_CODE_HIGHEST);
+            packageName = resolveInternalPackageNameInternalLocked(
+                    packageName, PackageManager.VERSION_CODE_HIGHEST, callingUid);
             return mSettings.mPackages.get(packageName);
         }
     }
@@ -24325,8 +24353,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 Manifest.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY,
             };
             try {
-                am.broadcastIntent(null, intent, null, null, 0, null, null, requiredPermissions,
-                        android.app.AppOpsManager.OP_NONE, null, false, false, UserHandle.USER_ALL);
+                am.broadcastIntentWithFeature(null, null, intent, null, null, 0, null, null,
+                        requiredPermissions, android.app.AppOpsManager.OP_NONE, null, false, false,
+                        UserHandle.USER_ALL);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

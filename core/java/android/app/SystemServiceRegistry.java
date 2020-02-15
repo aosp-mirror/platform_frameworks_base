@@ -109,6 +109,8 @@ import android.media.session.MediaSessionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
+import android.media.tv.tuner.ITunerResourceManager;
+import android.media.tv.tuner.TunerResourceManager;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityThread;
@@ -130,7 +132,7 @@ import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
 import android.net.wifi.WifiFrameworkInitializer;
-import android.net.wifi.wificond.WifiCondManager;
+import android.net.wifi.wificond.WifiNl80211Manager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -759,11 +761,11 @@ public final class SystemServiceRegistry {
                 return new EthernetManager(ctx.getOuterContext(), service);
             }});
 
-        registerService(Context.WIFI_COND_SERVICE, WifiCondManager.class,
-                new CachedServiceFetcher<WifiCondManager>() {
+        registerService(Context.WIFI_NL80211_SERVICE, WifiNl80211Manager.class,
+                new CachedServiceFetcher<WifiNl80211Manager>() {
                     @Override
-                    public WifiCondManager createService(ContextImpl ctx) {
-                        return new WifiCondManager(ctx.getOuterContext());
+                    public WifiNl80211Manager createService(ContextImpl ctx) {
+                        return new WifiNl80211Manager(ctx.getOuterContext());
                     }
                 });
 
@@ -935,6 +937,17 @@ public final class SystemServiceRegistry {
                 IBinder iBinder = ServiceManager.getServiceOrThrow(Context.TV_INPUT_SERVICE);
                 ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
                 return new TvInputManager(service, ctx.getUserId());
+            }});
+
+        registerService(Context.TV_TUNER_RESOURCE_MGR_SERVICE, TunerResourceManager.class,
+                new CachedServiceFetcher<TunerResourceManager>() {
+            @Override
+            public TunerResourceManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                IBinder iBinder =
+                        ServiceManager.getServiceOrThrow(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
+                ITunerResourceManager service = ITunerResourceManager.Stub.asInterface(iBinder);
+                return new TunerResourceManager(service, ctx.getUserId());
             }});
 
         registerService(Context.NETWORK_SCORE_SERVICE, NetworkScoreManager.class,

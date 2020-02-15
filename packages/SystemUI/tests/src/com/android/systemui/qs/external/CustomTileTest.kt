@@ -88,8 +88,8 @@ class CustomTileTest : SysuiTestCase() {
     }
 
     @Test
-    fun testBooleanTileHasBooleanState() {
-        `when`(mTileServiceManager.isBooleanTile).thenReturn(true)
+    fun testToggleableTileHasBooleanState() {
+        `when`(mTileServiceManager.isToggleableTile).thenReturn(true)
         customTile = CustomTile.create(mTileHost, TILE_SPEC)
 
         assertTrue(customTile.state is QSTile.BooleanState)
@@ -104,7 +104,7 @@ class CustomTileTest : SysuiTestCase() {
 
     @Test
     fun testValueUpdatedInBooleanTile() {
-        `when`(mTileServiceManager.isBooleanTile).thenReturn(true)
+        `when`(mTileServiceManager.isToggleableTile).thenReturn(true)
         customTile = CustomTile.create(mTileHost, TILE_SPEC)
         customTile.qsTile.icon = mock(Icon::class.java)
         `when`(customTile.qsTile.icon.loadDrawable(any(Context::class.java)))

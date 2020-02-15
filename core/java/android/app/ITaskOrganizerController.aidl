@@ -51,6 +51,13 @@ interface ITaskOrganizerController {
     /** Deletes a persistent root task in WM */
     boolean deleteRootTask(IWindowContainer task);
 
+    /** Gets direct child tasks (ordered from top-to-bottom) */
+    List<ActivityManager.RunningTaskInfo> getChildTasks(in IWindowContainer parent,
+            in int[] activityTypes);
+
+    /** Gets all root tasks on a display (ordered from top-to-bottom) */
+    List<ActivityManager.RunningTaskInfo> getRootTasks(int displayId, in int[] activityTypes);
+
     /** Get the root task which contains the current ime target */
     IWindowContainer getImeTarget(int display);
 

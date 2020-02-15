@@ -102,7 +102,7 @@ jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent* event) {
                                         event->getRepeatCount(), event->getMetaState(),
                                         event->getDeviceId(), event->getScanCode(),
                                         event->getFlags(), event->getSource(),
-                                        event->getDisplayId(), hmac.get(), NULL);
+                                        event->getDisplayId(), hmac.get(), nullptr);
     if (env->ExceptionCheck()) {
         ALOGE("An exception occurred while obtaining a key event.");
         LOGE_EX(env);

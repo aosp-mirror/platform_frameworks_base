@@ -248,8 +248,27 @@ public final class PowerManager {
     public static final int BRIGHTNESS_DEFAULT = -1;
 
     /**
+     * Brightness value for an invalid value having been stored.
+     * @hide
+     */
+    public static final int BRIGHTNESS_INVALID = -1;
+
+    //Brightness values for new float implementation:
+    /**
+     * Brightness value for fully on as float.
+     * @hide
+     */
+    public static final float BRIGHTNESS_MAX = 1.0f;
+
+    /**
+     * Brightness value for minimum valid brightness as float.
+     * @hide
+     */
+    public static final float BRIGHTNESS_MIN = 0.0f;
+
+    /**
      * Brightness value for fully off in float.
-     * TODO: rename this to BRIGHTNES_OFF and remove the integer-based constant.
+     * TODO(brightnessfloat): rename this to BRIGHTNES_OFF and remove the integer-based constant.
      * @hide
      */
     public static final float BRIGHTNESS_OFF_FLOAT = -1.0f;
@@ -420,6 +439,69 @@ public final class PowerManager {
      * @hide
      */
     public static final int GO_TO_SLEEP_FLAG_NO_DOZE = 1 << 0;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "BRIGHTNESS_CONSTRAINT_TYPE" }, value = {
+            BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM,
+            BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM,
+            BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT,
+            BRIGHTNESS_CONSTRAINT_TYPE_DIM,
+            BRIGHTNESS_CONSTRAINT_TYPE_DOZE,
+            BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR,
+            BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM_VR,
+            BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT_VR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BrightnessConstraint{}
+
+    /**
+     * Brightness constraint type: minimum allowed value.
+     * @hide
+     */
+    public static final int BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM = 0;
+    /**
+     * Brightness constraint type: minimum allowed value.
+     * @hide
+     */
+    public static final int BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM = 1;
+
+    /**
+     * Brightness constraint type: minimum allowed value.
+     * @hide
+     */
+    public static final int BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT = 2;
+
+    /**
+     * Brightness constraint type: minimum allowed value.
+     * @hide
+     */
+    public static final int BRIGHTNESS_CONSTRAINT_TYPE_DIM = 3;
+
+    /**
+     * Brightness constraint type: minimum allowed value.
+     * @hide
+     */
+    public static final int BRIGHTNESS_CONSTRAINT_TYPE_DOZE = 4;
+
+    /**
+     * Brightness constraint type: minimum allowed value.
+     * @hide
+     */
+    public static final int BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR = 5;
+
+    /**
+     * Brightness constraint type: minimum allowed value.
+     * @hide
+     */
+    public static final int BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM_VR = 6;
+
+    /**
+     * Brightness constraint type: minimum allowed value.
+     * @hide
+     */
+    public static final int BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT_VR = 7;
 
     /**
      * @hide
@@ -886,6 +968,19 @@ public final class PowerManager {
     public int getDefaultScreenBrightnessForVrSetting() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessForVrSettingDefault);
+    }
+
+    /**
+     * Gets a float screen brightness setting.
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public float getBrightnessConstraint(int constraint) {
+        try {
+            return mService.getBrightnessConstraint(constraint);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

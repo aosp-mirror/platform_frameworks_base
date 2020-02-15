@@ -85,6 +85,7 @@ public interface AppStandbyInternal {
     /**
      * Checks if an app has been idle for a while and filters out apps that are excluded.
      * It returns false if the current system state allows all apps to be considered active.
+     * This happens if the device is plugged in or otherwise temporarily allowed to make exceptions.
      * Called by interface impls.
      */
     boolean isAppIdleFiltered(String packageName, int appId, int userId,

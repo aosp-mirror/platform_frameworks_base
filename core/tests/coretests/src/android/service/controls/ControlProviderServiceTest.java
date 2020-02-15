@@ -147,6 +147,34 @@ public class ControlProviderServiceTest {
     }
 
     @Test
+    public void testLoadSuggested_withMaxNumber() throws RemoteException {
+        Control control1 = new Control.StatelessBuilder("TEST_ID", mPendingIntent).build();
+        Control control2 = new Control.StatelessBuilder("TEST_ID_2", mPendingIntent)
+                .setDeviceType(DeviceTypes.TYPE_AIR_FRESHENER).build();
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Control>> captor = ArgumentCaptor.forClass(List.class);
+
+        ArrayList<Control> list = new ArrayList<>();
+        list.add(control1);
+        list.add(control2);
+
+        final int maxSuggested = 1;
+
+        mControlsProviderService.setControls(list);
+        mControlsProvider.loadSuggested(maxSuggested, mLoadCallback);
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        verify(mLoadCallback).accept(eq(mToken), captor.capture());
+        List<Control> l = captor.getValue();
+        assertEquals(maxSuggested, l.size());
+
+        for (int i = 0; i < maxSuggested; ++i) {
+            assertTrue(equals(list.get(i), l.get(i)));
+        }
+    }
+
+    @Test
     public void testSubscribe() throws RemoteException {
         Control control = new Control.StatefulBuilder("TEST_ID", mPendingIntent)
                 .setTitle("TEST_TITLE")
@@ -212,6 +240,11 @@ public class ControlProviderServiceTest {
 
         @Override
         public void loadAvailableControls(Consumer<List<Control>> cb) {
+            cb.accept(mControls);
+        }
+
+        @Override
+        public void loadSuggestedControls(int maxNumber, Consumer<List<Control>> cb) {
             cb.accept(mControls);
         }
 

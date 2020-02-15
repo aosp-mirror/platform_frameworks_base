@@ -57,6 +57,7 @@ import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -67,6 +68,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.rollback.WatchdogRollbackLogger;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,6 +100,10 @@ public class StagingManager {
 
     @GuardedBy("mStagedSessions")
     private final SparseIntArray mSessionRollbackIds = new SparseIntArray();
+
+    @GuardedBy("mFailedPackageNames")
+    private final List<String> mFailedPackageNames = new ArrayList<>();
+    private String mNativeFailureReason;
 
     StagingManager(PackageInstallerService pi, Context context) {
         mPi = pi;
@@ -441,6 +447,22 @@ public class StagingManager {
         }
     }
 
+    /**
+     *  Prepares for the logging of apexd reverts by storing the native failure reason if necessary,
+     *  and adding the package name of the session which apexd reverted to the list of reverted
+     *  session package names.
+     *  Logging needs to wait until the ACTION_BOOT_COMPLETED broadcast is sent.
+     */
+    private void prepareForLoggingApexdRevert(@NonNull PackageInstallerSession session,
+            @NonNull String nativeFailureReason) {
+        synchronized (mFailedPackageNames) {
+            mNativeFailureReason = nativeFailureReason;
+            if (session.getPackageName() != null) {
+                mFailedPackageNames.add(session.getPackageName());
+            }
+        }
+    }
+
     private void resumeSession(@NonNull PackageInstallerSession session) {
         Slog.d(TAG, "Resuming session " + session.sessionId);
 
@@ -449,6 +471,12 @@ public class StagingManager {
         if (hasApex) {
             // Check with apexservice whether the apex packages have been activated.
             apexSessionInfo = mApexManager.getStagedSessionInfo(session.sessionId);
+
+            // Prepare for logging a native crash during boot, if one occurred.
+            if (apexSessionInfo != null && !TextUtils.isEmpty(
+                    apexSessionInfo.crashingNativeProcess)) {
+                prepareForLoggingApexdRevert(session, apexSessionInfo.crashingNativeProcess);
+            }
 
             if (apexSessionInfo != null && apexSessionInfo.isVerified) {
                 // Session has been previously submitted to apexd, but didn't complete all the
@@ -955,12 +983,23 @@ public class StagingManager {
         }
     }
 
+    private void logFailedApexSessionsIfNecessary() {
+        synchronized (mFailedPackageNames) {
+            if (!mFailedPackageNames.isEmpty()) {
+                WatchdogRollbackLogger.logApexdRevert(mContext,
+                        mFailedPackageNames, mNativeFailureReason);
+            }
+        }
+    }
+
     void systemReady() {
         // Register the receiver of boot completed intent for staging manager.
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context ctx, Intent intent) {
                 mPreRebootVerificationHandler.readyToStart();
+                BackgroundThread.getExecutor().execute(
+                        () -> logFailedApexSessionsIfNecessary());
                 ctx.unregisterReceiver(this);
             }
         }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));

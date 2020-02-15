@@ -20,6 +20,6 @@ import android.service.controls.Control
 
 data class ControlStatus(
     val control: Control,
-    val favorite: Boolean,
+    var favorite: Boolean,
     val removed: Boolean = false
 )

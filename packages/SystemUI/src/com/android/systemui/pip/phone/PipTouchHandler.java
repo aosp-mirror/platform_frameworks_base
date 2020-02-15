@@ -73,6 +73,7 @@ public class PipTouchHandler {
     private final ViewConfiguration mViewConfig;
     private final PipMenuListener mMenuListener = new PipMenuListener();
     private final PipBoundsHandler mPipBoundsHandler;
+    private final PipResizeGestureHandler mPipResizeGestureHandler;
     private IPinnedStackController mPinnedStackController;
 
     private final PipMenuActivityController mMenuController;
@@ -188,6 +189,8 @@ public class PipTouchHandler {
         mGesture = new DefaultPipTouchGesture();
         mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mActivityTaskManager,
                 mMenuController, mSnapAlgorithm, mFlingAnimationUtils);
+        mPipResizeGestureHandler =
+                new PipResizeGestureHandler(context, pipBoundsHandler, this, mMotionHelper);
         mTouchState = new PipTouchState(mViewConfig, mHandler,
                 () -> mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         mMovementBounds, true /* allowMenuTimeout */, willResizeMenu()));
@@ -227,6 +230,7 @@ public class PipTouchHandler {
     public void onActivityPinned() {
         cleanUp();
         mShowPipMenuOnAnimationEnd = true;
+        mPipResizeGestureHandler.onActivityPinned();
     }
 
     public void onActivityUnpinned(ComponentName topPipActivity) {
@@ -234,11 +238,14 @@ public class PipTouchHandler {
             // Clean up state after the last PiP activity is removed
             cleanUp();
         }
+        mPipResizeGestureHandler.onActivityUnpinned();
     }
 
     public void onPinnedStackAnimationEnded() {
         // Always synchronize the motion helper bounds once PiP animations finish
         mMotionHelper.synchronizePinnedStackBounds();
+        mPipResizeGestureHandler.updateMiniSize(mMotionHelper.getBounds().width(),
+                mMotionHelper.getBounds().height());
 
         if (mShowPipMenuOnAnimationEnd) {
             mMenuController.showMenu(MENU_STATE_CLOSE, mMotionHelper.getBounds(),
@@ -279,6 +286,7 @@ public class PipTouchHandler {
         Size expandedSize = mSnapAlgorithm.getSizeForAspectRatio(aspectRatio,
                 mExpandedShortestEdgeSize, displaySize.x, displaySize.y);
         mExpandedBounds.set(0, 0, expandedSize.getWidth(), expandedSize.getHeight());
+        mPipResizeGestureHandler.updateMaxSize(expandedSize.getWidth(), expandedSize.getHeight());
         Rect expandedMovementBounds = new Rect();
         mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds, expandedMovementBounds,
                 bottomOffset);

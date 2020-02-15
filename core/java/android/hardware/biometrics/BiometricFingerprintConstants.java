@@ -18,6 +18,7 @@ package android.hardware.biometrics;
 
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.fingerprint.FingerprintManager;
 
 /**
@@ -37,32 +38,32 @@ public interface BiometricFingerprintConstants {
     /**
      * The hardware is unavailable. Try again later.
      */
-    public static final int FINGERPRINT_ERROR_HW_UNAVAILABLE = 1;
+    int FINGERPRINT_ERROR_HW_UNAVAILABLE = 1;
 
     /**
      * Error state returned when the sensor was unable to process the current image.
      */
-    public static final int FINGERPRINT_ERROR_UNABLE_TO_PROCESS = 2;
+    int FINGERPRINT_ERROR_UNABLE_TO_PROCESS = 2;
 
     /**
      * Error state returned when the current request has been running too long. This is intended to
      * prevent programs from waiting for the fingerprint sensor indefinitely. The timeout is
      * platform and sensor-specific, but is generally on the order of 30 seconds.
      */
-    public static final int FINGERPRINT_ERROR_TIMEOUT = 3;
+    int FINGERPRINT_ERROR_TIMEOUT = 3;
 
     /**
      * Error state returned for operations like enrollment; the operation cannot be completed
      * because there's not enough storage remaining to complete the operation.
      */
-    public static final int FINGERPRINT_ERROR_NO_SPACE = 4;
+    int FINGERPRINT_ERROR_NO_SPACE = 4;
 
     /**
      * The operation was canceled because the fingerprint sensor is unavailable. For example,
      * this may happen when the user is switched, the device is locked or another pending operation
      * prevents or disables it.
      */
-    public static final int FINGERPRINT_ERROR_CANCELED = 5;
+    int FINGERPRINT_ERROR_CANCELED = 5;
 
     /**
      * The {@link FingerprintManager#remove} call failed. Typically this will happen when the
@@ -70,13 +71,13 @@ public interface BiometricFingerprintConstants {
      *
      * @hide
      */
-    public static final int FINGERPRINT_ERROR_UNABLE_TO_REMOVE = 6;
+    int FINGERPRINT_ERROR_UNABLE_TO_REMOVE = 6;
 
     /**
      * The operation was canceled because the API is locked out due to too many attempts.
      * This occurs after 5 failed attempts, and lasts for 30 seconds.
      */
-    public static final int FINGERPRINT_ERROR_LOCKOUT = 7;
+    int FINGERPRINT_ERROR_LOCKOUT = 7;
 
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
@@ -86,52 +87,63 @@ public interface BiometricFingerprintConstants {
      * expected to show the error message string if they happen, but are advised not to rely on the
      * message id since they will be device and vendor-specific
      */
-    public static final int FINGERPRINT_ERROR_VENDOR = 8;
+    int FINGERPRINT_ERROR_VENDOR = 8;
 
     /**
      * The operation was canceled because FINGERPRINT_ERROR_LOCKOUT occurred too many times.
      * Fingerprint authentication is disabled until the user unlocks with strong authentication
      * (PIN/Pattern/Password)
      */
-    public static final int FINGERPRINT_ERROR_LOCKOUT_PERMANENT = 9;
+    int FINGERPRINT_ERROR_LOCKOUT_PERMANENT = 9;
 
     /**
      * The user canceled the operation. Upon receiving this, applications should use alternate
      * authentication (e.g. a password). The application should also provide the means to return
      * to fingerprint authentication, such as a "use fingerprint" button.
      */
-    public static final int FINGERPRINT_ERROR_USER_CANCELED = 10;
+    int FINGERPRINT_ERROR_USER_CANCELED = 10;
 
     /**
      * The user does not have any fingerprints enrolled.
      */
-    public static final int FINGERPRINT_ERROR_NO_FINGERPRINTS = 11;
+    int FINGERPRINT_ERROR_NO_FINGERPRINTS = 11;
 
     /**
      * The device does not have a fingerprint sensor.
      */
-    public static final int FINGERPRINT_ERROR_HW_NOT_PRESENT = 12;
+    int FINGERPRINT_ERROR_HW_NOT_PRESENT = 12;
 
     /**
      * The user pressed the negative button. This is a placeholder that is currently only used
      * by the support library.
+     *
      * @hide
      */
-    public static final int FINGERPRINT_ERROR_NEGATIVE_BUTTON = 13;
+    int FINGERPRINT_ERROR_NEGATIVE_BUTTON = 13;
 
     /**
      * The device does not have pin, pattern, or password set up. See
      * {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)} and
      * {@link KeyguardManager#isDeviceSecure()}
+     *
      * @hide
      */
-    public static final int BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL = 14;
+    int BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL = 14;
+
+    /**
+     * A security vulnerability has been discovered and the sensor is unavailable until a
+     * security update has addressed this issue. This error can be received if for example,
+     * authentication was requested with {@link Authenticators#BIOMETRIC_STRONG}, but the
+     * sensor's strength can currently only meet {@link Authenticators#BIOMETRIC_WEAK}.
+     * @hide
+     */
+    public static final int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED = 15;
 
     /**
      * @hide
      */
     @UnsupportedAppUsage
-    public static final int FINGERPRINT_ERROR_VENDOR_BASE = 1000;
+    int FINGERPRINT_ERROR_VENDOR_BASE = 1000;
 
     //
     // Image acquisition messages. Must agree with those in fingerprint.h
@@ -140,19 +152,19 @@ public interface BiometricFingerprintConstants {
     /**
      * The image acquired was good.
      */
-    public static final int FINGERPRINT_ACQUIRED_GOOD = 0;
+    int FINGERPRINT_ACQUIRED_GOOD = 0;
 
     /**
      * Only a partial fingerprint image was detected. During enrollment, the user should be
      * informed on what needs to happen to resolve this problem, e.g. "press firmly on sensor."
      */
-    public static final int FINGERPRINT_ACQUIRED_PARTIAL = 1;
+    int FINGERPRINT_ACQUIRED_PARTIAL = 1;
 
     /**
      * The fingerprint image was too noisy to process due to a detected condition (i.e. dry skin) or
      * a possibly dirty sensor (See {@link #FINGERPRINT_ACQUIRED_IMAGER_DIRTY}).
      */
-    public static final int FINGERPRINT_ACQUIRED_INSUFFICIENT = 2;
+    int FINGERPRINT_ACQUIRED_INSUFFICIENT = 2;
 
     /**
      * The fingerprint image was too noisy due to suspected or detected dirt on the sensor.
@@ -161,13 +173,13 @@ public interface BiometricFingerprintConstants {
      * (stuck pixels, swaths, etc.). The user is expected to take action to clean the sensor
      * when this is returned.
      */
-    public static final int FINGERPRINT_ACQUIRED_IMAGER_DIRTY = 3;
+    int FINGERPRINT_ACQUIRED_IMAGER_DIRTY = 3;
 
     /**
      * The fingerprint image was unreadable due to lack of motion. This is most appropriate for
      * linear array sensors that require a swipe motion.
      */
-    public static final int FINGERPRINT_ACQUIRED_TOO_SLOW = 4;
+    int FINGERPRINT_ACQUIRED_TOO_SLOW = 4;
 
     /**
      * The fingerprint image was incomplete due to quick motion. While mostly appropriate for
@@ -175,16 +187,29 @@ public interface BiometricFingerprintConstants {
      * The user should be asked to move the finger slower (linear) or leave the finger on the sensor
      * longer.
      */
-    public static final int FINGERPRINT_ACQUIRED_TOO_FAST = 5;
+    int FINGERPRINT_ACQUIRED_TOO_FAST = 5;
 
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
+     *
      * @hide
      */
-    public static final int FINGERPRINT_ACQUIRED_VENDOR = 6;
+    int FINGERPRINT_ACQUIRED_VENDOR = 6;
+
+    /**
+     * This message represents the earliest message sent at the beginning of the authentication
+     * pipeline. It is expected to be used to measure latency. Note this should be sent whenever
+     * authentication is restarted.
+     * The framework will measure latency based on the time between the last START message and the
+     * onAuthenticated callback.
+     *
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_START = 7;
+
     /**
      * @hide
      */
-    public static final int FINGERPRINT_ACQUIRED_VENDOR_BASE = 1000;
+    int FINGERPRINT_ACQUIRED_VENDOR_BASE = 1000;
 }

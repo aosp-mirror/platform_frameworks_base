@@ -369,8 +369,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         mNetworkController.onReceive(mContext, intent);
 
         String defaultNetworkName = mMobileSignalController
-            .getStringIfExists(
-                com.android.internal.R.string.lockscreen_carrier_default);
+                .getTextIfExists(
+                com.android.internal.R.string.lockscreen_carrier_default).toString();
         assertNetworkNameEquals(defaultNetworkName);
     }
 
@@ -383,8 +383,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
         mNetworkController.onReceive(mContext, intent);
 
-        String defaultNetworkName = mMobileSignalController.getStringIfExists(
-                com.android.internal.R.string.lockscreen_carrier_default);
+        String defaultNetworkName = mMobileSignalController.getTextIfExists(
+                com.android.internal.R.string.lockscreen_carrier_default).toString();
         assertNetworkNameEquals(defaultNetworkName);
     }
 
@@ -401,8 +401,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         mNetworkController.onReceive(mContext, intent);
 
         assertNetworkNameEquals(plmn
-                + mMobileSignalController.getStringIfExists(
-                        R.string.status_bar_network_name_separator)
+                + mMobileSignalController.getTextIfExists(
+                        R.string.status_bar_network_name_separator).toString()
                 + spn);
     }
 

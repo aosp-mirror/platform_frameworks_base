@@ -83,7 +83,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mTile = new Tile();
         updateDefaultTileAndIcon();
         mServiceManager = host.getTileServices().getTileWrapper(this);
-        if (mServiceManager.isBooleanTile()) {
+        if (mServiceManager.isToggleableTile()) {
             // Replace states with BooleanState
             resetStates();
         }
@@ -191,6 +191,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mTile.setLabel(tile.getLabel());
         mTile.setSubtitle(tile.getSubtitle());
         mTile.setContentDescription(tile.getContentDescription());
+        mTile.setStateDescription(tile.getStateDescription());
         mTile.setState(tile.getState());
     }
 
@@ -209,8 +210,10 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     @Override
     public void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
         if (mListening == listening) return;
         mListening = listening;
+
         try {
             if (listening) {
                 updateDefaultTileAndIcon();
@@ -252,7 +255,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     @Override
     public State newTileState() {
-        if (mServiceManager != null && mServiceManager.isBooleanTile()) {
+        if (mServiceManager != null && mServiceManager.isToggleableTile()) {
             return new BooleanState();
         }
         return new State();
@@ -343,6 +346,12 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             state.contentDescription = mTile.getContentDescription();
         } else {
             state.contentDescription = state.label;
+        }
+
+        if (mTile.getStateDescription() != null) {
+            state.stateDescription = mTile.getStateDescription();
+        } else {
+            state.stateDescription = null;
         }
 
         if (state instanceof BooleanState) {

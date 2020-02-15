@@ -87,7 +87,8 @@ public final class FillResponse implements Parcelable {
     private final @Nullable UserData mUserData;
     private final @Nullable int[] mCancelIds;
     private final boolean mSupportsInlineSuggestions;
-    private final @Nullable ParceledListSlice<InlinePresentation> mInlineActions;
+    // TODO(b/149240554): revert back to use ParceledListSlice after the bug is resolved.
+    private final @Nullable ArrayList<InlinePresentation> mInlineActions;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
@@ -106,8 +107,7 @@ public final class FillResponse implements Parcelable {
         mUserData = builder.mUserData;
         mCancelIds = builder.mCancelIds;
         mSupportsInlineSuggestions = builder.mSupportsInlineSuggestions;
-        mInlineActions = (builder.mInlineActions != null) ? new ParceledListSlice<>(
-                builder.mInlineActions) : null;
+        mInlineActions = builder.mInlineActions;
     }
 
     /** @hide */
@@ -207,7 +207,7 @@ public final class FillResponse implements Parcelable {
 
     /** @hide */
     public @Nullable List<InlinePresentation> getInlineActions() {
-        return (mInlineActions != null) ? mInlineActions.getList() : null;
+        return mInlineActions;
     }
 
     /**
@@ -718,7 +718,7 @@ public final class FillResponse implements Parcelable {
         }
         builder.append(", mSupportInlinePresentations=").append(mSupportsInlineSuggestions);
         if (mInlineActions != null) {
-            builder.append(", mInlineActions=" + mInlineActions.getList());
+            builder.append(", mInlineActions=" + mInlineActions);
         }
         return builder.append("]").toString();
     }
@@ -748,7 +748,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelableArray(mFieldClassificationIds, flags);
         parcel.writeInt(mFlags);
         parcel.writeIntArray(mCancelIds);
-        parcel.writeParcelable(mInlineActions, flags);
+        parcel.writeTypedList(mInlineActions, flags);
         parcel.writeInt(mRequestId);
     }
 
@@ -804,13 +804,12 @@ public final class FillResponse implements Parcelable {
             final int[] cancelIds = parcel.createIntArray();
             builder.setPresentationCancelIds(cancelIds);
 
-            final ParceledListSlice<InlinePresentation> inlineActionsSlice = parcel.readParcelable(
-                    null);
-            final List<InlinePresentation> inlineActions =
-                    (inlineActionsSlice != null) ? inlineActionsSlice.getList() : null;
-            final int inlineActionsCount = (inlineActions != null) ? inlineActions.size() : 0;
-            for (int i = 0; i < inlineActionsCount; i++) {
-                builder.addInlineAction(inlineActions.get(i));
+            final List<InlinePresentation> inlineActions = parcel.createTypedArrayList(
+                    InlinePresentation.CREATOR);
+            if (inlineActions != null) {
+                for (InlinePresentation inlineAction : inlineActions) {
+                    builder.addInlineAction(inlineAction);
+                }
             }
 
             final FillResponse response = builder.build();

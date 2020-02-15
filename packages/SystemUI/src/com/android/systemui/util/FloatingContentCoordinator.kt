@@ -98,6 +98,14 @@ class FloatingContentCoordinator @Inject constructor() {
     private val allContentBounds: MutableMap<FloatingContent, Rect> = HashMap()
 
     /**
+     * Whether we are currently resolving conflicts by asking content to move. If we are, we'll
+     * temporarily ignore calls to [onContentMoved] - those calls are from the content that is
+     * moving to new, conflict-free bounds, so we don't need to perform conflict detection
+     * calculations in response.
+     */
+    private var currentlyResolvingConflicts = false
+
+    /**
      * Makes the coordinator aware of a new piece of floating content, and moves any existing
      * content out of the way, if necessary.
      *
@@ -126,6 +134,13 @@ class FloatingContentCoordinator @Inject constructor() {
      */
     @JvmOverloads
     fun onContentMoved(content: FloatingContent) {
+
+        // Ignore calls when we are currently resolving conflicts, since those calls are from
+        // content that is moving to new, conflict-free bounds.
+        if (currentlyResolvingConflicts) {
+            return
+        }
+
         if (!allContentBounds.containsKey(content)) {
             Log.wtf(TAG, "Received onContentMoved call before onContentAdded! " +
                     "This should never happen.")
@@ -162,6 +177,8 @@ class FloatingContentCoordinator @Inject constructor() {
      * them to move out of the way.
      */
     private fun maybeMoveConflictingContent(fromContent: FloatingContent) {
+        currentlyResolvingConflicts = true
+
         val conflictingNewBounds = allContentBounds[fromContent]!!
         allContentBounds
                 // Filter to content that intersects with the new bounds. That's content that needs
@@ -182,6 +199,8 @@ class FloatingContentCoordinator @Inject constructor() {
                                             .minus(conflictingNewBounds)))
                     allContentBounds[content] = content.getFloatingBoundsOnScreen()
                 }
+
+        currentlyResolvingConflicts = false
     }
 
     /**

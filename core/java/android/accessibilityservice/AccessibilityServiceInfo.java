@@ -551,11 +551,6 @@ public class AccessibilityServiceInfo implements Parcelable {
     private int mHtmlDescriptionRes;
 
     /**
-     * Non localized html description of the accessibility service.
-     */
-    private String mNonLocalizedHtmlDescription;
-
-    /**
      * Creates a new instance.
      */
     public AccessibilityServiceInfo() {
@@ -683,10 +678,6 @@ public class AccessibilityServiceInfo implements Parcelable {
                     com.android.internal.R.styleable.AccessibilityService_htmlDescription);
             if (peekedValue != null) {
                 mHtmlDescriptionRes = peekedValue.resourceId;
-                final CharSequence nonLocalizedHtmlDescription = peekedValue.coerceToString();
-                if (nonLocalizedHtmlDescription != null) {
-                    mNonLocalizedHtmlDescription = nonLocalizedHtmlDescription.toString().trim();
-                }
             }
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
@@ -919,7 +910,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     @Nullable
     public String loadHtmlDescription(@NonNull PackageManager packageManager) {
         if (mHtmlDescriptionRes == 0) {
-            return mNonLocalizedHtmlDescription;
+            return null;
         }
 
         final ServiceInfo serviceInfo = mResolveInfo.serviceInfo;
@@ -1017,7 +1008,6 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeInt(mAnimatedImageRes);
         parcel.writeInt(mHtmlDescriptionRes);
         parcel.writeString(mNonLocalizedDescription);
-        parcel.writeString(mNonLocalizedHtmlDescription);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -1039,7 +1029,6 @@ public class AccessibilityServiceInfo implements Parcelable {
         mAnimatedImageRes = parcel.readInt();
         mHtmlDescriptionRes = parcel.readInt();
         mNonLocalizedDescription = parcel.readString();
-        mNonLocalizedHtmlDescription = parcel.readString();
     }
 
     @Override

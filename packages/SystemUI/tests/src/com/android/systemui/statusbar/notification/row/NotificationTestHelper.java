@@ -41,18 +41,18 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubblesTestActivity;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpansionLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -89,8 +89,9 @@ public class NotificationTestHelper {
     private ExpandableNotificationRow mRow;
     private HeadsUpManagerPhone mHeadsUpManager;
     private final NotifBindPipeline mBindPipeline;
-    private final NotificationEntryListener mBindPipelineEntryListener;
+    private final NotifCollectionListener mBindPipelineEntryListener;
     private final RowContentBindStage mBindStage;
+    private StatusBarStateController mStatusBarStateController;
 
     public NotificationTestHelper(Context context, TestableDependency dependency) {
         mContext = context;
@@ -98,9 +99,9 @@ public class NotificationTestHelper {
         dependency.injectMockDependency(BubbleController.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
         dependency.injectMockDependency(SmartReplyController.class);
-        StatusBarStateController stateController = mock(StatusBarStateController.class);
-        mGroupManager = new NotificationGroupManager(stateController);
-        mHeadsUpManager = new HeadsUpManagerPhone(mContext, stateController,
+        mStatusBarStateController = mock(StatusBarStateController.class);
+        mGroupManager = new NotificationGroupManager(mStatusBarStateController);
+        mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarStateController,
                 mock(KeyguardBypassController.class));
         mHeadsUpManager.setUp(null, mGroupManager, null, null);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
@@ -110,17 +111,19 @@ public class NotificationTestHelper {
                 mock(NotifRemoteViewCache.class),
                 mock(NotificationRemoteInputManager.class));
         contentBinder.setInflateSynchronously(true);
-        mBindStage = new RowContentBindStage(contentBinder, mock(IStatusBarService.class));
+        mBindStage = new RowContentBindStage(contentBinder,
+                mock(NotifInflationErrorManager.class),
+                mock(RowContentBindStageLogger.class));
 
-        NotificationEntryManager entryManager = mock(NotificationEntryManager.class);
+        CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
-        mBindPipeline = new NotifBindPipeline(entryManager);
+        mBindPipeline = new NotifBindPipeline(collection, mock(NotifBindPipelineLogger.class));
         mBindPipeline.setStage(mBindStage);
 
-        ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
-                ArgumentCaptor.forClass(NotificationEntryListener.class);
-        verify(entryManager).addNotificationEntryListener(entryListenerCaptor.capture());
-        mBindPipelineEntryListener = entryListenerCaptor.getValue();
+        ArgumentCaptor<NotifCollectionListener> collectionListenerCaptor =
+                ArgumentCaptor.forClass(NotifCollectionListener.class);
+        verify(collection).addCollectionListener(collectionListenerCaptor.capture());
+        mBindPipelineEntryListener = collectionListenerCaptor.getValue();
     }
 
     /**
@@ -199,9 +202,17 @@ public class NotificationTestHelper {
     /**
      * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
      */
+    public ExpandableNotificationRow createBubbleInGroup()
+            throws Exception {
+        return createBubble(makeBubbleMetadata(null), PKG, true);
+    }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
+     */
     public ExpandableNotificationRow createBubble()
             throws Exception {
-        return createBubble(makeBubbleMetadata(null), PKG);
+        return createBubble(makeBubbleMetadata(null), PKG, false);
     }
 
     /**
@@ -211,7 +222,7 @@ public class NotificationTestHelper {
      */
     public ExpandableNotificationRow createBubble(@Nullable PendingIntent deleteIntent)
             throws Exception {
-        return createBubble(makeBubbleMetadata(deleteIntent), PKG);
+        return createBubble(makeBubbleMetadata(deleteIntent), PKG, false);
     }
 
     /**
@@ -221,8 +232,14 @@ public class NotificationTestHelper {
      */
     public ExpandableNotificationRow createBubble(BubbleMetadata bubbleMetadata, String pkg)
             throws Exception {
+        return createBubble(bubbleMetadata, pkg, false);
+    }
+
+    private ExpandableNotificationRow createBubble(BubbleMetadata bubbleMetadata, String pkg,
+            boolean inGroup)
+            throws Exception {
         Notification n = createNotification(false /* isGroupSummary */,
-                null /* groupKey */, bubbleMetadata);
+                inGroup ? GROUP_KEY : null /* groupKey */, bubbleMetadata);
         n.flags |= FLAG_BUBBLE;
         ExpandableNotificationRow row = generateRow(n, pkg, UID, USER_HANDLE,
                 0 /* extraInflationFlags */, IMPORTANCE_HIGH);
@@ -307,6 +324,10 @@ public class NotificationTestHelper {
         return notificationBuilder.build();
     }
 
+    public StatusBarStateController getStatusBarStateController() {
+        return mStatusBarStateController;
+    }
+
     private ExpandableNotificationRow generateRow(
             Notification notification,
             String pkg,
@@ -357,7 +378,7 @@ public class NotificationTestHelper {
         entry.createIcons(mContext, entry.getSbn());
         row.setEntry(entry);
 
-        mBindPipelineEntryListener.onPendingEntryAdded(entry);
+        mBindPipelineEntryListener.onEntryInit(entry);
         mBindPipeline.manageRow(entry, row);
 
         row.initialize(
@@ -368,7 +389,11 @@ public class NotificationTestHelper {
                 mGroupManager,
                 mHeadsUpManager,
                 mBindStage,
-                mock(OnExpandClickListener.class));
+                mock(OnExpandClickListener.class),
+                mock(NotificationMediaManager.class),
+                mock(ExpandableNotificationRow.OnAppOpsClickListener.class),
+                mock(FalsingManager.class),
+                mStatusBarStateController);
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
         inflateAndWait(entry, mBindStage);

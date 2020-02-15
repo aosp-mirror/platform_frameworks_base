@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"仕事用プロファイルの有効化"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"仕事用のアプリ、通知、データなど、仕事用プロファイルの機能が ON になります"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ON にする"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"このアプリは以前のバージョンの Android 用に作成されており、正常に動作しない可能性があります。アップデートを確認するか、デベロッパーにお問い合わせください。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"アップデートを確認"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"新着メッセージがあります"</string>

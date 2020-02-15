@@ -19,9 +19,7 @@ package com.android.systemui.controls.controller
 import android.content.ComponentName
 import android.util.AtomicFile
 import android.util.Log
-import android.util.Slog
 import android.util.Xml
-import com.android.systemui.util.concurrency.DelayableExecutor
 import libcore.io.IoUtils
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
@@ -29,10 +27,18 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.util.concurrent.Executor
 
+/**
+ * Manages persistence of favorite controls.
+ *
+ * This class uses an [AtomicFile] to serialize the favorite controls to an xml.
+ * @property file a file location for storing/reading the favorites.
+ * @property executor an executor in which to execute storing the favorites.
+ */
 class ControlsFavoritePersistenceWrapper(
     private var file: File,
-    private var executor: DelayableExecutor
+    private val executor: Executor
 ) {
 
     companion object {
@@ -46,10 +52,20 @@ class ControlsFavoritePersistenceWrapper(
         private const val TAG_TYPE = "type"
     }
 
+    /**
+     * Change the file location for storing/reading the favorites
+     *
+     * @param fileName new location
+     */
     fun changeFile(fileName: File) {
         file = fileName
     }
 
+    /**
+     * Stores the list of favorites in the corresponding file.
+     *
+     * @param list a list of favorite controls. The list will be stored in the same order.
+     */
     fun storeFavorites(list: List<ControlInfo>) {
         executor.execute {
             Log.d(TAG, "Saving data to file: $file")
@@ -87,6 +103,12 @@ class ControlsFavoritePersistenceWrapper(
         }
     }
 
+    /**
+     * Stores the list of favorites in the corresponding file.
+     *
+     * @return a list of stored favorite controls. Return an empty list if the file is not found
+     * @throws [IllegalStateException] if there is an error while reading the file
+     */
     fun readFavorites(): List<ControlInfo> {
         if (!file.exists()) {
             Log.d(TAG, "No favorites, returning empty list")
@@ -95,7 +117,7 @@ class ControlsFavoritePersistenceWrapper(
         val reader = try {
             FileInputStream(file)
         } catch (fnfe: FileNotFoundException) {
-            Slog.i(TAG, "No file found")
+            Log.i(TAG, "No file found")
             return emptyList()
         }
         try {

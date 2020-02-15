@@ -16,10 +16,12 @@
 
 package android.content.pm;
 
+import static android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -600,11 +602,15 @@ public class LauncherApps {
     }
 
     /**
-     * Show an error log on logcat, when the calling user is a managed profile, and the target
-     * user is different from the calling user, in order to help developers to detect it.
+     * Show an error log on logcat, when the calling user is a managed profile, the target
+     * user is different from the calling user, and it is not called from a package that has the
+     * {@link permission.INTERACT_ACROSS_USERS_FULL} permission, in order to help
+     * developers to detect it.
      */
     private void logErrorForInvalidProfileAccess(@NonNull UserHandle target) {
-        if (UserHandle.myUserId() != target.getIdentifier() && mUserManager.isManagedProfile()) {
+        if (UserHandle.myUserId() != target.getIdentifier() && mUserManager.isManagedProfile()
+                    && mContext.checkSelfPermission(permission.INTERACT_ACROSS_USERS_FULL)
+                            != PackageManager.PERMISSION_GRANTED) {
             Log.w(TAG, "Accessing other profiles/users from managed profile is no longer allowed.");
         }
     }
@@ -714,7 +720,7 @@ public class LauncherApps {
         }
         try {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(),
+                    mContext.getPackageName(), mContext.getFeatureId(),
                     component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -732,8 +738,8 @@ public class LauncherApps {
             @Nullable Rect sourceBounds, @Nullable Bundle opts) {
         try {
             mService.startSessionDetailsActivityAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(), sessionInfo, sourceBounds, opts,
-                    sessionInfo.getUser());
+                    mContext.getPackageName(), mContext.getFeatureId(), sessionInfo, sourceBounds,
+                    opts, sessionInfo.getUser());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -753,7 +759,7 @@ public class LauncherApps {
         logErrorForInvalidProfileAccess(user);
         try {
             mService.showAppDetailsAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(),
+                    mContext.getPackageName(), mContext.getFeatureId(),
                     component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -1089,6 +1095,61 @@ public class LauncherApps {
     }
 
     /**
+     * Mark shortcuts as cached for a package.
+     *
+     * <p>Only dynamic long lived shortcuts can be cached. None dynamic or non long lived shortcuts
+     * in the list will be ignored.
+     *
+     * <p>Unlike pinned shortcuts, where different callers can have different sets of pinned
+     * shortcuts, cached state is per shortcut only, and even if multiple callers cache the same
+     * shortcut, it can be uncached by any valid caller.
+     *
+     * @param packageName The target package name.
+     * @param shortcutIds The IDs of the shortcut to be cached.
+     * @param user The UserHandle of the profile.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
+     *
+     * @see ShortcutManager
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS)
+    public void cacheShortcuts(@NonNull String packageName, @NonNull List<String> shortcutIds,
+            @NonNull UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+        try {
+            mService.cacheShortcuts(mContext.getPackageName(), packageName, shortcutIds, user);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remove cached flag from shortcuts for a package.
+     *
+     * @param packageName The target package name.
+     * @param shortcutIds The IDs of the shortcut to be uncached.
+     * @param user The UserHandle of the profile.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
+     *
+     * @see ShortcutManager
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS)
+    public void uncacheShortcuts(@NonNull String packageName, @NonNull List<String> shortcutIds,
+            @NonNull UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+        try {
+            mService.uncacheShortcuts(mContext.getPackageName(), packageName, shortcutIds, user);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide kept for testing.
      */
     @Deprecated
@@ -1290,9 +1351,9 @@ public class LauncherApps {
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             int userId) {
         try {
-            final boolean success =
-                    mService.startShortcut(mContext.getPackageName(), packageName, shortcutId,
-                    sourceBounds, startActivityOptions, userId);
+            final boolean success = mService.startShortcut(mContext.getPackageName(), packageName,
+                    null /* default featureId */, shortcutId, sourceBounds, startActivityOptions,
+                    userId);
             if (!success) {
                 throw new ActivityNotFoundException("Shortcut could not be started");
             }

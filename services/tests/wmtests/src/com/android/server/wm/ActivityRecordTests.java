@@ -29,6 +29,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -137,6 +138,19 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mStack.removeChild(mTask, null /*reason*/);
         // Stack should be gone on task removal.
         assertNull(mService.mRootWindowContainer.getStack(mStack.mTaskId));
+    }
+
+    @Test
+    public void testRemoveChildWithOverlayActivity() {
+        final ActivityRecord overlayActivity =
+                new ActivityBuilder(mService).setTask(mTask).build();
+        overlayActivity.setTaskOverlay(true);
+        final ActivityRecord overlayActivity2 =
+                new ActivityBuilder(mService).setTask(mTask).build();
+        overlayActivity2.setTaskOverlay(true);
+
+        mTask.removeChild(overlayActivity2, "test");
+        verify(mSupervisor, never()).removeTask(any(), anyBoolean(), anyBoolean(), any());
     }
 
     @Test

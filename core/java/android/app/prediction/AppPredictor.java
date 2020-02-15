@@ -96,7 +96,7 @@ public final class AppPredictor {
         IBinder b = ServiceManager.getService(Context.APP_PREDICTION_SERVICE);
         mPredictionManager = IPredictionManager.Stub.asInterface(b);
         mSessionId = new AppPredictionSessionId(
-                context.getPackageName() + ":" + UUID.randomUUID().toString());
+                context.getPackageName() + ":" + UUID.randomUUID().toString(), context.getUserId());
         try {
             mPredictionManager.createPredictionSession(predictionContext, mSessionId);
         } catch (RemoteException e) {

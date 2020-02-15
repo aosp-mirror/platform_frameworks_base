@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.telephony.SubscriptionManager;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -87,10 +88,6 @@ public class CellularTile extends QSTileImpl<SignalState> {
     @Override
     public DetailAdapter getDetailAdapter() {
         return mDetailAdapter;
-    }
-
-    @Override
-    public void handleSetListening(boolean listening) {
     }
 
     @Override
@@ -194,27 +191,24 @@ public class CellularTile extends QSTileImpl<SignalState> {
             state.secondaryLabel = r.getString(R.string.cell_data_off);
         }
 
-
-        // TODO(b/77881974): Instead of switching out the description via a string check for
-        // we need to have two strings provided by the MobileIconGroup.
-        final CharSequence contentDescriptionSuffix;
+        state.contentDescription = state.label;
         if (state.state == Tile.STATE_INACTIVE) {
-            contentDescriptionSuffix = r.getString(R.string.cell_data_off_content_description);
+            // This information is appended later by converting the Tile.STATE_INACTIVE state.
+            state.stateDescription = "";
         } else {
-            contentDescriptionSuffix = state.secondaryLabel;
+            state.stateDescription = state.secondaryLabel;
         }
-
-        state.contentDescription = state.label + ", " + contentDescriptionSuffix;
     }
 
     private CharSequence appendMobileDataType(CharSequence current, CharSequence dataType) {
         if (TextUtils.isEmpty(dataType)) {
-            return current;
+            return Html.fromHtml(current.toString(), 0);
         }
         if (TextUtils.isEmpty(current)) {
-            return dataType;
+            return Html.fromHtml(dataType.toString(), 0);
         }
-        return mContext.getString(R.string.mobile_carrier_text_format, current, dataType);
+        String concat = mContext.getString(R.string.mobile_carrier_text_format, current, dataType);
+        return Html.fromHtml(concat, 0);
     }
 
     private CharSequence getMobileDataContentName(CallbackInfo cb) {
@@ -255,14 +249,17 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
         @Override
         public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
-                int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
-                String description, boolean isWide, int subId, boolean roaming) {
+                int qsType, boolean activityIn, boolean activityOut,
+                CharSequence typeContentDescription,
+                CharSequence typeContentDescriptionHtml, CharSequence description,
+                boolean isWide, int subId, boolean roaming) {
             if (qsIcon == null) {
                 // Not data sim, don't display.
                 return;
             }
             mInfo.dataSubscriptionName = mController.getMobileDataNetworkName();
-            mInfo.dataContentDescription = (description != null) ? typeContentDescription : null;
+            mInfo.dataContentDescription =
+                    (description != null) ? typeContentDescriptionHtml : null;
             mInfo.activityIn = activityIn;
             mInfo.activityOut = activityOut;
             mInfo.roaming = roaming;

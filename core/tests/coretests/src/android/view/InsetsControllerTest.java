@@ -45,6 +45,7 @@ import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.CancellationSignal;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type;
@@ -516,6 +517,34 @@ public class InsetsControllerTest {
     }
 
     @Test
+    public void testCancellation_afterGainingControl() throws Exception {
+        InsetsSourceControl control =
+                new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point());
+        mController.onControlsChanged(new InsetsSourceControl[] { control });
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            WindowInsetsAnimationControlListener mockListener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            CancellationSignal cancellationSignal = mController.controlWindowInsetsAnimation(
+                    statusBars(), 0 /* durationMs */,
+                    new LinearInterpolator(), mockListener);
+
+            // Ready gets deferred until next predraw
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+
+            verify(mockListener).onReady(any(), anyInt());
+
+            cancellationSignal.cancel();
+            verify(mockListener).onCancelled();
+        });
+        waitUntilNextFrame();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            assertFalse(mController.getSourceConsumer(ITYPE_STATUS_BAR).isRequestedVisible());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
     public void testControlImeNotReady() {
         prepareControls();
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
@@ -577,6 +606,28 @@ public class InsetsControllerTest {
             mTestHandler.timeAdvance();
 
             verify(listener).onCancelled();
+        });
+    }
+
+    @Test
+    public void testControlImeNotReady_cancel() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(), listener)
+                    .cancel();
+
+            verify(listener).onCancelled();
+
+            // Ready gets deferred until next predraw
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+
+            verify(listener, never()).onReady(any(), anyInt());
+
+            // Pretend that timeout is happening
+            mTestClock.fastForward(2500);
+            mTestHandler.timeAdvance();
         });
     }
 

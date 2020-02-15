@@ -867,7 +867,8 @@ public abstract class ColorSpace {
         }
     }
 
-    private ColorSpace(
+    /** @hide */
+    ColorSpace(
             @NonNull String name,
             @NonNull Model model,
             @IntRange(from = MIN_ID, to = MAX_ID) int id) {

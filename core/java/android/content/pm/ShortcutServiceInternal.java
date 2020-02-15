@@ -85,4 +85,11 @@ public abstract class ShortcutServiceInternal {
 
     public abstract boolean isForegroundDefaultLauncher(@NonNull String callingPackage,
             int callingUid);
+
+    public abstract void cacheShortcuts(int launcherUserId,
+            @NonNull String callingPackage, @NonNull String packageName,
+            @NonNull List<String> shortcutIds, int userId);
+    public abstract void uncacheShortcuts(int launcherUserId,
+            @NonNull String callingPackage, @NonNull String packageName,
+            @NonNull List<String> shortcutIds, int userId);
 }

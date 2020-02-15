@@ -15,6 +15,8 @@
  */
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -50,6 +52,7 @@ import java.util.function.Supplier;
  * @hide
  */
 @SystemApi
+@SystemApi(client = MODULE_LIBRARIES)
 @TestApi
 public class TetheringManager {
     private static final String TAG = TetheringManager.class.getSimpleName();
@@ -177,6 +180,7 @@ public class TetheringManager {
      *                          service is not connected.
      * {@hide}
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public TetheringManager(@NonNull final Context context,
             @NonNull Supplier<IBinder> connectorSupplier) {
         mContext = context;
@@ -395,6 +399,7 @@ public class TetheringManager {
      * {@hide}
      */
     @Deprecated
+    @SystemApi(client = MODULE_LIBRARIES)
     public int tether(@NonNull final String iface) {
         final String callerPkg = mContext.getOpPackageName();
         Log.i(TAG, "tether caller:" + callerPkg);
@@ -418,6 +423,7 @@ public class TetheringManager {
      * {@hide}
      */
     @Deprecated
+    @SystemApi(client = MODULE_LIBRARIES)
     public int untether(@NonNull final String iface) {
         final String callerPkg = mContext.getOpPackageName();
         Log.i(TAG, "untether caller:" + callerPkg);
@@ -444,6 +450,7 @@ public class TetheringManager {
      * {@hide}
      */
     @Deprecated
+    @SystemApi(client = MODULE_LIBRARIES)
     public int setUsbTethering(final boolean enable) {
         final String callerPkg = mContext.getOpPackageName();
         Log.i(TAG, "setUsbTethering caller:" + callerPkg);
@@ -702,6 +709,7 @@ public class TetheringManager {
      * {@hide}
      */
     // TODO: improve the usage of ResultReceiver, b/145096122
+    @SystemApi(client = MODULE_LIBRARIES)
     public void requestLatestTetheringEntitlementResult(final int type,
             @NonNull final ResultReceiver receiver, final boolean showEntitlementUi) {
         final String callerPkg = mContext.getOpPackageName();
@@ -982,6 +990,7 @@ public class TetheringManager {
      *               interface
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public int getLastTetherError(@NonNull final String iface) {
         mCallback.waitForStarted();
         if (mTetherStatesParcel == null) return TETHER_ERROR_NO_ERROR;
@@ -1004,6 +1013,7 @@ public class TetheringManager {
      *        what interfaces are considered tetherable usb interfaces.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public @NonNull String[] getTetherableUsbRegexs() {
         mCallback.waitForStarted();
         return mTetheringConfiguration.tetherableUsbRegexs;
@@ -1018,6 +1028,7 @@ public class TetheringManager {
      *        what interfaces are considered tetherable wifi interfaces.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public @NonNull String[] getTetherableWifiRegexs() {
         mCallback.waitForStarted();
         return mTetheringConfiguration.tetherableWifiRegexs;
@@ -1032,6 +1043,7 @@ public class TetheringManager {
      *        what interfaces are considered tetherable bluetooth interfaces.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public @NonNull String[] getTetherableBluetoothRegexs() {
         mCallback.waitForStarted();
         return mTetheringConfiguration.tetherableBluetoothRegexs;
@@ -1044,6 +1056,7 @@ public class TetheringManager {
      * @return an array of 0 or more Strings of tetherable interface names.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public @NonNull String[] getTetherableIfaces() {
         mCallback.waitForStarted();
         if (mTetherStatesParcel == null) return new String[0];
@@ -1057,6 +1070,7 @@ public class TetheringManager {
      * @return an array of 0 or more String of currently tethered interface names.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public @NonNull String[] getTetheredIfaces() {
         mCallback.waitForStarted();
         if (mTetherStatesParcel == null) return new String[0];
@@ -1076,6 +1090,7 @@ public class TetheringManager {
      *        which failed to tether.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public @NonNull String[] getTetheringErroredIfaces() {
         mCallback.waitForStarted();
         if (mTetherStatesParcel == null) return new String[0];
@@ -1103,6 +1118,7 @@ public class TetheringManager {
      * @return a boolean - {@code true} indicating Tethering is supported.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public boolean isTetheringSupported() {
         final String callerPkg = mContext.getOpPackageName();
 

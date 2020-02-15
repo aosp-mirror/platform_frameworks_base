@@ -285,7 +285,7 @@ easier.
         <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
     <style name="TextAppearance.DeviceDefault.Notification" parent="TextAppearance.Material.Notification">
-        <item name="fontFamily">@string/config_headlineFontFamily</item>
+        <item name="fontFamily">@string/config_bodyFontFamily</item>
     </style>
     <style name="TextAppearance.DeviceDefault.Notification.Title" parent="TextAppearance.Material.Notification.Title">
         <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>

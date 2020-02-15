@@ -23,14 +23,6 @@ import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 
-import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_BUBBLE;
-import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_DEMOTE;
-import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_FAVORITE;
-import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_HOME;
-import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_MUTE;
-import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_SNOOZE;
-import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_UNBUBBLE;
-
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
@@ -69,11 +61,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.phone.ShadeController;
 
 import java.lang.annotation.Retention;
 import java.util.Arrays;
@@ -92,6 +86,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     ShortcutManager mShortcutManager;
     private PackageManager mPm;
     private VisualStabilityManager mVisualStabilityManager;
+    private ShadeController mShadeController;
 
     private String mPackageName;
     private String mAppName;
@@ -103,23 +98,29 @@ public class NotificationConversationInfo extends LinearLayout implements
     private NotificationEntry mEntry;
     private StatusBarNotification mSbn;
     private boolean mIsDeviceProvisioned;
-    private int mStartingChannelImportance;
     private boolean mStartedAsBubble;
     private boolean mIsBubbleable;
-    // TODO: remove when launcher api works
-    @VisibleForTesting
-    boolean mShowHomeScreen = false;
 
-    private @UpdateChannelRunnable.Action int mSelectedAction = -1;
+    private @Action int mSelectedAction = -1;
 
     private OnSnoozeClickListener mOnSnoozeClickListener;
     private OnSettingsClickListener mOnSettingsClickListener;
-    private OnAppSettingsClickListener mAppSettingsClickListener;
     private NotificationGuts mGutsContainer;
     private BubbleController mBubbleController;
 
     @VisibleForTesting
     boolean mSkipPost = false;
+
+    @Retention(SOURCE)
+    @IntDef({ACTION_BUBBLE, ACTION_HOME, ACTION_FAVORITE, ACTION_SNOOZE, ACTION_MUTE})
+    private @interface Action {}
+    static final int ACTION_BUBBLE = 0;
+    static final int ACTION_HOME = 1;
+    static final int ACTION_FAVORITE = 2;
+    static final int ACTION_SNOOZE = 3;
+    static final int ACTION_MUTE = 4;
+    static final int ACTION_SETTINGS = 5;
+    static final int ACTION_UNBUBBLE = 6;
 
     private OnClickListener mOnBubbleClick = v -> {
         mSelectedAction = mStartedAsBubble ? ACTION_UNBUBBLE : ACTION_BUBBLE;
@@ -136,12 +137,14 @@ public class NotificationConversationInfo extends LinearLayout implements
     private OnClickListener mOnHomeClick = v -> {
         mSelectedAction = ACTION_HOME;
         mShortcutManager.requestPinShortcut(mShortcutInfo, null);
+        mShadeController.animateCollapsePanels();
         closeControls(v, true);
     };
 
     private OnClickListener mOnFavoriteClick = v -> {
         mSelectedAction = ACTION_FAVORITE;
-        closeControls(v, true);
+        updateChannel();
+
     };
 
     private OnClickListener mOnSnoozeClick = v -> {
@@ -151,13 +154,8 @@ public class NotificationConversationInfo extends LinearLayout implements
     };
 
     private OnClickListener mOnMuteClick = v -> {
-      mSelectedAction = ACTION_MUTE;
-      closeControls(v, true);
-    };
-
-    private OnClickListener mOnDemoteClick = v -> {
-        mSelectedAction = ACTION_DEMOTE;
-        closeControls(v, true);
+        mSelectedAction = ACTION_MUTE;
+        updateChannel();
     };
 
     public NotificationConversationInfo(Context context, AttributeSet attrs) {
@@ -197,15 +195,14 @@ public class NotificationConversationInfo extends LinearLayout implements
         mEntry = entry;
         mSbn = entry.getSbn();
         mPm = pm;
-        mAppSettingsClickListener = onAppSettingsClick;
         mAppName = mPackageName;
         mOnSettingsClickListener = onSettingsClick;
         mNotificationChannel = notificationChannel;
-        mStartingChannelImportance = mNotificationChannel.getImportance();
         mAppUid = mSbn.getUid();
         mDelegatePkg = mSbn.getOpPkg();
         mIsDeviceProvisioned = isDeviceProvisioned;
         mOnSnoozeClickListener = onSnoozeClickListener;
+        mShadeController = Dependency.get(ShadeController.class);
 
         mShortcutManager = shortcutManager;
         mLauncherApps = launcherApps;
@@ -251,9 +248,6 @@ public class NotificationConversationInfo extends LinearLayout implements
                 mNotificationChannel = mINotificationManager.getConversationNotificationChannel(
                         mContext.getOpPackageName(), UserHandle.getUserId(mAppUid), mPackageName,
                         mNotificationChannel.getId(), false, mConversationId);
-
-                // TODO: ask LA to pin the shortcut once api exists for pinning one shortcut at a
-                // time
             } catch (RemoteException e) {
                 Slog.e(TAG, "Could not create conversation channel", e);
             }
@@ -274,40 +268,24 @@ public class NotificationConversationInfo extends LinearLayout implements
 
         Button home = findViewById(R.id.home);
         home.setOnClickListener(mOnHomeClick);
-        home.setVisibility(mShowHomeScreen && mShortcutInfo != null
+        home.setVisibility(mShortcutInfo != null
                 && mShortcutManager.isRequestPinShortcutSupported()
                 ? VISIBLE : GONE);
 
-        Button favorite = findViewById(R.id.fave);
+        View favorite = findViewById(R.id.fave);
         favorite.setOnClickListener(mOnFavoriteClick);
-        if (mNotificationChannel.isImportantConversation()) {
-            favorite.setText(R.string.notification_conversation_unfavorite);
-            favorite.setCompoundDrawablesRelative(
-                    mContext.getDrawable(R.drawable.ic_star), null, null, null);
-        } else {
-            favorite.setText(R.string.notification_conversation_favorite);
-            favorite.setCompoundDrawablesRelative(
-                    mContext.getDrawable(R.drawable.ic_star_border), null, null, null);
-        }
 
         Button snooze = findViewById(R.id.snooze);
         snooze.setOnClickListener(mOnSnoozeClick);
 
-        Button mute = findViewById(R.id.mute);
+        View mute = findViewById(R.id.mute);
         mute.setOnClickListener(mOnMuteClick);
-        if (mStartingChannelImportance >= IMPORTANCE_DEFAULT
-                || mStartingChannelImportance == IMPORTANCE_UNSPECIFIED) {
-            mute.setText(R.string.notification_conversation_mute);
-            favorite.setCompoundDrawablesRelative(
-                    mContext.getDrawable(R.drawable.ic_notifications_silence), null, null, null);
-        } else {
-            mute.setText(R.string.notification_conversation_unmute);
-            favorite.setCompoundDrawablesRelative(
-                    mContext.getDrawable(R.drawable.ic_notifications_alert), null, null, null);
-        }
 
-        ImageButton demote = findViewById(R.id.demote);
-        demote.setOnClickListener(mOnDemoteClick);
+        final View settingsButton = findViewById(R.id.info);
+        settingsButton.setOnClickListener(getSettingsOnClickListener());
+        settingsButton.setVisibility(settingsButton.hasOnClickListeners() ? VISIBLE : GONE);
+
+        updateToggleActions();
     }
 
     private void bindHeader() {
@@ -315,26 +293,6 @@ public class NotificationConversationInfo extends LinearLayout implements
 
         // Delegate
         bindDelegate();
-
-        // Set up app settings link (i.e. Customize)
-        View settingsLinkView = findViewById(R.id.app_settings);
-        Intent settingsIntent = getAppSettingsIntent(mPm, mPackageName,
-                mNotificationChannel,
-                mSbn.getId(), mSbn.getTag());
-        if (settingsIntent != null
-                && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
-            settingsLinkView.setVisibility(VISIBLE);
-            settingsLinkView.setOnClickListener((View view) -> {
-                mAppSettingsClickListener.onClick(view, settingsIntent);
-            });
-        } else {
-            settingsLinkView.setVisibility(View.GONE);
-        }
-
-        // System Settings button.
-        final View settingsButton = findViewById(R.id.info);
-        settingsButton.setOnClickListener(getSettingsOnClickListener());
-        settingsButton.setVisibility(settingsButton.hasOnClickListeners() ? VISIBLE : GONE);
     }
 
     private OnClickListener getSettingsOnClickListener() {
@@ -424,15 +382,12 @@ public class NotificationConversationInfo extends LinearLayout implements
 
     private void bindDelegate() {
         TextView delegateView = findViewById(R.id.delegate_name);
-        TextView dividerView = findViewById(R.id.pkg_divider);
 
         if (!TextUtils.equals(mPackageName, mDelegatePkg)) {
             // this notification was posted by a delegate!
             delegateView.setVisibility(View.VISIBLE);
-            dividerView.setVisibility(View.VISIBLE);
         } else {
             delegateView.setVisibility(View.GONE);
-            dividerView.setVisibility(View.GONE);
         }
     }
 
@@ -492,26 +447,37 @@ public class NotificationConversationInfo extends LinearLayout implements
         }
     }
 
-    private Intent getAppSettingsIntent(PackageManager pm, String packageName,
-            NotificationChannel channel, int id, String tag) {
-        Intent intent = new Intent(Intent.ACTION_MAIN)
-                .addCategory(Notification.INTENT_CATEGORY_NOTIFICATION_PREFERENCES)
-                .setPackage(packageName);
-        final List<ResolveInfo> resolveInfos = pm.queryIntentActivities(
-                intent,
-                PackageManager.MATCH_DEFAULT_ONLY
-        );
-        if (resolveInfos == null || resolveInfos.size() == 0 || resolveInfos.get(0) == null) {
-            return null;
+    private void updateToggleActions() {
+        ImageButton favorite = findViewById(R.id.fave);
+        if (mNotificationChannel.isImportantConversation()) {
+            favorite.setContentDescription(
+                    mContext.getString(R.string.notification_conversation_favorite));
+            favorite.setImageResource(R.drawable.ic_important);
+        } else {
+            favorite.setContentDescription(
+                    mContext.getString(R.string.notification_conversation_unfavorite));
+            favorite.setImageResource(R.drawable.ic_important_outline);
         }
-        final ActivityInfo activityInfo = resolveInfos.get(0).activityInfo;
-        intent.setClassName(activityInfo.packageName, activityInfo.name);
-        if (channel != null) {
-            intent.putExtra(Notification.EXTRA_CHANNEL_ID, channel.getId());
+
+        ImageButton mute = findViewById(R.id.mute);
+        if (mNotificationChannel.getImportance() >= IMPORTANCE_DEFAULT
+                || mNotificationChannel.getImportance() == IMPORTANCE_UNSPECIFIED) {
+            mute.setContentDescription(
+                    mContext.getString(R.string.notification_conversation_unmute));
+            mute.setImageResource(R.drawable.ic_notifications_alert);
+        } else {
+            mute.setContentDescription(
+                    mContext.getString(R.string.notification_conversation_mute));
+            mute.setImageResource(R.drawable.ic_notifications_silence);
         }
-        intent.putExtra(Notification.EXTRA_NOTIFICATION_ID, id);
-        intent.putExtra(Notification.EXTRA_NOTIFICATION_TAG, tag);
-        return intent;
+    }
+
+    private void updateChannel() {
+        Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
+        bgHandler.post(
+                new UpdateChannelRunnable(mINotificationManager, mPackageName,
+                        mAppUid, mSelectedAction, mNotificationChannel));
+        mVisualStabilityManager.temporarilyAllowReordering();
     }
 
     /**
@@ -556,11 +522,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     @Override
     public boolean handleCloseControls(boolean save, boolean force) {
         if (save && mSelectedAction > -1) {
-            Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
-            bgHandler.post(
-                    new UpdateChannelRunnable(mINotificationManager, mPackageName,
-                            mAppUid, mSelectedAction, mNotificationChannel));
-            mVisualStabilityManager.temporarilyAllowReordering();
+            updateChannel();
         }
         return false;
     }
@@ -575,19 +537,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         return false;
     }
 
-    static class UpdateChannelRunnable implements Runnable {
-
-        @Retention(SOURCE)
-        @IntDef({ACTION_BUBBLE, ACTION_HOME, ACTION_FAVORITE, ACTION_SNOOZE, ACTION_MUTE,
-                ACTION_DEMOTE})
-        private @interface Action {}
-        static final int ACTION_BUBBLE = 0;
-        static final int ACTION_HOME = 1;
-        static final int ACTION_FAVORITE = 2;
-        static final int ACTION_SNOOZE = 3;
-        static final int ACTION_MUTE = 4;
-        static final int ACTION_DEMOTE = 5;
-        static final int ACTION_UNBUBBLE = 6;
+    class UpdateChannelRunnable implements Runnable {
 
         private final INotificationManager mINotificationManager;
         private final String mAppPkg;
@@ -633,10 +583,6 @@ public class NotificationConversationInfo extends LinearLayout implements
                                     mChannelToUpdate.getOriginalImportance(), IMPORTANCE_DEFAULT));
                         }
                         break;
-                    case ACTION_DEMOTE:
-                        mChannelToUpdate.setDemoted(!mChannelToUpdate.isDemoted());
-                        break;
-
                 }
 
                 if (channelSettingChanged) {
@@ -646,13 +592,7 @@ public class NotificationConversationInfo extends LinearLayout implements
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to update notification channel", e);
             }
+            ThreadUtils.postOnMainThread(() -> updateToggleActions());
         }
     }
-
-    @Retention(SOURCE)
-    @IntDef({BEHAVIOR_ALERTING, BEHAVIOR_SILENT, BEHAVIOR_BUBBLE})
-    private @interface AlertingBehavior {}
-    private static final int BEHAVIOR_ALERTING = 0;
-    private static final int BEHAVIOR_SILENT = 1;
-    private static final int BEHAVIOR_BUBBLE = 2;
 }

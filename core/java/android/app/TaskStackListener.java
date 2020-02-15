@@ -199,4 +199,8 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     @Override
     public void onRecentTaskListFrozenChanged(boolean frozen) {
     }
+
+    @Override
+    public void onTaskFocusChanged(int taskId, boolean focused) {
+    }
 }

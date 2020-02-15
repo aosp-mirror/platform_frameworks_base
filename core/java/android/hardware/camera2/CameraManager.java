@@ -400,7 +400,8 @@ public final class CameraManager {
                     try {
                         info.setCameraId(Integer.parseInt(cameraId));
                     } catch (NumberFormatException e) {
-                        Log.e(TAG, "Failed to parse camera Id " + cameraId + " to integer");
+                        // For external camera, reaching here is expected.
+                        Log.v(TAG, "Failed to parse camera Id " + cameraId + " to integer");
                     }
                     boolean hasConcurrentStreams =
                             CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId);

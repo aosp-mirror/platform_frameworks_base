@@ -142,6 +142,9 @@ public class BlobStoreManager {
     /** @hide */
     public static final int COMMIT_RESULT_ERROR = 1;
 
+    /** @hide */
+    public static final int INVALID_RES_ID = -1;
+
     private final Context mContext;
     private final IBlobStoreManager mService;
 
@@ -263,6 +266,9 @@ public class BlobStoreManager {
      * <p> This lease information is persisted and calling this more than once will result in
      * latest lease overriding any previous lease.
      *
+     * <p> When an app acquires a lease on a blob, the System will try to keep this
+     * blob around but note that it can still be deleted if it was requested by the user.
+     *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
      * @param descriptionResId the resource id for a short description string that can be surfaced
@@ -285,11 +291,68 @@ public class BlobStoreManager {
      *                               caller is trying to acquire too many leases.
      *
      * @see {@link #acquireLease(BlobHandle, int)}
+     * @see {@link #acquireLease(BlobHandle, CharSequence)}
      */
     public void acquireLease(@NonNull BlobHandle blobHandle, @IdRes int descriptionResId,
             @CurrentTimeMillisLong long leaseExpiryTimeMillis) throws IOException {
         try {
-            mService.acquireLease(blobHandle, descriptionResId, leaseExpiryTimeMillis,
+            mService.acquireLease(blobHandle, descriptionResId, null, leaseExpiryTimeMillis,
+                    mContext.getOpPackageName());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Acquire a lease to the blob represented by {@code blobHandle}. This lease indicates to the
+     * system that the caller wants the blob to be kept around.
+     *
+     * <p> This is a variant of {@link #acquireLease(BlobHandle, int, long)} taking a
+     * {@link CharSequence} for {@code description}. It is highly recommended that callers only
+     * use this when a valid resource ID for {@code description} could not be provided. Otherwise,
+     * apps should prefer using {@link #acquireLease(BlobHandle, int)} which will allow
+     * {@code description} to be localized.
+     *
+     * <p> Any active leases will be automatically released when the blob's expiry time
+     * ({@link BlobHandle#getExpiryTimeMillis()}) is elapsed.
+     *
+     * <p> This lease information is persisted and calling this more than once will result in
+     * latest lease overriding any previous lease.
+     *
+     * <p> When an app acquires a lease on a blob, the System will try to keep this
+     * blob around but note that it can still be deleted if it was requested by the user.
+     *
+     * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
+     *                   acquire a lease for.
+     * @param description a short description string that can be surfaced
+     *                    to the user explaining what the blob is used for.
+     * @param leaseExpiryTimeMillis the time in milliseconds after which the lease can be
+     *                              automatically released, in {@link System#currentTimeMillis()}
+     *                              timebase. If its value is {@code 0}, then the behavior of this
+     *                              API is identical to {@link #acquireLease(BlobHandle, int)}
+     *                              where clients have to explicitly call
+     *                              {@link #releaseLease(BlobHandle)} when they don't
+     *                              need the blob anymore.
+     *
+     * @throws IOException when there is an I/O error while acquiring a lease to the blob.
+     * @throws SecurityException when the blob represented by the {@code blobHandle} does not
+     *                           exist or the caller does not have access to it.
+     * @throws IllegalArgumentException when {@code blobHandle} is invalid or
+     *                                  if the {@code leaseExpiryTimeMillis} is greater than the
+     *                                  {@link BlobHandle#getExpiryTimeMillis()}.
+     * @throws IllegalStateException when a lease could not be acquired, such as when the
+     *                               caller is trying to acquire too many leases.
+     *
+     * @see {@link #acquireLease(BlobHandle, int, long)}
+     * @see {@link #acquireLease(BlobHandle, CharSequence)}
+     */
+    public void acquireLease(@NonNull BlobHandle blobHandle, @NonNull CharSequence description,
+            @CurrentTimeMillisLong long leaseExpiryTimeMillis) throws IOException {
+        try {
+            mService.acquireLease(blobHandle, INVALID_RES_ID, description, leaseExpiryTimeMillis,
                     mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
@@ -314,6 +377,9 @@ public class BlobStoreManager {
      * <p> This lease information is persisted and calling this more than once will result in
      * latest lease overriding any previous lease.
      *
+     * <p> When an app acquires a lease on a blob, the System will try to keep this
+     * blob around but note that it can still be deleted if it was requested by the user.
+     *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
      * @param descriptionResId the resource id for a short description string that can be surfaced
@@ -327,10 +393,55 @@ public class BlobStoreManager {
      *                               caller is trying to acquire too many leases.
      *
      * @see {@link #acquireLease(BlobHandle, int, long)}
+     * @see {@link #acquireLease(BlobHandle, CharSequence, long)}
      */
     public void acquireLease(@NonNull BlobHandle blobHandle, @IdRes int descriptionResId)
             throws IOException {
         acquireLease(blobHandle, descriptionResId, 0);
+    }
+
+    /**
+     * Acquire a lease to the blob represented by {@code blobHandle}. This lease indicates to the
+     * system that the caller wants the blob to be kept around.
+     *
+     * <p> This is a variant of {@link #acquireLease(BlobHandle, int)} taking a {@link CharSequence}
+     * for {@code description}. It is highly recommended that callers only use this when a valid
+     * resource ID for {@code description} could not be provided. Otherwise, apps should prefer
+     * using {@link #acquireLease(BlobHandle, int)} which will allow {@code description} to be
+     * localized.
+     *
+     * <p> This is similar to {@link #acquireLease(BlobHandle, CharSequence, long)} except clients
+     * don't have to specify the lease expiry time upfront using this API and need to explicitly
+     * release the lease using {@link #releaseLease(BlobHandle)} when they no longer like to keep
+     * a blob around.
+     *
+     * <p> Any active leases will be automatically released when the blob's expiry time
+     * ({@link BlobHandle#getExpiryTimeMillis()}) is elapsed.
+     *
+     * <p> This lease information is persisted and calling this more than once will result in
+     * latest lease overriding any previous lease.
+     *
+     * <p> When an app acquires a lease on a blob, the System will try to keep this
+     * blob around but note that it can still be deleted if it was requested by the user.
+     *
+     * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
+     *                   acquire a lease for.
+     * @param description a short description string that can be surfaced
+     *                    to the user explaining what the blob is used for.
+     *
+     * @throws IOException when there is an I/O error while acquiring a lease to the blob.
+     * @throws SecurityException when the blob represented by the {@code blobHandle} does not
+     *                           exist or the caller does not have access to it.
+     * @throws IllegalArgumentException when {@code blobHandle} is invalid.
+     * @throws IllegalStateException when a lease could not be acquired, such as when the
+     *                               caller is trying to acquire too many leases.
+     *
+     * @see {@link #acquireLease(BlobHandle, int)}
+     * @see {@link #acquireLease(BlobHandle, CharSequence, long)}
+     */
+    public void acquireLease(@NonNull BlobHandle blobHandle, @NonNull CharSequence description)
+            throws IOException {
+        acquireLease(blobHandle, description, 0);
     }
 
     /**

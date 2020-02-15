@@ -237,6 +237,10 @@ public class MockableLocationProvider extends AbstractLocationProvider {
      * Dumps the current provider implementation.
      */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        // holding the owner lock outside this could lead to deadlock since we don't run dump on the
+        // executor specified by the provider, we run it directly
+        Preconditions.checkState(!Thread.holdsLock(mOwnerLock));
+
         AbstractLocationProvider provider;
         synchronized (mOwnerLock) {
             provider = mProvider;

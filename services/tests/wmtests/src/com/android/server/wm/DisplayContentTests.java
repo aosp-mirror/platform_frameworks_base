@@ -1033,6 +1033,54 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(continued[0]);
     }
 
+    @Test
+    public void testGetOrCreateRootHomeTask_defaultDisplay() {
+        DisplayContent defaultDisplay = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
+
+        // Remove the current home stack if it exists so a new one can be created below.
+        ActivityStack homeTask = defaultDisplay.getRootHomeTask();
+        if (homeTask != null) {
+            defaultDisplay.removeStack(homeTask);
+        }
+        assertNull(defaultDisplay.getRootHomeTask());
+
+        assertNotNull(defaultDisplay.getOrCreateRootHomeTask());
+    }
+
+    @Test
+    public void testGetOrCreateRootHomeTask_supportedSecondaryDisplay() {
+        DisplayContent display = createNewDisplay();
+        doReturn(true).when(display).supportsSystemDecorations();
+        doReturn(false).when(display).isUntrustedVirtualDisplay();
+
+        // Remove the current home stack if it exists so a new one can be created below.
+        ActivityStack homeTask = display.getRootHomeTask();
+        if (homeTask != null) {
+            display.removeStack(homeTask);
+        }
+        assertNull(display.getRootHomeTask());
+
+        assertNotNull(display.getOrCreateRootHomeTask());
+    }
+
+    @Test
+    public void testGetOrCreateRootHomeTask_unsupportedSystemDecorations() {
+        DisplayContent display = createNewDisplay();
+        doReturn(false).when(display).supportsSystemDecorations();
+
+        assertNull(display.getRootHomeTask());
+        assertNull(display.getOrCreateRootHomeTask());
+    }
+
+    @Test
+    public void testGetOrCreateRootHomeTask_untrustedVirtualDisplay() {
+        DisplayContent display = createNewDisplay();
+        doReturn(true).when(display).isUntrustedVirtualDisplay();
+
+        assertNull(display.getRootHomeTask());
+        assertNull(display.getOrCreateRootHomeTask());
+    }
+
     private boolean isOptionsPanelAtRight(int displayId) {
         return (mWm.getPreferredOptionsPanelGravity(displayId) & Gravity.RIGHT) == Gravity.RIGHT;
     }

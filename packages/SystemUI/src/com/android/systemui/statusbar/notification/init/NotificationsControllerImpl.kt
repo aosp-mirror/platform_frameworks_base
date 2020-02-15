@@ -90,8 +90,8 @@ class NotificationsControllerImpl @Inject constructor(
         notificationRowBinder.setUpWithPresenter(
                 presenter,
                 listContainer,
-                headsUpManager,
                 bindRowCallback)
+        notifBindPipelineInitializer.initialize()
 
         if (featureFlags.isNewNotifPipelineEnabled) {
             newNotifPipeline.get().initialize(notificationListener, notificationRowBinder)
@@ -100,7 +100,6 @@ class NotificationsControllerImpl @Inject constructor(
         if (featureFlags.isNewNotifPipelineRenderingEnabled) {
             // TODO
         } else {
-            notifBindPipelineInitializer.initialize()
             notificationRowBinder.setInflationCallback(entryManager)
 
             remoteInputUriController.attach(entryManager)

@@ -1917,6 +1917,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Увімкнути робочий профіль?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Додатки, сповіщення, дані й інші функції робочого профілю буде ввімкнено"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Увімкнути"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Додаток недоступний"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> зараз недоступний."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Цей додаток створений для старішої версії Android і може працювати неналежним чином. Спробуйте знайти оновлення або зв’яжіться з розробником."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шукати оновлення"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас є нові повідомлення"</string>

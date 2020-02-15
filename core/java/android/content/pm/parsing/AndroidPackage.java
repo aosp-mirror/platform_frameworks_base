@@ -286,6 +286,8 @@ public interface AndroidPackage extends Parcelable {
 
     List<String> getQueriesPackages();
 
+    Set<String> getQueriesProviders();
+
     String getRealPackage();
 
     // TODO(b/135203078): Rename to getRequiredFeatures? Somewhat ambiguous whether "Req" is

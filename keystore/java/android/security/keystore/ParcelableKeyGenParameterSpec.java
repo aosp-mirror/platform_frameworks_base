@@ -97,6 +97,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         out.writeBoolean(mSpec.isRandomizedEncryptionRequired());
         out.writeBoolean(mSpec.isUserAuthenticationRequired());
         out.writeInt(mSpec.getUserAuthenticationValidityDurationSeconds());
+        out.writeInt(mSpec.getUserAuthenticationType());
         out.writeBoolean(mSpec.isUserPresenceRequired());
         out.writeByteArray(mSpec.getAttestationChallenge());
         out.writeBoolean(mSpec.isUniqueIdIncluded());
@@ -153,6 +154,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         final boolean randomizedEncryptionRequired = in.readBoolean();
         final boolean userAuthenticationRequired = in.readBoolean();
         final int userAuthenticationValidityDurationSeconds = in.readInt();
+        final int userAuthenticationTypes = in.readInt();
         final boolean userPresenceRequired = in.readBoolean();
         final byte[] attestationChallenge = in.createByteArray();
         final boolean uniqueIdIncluded = in.readBoolean();
@@ -185,6 +187,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
                 randomizedEncryptionRequired,
                 userAuthenticationRequired,
                 userAuthenticationValidityDurationSeconds,
+                userAuthenticationTypes,
                 userPresenceRequired,
                 attestationChallenge,
                 uniqueIdIncluded,

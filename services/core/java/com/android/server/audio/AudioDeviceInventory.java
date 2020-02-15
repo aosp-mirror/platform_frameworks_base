@@ -16,6 +16,7 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
@@ -23,7 +24,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
-import android.media.AudioDeviceAddress;
+import android.media.AudioDevice;
 import android.media.AudioDevicePort;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -31,6 +32,7 @@ import android.media.AudioPort;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
+import android.media.IStrategyPreferredDeviceDispatcher;
 import android.os.Binder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -75,7 +77,7 @@ public class AudioDeviceInventory {
     private final ArrayMap<Integer, String> mApmConnectedDevices = new ArrayMap<>();
 
     // List of preferred devices for strategies
-    private final ArrayMap<Integer, AudioDeviceAddress> mPreferredDevices = new ArrayMap<>();
+    private final ArrayMap<Integer, AudioDevice> mPreferredDevices = new ArrayMap<>();
 
     // the wrapper for AudioSystem static methods, allows us to spy AudioSystem
     private final @NonNull AudioSystemAdapter mAudioSystem;
@@ -86,6 +88,10 @@ public class AudioDeviceInventory {
     final AudioRoutesInfo mCurAudioRoutes = new AudioRoutesInfo();
     final RemoteCallbackList<IAudioRoutesObserver> mRoutesObservers =
             new RemoteCallbackList<IAudioRoutesObserver>();
+
+    // Monitoring of strategy-preferred device
+    final RemoteCallbackList<IStrategyPreferredDeviceDispatcher> mPrefDevDispatchers =
+            new RemoteCallbackList<IStrategyPreferredDeviceDispatcher>();
 
     /*package*/ AudioDeviceInventory(@NonNull AudioDeviceBroker broker) {
         mDeviceBroker = broker;
@@ -468,19 +474,21 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ void onSaveSetPreferredDevice(int strategy, @NonNull AudioDeviceAddress device) {
+    /*package*/ void onSaveSetPreferredDevice(int strategy, @NonNull AudioDevice device) {
         mPreferredDevices.put(strategy, device);
+        dispatchPreferredDevice(strategy, device);
     }
 
     /*package*/ void onSaveRemovePreferredDevice(int strategy) {
         mPreferredDevices.remove(strategy);
+        dispatchPreferredDevice(strategy, null);
     }
 
     //------------------------------------------------------------
     //
 
     /*package*/ int setPreferredDeviceForStrategySync(int strategy,
-                                                      @NonNull AudioDeviceAddress device) {
+                                                      @NonNull AudioDevice device) {
         final long identity = Binder.clearCallingIdentity();
         final int status = mAudioSystem.setPreferredDeviceForStrategy(strategy, device);
         Binder.restoreCallingIdentity(identity);
@@ -500,6 +508,16 @@ public class AudioDeviceInventory {
             mDeviceBroker.postSaveRemovePreferredDeviceForStrategy(strategy);
         }
         return status;
+    }
+
+    /*package*/ void registerStrategyPreferredDeviceDispatcher(
+            @NonNull IStrategyPreferredDeviceDispatcher dispatcher) {
+        mPrefDevDispatchers.register(dispatcher);
+    }
+
+    /*package*/ void unregisterStrategyPreferredDeviceDispatcher(
+            @NonNull IStrategyPreferredDeviceDispatcher dispatcher) {
+        mPrefDevDispatchers.unregister(dispatcher);
     }
 
     /**
@@ -702,6 +720,10 @@ public class AudioDeviceInventory {
                 delay = 0;
             }
             mDeviceBroker.postSetHearingAidConnectionState(state, device, delay);
+            if (state == BluetoothHearingAid.STATE_CONNECTED) {
+                mDeviceBroker.setForceUse_Async(AudioSystem.FOR_MEDIA, AudioSystem.FORCE_NONE,
+                                "HEARING_AID set to CONNECTED");
+            }
             return delay;
         }
     }
@@ -1088,6 +1110,17 @@ public class AudioDeviceInventory {
             }
             intent.putExtra(AudioManager.EXTRA_MAX_CHANNEL_COUNT, maxChannels);
         }
+    }
+
+    private void dispatchPreferredDevice(int strategy, @Nullable AudioDevice device) {
+        final int nbDispatchers = mPrefDevDispatchers.beginBroadcast();
+        for (int i = 0; i < nbDispatchers; i++) {
+            try {
+                mPrefDevDispatchers.getBroadcastItem(i).dispatchPrefDeviceChanged(strategy, device);
+            } catch (RemoteException e) {
+            }
+        }
+        mPrefDevDispatchers.finishBroadcast();
     }
 
     //----------------------------------------------------------

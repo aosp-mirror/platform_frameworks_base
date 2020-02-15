@@ -2087,7 +2087,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
                 .setFactoryResetProtectionAccounts(new ArrayList<>())
-                .setFactoryResetProtectionDisabled(true)
+                .setFactoryResetProtectionEnabled(false)
                 .build();
         dpm.setFactoryResetProtectionPolicy(admin1, policy);
 
@@ -2105,7 +2105,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setupProfileOwner();
 
         FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
-                .setFactoryResetProtectionDisabled(true)
+                .setFactoryResetProtectionEnabled(false)
                 .build();
 
         assertExpectException(SecurityException.class, null,
@@ -2157,7 +2157,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
                 .setFactoryResetProtectionAccounts(new ArrayList<>())
-                .setFactoryResetProtectionDisabled(true)
+                .setFactoryResetProtectionEnabled(false)
                 .build();
 
         dpm.setFactoryResetProtectionPolicy(admin1, policy);
@@ -2177,8 +2177,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     private void assertPoliciesAreEqual(FactoryResetProtectionPolicy expectedPolicy,
             FactoryResetProtectionPolicy actualPolicy) {
-        assertThat(actualPolicy.isFactoryResetProtectionDisabled()).isEqualTo(
-                expectedPolicy.isFactoryResetProtectionDisabled());
+        assertThat(actualPolicy.isFactoryResetProtectionEnabled()).isEqualTo(
+                expectedPolicy.isFactoryResetProtectionEnabled());
         assertAccountsAreEqual(expectedPolicy.getFactoryResetProtectionAccounts(),
                 actualPolicy.getFactoryResetProtectionAccounts());
     }
@@ -2186,6 +2186,42 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void assertAccountsAreEqual(List<String> expectedAccounts,
             List<String> actualAccounts) {
         assertThat(actualAccounts).containsExactlyElementsIn(expectedAccounts);
+    }
+
+    public void testSetKeyguardDisabledFeaturesWithDO() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+
+        dpm.setKeyguardDisabledFeatures(admin1, DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA);
+
+        assertThat(dpm.getKeyguardDisabledFeatures(admin1)).isEqualTo(
+                DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA);
+    }
+
+    public void testSetKeyguardDisabledFeaturesWithPO() throws Exception {
+        setupProfileOwner();
+
+        dpm.setKeyguardDisabledFeatures(admin1, DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);
+
+        assertThat(dpm.getKeyguardDisabledFeatures(admin1)).isEqualTo(
+                DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);
+    }
+
+    public void testSetKeyguardDisabledFeaturesWithPOOfOrganizationOwnedDevice()
+            throws Exception {
+        final int MANAGED_PROFILE_USER_ID = DpmMockContext.CALLER_USER_HANDLE;
+        final int MANAGED_PROFILE_ADMIN_UID =
+                UserHandle.getUid(MANAGED_PROFILE_USER_ID, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+
+        parentDpm.setKeyguardDisabledFeatures(admin1,
+                DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA);
+
+        assertThat(parentDpm.getKeyguardDisabledFeatures(admin1)).isEqualTo(
+                DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA);
     }
 
     public void testSetApplicationHiddenWithDO() throws Exception {
@@ -3781,35 +3817,35 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(-1, dpm.getLastSecurityLogRetrievalTime());
     }
 
-    public void testSetLockdownAdminConfiguredNetworksWithDO() throws Exception {
+    public void testSetConfiguredNetworksLockdownStateWithDO() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
-        dpm.setLockdownAdminConfiguredNetworks(admin1, true);
+        dpm.setConfiguredNetworksLockdownState(admin1, true);
         verify(getServices().settings).settingsGlobalPutInt(
                 Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 1);
 
-        dpm.setLockdownAdminConfiguredNetworks(admin1, false);
+        dpm.setConfiguredNetworksLockdownState(admin1, false);
         verify(getServices().settings).settingsGlobalPutInt(
                 Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
     }
 
-    public void testSetLockdownAdminConfiguredNetworksWithPO() throws Exception {
+    public void testSetConfiguredNetworksLockdownStateWithPO() throws Exception {
         setupProfileOwner();
         assertExpectException(SecurityException.class, null,
-                () -> dpm.setLockdownAdminConfiguredNetworks(admin1, false));
+                () -> dpm.setConfiguredNetworksLockdownState(admin1, false));
         verify(getServices().settings, never()).settingsGlobalPutInt(
                 Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
     }
 
-    public void testSetLockdownAdminConfiguredNetworksWithPOOfOrganizationOwnedDevice()
+    public void testSetConfiguredNetworksLockdownStateWithPOOfOrganizationOwnedDevice()
             throws Exception {
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
-        dpm.setLockdownAdminConfiguredNetworks(admin1, true);
+        dpm.setConfiguredNetworksLockdownState(admin1, true);
         verify(getServices().settings).settingsGlobalPutInt(
                 Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 1);
 
-        dpm.setLockdownAdminConfiguredNetworks(admin1, false);
+        dpm.setConfiguredNetworksLockdownState(admin1, false);
         verify(getServices().settings).settingsGlobalPutInt(
                 Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN, 0);
     }
@@ -5689,6 +5725,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetPasswordComplexity_securityExceptionNotThrownForParentInstance() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);
         setAsProfileOwner(admin1);
 
@@ -5698,12 +5737,18 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetPasswordComplexity_illegalStateExceptionIfLocked() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         when(getServices().userManager.isUserUnlocked(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(false);
         assertThrows(IllegalStateException.class, () -> dpm.getPasswordComplexity());
     }
 
     public void testGetPasswordComplexity_securityExceptionWithoutPermissions() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         when(getServices().userManager.isUserUnlocked(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(true);
         assertThrows(SecurityException.class, () -> dpm.getPasswordComplexity());
@@ -5711,6 +5756,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
 
     public void testGetPasswordComplexity_currentUserNoPassword() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         when(getServices().userManager.isUserUnlocked(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(true);
         mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);
@@ -5721,6 +5769,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetPasswordComplexity_currentUserHasPassword() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         when(getServices().userManager.isUserUnlocked(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(true);
         mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);
@@ -5734,6 +5785,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetPasswordComplexity_unifiedChallengeReturnsParentUserPassword() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         when(getServices().userManager.isUserUnlocked(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(true);
         mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);

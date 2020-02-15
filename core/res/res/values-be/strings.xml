@@ -1917,6 +1917,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Уключыць працоўны профіль?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Будуць уключаны вашы рабочыя праграмы, апавяшчэнні, даныя і іншыя функцыі працоўнага профілю"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Уключыць"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Праграма недаступная"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" цяпер недаступная."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Гэта праграма была створана для больш старой версіі Android і можа не працаваць належным чынам. Праверце наяўнасць абнаўленняў або звярніцеся да распрацоўшчыка."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Праверыць на наяўнасць абнаўленняў"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас ёсць новыя паведамленні"</string>

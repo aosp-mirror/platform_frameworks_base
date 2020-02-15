@@ -39,6 +39,7 @@ import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -114,9 +115,10 @@ public class MobileSignalController extends SignalController<
         mDefaults = defaults;
         mSubscriptionInfo = info;
         mPhoneStateListener = new MobilePhoneStateListener((new Handler(receiverLooper))::post);
-        mNetworkNameSeparator = getStringIfExists(R.string.status_bar_network_name_separator);
-        mNetworkNameDefault = getStringIfExists(
-                com.android.internal.R.string.lockscreen_carrier_default);
+        mNetworkNameSeparator = getTextIfExists(R.string.status_bar_network_name_separator)
+                .toString();
+        mNetworkNameDefault = getTextIfExists(
+                com.android.internal.R.string.lockscreen_carrier_default).toString();
 
         mapIconSets();
 
@@ -151,10 +153,6 @@ public class MobileSignalController extends SignalController<
         updateInflateSignalStrength();
         mapIconSets();
         updateTelephony();
-    }
-
-    public int getDataContentDescription() {
-        return getIcons().mDataContentDescription;
     }
 
     public void setAirplaneMode(boolean airplaneMode) {
@@ -360,8 +358,14 @@ public class MobileSignalController extends SignalController<
     public void notifyListeners(SignalCallback callback) {
         MobileIconGroup icons = getIcons();
 
-        String contentDescription = getStringIfExists(getContentDescription());
-        String dataContentDescription = getStringIfExists(icons.mDataContentDescription);
+        String contentDescription = getTextIfExists(getContentDescription()).toString();
+        CharSequence dataContentDescriptionHtml = getTextIfExists(icons.mDataContentDescription);
+
+        //TODO: Hacky
+        // The data content description can sometimes be shown in a text view and might come to us
+        // as HTML. Strip any styling here so that listeners don't have to care
+        CharSequence dataContentDescription = Html.fromHtml(
+                dataContentDescriptionHtml.toString(), 0).toString();
         if (mCurrentState.inetCondition == 0) {
             dataContentDescription = mContext.getString(R.string.data_connection_no_internet);
         }
@@ -376,7 +380,7 @@ public class MobileSignalController extends SignalController<
 
         int qsTypeIcon = 0;
         IconState qsIcon = null;
-        String description = null;
+        CharSequence description = null;
         // Only send data sim callbacks to QS.
         if (mCurrentState.dataSim) {
             qsTypeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.mQsDataType : 0;
@@ -393,8 +397,9 @@ public class MobileSignalController extends SignalController<
         showDataIcon &= mCurrentState.isDefault || dataDisabled;
         int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.mDataType : 0;
         callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
-                activityIn, activityOut, dataContentDescription, description, icons.mIsWide,
-                mSubscriptionInfo.getSubscriptionId(), mCurrentState.roaming);
+                activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
+                description, icons.mIsWide, mSubscriptionInfo.getSubscriptionId(),
+                mCurrentState.roaming);
     }
 
     @Override

@@ -39,6 +39,27 @@ public abstract class KeyProperties {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "AUTH_" }, value = {
+            AUTH_BIOMETRIC_STRONG,
+            AUTH_DEVICE_CREDENTIAL,
+    })
+    public @interface AuthEnum {}
+
+    /**
+     * The non-biometric credential used to secure the device (i.e., PIN, pattern, or password)
+     */
+    public static final int AUTH_DEVICE_CREDENTIAL = 1 << 0;
+
+    /**
+     * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
+     * requirements for <strong>Strong</strong>, as defined by the Android CDD.
+     */
+    public static final int AUTH_BIOMETRIC_STRONG = 1 << 1;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "PURPOSE_" }, value = {
             PURPOSE_ENCRYPT,
             PURPOSE_DECRYPT,

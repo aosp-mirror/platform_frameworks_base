@@ -738,7 +738,16 @@ public final class Credential implements Parcelable {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("IMSI: ").append(mImsi).append("\n");
+            String imsi;
+            if (mImsi != null) {
+                if (mImsi.length() > 6 && mImsi.charAt(6) != '*') {
+                    // Truncate the full IMSI from the log
+                    imsi = mImsi.substring(0, 6) + "****";
+                } else {
+                    imsi = mImsi;
+                }
+                builder.append("IMSI: ").append(imsi).append("\n");
+            }
             builder.append("EAPType: ").append(mEapType).append("\n");
             return builder.toString();
         }
@@ -1018,6 +1027,28 @@ public final class Credential implements Parcelable {
                 mCheckAaaServerCertStatus, mUserCredential, mCertCredential, mSimCredential,
                 mClientPrivateKey, Arrays.hashCode(mCaCertificates),
                 Arrays.hashCode(mClientCertificateChain));
+    }
+
+    /**
+     * Get a unique identifier for Credential. This identifier depends only on items that remain
+     * constant throughout the lifetime of a subscription's credentials.
+     *
+     * @hide
+     * @return a Unique identifier for a Credential object
+     */
+    public int getUniqueId() {
+        int usedCredential;
+
+        // Initialize usedCredential based on the credential type of the profile
+        if (mUserCredential != null) {
+            usedCredential = 0;
+        } else if (mCertCredential != null) {
+            usedCredential = 1;
+        } else {
+            usedCredential = 2;
+        }
+
+        return Objects.hash(usedCredential, mRealm);
     }
 
     @Override

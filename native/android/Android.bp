@@ -25,6 +25,7 @@ cc_defaults {
     cflags: [
         "-Wall",
         "-Werror",
+        "-Wextra",
         "-Wunused",
         "-Wunreachable-code",
     ],

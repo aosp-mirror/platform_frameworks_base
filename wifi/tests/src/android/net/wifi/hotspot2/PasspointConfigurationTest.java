@@ -20,8 +20,11 @@ import static android.net.wifi.WifiConfiguration.METERED_OVERRIDE_NONE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.net.wifi.hotspot2.pps.Credential;
+import android.net.wifi.hotspot2.pps.HomeSp;
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
@@ -367,16 +370,55 @@ public class PasspointConfigurationTest {
     }
 
     /**
-     * Verify that the unique identifier generated is correct.
+     * Verify that the unique identifier generated is identical for two instances
      *
      * @throws Exception
      */
     @Test
     public void validateUniqueId() throws Exception {
-        PasspointConfiguration config = PasspointTestUtils.createConfig();
-        String uniqueId;
-        uniqueId = config.getUniqueId();
-        assertEquals(uniqueId, config.getHomeSp().getFqdn());
+        PasspointConfiguration config1 = PasspointTestUtils.createConfig();
+        PasspointConfiguration config2 = PasspointTestUtils.createConfig();
+
+        assertEquals(config1.getUniqueId(), config2.getUniqueId());
+    }
+
+    /**
+     * Verify that the unique identifier generated is different for two instances with different
+     * HomeSp node
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateUniqueIdDifferentHomeSp() throws Exception {
+        PasspointConfiguration config1 = PasspointTestUtils.createConfig();
+
+        // Modify config2's RCOIs to a different set of values
+        PasspointConfiguration config2 = PasspointTestUtils.createConfig();
+        HomeSp homeSp = config2.getHomeSp();
+        homeSp.setRoamingConsortiumOis(new long[] {0xaa, 0xbb});
+        config2.setHomeSp(homeSp);
+
+        assertNotEquals(config1.getUniqueId(), config2.getUniqueId());
+    }
+
+    /**
+     * Verify that the unique identifier generated is different for two instances with different
+     * Credential node
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateUniqueIdDifferentCredential() throws Exception {
+        PasspointConfiguration config1 = PasspointTestUtils.createConfig();
+
+        // Modify config2's RCOIs to a different set of values
+        PasspointConfiguration config2 = PasspointTestUtils.createConfig();
+        Credential credential = config2.getCredential();
+        credential.setRealm("realm2.example.com");
+        credential.getSimCredential().setImsi("350460*");
+        config2.setCredential(credential);
+
+        assertNotEquals(config1.getUniqueId(), config2.getUniqueId());
     }
 
     /**

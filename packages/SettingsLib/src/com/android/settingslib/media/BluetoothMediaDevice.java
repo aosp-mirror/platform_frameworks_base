@@ -19,7 +19,8 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 import android.util.Pair;
 
 import com.android.settingslib.R;
@@ -35,8 +36,9 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     private CachedBluetoothDevice mCachedDevice;
 
-    BluetoothMediaDevice(Context context, CachedBluetoothDevice device) {
-        super(context, MediaDeviceType.TYPE_BLUETOOTH_DEVICE);
+    BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
+            MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
+        super(context, MediaDeviceType.TYPE_BLUETOOTH_DEVICE, routerManager, info, packageName);
         mCachedDevice = device;
         initDeviceRecord();
     }
@@ -63,20 +65,6 @@ public class BluetoothMediaDevice extends MediaDevice {
     @Override
     public String getId() {
         return MediaDeviceUtils.getId(mCachedDevice);
-    }
-
-    @Override
-    public boolean connect() {
-        //TODO(b/117129183): add callback to notify LocalMediaManager connection state.
-        final boolean isConnected = mCachedDevice.setActive();
-        setConnectedRecord();
-        Log.d(TAG, "connect() device : " + getName() + ", is selected : " + isConnected);
-        return isConnected;
-    }
-
-    @Override
-    public void disconnect() {
-        //TODO(b/117129183): disconnected last select device
     }
 
     /**

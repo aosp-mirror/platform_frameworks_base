@@ -56,7 +56,7 @@ import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
-import static android.os.Process.STATSD_UID;
+import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
@@ -411,9 +411,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                     Slog.e(TAG, "Bad app ops settings", e);
                 }
                 TOP_STATE_SETTLE_TIME = mParser.getDurationMillis(
-                        KEY_TOP_STATE_SETTLE_TIME, 30 * 1000L);
+                        KEY_TOP_STATE_SETTLE_TIME, 5 * 1000L);
                 FG_SERVICE_STATE_SETTLE_TIME = mParser.getDurationMillis(
-                        KEY_FG_SERVICE_STATE_SETTLE_TIME, 10 * 1000L);
+                        KEY_FG_SERVICE_STATE_SETTLE_TIME, 5 * 1000L);
                 BG_STATE_SETTLE_TIME = mParser.getDurationMillis(
                         KEY_BG_STATE_SETTLE_TIME, 1 * 1000L);
             }
@@ -1890,9 +1890,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
         boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(Binder.getCallingUid());
-        boolean isCallerStatsCollector = Binder.getCallingUid() == STATSD_UID;
+        boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
 
-        if (!isCallerStatsCollector && !isCallerInstrumented) {
+        if (!isCallerSystem && !isCallerInstrumented) {
             mHandler.post(() -> callback.sendResult(new Bundle()));
             return;
         }
@@ -3366,7 +3366,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             return false;
         }
 
-        return permInfo.getProtection() == PROTECTION_DANGEROUS;
+        return permInfo.getProtection() == PROTECTION_DANGEROUS
+                || (permInfo.getProtectionFlags() & PROTECTION_FLAG_APPOP) != 0;
     }
 
     private void verifyIncomingUid(int uid) {

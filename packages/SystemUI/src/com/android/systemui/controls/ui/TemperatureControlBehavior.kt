@@ -24,6 +24,8 @@ import android.service.controls.templates.TemperatureControlTemplate
 import android.widget.TextView
 
 import com.android.systemui.R
+import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
+import com.android.systemui.controls.ui.ControlActionCoordinator.MAX_LEVEL
 
 class TemperatureControlBehavior : Behavior {
     lateinit var clipLayer: Drawable

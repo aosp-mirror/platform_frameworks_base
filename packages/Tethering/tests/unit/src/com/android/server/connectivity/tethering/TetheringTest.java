@@ -127,6 +127,7 @@ import com.android.internal.util.StateMachine;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.networkstack.tethering.R;
+import com.android.testutils.MiscAssertsKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -1220,6 +1221,16 @@ public class TetheringTest {
         }
     }
 
+    private void assertTetherStatesNotNullButEmpty(final TetherStatesParcel parcel) {
+        assertFalse(parcel == null);
+        assertEquals(0, parcel.availableList.length);
+        assertEquals(0, parcel.tetheredList.length);
+        assertEquals(0, parcel.localOnlyList.length);
+        assertEquals(0, parcel.erroredIfaceList.length);
+        assertEquals(0, parcel.lastErrorList.length);
+        MiscAssertsKt.assertFieldCountEquals(5, TetherStatesParcel.class);
+    }
+
     @Test
     public void testRegisterTetheringEventCallback() throws Exception {
         TestTetheringEventCallback callback = new TestTetheringEventCallback();
@@ -1232,7 +1243,7 @@ public class TetheringTest {
         callback.expectConfigurationChanged(
                 mTethering.getTetheringConfiguration().toStableParcelable());
         TetherStatesParcel tetherState = callback.pollTetherStatesChanged();
-        assertEquals(tetherState, null);
+        assertTetherStatesNotNullButEmpty(tetherState);
         // 2. Enable wifi tethering.
         UpstreamNetworkState upstreamState = buildMobileDualStackUpstreamState();
         when(mUpstreamNetworkMonitor.getCurrentPreferredUpstream()).thenReturn(upstreamState);

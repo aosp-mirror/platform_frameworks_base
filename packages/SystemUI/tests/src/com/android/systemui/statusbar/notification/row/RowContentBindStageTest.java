@@ -34,7 +34,6 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
@@ -61,8 +60,10 @@ public class RowContentBindStageTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mRowContentBindStage = new RowContentBindStage(mBinder,
-                mock(IStatusBarService.class));
+        mRowContentBindStage = new RowContentBindStage(
+                mBinder,
+                mock(NotifInflationErrorManager.class),
+                mock(RowContentBindStageLogger.class));
         mRowContentBindStage.createStageParams(mEntry);
     }
 

@@ -17,6 +17,7 @@ package com.android.pacprocessor;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -30,45 +31,33 @@ import java.net.URL;
 
 public class PacService extends Service {
     private static final String TAG = "PacService";
+    private static final boolean sUseWebViewPacProcessor = Resources.getSystem().getBoolean(
+            com.android.internal.R.bool.config_useWebViewPacProcessor);
 
-    private PacNative mPacNative;
-    private ProxyServiceStub mStub;
+    private final LibpacInterface mLibpac = sUseWebViewPacProcessor
+            ? PacWebView.getInstance()
+            : PacNative.getInstance();
+
+    private ProxyServiceStub mStub = new ProxyServiceStub();
 
     @Override
     public void onCreate() {
         super.onCreate();
-        if (mPacNative == null) {
-            mPacNative = new PacNative();
-            mStub = new ProxyServiceStub(mPacNative);
-        }
+        mLibpac.startPacSupport();
     }
 
     @Override
     public void onDestroy() {
+        mLibpac.stopPacSupport();
         super.onDestroy();
-        if (mPacNative != null) {
-            mPacNative.stopPacSupport();
-            mPacNative = null;
-            mStub = null;
-        }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (mPacNative == null) {
-            mPacNative = new PacNative();
-            mStub = new ProxyServiceStub(mPacNative);
-        }
         return mStub;
     }
 
-    private static class ProxyServiceStub extends IProxyService.Stub {
-        private final PacNative mPacNative;
-
-        public ProxyServiceStub(PacNative pacNative) {
-            mPacNative = pacNative;
-        }
-
+    private class ProxyServiceStub extends IProxyService.Stub {
         @Override
         public String resolvePacFile(String host, String url) throws RemoteException {
             try {
@@ -85,7 +74,7 @@ public class PacService extends Service {
                         throw new IllegalArgumentException("Invalid host was passed");
                     }
                 }
-                return mPacNative.makeProxyRequest(url, host);
+                return mLibpac.makeProxyRequest(url, host);
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException("Invalid URL was passed");
             }
@@ -97,25 +86,17 @@ public class PacService extends Service {
                 Log.e(TAG, "Only system user is allowed to call setPacFile");
                 throw new SecurityException();
             }
-            mPacNative.setCurrentProxyScript(script);
+            mLibpac.setCurrentProxyScript(script);
         }
 
         @Override
         public void startPacSystem() throws RemoteException {
-            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                Log.e(TAG, "Only system user is allowed to call startPacSystem");
-                throw new SecurityException();
-            }
-            mPacNative.startPacSupport();
+            //TODO: remove
         }
 
         @Override
         public void stopPacSystem() throws RemoteException {
-            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                Log.e(TAG, "Only system user is allowed to call stopPacSystem");
-                throw new SecurityException();
-            }
-            mPacNative.stopPacSupport();
+            //TODO: remove
         }
     }
 }

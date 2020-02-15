@@ -27,6 +27,7 @@ android_library {
         "SettingsLibRadioButtonPreference",
         "WifiTrackerLib",
         "SettingsLibDisplayDensityUtils",
+        "SettingsLibSchedulesProvider",
     ],
 
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES

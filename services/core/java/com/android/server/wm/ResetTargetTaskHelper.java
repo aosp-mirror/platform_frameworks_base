@@ -67,7 +67,7 @@ class ResetTargetTaskHelper {
 
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 ResetTargetTaskHelper::processTask, this, PooledLambda.__(Task.class));
-        targetTask.mWmService.mRoot.forAllTasks(c);
+        targetTask.mWmService.mRoot.forAllTasks(c, true /*traverseTopToBottom*/, mTargetStack);
         c.recycle();
 
         processPendingReparentActivities();

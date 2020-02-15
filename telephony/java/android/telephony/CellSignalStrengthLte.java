@@ -181,7 +181,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         mCqi = CellInfo.UNAVAILABLE;
         mTimingAdvance = CellInfo.UNAVAILABLE;
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        mParametersUseForLevel = USE_RSRP | USE_RSSNR;
+        mParametersUseForLevel = USE_RSRP;
     }
 
     /** {@inheritDoc} */
@@ -236,7 +236,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         int[] rsrpThresholds, rsrqThresholds, rssnrThresholds;
         boolean rsrpOnly;
         if (cc == null) {
-            mParametersUseForLevel = USE_RSRP | USE_RSSNR;
+            mParametersUseForLevel = USE_RSRP;
             rsrpThresholds = sRsrpThresholds;
             rsrqThresholds = sRsrqThresholds;
             rssnrThresholds = sRssnrThresholds;
@@ -244,19 +244,30 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         } else {
             mParametersUseForLevel = cc.getInt(
                     CarrierConfigManager.KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT);
-            Rlog.i(LOG_TAG, "Using signal strength level: " + mParametersUseForLevel);
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Using signal strength level: " + mParametersUseForLevel);
+            }
             rsrpThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY);
             if (rsrpThresholds == null) rsrpThresholds = sRsrpThresholds;
-            Rlog.i(LOG_TAG, "Applying LTE RSRP Thresholds: " + Arrays.toString(rsrpThresholds));
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Applying LTE RSRP Thresholds: "
+                        + Arrays.toString(rsrpThresholds));
+            }
             rsrqThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_LTE_RSRQ_THRESHOLDS_INT_ARRAY);
             if (rsrqThresholds == null) rsrqThresholds = sRsrqThresholds;
-            Rlog.i(LOG_TAG, "Applying LTE RSRQ Thresholds: " + Arrays.toString(rsrqThresholds));
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Applying LTE RSRQ Thresholds: "
+                        + Arrays.toString(rsrqThresholds));
+            }
             rssnrThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_LTE_RSSNR_THRESHOLDS_INT_ARRAY);
             if (rssnrThresholds == null) rssnrThresholds = sRssnrThresholds;
-            Rlog.i(LOG_TAG, "Applying LTE RSSNR Thresholds: " + Arrays.toString(rssnrThresholds));
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Applying LTE RSSNR Thresholds: "
+                        + Arrays.toString(rssnrThresholds));
+            }
             rsrpOnly = cc.getBoolean(
                     CarrierConfigManager.KEY_USE_ONLY_RSRP_FOR_LTE_SIGNAL_BAR_BOOL, false);
         }
@@ -283,15 +294,21 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
 
         if (isLevelForParameter(USE_RSRP)) {
             rsrpLevel = updateLevelWithMeasure(rsrp, rsrpThresholds);
-            Rlog.i(LOG_TAG, "Updated 4G LTE RSRP Level: " + rsrpLevel);
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Updated 4G LTE RSRP Level: " + rsrpLevel);
+            }
         }
         if (isLevelForParameter(USE_RSRQ)) {
             rsrqLevel = updateLevelWithMeasure(mRsrq, rsrqThresholds);
-            Rlog.i(LOG_TAG, "Updated 4G LTE RSRQ Level: " + rsrqLevel);
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Updated 4G LTE RSRQ Level: " + rsrqLevel);
+            }
         }
         if (isLevelForParameter(USE_RSSNR)) {
             rssnrLevel = updateLevelWithMeasure(mRssnr, rssnrThresholds);
-            Rlog.i(LOG_TAG, "Updated 4G LTE RSSNR Level: " + rssnrLevel);
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Updated 4G LTE RSSNR Level: " + rssnrLevel);
+            }
         }
         // Apply the smaller value among three levels of three measures.
         mLevel = Math.min(Math.min(rsrpLevel, rsrqLevel), rssnrLevel);

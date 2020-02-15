@@ -55,7 +55,12 @@ public final class RoutingSessionInfo implements Parcelable {
     final List<String> mSelectedRoutes;
     final List<String> mSelectableRoutes;
     final List<String> mDeselectableRoutes;
-    final List<String> mTransferrableRoutes;
+    final List<String> mTransferableRoutes;
+
+    final int mVolumeHandling;
+    final int mVolumeMax;
+    final int mVolume;
+
     @Nullable
     final Bundle mControlHints;
     final boolean mIsSystemSession;
@@ -74,8 +79,12 @@ public final class RoutingSessionInfo implements Parcelable {
                 convertToUniqueRouteIds(builder.mSelectableRoutes));
         mDeselectableRoutes = Collections.unmodifiableList(
                 convertToUniqueRouteIds(builder.mDeselectableRoutes));
-        mTransferrableRoutes = Collections.unmodifiableList(
-                convertToUniqueRouteIds(builder.mTransferrableRoutes));
+        mTransferableRoutes = Collections.unmodifiableList(
+                convertToUniqueRouteIds(builder.mTransferableRoutes));
+
+        mVolumeHandling = builder.mVolumeHandling;
+        mVolumeMax = builder.mVolumeMax;
+        mVolume = builder.mVolume;
 
         mControlHints = builder.mControlHints;
         mIsSystemSession = builder.mIsSystemSession;
@@ -91,7 +100,11 @@ public final class RoutingSessionInfo implements Parcelable {
         mSelectedRoutes = ensureList(src.createStringArrayList());
         mSelectableRoutes = ensureList(src.createStringArrayList());
         mDeselectableRoutes = ensureList(src.createStringArrayList());
-        mTransferrableRoutes = ensureList(src.createStringArrayList());
+        mTransferableRoutes = ensureList(src.createStringArrayList());
+
+        mVolumeHandling = src.readInt();
+        mVolumeMax = src.readInt();
+        mVolume = src.readInt();
 
         mControlHints = src.readBundle();
         mIsSystemSession = src.readBoolean();
@@ -180,11 +193,41 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     /**
-     * Gets the list of ids of transferrable routes for the session.
+     * Gets the list of ids of transferable routes for the session.
      */
     @NonNull
-    public List<String> getTransferrableRoutes() {
-        return mTransferrableRoutes;
+    public List<String> getTransferableRoutes() {
+        return mTransferableRoutes;
+    }
+
+    /**
+     * Gets information about how volume is handled on the session.
+     *
+     * @return {@link MediaRoute2Info#PLAYBACK_VOLUME_FIXED} or
+     * {@link MediaRoute2Info#PLAYBACK_VOLUME_VARIABLE}.
+     */
+    @MediaRoute2Info.PlaybackVolume
+    public int getVolumeHandling() {
+        return mVolumeHandling;
+    }
+
+    /**
+     * Gets the maximum volume of the session.
+     */
+    public int getVolumeMax() {
+        return mVolumeMax;
+    }
+
+    /**
+     * Gets the current volume of the session.
+     * <p>
+     * When it's available, it represents the volume of routing session, which is a group
+     * of selected routes. To get the volume of each route, use {@link MediaRoute2Info#getVolume()}.
+     * </p>
+     * @see MediaRoute2Info#getVolume()
+     */
+    public int getVolume() {
+        return mVolume;
     }
 
     /**
@@ -217,7 +260,10 @@ public final class RoutingSessionInfo implements Parcelable {
         dest.writeStringList(mSelectedRoutes);
         dest.writeStringList(mSelectableRoutes);
         dest.writeStringList(mDeselectableRoutes);
-        dest.writeStringList(mTransferrableRoutes);
+        dest.writeStringList(mTransferableRoutes);
+        dest.writeInt(mVolumeHandling);
+        dest.writeInt(mVolumeMax);
+        dest.writeInt(mVolume);
         dest.writeBundle(mControlHints);
         dest.writeBoolean(mIsSystemSession);
     }
@@ -238,13 +284,17 @@ public final class RoutingSessionInfo implements Parcelable {
                 && Objects.equals(mSelectedRoutes, other.mSelectedRoutes)
                 && Objects.equals(mSelectableRoutes, other.mSelectableRoutes)
                 && Objects.equals(mDeselectableRoutes, other.mDeselectableRoutes)
-                && Objects.equals(mTransferrableRoutes, other.mTransferrableRoutes);
+                && Objects.equals(mTransferableRoutes, other.mTransferableRoutes)
+                && (mVolumeHandling == other.mVolumeHandling)
+                && (mVolumeMax == other.mVolumeMax)
+                && (mVolume == other.mVolume);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mId, mClientPackageName, mProviderId,
-                mSelectedRoutes, mSelectableRoutes, mDeselectableRoutes, mTransferrableRoutes);
+                mSelectedRoutes, mSelectableRoutes, mDeselectableRoutes, mTransferableRoutes,
+                mVolumeMax, mVolumeHandling, mVolume);
     }
 
     @Override
@@ -261,9 +311,12 @@ public final class RoutingSessionInfo implements Parcelable {
                 .append(", deselectableRoutes={")
                 .append(String.join(",", mDeselectableRoutes))
                 .append("}")
-                .append(", transferrableRoutes={")
-                .append(String.join(",", mTransferrableRoutes))
+                .append(", transferableRoutes={")
+                .append(String.join(",", mTransferableRoutes))
                 .append("}")
+                .append(", volumeHandling=").append(getVolumeHandling())
+                .append(", volumeMax=").append(getVolumeMax())
+                .append(", volume=").append(getVolume())
                 .append(" }");
         return result.toString();
     }
@@ -297,7 +350,10 @@ public final class RoutingSessionInfo implements Parcelable {
         final List<String> mSelectedRoutes;
         final List<String> mSelectableRoutes;
         final List<String> mDeselectableRoutes;
-        final List<String> mTransferrableRoutes;
+        final List<String> mTransferableRoutes;
+        int mVolumeHandling = MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
+        int mVolumeMax;
+        int mVolume;
         Bundle mControlHints;
         boolean mIsSystemSession;
 
@@ -325,7 +381,7 @@ public final class RoutingSessionInfo implements Parcelable {
             mSelectedRoutes = new ArrayList<>();
             mSelectableRoutes = new ArrayList<>();
             mDeselectableRoutes = new ArrayList<>();
-            mTransferrableRoutes = new ArrayList<>();
+            mTransferableRoutes = new ArrayList<>();
         }
 
         /**
@@ -344,7 +400,11 @@ public final class RoutingSessionInfo implements Parcelable {
             mSelectedRoutes = new ArrayList<>(sessionInfo.mSelectedRoutes);
             mSelectableRoutes = new ArrayList<>(sessionInfo.mSelectableRoutes);
             mDeselectableRoutes = new ArrayList<>(sessionInfo.mDeselectableRoutes);
-            mTransferrableRoutes = new ArrayList<>(sessionInfo.mTransferrableRoutes);
+            mTransferableRoutes = new ArrayList<>(sessionInfo.mTransferableRoutes);
+
+            mVolumeHandling = sessionInfo.mVolumeHandling;
+            mVolumeMax = sessionInfo.mVolumeMax;
+            mVolume = sessionInfo.mVolume;
 
             mControlHints = sessionInfo.mControlHints;
             mIsSystemSession = sessionInfo.mIsSystemSession;
@@ -464,35 +524,65 @@ public final class RoutingSessionInfo implements Parcelable {
         }
 
         /**
-         * Clears the transferrable routes.
+         * Clears the transferable routes.
          */
         @NonNull
-        public Builder clearTransferrableRoutes() {
-            mTransferrableRoutes.clear();
+        public Builder clearTransferableRoutes() {
+            mTransferableRoutes.clear();
             return this;
         }
 
         /**
-         * Adds a route to the transferrable routes. The {@code routeId} must not be empty.
+         * Adds a route to the transferable routes. The {@code routeId} must not be empty.
          */
         @NonNull
-        public Builder addTransferrableRoute(@NonNull String routeId) {
+        public Builder addTransferableRoute(@NonNull String routeId) {
             if (TextUtils.isEmpty(routeId)) {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
-            mTransferrableRoutes.add(routeId);
+            mTransferableRoutes.add(routeId);
             return this;
         }
 
         /**
-         * Removes a route from the transferrable routes. The {@code routeId} must not be empty.
+         * Removes a route from the transferable routes. The {@code routeId} must not be empty.
          */
         @NonNull
-        public Builder removeTransferrableRoute(@NonNull String routeId) {
+        public Builder removeTransferableRoute(@NonNull String routeId) {
             if (TextUtils.isEmpty(routeId)) {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
-            mTransferrableRoutes.remove(routeId);
+            mTransferableRoutes.remove(routeId);
+            return this;
+        }
+
+        /**
+         * Sets the session's volume handling.
+         * {@link MediaRoute2Info#PLAYBACK_VOLUME_FIXED} or
+         * {@link MediaRoute2Info#PLAYBACK_VOLUME_VARIABLE}.
+         */
+        @NonNull
+        public RoutingSessionInfo.Builder setVolumeHandling(
+                @MediaRoute2Info.PlaybackVolume int volumeHandling) {
+            mVolumeHandling = volumeHandling;
+            return this;
+        }
+
+        /**
+         * Sets the session's maximum volume, or 0 if unknown.
+         */
+        @NonNull
+        public RoutingSessionInfo.Builder setVolumeMax(int volumeMax) {
+            mVolumeMax = volumeMax;
+            return this;
+        }
+
+        /**
+         * Sets the session's current volume, or 0 if unknown.
+         */
+        @NonNull
+        public RoutingSessionInfo.Builder setVolume(int volume) {
+            mVolume = volume;
             return this;
         }
 

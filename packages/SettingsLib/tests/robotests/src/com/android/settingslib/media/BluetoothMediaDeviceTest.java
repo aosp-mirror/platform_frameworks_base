@@ -51,21 +51,7 @@ public class BluetoothMediaDeviceTest {
         when(mDevice.isActiveDevice(BluetoothProfile.A2DP)).thenReturn(true);
         when(mDevice.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(true);
 
-        mBluetoothMediaDevice = new BluetoothMediaDevice(mContext, mDevice);
-    }
-
-    @Test
-    public void connect_setActiveSuccess_isConnectedReturnTrue() {
-        when(mDevice.setActive()).thenReturn(true);
-
-        assertThat(mBluetoothMediaDevice.connect()).isTrue();
-    }
-
-    @Test
-    public void connect_setActiveFail_isConnectedReturnFalse() {
-        when(mDevice.setActive()).thenReturn(false);
-
-        assertThat(mBluetoothMediaDevice.connect()).isFalse();
+        mBluetoothMediaDevice = new BluetoothMediaDevice(mContext, mDevice, null, null, null);
     }
 
     @Test

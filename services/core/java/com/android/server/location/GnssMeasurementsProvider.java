@@ -18,6 +18,7 @@ package com.android.server.location;
 
 import android.content.Context;
 import android.location.GnssMeasurementsEvent;
+import android.location.GnssRequest;
 import android.location.IGnssMeasurementsListener;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -33,14 +34,14 @@ import com.android.internal.annotations.VisibleForTesting;
  * @hide
  */
 public abstract class GnssMeasurementsProvider
-        extends RemoteListenerHelper<IGnssMeasurementsListener> {
-    private static final String TAG = "GnssMeasurementsProvider";
+        extends RemoteListenerHelper<GnssRequest, IGnssMeasurementsListener> {
+    private static final String TAG = "GnssMeasProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final GnssMeasurementProviderNative mNative;
 
-    private boolean mIsCollectionStarted;
-    private boolean mEnableFullTracking;
+    private boolean mStartedCollection;
+    private boolean mStartedFullTracking;
 
     protected GnssMeasurementsProvider(Context context, Handler handler) {
         this(context, handler, new GnssMeasurementProviderNative());
@@ -57,8 +58,8 @@ public abstract class GnssMeasurementsProvider
         if (DEBUG) {
             Log.d(TAG, "resumeIfStarted");
         }
-        if (mIsCollectionStarted) {
-            mNative.startMeasurementCollection(mEnableFullTracking);
+        if (mStartedCollection) {
+            mNative.startMeasurementCollection(mStartedFullTracking);
         }
     }
 
@@ -67,18 +68,35 @@ public abstract class GnssMeasurementsProvider
         return mNative.isMeasurementSupported();
     }
 
-    @Override
-    protected int registerWithService() {
+    private boolean getMergedFullTracking() {
         int devOptions = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0);
-        int fullTrackingToggled = Settings.Global.getInt(mContext.getContentResolver(),
+        int enableFullTracking = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING, 0);
-        boolean enableFullTracking = (devOptions == 1 /* Developer Mode enabled */)
-                && (fullTrackingToggled == 1 /* Raw Measurements Full Tracking enabled */);
+        boolean enableFullTrackingBySetting = (devOptions == 1 /* Developer Mode enabled */)
+                && (enableFullTracking == 1 /* Raw Measurements Full Tracking enabled */);
+        if (enableFullTrackingBySetting) {
+            return true;
+        }
+
+        synchronized (mListenerMap) {
+            for (IdentifiedListener identifiedListener : mListenerMap.values()) {
+                GnssRequest request = identifiedListener.getRequest();
+                if (request != null && request.isFullTracking()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected int registerWithService() {
+        boolean enableFullTracking = getMergedFullTracking();
         boolean result = mNative.startMeasurementCollection(enableFullTracking);
         if (result) {
-            mIsCollectionStarted = true;
-            mEnableFullTracking = enableFullTracking;
+            mStartedCollection = true;
+            mStartedFullTracking = enableFullTracking;
             return RemoteListenerHelper.RESULT_SUCCESS;
         } else {
             return RemoteListenerHelper.RESULT_INTERNAL_ERROR;
@@ -89,7 +107,7 @@ public abstract class GnssMeasurementsProvider
     protected void unregisterFromService() {
         boolean stopped = mNative.stopMeasurementCollection();
         if (stopped) {
-            mIsCollectionStarted = false;
+            mStartedCollection = false;
         }
     }
 

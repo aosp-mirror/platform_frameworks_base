@@ -27,10 +27,10 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.os.UserHandle.USER_NULL;
 
-import static com.android.server.blob.BlobStoreConfig.CURRENT_XML_VERSION;
 import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.SESSION_EXPIRY_TIMEOUT_MILLIS;
 import static com.android.server.blob.BlobStoreConfig.TAG;
+import static com.android.server.blob.BlobStoreConfig.XML_VERSION_CURRENT;
 import static com.android.server.blob.BlobStoreSession.STATE_ABANDONED;
 import static com.android.server.blob.BlobStoreSession.STATE_COMMITTED;
 import static com.android.server.blob.BlobStoreSession.STATE_VERIFIED_INVALID;
@@ -324,7 +324,8 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     private void acquireLeaseInternal(BlobHandle blobHandle, int descriptionResId,
-            long leaseExpiryTimeMillis, int callingUid, String callingPackage) {
+            CharSequence description, long leaseExpiryTimeMillis,
+            int callingUid, String callingPackage) {
         synchronized (mBlobsLock) {
             final BlobMetadata blobMetadata = getUserBlobsLocked(UserHandle.getUserId(callingUid))
                     .get(blobHandle);
@@ -338,7 +339,7 @@ public class BlobStoreManagerService extends SystemService {
                         "Lease expiry cannot be later than blobs expiry time");
             }
             blobMetadata.addLeasee(callingPackage, callingUid,
-                    descriptionResId, leaseExpiryTimeMillis);
+                    descriptionResId, description, leaseExpiryTimeMillis);
             if (LOGV) {
                 Slog.v(TAG, "Acquired lease on " + blobHandle
                         + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
@@ -450,7 +451,7 @@ public class BlobStoreManagerService extends SystemService {
             out.setOutput(fos, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.startTag(null, TAG_SESSIONS);
-            XmlUtils.writeIntAttribute(out, ATTR_VERSION, CURRENT_XML_VERSION);
+            XmlUtils.writeIntAttribute(out, ATTR_VERSION, XML_VERSION_CURRENT);
 
             for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {
                 final LongSparseArray<BlobStoreSession> userSessions =
@@ -491,6 +492,7 @@ public class BlobStoreManagerService extends SystemService {
             final XmlPullParser in = Xml.newPullParser();
             in.setInput(fis, StandardCharsets.UTF_8.name());
             XmlUtils.beginDocument(in, TAG_SESSIONS);
+            final int version = XmlUtils.readIntAttribute(in, ATTR_VERSION);
             while (true) {
                 XmlUtils.nextElement(in);
                 if (in.getEventType() == XmlPullParser.END_DOCUMENT) {
@@ -499,7 +501,7 @@ public class BlobStoreManagerService extends SystemService {
 
                 if (TAG_SESSION.equals(in.getName())) {
                     final BlobStoreSession session = BlobStoreSession.createFromXml(
-                            in, mContext, mSessionStateChangeListener);
+                            in, version, mContext, mSessionStateChangeListener);
                     if (session == null) {
                         continue;
                     }
@@ -539,7 +541,7 @@ public class BlobStoreManagerService extends SystemService {
             out.setOutput(fos, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.startTag(null, TAG_BLOBS);
-            XmlUtils.writeIntAttribute(out, ATTR_VERSION, CURRENT_XML_VERSION);
+            XmlUtils.writeIntAttribute(out, ATTR_VERSION, XML_VERSION_CURRENT);
 
             for (int i = 0, userCount = mBlobsMap.size(); i < userCount; ++i) {
                 final ArrayMap<BlobHandle, BlobMetadata> userBlobs = mBlobsMap.valueAt(i);
@@ -579,6 +581,7 @@ public class BlobStoreManagerService extends SystemService {
             final XmlPullParser in = Xml.newPullParser();
             in.setInput(fis, StandardCharsets.UTF_8.name());
             XmlUtils.beginDocument(in, TAG_BLOBS);
+            final int version = XmlUtils.readIntAttribute(in, ATTR_VERSION);
             while (true) {
                 XmlUtils.nextElement(in);
                 if (in.getEventType() == XmlPullParser.END_DOCUMENT) {
@@ -586,7 +589,8 @@ public class BlobStoreManagerService extends SystemService {
                 }
 
                 if (TAG_BLOB.equals(in.getName())) {
-                    final BlobMetadata blobMetadata = BlobMetadata.createFromXml(mContext, in);
+                    final BlobMetadata blobMetadata = BlobMetadata.createFromXml(
+                            in, version, mContext);
                     final SparseArray<String> userPackages = allPackages.get(
                             blobMetadata.getUserId());
                     if (userPackages == null) {
@@ -1032,11 +1036,14 @@ public class BlobStoreManagerService extends SystemService {
 
         @Override
         public void acquireLease(@NonNull BlobHandle blobHandle, @IdRes int descriptionResId,
+                @Nullable CharSequence description,
                 @CurrentTimeSecondsLong long leaseExpiryTimeMillis, @NonNull String packageName) {
             Objects.requireNonNull(blobHandle, "blobHandle must not be null");
             blobHandle.assertIsValid();
-            Preconditions.checkArgument(ResourceId.isValid(descriptionResId),
-                    "descriptionResId is not valid");
+            Preconditions.checkArgument(
+                    ResourceId.isValid(descriptionResId) || description != null,
+                    "Description must be valid; descriptionId=" + descriptionResId
+                            + ", description=" + description);
             Preconditions.checkArgumentNonnegative(leaseExpiryTimeMillis,
                     "leaseExpiryTimeMillis must not be negative");
             Objects.requireNonNull(packageName, "packageName must not be null");
@@ -1044,7 +1051,7 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            acquireLeaseInternal(blobHandle, descriptionResId, leaseExpiryTimeMillis,
+            acquireLeaseInternal(blobHandle, descriptionResId, description, leaseExpiryTimeMillis,
                     callingUid, packageName);
         }
 

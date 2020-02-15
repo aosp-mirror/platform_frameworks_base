@@ -216,6 +216,9 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     private ArrayList<String> queriesPackages;
 
     @Nullable
+    private ArraySet<String> queriesProviders;
+
+    @Nullable
     private ArrayMap<String, ComponentParseUtils.ParsedProcess> processes;
 
     private String[] splitClassLoaderNames;
@@ -957,6 +960,12 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     }
 
     @Override
+    public ParsingPackage addQueriesProvider(String authority) {
+        this.queriesProviders = ArrayUtils.add(this.queriesProviders, authority);
+        return this;
+    }
+
+    @Override
     public PackageImpl setProcesses(ArrayMap<String, ComponentParseUtils.ParsedProcess> processes) {
         this.processes = processes;
         return this;
@@ -1496,6 +1505,16 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         this.privateFlags = requestLegacyExternalStorage
                 ? this.privateFlags | ApplicationInfo.PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE
                 : this.privateFlags & ~ApplicationInfo.PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE;
+        return this;
+    }
+
+    @Override
+    public PackageImpl setAllowNativeHeapPointerTagging(boolean allowNativeHeapPointerTagging) {
+        this.privateFlags = allowNativeHeapPointerTagging
+                ? this.privateFlags | ApplicationInfo
+                        .PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING
+                : this.privateFlags & ~ApplicationInfo
+                        .PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING;
         return this;
     }
 
@@ -2973,6 +2992,11 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     @Nullable
     public List<String> getQueriesPackages() {
         return queriesPackages;
+    }
+
+    @Override
+    public Set<String> getQueriesProviders() {
+        return queriesProviders;
     }
 
     private static void internStringArrayList(List<String> list) {

@@ -25,12 +25,17 @@ import android.service.controls.IControlsSubscription
 import android.service.controls.actions.ControlActionWrapper
 import android.util.Log
 
+/**
+ * Wrapper for the service calls.
+ *
+ * Calling all [IControlsProvider] methods through here will wrap them in a try/catch block.
+ */
 class ServiceWrapper(val service: IControlsProvider) {
     companion object {
         private const val TAG = "ServiceWrapper"
     }
 
-    private fun callThroughService(block: () -> Unit): Boolean {
+    private inline fun callThroughService(block: () -> Unit): Boolean {
         try {
             block()
             return true

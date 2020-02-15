@@ -42,8 +42,7 @@
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> کے ذریعے منسلک"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"‏دستیاب بذریعہ ‎%1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"سائن اپ کے لیے تھپتھپائیں"</string>
-    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"انٹرنیٹ نہیں ہے"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"‏نجی DNS سرور تک رسائی حاصل نہیں کی جا سکی"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"محدود کنکشن"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"انٹرنیٹ نہیں ہے"</string>
@@ -384,7 +383,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"‏Protanomaly (سرخ سبز)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"‏Tritanomaly (نیلا پیلا)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"رنگ کی اصلاح"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"رنگ کی درستگی رنگ نہ دکھائی دینے والے لوگوں کی رنگوں کو مزید درست طریقے سے دیکھنے میں مدد کرتی ہے"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> کے ذریعہ منسوخ کردیا گیا"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"تقریباً <xliff:g id="TIME_REMAINING">%1$s</xliff:g> باقی ہے"</string>
@@ -414,7 +414,10 @@
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> چارج ہونے تک"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"نامعلوم"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"چارج ہو رہا ہے"</string>
-    <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"چارج ہو رہا ہے"</string>
+    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
+    <skip />
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"چارج نہیں ہو رہا ہے"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"پلگ ان ہے، ابھی چارج نہیں کر سکتے"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"مکمل"</string>

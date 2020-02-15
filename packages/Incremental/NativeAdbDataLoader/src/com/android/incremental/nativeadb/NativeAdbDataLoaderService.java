@@ -16,6 +16,8 @@
 
 package com.android.incremental.nativeadb;
 
+import android.annotation.NonNull;
+import android.content.pm.DataLoaderParams;
 import android.service.dataloader.DataLoaderService;
 
 /** This code is used for testing only. */
@@ -26,7 +28,7 @@ public class NativeAdbDataLoaderService extends DataLoaderService {
     }
 
     @Override
-    public DataLoader onCreateDataLoader() {
+    public DataLoader onCreateDataLoader(@NonNull DataLoaderParams dataLoaderParams) {
         return null;
     }
 }

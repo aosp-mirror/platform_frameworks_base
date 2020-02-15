@@ -70,6 +70,8 @@ import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.TestableNotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
@@ -133,6 +135,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationSectionsManager mNotificationSectionsManager;
     @Mock private NotificationSection mNotificationSection;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+    @Mock private FeatureFlags mFeatureFlags;
     private UserChangedListener mUserChangedListener;
     private TestableNotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
@@ -182,9 +185,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(LeakDetector.class),
                 mock(ForegroundServiceDismissalFeatureController.class)
         );
-        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, mHeadsUpManager);
-
+        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
         NotificationShelf notificationShelf = mock(NotificationShelf.class);
         when(mNotificationSectionsManager.createSectionsForBuckets()).thenReturn(
@@ -208,7 +210,11 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mZenModeController,
                 mNotificationSectionsManager,
                 mock(ForegroundServiceSectionController.class),
-                mock(ForegroundServiceDismissalFeatureController.class)
+                mock(ForegroundServiceDismissalFeatureController.class),
+                mFeatureFlags,
+                mock(NotifPipeline.class),
+                mEntryManager,
+                mock(NotifCollection.class)
         );
         verify(mLockscreenUserManager).addUserChangedListener(userChangedCaptor.capture());
         mUserChangedListener = userChangedCaptor.getValue();

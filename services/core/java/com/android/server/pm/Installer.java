@@ -611,10 +611,10 @@ public class Installer extends SystemService {
     /**
      * Bind mount private volume CE and DE mirror storage.
      */
-    public void onPrivateVolumeMounted(String volumeUuid) throws InstallerException {
+    public void tryMountDataMirror(String volumeUuid) throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.onPrivateVolumeMounted(volumeUuid);
+            mInstalld.tryMountDataMirror(volumeUuid);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

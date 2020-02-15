@@ -22,6 +22,7 @@ import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHOR
 import static com.android.internal.util.ArrayUtils.convertToLongArray;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
@@ -53,6 +54,8 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.util.function.pooled.PooledLambda;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -84,6 +87,17 @@ public class AccessibilityShortcutController {
     private boolean mIsShortcutEnabled;
     private boolean mEnabledOnLockScreen;
     private int mUserId;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            DialogStaus.NOT_SHOWN,
+            DialogStaus.SHOWN,
+    })
+    /** Denotes the user shortcut type. */
+    private @interface DialogStaus {
+        int NOT_SHOWN = 0;
+        int SHOWN  = 1;
+    }
 
     // Visible for testing
     public FrameworkObjectProvider mFrameworkObjectProvider = new FrameworkObjectProvider();
@@ -163,7 +177,8 @@ public class AccessibilityShortcutController {
                 cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED, 1, mUserId) == 1;
         // Enable the shortcut from the lockscreen by default if the dialog has been shown
         final int dialogAlreadyShown = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, mUserId);
+                cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, DialogStaus.NOT_SHOWN,
+                mUserId);
         mEnabledOnLockScreen = Settings.Secure.getIntForUser(
                 cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
                 dialogAlreadyShown, mUserId) == 1;
@@ -178,7 +193,8 @@ public class AccessibilityShortcutController {
         final ContentResolver cr = mContext.getContentResolver();
         final int userId = ActivityManager.getCurrentUser();
         final int dialogAlreadyShown = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, userId);
+                cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, DialogStaus.NOT_SHOWN,
+                userId);
         // Play a notification vibration
         Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         if ((vibrator != null) && vibrator.hasVibrator()) {
@@ -205,7 +221,8 @@ public class AccessibilityShortcutController {
             w.setAttributes(attr);
             mAlertDialog.show();
             Settings.Secure.putIntForUser(
-                    cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 1, userId);
+                    cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, DialogStaus.SHOWN,
+                    userId);
         } else {
             playNotificationTone();
             if (mAlertDialog != null) {
@@ -251,15 +268,8 @@ public class AccessibilityShortcutController {
     }
 
     private AlertDialog createShortcutWarningDialog(int userId) {
-        final String serviceDescription = getShortcutFeatureDescription(true /* Include summary */);
-
-        if (serviceDescription == null) {
-            return null;
-        }
-
-        final String warningMessage = String.format(
-                mContext.getString(R.string.accessibility_shortcut_toogle_warning),
-                serviceDescription);
+        final String warningMessage = mContext.getString(
+                R.string.accessibility_shortcut_toogle_warning);
         final AlertDialog alertDialog = mFrameworkObjectProvider.getAlertDialogBuilder(
                 // Use SystemUI context so we pick up any theme set in a vendor overlay
                 mFrameworkObjectProvider.getSystemUiContext())
@@ -272,11 +282,17 @@ public class AccessibilityShortcutController {
                             Settings.Secure.putStringForUser(mContext.getContentResolver(),
                                     Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
                                     userId);
+
+                            // If canceled, treat as if the dialog has never been shown
+                            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                                    Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                                    DialogStaus.NOT_SHOWN, userId);
                         })
                 .setOnCancelListener((DialogInterface d) -> {
                     // If canceled, treat as if the dialog has never been shown
                     Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, userId);
+                            Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                            DialogStaus.NOT_SHOWN, userId);
                 })
                 .create();
         return alertDialog;

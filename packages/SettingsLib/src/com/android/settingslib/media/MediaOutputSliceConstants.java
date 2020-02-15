@@ -32,6 +32,16 @@ public class MediaOutputSliceConstants {
     public static final String KEY_REMOTE_MEDIA = "remote_media";
 
     /**
+     * Key for the {@link android.media.session.MediaSession.Token}.
+     */
+    public static final String KEY_MEDIA_SESSION_TOKEN = "key_media_session_token";
+
+    /**
+     * Key for the {@link android.media.RoutingSessionInfo#getId()}
+     */
+    public static final String KEY_SESSION_INFO_ID = "key_session_info_id";
+
+    /**
      * Activity Action: Show a settings dialog containing {@link MediaDevice} to transfer media.
      */
     public static final String ACTION_MEDIA_OUTPUT =

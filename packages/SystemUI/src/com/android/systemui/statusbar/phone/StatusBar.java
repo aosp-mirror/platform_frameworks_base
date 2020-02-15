@@ -163,7 +163,6 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
-import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -1353,6 +1352,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .statusBarWindowView(mNotificationShadeWindowView).build();
         mNotificationShadeWindowViewController = statusBarComponent
                 .getNotificationShadeWindowViewController();
+        mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowViewController.setupExpandedStatusBar();
         mStatusBarWindowController = statusBarComponent.getStatusBarWindowController();
         mPhoneStatusBarWindow = mSuperStatusBarViewFactory.getStatusBarWindowView();
@@ -1408,8 +1408,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!mRecentsOptional.isPresent()) {
             return false;
         }
-        int dockSide = WindowManagerProxy.getInstance().getDockSide();
-        if (dockSide == WindowManager.DOCKED_INVALID) {
+        Divider divider = null;
+        if (mDividerOptional.isPresent()) {
+            divider = mDividerOptional.get();
+        }
+        if (divider == null || !divider.inSplitMode()) {
             final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(mDisplayId);
             if (navbarPos == NAV_BAR_POS_INVALID) {
                 return false;
@@ -1419,16 +1422,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                     : SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
             return mRecentsOptional.get().splitPrimaryTask(createMode, null, metricsDockAction);
         } else {
-            if (mDividerOptional.isPresent()) {
-                Divider divider = mDividerOptional.get();
-                if (divider.isMinimized() && !divider.isHomeStackResizable()) {
-                    // Undocking from the minimized state is not supported
-                    return false;
-                } else {
-                    divider.onUndockingTask();
-                    if (metricsUndockAction != -1) {
-                        mMetricsLogger.action(metricsUndockAction);
-                    }
+            if (divider.isMinimized() && !divider.isHomeStackResizable()) {
+                // Undocking from the minimized state is not supported
+                return false;
+            } else {
+                divider.onUndockingTask();
+                if (metricsUndockAction != -1) {
+                    mMetricsLogger.action(metricsUndockAction);
                 }
             }
         }
@@ -2466,10 +2466,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             pw.println("  mHeadsUpManager: null");
         }
 
-        if (mBubbleController != null) {
-            mBubbleController.dump(fd, pw, args);
-        }
-
         if (mLightBarController != null) {
             mLightBarController.dump(fd, pw, args);
         }
@@ -2571,7 +2567,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             try {
                 result = ActivityTaskManager.getService().startActivityAsUser(
-                        null, mContext.getBasePackageName(),
+                        null, mContext.getBasePackageName(), mContext.getFeatureId(),
                         intent,
                         intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                         null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,

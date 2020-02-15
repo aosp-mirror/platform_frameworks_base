@@ -34,6 +34,7 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -2150,16 +2151,38 @@ public class UserManager {
         return isUserUnlocked(user.getIdentifier());
     }
 
+    private static final String CACHE_KEY_IS_USER_UNLOCKED_PROPERTY =
+            "cache_key.is_user_unlocked";
+
+    private final PropertyInvalidatedCache<Integer, Boolean> mIsUserUnlockedCache =
+            new PropertyInvalidatedCache<Integer, Boolean>(
+                32, CACHE_KEY_IS_USER_UNLOCKED_PROPERTY) {
+                @Override
+                protected Boolean recompute(Integer query) {
+                    try {
+                        return mService.isUserUnlocked(query);
+                    } catch (RemoteException re) {
+                        throw re.rethrowFromSystemServer();
+                    }
+                }
+            };
+
     /** {@hide} */
     @UnsupportedAppUsage
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isUserUnlocked(@UserIdInt int userId) {
-        try {
-            return mService.isUserUnlocked(userId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return mIsUserUnlockedCache.query(userId);
+    }
+
+    /** {@hide} */
+    public void disableIsUserUnlockedCache() {
+        mIsUserUnlockedCache.disableLocal();
+    }
+
+    /** {@hide} */
+    public static final void invalidateIsUserUnlockedCache() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_IS_USER_UNLOCKED_PROPERTY);
     }
 
     /**
@@ -2325,10 +2348,12 @@ public class UserManager {
      * @param restrictionKey the string key representing the restriction
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      */
+    @TestApi
     @UnsupportedAppUsage
-    @RequiresPermission(Manifest.permission.MANAGE_USERS)
-    public boolean hasBaseUserRestriction(@UserRestrictionKey String restrictionKey,
-            UserHandle userHandle) {
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    public boolean hasBaseUserRestriction(@UserRestrictionKey @NonNull String restrictionKey,
+            @NonNull UserHandle userHandle) {
         try {
             return mService.hasBaseUserRestriction(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
