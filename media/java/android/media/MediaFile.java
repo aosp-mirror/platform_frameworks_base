@@ -26,6 +26,7 @@ import android.mtp.MtpConstants;
 import libcore.content.type.MimeMap;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * MediaScanner helper class.
@@ -215,23 +216,23 @@ public class MediaFile {
             return true;
         }
 
-        switch (normalizedMimeType) {
+        switch (normalizedMimeType.toLowerCase(Locale.ROOT)) {
             case "application/epub+zip":
             case "application/msword":
             case "application/pdf":
             case "application/rtf":
             case "application/vnd.ms-excel":
-            case "application/vnd.ms-excel.addin.macroEnabled.12":
-            case "application/vnd.ms-excel.sheet.binary.macroEnabled.12":
-            case "application/vnd.ms-excel.sheet.macroEnabled.12":
-            case "application/vnd.ms-excel.template.macroEnabled.12":
+            case "application/vnd.ms-excel.addin.macroenabled.12":
+            case "application/vnd.ms-excel.sheet.binary.macroenabled.12":
+            case "application/vnd.ms-excel.sheet.macroenabled.12":
+            case "application/vnd.ms-excel.template.macroenabled.12":
             case "application/vnd.ms-powerpoint":
-            case "application/vnd.ms-powerpoint.addin.macroEnabled.12":
-            case "application/vnd.ms-powerpoint.presentation.macroEnabled.12":
-            case "application/vnd.ms-powerpoint.slideshow.macroEnabled.12":
-            case "application/vnd.ms-powerpoint.template.macroEnabled.12":
-            case "application/vnd.ms-word.document.macroEnabled.12":
-            case "application/vnd.ms-word.template.macroEnabled.12":
+            case "application/vnd.ms-powerpoint.addin.macroenabled.12":
+            case "application/vnd.ms-powerpoint.presentation.macroenabled.12":
+            case "application/vnd.ms-powerpoint.slideshow.macroenabled.12":
+            case "application/vnd.ms-powerpoint.template.macroenabled.12":
+            case "application/vnd.ms-word.document.macroenabled.12":
+            case "application/vnd.ms-word.template.macroenabled.12":
             case "application/vnd.oasis.opendocument.chart":
             case "application/vnd.oasis.opendocument.database":
             case "application/vnd.oasis.opendocument.formula":
