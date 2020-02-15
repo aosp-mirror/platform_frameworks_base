@@ -37,6 +37,7 @@ import android.content.pm.parsing.PackageImpl;
 import android.content.pm.parsing.ParsingPackage;
 import android.os.Build;
 import android.os.Process;
+import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -57,6 +58,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+@Presubmit
 @RunWith(JUnit4.class)
 public class AppsFilterTest {
 
@@ -314,7 +316,8 @@ public class AppsFilterTest {
                 b -> b.setSigningDetails(frameworkSigningDetails));
         PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
                 DUMMY_TARGET_UID,
-                b -> b.setSigningDetails(frameworkSigningDetails));
+                b -> b.setSigningDetails(frameworkSigningDetails)
+                        .setPkgFlags(ApplicationInfo.FLAG_SYSTEM));
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkg("com.some.other.package"), DUMMY_CALLING_UID,
                 b -> b.setSigningDetails(otherSigningDetails));
