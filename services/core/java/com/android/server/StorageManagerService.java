@@ -28,6 +28,10 @@ import static android.app.AppOpsManager.OP_MANAGE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_REQUEST_INSTALL_PACKAGES;
 import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
@@ -136,6 +140,7 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.AppFuseMount;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.FuseUnavailableMountException;
@@ -149,6 +154,7 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.Installer;
 import com.android.server.storage.AppFuseBridge;
 import com.android.server.storage.StorageSessionController;
@@ -184,6 +190,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -269,6 +276,11 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public void onStopUser(int userHandle) {
             mStorageManagerService.onStopUser(userHandle);
+        }
+
+        @Override
+        public void onStartUser(TargetUser user) {
+            mStorageManagerService.snapshotAndMonitorLegacyStorageAppOp(user.getUserHandle());
         }
     }
 
@@ -577,6 +589,12 @@ class StorageManagerService extends IStorageManager.Stub
     private final StorageSessionController mStorageSessionController;
 
     private final boolean mIsFuseEnabled;
+
+    @GuardedBy("mLock")
+    private final Set<Integer> mUidsWithLegacyExternalStorage = new ArraySet<>();
+    // Not guarded by lock, always used on the ActivityManager thread
+    private final Map<Integer, PackageMonitor> mPackageMonitorsForUser = new ArrayMap<>();
+
 
     class ObbState implements IBinder.DeathRecipient {
         public ObbState(String rawPath, String canonicalPath, int callingUid,
@@ -1144,6 +1162,10 @@ class StorageManagerService extends IStorageManager.Stub
             mStorageSessionController.onUserStopping(userId);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
+        }
+        PackageMonitor monitor = mPackageMonitorsForUser.remove(userId);
+        if (monitor != null) {
+            monitor.unregister();
         }
     }
 
@@ -1834,6 +1856,49 @@ class StorageManagerService extends IStorageManager.Stub
             mIAppOpsService.startWatchingMode(OP_LEGACY_STORAGE, null, mAppOpsCallback);
         } catch (RemoteException e) {
         }
+    }
+
+    private void updateLegacyStorageApps(String packageName, int uid, boolean hasLegacy) {
+        synchronized (mLock) {
+            if (hasLegacy) {
+                Slog.v(TAG, "Package " + packageName + " has legacy storage");
+                mUidsWithLegacyExternalStorage.add(uid);
+            } else {
+                // TODO(b/149391976): Handle shared user id. Check if there's any other
+                // installed app with legacy external storage before removing
+                Slog.v(TAG, "Package " + packageName + " does not have legacy storage");
+                mUidsWithLegacyExternalStorage.remove(uid);
+            }
+        }
+    }
+
+    private void snapshotAndMonitorLegacyStorageAppOp(UserHandle user) {
+        int userId = user.getIdentifier();
+
+        // TODO(b/149391976): Use mIAppOpsService.getPackagesForOps instead of iterating below
+        // It should improve performance but the AppOps method doesn't return any app here :(
+        // This operation currently takes about ~20ms on a freshly flashed device
+        for (ApplicationInfo ai : mPmInternal.getInstalledApplications(MATCH_DIRECT_BOOT_AWARE
+                        | MATCH_DIRECT_BOOT_UNAWARE | MATCH_UNINSTALLED_PACKAGES | MATCH_ANY_USER,
+                        userId, Process.myUid())) {
+            try {
+                boolean hasLegacy = mIAppOpsService.checkOperation(OP_LEGACY_STORAGE, ai.uid,
+                        ai.packageName) == MODE_ALLOWED;
+                updateLegacyStorageApps(ai.packageName, ai.uid, hasLegacy);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to check legacy op for package " + ai.packageName, e);
+            }
+        }
+
+        PackageMonitor monitor = new PackageMonitor() {
+                @Override
+                public void onPackageRemoved(String packageName, int uid) {
+                    updateLegacyStorageApps(packageName, uid, false);
+                }
+            };
+        // TODO(b/149391976): Use different handler?
+        monitor.register(mContext, user, true, mHandler);
+        mPackageMonitorsForUser.put(userId, monitor);
     }
 
     private static long getLastAccessTime(AppOpsManager manager,
@@ -4337,6 +4402,13 @@ class StorageManagerService extends IStorageManager.Stub
             mHandler.obtainMessage(H_RESET).sendToTarget();
         }
 
+        @Override
+        public boolean hasLegacyExternalStorage(int uid) {
+            synchronized (mLock) {
+                return mUidsWithLegacyExternalStorage.contains(uid);
+            }
+        }
+
         public boolean hasExternalStorage(int uid, String packageName) {
             // No need to check for system uid. This avoids a deadlock between
             // PackageManagerService and AppOpsService.
@@ -4382,8 +4454,11 @@ class StorageManagerService extends IStorageManager.Stub
                             // volumes, USB OTGs that are rarely mounted. The app will get the
                             // external_storage gid on next organic restart.
                             killAppForOpChange(code, uid, packageName);
-                            return;
                         }
+                        return;
+                    case OP_LEGACY_STORAGE:
+                        updateLegacyStorageApps(packageName, uid, mode == MODE_ALLOWED);
+                        return;
                 }
             }
 

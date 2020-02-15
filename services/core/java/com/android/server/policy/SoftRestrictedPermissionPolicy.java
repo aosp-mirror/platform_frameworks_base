@@ -35,14 +35,17 @@ import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.storage.StorageManagerInternal;
 import android.util.Log;
 
 import com.android.internal.compat.IPlatformCompat;
+import com.android.server.LocalServices;
 
 /**
  * The behavior of soft restricted permissions is different for each permission. This class collects
@@ -107,11 +110,16 @@ public abstract class SoftRestrictedPermissionPolicy {
                 final boolean isWhiteListed;
                 boolean shouldApplyRestriction;
                 final boolean hasRequestedLegacyExternalStorage;
+                final boolean shouldPreserveLegacyExternalStorage;
                 final boolean hasWriteMediaStorageGrantedForUid;
                 final boolean isScopedStorageEnabled;
 
                 if (appInfo != null) {
                     PackageManager pm = context.getPackageManager();
+                    PackageManagerInternal pmInternal =
+                            LocalServices.getService(PackageManagerInternal.class);
+                    StorageManagerInternal smInternal =
+                            LocalServices.getService(StorageManagerInternal.class);
                     int flags = pm.getPermissionFlags(permission, appInfo.packageName, user);
                     isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
                     hasRequestedLegacyExternalStorage = hasUidRequestedLegacyExternalStorage(
@@ -123,12 +131,16 @@ public abstract class SoftRestrictedPermissionPolicy {
                     isScopedStorageEnabled =
                             isChangeEnabledForUid(context, appInfo, user, ENABLE_SCOPED_STORAGE)
                             || isScopedStorageRequired;
+                    shouldPreserveLegacyExternalStorage = pmInternal.getPackage(
+                            appInfo.packageName).hasPreserveLegacyExternalStorage()
+                            && smInternal.hasLegacyExternalStorage(appInfo.uid);
                     shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0
-                            || isScopedStorageRequired;
+                            || (isScopedStorageRequired && !shouldPreserveLegacyExternalStorage);
                 } else {
                     isWhiteListed = false;
                     shouldApplyRestriction = false;
                     hasRequestedLegacyExternalStorage = false;
+                    shouldPreserveLegacyExternalStorage = false;
                     hasWriteMediaStorageGrantedForUid = false;
                     isScopedStorageEnabled = false;
                 }
@@ -150,7 +162,8 @@ public abstract class SoftRestrictedPermissionPolicy {
                     public boolean mayAllowExtraAppOp() {
                         return !shouldApplyRestriction
                                 && (hasRequestedLegacyExternalStorage
-                                        || hasWriteMediaStorageGrantedForUid);
+                                        || hasWriteMediaStorageGrantedForUid
+                                        || shouldPreserveLegacyExternalStorage);
                     }
                     @Override
                     public boolean mayDenyExtraAppOpIfGranted() {
