@@ -2,15 +2,17 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/global_actions_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
   <androidx.constraintlayout.widget.ConstraintLayout
       android:id="@+id/global_actions_grid_root"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="match_parent"
       android:clipChildren="false"
       android:clipToPadding="false"
+      android:paddingBottom="@dimen/global_actions_grid_container_shadow_offset"
       android:layout_marginBottom="@dimen/global_actions_grid_container_negative_shadow_offset">
 
     <com.android.systemui.globalactions.GlobalActionsFlatLayout
@@ -25,65 +27,20 @@
         android:gravity="top | center_horizontal"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:paddingBottom="@dimen/global_actions_grid_container_shadow_offset"
-        android:layout_marginTop="@dimen/global_actions_top_margin"
-        android:layout_marginBottom="@dimen/global_actions_grid_container_negative_shadow_offset">
+        android:layout_marginTop="@dimen/global_actions_top_margin">
       <LinearLayout
-          android:layout_height="wrap_content"
+          android:id="@android:id/list"
           android:layout_width="wrap_content"
-          android:layoutDirection="ltr"
-          android:clipChildren="false"
-          android:clipToPadding="false"
-          android:layout_marginBottom="@dimen/global_actions_grid_container_bottom_margin">
-        <!-- For separated items-->
-        <LinearLayout
-            android:id="@+id/separated_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/global_actions_grid_side_margin"
-            android:layout_marginRight="@dimen/global_actions_grid_side_margin"
-            android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
-            android:paddingRight="@dimen/global_actions_grid_horizontal_padding"
-            android:paddingTop="@dimen/global_actions_grid_vertical_padding"
-            android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:translationZ="@dimen/global_actions_translate"
-            />
-        <!-- Grid of action items -->
-        <com.android.systemui.globalactions.ListGridLayout
-            android:id="@android:id/list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="right"
-            android:layout_marginRight="@dimen/global_actions_grid_side_margin"
-            android:translationZ="@dimen/global_actions_translate"
-            android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
-            android:paddingRight="@dimen/global_actions_grid_horizontal_padding"
-            android:paddingTop="@dimen/global_actions_grid_vertical_padding"
-            android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
-            >
-          <LinearLayout
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:visibility="gone"
-              android:layoutDirection="locale"
-              />
-          <LinearLayout
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:visibility="gone"
-              android:layoutDirection="locale"
-              />
-          <LinearLayout
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:visibility="gone"
-              android:layoutDirection="locale"
-              />
-        </com.android.systemui.globalactions.ListGridLayout>
-      </LinearLayout>
+          android:layout_height="wrap_content"
+          android:layout_marginLeft="@dimen/global_actions_grid_side_margin"
+          android:layout_marginRight="@dimen/global_actions_grid_side_margin"
+          android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
+          android:paddingRight="@dimen/global_actions_grid_horizontal_padding"
+          android:paddingTop="@dimen/global_actions_grid_vertical_padding"
+          android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
+          android:orientation="horizontal"
+          android:gravity="left"
+          android:translationZ="@dimen/global_actions_translate" />
     </com.android.systemui.globalactions.GlobalActionsFlatLayout>
 
     <LinearLayout
@@ -110,8 +67,7 @@
         android:layout_marginLeft="@dimen/global_actions_grid_horizontal_padding"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/global_actions_panel">
-
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@id/global_actions_panel"
+        app:layout_constraintBottom_toBottomOf="parent" />
   </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

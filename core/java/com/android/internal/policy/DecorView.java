@@ -1627,9 +1627,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
         int opacity = PixelFormat.OPAQUE;
         final WindowConfiguration winConfig = getResources().getConfiguration().windowConfiguration;
+        // TODO(b/149585281) remove when root task has the correct bounds for freeform
+        final boolean renderShadowsInCompositor = mWindow.mRenderShadowsInCompositor
+                && winConfig.getWindowingMode() != WINDOWING_MODE_FREEFORM;
         // If we draw shadows in the compositor we don't need to force the surface to be
         // translucent.
-        if (winConfig.hasWindowShadow() && !mWindow.mRenderShadowsInCompositor) {
+        if (winConfig.hasWindowShadow() && !renderShadowsInCompositor) {
             // If the window has a shadow, it must be translucent.
             opacity = PixelFormat.TRANSLUCENT;
         } else{
@@ -2414,16 +2417,18 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     private void updateElevation() {
+        final int windowingMode =
+                getResources().getConfiguration().windowConfiguration.getWindowingMode();
+        final boolean renderShadowsInCompositor = mWindow.mRenderShadowsInCompositor
+                && windowingMode != WINDOWING_MODE_FREEFORM;
         // If rendering shadows in the compositor, don't set an elevation on the view
-        if (mWindow.mRenderShadowsInCompositor) {
+        if (renderShadowsInCompositor) {
             return;
         }
         float elevation = 0;
         final boolean wasAdjustedForStack = mElevationAdjustedForStack;
         // Do not use a shadow when we are in resizing mode (mBackdropFrameRenderer not null)
         // since the shadow is bound to the content size and not the target size.
-        final int windowingMode =
-                getResources().getConfiguration().windowConfiguration.getWindowingMode();
         if ((windowingMode == WINDOWING_MODE_FREEFORM) && !isResizing()) {
             elevation = hasWindowFocus() ?
                     DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;

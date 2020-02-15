@@ -31,8 +31,16 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A media route discovery preference describing the kinds of routes that media router
+ * A media route discovery preference describing the features of routes that media router
  * would like to discover and whether to perform active scanning.
+ * <p>
+ * When {@link MediaRouter2} instances set discovery preferences by calling
+ * {@link MediaRouter2#registerRouteCallback}, they are merged into a single discovery preference
+ * and it is delivered to call {@link MediaRoute2ProviderService#onDiscoveryPreferenceChanged}.
+ * </p><p>
+ * According to the given discovery preference, {@link MediaRoute2ProviderService} discovers
+ * routes and publishes them.
+ * </p>
  *
  * @see MediaRouter2#registerRouteCallback
  */
@@ -53,12 +61,12 @@ public final class RouteDiscoveryPreference implements Parcelable {
 
     @NonNull
     private final List<String> mPreferredFeatures;
-    private final boolean mActiveScan;
+    private final boolean mShouldPerformActiveScan;
     @Nullable
     private final Bundle mExtras;
 
     /**
-     * An empty discovery preference.
+     * An empty discovery preference
      * @hide
      */
     public static final RouteDiscoveryPreference EMPTY =
@@ -66,23 +74,39 @@ public final class RouteDiscoveryPreference implements Parcelable {
 
     RouteDiscoveryPreference(@NonNull Builder builder) {
         mPreferredFeatures = builder.mPreferredFeatures;
-        mActiveScan = builder.mActiveScan;
+        mShouldPerformActiveScan = builder.mActiveScan;
         mExtras = builder.mExtras;
     }
 
     RouteDiscoveryPreference(@NonNull Parcel in) {
         mPreferredFeatures = in.createStringArrayList();
-        mActiveScan = in.readBoolean();
+        mShouldPerformActiveScan = in.readBoolean();
         mExtras = in.readBundle();
     }
 
+    /**
+     * Gets the features of routes that media router would like to discover.
+     * <p>
+     * Routes that have at least one of the features will be discovered.
+     * They may include predefined features such as
+     * {@link MediaRoute2Info#FEATURE_LIVE_AUDIO}, {@link MediaRoute2Info#FEATURE_LIVE_VIDEO},
+     * or {@link MediaRoute2Info#FEATURE_REMOTE_PLAYBACK} or custom features defined by a provider.
+     * </p>
+     */
     @NonNull
     public List<String> getPreferredFeatures() {
         return mPreferredFeatures;
     }
 
-    public boolean isActiveScan() {
-        return mActiveScan;
+    /**
+     * Gets whether active scanning should be performed.
+     * <p>
+     * If any of discovery preferences sets this as {@code true}, active scanning will
+     * be performed regardless of other discovery preferences.
+     * </p>
+     */
+    public boolean shouldPerformActiveScan() {
+        return mShouldPerformActiveScan;
     }
 
     /**
@@ -100,7 +124,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStringList(mPreferredFeatures);
-        dest.writeBoolean(mActiveScan);
+        dest.writeBoolean(mShouldPerformActiveScan);
         dest.writeBundle(mExtras);
     }
 
@@ -112,7 +136,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
                 .append(String.join(", ", mPreferredFeatures))
                 .append("}")
                 .append(", activeScan=")
-                .append(mActiveScan)
+                .append(mShouldPerformActiveScan)
                 .append(" }");
 
         return result.toString();
@@ -128,12 +152,12 @@ public final class RouteDiscoveryPreference implements Parcelable {
         }
         RouteDiscoveryPreference other = (RouteDiscoveryPreference) o;
         return Objects.equals(mPreferredFeatures, other.mPreferredFeatures)
-                && mActiveScan == other.mActiveScan;
+                && mShouldPerformActiveScan == other.mShouldPerformActiveScan;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mPreferredFeatures, mActiveScan);
+        return Objects.hash(mPreferredFeatures, mShouldPerformActiveScan);
     }
 
     /**
@@ -154,12 +178,12 @@ public final class RouteDiscoveryPreference implements Parcelable {
             Objects.requireNonNull(preference, "preference must not be null");
 
             mPreferredFeatures = preference.getPreferredFeatures();
-            mActiveScan = preference.isActiveScan();
+            mActiveScan = preference.shouldPerformActiveScan();
             mExtras = preference.getExtras();
         }
 
         /**
-         * A constructor to combine all of the preferences into a single preference .
+         * A constructor to combine all of the preferences into a single preference.
          * It ignores extras of preferences.
          *
          * @hide
@@ -171,13 +195,19 @@ public final class RouteDiscoveryPreference implements Parcelable {
             mActiveScan = false;
             for (RouteDiscoveryPreference preference : preferences) {
                 routeFeatureSet.addAll(preference.mPreferredFeatures);
-                mActiveScan |= preference.mActiveScan;
+                mActiveScan |= preference.mShouldPerformActiveScan;
             }
             mPreferredFeatures = new ArrayList<>(routeFeatureSet);
         }
 
         /**
          * Sets preferred route features to discover.
+         * @param preferredFeatures features of routes that media router would like to discover.
+         *                          May include predefined features
+         *                          such as {@link MediaRoute2Info#FEATURE_LIVE_AUDIO},
+         *                          {@link MediaRoute2Info#FEATURE_LIVE_VIDEO},
+         *                          or {@link MediaRoute2Info#FEATURE_REMOTE_PLAYBACK}
+         *                          or custom features defined by a provider.
          */
         @NonNull
         public Builder setPreferredFeatures(@NonNull List<String> preferredFeatures) {
@@ -188,9 +218,13 @@ public final class RouteDiscoveryPreference implements Parcelable {
 
         /**
          * Sets if active scanning should be performed.
+         * <p>
+         * Since active scanning uses more system resources, set this as {@code true} only
+         * when it's necessary.
+         * </p>
          */
         @NonNull
-        public Builder setActiveScan(boolean activeScan) {
+        public Builder setShouldPerformActiveScan(boolean activeScan) {
             mActiveScan = activeScan;
             return this;
         }

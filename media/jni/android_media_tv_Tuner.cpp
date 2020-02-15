@@ -32,6 +32,7 @@ using ::android::hardware::hidl_vec;
 using ::android::hardware::tv::tuner::V1_0::DataFormat;
 using ::android::hardware::tv::tuner::V1_0::DemuxAlpFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxAlpFilterType;
+using ::android::hardware::tv::tuner::V1_0::DemuxAlpLengthType;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterAvSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterDownloadSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
@@ -40,6 +41,7 @@ using ::android::hardware::tv::tuner::V1_0::DemuxFilterRecordSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterSectionBits;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterSectionSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxIpAddress;
 using ::android::hardware::tv::tuner::V1_0::DemuxIpFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxIpFilterType;
 using ::android::hardware::tv::tuner::V1_0::DemuxMmtpFilterSettings;
@@ -128,6 +130,9 @@ struct fields_t {
 };
 
 static fields_t gFields;
+
+static int IP_V4_LENGTH = 4;
+static int IP_V6_LENGTH = 16;
 
 namespace android {
 /////////////// LnbCallback ///////////////////////
@@ -1509,12 +1514,67 @@ static DemuxFilterDownloadSettings getFilterDownloadSettings(JNIEnv *env, const 
     return filterDownloadSettings;
 }
 
+static DemuxIpAddress getDemuxIpAddress(JNIEnv *env, const jobject& config) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/IpFilterConfiguration");
+
+    jbyteArray jsrcIpAddress = static_cast<jbyteArray>(
+            env->GetObjectField(config, env->GetFieldID(clazz, "mSrcIpAddress", "[B")));
+    jsize srcSize = env->GetArrayLength(jsrcIpAddress);
+    jbyteArray jdstIpAddress = static_cast<jbyteArray>(
+            env->GetObjectField(config, env->GetFieldID(clazz, "mDstIpAddress", "[B")));
+    jsize dstSize = env->GetArrayLength(jdstIpAddress);
+
+    DemuxIpAddress res;
+
+    if (srcSize != dstSize) {
+        // should never happen. Validated on Java size.
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+            "IP address lengths don't match. srcLength=%d, dstLength=%d", srcSize, dstSize);
+        return res;
+    }
+
+    if (srcSize == IP_V4_LENGTH) {
+        uint8_t srcAddr[IP_V4_LENGTH];
+        uint8_t dstAddr[IP_V4_LENGTH];
+        env->GetByteArrayRegion(
+                jsrcIpAddress, 0, srcSize, reinterpret_cast<jbyte*>(srcAddr));
+        env->GetByteArrayRegion(
+                jdstIpAddress, 0, dstSize, reinterpret_cast<jbyte*>(dstAddr));
+        res.srcIpAddress.v4(srcAddr);
+        res.dstIpAddress.v4(dstAddr);
+    } else if (srcSize == IP_V6_LENGTH) {
+        uint8_t srcAddr[IP_V6_LENGTH];
+        uint8_t dstAddr[IP_V6_LENGTH];
+        env->GetByteArrayRegion(
+                jsrcIpAddress, 0, srcSize, reinterpret_cast<jbyte*>(srcAddr));
+        env->GetByteArrayRegion(
+                jdstIpAddress, 0, dstSize, reinterpret_cast<jbyte*>(dstAddr));
+        res.srcIpAddress.v6(srcAddr);
+        res.dstIpAddress.v6(dstAddr);
+    } else {
+        // should never happen. Validated on Java size.
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+            "Invalid IP address length %d", srcSize);
+        return res;
+    }
+
+    uint16_t srcPort = static_cast<uint16_t>(
+            env->GetIntField(config, env->GetFieldID(clazz, "mSrcPort", "I")));
+    uint16_t dstPort = static_cast<uint16_t>(
+            env->GetIntField(config, env->GetFieldID(clazz, "mDstPort", "I")));
+
+    res.srcPort = srcPort;
+    res.dstPort = dstPort;
+
+    return res;
+}
+
 static DemuxFilterSettings getFilterConfiguration(
-        JNIEnv *env, int type, int subtype, jobject filterSettingsObj) {
+        JNIEnv *env, int type, int subtype, jobject filterConfigObj) {
     DemuxFilterSettings filterSettings;
     jobject settingsObj =
             env->GetObjectField(
-                    filterSettingsObj,
+                    filterConfigObj,
                     env->GetFieldID(
                             env->FindClass("android/media/tv/tuner/filter/FilterConfiguration"),
                             "mSettings",
@@ -1523,9 +1583,10 @@ static DemuxFilterSettings getFilterConfiguration(
     switch (mainType) {
         case DemuxFilterMainType::TS: {
             jclass clazz = env->FindClass("android/media/tv/tuner/filter/TsFilterConfiguration");
-            int tpid = env->GetIntField(filterSettingsObj, env->GetFieldID(clazz, "mTpid", "I"));
+            uint16_t tpid = static_cast<uint16_t>(
+                    env->GetIntField(filterConfigObj, env->GetFieldID(clazz, "mTpid", "I")));
             DemuxTsFilterSettings tsFilterSettings {
-                .tpid = static_cast<uint16_t>(tpid),
+                .tpid = tpid,
             };
 
             DemuxTsFilterType tsType = static_cast<DemuxTsFilterType>(subtype);
@@ -1553,7 +1614,12 @@ static DemuxFilterSettings getFilterConfiguration(
             break;
         }
         case DemuxFilterMainType::MMTP: {
-            DemuxMmtpFilterSettings mmtpFilterSettings;
+            jclass clazz = env->FindClass("android/media/tv/tuner/filter/MmtpFilterConfiguration");
+            uint16_t mmtpPid = static_cast<uint16_t>(
+                    env->GetIntField(filterConfigObj, env->GetFieldID(clazz, "mMmtpPid", "I")));
+            DemuxMmtpFilterSettings mmtpFilterSettings {
+                .mmtpPid = mmtpPid,
+            };
             DemuxMmtpFilterType mmtpType = static_cast<DemuxMmtpFilterType>(subtype);
             switch (mmtpType) {
                 case DemuxMmtpFilterType::SECTION:
@@ -1583,43 +1649,79 @@ static DemuxFilterSettings getFilterConfiguration(
             break;
         }
         case DemuxFilterMainType::IP: {
-            DemuxIpFilterSettings ipFilterSettings;
+            DemuxIpAddress ipAddr = getDemuxIpAddress(env, filterConfigObj);
+
+            DemuxIpFilterSettings ipFilterSettings {
+                .ipAddr = ipAddr,
+            };
             DemuxIpFilterType ipType = static_cast<DemuxIpFilterType>(subtype);
             switch (ipType) {
-                case DemuxIpFilterType::SECTION:
+                case DemuxIpFilterType::SECTION: {
                     ipFilterSettings.filterSettings.section(
                             getFilterSectionSettings(env, settingsObj));
                     break;
-                case DemuxIpFilterType::IP:
-                    // TODO: handle passthrough
-                    ipFilterSettings.filterSettings.bPassthrough(false);
+                }
+                case DemuxIpFilterType::IP: {
+                    jclass clazz = env->FindClass(
+                            "android/media/tv/tuner/filter/IpFilterConfiguration");
+                    bool bPassthrough = static_cast<bool>(
+                            env->GetBooleanField(
+                                    filterConfigObj, env->GetFieldID(
+                                            clazz, "mPassthrough", "Z")));
+                    ipFilterSettings.filterSettings.bPassthrough(bPassthrough);
                     break;
-                default:
+                }
+                default: {
                     break;
+                }
             }
             filterSettings.ip(ipFilterSettings);
             break;
         }
         case DemuxFilterMainType::TLV: {
-            DemuxTlvFilterSettings tlvFilterSettings;
+            jclass clazz = env->FindClass("android/media/tv/tuner/filter/TlvFilterConfiguration");
+            uint8_t packetType = static_cast<uint8_t>(
+                    env->GetIntField(filterConfigObj, env->GetFieldID(clazz, "mPacketType", "I")));
+            bool isCompressedIpPacket = static_cast<bool>(
+                    env->GetBooleanField(
+                            filterConfigObj, env->GetFieldID(clazz, "mIsCompressedIpPacket", "Z")));
+
+            DemuxTlvFilterSettings tlvFilterSettings {
+                .packetType = packetType,
+                .isCompressedIpPacket = isCompressedIpPacket,
+            };
             DemuxTlvFilterType tlvType = static_cast<DemuxTlvFilterType>(subtype);
             switch (tlvType) {
-                case DemuxTlvFilterType::SECTION:
+                case DemuxTlvFilterType::SECTION: {
                     tlvFilterSettings.filterSettings.section(
                             getFilterSectionSettings(env, settingsObj));
                     break;
-                case DemuxTlvFilterType::TLV:
-                    // TODO: handle passthrough
-                    tlvFilterSettings.filterSettings.bPassthrough(false);
+                }
+                case DemuxTlvFilterType::TLV: {
+                    bool bPassthrough = static_cast<bool>(
+                            env->GetBooleanField(
+                                    filterConfigObj, env->GetFieldID(
+                                            clazz, "mPassthrough", "Z")));
+                    tlvFilterSettings.filterSettings.bPassthrough(bPassthrough);
                     break;
-                default:
+                }
+                default: {
                     break;
+                }
             }
             filterSettings.tlv(tlvFilterSettings);
             break;
         }
         case DemuxFilterMainType::ALP: {
-            DemuxAlpFilterSettings alpFilterSettings;
+            jclass clazz = env->FindClass("android/media/tv/tuner/filter/AlpFilterConfiguration");
+            uint8_t packetType = static_cast<uint8_t>(
+                    env->GetIntField(filterConfigObj, env->GetFieldID(clazz, "mPacketType", "I")));
+            DemuxAlpLengthType lengthType = static_cast<DemuxAlpLengthType>(
+                    env->GetIntField(filterConfigObj, env->GetFieldID(clazz, "mLengthType", "I")));
+            DemuxAlpFilterSettings alpFilterSettings {
+                .packetType = packetType,
+                .lengthType = lengthType,
+            };
             DemuxAlpFilterType alpType = static_cast<DemuxAlpFilterType>(subtype);
             switch (alpType) {
                 case DemuxAlpFilterType::SECTION:

@@ -42,9 +42,7 @@ cc_library_shared {
         "android_util_StringBlock.cpp",
         "android_util_XmlBlock.cpp",
         "android_util_jar_StrictJarFile.cpp",
-        "android_view_RenderNodeAnimator.cpp",
         "com_android_internal_util_VirtualRefBasePtr.cpp",
-        "com_android_internal_view_animation_NativeInterpolatorFactoryHelper.cpp",
     ],
 
     include_dirs: [
@@ -351,6 +349,8 @@ cc_library_static {
         "android/graphics/apex/android_paint.cpp",
         "android/graphics/apex/android_region.cpp",
 
+        "android_graphics_animation_NativeInterpolatorFactory.cpp",
+        "android_graphics_animation_RenderNodeAnimator.cpp",
         "android_graphics_Canvas.cpp",
         "android_graphics_ColorSpace.cpp",
         "android_graphics_drawable_AnimatedVectorDrawable.cpp",

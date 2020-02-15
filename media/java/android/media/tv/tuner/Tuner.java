@@ -532,6 +532,8 @@ public class Tuner implements AutoCloseable  {
         Filter filter = nativeOpenFilter(
                 mainType, TunerUtils.getFilterSubtype(mainType, subType), bufferSize);
         if (filter != null) {
+            filter.setMainType(mainType);
+            filter.setSubtype(subType);
             filter.setCallback(cb);
             if (mHandler == null) {
                 mHandler = createEventHandler();
@@ -610,10 +612,10 @@ public class Tuner implements AutoCloseable  {
      *
      * @return  a {@link Descrambler} object.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER)
     @Nullable
     public Descrambler openDescrambler() {
-        TunerUtils.checkTunerPermission(mContext);
+        TunerUtils.checkDescramblerPermission(mContext);
         return nativeOpenDescrambler();
     }
 

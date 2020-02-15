@@ -17,14 +17,15 @@
 package com.android.systemui.controls.ui
 
 import android.content.Context
+import android.graphics.BlendMode
 import android.graphics.drawable.ClipDrawable
-import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.TemperatureControlTemplate
+import android.service.controls.templates.ThumbnailTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
 import android.view.View
@@ -41,7 +42,8 @@ private const val UPDATE_DELAY_IN_MILLIS = 3000L
 class ControlViewHolder(
     val layout: ViewGroup,
     val controlsController: ControlsController,
-    val uiExecutor: DelayableExecutor
+    val uiExecutor: DelayableExecutor,
+    val bgExecutor: DelayableExecutor
 ) {
     val icon: ImageView = layout.requireViewById(R.id.icon)
     val status: TextView = layout.requireViewById(R.id.status)
@@ -50,7 +52,6 @@ class ControlViewHolder(
     val subtitle: TextView = layout.requireViewById(R.id.subtitle)
     val context: Context = layout.getContext()
     val clipLayer: ClipDrawable
-    val gd: GradientDrawable
     lateinit var cws: ControlWithState
     var cancelUpdate: Runnable? = null
 
@@ -58,7 +59,6 @@ class ControlViewHolder(
         val ld = layout.getBackground() as LayerDrawable
         ld.mutate()
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer) as ClipDrawable
-        gd = clipLayer.getDrawable() as GradientDrawable
     }
 
     fun bindData(cws: ControlWithState) {
@@ -121,6 +121,7 @@ class ControlViewHolder(
             template is ToggleTemplate -> ToggleBehavior()
             template is ToggleRangeTemplate -> ToggleRangeBehavior()
             template is TemperatureControlTemplate -> TemperatureControlBehavior()
+            template is ThumbnailTemplate -> StaticBehavior(uiExecutor, bgExecutor)
             else -> {
                 object : Behavior {
                     override fun apply(cvh: ControlViewHolder, cws: ControlWithState) {
@@ -141,9 +142,9 @@ class ControlViewHolder(
         icon.setImageIcon(Icon.createWithResource(context, ri.iconResourceId))
         icon.setImageTintList(fg)
 
-        gd.setColor(bg)
+        clipLayer.getDrawable().setTintBlendMode(BlendMode.HUE)
+        clipLayer.getDrawable().setTintList(bg)
     }
-
     fun setEnabled(enabled: Boolean) {
         status.setEnabled(enabled)
         icon.setEnabled(enabled)

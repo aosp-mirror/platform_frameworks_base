@@ -2908,6 +2908,7 @@
   <java-symbol type="string" name="status_bar_microphone" />
   <java-symbol type="string" name="status_bar_camera" />
   <java-symbol type="string" name="status_bar_sensors_off" />
+  <java-symbol type="string" name="status_bar_screen_record" />
 
   <!-- Locale picker -->
   <java-symbol type="id" name="locale_search_menu" />
@@ -3902,4 +3903,6 @@
 
   <!-- Whether to expand the lock screen user switcher by default -->
   <java-symbol type="bool" name="config_expandLockScreenUserSwitcher" />
+
+  <java-symbol type="string" name="loading" />
 </resources>

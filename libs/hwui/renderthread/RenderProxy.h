@@ -140,6 +140,10 @@ public:
      */
     ANDROID_API void setRenderAheadDepth(int renderAhead);
 
+    // TODO: This api will need to take in an ANativeWindow instead, but the
+    // caller, ThreadedRenderer, doesn't have access to libandroid due to a
+    // circular dependency, so it can't use the JNI ANativeWindow methods. Once
+    // that is resolved then replace the surface type here.
     ANDROID_API static int copySurfaceInto(sp<Surface>& surface, int left, int top, int right,
                                            int bottom, SkBitmap* bitmap);
     ANDROID_API static void prepareToDraw(Bitmap& bitmap);

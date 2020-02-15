@@ -16,6 +16,8 @@
 
 package android.location;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Binder;
@@ -62,20 +64,24 @@ abstract class AbstractListenerManager<TRequest, TListener> {
         }
 
         private void execute(Consumer<TListener> operation) {
-            mExecutor.execute(() -> {
-                TListener listener = mListener;
-                if (listener == null) {
-                    return;
-                }
+            mExecutor.execute(
+                    obtainRunnable(Registration<TRequest, TListener>::accept, this, operation)
+                            .recycleOnUse());
+        }
 
-                // we may be under the binder identity if a direct executor is used
-                long identity = Binder.clearCallingIdentity();
-                try {
-                    operation.accept(listener);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            });
+        private void accept(Consumer<TListener> operation) {
+            TListener listener = mListener;
+            if (listener == null) {
+                return;
+            }
+
+            // we may be under the binder identity if a direct executor is used
+            long identity = Binder.clearCallingIdentity();
+            try {
+                operation.accept(listener);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 

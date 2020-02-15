@@ -146,7 +146,8 @@ final class RemoteAugmentedAutofillService
             @Nullable AutofillValue focusedValue,
             @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
             @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback,
-            @NonNull Runnable onErrorCallback) {
+            @NonNull Runnable onErrorCallback,
+            @NonNull RemoteInlineSuggestionRenderService remoteRenderService) {
         long requestTime = SystemClock.elapsedRealtime();
         AtomicReference<ICancellationSignal> cancellationRef = new AtomicReference<>();
 
@@ -168,7 +169,7 @@ final class RemoteAugmentedAutofillService
                                     maybeRequestShowInlineSuggestions(sessionId,
                                             inlineSuggestionsRequest, inlineSuggestionsData,
                                             focusedId, inlineSuggestionsCallback, client,
-                                            onErrorCallback);
+                                            onErrorCallback, remoteRenderService);
                                     requestAutofill.complete(null);
                                 }
 
@@ -234,7 +235,8 @@ final class RemoteAugmentedAutofillService
             @Nullable InlineSuggestionsRequest request, @Nullable Dataset[] inlineSuggestionsData,
             @NonNull AutofillId focusedId,
             @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback,
-            @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback) {
+            @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback,
+            @NonNull RemoteInlineSuggestionRenderService remoteRenderService) {
         if (ArrayUtils.isEmpty(inlineSuggestionsData) || inlineSuggestionsCallback == null
                 || request == null) {
             return;
@@ -254,7 +256,7 @@ final class RemoteAugmentedAutofillService
                                 } catch (RemoteException e) {
                                     Slog.w(TAG, "Encounter exception autofilling the values");
                                 }
-                            }, onErrorCallback));
+                            }, onErrorCallback, remoteRenderService));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception sending inline suggestions response back to IME.");
         }

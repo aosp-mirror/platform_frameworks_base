@@ -121,7 +121,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * The display manager service relies on a collection of {@link DisplayAdapter} components,
  * for discovering and configuring physical display devices attached to the system.
  * There are separate display adapters for each manner that devices are attached:
- * one display adapter for built-in local displays, one for simulated non-functional
+ * one display adapter for physical displays, one for simulated non-functional
  * displays when the system is headless, one for simulated overlay displays used for
  * development, one for wifi displays, etc.
  * </p><p>
@@ -231,7 +231,7 @@ public final class DisplayManagerService extends SystemService {
     private int mGlobalDisplayState = Display.STATE_ON;
 
     // The overall display brightness.
-    // For now, this only applies to the built-in display but we may split it up eventually.
+    // For now, this only applies to the default display but we may split it up eventually.
     private float mGlobalDisplayBrightness;
 
     // Set to true when there are pending display changes that have yet to be applied

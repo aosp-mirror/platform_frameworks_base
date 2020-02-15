@@ -7824,9 +7824,7 @@ public class AppOpsManager {
      * @hide
      */
     public static boolean isCollectingNotedAppOps() {
-        synchronized (sLock) {
-            return sNotedAppOpsCollector != null;
-        }
+        return sNotedAppOpsCollector != null;
     }
 
     /**

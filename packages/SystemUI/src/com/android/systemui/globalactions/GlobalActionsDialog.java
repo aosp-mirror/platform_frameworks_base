@@ -64,12 +64,12 @@ import android.util.ArraySet;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -88,13 +88,13 @@ import com.android.internal.util.ScreenRecordHelper;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.view.RotationPolicy;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.MultiListLayout;
 import com.android.systemui.MultiListLayout.MultiListAdapter;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.controls.ui.ControlsUiController;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
@@ -110,6 +110,7 @@ import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolat
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -155,6 +156,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ContentResolver mContentResolver;
     private final Resources mResources;
+    private final ConfigurationController mConfigurationController;
     private final UserManager mUserManager;
     private final TrustManager mTrustManager;
     private final IActivityManager mIActivityManager;
@@ -186,6 +188,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private GlobalActionsPanelPlugin mPanelPlugin;
     private ControlsUiController mControlsUiController;
+    private final IWindowManager mIWindowManager;
+    private final Executor mBackgroundExecutor;
 
     /**
      * @param context everything needs a context :(
@@ -204,7 +208,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             BlurUtils blurUtils, SysuiColorExtractor colorExtractor,
             IStatusBarService statusBarService,
             NotificationShadeWindowController notificationShadeWindowController,
-            ControlsUiController controlsUiController) {
+            ControlsUiController controlsUiController, IWindowManager iWindowManager,
+            @Background Executor backgroundExecutor) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -215,6 +220,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mBroadcastDispatcher = broadcastDispatcher;
         mContentResolver = contentResolver;
         mResources = resources;
+        mConfigurationController = configurationController;
         mUserManager = userManager;
         mTrustManager = trustManager;
         mIActivityManager = iActivityManager;
@@ -225,6 +231,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mStatusBarService = statusBarService;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mControlsUiController = controlsUiController;
+        mIWindowManager = iWindowManager;
+        mBackgroundExecutor = backgroundExecutor;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -249,7 +257,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mScreenshotHelper = new ScreenshotHelper(context);
         mScreenRecordHelper = new ScreenRecordHelper(context);
 
-        configurationController.addCallback(this);
+        mConfigurationController.addCallback(this);
 
         mActivityStarter = activityStarter;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
@@ -335,45 +343,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         } else {
             mSilentModeAction = new SilentModeTriStateAction(mAudioManager, mHandler);
         }
-        mAirplaneModeOn = new ToggleAction(
-                R.drawable.ic_lock_airplane_mode,
-                R.drawable.ic_lock_airplane_mode_off,
-                R.string.global_actions_toggle_airplane_mode,
-                R.string.global_actions_airplane_mode_on_status,
-                R.string.global_actions_airplane_mode_off_status) {
-
-            void onToggle(boolean on) {
-                if (mHasTelephony && TelephonyProperties.in_ecm_mode().orElse(false)) {
-                    mIsWaitingForEcmExit = true;
-                    // Launch ECM exit dialog
-                    Intent ecmDialogIntent =
-                            new Intent(TelephonyManager.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, null);
-                    ecmDialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(ecmDialogIntent);
-                } else {
-                    changeAirplaneModeSystemSetting(on);
-                }
-            }
-
-            @Override
-            protected void changeStateFromPress(boolean buttonOn) {
-                if (!mHasTelephony) return;
-
-                // In ECM mode airplane state cannot be changed
-                if (!TelephonyProperties.in_ecm_mode().orElse(false)) {
-                    mState = buttonOn ? State.TurningOn : State.TurningOff;
-                    mAirplaneState = mState;
-                }
-            }
-
-            public boolean showDuringKeyguard() {
-                return true;
-            }
-
-            public boolean showBeforeProvisioning() {
-                return false;
-            }
-        };
+        mAirplaneModeOn = new AirplaneModeAction();
         onAirplaneModeChanged();
 
         mItems = new ArrayList<Action>();
@@ -495,7 +465,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     public void destroy() {
-        Dependency.get(ConfigurationController.class).removeCallback(this);
+        mConfigurationController.removeCallback(this);
     }
 
     private final class PowerAction extends SinglePressAction implements LongPressAction {
@@ -537,7 +507,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public boolean shouldBeSeparated() {
-            return !shouldShowControls();
+            return true;
         }
 
         @Override
@@ -836,14 +806,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
             @Override
             public void onPress() {
-                new LockPatternUtils(mContext)
-                        .requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
-                                UserHandle.USER_ALL);
+                mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
+                        UserHandle.USER_ALL);
                 try {
-                    WindowManagerGlobal.getWindowManagerService().lockNow(null);
+                    mIWindowManager.lockNow(null);
                     // Lock profiles (if any) on the background thread.
-                    final Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
-                    bgHandler.post(() -> lockProfiles());
+                    mBackgroundExecutor.execute(() -> lockProfiles());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error while trying to lock device.", e);
                 }
@@ -1333,6 +1301,48 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
+    private class AirplaneModeAction extends ToggleAction {
+        AirplaneModeAction() {
+            super(
+                R.drawable.ic_lock_airplane_mode,
+                R.drawable.ic_lock_airplane_mode_off,
+                R.string.global_actions_toggle_airplane_mode,
+                R.string.global_actions_airplane_mode_on_status,
+                R.string.global_actions_airplane_mode_off_status);
+        }
+        void onToggle(boolean on) {
+            if (mHasTelephony && TelephonyProperties.in_ecm_mode().orElse(false)) {
+                mIsWaitingForEcmExit = true;
+                // Launch ECM exit dialog
+                Intent ecmDialogIntent =
+                        new Intent(TelephonyManager.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, null);
+                ecmDialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivity(ecmDialogIntent);
+            } else {
+                changeAirplaneModeSystemSetting(on);
+            }
+        }
+
+        @Override
+        protected void changeStateFromPress(boolean buttonOn) {
+            if (!mHasTelephony) return;
+
+            // In ECM mode airplane state cannot be changed
+            if (!TelephonyProperties.in_ecm_mode().orElse(false)) {
+                mState = buttonOn ? State.TurningOn : State.TurningOff;
+                mAirplaneState = mState;
+            }
+        }
+
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        public boolean showBeforeProvisioning() {
+            return false;
+        }
+    }
+
     private class SilentModeToggleAction extends ToggleAction {
         public SilentModeToggleAction() {
             super(R.drawable.ic_audio_vol_mute,
@@ -1555,6 +1565,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private ControlsUiController mControlsUiController;
         private ViewGroup mControlsView;
+        private ViewGroup mContainerView;
 
         ActionsDialog(Context context, MyAdapter adapter,
                 GlobalActionsPanelPlugin.PanelViewController plugin, BlurUtils blurUtils,
@@ -1672,6 +1683,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mScrimAlpha = ScrimController.BUSY_SCRIM_ALPHA;
             }
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
+
+            if (mControlsView != null) {
+                mContainerView = findViewById(com.android.systemui.R.id.global_actions_container);
+                mContainerView.setOnTouchListener((v, e) -> {
+                    dismiss();
+                    return true;
+                });
+            }
         }
 
         private void fixNavBarClipping() {
@@ -1892,14 +1911,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     private static boolean isForceGridEnabled(Context context) {
         return isPanelDebugModeEnabled(context);
-    }
-
-
-    /**
-     * Determines whether the Global Actions menu should use a separated view for emergency actions.
-     */
-    private static boolean shouldUseSeparatedView() {
-        return true;
     }
 
     private boolean shouldShowControls() {

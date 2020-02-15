@@ -802,7 +802,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             newRollback = getRollbackForSessionLocked(packageSession.getSessionId());
             if (newRollback == null) {
                 newRollback = createNewRollbackLocked(parentSession);
-                mRollbacks.add(newRollback);
             }
         }
         newRollback.addToken(token);
@@ -1002,11 +1001,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
 
-            Rollback rollback = completeEnableRollback(newRollback);
-            if (rollback == null) {
+            if (!completeEnableRollback(newRollback)) {
                 result.offer(-1);
             } else {
-                result.offer(rollback.info.getRollbackId());
+                result.offer(newRollback.info.getRollbackId());
             }
         });
 
@@ -1158,19 +1156,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 Rollback rollback;
                 synchronized (mLock) {
                     rollback = getRollbackForSessionLocked(sessionId);
-                    if (rollback == null || rollback.isStaged() || !rollback.isEnabling()
-                            || !rollback.notifySessionWithSuccess()) {
-                        return;
-                    }
-                    // All child sessions finished with success. We can enable this rollback now.
-                    // TODO: refactor #completeEnableRollback so we won't remove 'rollback' from
-                    // mRollbacks here and add it back in #completeEnableRollback later.
-                    mRollbacks.remove(rollback);
                 }
-                // TODO: Now #completeEnableRollback returns the same rollback object as the
-                // parameter on success. It would be more readable to return a boolean to indicate
-                // success or failure.
-                if (completeEnableRollback(rollback) != null) {
+                if (rollback != null && !rollback.isStaged() && rollback.isEnabling()
+                        && rollback.notifySessionWithSuccess()
+                        && completeEnableRollback(rollback)) {
                     makeRollbackAvailable(rollback);
                 }
             } else {
@@ -1188,13 +1177,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     /**
-     * Add a rollback to the list of rollbacks. It does not make the rollback available yet.
+     * Persist a rollback as enable-completed. It does not make the rollback available yet.
+     * This rollback will be deleted and removed from {@link #mRollbacks} should any error happens.
      *
-     * @return the Rollback instance for a successfully enable-completed rollback,
-     * or null on error.
+     * @return {code true} if {code rollback} is successfully enable-completed,
+     * or {code false} otherwise.
      */
     @WorkerThread
-    private Rollback completeEnableRollback(Rollback rollback) {
+    private boolean completeEnableRollback(Rollback rollback) {
         if (LOCAL_LOGV) {
             Slog.v(TAG, "completeEnableRollback id=" + rollback.info.getRollbackId());
         }
@@ -1205,26 +1195,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // rollback for the embedded apk-in-apex, if any.
         if (!rollback.allPackagesEnabled()) {
             Slog.e(TAG, "Failed to enable rollback for all packages in session.");
+            mRollbacks.remove(rollback);
             rollback.delete(mAppDataRollbackHelper);
-            return null;
+            return false;
         }
 
+        // Note: There is a small window of time between when
+        // the session has been committed by the package
+        // manager and when we make the rollback available
+        // here. Presumably the window is small enough that
+        // nobody will want to roll back the newly installed
+        // package before we make the rollback available.
+        // TODO: We'll lose the rollback if the
+        // device reboots between when the session is
+        // committed and this point. Revisit this after
+        // adding support for rollback of staged installs.
         rollback.saveRollback();
-        synchronized (mLock) {
-            // Note: There is a small window of time between when
-            // the session has been committed by the package
-            // manager and when we make the rollback available
-            // here. Presumably the window is small enough that
-            // nobody will want to roll back the newly installed
-            // package before we make the rollback available.
-            // TODO: We'll lose the rollback if the
-            // device reboots between when the session is
-            // committed and this point. Revisit this after
-            // adding support for rollback of staged installs.
-            mRollbacks.add(rollback);
-        }
 
-        return rollback;
+        return true;
     }
 
     @WorkerThread
@@ -1304,6 +1292,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
     }
 
+    /**
+     * Creates and returns a Rollback according to the given SessionInfo
+     * and adds it to {@link #mRollbacks}.
+     */
     @WorkerThread
     @GuardedBy("mLock")
     private Rollback createNewRollbackLocked(PackageInstaller.SessionInfo parentSession) {
@@ -1338,6 +1330,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     installerPackageName, packageSessionIds);
         }
 
+        mRollbacks.add(rollback);
         return rollback;
     }
 

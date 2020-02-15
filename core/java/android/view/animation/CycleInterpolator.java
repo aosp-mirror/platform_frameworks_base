@@ -20,12 +20,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.animation.HasNativeInterpolator;
+import android.graphics.animation.NativeInterpolator;
+import android.graphics.animation.NativeInterpolatorFactory;
 import android.util.AttributeSet;
 
 import com.android.internal.R;
-import com.android.internal.view.animation.HasNativeInterpolator;
-import com.android.internal.view.animation.NativeInterpolatorFactory;
-import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
 
 /**
  * Repeats the animation for a specified number of cycles. The
@@ -33,7 +33,7 @@ import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
  *
  */
 @HasNativeInterpolator
-public class CycleInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
+public class CycleInterpolator extends BaseInterpolator implements NativeInterpolator {
     public CycleInterpolator(float cycles) {
         mCycles = cycles;
     }
@@ -65,6 +65,6 @@ public class CycleInterpolator extends BaseInterpolator implements NativeInterpo
     /** @hide */
     @Override
     public long createNativeInterpolator() {
-        return NativeInterpolatorFactoryHelper.createCycleInterpolator(mCycles);
+        return NativeInterpolatorFactory.createCycleInterpolator(mCycles);
     }
 }

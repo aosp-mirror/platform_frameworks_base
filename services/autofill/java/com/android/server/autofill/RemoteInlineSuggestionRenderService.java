@@ -36,7 +36,10 @@ import android.util.Slog;
 
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 
-final class RemoteInlineSuggestionRenderService extends
+/**
+ * Remote service to help connect to InlineSuggestionRenderService in ExtServices.
+ */
+public final class RemoteInlineSuggestionRenderService extends
         AbstractMultiplePendingRequestsRemoteService<RemoteInlineSuggestionRenderService,
                 IInlineSuggestionRenderService> {
 
@@ -81,9 +84,11 @@ final class RemoteInlineSuggestionRenderService extends
      * Called by {@link Session} to generate a call to the
      * {@link RemoteInlineSuggestionRenderService} to request rendering a slice .
      */
-    void renderSuggestion(@NonNull IInlineSuggestionUiCallback callback,
-            @NonNull InlinePresentation presentation, int width, int height) {
-        scheduleAsyncRequest((s) -> s.renderSuggestion(callback, presentation, width, height));
+    public void renderSuggestion(@NonNull IInlineSuggestionUiCallback callback,
+            @NonNull InlinePresentation presentation, int width, int height,
+            @Nullable IBinder hostInputToken) {
+        scheduleAsyncRequest(
+                (s) -> s.renderSuggestion(callback, presentation, width, height, hostInputToken));
     }
 
     @Nullable

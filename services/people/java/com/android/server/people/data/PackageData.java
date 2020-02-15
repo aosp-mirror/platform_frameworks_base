@@ -16,6 +16,12 @@
 
 package com.android.server.people.data;
 
+import static com.android.server.people.data.EventStore.CATEGORY_CALL;
+import static com.android.server.people.data.EventStore.CATEGORY_CLASS_BASED;
+import static com.android.server.people.data.EventStore.CATEGORY_LOCUS_ID_BASED;
+import static com.android.server.people.data.EventStore.CATEGORY_SHORTCUT_BASED;
+import static com.android.server.people.data.EventStore.CATEGORY_SMS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -89,11 +95,6 @@ public class PackageData {
         mConversationStore.forAllConversations(consumer);
     }
 
-    @NonNull
-    public EventHistory getPackageLevelEventHistory() {
-        return getEventStore().getPackageEventHistory();
-    }
-
     /**
      * Gets the {@link ConversationInfo} for a given shortcut ID. Returns null if such as {@link
      * ConversationInfo} does not exist.
@@ -117,14 +118,16 @@ public class PackageData {
             return result;
         }
 
-        EventHistory shortcutEventHistory = getEventStore().getShortcutEventHistory(shortcutId);
+        EventHistory shortcutEventHistory = getEventStore().getEventHistory(
+                CATEGORY_SHORTCUT_BASED, shortcutId);
         if (shortcutEventHistory != null) {
             result.addEventHistory(shortcutEventHistory);
         }
 
         LocusId locusId = conversationInfo.getLocusId();
         if (locusId != null) {
-            EventHistory locusEventHistory = getEventStore().getLocusEventHistory(locusId);
+            EventHistory locusEventHistory = getEventStore().getEventHistory(
+                    CATEGORY_LOCUS_ID_BASED, locusId.getId());
             if (locusEventHistory != null) {
                 result.addEventHistory(locusEventHistory);
             }
@@ -135,18 +138,28 @@ public class PackageData {
             return result;
         }
         if (isDefaultDialer()) {
-            EventHistory callEventHistory = getEventStore().getCallEventHistory(phoneNumber);
+            EventHistory callEventHistory = getEventStore().getEventHistory(
+                    CATEGORY_CALL, phoneNumber);
             if (callEventHistory != null) {
                 result.addEventHistory(callEventHistory);
             }
         }
         if (isDefaultSmsApp()) {
-            EventHistory smsEventHistory = getEventStore().getSmsEventHistory(phoneNumber);
+            EventHistory smsEventHistory = getEventStore().getEventHistory(
+                    CATEGORY_SMS, phoneNumber);
             if (smsEventHistory != null) {
                 result.addEventHistory(smsEventHistory);
             }
         }
         return result;
+    }
+
+    /** Gets the {@link EventHistory} for a given Activity class. */
+    @NonNull
+    public EventHistory getClassLevelEventHistory(String className) {
+        EventHistory eventHistory = getEventStore().getEventHistory(
+                CATEGORY_CLASS_BASED, className);
+        return eventHistory != null ? eventHistory : new AggregateEventHistoryImpl();
     }
 
     public boolean isDefaultDialer() {
@@ -165,6 +178,47 @@ public class PackageData {
     @NonNull
     EventStore getEventStore() {
         return mEventStore;
+    }
+
+    /**
+     * Deletes all the data (including conversation, events and index) for the specified
+     * conversation shortcut ID.
+     */
+    void deleteDataForConversation(String shortcutId) {
+        ConversationInfo conversationInfo = mConversationStore.deleteConversation(shortcutId);
+        if (conversationInfo == null) {
+            return;
+        }
+        mEventStore.deleteEventHistory(CATEGORY_SHORTCUT_BASED, shortcutId);
+        if (conversationInfo.getLocusId() != null) {
+            mEventStore.deleteEventHistory(
+                    CATEGORY_LOCUS_ID_BASED, conversationInfo.getLocusId().getId());
+        }
+        String phoneNumber = conversationInfo.getContactPhoneNumber();
+        if (!TextUtils.isEmpty(phoneNumber)) {
+            if (isDefaultDialer()) {
+                mEventStore.deleteEventHistory(CATEGORY_CALL, phoneNumber);
+            }
+            if (isDefaultSmsApp()) {
+                mEventStore.deleteEventHistory(CATEGORY_SMS, phoneNumber);
+            }
+        }
+    }
+
+    /** Prunes the events and index data that don't have a associated conversation. */
+    void pruneOrphanEvents() {
+        mEventStore.pruneOrphanEventHistories(CATEGORY_SHORTCUT_BASED,
+                key -> mConversationStore.getConversation(key) != null);
+        mEventStore.pruneOrphanEventHistories(CATEGORY_LOCUS_ID_BASED,
+                key -> mConversationStore.getConversationByLocusId(new LocusId(key)) != null);
+        if (isDefaultDialer()) {
+            mEventStore.pruneOrphanEventHistories(CATEGORY_CALL,
+                    key -> mConversationStore.getConversationByPhoneNumber(key) != null);
+        }
+        if (isDefaultSmsApp()) {
+            mEventStore.pruneOrphanEventHistories(CATEGORY_SMS,
+                    key -> mConversationStore.getConversationByPhoneNumber(key) != null);
+        }
     }
 
     void onDestroy() {

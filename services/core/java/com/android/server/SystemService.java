@@ -168,6 +168,11 @@ public abstract class SystemService {
         public int getUserIdentifier() {
             return mUserInfo.id;
         }
+
+        @Override
+        public String toString() {
+            return Integer.toString(getUserIdentifier());
+        }
     }
 
     /**

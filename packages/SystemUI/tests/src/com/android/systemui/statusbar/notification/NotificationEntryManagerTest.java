@@ -282,6 +282,9 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 .inflationCallback(any()))
                 .thenReturn(mExpandableNotificationRowComponentBuilder);
         when(mExpandableNotificationRowComponentBuilder
+                .rowContentBindStage(any()))
+                .thenReturn(mExpandableNotificationRowComponentBuilder);
+        when(mExpandableNotificationRowComponentBuilder
                 .onExpandClickListener(any()))
                 .thenReturn(mExpandableNotificationRowComponentBuilder);
 

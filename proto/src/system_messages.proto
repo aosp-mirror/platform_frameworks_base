@@ -248,6 +248,10 @@ message SystemMessage {
     // Package: android
     NOTE_LOCATION_CHANGED = 59;
 
+    // Notify user that a SIM is required to connect to Wifi network
+    // Package: android
+    NOTE_ID_WIFI_SIM_REQUIRED = 60;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

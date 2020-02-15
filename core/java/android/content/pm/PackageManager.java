@@ -1988,10 +1988,11 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device supports a Context Hub.
+     * {@link #hasSystemFeature}: The device supports a Context Hub, used to expose the
+     * functionalities in {@link android.hardware.location.ContextHubManager}.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_CONTEXTHUB = "android.hardware.context_hub";
+    public static final String FEATURE_CONTEXT_HUB = "android.hardware.context_hub";
 
     /** {@hide} */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -3385,6 +3386,14 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_AUTO_REVOKE_USER_SET = 1 << 18;
 
     /**
+     * Permission flag: Whether permission was revoked by auto-revoke.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_AUTO_REVOKED = 1 << 20;
+
+    /**
      * Permission flags: Reserved for use by the permission controller.
      *
      * @hide
@@ -3437,7 +3446,8 @@ public abstract class PackageManager {
             | FLAG_PERMISSION_REVOKED_COMPAT
             | FLAG_PERMISSION_ONE_TIME
             | FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED
-            | FLAG_PERMISSION_AUTO_REVOKE_USER_SET;
+            | FLAG_PERMISSION_AUTO_REVOKE_USER_SET
+            | FLAG_PERMISSION_AUTO_REVOKED;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -4262,7 +4272,8 @@ public abstract class PackageManager {
             FLAG_PERMISSION_REVOKED_COMPAT,
             FLAG_PERMISSION_ONE_TIME,
             FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED,
-            FLAG_PERMISSION_AUTO_REVOKE_USER_SET
+            FLAG_PERMISSION_AUTO_REVOKE_USER_SET,
+            FLAG_PERMISSION_AUTO_REVOKED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
@@ -7401,6 +7412,7 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_ONE_TIME: return "ONE_TIME";
             case FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED: return "AUTO_REVOKE_IF_UNUSED";
             case FLAG_PERMISSION_AUTO_REVOKE_USER_SET: return "AUTO_REVOKE_USER_SET";
+            case FLAG_PERMISSION_AUTO_REVOKED: return "AUTO_REVOKED";
             default: return Integer.toString(flag);
         }
     }

@@ -655,7 +655,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private final GestureExclusionTracker mGestureExclusionTracker = new GestureExclusionTracker();
 
-    private IAccessibilityEmbeddedConnection mEmbeddedConnection;
+    private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
     static final class SystemUiVisibilityInfo {
         int seq;
@@ -9370,11 +9370,12 @@ public final class ViewRootImpl implements ViewParent,
      * Gets an accessibility embedded connection interface for this ViewRootImpl.
      * @hide
      */
-    public IAccessibilityEmbeddedConnection getEmbeddedConnection() {
-        if (mEmbeddedConnection == null) {
-            mEmbeddedConnection = new AccessibilityEmbeddedConnection(ViewRootImpl.this);
+    public IAccessibilityEmbeddedConnection getAccessibilityEmbeddedConnection() {
+        if (mAccessibilityEmbeddedConnection == null) {
+            mAccessibilityEmbeddedConnection = new AccessibilityEmbeddedConnection(
+                    ViewRootImpl.this);
         }
-        return mEmbeddedConnection;
+        return mAccessibilityEmbeddedConnection;
     }
 
     private class SendWindowContentChangedAccessibilityEvent implements Runnable {

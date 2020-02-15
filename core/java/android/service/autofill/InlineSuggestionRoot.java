@@ -14,39 +14,39 @@
  * limitations under the License.
  */
 
-package com.android.server.autofill.ui;
+package android.service.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.RemoteException;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.widget.FrameLayout;
 
-import com.android.server.LocalServices;
-import com.android.server.wm.WindowManagerInternal;
-
 /**
  * This class is the root view for an inline suggestion. It is responsible for
  * detecting the click on the item and to also transfer input focus to the IME
  * window if we detect the user is scrolling.
+ *
+ * @hide
  */
- // TODO(b/146453086) Move to ExtServices and add @SystemApi to transfer touch focus
 @SuppressLint("ViewConstructor")
-class InlineSuggestionRoot extends FrameLayout {
-    private static final String LOG_TAG = InlineSuggestionRoot.class.getSimpleName();
+public class InlineSuggestionRoot extends FrameLayout {
+    private static final String TAG = "InlineSuggestionRoot";
 
-    private final @NonNull Runnable mOnErrorCallback;
+    private final @NonNull IInlineSuggestionUiCallback mCallback;
     private final int mTouchSlop;
 
     private float mDownX;
     private float mDownY;
 
-    InlineSuggestionRoot(@NonNull Context context, @NonNull Runnable onErrorCallback) {
+    public InlineSuggestionRoot(@NonNull Context context,
+            @NonNull IInlineSuggestionUiCallback callback) {
         super(context);
-        mOnErrorCallback = onErrorCallback;
+        mCallback = callback;
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setFocusable(false);
     }
@@ -64,20 +64,15 @@ class InlineSuggestionRoot extends FrameLayout {
                 final float distance = MathUtils.dist(mDownX, mDownY,
                         event.getX(), event.getY());
                 if (distance > mTouchSlop) {
-                    transferTouchFocusToImeWindow();
+                    try {
+                        mCallback.onTransferTouchFocusToImeWindow(getViewRootImpl().getInputToken(),
+                                getContext().getDisplayId());
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "RemoteException transferring touch focus to IME");
+                    }
                 }
             } break;
         }
         return super.onTouchEvent(event);
-    }
-
-    private void transferTouchFocusToImeWindow() {
-        final WindowManagerInternal windowManagerInternal = LocalServices.getService(
-                WindowManagerInternal.class);
-        if (!windowManagerInternal.transferTouchFocusToImeWindow(getViewRootImpl().getInputToken(),
-                getContext().getDisplayId())) {
-            Log.e(LOG_TAG, "Cannot transfer touch focus from suggestion to IME");
-            mOnErrorCallback.run();
-        }
     }
 }

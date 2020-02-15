@@ -566,10 +566,10 @@ android_media_AudioSystem_handleDeviceConfigChange(JNIEnv *env, jobject thiz, ji
     return (jint) status;
 }
 
-static jint
-android_media_AudioSystem_setPhoneState(JNIEnv *env, jobject thiz, jint state)
-{
-    return (jint) check_AudioSystem_Command(AudioSystem::setPhoneState((audio_mode_t) state));
+static jint android_media_AudioSystem_setPhoneState(JNIEnv *env, jobject thiz, jint state,
+                                                    jint uid) {
+    return (jint)check_AudioSystem_Command(
+            AudioSystem::setPhoneState((audio_mode_t)state, (uid_t)uid));
 }
 
 static jint
@@ -2434,7 +2434,7 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_getDeviceConnectionState},
          {"handleDeviceConfigChange", "(ILjava/lang/String;Ljava/lang/String;I)I",
           (void *)android_media_AudioSystem_handleDeviceConfigChange},
-         {"setPhoneState", "(I)I", (void *)android_media_AudioSystem_setPhoneState},
+         {"setPhoneState", "(II)I", (void *)android_media_AudioSystem_setPhoneState},
          {"setForceUse", "(II)I", (void *)android_media_AudioSystem_setForceUse},
          {"getForceUse", "(I)I", (void *)android_media_AudioSystem_getForceUse},
          {"initStreamVolume", "(III)I", (void *)android_media_AudioSystem_initStreamVolume},

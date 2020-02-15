@@ -18,6 +18,7 @@ package com.android.server.systemconfig;
 
 import static org.junit.Assert.assertEquals;
 
+import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -48,8 +49,9 @@ import java.util.Set;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:SystemConfigTest
  */
-@RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
+@RunWith(AndroidJUnit4.class)
 public class SystemConfigTest {
     private static final String LOG_TAG = "SystemConfigTest";
 

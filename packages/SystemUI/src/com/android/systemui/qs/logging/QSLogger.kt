@@ -105,8 +105,8 @@ class QSLogger @Inject constructor(
     fun logTileUpdated(tileSpec: String, state: QSTile.State) {
         log(VERBOSE, {
             str1 = tileSpec
-            str2 = state.label.toString()
-            str3 = state.icon.toString()
+            str2 = state.label?.toString()
+            str3 = state.icon?.toString()
             int1 = state.state
             if (state is QSTile.SignalState) {
                 bool1 = true

@@ -133,10 +133,11 @@ class ConversationStore {
     }
 
     @MainThread
-    synchronized void deleteConversation(@NonNull String shortcutId) {
+    @Nullable
+    synchronized ConversationInfo deleteConversation(@NonNull String shortcutId) {
         ConversationInfo conversationInfo = mConversationInfoMap.remove(shortcutId);
         if (conversationInfo == null) {
-            return;
+            return null;
         }
 
         LocusId locusId = conversationInfo.getLocusId();
@@ -159,6 +160,7 @@ class ConversationStore {
             mNotifChannelIdToShortcutIdMap.remove(notifChannelId);
         }
         scheduleUpdateConversationsOnDisk();
+        return conversationInfo;
     }
 
     synchronized void forAllConversations(@NonNull Consumer<ConversationInfo> consumer) {

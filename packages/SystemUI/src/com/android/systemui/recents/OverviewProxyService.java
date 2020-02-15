@@ -352,6 +352,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             try {
                 Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra(AccessibilityManager.EXTRA_SHORTCUT_TYPE,
+                        AccessibilityManager.ACCESSIBILITY_BUTTON);
                 mContext.startActivityAsUser(intent, UserHandle.CURRENT);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -376,6 +378,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 Insets visibleInsets, int taskId) {
             mScreenshotHelper.provideScreenshot(screenImage, locationInScreen, visibleInsets,
                     taskId, mHandler, null);
+        }
+
+        @Override
+        public void setSplitScreenMinimized(boolean minimized) {
+            Divider divider = mDividerOptional.get();
+            if (divider != null) {
+                divider.setMinimized(minimized);
+            }
         }
 
         private boolean verifyCaller(String reason) {

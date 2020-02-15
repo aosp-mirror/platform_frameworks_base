@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.view.animation;
+package android.graphics.animation;
 
 import android.animation.TimeInterpolator;
 import android.util.TimeUtils;
@@ -26,14 +26,15 @@ import android.view.Choreographer;
  * with {@link HasNativeInterpolator}
  *
  * This implements TimeInterpolator to allow for easier interop with Animators
+ * @hide
  */
 @HasNativeInterpolator
-public class FallbackLUTInterpolator implements NativeInterpolatorFactory, TimeInterpolator {
+public class FallbackLUTInterpolator implements NativeInterpolator, TimeInterpolator {
 
     // If the duration of an animation is more than 300 frames, we cap the sample size to 300.
     private static final int MAX_SAMPLE_POINTS = 300;
     private TimeInterpolator mSourceInterpolator;
-    private final float mLut[];
+    private final float[] mLut;
 
     /**
      * Used to cache the float[] LUT for use across multiple native
@@ -50,7 +51,7 @@ public class FallbackLUTInterpolator implements NativeInterpolatorFactory, TimeI
         // We need 2 frame values as the minimal.
         int numAnimFrames = Math.max(2, (int) Math.ceil(((double) duration) / animIntervalMs));
         numAnimFrames = Math.min(numAnimFrames, MAX_SAMPLE_POINTS);
-        float values[] = new float[numAnimFrames];
+        float[] values = new float[numAnimFrames];
         float lastFrame = numAnimFrames - 1;
         for (int i = 0; i < numAnimFrames; i++) {
             float inValue = i / lastFrame;
@@ -61,7 +62,7 @@ public class FallbackLUTInterpolator implements NativeInterpolatorFactory, TimeI
 
     @Override
     public long createNativeInterpolator() {
-        return NativeInterpolatorFactoryHelper.createLutInterpolator(mLut);
+        return NativeInterpolatorFactory.createLutInterpolator(mLut);
     }
 
     /**
@@ -69,7 +70,7 @@ public class FallbackLUTInterpolator implements NativeInterpolatorFactory, TimeI
      */
     public static long createNativeInterpolator(TimeInterpolator interpolator, long duration) {
         float[] lut = createLUT(interpolator, duration);
-        return NativeInterpolatorFactoryHelper.createLutInterpolator(lut);
+        return NativeInterpolatorFactory.createLutInterpolator(lut);
     }
 
     @Override

@@ -42,6 +42,7 @@ import android.graphics.PixelFormat;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
+import android.graphics.animation.NativeInterpolatorFactory;
 import android.os.Build;
 import android.os.Handler;
 import android.util.ArrayMap;
@@ -54,7 +55,6 @@ import android.util.Property;
 import android.util.TimeUtils;
 import android.view.Choreographer;
 import android.view.NativeVectorDrawableAnimator;
-import android.view.RenderNodeAnimatorSetHelper;
 import android.view.View;
 
 import com.android.internal.R;
@@ -1532,7 +1532,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             long startDelay = extraDelay + animator.getStartDelay();
             TimeInterpolator interpolator = animator.getInterpolator();
             long nativeInterpolator =
-                    RenderNodeAnimatorSetHelper.createNativeInterpolator(interpolator, duration);
+                    NativeInterpolatorFactory.createNativeInterpolator(interpolator, duration);
 
             startDelay *= ValueAnimator.getDurationScale();
             duration *= ValueAnimator.getDurationScale();
@@ -1548,7 +1548,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
          * to the last seen RenderNode target and start right away.
          */
         protected void recordLastSeenTarget(RecordingCanvas canvas) {
-            final RenderNode node = RenderNodeAnimatorSetHelper.getTarget(canvas);
+            final RenderNode node = canvas.mNode;
             mLastSeenTarget = new WeakReference<RenderNode>(node);
             // Add the animator to the list of animators on every draw
             if (mInitialized || mPendingAnimationActions.size() > 0) {

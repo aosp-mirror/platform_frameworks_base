@@ -956,6 +956,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private boolean onAccessibilityLongClick(View v) {
         Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra(AccessibilityManager.EXTRA_SHORTCUT_TYPE,
+                AccessibilityManager.ACCESSIBILITY_BUTTON);
         v.getContext().startActivityAsUser(intent, UserHandle.CURRENT);
         return true;
     }

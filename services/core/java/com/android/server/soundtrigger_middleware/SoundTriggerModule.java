@@ -169,7 +169,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
     }
 
     @Override
-    public synchronized  void serviceDied(long cookie) {
+    public synchronized void serviceDied(long cookie) {
         Log.w(TAG, String.format("Underlying HAL driver died."));
         for (Session session : mActiveSessions) {
             session.moduleDied();
@@ -248,44 +248,77 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
         @Override
         public int loadModel(@NonNull SoundModel model) {
             Log.d(TAG, String.format("loadModel(model=%s)", model));
-            synchronized (SoundTriggerModule.this) {
-                checkValid();
-                if (mNumLoadedModels == mProperties.maxSoundModels) {
-                    throw new RecoverableException(Status.RESOURCE_CONTENTION,
-                            "Maximum number of models loaded.");
+
+            // We must do this outside the lock, to avoid possible deadlocks with the remote process
+            // that provides the audio sessions, which may also be calling into us.
+            SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
+                    mAudioSessionProvider.acquireSession();
+
+            try {
+                synchronized (SoundTriggerModule.this) {
+                    checkValid();
+                    if (mNumLoadedModels == mProperties.maxSoundModels) {
+                        throw new RecoverableException(Status.RESOURCE_CONTENTION,
+                                "Maximum number of models loaded.");
+                    }
+                    Model loadedModel = new Model();
+                    int result = loadedModel.load(model, audioSession);
+                    ++mNumLoadedModels;
+                    return result;
                 }
-                Model loadedModel = new Model();
-                int result = loadedModel.load(model);
-                ++mNumLoadedModels;
-                return result;
+            } catch (Exception e) {
+                // We must do this outside the lock, to avoid possible deadlocks with the remote
+                // process that provides the audio sessions, which may also be calling into us.
+                mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
+                throw e;
             }
         }
 
         @Override
         public int loadPhraseModel(@NonNull PhraseSoundModel model) {
             Log.d(TAG, String.format("loadPhraseModel(model=%s)", model));
-            synchronized (SoundTriggerModule.this) {
-                checkValid();
-                if (mNumLoadedModels == mProperties.maxSoundModels) {
-                    throw new RecoverableException(Status.RESOURCE_CONTENTION,
-                            "Maximum number of models loaded.");
+
+            // We must do this outside the lock, to avoid possible deadlocks with the remote process
+            // that provides the audio sessions, which may also be calling into us.
+            SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
+                    mAudioSessionProvider.acquireSession();
+
+            try {
+                synchronized (SoundTriggerModule.this) {
+                    checkValid();
+                    if (mNumLoadedModels == mProperties.maxSoundModels) {
+                        throw new RecoverableException(Status.RESOURCE_CONTENTION,
+                                "Maximum number of models loaded.");
+                    }
+                    Model loadedModel = new Model();
+                    int result = loadedModel.load(model, audioSession);
+                    ++mNumLoadedModels;
+                    Log.d(TAG, String.format("loadPhraseModel()->%d", result));
+                    return result;
                 }
-                Model loadedModel = new Model();
-                int result = loadedModel.load(model);
-                ++mNumLoadedModels;
-                Log.d(TAG, String.format("loadPhraseModel()->%d", result));
-                return result;
+            } catch (Exception e) {
+                // We must do this outside the lock, to avoid possible deadlocks with the remote
+                // process that provides the audio sessions, which may also be calling into us.
+                mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
+                throw e;
             }
         }
 
         @Override
         public void unloadModel(int modelHandle) {
             Log.d(TAG, String.format("unloadModel(handle=%d)", modelHandle));
+
+            int sessionId;
+
             synchronized (SoundTriggerModule.this) {
                 checkValid();
-                mLoadedModels.get(modelHandle).unload();
+                sessionId = mLoadedModels.get(modelHandle).unload();
                 --mNumLoadedModels;
             }
+
+            // We must do this outside the lock, to avoid possible deadlocks with the remote process
+            // that provides the audio sessions, which may also be calling into us.
+            mAudioSessionProvider.releaseSession(sessionId);
         }
 
         @Override
@@ -413,45 +446,40 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                 SoundTriggerModule.this.notifyAll();
             }
 
-            private int load(@NonNull SoundModel model) {
+            private int load(@NonNull SoundModel model,
+                    SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
                 mModelType = model.type;
+                mSession = audioSession;
                 ISoundTriggerHw.SoundModel hidlModel = ConversionUtil.aidl2hidlSoundModel(model);
 
-                mSession = mAudioSessionProvider.acquireSession();
-                try {
-                    mHandle = mHalService.loadSoundModel(hidlModel, this, 0);
-                } catch (Exception e) {
-                    mAudioSessionProvider.releaseSession(mSession.mSessionHandle);
-                    throw e;
-                }
-
+                mHandle = mHalService.loadSoundModel(hidlModel, this, 0);
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
                 return mHandle;
             }
 
-            private int load(@NonNull PhraseSoundModel model) {
+            private int load(@NonNull PhraseSoundModel model,
+                    SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
                 mModelType = model.common.type;
+                mSession = audioSession;
                 ISoundTriggerHw.PhraseSoundModel hidlModel =
                         ConversionUtil.aidl2hidlPhraseSoundModel(model);
 
-                mSession = mAudioSessionProvider.acquireSession();
-                try {
-                    mHandle = mHalService.loadPhraseSoundModel(hidlModel, this, 0);
-                } catch (Exception e) {
-                    mAudioSessionProvider.releaseSession(mSession.mSessionHandle);
-                    throw e;
-                }
+                mHandle = mHalService.loadPhraseSoundModel(hidlModel, this, 0);
 
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
                 return mHandle;
             }
 
-            private void unload() {
-                mAudioSessionProvider.releaseSession(mSession.mSessionHandle);
+            /**
+             * Unloads the model.
+             * @return The audio session handle.
+             */
+            private int unload() {
                 mHalService.unloadSoundModel(mHandle);
                 mLoadedModels.remove(mHandle);
+                return mSession.mSessionHandle;
             }
 
             private void startRecognition(@NonNull RecognitionConfig config) {

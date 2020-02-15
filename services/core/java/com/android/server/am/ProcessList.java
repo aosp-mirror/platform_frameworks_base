@@ -59,6 +59,8 @@ import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -119,6 +121,7 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
 
+import dalvik.annotation.compat.VersionCodes;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
@@ -326,6 +329,15 @@ public final class ProcessList {
      * How long between a process kill and we actually receive its death recipient
      */
     private static final int PROC_KILL_TIMEOUT = 2000; // 2 seconds;
+
+    /**
+     * Native heap allocations will now have a non-zero tag in the most significant byte.
+     * @see <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged
+     * Pointers</a>
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = VersionCodes.Q)
+    private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
 
     ActivityManagerService mService = null;
 
@@ -1766,6 +1778,13 @@ public final class ProcessList {
             // Property defaults to true currently.
             if (!TextUtils.isEmpty(useAppImageCache) && !useAppImageCache.equals("false")) {
                 runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
+            }
+
+            // Enable heap pointer tagging, unless disabled by the app manifest, target sdk level,
+            // or the compat feature.
+            if (app.info.allowsNativeHeapPointerTagging()
+                    && mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
+                runtimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
             }
 
             String invokeWith = null;

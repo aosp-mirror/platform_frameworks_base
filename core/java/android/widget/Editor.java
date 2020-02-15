@@ -5271,6 +5271,8 @@ public class Editor {
                 if (opacity < 10 || opacity > 100) {
                     opacity = 50;
                 }
+                // Converts the opacity value from range {0..100} to {0..255}.
+                opacity = opacity * 255 / 100;
             }
             mDeltaHeight = deltaHeight;
             mDrawableOpacity = opacity;

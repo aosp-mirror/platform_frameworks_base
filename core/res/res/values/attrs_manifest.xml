@@ -1782,6 +1782,15 @@
 
              The default value is {@code false}. -->
         <attr name="crossProfile" format="boolean" />
+
+        <!-- If {@code true} this app will receive tagged pointers to native heap allocations
+             from functions like malloc() on compatible devices. Note that this may not always
+             be respected due to policy or backwards compatibility reasons. See the
+             <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged Pointers</a>
+             document for more information on this feature.
+
+             The default value is {@code true}. -->
+        <attr name="allowNativeHeapPointerTagging" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>feature</code> tag declares a feature. A feature is a logical part of an app.

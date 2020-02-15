@@ -17,6 +17,7 @@
 package com.android.settingslib.testutils.shadow;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 
@@ -29,6 +30,7 @@ import java.util.List;
 public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBluetoothAdapter {
 
     private List<Integer> mSupportedProfiles;
+    private List<BluetoothDevice> mMostRecentlyConnectedDevices;
     private BluetoothProfile.ServiceListener mServiceListener;
 
     @Implementation
@@ -49,5 +51,14 @@ public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBlueto
 
     public void setSupportedProfiles(List<Integer> supportedProfiles) {
         mSupportedProfiles = supportedProfiles;
+    }
+
+    @Implementation
+    protected List<BluetoothDevice> getMostRecentlyConnectedDevices() {
+        return mMostRecentlyConnectedDevices;
+    }
+
+    public void setMostRecentlyConnectedDevices(List<BluetoothDevice> list) {
+        mMostRecentlyConnectedDevices = list;
     }
 }

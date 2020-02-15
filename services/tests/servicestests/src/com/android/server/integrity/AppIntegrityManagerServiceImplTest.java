@@ -90,7 +90,7 @@ import java.util.Map;
 @RunWith(JUnit4.class)
 public class AppIntegrityManagerServiceImplTest {
     private static final String TEST_APP_PATH =
-            "/data/local/tmp/AppIntegrityManagerServiceTestApp.apk";
+            "AppIntegrityManagerServiceImplTest/AppIntegrityManagerServiceTestApp.apk";
 
     private static final String TEST_APP_TWO_CERT_PATH =
             "AppIntegrityManagerServiceImplTest/DummyAppTwoCerts.apk";
@@ -106,9 +106,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     // These are obtained by running the test and checking logcat.
     private static final String APP_CERT =
-            "301AA3CB081134501C45F1422ABC66C24224FD5DED5FDC8F17E697176FD866AA";
-    private static final String INSTALLER_CERT =
-            "301AA3CB081134501C45F1422ABC66C24224FD5DED5FDC8F17E697176FD866AA";
+            "C8A2E9BCCF597C2FB6DC66BEE293FC13F2FC47EC77BC6B2B0D52C11F51192AB8";
     // We use SHA256 for package names longer than 32 characters.
     private static final String INSTALLER_SHA256 =
             "30F41A7CBF96EE736A54DD6DF759B50ED3CC126ABCEF694E167C324F5976C227";
@@ -149,8 +147,12 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Before
     public void setup() throws Exception {
-        mTestApk = new File(TEST_APP_PATH);
-        mTestApkTwoCerts = File.createTempFile("AppIntegrity", ".apk");
+        mTestApk = File.createTempFile("AppIntegrity", ".apk");
+        try (InputStream inputStream = mRealContext.getAssets().open(TEST_APP_PATH)) {
+            Files.copy(inputStream, mTestApk.toPath(), REPLACE_EXISTING);
+        }
+
+        mTestApkTwoCerts = File.createTempFile("AppIntegrityTwoCerts", ".apk");
         try (InputStream inputStream = mRealContext.getAssets().open(TEST_APP_TWO_CERT_PATH)) {
             Files.copy(inputStream, mTestApkTwoCerts.toPath(), REPLACE_EXISTING);
         }
@@ -174,6 +176,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @After
     public void tearDown() throws Exception {
+        mTestApk.delete();
         mTestApkTwoCerts.delete();
     }
 
@@ -304,7 +307,7 @@ public class AppIntegrityManagerServiceImplTest {
         assertEquals(PACKAGE_NAME, appInstallMetadata.getPackageName());
         assertThat(appInstallMetadata.getAppCertificates()).containsExactly(APP_CERT);
         assertEquals(INSTALLER_SHA256, appInstallMetadata.getInstallerName());
-        assertThat(appInstallMetadata.getInstallerCertificates()).containsExactly(INSTALLER_CERT);
+        // we cannot check installer cert because it seems to be device specific.
         assertEquals(VERSION_CODE, appInstallMetadata.getVersionCode());
         assertFalse(appInstallMetadata.isPreInstalled());
         // These are hardcoded in the test apk android manifest

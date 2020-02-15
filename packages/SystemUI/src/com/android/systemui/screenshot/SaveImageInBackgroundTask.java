@@ -219,11 +219,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mParams.mActionsReadyListener.onActionsReady(null, null, null);
         }
 
-        // Recycle the bitmap data
-        if (image != null) {
-            image.recycle();
-        }
-
         return null;
     }
 

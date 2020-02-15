@@ -34,6 +34,7 @@ import "frameworks/base/core/proto/android/os/system_properties.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
 import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
+import "frameworks/base/core/proto/android/server/bluetooth_manager_service.proto";
 import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/jobscheduler.proto";
 import "frameworks/base/core/proto/android/server/location/context_hub.proto";
@@ -486,6 +487,11 @@ message IncidentProto {
     optional .clearcut.connectivity.IpConnectivityLog ip_connectivity_metrics = 3049 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "connmetrics --proto"
+    ];
+
+    optional com.android.server.BluetoothManagerServiceDumpProto bluetooth_manager = 3050 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "bluetooth_manager --proto"
     ];
 
     optional com.android.server.location.ContextHubServiceProto context_hub = 3051 [

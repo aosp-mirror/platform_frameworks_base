@@ -16,16 +16,16 @@
 
 #include "Readback.h"
 
-#include "pipeline/skia/LayerDrawable.h"
-#include "renderthread/EglManager.h"
-#include "renderthread/VulkanManager.h"
-
-#include <gui/Surface.h>
-#include <ui/Fence.h>
+#include <sync/sync.h>
+#include <system/window.h>
 #include <ui/GraphicBuffer.h>
+
 #include "DeferredLayerUpdater.h"
 #include "Properties.h"
 #include "hwui/Bitmap.h"
+#include "pipeline/skia/LayerDrawable.h"
+#include "renderthread/EglManager.h"
+#include "renderthread/VulkanManager.h"
 #include "utils/Color.h"
 #include "utils/MathUtils.h"
 #include "utils/TraceUtils.h"
@@ -35,40 +35,43 @@ using namespace android::uirenderer::renderthread;
 namespace android {
 namespace uirenderer {
 
-CopyResult Readback::copySurfaceInto(Surface& surface, const Rect& srcRect, SkBitmap* bitmap) {
+CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& srcRect, SkBitmap* bitmap) {
     ATRACE_CALL();
     // Setup the source
-    sp<GraphicBuffer> sourceBuffer;
-    sp<Fence> sourceFence;
+    AHardwareBuffer* rawSourceBuffer;
+    int rawSourceFence;
     Matrix4 texTransform;
-    status_t err = surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence, texTransform.data);
+    status_t err = ANativeWindow_getLastQueuedBuffer(window, &rawSourceBuffer, &rawSourceFence,
+                                                     texTransform.data);
+    base::unique_fd sourceFence(rawSourceFence);
     texTransform.invalidateType();
     if (err != NO_ERROR) {
         ALOGW("Failed to get last queued buffer, error = %d", err);
         return CopyResult::UnknownError;
     }
-    if (!sourceBuffer.get()) {
+    if (rawSourceBuffer == nullptr) {
         ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
         return CopyResult::SourceEmpty;
     }
-    if (sourceBuffer->getUsage() & GRALLOC_USAGE_PROTECTED) {
+
+    std::unique_ptr<AHardwareBuffer, decltype(&AHardwareBuffer_release)> sourceBuffer(
+            rawSourceBuffer, AHardwareBuffer_release);
+    AHardwareBuffer_Desc description;
+    AHardwareBuffer_describe(sourceBuffer.get(), &description);
+    if (description.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT) {
         ALOGW("Surface is protected, unable to copy from it");
         return CopyResult::SourceInvalid;
     }
-    err = sourceFence->wait(500 /* ms */);
-    if (err != NO_ERROR) {
+
+    if (sourceFence != -1 && sync_wait(sourceFence.get(), 500 /* ms */) != NO_ERROR) {
         ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
         return CopyResult::Timeout;
     }
-    if (!sourceBuffer.get()) {
-        return CopyResult::UnknownError;
-    }
 
-    sk_sp<SkColorSpace> colorSpace =
-            DataSpaceToColorSpace(static_cast<android_dataspace>(surface.getBuffersDataSpace()));
-    sk_sp<SkImage> image = SkImage::MakeFromAHardwareBuffer(
-            reinterpret_cast<AHardwareBuffer*>(sourceBuffer.get()),
-            kPremul_SkAlphaType, colorSpace);
+    sk_sp<SkColorSpace> colorSpace = DataSpaceToColorSpace(
+            static_cast<android_dataspace>(ANativeWindow_getBuffersDataSpace(window)));
+    sk_sp<SkImage> image =
+            SkImage::MakeFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, colorSpace);
     return copyImageInto(image, texTransform, srcRect, bitmap);
 }
 

@@ -56,6 +56,7 @@ import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
+import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
@@ -3365,7 +3366,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             return false;
         }
 
-        return permInfo.getProtection() == PROTECTION_DANGEROUS;
+        return permInfo.getProtection() == PROTECTION_DANGEROUS
+                || (permInfo.getProtectionFlags() & PROTECTION_FLAG_APPOP) != 0;
     }
 
     private void verifyIncomingUid(int uid) {

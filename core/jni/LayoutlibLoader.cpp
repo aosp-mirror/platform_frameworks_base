@@ -65,6 +65,8 @@ extern int register_android_graphics_Path(JNIEnv* env);
 extern int register_android_graphics_PathMeasure(JNIEnv* env);
 extern int register_android_graphics_Picture(JNIEnv* env);
 extern int register_android_graphics_Region(JNIEnv* env);
+extern int register_android_graphics_animation_NativeInterpolatorFactory(JNIEnv* env);
+extern int register_android_graphics_animation_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_graphics_drawable_AnimatedVectorDrawable(JNIEnv* env);
 extern int register_android_graphics_drawable_VectorDrawable(JNIEnv* env);
 extern int register_android_graphics_fonts_Font(JNIEnv* env);
@@ -82,10 +84,8 @@ extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_util_jar_StrictJarFile(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
-extern int register_android_view_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
-extern int register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper(JNIEnv *env);
 
 #define REG_JNI(name)      { name }
 struct RegJNIRec {
@@ -130,6 +130,10 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.Region", REG_JNI(register_android_graphics_Region)},
         {"android.graphics.Shader", REG_JNI(register_android_graphics_Shader)},
         {"android.graphics.Typeface", REG_JNI(register_android_graphics_Typeface)},
+        {"android.graphics.animation.NativeInterpolatorFactory",
+         REG_JNI(register_android_graphics_animation_NativeInterpolatorFactory)},
+        {"android.graphics.animation.RenderNodeAnimator",
+         REG_JNI(register_android_graphics_animation_RenderNodeAnimator)},
         {"android.graphics.drawable.AnimatedVectorDrawable",
          REG_JNI(register_android_graphics_drawable_AnimatedVectorDrawable)},
         {"android.graphics.drawable.VectorDrawable",
@@ -151,11 +155,8 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.util.Log", REG_JNI(register_android_util_Log)},
         {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
         {"android.util.jar.StrictJarFile", REG_JNI(register_android_util_jar_StrictJarFile)},
-        {"android.view.RenderNodeAnimator", REG_JNI(register_android_view_RenderNodeAnimator)},
         {"com.android.internal.util.VirtualRefBasePtr",
          REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
-        {"com.android.internal.view.animation.NativeInterpolatorFactoryHelper",
-         REG_JNI(register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper)},
 };
 // Vector to store the names of classes that need delegates of their native methods
 static vector<string> classesToDelegate;

@@ -199,6 +199,7 @@ class Task extends WindowContainer<WindowContainer> {
     static final int INVALID_MIN_SIZE = -1;
     private float mShadowRadius = 0;
     private final Rect mLastSurfaceCrop = new Rect();
+    private static final boolean ENABLE_FREEFORM_COMPOSITOR_SHADOWS = false;
 
     /**
      * The modes to control how the stack is moved to the front when calling {@link Task#reparent}.
@@ -2144,12 +2145,6 @@ class Task extends WindowContainer<WindowContainer> {
                     // For floating tasks, calculate the smallest width from the bounds of the task
                     inOutConfig.smallestScreenWidthDp = (int) (
                             Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
-                } else if (WindowConfiguration.isSplitScreenWindowingMode(windowingMode)) {
-                    // Iterating across all screen orientations, and return the minimum of the task
-                    // width taking into account that the bounds might change because the snap
-                    // algorithm snaps to a different value
-                    inOutConfig.smallestScreenWidthDp =
-                            getSmallestScreenWidthDpForDockedBounds(mTmpFullBounds);
                 }
                 // otherwise, it will just inherit
             }
@@ -2553,8 +2548,10 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private void updateSurfaceCrop() {
+        // TODO(b/149585281) remove when root task has the correct bounds for freeform
         // Only update the crop if we are drawing shadows on the task.
-        if (mSurfaceControl == null || !mWmService.mRenderShadowsInCompositor) {
+        if (mSurfaceControl == null || !mWmService.mRenderShadowsInCompositor
+                || !isRootTask() || !ENABLE_FREEFORM_COMPOSITOR_SHADOWS) {
             return;
         }
 
@@ -2978,8 +2975,14 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
+    void onSurfaceShown(SurfaceControl.Transaction t) {
+        super.onSurfaceShown(t);
+        t.unsetColor(mSurfaceControl);
+    }
+
+    @Override
     SurfaceControl.Builder makeSurface() {
-        return super.makeSurface().setMetadata(METADATA_TASK_ID, mTaskId);
+        return super.makeSurface().setColorLayer().setMetadata(METADATA_TASK_ID, mTaskId);
     }
 
     boolean isTaskAnimating() {
@@ -3246,6 +3249,10 @@ class Task extends WindowContainer<WindowContainer> {
     Task asTask() {
         // I'm a task!
         return this;
+    }
+
+    TaskTile asTile() {
+        return null;
     }
 
     // TODO(task-merge): Figure-out how this should work with hierarchy tasks.
@@ -3934,7 +3941,8 @@ class Task extends WindowContainer<WindowContainer> {
             return dipToPixel(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP,
                     mDisplayContent.getDisplayMetrics());
         }
-        if (inFreeformWindowingMode()) {
+        // TODO(b/149585281) remove when root task has the correct bounds for freeform
+        if (ENABLE_FREEFORM_COMPOSITOR_SHADOWS && inFreeformWindowingMode()) {
             final int elevation = taskIsFocused
                     ? DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
             return dipToPixel(elevation, mDisplayContent.getDisplayMetrics());
@@ -3949,7 +3957,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     private void updateShadowsRadius(boolean taskIsFocused,
             SurfaceControl.Transaction pendingTransaction) {
-        if (!mWmService.mRenderShadowsInCompositor) return;
+        if (!mWmService.mRenderShadowsInCompositor || !isRootTask()) return;
 
         final float newShadowRadius = getShadowRadius(taskIsFocused);
         if (mShadowRadius != newShadowRadius) {

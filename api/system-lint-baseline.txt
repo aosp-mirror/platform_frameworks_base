@@ -206,7 +206,7 @@ MutableBareField: android.net.wifi.WifiConfiguration#macRandomizationSetting:
     
 MutableBareField: android.net.wifi.WifiConfiguration#meteredOverride:
     
-MutableBareField: android.net.wifi.WifiConfiguration#requirePMF:
+MutableBareField: android.net.wifi.WifiConfiguration#requirePmf:
     
 MutableBareField: android.net.wifi.WifiConfiguration#saePasswordId:
     

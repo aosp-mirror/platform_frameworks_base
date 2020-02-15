@@ -16,8 +16,9 @@
 
 package com.android.server.accessibility;
 
-import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE_ID;
+import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE;
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER;
+import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP;
 import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
@@ -39,6 +40,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.graphics.GraphicBuffer;
+import android.graphics.ParcelableColorSpace;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -1021,13 +1023,15 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 final GraphicBuffer graphicBuffer = screenshotBuffer.getGraphicBuffer();
                 final HardwareBuffer hardwareBuffer =
                         HardwareBuffer.createFromGraphicBuffer(graphicBuffer);
-                final int colorSpaceId = screenshotBuffer.getColorSpace().getId();
+                final ParcelableColorSpace colorSpace =
+                        new ParcelableColorSpace(screenshotBuffer.getColorSpace());
 
                 // Send back the result.
                 final Bundle payload = new Bundle();
                 payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
                         hardwareBuffer);
-                payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE_ID, colorSpaceId);
+                payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
+                payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP, SystemClock.uptimeMillis());
                 callback.sendResult(payload);
             }, null).recycleOnUse());
         } finally {

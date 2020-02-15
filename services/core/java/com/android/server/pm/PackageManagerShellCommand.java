@@ -119,6 +119,7 @@ import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -135,7 +136,6 @@ import java.util.concurrent.TimeUnit;
 class PackageManagerShellCommand extends ShellCommand {
     /** Path for streaming APK content */
     private static final String STDIN_PATH = "-";
-    private static final byte[] STDIN_PATH_BYTES = "-".getBytes(StandardCharsets.UTF_8);
     /** Path where ART profiles snapshots are dumped for the shell user */
     private final static String ART_PROFILE_SNAPSHOT_DEBUG_LOCATION = "/data/misc/profman/";
     private static final int DEFAULT_WAIT_MS = 60 * 1000;
@@ -2988,8 +2988,10 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             // 1. Single file from stdin.
             if (args.isEmpty() || STDIN_PATH.equals(args.get(0))) {
-                String name = "base." + (isApex ? "apex" : "apk");
-                session.addFile(LOCATION_DATA_APP, name, sessionSizeBytes, STDIN_PATH_BYTES, null);
+                final String name = "base." + (isApex ? "apex" : "apk");
+                final String metadata = "-" + name;
+                session.addFile(LOCATION_DATA_APP, name, sessionSizeBytes,
+                        metadata.getBytes(StandardCharsets.UTF_8), null);
                 return 0;
             }
 
@@ -2998,24 +3000,58 @@ class PackageManagerShellCommand extends ShellCommand {
 
                 // 2. File with specified size read from stdin.
                 if (delimLocation != -1) {
-                    String name = arg.substring(0, delimLocation);
-                    String sizeStr = arg.substring(delimLocation + 1);
-                    long sizeBytes;
+                    final String[] fileDesc = arg.split(":");
+                    String name = null;
+                    long sizeBytes = -1;
+                    String metadata;
+                    byte[] signature = null;
+
+                    try {
+                        if (fileDesc.length > 0) {
+                            name = fileDesc[0];
+                        }
+                        if (fileDesc.length > 1) {
+                            sizeBytes = Long.parseUnsignedLong(fileDesc[1]);
+                        }
+                        if (fileDesc.length > 2 && !TextUtils.isEmpty(fileDesc[2])) {
+                            metadata = fileDesc[2];
+                        } else {
+                            metadata = name;
+                        }
+                        if (fileDesc.length > 3) {
+                            signature = Base64.getDecoder().decode(fileDesc[3]);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        getErrPrintWriter().println(
+                                "Unable to parse file parameters: " + arg + ", reason: " + e);
+                        return 1;
+                    }
 
                     if (TextUtils.isEmpty(name)) {
                         getErrPrintWriter().println("Empty file name in: " + arg);
                         return 1;
                     }
+
+                    if (signature != null) {
+                        // Streaming/adb mode.
+                        metadata = "+" + metadata;
+                    } else {
+                        // Singleshot read from stdin.
+                        metadata = "-" + metadata;
+                    }
+
                     try {
-                        sizeBytes = Long.parseUnsignedLong(sizeStr);
-                    } catch (NumberFormatException e) {
-                        getErrPrintWriter().println("Unable to parse size from: " + arg);
+                        if (V4Signature.readFrom(signature) == null) {
+                            getErrPrintWriter().println("V4 signature is invalid in: " + arg);
+                            return 1;
+                        }
+                    } catch (Exception e) {
+                        getErrPrintWriter().println("V4 signature is invalid: " + e + " in " + arg);
                         return 1;
                     }
 
-                    // Incremental requires unique metadatas, let's add a name to the dash.
                     session.addFile(LOCATION_DATA_APP, name, sizeBytes,
-                            ("-" + name).getBytes(StandardCharsets.UTF_8), null);
+                            metadata.getBytes(StandardCharsets.UTF_8), signature);
                     continue;
                 }
 

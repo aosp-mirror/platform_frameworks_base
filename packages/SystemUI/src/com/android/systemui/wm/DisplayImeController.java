@@ -48,8 +48,8 @@ import javax.inject.Singleton;
 public class DisplayImeController implements DisplayController.OnDisplaysChangedListener {
     private static final String TAG = "DisplayImeController";
 
-    static final int ANIMATION_DURATION_SHOW_MS = 275;
-    static final int ANIMATION_DURATION_HIDE_MS = 340;
+    public static final int ANIMATION_DURATION_SHOW_MS = 275;
+    public static final int ANIMATION_DURATION_HIDE_MS = 340;
     static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     private static final int DIRECTION_NONE = 0;
     private static final int DIRECTION_SHOW = 1;

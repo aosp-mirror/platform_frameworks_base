@@ -1741,7 +1741,7 @@ public final class SystemServer {
             mSystemServiceManager.startService(SensorNotificationService.class);
             t.traceEnd();
 
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_CONTEXTHUB)) {
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_CONTEXT_HUB)) {
                 t.traceBegin("StartContextHubSystemService");
                 mSystemServiceManager.startService(ContextHubSystemService.class);
                 t.traceEnd();

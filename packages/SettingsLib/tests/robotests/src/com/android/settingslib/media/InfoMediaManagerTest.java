@@ -203,4 +203,46 @@ public class InfoMediaManagerTest {
 
         assertThat(mInfoMediaManager.connectDeviceWithoutPackageName(device)).isFalse();
     }
+
+    @Test
+    public void onRoutesRemoved_getAvailableRoutes_shouldAddMediaDevice() {
+        final MediaRoute2Info info = mock(MediaRoute2Info.class);
+        when(info.getId()).thenReturn(TEST_ID);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        final List<MediaRoute2Info> routes = new ArrayList<>();
+        routes.add(info);
+        when(mRouterManager.getAvailableRoutes(TEST_PACKAGE_NAME)).thenReturn(routes);
+
+        final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
+        assertThat(mediaDevice).isNull();
+
+        mInfoMediaManager.mMediaRouterCallback.onRoutesRemoved(routes);
+
+        final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
+        assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
+        assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(infoDevice);
+        assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
+    }
+
+    @Test
+    public void onRoutesRemoved_buildAllRoutes_shouldAddMediaDevice() {
+        final MediaRoute2Info info = mock(MediaRoute2Info.class);
+        when(info.getId()).thenReturn(TEST_ID);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        final List<MediaRoute2Info> routes = new ArrayList<>();
+        routes.add(info);
+        when(mRouterManager.getAllRoutes()).thenReturn(routes);
+
+        final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
+        assertThat(mediaDevice).isNull();
+
+        mInfoMediaManager.mPackageName = "";
+        mInfoMediaManager.mMediaRouterCallback.onRoutesChanged(routes);
+
+        final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
+        assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
+        assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
+    }
 }

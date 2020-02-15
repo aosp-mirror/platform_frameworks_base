@@ -365,6 +365,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // build a surface.
             setSurfaceControl(makeSurface().build());
             getPendingTransaction().show(mSurfaceControl);
+            onSurfaceShown(getPendingTransaction());
             updateSurfacePosition();
         } else {
             // If we have a surface but a new parent, we just need to perform a reparent. Go through
@@ -381,6 +382,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Either way we need to ask the parent to assign us a Z-order.
         mParent.assignChildLayers();
         scheduleAnimation();
+    }
+
+    /**
+     * Called when the surface is shown for the first time.
+     */
+    void onSurfaceShown(Transaction t) {
+        // do nothing
     }
 
     // Temp. holders for a chain of containers we are currently processing.
@@ -1908,7 +1916,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     @Override
     public Builder makeAnimationLeash() {
-        return makeSurface();
+        return makeSurface().setContainerLayer();
     }
 
     @Override

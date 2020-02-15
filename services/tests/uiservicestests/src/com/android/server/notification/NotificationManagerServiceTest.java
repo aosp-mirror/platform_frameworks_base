@@ -2622,6 +2622,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSystemNotificationListenerCanUnsnooze() throws Exception {
+        final NotificationRecord nr = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testSystemNotificationListenerCanUnsnooze",
+                nr.getSbn().getId(), nr.getSbn().getNotification(),
+                nr.getSbn().getUserId());
+        waitForIdle();
+        NotificationManagerService.SnoozeNotificationRunnable snoozeNotificationRunnable =
+                mService.new SnoozeNotificationRunnable(
+                        nr.getKey(), 100, null);
+        snoozeNotificationRunnable.run();
+
+        ManagedServices.ManagedServiceInfo listener = mListeners.new ManagedServiceInfo(
+                null, new ComponentName(PKG, "test_class"), mUid, true, null, 0);
+        listener.isSystem = true;
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(listener);
+
+        mBinderService.unsnoozeNotificationFromSystemListener(null, nr.getKey());
+        waitForIdle();
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifs.length);
+        assertNotNull(notifs[0].getKey());//mService.getNotificationRecord(nr.getSbn().getKey()));
+    }
+
+    @Test
     public void testSetListenerAccessForUser() throws Exception {
         UserHandle user = UserHandle.of(10);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
