@@ -34,6 +34,7 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
+import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
@@ -52,11 +53,14 @@ import static android.app.AppOpsManager.extractUidStateFromKey;
 import static android.app.AppOpsManager.makeKey;
 import static android.app.AppOpsManager.modeToName;
 import static android.app.AppOpsManager.opToName;
+import static android.app.AppOpsManager.opToPublicName;
 import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
+import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
+import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM;
 
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
@@ -79,6 +83,8 @@ import android.app.AppOpsManager.OpFlags;
 import android.app.AppOpsManagerInternal;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.AsyncNotedAppOp;
+import android.app.RuntimeAppOpAccessMessage;
+import android.app.SyncNotedAppOp;
 import android.compat.Compatibility;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -87,6 +93,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
@@ -137,6 +144,7 @@ import com.android.internal.app.IAppOpsAsyncNotedCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.MessageSamplingConfig;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -147,6 +155,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
+import com.android.server.pm.PackageList;
 
 import libcore.util.EmptyArray;
 
@@ -163,6 +172,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -172,6 +183,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 public class AppOpsService extends IAppOpsService.Stub {
     static final String TAG = "AppOps";
@@ -308,6 +321,34 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private ActivityManagerInternal mActivityManagerInternal;
 
+    /** Package sampled for message collection in the current session */
+    @GuardedBy("this")
+    private String mSampledPackage = null;
+
+    /** Appop sampled for message collection in the current session */
+    @GuardedBy("this")
+    private int mSampledAppOpCode = OP_NONE;
+
+    /** Maximum distance for appop to be considered for message collection in the current session */
+    @GuardedBy("this")
+    private int mAcceptableLeftDistance = 0;
+
+    /** Number of messages collected for sampled package and appop in the current session */
+    @GuardedBy("this")
+    private float mMessagesCollectedCount;
+
+    /** List of rarely used packages priorities for message collection */
+    @GuardedBy("this")
+    private ArraySet<String> mRarelyUsedPackages = new ArraySet<>();
+
+    /** Sampling strategy used for current session */
+    @GuardedBy("this")
+    @AppOpsManager.SamplingStrategy
+    private int mSamplingStrategy;
+
+    /** Last runtime permission access message collected and ready for reporting */
+    @GuardedBy("this")
+    private RuntimeAppOpAccessMessage mCollectedRuntimePermissionMessage;
     /**
      * An unsynchronized pool of {@link OpEventProxyInfo} objects.
      */
@@ -1541,6 +1582,38 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }, packageSuspendFilter);
+
+        final IntentFilter packageAddedFilter = new IntentFilter();
+        packageAddedFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        packageAddedFilter.addDataScheme("package");
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final Uri data = intent.getData();
+
+                final String packageName = data.getSchemeSpecificPart();
+                PackageInfo pi = LocalServices.getService(
+                        PackageManagerInternal.class).getPackageInfo(packageName,
+                        PackageManager.GET_PERMISSIONS, Process.myUid(), mContext.getUserId());
+                if (isSamplingTarget(pi)) {
+                    synchronized (this) {
+                        mRarelyUsedPackages.add(packageName);
+                    }
+                }
+            }
+        }, packageAddedFilter);
+
+        List<String> packageNames = getPackageNamesForSampling();
+        synchronized (this) {
+            resamplePackageAndAppOpLocked(packageNames);
+        }
+
+        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
+            @Override
+            public void run() {
+                initializeRarelyUsedPackagesList(new ArraySet<>(packageNames));
+            }
+        });
 
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
@@ -3036,6 +3109,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 AsyncNotedAppOp asyncNotedOp = new AsyncNotedAppOp(opCode, callingUid,
                         featureId, message, System.currentTimeMillis());
                 final boolean[] wasNoteForwarded = {false};
+
+                reportRuntimeAppOpAccessMessageAsyncLocked(uid, packageName, opCode, featureId,
+                        message);
 
                 if (callbacks != null) {
                     callbacks.broadcast((cb) -> {
@@ -5499,6 +5575,227 @@ public class AppOpsService extends IAppOpsService.Stub {
                 "clearHistory");
         // Must not hold the appops lock
         mHistoricalRegistry.clearHistory();
+    }
+
+    /**
+     * Report runtime access to AppOp together with message (including stack trace)
+     *
+     * @param packageName The package which reported the op
+     * @param notedAppOp contains code of op and featureId provided by developer
+     * @param message Message describing AppOp access (can be stack trace)
+     *
+     * @return Config for future sampling to reduce amount of reporting
+     */
+    @Override
+    public MessageSamplingConfig reportRuntimeAppOpAccessMessageAndGetConfig(
+            String packageName, SyncNotedAppOp notedAppOp, String message) {
+        int uid = Binder.getCallingUid();
+        Objects.requireNonNull(packageName);
+        synchronized (this) {
+            switchPackageIfRarelyUsedLocked(packageName);
+            if (!packageName.equals(mSampledPackage)) {
+                return new MessageSamplingConfig(OP_NONE, 0,
+                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli());
+            }
+
+            Objects.requireNonNull(notedAppOp);
+            Objects.requireNonNull(message);
+
+            reportRuntimeAppOpAccessMessageInternalLocked(uid, packageName,
+                    AppOpsManager.strOpToOp(notedAppOp.getOp()),
+                    notedAppOp.getFeatureId(), message);
+
+            return new MessageSamplingConfig(mSampledAppOpCode, mAcceptableLeftDistance,
+                    Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli());
+        }
+    }
+
+    /**
+     * Report runtime access to AppOp together with message (entry point for reporting
+     * asynchronous access)
+     * @param uid Uid of the package which reported the op
+     * @param packageName The package which reported the op
+     * @param opCode Code of AppOp
+     * @param featureId FeautreId of AppOp reported
+     * @param message Message describing AppOp access (can be stack trace)
+     */
+    private void reportRuntimeAppOpAccessMessageAsyncLocked(int uid,
+            @NonNull String packageName, int opCode, @Nullable String featureId,
+            @NonNull String message) {
+        switchPackageIfRarelyUsedLocked(packageName);
+        if (!Objects.equals(mSampledPackage, packageName)) {
+            return;
+        }
+        reportRuntimeAppOpAccessMessageInternalLocked(uid, packageName, opCode, featureId, message);
+    }
+
+    /**
+     * Decides whether reported message is within the range of watched AppOps and picks it for
+     * reporting uniformly at random across all received messages.
+     */
+    private void reportRuntimeAppOpAccessMessageInternalLocked(int uid,
+            @NonNull String packageName, int opCode, @Nullable String featureId,
+            @NonNull String message) {
+        int newLeftDistance = AppOpsManager.leftCircularDistance(opCode,
+                mSampledAppOpCode, _NUM_OP);
+
+        if (mAcceptableLeftDistance < newLeftDistance) {
+            return;
+        }
+
+        if (mAcceptableLeftDistance > newLeftDistance) {
+            mAcceptableLeftDistance = newLeftDistance;
+            mMessagesCollectedCount = 0.0f;
+        }
+
+        mMessagesCollectedCount += 1.0f;
+        if (ThreadLocalRandom.current().nextFloat() <= 1.0f / mMessagesCollectedCount) {
+            mCollectedRuntimePermissionMessage = new RuntimeAppOpAccessMessage(uid, opCode,
+                    packageName, featureId, message, mSamplingStrategy);
+        }
+        return;
+    }
+
+    /** Pulls current AppOps access report and resamples package and app op to watch */
+    @Override
+    public @Nullable RuntimeAppOpAccessMessage collectRuntimeAppOpAccessMessage() {
+        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
+                Binder.getCallingPid(), Binder.getCallingUid(), null);
+        RuntimeAppOpAccessMessage result;
+        List<String> packageNames = getPackageNamesForSampling();
+        synchronized (this) {
+            result = mCollectedRuntimePermissionMessage;
+            resamplePackageAndAppOpLocked(packageNames);
+        }
+        return result;
+    }
+
+    /**
+     * Checks if package is in the list of rarely used package and starts watching the new package
+     * to collect incoming message.
+     * @param packageName
+     */
+    private void switchPackageIfRarelyUsedLocked(@NonNull String packageName) {
+        if (mRarelyUsedPackages.contains(packageName)) {
+            mRarelyUsedPackages.remove(packageName);
+            if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
+                mSamplingStrategy = RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
+                resampleAppOpForPackageLocked(packageName);
+            }
+        }
+    }
+
+    /** Resamples package and appop to watch from the list provided. */
+    private void resamplePackageAndAppOpLocked(@NonNull List<String> packageNames) {
+        if (!packageNames.isEmpty()) {
+            mSamplingStrategy = RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM;
+            resampleAppOpForPackageLocked(packageNames.get(
+                    ThreadLocalRandom.current().nextInt(packageNames.size())));
+        }
+    }
+
+    /** Resamples appop for the chosen package and initializes sampling state */
+    private void resampleAppOpForPackageLocked(@NonNull String packageName) {
+        mMessagesCollectedCount = 0.0f;
+        mSampledAppOpCode = ThreadLocalRandom.current().nextInt(_NUM_OP);
+        mAcceptableLeftDistance = _NUM_OP;
+        mSampledPackage = packageName;
+        mCollectedRuntimePermissionMessage = null;
+    }
+
+    /**
+     * Creates list of rarely used packages - packages which were not used over last week or
+     * which declared but did not use permissions over last week.
+     *  */
+    private void initializeRarelyUsedPackagesList(@NonNull ArraySet<String> candidates) {
+        AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+        List<String> runtimeAppOpsList = getRuntimeAppOpsList();
+        AppOpsManager.HistoricalOpsRequest histOpsRequest =
+                new AppOpsManager.HistoricalOpsRequest.Builder(
+                        Instant.now().minus(7, ChronoUnit.DAYS).toEpochMilli(),
+                        Long.MAX_VALUE).setOpNames(runtimeAppOpsList).setFlags(
+                        OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED).build();
+        appOps.getHistoricalOps(histOpsRequest, AsyncTask.THREAD_POOL_EXECUTOR,
+                new Consumer<HistoricalOps>() {
+                    @Override
+                    public void accept(HistoricalOps histOps) {
+                        int uidCount = histOps.getUidCount();
+                        for (int uidIdx = 0; uidIdx < uidCount; uidIdx++) {
+                            final AppOpsManager.HistoricalUidOps uidOps = histOps.getUidOpsAt(
+                                    uidIdx);
+                            int pkgCount = uidOps.getPackageCount();
+                            for (int pkgIdx = 0; pkgIdx < pkgCount; pkgIdx++) {
+                                String packageName = uidOps.getPackageOpsAt(
+                                        pkgIdx).getPackageName();
+                                if (!candidates.contains(packageName)) {
+                                    continue;
+                                }
+                                AppOpsManager.HistoricalPackageOps packageOps =
+                                        uidOps.getPackageOpsAt(pkgIdx);
+                                if (packageOps.getOpCount() != 0) {
+                                    candidates.remove(packageName);
+                                }
+                            }
+                        }
+                        synchronized (this) {
+                            mRarelyUsedPackages = candidates;
+                        }
+                    }
+                });
+    }
+
+    /** List of app ops related to runtime permissions */
+    private List<String> getRuntimeAppOpsList() {
+        ArrayList<String> result = new ArrayList();
+        for (int i = 0; i < _NUM_OP; i++) {
+            if (shouldCollectNotes(i)) {
+                result.add(opToPublicName(i));
+            }
+        }
+        return result;
+    }
+
+    /** Returns list of packages to be used for package sampling */
+    private @NonNull List<String> getPackageNamesForSampling() {
+        List<String> packageNames = new ArrayList<>();
+        PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        PackageList packages = packageManagerInternal.getPackageList();
+        for (String packageName : packages.getPackageNames()) {
+            PackageInfo pkg = packageManagerInternal.getPackageInfo(packageName,
+                    PackageManager.GET_PERMISSIONS, Process.myUid(), mContext.getUserId());
+            if (isSamplingTarget(pkg)) {
+                packageNames.add(pkg.packageName);
+            }
+        }
+        return packageNames;
+    }
+
+    /** Checks whether package should be included in sampling pool */
+    private boolean isSamplingTarget(@Nullable PackageInfo pkg) {
+        if (pkg == null) {
+            return false;
+        }
+        if (pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.Q) {
+            return false;
+        }
+
+        String[] requestedPermissions = pkg.requestedPermissions;
+        if (requestedPermissions == null) {
+            return false;
+        }
+        for (String permission : requestedPermissions) {
+            PermissionInfo permissionInfo;
+            try {
+                permissionInfo = mContext.getPackageManager().getPermissionInfo(permission, 0);
+            } catch (PackageManager.NameNotFoundException ignored) {
+                continue;
+            }
+            if (permissionInfo.getProtection() == PROTECTION_DANGEROUS) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void removeUidsForUserLocked(int userHandle) {
