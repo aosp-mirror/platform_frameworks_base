@@ -6767,7 +6767,7 @@ public class Intent implements Parcelable, Cloneable {
                     this.mClipData = new ClipData(o.mClipData);
                 }
             } else {
-                if (o.mExtras != null && !o.mExtras.maybeIsEmpty()) {
+                if (o.mExtras != null && !o.mExtras.isDefinitelyEmpty()) {
                     this.mExtras = Bundle.STRIPPED;
                 }
 

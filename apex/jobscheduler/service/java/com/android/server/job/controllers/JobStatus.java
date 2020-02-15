@@ -1648,11 +1648,11 @@ public final class JobStatus {
                     pw.println();
                 }
             }
-            if (job.getExtras() != null && !job.getExtras().maybeIsEmpty()) {
+            if (job.getExtras() != null && !job.getExtras().isDefinitelyEmpty()) {
                 pw.print(prefix); pw.print("  Extras: ");
                 pw.println(job.getExtras().toShortString());
             }
-            if (job.getTransientExtras() != null && !job.getTransientExtras().maybeIsEmpty()) {
+            if (job.getTransientExtras() != null && !job.getTransientExtras().isDefinitelyEmpty()) {
                 pw.print(prefix); pw.print("  Transient extras: ");
                 pw.println(job.getTransientExtras().toShortString());
             }
@@ -1869,10 +1869,10 @@ public final class JobStatus {
                             job.getTriggerContentMaxDelay());
                 }
             }
-            if (job.getExtras() != null && !job.getExtras().maybeIsEmpty()) {
+            if (job.getExtras() != null && !job.getExtras().isDefinitelyEmpty()) {
                 job.getExtras().dumpDebug(proto, JobStatusDumpProto.JobInfo.EXTRAS);
             }
-            if (job.getTransientExtras() != null && !job.getTransientExtras().maybeIsEmpty()) {
+            if (job.getTransientExtras() != null && !job.getTransientExtras().isDefinitelyEmpty()) {
                 job.getTransientExtras().dumpDebug(proto, JobStatusDumpProto.JobInfo.TRANSIENT_EXTRAS);
             }
             if (job.getClipData() != null) {
