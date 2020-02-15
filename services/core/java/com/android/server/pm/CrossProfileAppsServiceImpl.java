@@ -66,6 +66,8 @@ import java.util.Objects;
 public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     private static final String TAG = "CrossProfileAppsService";
 
+    private final LocalService mLocalService = new LocalService();
+
     private Context mContext;
     private Injector mInjector;
 
@@ -77,8 +79,6 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     CrossProfileAppsServiceImpl(Context context, Injector injector) {
         mContext = context;
         mInjector = injector;
-
-        LocalServices.addService(CrossProfileAppsInternal.class, new LocalService());
     }
 
     @Override
@@ -205,7 +205,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         }
 
         if (callerUserId != userId) {
-            if (!hasInteractAcrossProfilesPermission(callingPackage)) {
+            if (!hasCallerGotInteractAcrossProfilesPermission(callingPackage)) {
                 throw new SecurityException("Attempt to launch activity without required "
                         + android.Manifest.permission.INTERACT_ACROSS_PROFILES + " permission"
                         + " or target user is not in the same profile group.");
@@ -268,20 +268,12 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         if (targetUserProfiles.isEmpty()) {
             return false;
         }
-        return hasInteractAcrossProfilesPermission(callingPackage);
+        return hasCallerGotInteractAcrossProfilesPermission(callingPackage);
     }
 
-    private boolean hasInteractAcrossProfilesPermission(String callingPackage) {
-        final int callingUid = mInjector.getCallingUid();
-        final int callingPid = mInjector.getCallingPid();
-        return isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingUid)
-                || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS, callingUid)
-                || PermissionChecker.checkPermissionForPreflight(
-                        mContext,
-                        Manifest.permission.INTERACT_ACROSS_PROFILES,
-                        callingPid,
-                        callingUid,
-                        callingPackage) == PermissionChecker.PERMISSION_GRANTED;
+    private boolean hasCallerGotInteractAcrossProfilesPermission(String callingPackage) {
+        return hasInteractAcrossProfilesPermission(
+                callingPackage, mInjector.getCallingUid(), mInjector.getCallingPid());
     }
 
     private boolean isCrossProfilePackageWhitelisted(String packageName) {
@@ -563,6 +555,10 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         setInteractAcrossProfilesAppOp(packageName, AppOpsManager.opToDefaultMode(op));
     }
 
+    CrossProfileAppsInternal getLocalService() {
+        return mLocalService;
+    }
+
     private boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId) {
         return mInjector.withCleanCallingIdentity(() ->
                 mInjector.getUserManager().isSameProfileGroup(callerUserId, userId));
@@ -587,6 +583,20 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     private boolean isManagedProfile(@UserIdInt int userId) {
         return mInjector.withCleanCallingIdentity(()
                 -> mContext.getSystemService(UserManager.class).isManagedProfile(userId));
+    }
+
+    private boolean hasInteractAcrossProfilesPermission(String packageName, int uid, int pid) {
+        if (isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, uid)
+                || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS, uid)) {
+            return true;
+        }
+        return PermissionChecker.PERMISSION_GRANTED
+                == PermissionChecker.checkPermissionForPreflight(
+                        mContext,
+                        Manifest.permission.INTERACT_ACROSS_PROFILES,
+                        pid,
+                        uid,
+                        packageName);
     }
 
     private static class InjectorImpl implements Injector {
@@ -728,9 +738,11 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     class LocalService extends CrossProfileAppsInternal {
+
         @Override
-        public boolean verifyPackageHasInteractAcrossProfilePermission(String packageName,
-                @UserIdInt int userId) throws PackageManager.NameNotFoundException {
+        public boolean verifyPackageHasInteractAcrossProfilePermission(
+                String packageName, @UserIdInt int userId)
+                throws PackageManager.NameNotFoundException {
             final int uid = Objects.requireNonNull(
                     mInjector.getPackageManager().getApplicationInfoAsUser(
                             Objects.requireNonNull(packageName), /* flags= */ 0, userId)).uid;
@@ -740,16 +752,13 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         @Override
         public boolean verifyUidHasInteractAcrossProfilePermission(String packageName, int uid) {
             Objects.requireNonNull(packageName);
+            return hasInteractAcrossProfilesPermission(
+                    packageName, uid, PermissionChecker.PID_UNKNOWN);
+        }
 
-            return isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, uid)
-                    || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS, uid)
-                    || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_PROFILES, uid)
-                    || PermissionChecker.checkPermissionForPreflight(
-                            mContext,
-                            Manifest.permission.INTERACT_ACROSS_PROFILES,
-                            PermissionChecker.PID_UNKNOWN,
-                            uid,
-                            packageName) == PermissionChecker.PERMISSION_GRANTED;
+        @Override
+        public List<UserHandle> getTargetUserProfiles(String packageName, int userId) {
+            return getTargetUserProfilesUnchecked(packageName, userId);
         }
     }
 }
