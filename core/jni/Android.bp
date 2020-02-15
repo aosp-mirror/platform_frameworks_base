@@ -234,6 +234,7 @@ cc_library_shared {
                 "libui",
                 "libgraphicsenv",
                 "libgui",
+                "libmediandk",
                 "libsensor",
                 "libinput",
                 "libcamera_client",
@@ -449,9 +450,10 @@ cc_library_static {
             ],
             shared_libs: [
                 "libandroidfw",
+                "libEGL",
+                "libmediandk",
                 "libnativedisplay",
                 "libnativewindow",
-                "libgui",
                 "libpdfium",
             ],
             static_libs: [
