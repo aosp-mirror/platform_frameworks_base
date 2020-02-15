@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -43,6 +44,7 @@ import android.view.View;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -83,13 +85,12 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
                 any(NotificationMenuRowPlugin.MenuItem.class)))
                 .thenReturn(true);
         when(mMenuRow.getLongpressMenuItem(any(Context.class))).thenReturn(mMenuItem);
-        mDependency.injectTestDependency(NotificationGutsManager.class, mGutsManager);
-        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectMockDependency(BubbleController.class);
 
         mHelper = new NotificationTestHelper(mContext, mDependency);
 
-        mBlockingHelperManager = new NotificationBlockingHelperManager(mContext);
+        mBlockingHelperManager = new NotificationBlockingHelperManager(
+                mContext, mGutsManager, mEntryManager, mock(MetricsLogger.class));
         // By default, have the shade visible/expanded.
         mBlockingHelperManager.setNotificationShadeExpanded(1f);
     }

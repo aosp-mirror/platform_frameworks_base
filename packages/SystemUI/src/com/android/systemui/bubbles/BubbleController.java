@@ -72,9 +72,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.BubbleController.BubbleExpandListener;
-import com.android.systemui.bubbles.BubbleController.BubbleStateChangeListener;
-import com.android.systemui.bubbles.BubbleController.NotifCallback;
+import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder;
@@ -105,16 +103,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Bubbles are a special type of content that can "float" on top of other apps or System UI.
  * Bubbles can be expanded to show more content.
  *
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
-@Singleton
 public class BubbleController implements ConfigurationController.ConfigurationListener, Dumpable {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
@@ -277,7 +271,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
-    @Inject
     public BubbleController(Context context,
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarStateController statusBarStateController,
@@ -298,6 +291,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 notifPipeline, featureFlags, dumpController);
     }
 
+    /**
+     * Injected constructor. See {@link BubbleModule}.
+     */
     public BubbleController(Context context,
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarStateController statusBarStateController,

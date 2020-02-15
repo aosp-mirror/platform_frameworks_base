@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar.phone.dagger;
 
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
@@ -52,7 +52,6 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
-import com.android.systemui.statusbar.StatusBarDependenciesModule;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -65,7 +64,27 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.AutoHideController;
+import com.android.systemui.statusbar.phone.BiometricUnlockController;
+import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.DozeScrimController;
+import com.android.systemui.statusbar.phone.DozeServiceHost;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
+import com.android.systemui.statusbar.phone.KeyguardLiftController;
+import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.LightsOutNotifController;
+import com.android.systemui.statusbar.phone.LockscreenLockIconController;
+import com.android.systemui.statusbar.phone.LockscreenWallpaper;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -91,8 +110,8 @@ import dagger.Provides;
 /**
  * Dagger Module providing {@link StatusBar}.
  */
-@Module(includes = {StatusBarDependenciesModule.class})
-public class StatusBarModule {
+@Module(includes = {StatusBarPhoneDependenciesModule.class})
+public interface StatusBarPhoneModule {
     /**
      * Provides our instance of StatusBar which is considered optional.
      */

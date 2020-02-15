@@ -25,8 +25,7 @@ import android.view.MotionEvent;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-
-import javax.inject.Inject;
+import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 
 /** A controller to control all auto-hide things. */
 public class AutoHideController {
@@ -51,7 +50,9 @@ public class AutoHideController {
         }
     };
 
-    @Inject
+    /**
+     * Injected constructor. See {@link StatusBarPhoneModule}.
+     */
     public AutoHideController(Context context, @Main Handler handler,
             NotificationRemoteInputManager notificationRemoteInputManager,
             IWindowManager iWindowManager) {
