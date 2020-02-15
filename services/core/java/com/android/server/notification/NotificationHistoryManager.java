@@ -166,6 +166,22 @@ public class NotificationHistoryManager {
         }
     }
 
+    public void deleteConversation(String pkg, int uid, String conversationId) {
+        synchronized (mLock) {
+            int userId = UserHandle.getUserId(uid);
+            final NotificationHistoryDatabase userHistory =
+                    getUserHistoryAndInitializeIfNeededLocked(userId);
+            // TODO: it shouldn't be possible to delete a notification entry while the user is
+            // locked but we should handle it
+            if (userHistory == null) {
+                Slog.w(TAG, "Attempted to remove conversation for locked/gone/disabled user "
+                        + userId);
+                return;
+            }
+            userHistory.deleteConversation(pkg, conversationId);
+        }
+    }
+
     // TODO: wire this up to AMS when power button is long pressed
     public void triggerWriteToDisk() {
         synchronized (mLock) {

@@ -5655,6 +5655,22 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground));
     }
 
+    public void onConversationRemoved(String pkg, int uid, String conversationId) {
+        checkCallerIsSystem();
+        Preconditions.checkStringNotEmpty(pkg);
+        Preconditions.checkStringNotEmpty(conversationId);
+
+        mHistoryManager.deleteConversation(pkg, uid, conversationId);
+        List<String> deletedChannelIds =
+                mPreferencesHelper.deleteConversation(pkg, uid, conversationId);
+        for (String channelId : deletedChannelIds) {
+            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
+                    UserHandle.getUserId(uid), REASON_CHANNEL_BANNED,
+                    null);
+        }
+        handleSavePolicyFile();
+    }
+
     @VisibleForTesting
     protected void fixNotification(Notification notification, String pkg, String tag, int id,
             int userId) throws NameNotFoundException {

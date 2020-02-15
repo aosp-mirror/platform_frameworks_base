@@ -289,6 +289,44 @@ public class NotificationHistoryTest {
     }
 
     @Test
+    public void testRemoveConversationNotificationFromWrite() {
+        NotificationHistory history = new NotificationHistory();
+
+        List<HistoricalNotification> postRemoveExpectedEntries = new ArrayList<>();
+        List<String> postRemoveExpectedStrings = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            HistoricalNotification n = getHistoricalNotification("pkg", i);
+
+            if (i != 2) {
+                postRemoveExpectedStrings.add(n.getPackage());
+                postRemoveExpectedStrings.add(n.getChannelName());
+                postRemoveExpectedStrings.add(n.getChannelId());
+                if (n.getConversationId() != null) {
+                    postRemoveExpectedStrings.add(n.getConversationId());
+                }
+                postRemoveExpectedEntries.add(n);
+            }
+
+            history.addNotificationToWrite(n);
+        }
+        // add second notification with the same conversation id that will be removed
+        history.addNotificationToWrite(getHistoricalNotification("pkg", 2));
+
+        history.poolStringsFromNotifications();
+
+        assertThat(history.getNotificationsToWrite().size()).isEqualTo(11);
+        // 1 package name and 20 unique channel names and ids and 5 conversation ids
+        assertThat(history.getPooledStringsToWrite().length).isEqualTo(26);
+
+        history.removeConversationFromWrite("pkg", "convo2");
+
+        // 1 package names and 9 * 2 unique channel names and ids and 4 conversation ids
+        assertThat(history.getPooledStringsToWrite().length).isEqualTo(23);
+        assertThat(history.getNotificationsToWrite())
+                .containsExactlyElementsIn(postRemoveExpectedEntries);
+    }
+
+    @Test
     public void testParceling() {
         NotificationHistory history = new NotificationHistory();
 
