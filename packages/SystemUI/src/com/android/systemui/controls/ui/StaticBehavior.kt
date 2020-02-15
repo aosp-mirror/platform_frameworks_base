@@ -24,20 +24,20 @@ import android.service.controls.templates.ThumbnailTemplate
 import com.android.systemui.R
 import com.android.systemui.controls.ui.ControlActionCoordinator.MAX_LEVEL
 
-import java.util.concurrent.Executor
-
 /**
  * Used for controls that cannot be interacted with. Information is presented to the user
  * but no actions can be taken. If using a ThumbnailTemplate, the background image will
  * be changed.
  */
-class StaticBehavior(
-    val uiExecutor: Executor,
-    val bgExecutor: Executor
-) : Behavior {
+class StaticBehavior() : Behavior {
     lateinit var control: Control
+    lateinit var cvh: ControlViewHolder
 
-    override fun apply(cvh: ControlViewHolder, cws: ControlWithState) {
+    override fun initialize(cvh: ControlViewHolder) {
+        this.cvh = cvh
+    }
+
+    override fun bind(cws: ControlWithState) {
         this.control = cws.control!!
 
         cvh.status.setText(control.getStatusText())
@@ -51,12 +51,12 @@ class StaticBehavior(
 
         val template = control.getControlTemplate()
         if (template is ThumbnailTemplate) {
-            bgExecutor.execute {
+            cvh.bgExecutor.execute {
                 // clear the default tinting in favor of only using alpha
                 val drawable = template.getThumbnail().loadDrawable(cvh.context)
                 drawable.setTintList(null)
                 drawable.setAlpha((0.45 * 255).toInt())
-                uiExecutor.execute {
+                cvh.uiExecutor.execute {
                     val radius = cvh.context.getResources()
                             .getDimensionPixelSize(R.dimen.control_corner_radius).toFloat()
                     clipLayer.setDrawable(CornerDrawable(drawable, radius))

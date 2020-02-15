@@ -16,7 +16,7 @@
 
 package com.android.systemui.controls.ui
 
-class UnknownBehavior : Behavior {
+class DefaultBehavior : Behavior {
     lateinit var cvh: ControlViewHolder
 
     override fun initialize(cvh: ControlViewHolder) {
@@ -24,7 +24,7 @@ class UnknownBehavior : Behavior {
     }
 
     override fun bind(cws: ControlWithState) {
-        cvh.status.setText(cvh.context.getString(com.android.internal.R.string.loading))
+        cvh.status.setText(cws.control?.getStatusText() ?: "")
         cvh.setEnabled(false)
         cvh.applyRenderInfo(RenderInfo.lookup(cws.ci.deviceType, false))
     }
