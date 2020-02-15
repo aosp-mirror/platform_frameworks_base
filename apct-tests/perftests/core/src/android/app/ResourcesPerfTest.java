@@ -96,7 +96,7 @@ public class ResourcesPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         TypedValue value = new TypedValue();
         while (state.keepRunning()) {
-            mRes.getValue(com.android.internal.R.string.android_upgrading_apk, value,
+            mRes.getValue(com.android.internal.R.string.mmcc_illegal_me, value,
                     false /* resolve_refs */);
         }
     }

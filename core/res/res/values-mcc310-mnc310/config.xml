@@ -21,6 +21,10 @@
      for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
+    <!-- Configure mobile network MTU. Carrier specific value is set here.
+    -->
+    <integer name="config_mobile_mtu">1440</integer>
+
     <!-- Flag specifying whether VoLTE should be available for carrier: independent of
          carrier provisioning. If false: hard disabled. If true: then depends on carrier
          provisioning, availability etc -->
