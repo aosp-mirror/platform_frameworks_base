@@ -21,13 +21,6 @@
      for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <!-- Configure mobile network MTU. Carrier specific value is set here.
-    -->
-    <integer name="config_mobile_mtu">1450</integer>
-
-    <!-- Do not set the system language as value of EF LI/EF PL -->
-    <bool name="config_use_sim_language_file">false</bool>
-
     <!-- Configures encoding type to parse the User Data of an SMS for reserved TP-DCS value.
          Refer to SmsConstants.java
          ENCODING_UNKNOWN = 0;
