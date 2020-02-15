@@ -4613,13 +4613,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final long quota = ((long) msg.arg1 << 32) | (msg.arg2 & 0xFFFFFFFFL);
                     removeInterfaceQuota(iface);
                     setInterfaceQuota(iface, quota);
-                    mNetworkStats.setStatsProviderLimit(iface, quota);
+                    mNetworkStats.setStatsProviderLimitAsync(iface, quota);
                     return true;
                 }
                 case MSG_REMOVE_INTERFACE_QUOTA: {
                     final String iface = (String) msg.obj;
                     removeInterfaceQuota(iface);
-                    mNetworkStats.setStatsProviderLimit(iface, QUOTA_UNLIMITED);
+                    mNetworkStats.setStatsProviderLimitAsync(iface, QUOTA_UNLIMITED);
                     return true;
                 }
                 case MSG_RESET_FIREWALL_RULES_BY_UID: {
