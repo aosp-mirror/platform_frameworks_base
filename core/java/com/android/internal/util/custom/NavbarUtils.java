@@ -35,13 +35,35 @@ public class NavbarUtils {
             = "com.android.internal.systemui.navbar.gestural_wide_back";
     private static final String NAV_BAR_MODE_GESTURAL_OVERLAY_EXTRA_WIDE_BACK
             = "com.android.internal.systemui.navbar.gestural_extra_wide_back";
+
+    // No pill overlays
+    public static final String NAV_BAR_MODE_GESTURAL_OVERLAY_NO_PILL
+            = "com.android.internal.systemui.navbar.gestural_nopill";
+    public static final String NAV_BAR_MODE_GESTURAL_OVERLAY_NARROW_BACK_NO_PILL
+            = "com.android.internal.systemui.navbar.gestural_narrow_back_nopill";
+    public static final String NAV_BAR_MODE_GESTURAL_OVERLAY_WIDE_BACK_NO_PILL
+            = "com.android.internal.systemui.navbar.gestural_wide_back_nopill";
+    public static final String NAV_BAR_MODE_GESTURAL_OVERLAY_EXTRA_WIDE_BACK_NO_PILL
+            = "com.android.internal.systemui.navbar.gestural_extra_wide_back_nopill";
+
+    public static final String[] BACK_GESTURE_INSET_OVERLAYS_NO_PILL = {
+            NAV_BAR_MODE_GESTURAL_OVERLAY_NARROW_BACK_NO_PILL,
+            NAV_BAR_MODE_GESTURAL_OVERLAY_NO_PILL,
+            NAV_BAR_MODE_GESTURAL_OVERLAY_WIDE_BACK_NO_PILL,
+            NAV_BAR_MODE_GESTURAL_OVERLAY_EXTRA_WIDE_BACK_NO_PILL
+    };
+
     private static final String[] NAVBAR_MODES_OVERLAYS = {
             NAV_BAR_MODE_2BUTTON_OVERLAY,
             NAV_BAR_MODE_3BUTTON_OVERLAY,
             NAV_BAR_MODE_GESTURAL_OVERLAY,
             NAV_BAR_MODE_GESTURAL_OVERLAY_NARROW_BACK,
             NAV_BAR_MODE_GESTURAL_OVERLAY_WIDE_BACK,
-            NAV_BAR_MODE_GESTURAL_OVERLAY_EXTRA_WIDE_BACK
+            NAV_BAR_MODE_GESTURAL_OVERLAY_EXTRA_WIDE_BACK,
+            NAV_BAR_MODE_GESTURAL_OVERLAY_NO_PILL,
+            NAV_BAR_MODE_GESTURAL_OVERLAY_NARROW_BACK_NO_PILL,
+            NAV_BAR_MODE_GESTURAL_OVERLAY_WIDE_BACK_NO_PILL,
+            NAV_BAR_MODE_GESTURAL_OVERLAY_EXTRA_WIDE_BACK_NO_PILL
     };
 
     public static String getNavigationBarModeOverlay(Context context, IOverlayManager overlayManager) {
