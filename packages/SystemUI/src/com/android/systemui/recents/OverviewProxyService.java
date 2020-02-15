@@ -418,6 +418,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final ServiceConnection mOverviewServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            if (SysUiState.DEBUG) {
+                Log.d(TAG_OPS, "Overview proxy service connected");
+            }
             mConnectionBackoffAttempts = 0;
             mHandler.removeCallbacks(mDeferredConnectionCallback);
             try {
@@ -570,6 +573,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 mNavBarController.getDefaultNavigationBarFragment();
         final NavigationBarView navBarView =
                 mNavBarController.getNavigationBarView(mContext.getDisplayId());
+        if (SysUiState.DEBUG) {
+            Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment
+                    + " navBarView=" + navBarView);
+        }
 
         if (navBarFragment != null) {
             navBarFragment.updateSystemUiStateFlags(-1);
@@ -584,6 +591,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     private void notifySystemUiStateFlags(int flags) {
+        if (SysUiState.DEBUG) {
+            Log.d(TAG_OPS, "Notifying sysui state change to overview service: proxy="
+                    + mOverviewProxy + " flags=" + flags);
+        }
         try {
             if (mOverviewProxy != null) {
                 mOverviewProxy.onSystemUiStateChanged(flags);

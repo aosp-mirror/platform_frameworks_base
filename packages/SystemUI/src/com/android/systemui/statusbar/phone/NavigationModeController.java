@@ -73,7 +73,7 @@ import javax.inject.Singleton;
 public class NavigationModeController implements Dumpable {
 
     private static final String TAG = NavigationModeController.class.getSimpleName();
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     public interface ModeChangedListener {
         void onNavigationModeChanged(int mode);
@@ -248,8 +248,7 @@ public class NavigationModeController implements Dumpable {
                     Secure.NAVIGATION_MODE, String.valueOf(mode));
         });
         if (DEBUG) {
-            Log.e(TAG, "updateCurrentInteractionMode: mode=" + mMode
-                    + " contextUser=" + mCurrentUserContext.getUserId());
+            Log.e(TAG, "updateCurrentInteractionMode: mode=" + mMode);
             dumpAssetPaths(mCurrentUserContext);
         }
 
@@ -293,6 +292,7 @@ public class NavigationModeController implements Dumpable {
                     0 /* flags */, UserHandle.of(userId));
         } catch (PackageManager.NameNotFoundException e) {
             // Never happens for the sysui package
+            Log.e(TAG, "Failed to create package context", e);
             return null;
         }
     }
@@ -408,7 +408,8 @@ public class NavigationModeController implements Dumpable {
     }
 
     private void dumpAssetPaths(Context context) {
-        Log.d(TAG, "assetPaths=");
+        Log.d(TAG, "  contextUser=" + mCurrentUserContext.getUserId());
+        Log.d(TAG, "  assetPaths=");
         ApkAssets[] assets = context.getResources().getAssets().getApkAssets();
         for (ApkAssets a : assets) {
             Log.d(TAG, "    " + a.getAssetPath());
