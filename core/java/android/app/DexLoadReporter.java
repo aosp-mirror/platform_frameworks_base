@@ -28,8 +28,9 @@ import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -86,32 +87,50 @@ import java.util.Set;
     }
 
     @Override
-    public void report(Map<String, String> classLoaderContextMap) {
-        if (classLoaderContextMap.isEmpty()) {
-            Slog.wtf(TAG, "Bad call to DexLoadReporter: empty classLoaderContextMap");
+    public void report(List<ClassLoader> classLoadersChain, List<String> classPaths) {
+        if (classLoadersChain.size() != classPaths.size()) {
+            Slog.wtf(TAG, "Bad call to DexLoadReporter: argument size mismatch");
+            return;
+        }
+        if (classPaths.isEmpty()) {
+            Slog.wtf(TAG, "Bad call to DexLoadReporter: empty dex paths");
+            return;
+        }
+
+        // The first element of classPaths is the list of dex files that should be registered.
+        // The classpath is represented as a list of dex files separated by File.pathSeparator.
+        String[] dexPathsForRegistration = classPaths.get(0).split(File.pathSeparator);
+        if (dexPathsForRegistration.length == 0) {
+            // No dex files to register.
             return;
         }
 
         // Notify the package manager about the dex loads unconditionally.
         // The load might be for either a primary or secondary dex file.
-        notifyPackageManager(classLoaderContextMap);
+        notifyPackageManager(classLoadersChain, classPaths);
         // Check for secondary dex files and register them for profiling if possible.
         // Note that we only register the dex paths belonging to the first class loader.
-        registerSecondaryDexForProfiling(classLoaderContextMap.keySet());
+        registerSecondaryDexForProfiling(dexPathsForRegistration);
     }
 
-    private void notifyPackageManager(Map<String, String> classLoaderContextMap) {
+    private void notifyPackageManager(List<ClassLoader> classLoadersChain,
+            List<String> classPaths) {
         // Get the class loader names for the binder call.
+        List<String> classLoadersNames = new ArrayList<>(classPaths.size());
+        for (ClassLoader classLoader : classLoadersChain) {
+            classLoadersNames.add(classLoader.getClass().getName());
+        }
         String packageName = ActivityThread.currentPackageName();
         try {
-            ActivityThread.getPackageManager().notifyDexLoad(packageName,
-                    classLoaderContextMap, VMRuntime.getRuntime().vmInstructionSet());
+            ActivityThread.getPackageManager().notifyDexLoad(
+                    packageName, classLoadersNames, classPaths,
+                    VMRuntime.getRuntime().vmInstructionSet());
         } catch (RemoteException re) {
             Slog.e(TAG, "Failed to notify PM about dex load for package " + packageName, re);
         }
     }
 
-    private void registerSecondaryDexForProfiling(Set<String> dexPaths) {
+    private void registerSecondaryDexForProfiling(String[] dexPaths) {
         if (!SystemProperties.getBoolean("dalvik.vm.dexopt.secondary", false)) {
             return;
         }
