@@ -24,18 +24,19 @@
 #include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
-#include <SkTypeface.h>
 #include <SkSerialProcs.h>
+#include <SkTypeface.h>
+#include <android-base/properties.h>
+#include <unistd.h>
+
+#include <sstream>
+
 #include "LightingInfo.h"
 #include "VectorDrawable.h"
 #include "thread/CommonPool.h"
 #include "tools/SkSharingProc.h"
-#include "utils/TraceUtils.h"
 #include "utils/String8.h"
-
-#include <unistd.h>
-
-#include <android-base/properties.h>
+#include "utils/TraceUtils.h"
 
 using namespace android::uirenderer::renderthread;
 

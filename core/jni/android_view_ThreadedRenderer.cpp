@@ -17,40 +17,36 @@
 #define LOG_TAG "ThreadedRenderer"
 #define ATRACE_TAG ATRACE_TAG_VIEW
 
-#include <algorithm>
-#include <atomic>
-#include <inttypes.h>
-
-#include "jni.h"
-#include <nativehelper/JNIHelp.h>
-#include "core_jni_helpers.h"
-#include <GraphicsJNI.h>
-
-#include <gui/BufferItemConsumer.h>
-#include <gui/BufferQueue.h>
-#include <gui/Surface.h>
-
-#include "android_graphics_HardwareRendererObserver.h"
-
-#include <private/EGL/cache.h>
-
-#include <utils/RefBase.h>
-#include <utils/StrongPointer.h>
-#include <utils/Timers.h>
-#include <utils/TraceUtils.h>
-#include <android_runtime/android_view_Surface.h>
-#include <system/window.h>
-
 #include <FrameInfo.h>
+#include <GraphicsJNI.h>
 #include <Picture.h>
 #include <Properties.h>
 #include <RootRenderNode.h>
+#include <dlfcn.h>
+#include <gui/BufferItemConsumer.h>
+#include <gui/BufferQueue.h>
+#include <gui/Surface.h>
+#include <inttypes.h>
+#include <nativehelper/JNIHelp.h>
+#include <pipeline/skia/ShaderCache.h>
+#include <private/EGL/cache.h>
 #include <renderthread/CanvasContext.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
-#include <pipeline/skia/ShaderCache.h>
+#include <system/window.h>
 #include <utils/Color.h>
+#include <utils/RefBase.h>
+#include <utils/StrongPointer.h>
+#include <utils/Timers.h>
+#include <utils/TraceUtils.h>
+
+#include <algorithm>
+#include <atomic>
+
+#include "android_graphics_HardwareRendererObserver.h"
+#include "core_jni_helpers.h"
+#include "jni.h"
 
 namespace android {
 
@@ -77,6 +73,9 @@ static JNIEnv* getenv(JavaVM* vm) {
     }
     return env;
 }
+
+typedef ANativeWindow* (*ANW_fromSurface)(JNIEnv* env, jobject surface);
+ANW_fromSurface fromSurface;
 
 class JvmErrorReporter : public ErrorHandler {
 public:
@@ -178,9 +177,9 @@ static void android_view_ThreadedRenderer_setName(JNIEnv* env, jobject clazz,
 static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface, jboolean discardBuffer) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<Surface> surface;
+    ANativeWindow* window = nullptr;
     if (jsurface) {
-        surface = android_view_Surface_getSurface(env, jsurface);
+        window = fromSurface(env, jsurface);
     }
     bool enableTimeout = true;
     if (discardBuffer) {
@@ -188,7 +187,7 @@ static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
         enableTimeout = false;
         proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
     }
-    proxy->setSurface(surface, enableTimeout);
+    proxy->setSurface(window, enableTimeout);
 }
 
 static jboolean android_view_ThreadedRenderer_pause(JNIEnv* env, jobject clazz,
@@ -458,8 +457,10 @@ static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
         jint right, jint bottom, jlong bitmapPtr) {
     SkBitmap bitmap;
     bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
-    sp<Surface> surface = android_view_Surface_getSurface(env, jsurface);
-    return RenderProxy::copySurfaceInto(surface, left, top, right, bottom, &bitmap);
+    ANativeWindow* window = fromSurface(env, jsurface);
+    jint result = RenderProxy::copySurfaceInto(window, left, top, right, bottom, &bitmap);
+    ANativeWindow_release(window);
+    return result;
 }
 
 class ContextFactory : public IContextFactory {
@@ -480,6 +481,7 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
     uint32_t width = jwidth;
     uint32_t height = jheight;
 
+    // TODO: should this be generated from an AImageReader?
     // Create a Surface wired up to a BufferItemConsumer
     sp<IGraphicBufferProducer> producer;
     sp<IGraphicBufferConsumer> rawConsumer;
@@ -496,7 +498,7 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
         ContextFactory factory;
         RenderProxy proxy{true, renderNode, &factory};
         proxy.setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
-        proxy.setSurface(surface);
+        proxy.setSurface(surface.get());
         // Shadows can't be used via this interface, so just set the light source
         // to all 0s.
         proxy.setLightAlpha(0, 0);
@@ -721,6 +723,11 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
             "android/graphics/HardwareRenderer$FrameCompleteCallback");
     gFrameCompleteCallback.onFrameComplete = GetMethodIDOrDie(env, frameCompleteClass,
             "onFrameComplete", "(J)V");
+
+    void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
+    fromSurface = (ANW_fromSurface)dlsym(handle_, "ANativeWindow_fromSurface");
+    LOG_ALWAYS_FATAL_IF(fromSurface == nullptr,
+                        "Failed to find required symbol ANativeWindow_fromSurface!");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }

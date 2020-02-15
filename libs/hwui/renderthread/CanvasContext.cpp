@@ -139,15 +139,15 @@ void CanvasContext::destroy() {
     mAnimationContext->destroy();
 }
 
-void CanvasContext::setSurface(sp<Surface>&& surface, bool enableTimeout) {
+void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
     ATRACE_CALL();
 
-    if (surface) {
-        mNativeSurface = std::make_unique<ReliableSurface>(std::move(surface));
+    if (window) {
+        mNativeSurface = std::make_unique<ReliableSurface>(window);
         mNativeSurface->init();
         if (enableTimeout) {
             // TODO: Fix error handling & re-shorten timeout
-            ANativeWindow_setDequeueTimeout(mNativeSurface->getNativeWindow(), 4000_ms);
+            ANativeWindow_setDequeueTimeout(window, 4000_ms);
         }
     } else {
         mNativeSurface = nullptr;
@@ -167,7 +167,7 @@ void CanvasContext::setSurface(sp<Surface>&& surface, bool enableTimeout) {
 
     mFrameNumber = -1;
 
-    if (hasSurface) {
+    if (window != nullptr && hasSurface) {
         mHaveNewSurface = true;
         mSwapHistory.clear();
         // Enable frame stats after the surface has been bound to the appropriate graphics API.

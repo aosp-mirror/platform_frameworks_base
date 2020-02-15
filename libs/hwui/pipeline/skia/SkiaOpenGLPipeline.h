@@ -16,8 +16,10 @@
 
 #pragma once
 
-#include "SkiaPipeline.h"
+#include <EGL/egl.h>
+#include <system/window.h>
 
+#include "SkiaPipeline.h"
 #include "renderstate/RenderState.h"
 
 namespace android {

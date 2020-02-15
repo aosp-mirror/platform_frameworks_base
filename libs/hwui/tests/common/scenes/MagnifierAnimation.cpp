@@ -70,7 +70,7 @@ public:
             magnifier->getSkBitmap(&temp);
             constexpr int x = 90;
             constexpr int y = 325;
-            RenderProxy::copySurfaceInto(renderTarget, x, y, x + magnifier->width(),
+            RenderProxy::copySurfaceInto(renderTarget.get(), x, y, x + magnifier->width(),
                                          y + magnifier->height(), &temp);
         }
     }
