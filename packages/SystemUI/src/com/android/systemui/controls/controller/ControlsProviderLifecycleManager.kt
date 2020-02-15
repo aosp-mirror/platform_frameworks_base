@@ -86,7 +86,7 @@ class ControlsProviderLifecycleManager(
         private const val MSG_ACTION = 2
         private const val MSG_UNBIND = 3
         private const val BIND_RETRY_DELAY = 1000L // ms
-        private const val LOAD_TIMEOUT = 5000L // ms
+        private const val LOAD_TIMEOUT_SECONDS = 30L // seconds
         private const val MAX_BIND_RETRIES = 5
         private const val MAX_CONTROLS_REQUEST = 100000L
         private const val DEBUG = true
@@ -231,7 +231,7 @@ class ControlsProviderLifecycleManager(
             // Don't accept load callbacks after this
             lastLoadCallback = null
             unbindService()
-        }, LOAD_TIMEOUT, TimeUnit.MILLISECONDS)
+        }, LOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
 
         invokeOrQueue(::load, Message.Load)
     }
