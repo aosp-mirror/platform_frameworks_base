@@ -14081,14 +14081,6 @@ package android.view.contentcapture {
 
 }
 
-package android.view.inline {
-
-  public final class InlinePresentationSpec implements android.os.Parcelable {
-    method @Nullable public String getStyle();
-  }
-
-}
-
 package android.webkit {
 
   public abstract class CookieManager {
