@@ -36,9 +36,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -67,6 +68,7 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.service.notification.ConversationChannelWrapper;
+import android.test.mock.MockIContentProvider;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 import android.util.ArrayMap;
@@ -87,6 +89,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -122,7 +125,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Mock NotificationUsageStats mUsageStats;
     @Mock RankingHandler mHandler;
     @Mock PackageManager mPm;
-    @Mock IContentProvider mTestIContentProvider;
+    @Spy IContentProvider mTestIContentProvider = new MockIContentProvider();
     @Mock Context mContext;
     @Mock ZenModeHelper mMockZenModeHelper;
 
@@ -167,12 +170,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(testContentProvider.getIContentProvider()).thenReturn(mTestIContentProvider);
         contentResolver.addProvider(TEST_AUTHORITY, testContentProvider);
 
-        when(mTestIContentProvider.canonicalize(any(), any(), eq(SOUND_URI)))
-                .thenReturn(CANONICAL_SOUND_URI);
-        when(mTestIContentProvider.canonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
-                .thenReturn(CANONICAL_SOUND_URI);
-        when(mTestIContentProvider.uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
-                .thenReturn(SOUND_URI);
+        doReturn(CANONICAL_SOUND_URI)
+                .when(mTestIContentProvider).canonicalize(any(), any(), eq(SOUND_URI));
+        doReturn(CANONICAL_SOUND_URI)
+                .when(mTestIContentProvider).canonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+        doReturn(SOUND_URI)
+                .when(mTestIContentProvider).uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
 
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
                 NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
@@ -503,12 +506,13 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .appendQueryParameter("title", "Test")
                 .appendQueryParameter("canonical", "1")
                 .build();
-        when(mTestIContentProvider.canonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
-                .thenReturn(canonicalBasedOnLocal);
-        when(mTestIContentProvider.uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
-                .thenReturn(localUri);
-        when(mTestIContentProvider.uncanonicalize(any(), any(), eq(canonicalBasedOnLocal)))
-                .thenReturn(localUri);
+        doReturn(canonicalBasedOnLocal)
+                .when(mTestIContentProvider).canonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+        doReturn(localUri)
+                .when(mTestIContentProvider).uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+        doReturn(localUri)
+                .when(mTestIContentProvider).uncanonicalize(any(), any(),
+                eq(canonicalBasedOnLocal));
 
         NotificationChannel channel =
                 new NotificationChannel("id", "name", IMPORTANCE_LOW);
@@ -527,10 +531,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testRestoreXml_withNonExistentCanonicalizedSoundUri() throws Exception {
         Thread.sleep(3000);
-        when(mTestIContentProvider.canonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
-                .thenReturn(null);
-        when(mTestIContentProvider.uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
-                .thenReturn(null);
+        doReturn(null)
+                .when(mTestIContentProvider).canonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
+        doReturn(null)
+                .when(mTestIContentProvider).uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
 
         NotificationChannel channel =
                 new NotificationChannel("id", "name", IMPORTANCE_LOW);
@@ -554,7 +558,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testRestoreXml_withUncanonicalizedNonLocalSoundUri() throws Exception {
         // Not a local uncanonicalized uri, simulating that it fails to exist locally
-        when(mTestIContentProvider.canonicalize(any(), any(), eq(SOUND_URI))).thenReturn(null);
+        doReturn(null)
+                .when(mTestIContentProvider).canonicalize(any(), any(), eq(SOUND_URI));
         String id = "id";
         String backupWithUncanonicalizedSoundUri = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"

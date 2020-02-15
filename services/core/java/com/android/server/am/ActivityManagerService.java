@@ -7266,7 +7266,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Wait for the provider to be published...
         final long timeout =
-                SystemClock.uptimeMillis() + ContentResolver.CONTENT_PROVIDER_WAIT_TIMEOUT_MILLIS;
+                SystemClock.uptimeMillis() + ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS;
         boolean timedOut = false;
         synchronized (cpr) {
             while (cpr.provider == null) {
