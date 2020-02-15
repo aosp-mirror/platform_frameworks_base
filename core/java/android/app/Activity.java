@@ -1907,6 +1907,7 @@ public class Activity extends ContextThemeWrapper
             if (!mAutoFillIgnoreFirstResumePause) {
                 View focus = getCurrentFocus();
                 if (focus != null && focus.canNotifyAutofillEnterExitEvent()) {
+                    // TODO(b/148815880): Bring up keyboard if resumed from inline authentication.
                     // TODO: in Activity killed/recreated case, i.e. SessionLifecycleTest#
                     // testDatasetVisibleWhileAutofilledAppIsLifecycled: the View's initial
                     // window visibility after recreation is INVISIBLE in onResume() and next frame
@@ -8467,7 +8468,7 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     @Override
     public final void autofillClientAuthenticate(int authenticationId, IntentSender intent,
-            Intent fillInIntent) {
+            Intent fillInIntent, boolean authenticateInline) {
         try {
             startIntentSenderForResultInner(intent, AUTO_FILL_AUTH_WHO_PREFIX,
                     authenticationId, fillInIntent, 0, 0, null);

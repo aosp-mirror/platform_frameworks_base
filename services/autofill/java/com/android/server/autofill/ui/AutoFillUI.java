@@ -79,7 +79,7 @@ public final class AutoFillUI {
 
     public interface AutoFillUiCallback {
         void authenticate(int requestId, int datasetIndex, @NonNull IntentSender intent,
-                @Nullable Bundle extras);
+                @Nullable Bundle extras, boolean authenticateInline);
         void fill(int requestId, int datasetIndex, @NonNull Dataset dataset);
         void save();
         void cancelSave();
@@ -217,7 +217,8 @@ public final class AutoFillUI {
                     if (mCallback != null) {
                         mCallback.authenticate(response.getRequestId(),
                                 AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED,
-                                response.getAuthentication(), response.getClientState());
+                                response.getAuthentication(), response.getClientState(),
+                                /* authenticateInline= */ false);
                     }
                 }
 
