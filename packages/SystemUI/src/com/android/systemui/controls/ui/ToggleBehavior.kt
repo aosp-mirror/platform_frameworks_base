@@ -16,11 +16,9 @@
 
 package com.android.systemui.controls.ui
 
-import android.content.Context
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.View
-import android.widget.TextView
 import android.service.controls.Control
 import android.service.controls.templates.ToggleTemplate
 
@@ -33,21 +31,21 @@ class ToggleBehavior : Behavior {
     lateinit var template: ToggleTemplate
     lateinit var control: Control
     lateinit var cvh: ControlViewHolder
-    lateinit var context: Context
-    lateinit var status: TextView
 
-    override fun apply(cvh: ControlViewHolder, cws: ControlWithState) {
-        this.control = cws.control!!
+    override fun initialize(cvh: ControlViewHolder) {
         this.cvh = cvh
-        status = cvh.status
-
-        status.setText(control.getStatusText())
-
-        template = control.getControlTemplate() as ToggleTemplate
+        cvh.setEnabled(false)
 
         cvh.layout.setOnClickListener(View.OnClickListener() {
             ControlActionCoordinator.toggle(cvh, template.getTemplateId(), template.isChecked())
         })
+    }
+
+    override fun bind(cws: ControlWithState) {
+        this.control = cws.control!!
+
+        cvh.status.setText(control.getStatusText())
+        template = control.getControlTemplate() as ToggleTemplate
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
