@@ -5233,9 +5233,7 @@ public final class Settings {
                         List<RuntimePermissionsState.PermissionState> permissions =
                                 getPermissionsFromPermissionsState(
                                         packageSetting.getPermissionsState(), userId);
-                        if (permissions != null) {
-                            packagePermissions.put(packageName, permissions);
-                        }
+                        packagePermissions.put(packageName, permissions);
                     }
                 }
 
@@ -5248,9 +5246,7 @@ public final class Settings {
                     List<RuntimePermissionsState.PermissionState> permissions =
                             getPermissionsFromPermissionsState(
                                     sharedUserSetting.getPermissionsState(), userId);
-                    if (permissions != null) {
-                        sharedUserPermissions.put(sharedUserName, permissions);
-                    }
+                    sharedUserPermissions.put(sharedUserName, permissions);
                 }
 
                 runtimePermissions = new RuntimePermissionsState(version, fingerprint,
@@ -5260,15 +5256,11 @@ public final class Settings {
             mPersistence.write(runtimePermissions, UserHandle.of(userId));
         }
 
-        @Nullable
+        @NonNull
         private List<RuntimePermissionsState.PermissionState> getPermissionsFromPermissionsState(
                 @NonNull PermissionsState permissionsState, @UserIdInt int userId) {
             List<PermissionState> permissionStates = permissionsState.getRuntimePermissionStates(
                     userId);
-            if (permissionStates.isEmpty()) {
-                return null;
-            }
-
             List<RuntimePermissionsState.PermissionState> permissions =
                     new ArrayList<>();
             int permissionStatesSize = permissionStates.size();
@@ -5340,31 +5332,60 @@ public final class Settings {
             boolean defaultPermissionsGranted = Build.FINGERPRINT.equals(fingerprint);
             mDefaultPermissionsGranted.put(userId, defaultPermissionsGranted);
 
-            for (Map.Entry<String, List<RuntimePermissionsState.PermissionState>> entry
-                    : runtimePermissions.getPackagePermissions().entrySet()) {
-                String packageName = entry.getKey();
-                List<RuntimePermissionsState.PermissionState> permissions = entry.getValue();
+            boolean isUpgradeToR = getInternalVersion().sdkVersion < Build.VERSION_CODES.R;
 
-                PackageSetting packageSetting = mPackages.get(packageName);
-                if (packageSetting == null) {
-                    Slog.w(PackageManagerService.TAG, "Unknown package:" + packageName);
-                    continue;
+            Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
+                    runtimePermissions.getPackagePermissions();
+            int packagesSize = mPackages.size();
+            for (int i = 0; i < packagesSize; i++) {
+                String packageName = mPackages.keyAt(i);
+                PackageSetting packageSetting = mPackages.valueAt(i);
+
+                List<RuntimePermissionsState.PermissionState> permissions =
+                        packagePermissions.get(packageName);
+                if (permissions != null) {
+                    readPermissionsStateLpr(permissions, packageSetting.getPermissionsState(),
+                            userId);
+                } else if (packageSetting.sharedUser == null && !isUpgradeToR) {
+                    Slog.w(TAG, "Missing permission state for package: " + packageName);
+                    generateFallbackPermissionsStateLpr(
+                            packageSetting.pkg.getRequestedPermissions(),
+                            packageSetting.pkg.getTargetSdkVersion(),
+                            packageSetting.getPermissionsState(), userId);
                 }
-                readPermissionsStateLpr(permissions, packageSetting.getPermissionsState(), userId);
             }
 
-            for (Map.Entry<String, List<RuntimePermissionsState.PermissionState>> entry
-                    : runtimePermissions.getSharedUserPermissions().entrySet()) {
-                String sharedUserName = entry.getKey();
-                List<RuntimePermissionsState.PermissionState> permissions = entry.getValue();
+            Map<String, List<RuntimePermissionsState.PermissionState>> sharedUserPermissions =
+                    runtimePermissions.getSharedUserPermissions();
+            int sharedUsersSize = mSharedUsers.size();
+            for (int i = 0; i < sharedUsersSize; i++) {
+                String sharedUserName = mSharedUsers.keyAt(i);
+                SharedUserSetting sharedUserSetting = mSharedUsers.valueAt(i);
 
-                SharedUserSetting sharedUserSetting = mSharedUsers.get(sharedUserName);
-                if (sharedUserSetting == null) {
-                    Slog.w(PackageManagerService.TAG, "Unknown shared user:" + sharedUserName);
-                    continue;
+                List<RuntimePermissionsState.PermissionState> permissions =
+                        sharedUserPermissions.get(sharedUserName);
+                if (permissions != null) {
+                    readPermissionsStateLpr(permissions, sharedUserSetting.getPermissionsState(),
+                            userId);
+                } else if (!isUpgradeToR) {
+                    Slog.w(TAG, "Missing permission state for shared user: " + sharedUserName);
+                    ArraySet<String> requestedPermissions = new ArraySet<>();
+                    int targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+                    int sharedUserPackagesSize = sharedUserSetting.packages.size();
+                    for (int packagesI = 0; packagesI < sharedUserPackagesSize; packagesI++) {
+                        PackageSetting packageSetting = sharedUserSetting.packages.valueAt(
+                                packagesI);
+                        if (packageSetting == null || packageSetting.pkg == null
+                                || !packageSetting.getInstalled(userId)) {
+                            continue;
+                        }
+                        AndroidPackage pkg = packageSetting.pkg;
+                        requestedPermissions.addAll(pkg.getRequestedPermissions());
+                        targetSdkVersion = Math.min(targetSdkVersion, pkg.getTargetSdkVersion());
+                    }
+                    generateFallbackPermissionsStateLpr(requestedPermissions, targetSdkVersion,
+                            sharedUserSetting.getPermissionsState(), userId);
                 }
-                readPermissionsStateLpr(permissions, sharedUserSetting.getPermissionsState(),
-                        userId);
             }
         }
 
@@ -5391,6 +5412,30 @@ public final class Settings {
                 } else {
                     permissionsState.updatePermissionFlags(basePermission, userId,
                             PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
+                }
+            }
+        }
+
+        private void generateFallbackPermissionsStateLpr(
+                @NonNull Collection<String> requestedPermissions, int targetSdkVersion,
+                @NonNull PermissionsState permissionsState, @UserIdInt int userId) {
+            for (String permissionName : requestedPermissions) {
+                BasePermission permission = mPermissions.getPermission(permissionName);
+                if (Objects.equals(permission.getSourcePackageName(), PLATFORM_PACKAGE_NAME)
+                        && permission.isRuntime() && !permission.isRemoved()) {
+                    if (permission.isHardOrSoftRestricted() || permission.isImmutablyRestricted()) {
+                        permissionsState.updatePermissionFlags(permission, userId,
+                                PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT,
+                                PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT);
+                    }
+                    if (targetSdkVersion < Build.VERSION_CODES.M) {
+                        permissionsState.updatePermissionFlags(permission, userId,
+                                PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
+                                        | PackageManager.FLAG_PERMISSION_REVOKED_COMPAT,
+                                PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
+                                        | PackageManager.FLAG_PERMISSION_REVOKED_COMPAT);
+                        permissionsState.grantRuntimePermission(permission, userId);
+                    }
                 }
             }
         }
