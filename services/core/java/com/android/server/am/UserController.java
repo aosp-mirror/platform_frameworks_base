@@ -30,6 +30,7 @@ import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 
+import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__FRAMEWORK_LOCKED_BOOT_COMPLETED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -92,8 +93,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -398,13 +399,14 @@ class UserController implements Handler.Callback {
             // Do not report secondary users, runtime restarts or first boot/upgrade
             if (userId == UserHandle.USER_SYSTEM
                     && !mInjector.isRuntimeRestarted() && !mInjector.isFirstBootOrUpgrade()) {
-                int uptimeSeconds = (int)(SystemClock.elapsedRealtime() / 1000);
-                MetricsLogger.histogram(mInjector.getContext(),
-                        "framework_locked_boot_completed", uptimeSeconds);
-                final int MAX_UPTIME_SECONDS = 120;
-                if (uptimeSeconds > MAX_UPTIME_SECONDS) {
+                final long elapsedTimeMs = SystemClock.elapsedRealtime();
+                FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
+                        BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__FRAMEWORK_LOCKED_BOOT_COMPLETED,
+                        elapsedTimeMs);
+                final long maxElapsedTimeMs = 120_000;
+                if (elapsedTimeMs > maxElapsedTimeMs) {
                     Slog.wtf("SystemServerTiming",
-                            "finishUserBoot took too long. uptimeSeconds=" + uptimeSeconds);
+                            "finishUserBoot took too long. elapsedTimeMs=" + elapsedTimeMs);
                 }
             }
 
@@ -618,9 +620,10 @@ class UserController implements Handler.Callback {
         // Do not report secondary users, runtime restarts or first boot/upgrade
         if (userId == UserHandle.USER_SYSTEM
                 && !mInjector.isRuntimeRestarted() && !mInjector.isFirstBootOrUpgrade()) {
-            int uptimeSeconds = (int) (SystemClock.elapsedRealtime() / 1000);
-            MetricsLogger.histogram(mInjector.getContext(), "framework_boot_completed",
-                    uptimeSeconds);
+            final long elapsedTimeMs = SystemClock.elapsedRealtime();
+            FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
+                    FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__FRAMEWORK_BOOT_COMPLETED,
+                    elapsedTimeMs);
         }
         final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
         bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
