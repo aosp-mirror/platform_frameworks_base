@@ -14,29 +14,43 @@
 
 package com.android.systemui;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
+import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
 import static com.android.systemui.ScreenDecorations.rectsToRegion;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 
 import androidx.test.filters.SmallTest;
 
@@ -57,9 +71,12 @@ import java.util.Collections;
 @SmallTest
 public class ScreenDecorationsTest extends SysuiTestCase {
 
+    private static final Rect ZERO_RECT = new Rect();
+
     private TestableLooper mTestableLooper;
     private ScreenDecorations mScreenDecorations;
     private WindowManager mWindowManager;
+    private DisplayManager mDisplayManager;
     private Handler mMainHandler;
     @Mock
     private TunerService mTunerService;
@@ -74,12 +91,18 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mMainHandler = new Handler(mTestableLooper.getLooper());
 
         mWindowManager = mock(WindowManager.class);
-
-        Display display = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
-        when(mWindowManager.getDefaultDisplay()).thenReturn(display);
+        WindowMetrics metrics = mContext.getSystemService(WindowManager.class)
+                .getMaximumWindowMetrics();
+        when(mWindowManager.getMaximumWindowMetrics()).thenReturn(metrics);
         mContext.addMockSystemService(WindowManager.class, mWindowManager);
 
-        mScreenDecorations = new ScreenDecorations(mContext, mMainHandler,
+        mDisplayManager = mock(DisplayManager.class);
+        Display display = mContext.getSystemService(DisplayManager.class)
+                .getDisplay(DEFAULT_DISPLAY);
+        when(mDisplayManager.getDisplay(anyInt())).thenReturn(display);
+        mContext.addMockSystemService(DisplayManager.class, mDisplayManager);
+
+        mScreenDecorations = spy(new ScreenDecorations(mContext, mMainHandler,
                 mBroadcastDispatcher, mTunerService) {
             @Override
             public void start() {
@@ -103,7 +126,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 super.onTuningChanged(key, newValue);
                 mTestableLooper.processAllMessages();
             }
-        };
+        });
         reset(mTunerService);
     }
 
@@ -120,6 +143,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 0);
 
+        // no cutout
+        doReturn(null).when(mScreenDecorations).getCutout();
+
         mScreenDecorations.start();
         // No views added.
         verify(mWindowManager, never()).addView(any(), any());
@@ -128,7 +154,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRounding() {
+    public void testRounding_NoCutout() {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
         mContext.getOrCreateTestableResources().addOverride(
@@ -136,26 +162,232 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 20);
 
+        // no cutout
+        doReturn(null).when(mScreenDecorations).getCutout();
+
         mScreenDecorations.start();
-        // Add 2 windows for rounded corners (top and bottom).
-        verify(mWindowManager, times(2)).addView(any(), any());
+
+        // Top and bottom windows are created for rounded corners.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]), any());
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]), any());
+
+        // Left and right window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]);
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]);
 
         // One tunable.
         verify(mTunerService, times(1)).addTunable(any(), any());
     }
 
     @Test
-    public void testCutout() {
+    public void testNoRounding_CutoutShortEdge() {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, 0);
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 0);
 
+        // top cutout
+        doReturn(new DisplayCutout(
+                        Insets.of(0, 10, 0, 0),
+                        ZERO_RECT,
+                        new Rect(9, 0, 10, 1),
+                        ZERO_RECT,
+                        ZERO_RECT,
+                        Insets.NONE)).when(mScreenDecorations).getCutout();
+
         mScreenDecorations.start();
-        // Add 2 windows for rounded corners (top and bottom).
-        verify(mWindowManager, times(2)).addView(any(), any());
+        // Top window is created for top cutout.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]), any());
+        // Bottom window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+        // Left window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]);
+        // Right window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]);
+    }
+
+    @Test
+    public void testNoRounding_CutoutLongEdge() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, 0);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 0);
+
+        // left cutout
+        doReturn(new DisplayCutout(
+                Insets.of(0, 10, 0, 0),
+                new Rect(0, 200, 1, 210),
+                ZERO_RECT,
+                ZERO_RECT,
+                ZERO_RECT,
+                Insets.NONE)).when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        // Left window is created for left cutout.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]), any());
+        // Bottom window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+        // Top window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]);
+        // Right window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]);
+    }
+
+    @Test
+    public void testRounding_CutoutShortEdge() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 20);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 20);
+
+        // top cutout
+        doReturn(new DisplayCutout(
+                Insets.of(0, 10, 0, 0),
+                ZERO_RECT,
+                new Rect(9, 0, 10, 1),
+                ZERO_RECT,
+                ZERO_RECT,
+                Insets.NONE)).when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        // Top window is created for rouned corner and top cutout.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]), any());
+        // Bottom window is created for rouned corner.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]), any());
+        // Left window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]);
+        // Right window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]);
+    }
+
+    @Test
+    public void testRounding_CutoutLongEdge() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 20);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 20);
+
+        // left cutout
+        doReturn(new DisplayCutout(
+                Insets.of(0, 10, 0, 0),
+                new Rect(0, 200, 1, 210),
+                ZERO_RECT,
+                ZERO_RECT,
+                ZERO_RECT,
+                Insets.NONE)).when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        // Left window is created for rouned corner and left cutout.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]), any());
+        // Right window is created for rouned corner.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]), any());
+        // Top window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]);
+        // Bottom window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+    }
+
+    @Test
+    public void testRounding_CutoutShortAndLongEdge() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 20);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 20);
+
+        // top and left cutout
+        doReturn(new DisplayCutout(
+                Insets.of(0, 10, 0, 0),
+                new Rect(0, 200, 1, 210),
+                new Rect(9, 0, 10, 1),
+                ZERO_RECT,
+                ZERO_RECT,
+                Insets.NONE)).when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        // Top window is created for rouned corner and top cutout.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]), any());
+        // Bottom window is created for rouned corner.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]), any());
+        // Left window is created for left cutout.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]), any());
+        // Right window should be null.
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]);
+    }
+
+    @Test
+    public void testNoRounding_SwitchFrom_ShortEdgeCutout_To_LongCutout() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, 0);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 0);
+
+        // Set to short edge cutout(top).
+        doReturn(new DisplayCutout(
+                Insets.of(0, 10, 0, 0),
+                ZERO_RECT,
+                new Rect(9, 0, 10, 1),
+                ZERO_RECT,
+                ZERO_RECT,
+                Insets.NONE)).when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]), any());
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]);
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]);
+
+        // Switch to long edge cutout(left).
+        // left cutout
+        doReturn(new DisplayCutout(
+                Insets.of(0, 10, 0, 0),
+                new Rect(0, 200, 1, 210),
+                ZERO_RECT,
+                ZERO_RECT,
+                ZERO_RECT,
+                Insets.NONE)).when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.onConfigurationChanged(new Configuration());
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]), any());
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]);
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]);
     }
 
     @Test
@@ -164,22 +396,40 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, 0);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, 0);
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 0);
 
+        // top cutout
+        doReturn(new DisplayCutout(
+                Insets.of(0, 10, 0, 0),
+                ZERO_RECT,
+                new Rect(9, 0, 10, 1),
+                ZERO_RECT,
+                ZERO_RECT,
+                Insets.NONE)).when(mScreenDecorations).getCutout();
+
         mScreenDecorations.start();
+        assertNull(mScreenDecorations.mOverlays);
 
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
         mScreenDecorations.onConfigurationChanged(new Configuration());
 
-        // Add 2 windows for rounded corners (top and bottom).
-        verify(mWindowManager, times(2)).addView(any(), any());
+        // Only top windows should be added.
+        verify(mWindowManager, times(1))
+                .addView(eq(mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP]), any());
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM]);
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT]);
+        assertNull(mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT]);
     }
 
     @Test
     public void hasRoundedCornerOverlayFlagSet() {
-        assertThat(mScreenDecorations.getWindowLayoutParams().privateFlags
+        assertThat(mScreenDecorations.getWindowLayoutParams(1).privateFlags
                         & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                 is(PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY));
     }
