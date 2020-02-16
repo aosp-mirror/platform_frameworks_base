@@ -4911,8 +4911,10 @@ package android.media.tv.tuner {
   }
 
   public final class TunerConstants {
-    field public static final int INVALID_STREAM_ID = -1; // 0xffffffff
-    field public static final int INVALID_TS_PID = -1; // 0xffffffff
+    field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
+    field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
+    field public static final int INVALID_STREAM_ID = 65535; // 0xffff
+    field public static final int INVALID_TS_PID = 65535; // 0xffff
     field public static final int RESULT_INVALID_ARGUMENT = 4; // 0x4
     field public static final int RESULT_INVALID_STATE = 3; // 0x3
     field public static final int RESULT_NOT_INITIALIZED = 2; // 0x2
