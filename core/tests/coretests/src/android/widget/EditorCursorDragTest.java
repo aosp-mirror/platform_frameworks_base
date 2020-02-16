@@ -25,6 +25,9 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertFalse;
@@ -32,11 +35,14 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.text.Layout;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -50,9 +56,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class EditorCursorDragTest {
+    private static final String LOG_TAG = EditorCursorDragTest.class.getSimpleName();
+
+    private static final AtomicLong sTicker = new AtomicLong(1);
+
     @Rule
     public ActivityTestRule<TextViewActivity> mActivityRule = new ActivityTestRule<>(
             TextViewActivity.class);
@@ -119,13 +131,11 @@ public class EditorCursorDragTest {
         onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
 
-        // Swipe along a diagonal path. This should drag the cursor.
-        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("2")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("2")));
-
-        // Swipe along a steeper diagonal path. This should still drag the cursor.
+        // Swipe along a diagonal path. This should drag the cursor. Because we snap the finger to
+        // the handle as the touch moves downwards (and because we have some slop to avoid jumping
+        // across lines), the cursor position will end up higher than the finger position.
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("3")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("3")));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("1")));
 
         // Swipe right-down along a very steep diagonal path. This should not drag the cursor.
         // Normally this would trigger a scroll, but since the full view fits on the screen there
@@ -133,12 +143,15 @@ public class EditorCursorDragTest {
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("7")));
         onView(withId(R.id.textview)).check(hasSelection(not(emptyString())));
 
+        // Tap to clear the selection.
+        int index = text.indexOf("line9");
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(index));
+        onView(withId(R.id.textview)).check(hasSelection(emptyString()));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(index));
+
         // Swipe right-up along a very steep diagonal path. This should not drag the cursor.
         // Normally this would trigger a scroll, but since the full view fits on the screen there
         // is nothing to scroll and the gesture will trigger a selection drag.
-        int index = text.indexOf("line9");
-        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(index));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(index));
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line7"), text.indexOf("1")));
         onView(withId(R.id.textview)).check(hasSelection(not(emptyString())));
     }
@@ -154,13 +167,11 @@ public class EditorCursorDragTest {
         onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
 
-        // Swipe along a diagonal path. This should drag the cursor.
-        onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("2")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("2")));
-
-        // Swipe along a steeper diagonal path. This should still drag the cursor.
+        // Swipe along a diagonal path. This should drag the cursor. Because we snap the finger to
+        // the handle as the touch moves downwards (and because we have some slop to avoid jumping
+        // across lines), the cursor position will end up higher than the finger position.
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("3")));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("3")));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("1")));
 
         // Swipe right-down along a very steep diagonal path. This should not drag the cursor.
         // Normally this would trigger a scroll up, but since the view is already at the top there
@@ -168,11 +179,14 @@ public class EditorCursorDragTest {
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line1"), text.indexOf("7")));
         onView(withId(R.id.textview)).check(hasSelection(not(emptyString())));
 
-        // Swipe right-up along a very steep diagonal path. This should not drag the cursor. This
-        // will trigger a downward scroll and the cursor position will not change.
+        // Tap to clear the selection.
         int index = text.indexOf("line9");
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(index));
+        onView(withId(R.id.textview)).check(hasSelection(emptyString()));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(index));
+
+        // Swipe right-up along a very steep diagonal path. This should not drag the cursor. This
+        // will trigger a downward scroll and the cursor position will not change.
         onView(withId(R.id.textview)).perform(dragOnText(text.indexOf("line7"), text.indexOf("1")));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(index));
     }
@@ -387,12 +401,14 @@ public class EditorCursorDragTest {
         assertFalse(editor.getSelectionController().isCursorBeingModified());
     }
 
+    @Suppress // b/149712851
     @Test // Reproduces b/147366705
     public void testCursorDrag_nonSelectableTextView() throws Throwable {
         String text = "Hello world!";
         TextView tv = mActivity.findViewById(R.id.nonselectable_textview);
         tv.setText(text);
         Editor editor = tv.getEditorForTesting();
+        assertThat(editor).isNotNull();
 
         // Simulate a tap. No error should be thrown.
         long event1Time = 1001;
@@ -402,6 +418,68 @@ public class EditorCursorDragTest {
         // Swipe left to right. No error should be thrown.
         onView(withId(R.id.nonselectable_textview)).perform(
                 dragOnText(text.indexOf("llo"), text.indexOf("!")));
+    }
+
+    @Test
+    public void testCursorDrag_slop() throws Throwable {
+        String text = "line1: This is the 1st line: A\n"
+                    + "line2: This is the 2nd line: B\n"
+                    + "line3: This is the 3rd line: C\n";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+        TextView tv = mActivity.findViewById(R.id.textview);
+
+        // Simulate a drag where the finger moves slightly up and down (above and below the original
+        // line where the drag started). The cursor should just move along the original line without
+        // jumping up or down across lines.
+        MotionEventInfo[] events = new MotionEventInfo[]{
+                // Start dragging along the second line
+                motionEventInfo(text.indexOf("line2"), 1.0f),
+                motionEventInfo(text.indexOf("This is the 2nd"), 1.0f),
+                // Move to the bottom of the first line; cursor should remain on second line
+                motionEventInfo(text.indexOf("he 1st"), 0.0f, text.indexOf("he 2nd")),
+                // Move to the top of the third line; cursor should remain on second line
+                motionEventInfo(text.indexOf("e: C"), 1.0f, text.indexOf("e: B")),
+                motionEventInfo(text.indexOf("B"), 0.0f)
+        };
+        simulateDrag(tv, events, true);
+    }
+
+    @Test
+    public void testCursorDrag_snapToHandle() throws Throwable {
+        String text = "line1: This is the 1st line: A\n"
+                    + "line2: This is the 2nd line: B\n"
+                    + "line3: This is the 3rd line: C\n";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+        TextView tv = mActivity.findViewById(R.id.textview);
+
+        // When the drag motion moves downward, we delay jumping to the lower line to allow the
+        // user's touch to snap to the cursor's handle. Once the finger is over the handle, we
+        // position the cursor above the user's actual touch (offset such that the finger remains
+        // over the handle rather than on top of the cursor vertical bar). This improves the
+        // visibility of the cursor and the text underneath.
+        MotionEventInfo[] events = new MotionEventInfo[]{
+                // Start dragging along the first line
+                motionEventInfo(text.indexOf("line1"), 1.0f),
+                motionEventInfo(text.indexOf("This is the 1st"), 1.0f),
+                // Move to the bottom of the third line; cursor should end up on second line
+                motionEventInfo(text.indexOf("he 3rd"), 0.0f, text.indexOf("he 2nd")),
+                // Move to the middle of the second line; cursor should end up on the first line
+                motionEventInfo(text.indexOf("he 2nd"), 0.5f, text.indexOf("he 1st"))
+        };
+        simulateDrag(tv, events, true);
+
+        // If the drag motion hasn't moved downward (ie, we haven't had a chance to snap to the
+        // handle), we position the cursor directly at the touch position.
+        events = new MotionEventInfo[]{
+                // Start dragging along the third line
+                motionEventInfo(text.indexOf("line3"), 1.0f),
+                motionEventInfo(text.indexOf("This is the 3rd"), 1.0f),
+                // Move to the middle of the second line; cursor should end up on the second line
+                motionEventInfo(text.indexOf("he 2nd"), 0.5f, text.indexOf("he 2nd")),
+        };
+        simulateDrag(tv, events, true);
     }
 
     private static MotionEvent downEvent(long downTime, long eventTime, float x, float y) {
@@ -435,5 +513,90 @@ public class EditorCursorDragTest {
         event.setSource(InputDevice.SOURCE_MOUSE);
         event.setButtonState(MotionEvent.BUTTON_PRIMARY);
         return event;
+    }
+
+    public static MotionEventInfo motionEventInfo(int index, float ratioToLineTop) {
+        return new MotionEventInfo(index, ratioToLineTop, index);
+    }
+
+    public static MotionEventInfo motionEventInfo(int index, float ratioToLineTop,
+            int expectedCursorIndex) {
+        return new MotionEventInfo(index, ratioToLineTop, expectedCursorIndex);
+    }
+
+    private static class MotionEventInfo {
+        public final int index;
+        public final float ratioToLineTop; // 0.0 = bottom of line, 0.5 = middle of line, etc
+        public final int expectedCursorIndex;
+
+        private MotionEventInfo(int index, float ratioToLineTop, int expectedCursorIndex) {
+            this.index = index;
+            this.ratioToLineTop = ratioToLineTop;
+            this.expectedCursorIndex = expectedCursorIndex;
+        }
+
+        public float[] getCoordinates(TextView textView) {
+            Layout layout = textView.getLayout();
+            int line = layout.getLineForOffset(index);
+            float x = layout.getPrimaryHorizontal(index) + textView.getTotalPaddingLeft();
+            int bottom = layout.getLineBottom(line);
+            int top = layout.getLineTop(line);
+            float y = bottom - ((bottom - top) * ratioToLineTop) + textView.getTotalPaddingTop();
+            return new float[]{x, y};
+        }
+    }
+
+    private void simulateDrag(TextView tv, MotionEventInfo[] events, boolean runAssertions)
+            throws Exception {
+        Editor editor = tv.getEditorForTesting();
+
+        float[] downCoords = events[0].getCoordinates(tv);
+        long downEventTime = sTicker.addAndGet(10_000);
+        MotionEvent downEvent = downEvent(downEventTime, downEventTime,
+                downCoords[0], downCoords[1]);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(downEvent));
+
+        for (int i = 1; i < events.length; i++) {
+            float[] moveCoords = events[i].getCoordinates(tv);
+            long eventTime = downEventTime + i;
+            MotionEvent event = moveEvent(downEventTime, eventTime, moveCoords[0], moveCoords[1]);
+            mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event));
+            assertCursorPosition(tv, events[i].expectedCursorIndex, runAssertions);
+        }
+
+        MotionEventInfo lastEvent = events[events.length - 1];
+        float[] upCoords = lastEvent.getCoordinates(tv);
+        long upEventTime = downEventTime + events.length;
+        MotionEvent upEvent = upEvent(downEventTime, upEventTime, upCoords[0], upCoords[1]);
+        mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(upEvent));
+    }
+
+    private static void assertCursorPosition(TextView tv, int expectedPosition,
+            boolean runAssertions) {
+        String textAfterExpectedPos = getTextAfterIndex(tv, expectedPosition, 15);
+        String textAfterActualPos = getTextAfterIndex(tv, tv.getSelectionStart(), 15);
+        String msg = "Expected cursor at " + expectedPosition + ", just before \""
+                + textAfterExpectedPos + "\". Cursor is at " + tv.getSelectionStart()
+                + ", just before \"" + textAfterActualPos + "\".";
+        Log.d(LOG_TAG, msg);
+        if (runAssertions) {
+            assertWithMessage(msg).that(tv.getSelectionStart()).isEqualTo(expectedPosition);
+            assertThat(tv.getSelectionEnd()).isEqualTo(expectedPosition);
+        }
+    }
+
+    private static String getTextAfterIndex(TextView tv, int position, int maxLength) {
+        int end = Math.min(position + maxLength, tv.getText().length());
+        try {
+            String afterPosition = tv.getText().subSequence(position, end).toString();
+            if (afterPosition.indexOf('\n') > 0) {
+                afterPosition = afterPosition.substring(0, afterPosition.indexOf('\n'));
+            }
+            return afterPosition;
+        } catch (StringIndexOutOfBoundsException e) {
+            Log.d(LOG_TAG, "Invalid target position: position=" + position + ", length="
+                    + tv.getText().length() + ", end=" + end);
+            return "";
+        }
     }
 }
