@@ -2976,6 +2976,9 @@ package android.provider {
     field public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
     field public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS = "location_access_check_delay_millis";
     field public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS = "location_access_check_interval_millis";
+    field public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
+    field public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
+    field public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
     field public static final String NOTIFICATION_BADGING = "notification_badging";
     field @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
@@ -3395,6 +3398,34 @@ package android.service.notification {
     method public String getId();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.SnoozeCriterion> CREATOR;
+  }
+
+}
+
+package android.service.quickaccesswallet {
+
+  public interface QuickAccessWalletClient {
+    method public void addWalletServiceEventListener(@NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletServiceEventListener);
+    method @NonNull public static android.service.quickaccesswallet.QuickAccessWalletClient create(@NonNull android.content.Context);
+    method @Nullable public android.content.Intent createWalletIntent();
+    method @Nullable public android.content.Intent createWalletSettingsIntent();
+    method public void disconnect();
+    method public void getWalletCards(@NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.OnWalletCardsRetrievedCallback);
+    method public boolean isWalletFeatureAvailable();
+    method public boolean isWalletFeatureAvailableWhenDeviceLocked();
+    method public boolean isWalletServiceAvailable();
+    method public void notifyWalletDismissed();
+    method public void removeWalletServiceEventListener(@NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletServiceEventListener);
+    method public void selectWalletCard(@NonNull android.service.quickaccesswallet.SelectWalletCardRequest);
+  }
+
+  public static interface QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
+    method public void onWalletCardRetrievalError(@NonNull android.service.quickaccesswallet.GetWalletCardsError);
+    method public void onWalletCardsRetrieved(@NonNull android.service.quickaccesswallet.GetWalletCardsResponse);
+  }
+
+  public static interface QuickAccessWalletClient.WalletServiceEventListener {
+    method public void onWalletServiceEvent(@NonNull android.service.quickaccesswallet.WalletServiceEvent);
   }
 
 }
