@@ -191,6 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Уред откажан од администраторот за лична употреба"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Некој управува со уредот"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Вашата организација управува со уредов и можно е да го следи сообраќајот на мрежата. Допрете за детали."</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"Администраторот ги променил поставките за локација"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"Допрете за да ги видите поставките за локација."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Уредот ќе се избрише"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Апликацијата на администраторот не може да се користи. Уредот ќе се избрише сега.\n\nАко имате прашања, контактирајте со администраторот на организацијата."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Печатењето е оневозможено од <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -429,6 +431,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Оваа привилегирана | системска апликација може да фотографира и да снима видеа со системската камера во секое време. Потребно е апликацијата да ја има и дозволата android.permission.CAMERA"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролирај вибрации"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволува апликацијата да ги контролира вибрациите."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ѝ дозволува на апликацијата да пристапи до состојбата на вибрации."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно избирај телефонски броеви"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Овозможува апликацијата да повикува телефонски броеви без ваша интервенција. Ова може да предизвика неочекувани трошоци или повици. Имајте на ум дека ова не дозволува апликацијата да повикува броеви на служби за итна помош. Злонамерните апликации може да ве чинат пари поради повици без ваша потврда."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"пристапи до услугата за повици IMS"</string>
@@ -543,6 +546,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Обидете се повторно."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Не се запишани отпечатоци."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Уредов нема сензор за отпечатоци."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Прст <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +591,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ликот не може да се потврди. Обидете се повторно."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Не сте поставиле „Отклучување со лик“."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"„Отклучувањето со лик“ не е поддржано на уредов."</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1616,7 +1623,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Услугата од преден план започната во заднина од <xliff:g id="PACKAGENAME">%1$s</xliff:g> нема да има дозола за „додека се користи“ во идните R-верзии. Погледнете на go/r-bg-fgs-restriction и испратете извештај за грешка."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да го зголемиме звукот над препорачаното ниво?\n\nСлушањето звуци со голема јачина подолги периоди може да ви го оштети сетилото за слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Да се користи кратенка за „Пристапност“?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција на пристапност.\n\n Тековна функција на пристапност:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Функцијата може да ја промените во „Поставки“ &gt; „Пристапност“."</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменете ги кратенките"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Откажи"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Исклучи ја кратенката"</string>
@@ -2012,4 +2020,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> е ставен во корпата ОГРАНИЧЕНИ"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Лични"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Службени"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

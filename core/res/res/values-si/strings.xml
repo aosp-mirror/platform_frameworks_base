@@ -191,6 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"පරිපාලක පුද්ගලික භාවිතය සඳහා උපාංගය අත්හැර දමන ලදී"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"උපාංගය කළමනාකරණය කෙරේ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ඔබගේ ආයතනය මෙම උපාංගය කළමනාකරණය කරන අතර එය ජාල තදබදය නිරීක්ෂණය කළ හැක. විස්තර සඳහා තට්ටු කරන්න."</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"ස්ථාන සැකසීම් ඔබේ පරිපාලක විසින් වෙනස් කරන ලදී"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"ඔබේ ස්ථාන සැකසීම් බැලීමට තට්ටු කරන්න."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"පරිපාලක යෙදුම භාවිතා කළ නොහැකිය. ඔබේ උපාංගය දැන් මකා දමනු ඇත.\n\nඔබට ප්‍රශ්න තිබේ නම්, ඔබේ සංවිධානයේ පරිපාලකට අමතන්න."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> විසින් මුද්‍රණය කිරීම අබල කර ඇත."</string>
@@ -429,6 +431,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"මෙම වරප්‍රසාද ලත් | යෙදුමට ඕනෑම වේලාවක කැමරාව භාවිත කර පින්තූර ගැනීමට සහ වීඩියෝ පටිගත කිරීමට හැකිය. යෙදුම විසින් රඳවා තබා ගැනීමට android.permission.CAMERA ප්‍රවේශයද අවශ්‍ය වේ"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"කම්පනය පාලනය කිරීම"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"කම්පකය පාලනයට යෙදුමට අවසර දෙන්න."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"යෙදුමට කම්පන තත්ත්වයට ප්‍රවේශ වීමට ඉඩ දෙන්න."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"ඔබගේ මැදිහත් වීමක් නොමැතිව දුරකථන අංක ඇමතීමට යෙදුමට අවසර දෙන්න. මෙහි ප්‍රතිඑලය වන්නේ අනපේක්ෂිත අයකිරීම් හෝ ඇමතුම් ඇතිවීමයි. මෙයන් හදිසි අංක වලට ඇමතුම් ගැනීමට යෙදුමට අවසර නොදෙන බවට සටහන් කරගන්න. ඔබගේ අනුදැනුමක් නොමැතිව ඇමතුම් ගැනීමෙන් අනිෂ්ට යෙදුම් ඔබගේ මුදල් නිකරුණේ වැය කරයි."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ඇමතුම් සේවාවට පිවිසෙන්න"</string>
@@ -543,6 +546,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ඇඟිලි සලකුණු ඇතුළත් කර නොමැත."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +591,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"මුහුණ සත්‍යාපන කළ නොහැක. නැවත උත්සාහ කරන්න."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"ඔබ මුහුණු අඟුලු ඇරීම සකසා නැත"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"මෙම උපාංගයෙහි මුහුණු අඟුලු ඇරීමට සහය නොදැක්වේ"</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"මුහුණු <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1616,7 +1623,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> වෙතින් පසුබිම ආරම්භ කරන ලද පෙරබිම් සේවාව අනාගත R තැනුම්වලදී භාවිතයේ අවසරය නැත. කරුණාකර go/r-bg-fgs-අවහිරතාව බලා දෝෂ වාර්තාවක් ගොනු කරන්න."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"නිර්දේශිතයි මට්ටමට වඩා ශබ්දය වැඩිද?\n\nදිගු කාලයක් සඳහා ඉහළ ශබ්දයක් ඇසීමෙන් ඇතැම් විට ඔබගේ ඇසීමට හානි විය හැක."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ප්‍රවේශ්‍යතා කෙටිමඟ භාවිතා කරන්නද?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"කෙටිමඟ සක්‍රිය විට, හඬ බොත්තම් දෙකම තත්පර 3ක් අල්ලාගෙන සිටීමෙන් ප්‍රවේශ්‍යත අංගයක් ඇරඹේ.\n\n වත්මන් ප්‍රවේශ්‍යතා අංගය:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n සැකසීම් &gt; ප්‍රවේශ්‍යතාව තුළ ඔබට අංගය වෙනස් කළ හැක."</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"කෙටිමං සංස්කරණ කරන්න"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"අවලංගු කරන්න"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"කෙටිමඟ ක්‍රියාවිරහිත කරන්න"</string>
@@ -2012,4 +2020,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> අවහිර කළ බාල්දියට දමා ඇත"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"පුද්ගලික"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"කාර්යාල"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

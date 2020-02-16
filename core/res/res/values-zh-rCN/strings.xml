@@ -191,6 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"管理员已将该设备开放给个人使用"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"设备为受管理设备"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"贵单位会管理该设备，且可能会监控网络流量。点按即可了解详情。"</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"您的管理员已更改位置信息设置"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"点按即可查看您的位置信息设置。"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"系统将清空您的设备"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"无法使用管理应用，系统现在将清空您的设备。\n\n如有疑问，请与您所在单位的管理员联系。"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"“<xliff:g id="OWNER_APP">%s</xliff:g>”已停用打印功能。"</string>
@@ -429,6 +431,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"获取访问权限后，这个系统应用就随时可以使用系统相机拍照及录制视频。另外，应用还需要获取 android.permission.CAMERA 权限"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"控制振动"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允许应用控制振动器。"</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"允许该应用访问振动器状态。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"拨打电话"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"允许该应用在您未执行操作的情况下拨打电话号码。此权限可能会导致意外收费或呼叫。请注意，此权限不允许该应用拨打紧急电话号码。恶意应用可通过拨打电话产生相关费用，而无需您的确认。"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"使用即时通讯通话服务"</string>
@@ -543,6 +546,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"请重试。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"未注册任何指纹。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"此设备没有指纹传感器。"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"手指 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +591,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"无法验证人脸，请重试。"</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"您尚未设置人脸解锁。"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"此设备不支持人脸解锁。"</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"面孔 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1614,7 +1621,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"在未来的 R 版本中，在后台启动的 <xliff:g id="PACKAGENAME">%1$s</xliff:g> 中的前台服务将不具有仅在使用时授予的权限。请访问 go/r-bg-fgs-restriction 并提交错误报告。"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要将音量调高到建议的音量以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用无障碍快捷方式吗？"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"开启快捷方式后，同时按下两个音量按钮 3 秒钟即可启动所设定的无障碍功能。\n\n当前设定的无障碍功能：\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n如需更改设定的功能，请依次转到“设置”&gt;“无障碍”。"</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"修改快捷方式"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"取消"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"关闭快捷方式"</string>
@@ -2010,4 +2018,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 已被放入受限存储分区"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"个人"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"工作"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

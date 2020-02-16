@@ -191,6 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Yönetici, cihazı kişisel kullanım için serbest bıraktı"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Cihaz yönetiliyor"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Kuruluşunuz bu cihazı yönetmekte olup ağ trafiğini izleyebilir. Ayrıntılar için dokunun."</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"Konum ayarları, yöneticiniz tarafından değiştirildi"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"Konum ayarlarınızı görmek için dokunun."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Cihazınız silinecek"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Yönetim uygulaması kullanılamıyor. Cihazınız şimdi silinecek.\n\nSorularınız varsa kuruluşunuzun yöneticisine başvurun."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Yazdırma işlemi <xliff:g id="OWNER_APP">%s</xliff:g> tarafından devre dışı bırakıldı."</string>
@@ -429,6 +431,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Ayrıcalık tanınmış bu | sistem uygulaması herhangi bir zamanda sistem kamerası kullanarak fotoğraf çekebilir ve video kaydedebilir. Uygulamanın da bu ayrıcalığa sahip olması için android.permission.CAMERA izni gerektirir"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"titreşimi denetleme"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Uygulamaya, titreşimi denetleme izni verir."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Uygulamanın titreşim durumuna erişimesine izni verir."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon numaralarına doğrudan çağrı yap"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Uygulamaya sizin müdahaleniz olmadan telefon numaralarına çağrı yapma izni verir. Bu durum beklenmeyen ödemelere veya çağrılara neden olabilir. Ancak bu iznin, uygulamanın acil numaralara çağrı yapmasına olanak sağlamadığını unutmayın. Kötü amaçlı uygulamalar onayınız olmadan çağrılar yaparak sizi zarara sokabilir."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS çağrı hizmetine erişme"</string>
@@ -543,6 +546,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Tekrar deneyin."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Parmak izi kaydedilmedi."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Bu cihazda parmak izi sensörü yok."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. parmak"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +591,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Yüz doğrulanamıyor. Tekrar deneyin."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Yüz tanıma kilidi ayarlamadınız."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Bu cihazda yüz tanıma kilidi desteklenmiyor"</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"Yüz <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1614,7 +1621,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> paketinden ön plan hizmetini başlatan arka plan, sonraki R derlemelerinde kullanım sırasında iznine sahip olmayacak. Lütfen go/r-bg-fgs-restriction sayfasına bakıp hata raporu girin."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ses seviyesi önerilen düzeyin üzerine yükseltilsin mi?\n\nUzun süre yüksek ses seviyesinde dinlemek işitme duyunuza zarar verebilir."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erişilebilirlik Kısayolu Kullanılsın mı?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kısayol açık olduğunda, ses düğmelerinin ikisini birden 3 saniyeliğine basılı tutmanız bir erişilebilirlik özelliğini başlatır.\n\n Geçerli erişilebilirlik özelliği:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Özelliği, Ayarlar &gt; Erişilebilirlik seçeneğinden değiştirebilirsiniz."</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Kısayolları düzenle"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"İptal"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Kısayolu Kapat"</string>
@@ -2010,4 +2018,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> KISITLANMIŞ gruba yerleştirildi"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Kişisel"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"İş"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

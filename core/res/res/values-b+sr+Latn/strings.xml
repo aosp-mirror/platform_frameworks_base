@@ -193,6 +193,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator je ustupio uređaj za ličnu upotrebu"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Uređajem se upravlja"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organizacija upravlja ovim uređajem i može da nadgleda mrežni saobraćaj. Dodirnite za detalje."</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"Administrator je promenio podešavanja lokacije"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"Dodirnite da biste videli podešavanja lokacije."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Uređaj će biti obrisan"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Ne možete da koristite ovu aplikaciju za administratore. Uređaj će sada biti obrisan.\n\nAko imate pitanja, kontaktirajte administratora organizacije."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Štampanje je onemogućila aplikacija <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -432,6 +434,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Ova privilegovana | sistemska aplikacija može da snima slike i video snimke pomoću kamere sistema u bilo kom trenutku. Aplikacija treba da ima i dozvolu android.permission.CAMERA"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrola vibracije"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Dozvoljava aplikaciji da kontroliše vibraciju."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Dozvoljava aplikaciji da pristupa stanju vibriranja."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"direktno pozivanje brojeva telefona"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Dozvoljava aplikaciji da poziva brojeve telefona bez vaše dozvole. Ovo može da dovede do neočekivanih troškova ili poziva. Imajte na umu da ovo ne dozvoljava aplikaciji da poziva brojeve za hitne slučajeve. Zlonamerne aplikacije mogu da pozivaju bez vaše potvrde, što može da dovede do troškova."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"pristup usluzi poziva pomoću razmene trenutnih poruka"</string>
@@ -546,6 +549,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Probajte ponovo."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nije registrovan nijedan otisak prsta."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ovaj uređaj nema senzor za otisak prsta."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -589,6 +594,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Provera lica nije uspela. Probajte ponovo."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Niste podesili otključavanje licem"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Otključavanje licem nije podržano na ovom uređaju"</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"Lice <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1636,7 +1643,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Usluga u prvom planu sa <xliff:g id="PACKAGENAME">%1$s</xliff:g> koja je pokrenuta u pozadini neće imati dozvolu tokom korišćenja u budućim R verzijama. Posetite go/r-bg-fgs-restriction i pošaljite izveštaj o grešci."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Želite da pojačate zvuk iznad preporučenog nivoa?\n\nSlušanje glasne muzike duže vreme može da vam ošteti sluh."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite li da koristite prečicu za pristupačnost?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kada je prečica uključena, pritisnite oba dugmeta za jačinu zvuka da biste pokrenuli funkciju pristupačnosti.\n\n Aktuelna funkcija pristupačnosti:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Možete da promenite funkciju u odeljku Podešavanja &gt; Pristupačnost."</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Izmenite prečice"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Otkaži"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Isključi prečicu"</string>
@@ -2044,4 +2052,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Paket <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> je dodat u segment OGRANIČENO"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Lični"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Poslovni"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

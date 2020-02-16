@@ -191,6 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"O administrador renunciou ao dispositivo para uso pessoal"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"O dispositivo é gerenciado"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Sua organização gerencia este dispositivo e pode monitorar o tráfego de rede. Toque para ver detalhes."</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"Configurações de localização modificadas pelo administrador"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"Toque para ver as configurações de localização."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Seu dispositivo será limpo"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Não é possível usar o aplicativo para administrador. Seu dispositivo passará por uma limpeza agora.\n\nEm caso de dúvidas, entre em contato com o administrador da sua organização."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Impressão desativada por <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -429,6 +431,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Este app do sistema/com privilégios pode tirar fotos e gravar vídeos a qualquer momento usando a câmera do sistema. É necessário que o app tenha também a permissão android.permission.CAMERA"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar vibração"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que o app controle a vibração."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que o app acesse o estado da vibração."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ligar diretamente para números de telefone"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Permite que o app ligue para números de telefone sem sua intervenção. Isso pode resultar em cobranças ou chamadas inesperadas. Esta opção não permite que o app ligue para números de emergência. Apps maliciosos podem gerar custos com chamadas feitas sem sua confirmação."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"acessar serviço de mensagens instantâneas para chamadas"</string>
@@ -543,6 +546,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Tente novamente."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nenhuma impressão digital registrada."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo não tem um sensor de impressão digital."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +591,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Não é possível verificar o rosto. Tente novamente."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"O desbloqueio facial não foi configurado."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"O desbloqueio facial não é compatível com este dispositivo."</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1614,7 +1621,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"O serviço em primeiro plano iniciado em segundo plano por <xliff:g id="PACKAGENAME">%1$s</xliff:g> não receberá uma permissão durante o uso em futuras versões R. Consulte go/r-bg-fgs-restriction e crie um relatório de bug."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Aumentar o volume acima do nível recomendado?\n\nOuvir em volume alto por longos períodos pode danificar sua audição."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usar atalho de Acessibilidade?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Quando o atalho está ativado, pressione os dois botões de volume por três segundos para iniciar um recurso de acessibilidade.\n\n Recurso de acessibilidade atual:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n É possível alterar o recurso em Configurações &gt; Acessibilidade."</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atalhos"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Cancelar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desativar atalho"</string>
@@ -2010,4 +2018,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> foi colocado no intervalo \"RESTRITO\""</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Pessoal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabalho"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>
