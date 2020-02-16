@@ -30,7 +30,7 @@ import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
-import android.media.IMediaRouter2Client;
+import android.media.IMediaRouter2;
 import android.media.IMediaRouter2Manager;
 import android.media.IMediaRouterClient;
 import android.media.IMediaRouterService;
@@ -450,50 +450,78 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void registerClient2(IMediaRouter2Client client, String packageName) {
+    public void registerRouter2(IMediaRouter2 router, String packageName) {
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {
             throw new SecurityException("packageName must match the calling uid");
         }
-        mService2.registerClient(client, packageName);
+        mService2.registerRouter2(router, packageName);
     }
 
     // Binder call
     @Override
-    public void unregisterClient2(IMediaRouter2Client client) {
-        mService2.unregisterClient(client);
+    public void unregisterRouter2(IMediaRouter2 router) {
+        mService2.unregisterRouter2(router);
     }
 
     // Binder call
     @Override
-    public void requestCreateSession(IMediaRouter2Client client, MediaRoute2Info route,
+    public void setDiscoveryRequestWithRouter2(IMediaRouter2 router,
+            RouteDiscoveryPreference request) {
+        mService2.setDiscoveryRequestWithRouter2(router, request);
+    }
+
+    // Binder call
+    @Override
+    public void setRouteVolumeWithRouter2(IMediaRouter2 router,
+            MediaRoute2Info route, int volume) {
+        mService2.setRouteVolumeWithRouter2(router, route, volume);
+    }
+
+    // Binder call
+    @Override
+    public void requestCreateSessionWithRouter2(IMediaRouter2 router, MediaRoute2Info route,
             int requestId, Bundle sessionHints) {
-        mService2.requestCreateSession(client, route, requestId, sessionHints);
+        mService2.requestCreateSessionWithRouter2(router, route, requestId, sessionHints);
     }
 
     // Binder call
     @Override
-    public void selectRoute(IMediaRouter2Client client, String sessionId, MediaRoute2Info route) {
-        mService2.selectRoute(client, sessionId, route);
-    }
-
-    // Binder call
-    @Override
-    public void deselectRoute(IMediaRouter2Client client, String sessionId, MediaRoute2Info route) {
-        mService2.deselectRoute(client, sessionId, route);
-    }
-
-    // Binder call
-    @Override
-    public void transferToRoute(IMediaRouter2Client client, String sessionId,
+    public void selectRouteWithRouter2(IMediaRouter2 router, String sessionId,
             MediaRoute2Info route) {
-        mService2.transferToRoute(client, sessionId, route);
+        mService2.selectRouteWithRouter2(router, sessionId, route);
     }
 
     // Binder call
     @Override
-    public void releaseSession(IMediaRouter2Client client, String sessionId) {
-        mService2.releaseSession(client, sessionId);
+    public void deselectRouteWithRouter2(IMediaRouter2 router, String sessionId,
+            MediaRoute2Info route) {
+        mService2.deselectRouteWithRouter2(router, sessionId, route);
+    }
+
+    // Binder call
+    @Override
+    public void transferToRouteWithRouter2(IMediaRouter2 router, String sessionId,
+            MediaRoute2Info route) {
+        mService2.transferToRouteWithRouter2(router, sessionId, route);
+    }
+
+    // Binder call
+    @Override
+    public void setSessionVolumeWithRouter2(IMediaRouter2 router, String sessionId, int volume) {
+        mService2.setSessionVolumeWithRouter2(router, sessionId, volume);
+    }
+
+    // Binder call
+    @Override
+    public void releaseSessionWithRouter2(IMediaRouter2 router, String sessionId) {
+        mService2.releaseSessionWithRouter2(router, sessionId);
+    }
+
+    // Binder call
+    @Override
+    public List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
+        return mService2.getActiveSessions(manager);
     }
 
     // Binder call
@@ -514,74 +542,50 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void requestCreateClientSession(IMediaRouter2Manager manager, String packageName,
+    public void setRouteVolumeWithManager(IMediaRouter2Manager manager,
+            MediaRoute2Info route, int volume) {
+        mService2.setRouteVolumeWithManager(manager, route, volume);
+    }
+
+    // Binder call
+    @Override
+    public void requestCreateSessionWithManager(IMediaRouter2Manager manager, String packageName,
             MediaRoute2Info route, int requestId) {
-        mService2.requestCreateClientSession(manager, packageName, route, requestId);
-    }
-    // Binder call
-    @Override
-    public void setDiscoveryRequest2(IMediaRouter2Client client, RouteDiscoveryPreference request) {
-        mService2.setDiscoveryRequest2(client, request);
+        mService2.requestCreateSessionWithManager(manager, packageName, route, requestId);
     }
 
     // Binder call
     @Override
-    public void setRouteVolume2(IMediaRouter2Client client,
-            MediaRoute2Info route, int volume) {
-        mService2.setRouteVolume2(client, route, volume);
+    public void selectRouteWithManager(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        mService2.selectRouteWithManager(manager, sessionId, route);
     }
 
     // Binder call
     @Override
-    public void setSessionVolume2(IMediaRouter2Client client, String sessionId, int volume) {
-        mService2.setSessionVolume2(client, sessionId, volume);
+    public void deselectRouteWithManager(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        mService2.deselectRouteWithManager(manager, sessionId, route);
     }
 
     // Binder call
     @Override
-    public void setRouteVolume2Manager(IMediaRouter2Manager manager,
-            MediaRoute2Info route, int volume) {
-        mService2.setRouteVolume2Manager(manager, route, volume);
+    public void transferToRouteWithManager(IMediaRouter2Manager manager, String sessionId,
+            MediaRoute2Info route) {
+        mService2.transferToRouteWithManager(manager, sessionId, route);
     }
 
     // Binder call
     @Override
-    public void setSessionVolume2Manager(IMediaRouter2Manager manager,
+    public void setSessionVolumeWithManager(IMediaRouter2Manager manager,
             String sessionId, int volume) {
-        mService2.setSessionVolume2Manager(manager, sessionId, volume);
+        mService2.setSessionVolumeWithManager(manager, sessionId, volume);
     }
 
     // Binder call
     @Override
-    public List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager) {
-        return mService2.getActiveSessions(manager);
-    }
-
-    // Binder call
-    @Override
-    public void selectClientRoute(IMediaRouter2Manager manager, String sessionId,
-            MediaRoute2Info route) {
-        mService2.selectClientRoute(manager, sessionId, route);
-    }
-
-    // Binder call
-    @Override
-    public void deselectClientRoute(IMediaRouter2Manager manager, String sessionId,
-            MediaRoute2Info route) {
-        mService2.deselectClientRoute(manager, sessionId, route);
-    }
-
-    // Binder call
-    @Override
-    public void transferToClientRoute(IMediaRouter2Manager manager, String sessionId,
-            MediaRoute2Info route) {
-        mService2.transferToClientRoute(manager, sessionId, route);
-    }
-
-    // Binder call
-    @Override
-    public void releaseClientSession(IMediaRouter2Manager manager, String sessionId) {
-        mService2.releaseClientSession(manager, sessionId);
+    public void releaseSessionWithManager(IMediaRouter2Manager manager, String sessionId) {
+        mService2.releaseSessionWithManager(manager, sessionId);
     }
 
     void restoreBluetoothA2dp() {

@@ -17,7 +17,7 @@
 package android.media;
 
 import android.content.Intent;
-import android.media.IMediaRouter2Client;
+import android.media.IMediaRouter2;
 import android.media.IMediaRouter2Manager;
 import android.media.IMediaRouterClient;
 import android.media.MediaRoute2Info;
@@ -44,40 +44,43 @@ interface IMediaRouterService {
     void requestSetVolume(IMediaRouterClient client, String routeId, int volume);
     void requestUpdateVolume(IMediaRouterClient client, String routeId, int direction);
 
-    // Methods for media router 2
+    // Note: When changing this file, match the order of methods below with 
+    // MediaRouterService.java for readability.
+
+    // Methods for MediaRouter2
     List<MediaRoute2Info> getSystemRoutes();
     RoutingSessionInfo getSystemSessionInfo();
-    void registerClient2(IMediaRouter2Client client, String packageName);
-    void unregisterClient2(IMediaRouter2Client client);
-    void setRouteVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int volume);
-    void setSessionVolume2(IMediaRouter2Client client, String sessionId, int volume);
 
-    void requestCreateSession(IMediaRouter2Client client, in MediaRoute2Info route, int requestId,
-            in @nullable Bundle sessionHints);
-    void setDiscoveryRequest2(IMediaRouter2Client client, in RouteDiscoveryPreference preference);
-    void selectRoute(IMediaRouter2Client client, String sessionId, in MediaRoute2Info route);
-    void deselectRoute(IMediaRouter2Client client, String sessionId, in MediaRoute2Info route);
-    void transferToRoute(IMediaRouter2Client client, String sessionId, in MediaRoute2Info route);
-    void releaseSession(IMediaRouter2Client client, String sessionId);
+    void registerRouter2(IMediaRouter2 router, String packageName);
+    void unregisterRouter2(IMediaRouter2 router);
+    void setDiscoveryRequestWithRouter2(IMediaRouter2 router,
+            in RouteDiscoveryPreference preference);
+    void setRouteVolumeWithRouter2(IMediaRouter2 router, in MediaRoute2Info route, int volume);
 
+    void requestCreateSessionWithRouter2(IMediaRouter2 router, in MediaRoute2Info route,
+            int requestId, in @nullable Bundle sessionHints);
+    void selectRouteWithRouter2(IMediaRouter2 router, String sessionId, in MediaRoute2Info route);
+    void deselectRouteWithRouter2(IMediaRouter2 router, String sessionId, in MediaRoute2Info route);
+    void transferToRouteWithRouter2(IMediaRouter2 router, String sessionId,
+            in MediaRoute2Info route);
+    void setSessionVolumeWithRouter2(IMediaRouter2 router, String sessionId, int volume);
+    void releaseSessionWithRouter2(IMediaRouter2 router, String sessionId);
+
+    // Methods for MediaRouter2Manager
+    List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager);
     void registerManager(IMediaRouter2Manager manager, String packageName);
     void unregisterManager(IMediaRouter2Manager manager);
+    void setRouteVolumeWithManager(IMediaRouter2Manager manager, in MediaRoute2Info route,
+            int volume);
 
-    void requestCreateClientSession(IMediaRouter2Manager manager, String packageName,
-        in @nullable MediaRoute2Info route, int requestId);
-
-    void setRouteVolume2Manager(IMediaRouter2Manager manager,
-            in MediaRoute2Info route, int volume);
-    void setSessionVolume2Manager(IMediaRouter2Manager manager,
-            String sessionId, int volume);
-
-    List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager);
-    void selectClientRoute(IMediaRouter2Manager manager,
-            String sessionId, in MediaRoute2Info route);
-    void deselectClientRoute(IMediaRouter2Manager manager,
-            String sessionId, in MediaRoute2Info route);
-    void transferToClientRoute(IMediaRouter2Manager manager,
-            String sessionId, in MediaRoute2Info route);
-    void releaseClientSession(IMediaRouter2Manager manager, String sessionId);
-
+    void requestCreateSessionWithManager(IMediaRouter2Manager manager, String packageName,
+            in @nullable MediaRoute2Info route, int requestId);
+    void selectRouteWithManager(IMediaRouter2Manager manager, String sessionId,
+            in MediaRoute2Info route);
+    void deselectRouteWithManager(IMediaRouter2Manager manager, String sessionId,
+            in MediaRoute2Info route);
+    void transferToRouteWithManager(IMediaRouter2Manager manager, String sessionId,
+            in MediaRoute2Info route);
+    void setSessionVolumeWithManager(IMediaRouter2Manager manager, String sessionId, int volume);
+    void releaseSessionWithManager(IMediaRouter2Manager manager, String sessionId);
 }
