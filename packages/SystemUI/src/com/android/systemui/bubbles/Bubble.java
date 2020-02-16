@@ -38,9 +38,11 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.io.FileDescriptor;
@@ -50,7 +52,7 @@ import java.util.Objects;
 /**
  * Encapsulates the data and UI elements of a bubble.
  */
-class Bubble {
+class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
     private NotificationEntry mEntry;
@@ -148,12 +150,12 @@ class Bubble {
     }
 
     @Nullable
-    BadgedImageView getIconView() {
+    public BadgedImageView getIconView() {
         return mIconView;
     }
 
     @Nullable
-    BubbleExpandedView getExpandedView() {
+    public BubbleExpandedView getExpandedView() {
         return mExpandedView;
     }
 
@@ -238,7 +240,7 @@ class Bubble {
      * Note that this contents visibility doesn't affect visibility at {@link android.view.View},
      * and setting {@code false} actually means rendering the expanded view in transparent.
      */
-    void setContentVisibility(boolean visibility) {
+    public void setContentVisibility(boolean visibility) {
         if (mExpandedView != null) {
             mExpandedView.setContentVisibility(visibility);
         }
@@ -480,5 +482,37 @@ class Bubble {
     @Override
     public int hashCode() {
         return Objects.hash(mKey);
+    }
+
+    public void logUIEvent(int bubbleCount, int action, float normalX, float normalY, int index) {
+        if (this.getEntry() == null
+                || this.getEntry().getSbn() == null) {
+            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                    null /* package name */,
+                    null /* notification channel */,
+                    0 /* notification ID */,
+                    0 /* bubble position */,
+                    bubbleCount,
+                    action,
+                    normalX,
+                    normalY,
+                    false /* unread bubble */,
+                    false /* on-going bubble */,
+                    false /* isAppForeground (unused) */);
+        } else {
+            StatusBarNotification notification = this.getEntry().getSbn();
+            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                    notification.getPackageName(),
+                    notification.getNotification().getChannelId(),
+                    notification.getId(),
+                    index,
+                    bubbleCount,
+                    action,
+                    normalX,
+                    normalY,
+                    this.showInShade(),
+                    this.isOngoing(),
+                    false /* isAppForeground (unused) */);
+        }
     }
 }
