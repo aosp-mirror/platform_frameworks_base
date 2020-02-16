@@ -713,7 +713,11 @@ public class AppTransitionController {
 
         final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
         final boolean showWallpaper = wallpaperTarget != null
-                && (wallpaperTarget.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
+                && ((wallpaperTarget.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
+                // Update task open transition to wallpaper transition when wallpaper is visible.
+                // (i.e.launching app info activity from recent tasks)
+                || ((transit == TRANSIT_TASK_OPEN || transit == TRANSIT_TASK_TO_FRONT)
+                && mWallpaperControllerLocked.isWallpaperVisible()));
         // If wallpaper is animating or wallpaperTarget doesn't have SHOW_WALLPAPER flag set,
         // don't consider upgrading to wallpaper transition.
         final WindowState oldWallpaper =
