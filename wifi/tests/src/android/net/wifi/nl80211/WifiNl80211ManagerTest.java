@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.wificond;
+package android.net.wifi.nl80211;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -71,7 +71,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Unit tests for {@link android.net.wifi.wificond.WifiNl80211Manager}.
+ * Unit tests for {@link android.net.wifi.nl80211.WifiNl80211Manager}.
  */
 @SmallTest
 public class WifiNl80211ManagerTest {

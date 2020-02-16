@@ -48,7 +48,7 @@ filegroup {
         // to a separate package.
         "java/android/net/wifi/WifiNetworkScoreCache.java",
         "java/android/net/wifi/WifiOemMigrationHook.java",
-        "java/android/net/wifi/wificond/*.java",
+        "java/android/net/wifi/nl80211/*.java",
         ":libwificond_ipc_aidl",
     ],
 }
