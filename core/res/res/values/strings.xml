@@ -54,6 +54,235 @@
     <!-- What the UI should display for "Msisdn" unless overridden by the SIM-->
     <string name="defaultMsisdnAlphaTag">MSISDN1</string>
 
+    <!-- For GsmMmiCode.java --> <skip />
+    <!-- Displayed when the user dialed an MMI code whose function
+         could not be performed. This will be displayed in a toast. -->
+    <string name="mmiError">Connection problem or invalid MMI code.</string>
+    <!-- Displayed when the user dialed an MMI code whose function
+         could not be performed because FDN is enabled. This will be displayed in a toast. -->
+    <string name="mmiFdnError">Operation is restricted to fixed dialing numbers only.</string>
+    <!-- Displayed when a carrier does not support call forwarding queries when roaming. -->
+    <string name="mmiErrorWhileRoaming">Can not change call forwarding settings from your phone while you are roaming.</string>
+
+    <!-- Displayed when a phone feature such as call barring was activated. -->
+    <string name="serviceEnabled">Service was enabled.</string>
+    <!-- Displayed in front of the list of a set of service classes
+         (voice, data, fax, etc.) that were enabled. -->
+    <string name="serviceEnabledFor">Service was enabled for:</string>
+    <!-- Displayed when a phone feature such as call forwarding was deactivated. -->
+    <string name="serviceDisabled">Service has been disabled.</string>
+    <!-- Displayed when a phone property such as a SIM password was registered. -->
+    <string name="serviceRegistered">Registration was successful.</string>
+    <!-- Displayed when a phone property such as a SIM password was erased. -->
+    <string name="serviceErased">Erasure was successful.</string>
+    <!-- Displayed when a SIM password was entered incorrectly. -->
+    <string name="passwordIncorrect">Incorrect password.</string>
+    <!-- Displayed when a phone feature triggered by an MMI code is complete. -->
+    <string name="mmiComplete">MMI complete.</string>
+    <!-- Displayed when a SIM PIN password is entered incorrectly. -->
+    <string name="badPin">The old PIN you typed isn\'t correct.</string>
+    <!-- Displayed when a SIM PUK password is entered incorrectly. -->
+    <string name="badPuk">The PUK you typed isn\'t correct.</string>
+    <!-- Displayed when SIM PIN passwords are entered inconsistently. -->
+    <string name="mismatchPin">The PINs you typed don\'t match.</string>
+    <!-- Displayed when a SIM PIN password is too long or too short. -->
+    <string name="invalidPin">Type a PIN that is 4 to 8 numbers.</string>
+    <!-- Displayed when a SIM PUK password is too short. -->
+    <string name="invalidPuk">Type a PUK that is 8 numbers or longer.</string>
+    <!-- Displayed to prompt the user to type the PUK password to unlock
+         the SIM card. -->
+    <string name="needPuk">Your SIM card is PUK-locked. Type the PUK code to unlock it.</string>
+    <string name="needPuk2">Type PUK2 to unblock SIM card.</string>
+    <!-- Displayed when user attempts to change SIM PIN1 without enabling PIN1. -->
+    <string name="enablePin">Unsuccessful, enable SIM/RUIM Lock.</string>
+    <!-- Displayed when a SIM PIN/PUK is entered incorrectly. -->
+    <plurals name="pinpuk_attempts">
+        <item quantity="one">You have <xliff:g id="number">%d</xliff:g> remaining attempt before SIM is locked.</item>
+        <item quantity="other">You have <xliff:g id="number">%d</xliff:g> remaining attempts before SIM is locked.</item>
+    </plurals>
+    <!-- Title for the dialog used to display the user's IMEI number [CHAR LIMIT=10] -->
+    <string name="imei">IMEI</string>
+
+    <!-- Title for the dialog used to display the user's MEID number on CDMA network
+         [CHAR LIMIT=10] -->
+    <string name="meid">MEID</string>
+
+    <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
+    <string name="ClipMmi">Incoming Caller ID</string>
+    <!-- Displayed as the title for a success/failure report enabling/disabling caller ID. -->
+    <string name="ClirMmi">Outgoing Caller ID</string>
+    <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID. -->
+    <string name="ColpMmi">Connected Line ID</string>
+    <!-- Displayed as the title for a success/failure report enabling/disabling connected line ID restriction. -->
+    <string name="ColrMmi">Connected Line ID Restriction</string>
+    <!-- Displayed as the title for a success/failure report enabling/disabling call forwarding. -->
+    <string name="CfMmi">Call forwarding</string>
+    <!-- Displayed as the title for a success/failure report enabling/disabling call waiting. -->
+    <string name="CwMmi">Call waiting</string>
+    <!-- Displayed as the title for a success/failure report enabling/disabling call barring. -->
+    <string name="BaMmi">Call barring</string>
+    <!-- Displayed as the title for a success/failure report changing the SIM password. -->
+    <string name="PwdMmi">Password change</string>
+    <!-- Displayed as the title for a success/failure report changing the SIM PIN. -->
+    <string name="PinMmi">PIN change</string>
+    <string name="CnipMmi">Calling number present</string>
+    <string name="CnirMmi">Calling number restricted</string>
+    <string name="ThreeWCMmi">Three way calling</string>
+    <string name="RuacMmi">Rejection of undesired annoying calls</string>
+    <string name="CndMmi">Calling number delivery</string>
+    <string name="DndMmi">Do not disturb</string>
+
+    <!-- Displayed to confirm to the user that caller ID will be restricted on the next call as usual. -->
+    <string name="CLIRDefaultOnNextCallOn">Caller ID defaults to restricted. Next call: Restricted</string>
+    <!-- Displayed to confirm to the user that caller ID will be not restricted on the next call even though it usually is. -->
+    <string name="CLIRDefaultOnNextCallOff">Caller ID defaults to restricted. Next call: Not restricted</string>
+    <!-- Displayed to confirm to the user that caller ID will not be restricted on the next call but usually is. -->
+    <string name="CLIRDefaultOffNextCallOn">Caller ID defaults to not restricted. Next call: Restricted</string>
+    <!-- Displayed to confirm to the user that caller ID will not be restricted on the next call or in general. -->
+    <string name="CLIRDefaultOffNextCallOff">Caller ID defaults to not restricted. Next call: Not restricted</string>
+
+
+    <!-- Displayed to tell the user that caller ID is not provisioned for their SIM. -->
+    <string name="serviceNotProvisioned">Service not provisioned.</string>
+    <!-- Displayed to tell the user that they cannot change the caller ID setting. -->
+    <string name="CLIRPermanent">You can\'t change the caller ID setting.</string>
+
+    <!-- Notification title to tell the user that data service is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="RestrictedOnDataTitle">No mobile data service</string>
+    <!-- Notification title to tell the user that emergency calling is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="RestrictedOnEmergencyTitle">Emergency calling unavailable</string>
+    <!-- Notification title to tell the user that normal service is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="RestrictedOnNormalTitle">No voice service</string>
+    <!-- Notification title to tell the user that all emergency and normal voice services are blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="RestrictedOnAllVoiceTitle">No voice service or emergency calling</string>
+
+    <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control. [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="RestrictedStateContent">Temporarily turned off by your carrier</string>
+
+    <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control when multiple SIMs are active. [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="RestrictedStateContentMsimTemplate">Temporarily turned off by your carrier for SIM <xliff:g id="simNumber" example="1">%d</xliff:g></string>
+
+    <!-- Displayed to tell the user that they should switch their network preference. -->
+    <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach mobile network</string>
+    <!-- Displayed to tell the user that they should switch their network preference. -->
+    <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
+    <!-- Displayed to tell the user that emergency calls might not be available. -->
+    <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
+    <!-- Displayed to tell the user that emergency calls might not be available. -->
+    <string name="EmergencyCallWarningSummary">Can\u2019t make emergency calls over Wi\u2011Fi</string>
+
+    <!-- Telephony notification channel name for a channel containing network alert notifications. -->
+    <string name="notification_channel_network_alert">Alerts</string>
+    <!-- Telephony notification channel name for a channel containing call forwarding notifications. -->
+    <string name="notification_channel_call_forward">Call forwarding</string>
+    <!-- Telephony notification channel name for a channel containing emergency callback mode notifications. -->
+    <string name="notification_channel_emergency_callback">Emergency callback mode</string>
+    <!-- Telephony notification channel name for a channel containing mobile data status notifications. -->
+    <string name="notification_channel_mobile_data_status">Mobile data status</string>
+    <!-- Telephony notification channel name for a channel containing sms notifications. -->
+    <string name="notification_channel_sms">SMS messages</string>
+    <!-- Telephony notification channel name for a channel containing voice mail notifications. -->
+    <string name="notification_channel_voice_mail">Voicemail messages</string>
+    <!-- Telephony notification channel name for a channel containing wifi calling status notifications. -->
+    <string name="notification_channel_wfc">Wi-Fi calling</string>
+    <!-- Telephony notification channel name for a channel containing SIM notifications -->
+    <string name="notification_channel_sim">SIM status</string>
+    <!-- Telephony notification channel name for a channel containing high priority SIM notifications -->
+    <string name="notification_channel_sim_high_prio">High priority SIM status</string>
+
+
+    <!-- Displayed to tell the user that peer changed TTY mode -->
+    <string name="peerTtyModeFull">Peer requested TTY Mode FULL</string>
+    <string name="peerTtyModeHco">Peer requested TTY Mode HCO</string>
+    <string name="peerTtyModeVco">Peer requested TTY Mode VCO</string>
+    <string name="peerTtyModeOff">Peer requested TTY Mode OFF</string>
+
+    <!-- Mappings between TS 27.007 +CFCC/+CLCK "service classes" and human-readable strings--> <skip />
+    <!-- Example: Service was enabled for: Voice, Data -->
+    <string name="serviceClassVoice">Voice</string>
+    <!-- Example: Service was enabled for: Voice, Data -->
+    <string name="serviceClassData">Data</string>
+    <!-- Example: Service was enabled for: Voice, FAX -->
+    <string name="serviceClassFAX">FAX</string>
+    <!-- Example: Service was enabled for: Voice, SMS -->
+    <string name="serviceClassSMS">SMS</string>
+    <!-- Meaning: asynchronous data.  Example: Service was enabled for: Voice, Async -->
+    <string name="serviceClassDataAsync">Async</string>
+    <!-- Meaning: synchronous data.  Example: Service was enabled for: Voice, Async -->
+    <string name="serviceClassDataSync">Sync</string>
+    <!-- Meaning: packet data.  Example: Service was enabled for: Voice, Packet -->
+    <string name="serviceClassPacket">Packet</string>
+    <!-- Meaning: unknown.  Example: Service was enabled for: Voice, PAD -->
+    <string name="serviceClassPAD">PAD</string>
+
+    <!-- CDMA Roaming Indicator Strings (non ERI)--> <skip />
+    <!-- Default roaming indicator text -->
+    <string name="roamingText0">Roaming Indicator On</string>
+    <string name="roamingText1">Roaming Indicator Off</string>
+    <string name="roamingText2">Roaming Indicator Flashing</string>
+    <string name="roamingText3">Out of Neighborhood</string>
+    <string name="roamingText4">Out of Building</string>
+    <string name="roamingText5">Roaming - Preferred System</string>
+    <string name="roamingText6">Roaming - Available System</string>
+    <string name="roamingText7">Roaming - Alliance Partner</string>
+    <string name="roamingText8">Roaming - Premium Partner</string>
+    <string name="roamingText9">Roaming - Full Service Functionality</string>
+    <string name="roamingText10">Roaming - Partial Service Functionality</string>
+    <string name="roamingText11">Roaming Banner On</string>
+    <string name="roamingText12">Roaming Banner Off</string>
+    <string name="roamingTextSearching">Searching for Service</string>
+
+    <!-- Displayed when WFC registration fails -->
+    <string name="wfcRegErrorTitle">Couldn\u2019t set up Wi\u2011Fi calling</string>
+    <!-- WFC Operator Error Messages showed as alerts -->
+    <string-array name="wfcOperatorErrorAlertMessages">
+        <item>To make calls and send messages over Wi-Fi, first ask your carrier to set up this service. Then turn on Wi-Fi calling again from Settings. (Error code: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g>)</item>
+    </string-array>
+    <!-- WFC Operator Error Messages showed as notifications -->
+    <string-array name="wfcOperatorErrorNotificationMessages">
+        <item>Issue registering Wi\u2011Fi calling with your carrier: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g></item>
+    </string-array>
+    <!-- Template for showing mobile network operator name while WFC is active -->
+    <string-array name="wfcSpnFormats" translatable="false">
+        <item>@string/wfcSpnFormat_spn</item>
+        <item>@string/wfcSpnFormat_spn_wifi_calling</item>
+        <item>@string/wfcSpnFormat_wlan_call</item>
+        <item>@string/wfcSpnFormat_spn_wlan_call</item>
+        <item>@string/wfcSpnFormat_spn_wifi</item>
+        <item>@string/wfcSpnFormat_wifi_calling_bar_spn</item>
+        <item>@string/wfcSpnFormat_spn_vowifi</item>
+        <item>@string/wfcSpnFormat_wifi_calling</item>
+        <item>@string/wfcSpnFormat_wifi</item>
+        <item>@string/wfcSpnFormat_wifi_calling_wo_hyphen</item>
+        <item>@string/wfcSpnFormat_vowifi</item>
+        <item>@string/wfcSpnFormat_spn_wifi_calling_vo_hyphen</item>
+    </string-array>
+
+    <!-- Spn during Wi-Fi Calling: "<operator>" -->
+    <string name="wfcSpnFormat_spn"><xliff:g id="spn" example="Operator">%s</xliff:g></string>
+    <!-- Spn during Wi-Fi Calling: "<operator> Wi-Fi Calling" -->
+    <string name="wfcSpnFormat_spn_wifi_calling"><xliff:g id="spn" example="Operator">%s</xliff:g> Wi-Fi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "<operator> WiFi Calling" -->
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen"><xliff:g id="spn" example="Operator">%s</xliff:g> WiFi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "WLAN Call" -->
+    <string name="wfcSpnFormat_wlan_call">WLAN Call</string>
+    <!-- Spn during Wi-Fi Calling: "<operator> WLAN Call" -->
+    <string name="wfcSpnFormat_spn_wlan_call"><xliff:g id="spn" example="Operator">%s</xliff:g> WLAN Call</string>
+    <!-- Spn during Wi-Fi Calling: "<operator> Wi-Fi" -->
+    <string name="wfcSpnFormat_spn_wifi"><xliff:g id="spn" example="Operator">%s</xliff:g> Wi-Fi</string>
+    <!-- Spn during Wi-Fi Calling: "WiFi Calling | <operator>" -->
+    <string name="wfcSpnFormat_wifi_calling_bar_spn">WiFi Calling | <xliff:g id="spn" example="Operator">%s</xliff:g></string>
+    <!-- Spn during Wi-Fi Calling: "<operator> VoWifi" -->
+    <string name="wfcSpnFormat_spn_vowifi"><xliff:g id="spn" example="Operator">%s</xliff:g> VoWifi</string>
+    <!-- Spn during Wi-Fi Calling: "Wi-Fi Calling" -->
+    <string name="wfcSpnFormat_wifi_calling">Wi-Fi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "Wi-Fi" -->
+    <string name="wfcSpnFormat_wifi">Wi-Fi</string>
+    <!-- Spn during Wi-Fi Calling: "WiFi Calling" (without hyphen) -->
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen">WiFi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "VoWifi" -->
+    <string name="wfcSpnFormat_vowifi">VoWifi</string>
+
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
     <!-- WFC, summary for Wi-Fi Preferred -->
@@ -62,6 +291,25 @@
     <string name="wfc_mode_cellular_preferred_summary">Call over mobile network</string>
     <!-- WFC, summary for Wi-Fi Only -->
     <string name="wfc_mode_wifi_only_summary">Wi-Fi only</string>
+
+    <!--
+        {0} is one of "bearerServiceCode*"
+        {1} is dialing number
+        {2} is time in seconds
+
+        cfTemplateRegistered and cfTemplateRegisteredTime mean that a phone number
+        has been set but forwarding is not on.
+    --> <skip />
+    <!-- Displayed when the call forwarding query was not able to be forwarded. -->
+    <string name="cfTemplateNotForwarded"><xliff:g id="bearer_service_code">{0}</xliff:g>: Not forwarded</string>
+    <!-- Displayed when the call forwarding query was forwarded. -->
+    <string name="cfTemplateForwarded"><xliff:g id="bearer_service_code">{0}</xliff:g>: <xliff:g id="dialing_number">{1}</xliff:g></string>
+    <!-- Displayed when the call forwarding query will be forwarded after some time. -->
+    <string name="cfTemplateForwardedTime"><xliff:g id="bearer_service_code">{0}</xliff:g>: <xliff:g id="dialing_number">{1}</xliff:g> after <xliff:g id="time_delay">{2}</xliff:g> seconds</string>
+    <!-- Displayed when the call forwarding query was set but forwarding is not enabled. -->
+    <string name="cfTemplateRegistered"><xliff:g id="bearer_service_code">{0}</xliff:g>: Not forwarded</string>
+    <!-- Displayed when the call forwarding query was set but forwarding is not enabled. -->
+    <string name="cfTemplateRegisteredTime"><xliff:g id="bearer_service_code">{0}</xliff:g>: Not forwarded</string>
 
     <!-- android.net.http Error strings --> <skip />
     <!-- Displayed when a feature code (non-phone number) is dialed and completes successfully. -->
@@ -3170,8 +3418,62 @@
 
     <!-- Name of the dialog that lets the user choose an accented character to insert -->
     <string name="select_character">Insert character</string>
+
+    <!-- SMS per-application rate control Dialog --> <skip />
+    <!-- SMS_DIALOG: An SMS dialog is shown if an application tries to send too many SMSes.  This is the title of that dialog. -->
+    <string name="sms_control_title">Sending SMS messages</string>
+    <!-- See SMS_DIALOG.  This is the message shown in that dialog. [CHAR LIMIT=NONE] -->
+    <string name="sms_control_message">&lt;b><xliff:g id="app_name">%1$s</xliff:g>&lt;/b> is sending a large number of SMS messages. Do you want to allow this app to continue sending messages?</string>
+    <!-- See SMS_DIALOG.  This is a button choice to allow sending the SMSes. [CHAR LIMIT=30] -->
+    <string name="sms_control_yes">Allow</string>
+    <!-- See SMS_DIALOG.  This is a button choice to disallow sending the SMSes. [CHAR LIMIT=30] -->
+    <string name="sms_control_no">Deny</string>
+
+    <!-- SMS short code verification dialog. --> <skip />
+    <!-- The message text for the SMS short code confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="sms_short_code_confirm_message">&lt;b><xliff:g id="app_name">%1$s</xliff:g>&lt;/b> would like to send a message to &lt;b><xliff:g id="dest_address">%2$s</xliff:g>&lt;/b>.</string>
+    <!-- Message details for the SMS short code confirmation dialog (possible premium short code). [CHAR LIMIT=NONE] -->
+    <string name="sms_short_code_details">This <b>may cause charges</b> on your mobile account.</string>
+    <!-- Message details for the SMS short code confirmation dialog (premium short code). [CHAR LIMIT=NONE] -->
+    <string name="sms_premium_short_code_details"><b>This will cause charges on your mobile account.</b></string>
+    <!-- Text of the approval button for the SMS short code confirmation dialog. [CHAR LIMIT=30] -->
+    <string name="sms_short_code_confirm_allow">Send</string>
+    <!-- Text of the cancel button for the SMS short code confirmation dialog. [CHAR LIMIT=30] -->
+    <string name="sms_short_code_confirm_deny">Cancel</string>
+    <!-- Text of the checkbox for the SMS short code confirmation dialog to remember the user's choice. [CHAR LIMIT=40] -->
+    <string name="sms_short_code_remember_choice">Remember my choice</string>
+    <!-- Text shown when remember checkbox is checked to inform the user how they may undo the setting. [CHAR LIMIT=40] -->
+    <string name="sms_short_code_remember_undo_instruction">You can change this later in Settings\u00A0>\u00A0Apps"</string>
+
+    <!-- Text of the approval button for the SMS short code confirmation dialog when checkbox is checked. [CHAR LIMIT=30] -->
+    <string name="sms_short_code_confirm_always_allow">Always Allow</string>
+    <!-- Text of the cancel button for the SMS short code confirmation dialog when checkbox is checked. [CHAR LIMIT=30] -->
+    <string name="sms_short_code_confirm_never_allow">Never Allow</string>
+
+    <!-- SIM swap and device reboot Dialog --> <skip />
+    <!-- See SIM_REMOVED_DIALOG.  This is the title of that dialog. -->
+    <string name="sim_removed_title">SIM card removed</string>
+    <!-- See SIM_REMOVED_DIALOG.  This is the message of that dialog. -->
+    <string name="sim_removed_message">The mobile network will be unavailable until you restart with a valid SIM card inserted.</string>
+    <!-- See SIM_REMOVED_DIALOG.  This is the button of that dialog. -->
+    <string name="sim_done_button">Done</string>
+    <!-- See SIM_ADDED_DIALOG.  This is the title of that dialog. -->
+    <string name="sim_added_title">SIM card added</string>
+    <!-- See SIM_ADDED_DIALOG.  This is the message of that dialog. -->
+    <string name="sim_added_message">Restart your device to access the mobile network.</string>
     <!-- See SIM_ADDED_DIALOG.  This is the button of that dialog. -->
     <string name="sim_restart_button">Restart</string>
+    <!-- See Carrier_App_Dialog. This is the message of that dialog. -->
+    <string name="install_carrier_app_notification_title">Activate mobile service</string>
+    <!-- Notification message that shows when the user inserts a SIM card that requires a carrier app download, but the app name is unknown -->
+    <string name="install_carrier_app_notification_text">Download the carrier app to activate your new SIM</string>
+    <!-- Notification message that shows when the user inserts a SIM card that requires a carrier app download.  App name is known -->
+    <string name="install_carrier_app_notification_text_app_name">Download the <xliff:g id="app_name">%1$s</xliff:g> app to activate your new SIM</string>
+    <!-- See Carrier_App_Notification. This is the button of that dialog. -->
+    <string name="install_carrier_app_notification_button">Download app</string>
+    <!-- See carrier_app_notification. This is the headline. -->
+    <string name="carrier_app_notification_title">New SIM inserted</string>
+    <string name="carrier_app_notification_text">Tap to set it up</string>
 
     <!-- Date/Time picker dialogs strings -->
 
@@ -3466,6 +3768,12 @@
     <!-- This string appears (on two lines) when you type a number into contacts search, to let you create a contact whose phone number is the number you typed.  The first line will be in bigger type than the second. -->
     <string name="create_contact_using">Create contact\nusing <xliff:g id="number" example="555">%s</xliff:g></string>
 
+    <!-- This string array should be overridden by the manufacture to present a list of carrier-id,locale. The wifi regulatory domain is extracted from the locale information. This is used at startup to set system defaults by checking the system property ro.carrier for the carrier-id and searching through this array -->
+    <!-- An Array of [[Carrier-ID]                     -->
+    <!--              [default-locale]]                -->
+    <string-array translatable="false" name="carrier_properties">
+    </string-array>
+
     <string name="grant_credentials_permission_message_header">The following one or more apps request permission to access your account, now and in the future.</string>
     <string name="grant_credentials_permission_message_footer">Do you want to allow this request?</string>
     <string name="grant_permissions_header_text">Access request</string>
@@ -3499,6 +3807,9 @@
     <!-- Label to show for a service that is running because it is observing and modifying the
          importance of the user's notifications. -->
     <string name="notification_ranker_binding_label">Notification ranker service</string>
+
+    <!-- Do Not Translate: Alternate eri.xml -->
+    <string name="alternate_eri_file">/data/eri.xml</string>
 
     <!-- The title of the notification when VPN is active. -->
     <string name="vpn_title">VPN activated</string>
@@ -3800,6 +4111,15 @@
 
     <!-- Title for a dialog showing possible activities for sharing in ShareActionProvider [CHAR LIMIT=25] -->
     <string name="share_action_provider_share_with">Share with</string>
+
+    <!-- STK sending DTMF, SMS, USSD, SS -->
+    <string name="sending">Sending\u2026</string>
+
+    <!-- STK launch Browser -->
+    <string name="launchBrowserDefault">Launch Browser?</string>
+
+    <!-- STK setup Call -->
+    <string name="SetupCallDefault">Accept call?</string>
 
     <!-- Title for a button to choose the currently selected activity
          as the default in the activity resolver. [CHAR LIMIT=25] -->
@@ -4519,6 +4839,17 @@
     <!-- Error message shown when there is a system error which can be solved by the manufacturer. [CHAR LIMIT=NONE] -->
     <string name="system_error_manufacturer">There\'s an internal problem with your device. Contact your manufacturer for details.</string>
 
+    <!-- Displayed when the USSD/SS request is modified by STK CC to a
+    different request. This will be displayed in a toast. -->
+    <string name="stk_cc_ussd_to_dial">USSD request changed to regular call</string>
+    <string name="stk_cc_ussd_to_ss">USSD request changed to SS request</string>
+    <string name="stk_cc_ussd_to_ussd">Changed to new USSD request</string>
+    <string name="stk_cc_ussd_to_dial_video">USSD request changed to video call</string>
+    <string name="stk_cc_ss_to_dial">SS request changed to regular call</string>
+    <string name="stk_cc_ss_to_dial_video">SS request changed to video call</string>
+    <string name="stk_cc_ss_to_ussd">SS request changed to USSD request</string>
+    <string name="stk_cc_ss_to_ss">Changed to new SS request</string>
+
     <!-- Content description of the work profile icon in the notification. -->
     <string name="notification_work_profile_content_description">Work profile</string>
 
@@ -4628,6 +4959,11 @@
     <!-- Title for button to see application detail in app store which it came from - it may allow user to update to newer version. [CHAR LIMIT=50] -->
     <string name="deprecated_target_sdk_app_store">Check for update</string>
 
+    <!-- Notification title shown when new SMS/MMS is received while the device is locked [CHAR LIMIT=NONE] -->
+    <string name="new_sms_notification_title">You have new messages</string>
+    <!-- Notification content shown when new SMS/MMS is received while the device is locked [CHAR LIMIT=NONE] -->
+    <string name="new_sms_notification_content">Open SMS app to view</string>
+
     <!-- Notification title shown when user profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=36] -->
     <string name="profile_encrypted_title">Some functionality may be limited</string>
     <!-- Notification detail shown when work profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=30] -->
@@ -4662,6 +4998,9 @@
 
     <!-- Accessibilty string added to a widget that has been suspended [CHAR LIMIT=20] -->
     <string name="suspended_widget_accessibility">Disabled <xliff:g id="label" example="Calendar">%1$s</xliff:g></string>
+
+    <!-- Label used by Telephony code, assigned as the display name for conference calls [CHAR LIMIT=60] -->
+    <string name="conference_call">Conference Call</string>
 
     <!-- Window title for a tooltip [CHAR LIMIT=NONE] -->
     <string name="tooltip_popup_title">Tooltip</string>
@@ -4798,6 +5137,18 @@
 
     <!-- Primary ETWS (Earthquake and Tsunami Warning System) default message for others -->
     <string name="etws_primary_default_message_others"></string>
+
+    <!-- Title of notification when UE fails CS registration with MM reject cause code from network. -->
+    <string name="mmcc_authentication_reject">SIM not allowed for voice</string>
+    <string name="mmcc_imsi_unknown_in_hlr">SIM not provisioned for voice</string>
+    <string name="mmcc_illegal_ms">SIM not allowed for voice</string>
+    <string name="mmcc_illegal_me">Phone not allowed for voice</string>
+
+    <!-- Title of notification when UE fails to register network with MM reject cause code when multiple SIMs are active. -->
+    <string name="mmcc_authentication_reject_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not provisioned</string>
+    <string name="mmcc_illegal_ms_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
+    <string name="mmcc_illegal_me_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
 
     <!-- Popup window default title to be read by a screen reader-->
     <string name="popup_window_default_title">Popup Window</string>

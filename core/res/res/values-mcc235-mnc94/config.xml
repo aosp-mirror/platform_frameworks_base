@@ -31,4 +31,8 @@
         <item>9</item>
     </integer-array>
 
+    <!-- Configure mobile network MTU. Carrier specific value is set here.
+    -->
+    <integer name="config_mobile_mtu">1440</integer>
+
 </resources>

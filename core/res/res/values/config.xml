@@ -108,6 +108,12 @@
          any other apn from connecting until ims apn is connected-->
     <bool name="ImsConnectedDefaultValue">false</bool>
 
+    <!-- Flag indicating whether the surface flinger is inefficient
+         at performing a blur.  Used by parts of the UI to turn off
+         the blur effect where it isn't worth the performance hit.
+         As of Honeycomb, blurring is not supported anymore. -->
+    <bool name="config_sf_slowBlur">true</bool>
+
     <!-- Flag indicating that the media framework should support playing of sounds on volume
          key usage.  This adds noticeable additional overhead to volume key processing, so
          is disableable for products for which it is irrelevant. -->
@@ -469,6 +475,10 @@
         <item>eth0</item>
         -->
     </string-array>
+
+    <!-- Package name for the default CellBroadcastService module [DO NOT TRANSLATE] -->
+    <string name="cellbroadcast_default_package" translatable="false">com.android.cellbroadcastservice
+    </string>
 
     <!-- If the mobile hotspot feature requires provisioning, a package name and class name
         can be provided to launch a supported application that provisions the devices.
@@ -1215,6 +1225,12 @@
     <!-- Disable lockscreen rotation by default -->
     <bool name="config_enableLockScreenRotation">false</bool>
 
+    <!-- Is the device capable of hot swapping an UICC Card -->
+    <bool name="config_hotswapCapable">false</bool>
+
+    <!-- Component name of the ICC hotswap prompt for restart dialog -->
+    <string name="config_iccHotswapPromptForRestartDialogComponent" translatable="false">@null</string>
+
     <!-- Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
     <bool name="config_enable_puk_unlock_screen">true</bool>
@@ -1831,6 +1847,9 @@
          that has declared it can process the call's handle. -->
     <bool name="config_requireCallCapableAccountForHandle">false</bool>
 
+    <!-- Flag indicating if the user is notified when the mobile network access is restricted -->
+    <bool name="config_user_notification_of_restrictied_mobile_access">true</bool>
+
     <!-- Flag indicating whether the current device allows sms service.
          If true, this means that the device supports both sending and
          receiving sms via the telephony network.
@@ -1897,6 +1916,10 @@
     <!-- IP address of the dns server to use if nobody else suggests one -->
     <string name="config_default_dns_server" translatable="false">8.8.8.8</string>
 
+    <!-- The default mobile provisioning apn. Empty by default, maybe overridden by
+         an mcc/mnc specific config.xml -->
+    <string name="mobile_provisioning_apn" translatable="false"></string>
+
     <!-- The default mobile provisioning url. Empty by default, maybe overridden by
          an mcc/mnc specific config.xml -->
     <string name="mobile_provisioning_url" translatable="false"></string>
@@ -1907,6 +1930,13 @@
 
     <!-- Enables SIP on WIFI only -->
     <bool name="config_sip_wifi_only">false</bool>
+
+    <!-- Enables built-in SIP phone capability -->
+    <bool name="config_built_in_sip_phone">true</bool>
+
+    <!-- Boolean indicating if restoring network selection should be skipped -->
+    <!-- The restoring is handled by modem if it is true-->
+    <bool translatable="false" name="skip_restoring_network_selection">false</bool>
 
     <!-- Maximum number of database connections opened and managed by framework layer
          to handle queries on each database when using Write-Ahead Logging. -->
@@ -1993,6 +2023,10 @@
          a keyboard is present. -->
     <bool name="config_showMenuShortcutsWhenKeyboardPresent">false</bool>
 
+    <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
+    <string-array name="config_twoDigitNumberPattern" translatable="false">
+    </string-array>
+
     <!-- If this value is true, Sms encoded as octet is decoded by utf8 decoder.
          If false, decoded by Latin decoder. -->
     <bool name="config_sms_utf8_support">false</bool>
@@ -2000,6 +2034,12 @@
     <!-- If this value is true, The mms content-disposition field is supported correctly.
          If false, Content-disposition fragments are ignored -->
     <bool name="config_mms_content_disposition_support">true</bool>
+
+    <!-- MMS user agent string -->
+    <string name="config_mms_user_agent" translatable="false"></string>
+
+    <!-- MMS user agent prolfile url -->
+    <string name="config_mms_user_agent_profile_url" translatable="false"></string>
 
     <!-- National Language Identifier codes for the following two config items.
          (from 3GPP TS 23.038 V9.1.1 Table 6.2.1.2.4.1):
@@ -2043,6 +2083,14 @@
 
     <!-- Set to true if the RSSI should always display CDMA signal strength even on EVDO -->
     <bool name="config_alwaysUseCdmaRssi">false</bool>
+
+
+    <!-- If this value is true, duplicate Source/Destination port fields
+         in WDP header of some carriers OMADM wap push are supported.
+         ex: MSGTYPE-TotalSegments-CurrentSegment
+             -SourcePortDestPort-SourcePortDestPort-OMADM PDU
+         If false, not supported. -->
+    <bool name="config_duplicate_port_omadm_wappush">false</bool>
 
     <!-- Maximum numerical value that will be shown in a status bar
          notification icon or in the notification itself. Will be replaced
@@ -2397,6 +2445,17 @@
     headset output is compliant to EN 60950 requirements for portable music players. -->
     <integer name="config_safe_media_volume_usb_mB">-3700</integer>
 
+    <!-- Configure mobile network MTU. The standard default is set here but each carrier
+         may have a specific value set in an overlay config.xml file. -->
+    <integer name="config_mobile_mtu">1500</integer>
+
+    <!-- Configure mobile tcp buffer sizes in the form:
+         rat-name:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
+         If no value is found for the rat-name in use, the system default will be applied.
+    -->
+    <string-array name="config_mobile_tcp_buffers">
+    </string-array>
+
     <!-- Configure ethernet tcp buffersizes in the form:
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
     <string name="config_ethernet_tcp_buffers" translatable="false">524288,1048576,3145728,524288,1048576,2097152</string>
@@ -2456,6 +2515,19 @@
 
     <!-- Whether camera shutter sound is forced or not  (country specific). -->
     <bool name="config_camera_sound_forced">false</bool>
+
+    <!-- Set to true if we need to not prefer an APN.
+         This is being added to enable a simple scenario of pre-paid
+         provisioning on some carriers, working around a bug (7305641)
+         where if the preferred is used we don't try the others. -->
+    <bool name="config_dontPreferApn">false</bool>
+
+    <!-- Set to true if after a provisioning apn the radio should be restarted -->
+    <bool name="config_restartRadioAfterProvisioning">false</bool>
+
+    <!-- Boolean indicating if RADIO POWER OFF is required on receiving SIM REFRESH with RESET.
+         This will be handled by modem if it is false. -->
+    <bool name="config_requireRadioPowerOffOnSimRefreshReset">false</bool>
 
     <!-- Vibrator pattern to be used as the default for notifications
          that specify DEFAULT_VIBRATE.
@@ -2544,6 +2616,10 @@
     <string name="config_customVpnAlwaysOnDisconnectedDialogComponent" translatable="false"
             >com.android.vpndialogs/com.android.vpndialogs.AlwaysOnDisconnectedDialog</string>
 
+    <!-- Name of the dialog that is used to install the carrier app when the SIM is inserted -->
+    <string name="config_carrierAppInstallDialogComponent" translatable="false"
+            >com.android.simappdialog/com.android.simappdialog.InstallCarrierAppActivity</string>
+
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 
@@ -2595,9 +2671,40 @@
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>
 
+    <!-- set to false if we need to show user confirmation
+         when alpha identifier is not provided by the UICC -->
+    <bool name="config_stkNoAlphaUsrCnf">true</bool>
+
     <!-- Threshold (in ms) under which a screen off / screen on will be considered a reset of the
          immersive mode confirmation prompt.-->
     <integer name="config_immersive_mode_confirmation_panic">5000</integer>
+
+    <!-- For some operators, PDU has garbages. To fix it, need to use valid index -->
+    <integer name="config_valid_wappush_index">-1</integer>
+
+    <!-- call barring MMI code from TS 22.030 Annex B -->
+    <string-array translatable="false" name="config_callBarringMMI">
+        <item>33</item>
+        <item>331</item>
+        <item>332</item>
+        <item>35</item>
+        <item>351</item>
+        <item>330</item>
+        <item>333</item>
+        <item>353</item>
+    </string-array>
+
+    <!-- Ims supported call barring MMI code -->
+    <string-array translatable="false" name="config_callBarringMMI_for_ims">
+        <item>33</item>
+        <item>331</item>
+        <item>332</item>
+        <item>35</item>
+        <item>351</item>
+        <item>330</item>
+        <item>333</item>
+        <item>353</item>
+    </string-array>
 
     <!-- Override the default detection behavior for the framework method
          android.view.ViewConfiguration#hasPermanentMenuKey().
@@ -2740,6 +2847,55 @@
          in the display pipeline plus some slack just to be sure. -->
     <integer name="config_drawLockTimeoutMillis">120</integer>
 
+    <!-- An array of device capabilities defined by GSMA SGP.22 v2.0.
+         The first item is the capability name that the device supports. The second item is the
+         major version. The minor and revision versions are default to 0s.
+         The device capabilities and their definition in the spec are:
+             gsm : gsmSupportedRelease
+             utran : utranSupportedRelease
+             cdma1x : cdma2000onexSupportedRelease
+             hrpd : cdma2000hrpdSupportedRelease
+             ehrpd : cdma2000ehrpdSupportedRelease
+             eutran : eutranSupportedRelease
+             nfc : contactlessSupportedRelease
+             crl : rspCrlSupportedVersion
+    -->
+    <string-array translatable="false" name="config_telephonyEuiccDeviceCapabilities">
+        <!-- Example:
+        <item>"gsm,11"</item>
+        <item>"utran,11"</item>
+        <item>"cdma1x,1"</item>
+        <item>"hrpd,3"</item>
+        <item>"ehrpd,12"</item>
+        <item>"eutran,11"</item>
+        <item>"nfc,1"</item>
+        <item>"crl,1"</item>
+        -->
+    </string-array>
+
+    <!-- default telephony hardware configuration for this platform.
+    -->
+    <!-- this string array should be overridden by the device to present a list
+         telephony hardware resource.  this is used by the telephony device controller
+         (TDC) to offer the basic capabilities of the hardware to the telephony
+         framework
+    -->
+    <!-- an array of "[hardware type],[hardware-uuid],[state],[[hardware-type specific]]"
+         with, [[hardware-type specific]] in:
+            - "[[ril-model],[rat],[max-active-voice],[max-active-data],[max-active-standby]]"
+              for 'modem' hardware
+            - "[[associated-modem-uuid]]"
+              for 'sim' hardware.
+         refer to HardwareConfig in com.android.internal.telephony for specific details/values
+         those elements can carry.
+    -->
+    <string-array translatable="false" name="config_telephonyHardware">
+        <!-- modem -->
+        <item>0,modem,0,0,0,1,1,1</item>
+        <!-- sim -->
+        <item>1,sim,0,modem</item>
+    </string-array>
+
     <!-- This string array can be overriden to add an additional DRM support for WebView EME. -->
     <!-- Array of "[keySystemName],[UuidOfMediaDrm]" -->
     <string-array name="config_keySystemUuidMapping" translatable="false">
@@ -2754,10 +2910,17 @@
     <!-- Flag indicating which package name can access DeviceConfig table -->
     <string name="config_deviceConfiguratorPackageName" translatable="false"></string>
 
+    <!-- Flag indicating apps will skip sending hold request before merge. In this case
+        IMS service implementation will do both.i.e.hold followed by merge. -->
+    <bool name="skipHoldBeforeMerge">true</bool>
+
     <!-- Flag indicating whether the IMS service can be turned off. If false then
         the service will not be turned-off completely (the ImsManager.turnOffIms() will
         be disabled) but individual Features can be disabled using ImsConfig.setFeatureValue() -->
     <bool name="imsServiceAllowTurnOff">true</bool>
+
+    <!-- Flag specifying whether VoLTE is available on device -->
+    <bool name="config_device_volte_available">false</bool>
 
     <!-- Flag specifying whether VoLTE should be available for carrier: independent of
          carrier provisioning. If false: hard disabled. If true: then depends on carrier
@@ -2767,18 +2930,48 @@
     <!-- Flag specifying whether VoLTE TTY is supported -->
     <bool name="config_carrier_volte_tty_supported">true</bool>
 
+    <!-- Flag specifying whether VT is available on device -->
+    <bool name="config_device_vt_available">false</bool>
+
+    <!-- Flag specifying whether the device will use the "allow_hold_in_ims_call" carrier config
+         option.  When false, the device will support holding of IMS calls, regardless of the
+         carrier config setting. -->
+    <bool name="config_device_respects_hold_carrier_config">true</bool>
+
     <!-- Flag specifying whether VT should be available for carrier: independent of
          carrier provisioning. If false: hard disabled. If true: then depends on carrier
          provisioning, availability etc -->
     <bool name="config_carrier_vt_available">false</bool>
+
+    <!-- Flag specifying whether WFC over IMS is available on device -->
+        <bool name="config_device_wfc_ims_available">false</bool>
 
     <!-- Flag specifying whether WFC over IMS should be available for carrier: independent of
          carrier provisioning. If false: hard disabled. If true: then depends on carrier
          provisioning, availability etc -->
     <bool name="config_carrier_wfc_ims_available">false</bool>
 
+    <!-- Whether to use voip audio mode for ims call -->
+    <bool name="config_use_voip_mode_for_ims">false</bool>
+
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
+
+    <!-- Cellular data service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wwan_data_service_package" translatable="false">com.android.phone</string>
+
+    <!-- IWLAN data service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_data_service_package" translatable="false"></string>
+
+    <!-- Cellular data service class name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wwan_data_service_class" translatable="false"></string>
+
+    <!-- IWLAN data service class name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_data_service_class" translatable="false"></string>
 
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
@@ -2808,6 +3001,8 @@
         <!-- VZW -->
         <item>20404;suffix;BAE0000000000000</item>
     </string-array>
+
+    <bool name="config_auto_attach_data_on_creation">true</bool>
 
     <!-- Sprint need a 70 ms delay for 3way call -->
     <integer name="config_cdma_3waycall_flash_delay">0</integer>
@@ -2849,7 +3044,19 @@
         <item>732101</item>
     </string-array>
 
+    <!-- Config determines whether to update phone object when voice registration
+         state changes. Voice radio tech change will always trigger an update of
+         phone object irrespective of this config -->
+    <bool name="config_switch_phone_on_voice_reg_state_change">true</bool>
+
     <bool name="config_sms_force_7bit_encoding">false</bool>
+
+    <!-- Number of physical SIM slots on the device. This includes both eSIM and pSIM slots, and
+         is not necessarily the same as the number of phones/logical modems supported by the device.
+         For example, a multi-sim device can have 2 phones/logical modems, but 3 physical slots,
+         or a single SIM device can have 1 phones/logical modems, but 2 physical slots (one eSIM
+         and one pSIM) -->
+    <integer name="config_num_physical_slots">1</integer>
 
     <!--Thresholds for LTE dbm in status bar-->
     <integer-array translatable="false" name="config_lteDbmThresholds">
@@ -2882,6 +3089,17 @@
     <!-- The maximum bitmap size that can be written to a MediaMetadata object. This value
          is the max width/height allowed in dips.-->
     <dimen name="config_mediaMetadataBitmapMaxSize">320dp</dimen>
+
+    <string translatable="false" name="prohibit_manual_network_selection_in_gobal_mode">false</string>
+
+    <!-- An array of CDMA roaming indicators which means international roaming -->
+    <integer-array translatable="false" name="config_cdma_international_roaming_indicators" />
+
+    <!-- flag to indicate if EF LI/EF PL should be used for system language -->
+    <bool name="config_use_sim_language_file">false</bool>
+
+    <!-- Use ERI text for network name on CDMA LTE -->
+    <bool name="config_LTE_eri_for_network_name">true</bool>
 
     <!-- Whether to start in touch mode -->
     <bool name="config_defaultInTouchMode">true</bool>
@@ -2931,6 +3149,12 @@
 
     <!-- Whether device supports double tap to wake -->
     <bool name="config_supportDoubleTapWake">false</bool>
+
+    <!-- The RadioAccessFamilies supported by the device.
+         Empty is viewed as "all".  Only used on devices which
+         don't support RIL_REQUEST_GET_RADIO_CAPABILITY
+         format is UMTS|LTE|... -->
+    <string translatable="false" name="config_radio_access_family"></string>
 
     <!-- Whether the main built-in display is round. This will affect
          Configuration.screenLayout's SCREENLAYOUT_ROUND_MASK flags for Configurations on the
@@ -3002,6 +3226,13 @@
     <!-- If the device should still vibrate even in low power mode, for certain priority vibrations
      (e.g. accessibility, alarms). This is mainly for Wear devices that don't have speakers. -->
     <bool name="config_allowPriorityVibrationsInLowPowerMode">false</bool>
+
+    <!-- Number of retries Cell Data should attempt for a given error code before
+         restarting the modem.
+         Error codes not listed will not lead to modem restarts.
+         Array of "code#,retry#"  -->
+    <string-array name="config_cell_retries_per_error_code">
+    </string-array>
 
     <!-- Set initial MaxRetry value for operators -->
     <integer name="config_mdc_initial_max_retry">1</integer>
@@ -3270,6 +3501,15 @@
          UI is handled by ActivityManagerService -->
     <bool name="config_customUserSwitchUi">false</bool>
 
+    <!-- A array of regex to treat a SMS as VVM SMS if the message body matches.
+         Each item represents an entry, which consists of two parts:
+         a comma (,) separated list of MCCMNC the regex applies to, followed by a semicolon (;), and
+         then the regex itself. -->
+    <string-array translatable="false" name="config_vvmSmsFilterRegexes">
+        <!-- Verizon requires any SMS that starts with //VZWVVM to be treated as a VVM SMS-->
+        <item>310004,310010,310012,310013,310590,310890,310910,311110,311270,311271,311272,311273,311274,311275,311276,311277,311278,311279,311280,311281,311282,311283,311284,311285,311286,311287,311288,311289,311390,311480,311481,311482,311483,311484,311485,311486,311487,311488,311489;^//VZWVVM.*</item>
+    </string-array>
+
     <!-- This config is holding calling number conversion map - expected to convert to emergency
          number. Formats for this config as below:
          <item>[dialstring1],[dialstring2],[dialstring3]:[replacement]</item>
@@ -3475,6 +3715,11 @@
     <!-- Default data warning level in mb -->
     <integer name="default_data_warning_level_mb">2048</integer>
 
+    <!-- When true, indicates that the vendor's IMS implementation requires a workaround when
+     sending a request to enable or disable the camera while the video session is also
+     paused. -->
+    <bool name="config_useVideoPauseWorkaround">false</bool>
+
     <!-- Whether to send a custom package name with the PSD.-->
     <bool name="config_sendPackageName">false</bool>
 
@@ -3566,6 +3811,14 @@
     <integer name="config_stableDeviceDisplayWidth">-1</integer>
     <integer name="config_stableDeviceDisplayHeight">-1</integer>
 
+    <!-- List of countries in which we display 'No service' on status bar
+         instead of 'Emergency calls only' when SIM is unready. -->
+    <string-array translatable="false" name="config_display_no_service_when_sim_unready">
+        <item>"DE"</item>
+        <item>"GB"</item>
+        <item>"JP"</item>
+    </string-array>
+
     <!-- Class names of device specific services inheriting com.android.server.SystemService. The
          classes are instantiated in the order of the array. -->
     <string-array translatable="false" name="config_deviceSpecificSystemServices"></string-array>
@@ -3613,6 +3866,25 @@
     <bool name="config_supportBluetoothPersistedState">true</bool>
 
     <bool name="config_keepRestrictedProfilesInBackground">true</bool>
+
+    <!-- Cellular network service package name to bind to by default. -->
+    <string name="config_wwan_network_service_package" translatable="false">com.android.phone</string>
+
+    <!-- Cellular network service class name to bind to by default.-->
+    <string name="config_wwan_network_service_class" translatable="false"></string>
+
+    <!-- IWLAN network service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_network_service_package" translatable="false"></string>
+
+    <!-- IWLAN network service class name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_network_service_class" translatable="false"></string>
+    <!-- Telephony qualified networks service package name to bind to by default. -->
+    <string name="config_qualified_networks_service_package" translatable="false"></string>
+
+    <!-- Telephony qualified networks service class name to bind to by default. -->
+    <string name="config_qualified_networks_service_class" translatable="false"></string>
     <!-- Wear devices: Controls the radios affected by Activity Mode. -->
     <string-array name="config_wearActivityModeRadios">
         <item>"wifi"</item>
@@ -3690,6 +3962,9 @@
 
     <!-- Enable Zram writeback feature to allow unused pages in zram be written to flash. -->
     <bool name="config_zramWriteback">false</bool>
+
+    <!-- Whether cbrs is supported on the device or not -->
+    <bool translatable="false" name="config_cbrs_supported">false</bool>
 
     <!-- Whether or not aware is enabled by default -->
     <bool name="config_awareSettingAvailable">false</bool>
