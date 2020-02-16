@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs;
+package com.android.systemui.qs.carrier;
 
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 
@@ -29,7 +29,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.CarrierTextController;
@@ -38,7 +37,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.NetworkController;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -82,11 +80,13 @@ public class QSCarrierGroupController {
                         Log.e(TAG, "Invalid SIM slot index for subscription: " + subId);
                         return;
                     }
-                    mInfos[slotIndex].visible = statusIcon.visible;
-                    mInfos[slotIndex].mobileSignalIconId = statusIcon.icon;
-                    mInfos[slotIndex].contentDescription = statusIcon.contentDescription;
-                    mInfos[slotIndex].typeContentDescription = typeContentDescription.toString();
-                    mInfos[slotIndex].roaming = roaming;
+                    mInfos[slotIndex] = new CellSignalState(
+                            statusIcon.visible,
+                            statusIcon.icon,
+                            statusIcon.contentDescription,
+                            typeContentDescription.toString(),
+                            roaming
+                    );
                     mMainHandler.obtainMessage(H.MSG_UPDATE_STATE).sendToTarget();
                 }
 
@@ -94,7 +94,7 @@ public class QSCarrierGroupController {
                 public void setNoSims(boolean hasNoSims, boolean simDetected) {
                     if (hasNoSims) {
                         for (int i = 0; i < SIM_SLOTS; i++) {
-                            mInfos[i].visible = false;
+                            mInfos[i] = mInfos[i].changeVisibility(false);
                         }
                     }
                     mMainHandler.obtainMessage(H.MSG_UPDATE_STATE).sendToTarget();
@@ -236,7 +236,7 @@ public class QSCarrierGroupController {
                                         + info.subscriptionIds[i]);
                         continue;
                     }
-                    mInfos[slot].visible = true;
+                    mInfos[slot] = mInfos[slot].changeVisibility(true);
                     slotSeen[slot] = true;
                     mCarrierGroups[slot].setCarrierText(
                             info.listOfCarriers[i].toString().trim());
@@ -244,7 +244,7 @@ public class QSCarrierGroupController {
                 }
                 for (int i = 0; i < SIM_SLOTS; i++) {
                     if (!slotSeen[i]) {
-                        mInfos[i].visible = false;
+                        mInfos[i] = mInfos[i].changeVisibility(false);
                         mCarrierGroups[i].setVisibility(View.GONE);
                     }
                 }
@@ -255,7 +255,7 @@ public class QSCarrierGroupController {
             // No sims or airplane mode (but not WFC). Do not show QSCarrierGroup, instead just show
             // info.carrierText in a different view.
             for (int i = 0; i < SIM_SLOTS; i++) {
-                mInfos[i].visible = false;
+                mInfos[i] = mInfos[i].changeVisibility(false);
                 mCarrierGroups[i].setCarrierText("");
                 mCarrierGroups[i].setVisibility(View.GONE);
             }
@@ -295,35 +295,6 @@ public class QSCarrierGroupController {
         }
     }
 
-    static final class CellSignalState {
-        boolean visible;
-        int mobileSignalIconId;
-        String contentDescription;
-        String typeContentDescription;
-        boolean roaming;
-
-        @Override
-        public boolean equals(@Nullable Object obj) {
-            if (this == obj) return true;
-            if (!(obj instanceof CellSignalState)) return false;
-            CellSignalState other = (CellSignalState) obj;
-            return this.visible == other.visible
-                    && this.mobileSignalIconId == other.mobileSignalIconId
-                    && Objects.equals(this.contentDescription, other.contentDescription)
-                    && Objects.equals(this.typeContentDescription, other.typeContentDescription)
-                    && this.roaming == other.roaming;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(visible,
-                    mobileSignalIconId,
-                    contentDescription,
-                    typeContentDescription,
-                    roaming);
-        }
-    }
-
     public static class Builder {
         private QSCarrierGroup mView;
         private final ActivityStarter mActivityStarter;
@@ -343,7 +314,7 @@ public class QSCarrierGroupController {
             mCarrierTextControllerBuilder = carrierTextControllerBuilder;
         }
 
-        Builder setQSCarrierGroup(QSCarrierGroup view) {
+        public Builder setQSCarrierGroup(QSCarrierGroup view) {
             mView = view;
             return this;
         }
