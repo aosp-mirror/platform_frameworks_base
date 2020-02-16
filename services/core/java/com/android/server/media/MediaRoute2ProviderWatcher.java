@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -171,7 +172,7 @@ final class MediaRoute2ProviderWatcher {
     };
 
     public interface Callback {
-        void onAddProviderService(MediaRoute2ProviderServiceProxy proxy);
-        void onRemoveProviderService(MediaRoute2ProviderServiceProxy proxy);
+        void onAddProviderService(@NonNull MediaRoute2ProviderServiceProxy proxy);
+        void onRemoveProviderService(@NonNull MediaRoute2ProviderServiceProxy proxy);
     }
 }
