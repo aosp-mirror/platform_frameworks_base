@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
@@ -55,7 +56,8 @@ public class FileIntegrityService extends SystemService {
     private final IBinder mService = new IFileIntegrityService.Stub() {
         @Override
         public boolean isApkVeritySupported() {
-            return SystemProperties.getInt("ro.apk_verity.mode", 0) == 2;
+            return Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.R
+                    || SystemProperties.getInt("ro.apk_verity.mode", 0) == 2;
         }
 
         @Override

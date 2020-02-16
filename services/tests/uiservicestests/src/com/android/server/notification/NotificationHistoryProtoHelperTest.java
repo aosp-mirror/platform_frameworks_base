@@ -21,6 +21,7 @@ import android.app.NotificationHistory;
 import android.app.NotificationHistory.HistoricalNotification;
 import android.graphics.drawable.Icon;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.text.TextUtils;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -57,6 +58,10 @@ public class NotificationHistoryProtoHelperTest extends UiServiceTestCase {
         String expectedText = "text" + index;
         Icon expectedIcon = Icon.createWithResource(InstrumentationRegistry.getContext(),
                 index);
+        String conversationId = null;
+        if (index % 2 == 0) {
+            conversationId = "convo" + index;
+        }
 
         return new HistoricalNotification.Builder()
                 .setPackage(packageName)
@@ -68,6 +73,7 @@ public class NotificationHistoryProtoHelperTest extends UiServiceTestCase {
                 .setTitle(expectedTitle)
                 .setText(expectedText)
                 .setIcon(expectedIcon)
+                .setConversationId(conversationId)
                 .build();
     }
 
@@ -139,6 +145,9 @@ public class NotificationHistoryProtoHelperTest extends UiServiceTestCase {
                 expectedStrings.add(n.getPackage());
                 expectedStrings.add(n.getChannelName());
                 expectedStrings.add(n.getChannelId());
+                if (!TextUtils.isEmpty(n.getConversationId())) {
+                    expectedStrings.add(n.getConversationId());
+                }
                 expectedEntries.add(n);
             }
             history.addNotificationToWrite(n);
@@ -178,6 +187,9 @@ public class NotificationHistoryProtoHelperTest extends UiServiceTestCase {
                 expectedStrings.add(n.getPackage());
                 expectedStrings.add(n.getChannelName());
                 expectedStrings.add(n.getChannelId());
+                if (!TextUtils.isEmpty(n.getConversationId())) {
+                    expectedStrings.add(n.getConversationId());
+                }
                 expectedEntries.add(n);
             }
             history.addNotificationToWrite(n);
@@ -227,6 +239,9 @@ public class NotificationHistoryProtoHelperTest extends UiServiceTestCase {
                 expectedStrings.add(n.getPackage());
                 expectedStrings.add(n.getChannelName());
                 expectedStrings.add(n.getChannelId());
+                if (n.getConversationId() != null) {
+                    expectedStrings.add(n.getConversationId());
+                }
                 expectedEntries.add(n);
             }
             history.addNotificationToWrite(n);
@@ -264,6 +279,9 @@ public class NotificationHistoryProtoHelperTest extends UiServiceTestCase {
             expectedStrings.add(n.getPackage());
             expectedStrings.add(n.getChannelName());
             expectedStrings.add(n.getChannelId());
+            if (n.getConversationId() != null) {
+                expectedStrings.add(n.getConversationId());
+            }
             history.addNotificationToWrite(n);
         }
         history.poolStringsFromNotifications();
@@ -279,6 +297,9 @@ public class NotificationHistoryProtoHelperTest extends UiServiceTestCase {
             expectedStrings.add(n.getPackage());
             expectedStrings.add(n.getChannelName());
             expectedStrings.add(n.getChannelId());
+            if (n.getConversationId() != null) {
+                expectedStrings.add(n.getConversationId());
+            }
             actualHistory.addNotificationToWrite(n);
         }
         actualHistory.poolStringsFromNotifications();

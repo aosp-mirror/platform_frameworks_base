@@ -21,27 +21,26 @@ import android.util.ArraySet;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Handles when smart replies are added to a notification
  * and clicked upon.
  */
-@Singleton
 public class SmartReplyController {
     private final IStatusBarService mBarService;
     private final NotificationEntryManager mEntryManager;
     private Set<String> mSendingKeys = new ArraySet<>();
     private Callback mCallback;
 
-    @Inject
+    /**
+     * Injected constructor. See {@link StatusBarModule}.
+     */
     public SmartReplyController(NotificationEntryManager entryManager,
             IStatusBarService statusBarService) {
         mBarService = statusBarService;

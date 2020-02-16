@@ -86,8 +86,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-//TODO: use java.lang.ref.Cleaner once Android supports Java 9
 import sun.misc.Cleaner;
+
+//TODO: use java.lang.ref.Cleaner once Android supports Java 9
 
 /**
  * <p>The {@link AutofillManager} class provides ways for apps and custom views to
@@ -547,7 +548,7 @@ public final class AutofillManager {
          * @param fillInIntent The authentication fill-in intent.
          */
         void autofillClientAuthenticate(int authenticationId, IntentSender intent,
-                Intent fillInIntent);
+                Intent fillInIntent, boolean authenticateInline);
 
         /**
          * Tells the client this manager has state to be reset.
@@ -2070,7 +2071,7 @@ public final class AutofillManager {
     }
 
     private void authenticate(int sessionId, int authenticationId, IntentSender intent,
-            Intent fillInIntent) {
+            Intent fillInIntent, boolean authenticateInline) {
         synchronized (mLock) {
             if (sessionId == mSessionId) {
                 final AutofillClient client = getClient();
@@ -2078,7 +2079,8 @@ public final class AutofillManager {
                     // clear mOnInvisibleCalled and we will see if receive onInvisibleForAutofill()
                     // before onAuthenticationResult()
                     mOnInvisibleCalled = false;
-                    client.autofillClientAuthenticate(authenticationId, intent, fillInIntent);
+                    client.autofillClientAuthenticate(authenticationId, intent, fillInIntent,
+                            authenticateInline);
                 }
             }
         }
@@ -3250,10 +3252,11 @@ public final class AutofillManager {
 
         @Override
         public void authenticate(int sessionId, int authenticationId, IntentSender intent,
-                Intent fillInIntent) {
+                Intent fillInIntent, boolean authenticateInline) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.post(() -> afm.authenticate(sessionId, authenticationId, intent, fillInIntent));
+                afm.post(() -> afm.authenticate(sessionId, authenticationId, intent, fillInIntent,
+                        authenticateInline));
             }
         }
 

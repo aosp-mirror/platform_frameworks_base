@@ -290,9 +290,9 @@ bool LogEvent::write(float value) {
 }
 
 bool LogEvent::writeBytes(const string& value) {
-    if (mContext) {
+    /* if (mContext) {
         return android_log_write_char_array(mContext, value.c_str(), value.length()) >= 0;
-    }
+    }*/
     return false;
 }
 

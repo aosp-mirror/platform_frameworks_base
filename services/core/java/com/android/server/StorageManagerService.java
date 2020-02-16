@@ -3975,7 +3975,7 @@ class StorageManagerService extends IStorageManager.Stub
             if (mIsFuseEnabled && hasMtp) {
                 ApplicationInfo ai = mIPackageManager.getApplicationInfo(packageName,
                         0, UserHandle.getUserId(uid));
-                if (ai.isSignedWithPlatformKey()) {
+                if (ai != null && ai.isSignedWithPlatformKey()) {
                     // Platform processes hosting the MTP server should be able to write in Android/
                     return Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE;
                 }

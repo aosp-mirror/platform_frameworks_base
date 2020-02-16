@@ -7156,7 +7156,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
-                } else if (dyingProc == cpr.proc) {
+                } else if (dyingProc == cpr.proc && dyingProc != null) {
                     // The old stable connection's client should be killed during proc cleaning up,
                     // so do not re-use the old ContentProviderRecord, otherwise the new clients
                     // could get killed unexpectedly.
@@ -8387,6 +8387,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void setActivityController(IActivityController controller, boolean imAMonkey) {
+        if (controller != null) {
+            Binder.allowBlocking(controller.asBinder());
+        }
         mActivityTaskManager.setActivityController(controller, imAMonkey);
     }
 

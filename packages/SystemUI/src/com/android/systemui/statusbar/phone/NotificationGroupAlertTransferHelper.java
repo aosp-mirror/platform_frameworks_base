@@ -36,21 +36,18 @@ import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.NotificationGroup;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
+import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * A helper class dealing with the alert interactions between {@link NotificationGroupManager} and
  * {@link HeadsUpManager}. In particular, this class deals with keeping
  * the correct notification in a group alerting based off the group suppression.
  */
-@Singleton
 public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedListener,
         StateListener {
 
@@ -76,7 +73,9 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
     private boolean mIsDozing;
 
-    @Inject
+    /**
+     * Injected constructor. See {@link StatusBarPhoneModule}.
+     */
     public NotificationGroupAlertTransferHelper(RowContentBindStage bindStage) {
         Dependency.get(StatusBarStateController.class).addCallback(this);
         mRowContentBindStage = bindStage;

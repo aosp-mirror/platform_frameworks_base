@@ -770,7 +770,14 @@ public class NavigationBarView extends FrameLayout implements
 
     public void updatePanelSystemUiStateFlags() {
         int displayId = mContext.getDisplayId();
+        if (SysUiState.DEBUG) {
+            Log.d(TAG, "Updating panel sysui state flags: panelView=" + mPanelView);
+        }
         if (mPanelView != null) {
+            if (SysUiState.DEBUG) {
+                Log.d(TAG, "Updating panel sysui state flags: fullyExpanded="
+                        + mPanelView.isFullyExpanded() + " inQs=" + mPanelView.isInSettings());
+            }
             mSysUiFlagContainer.setFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
                     mPanelView.isFullyExpanded() && !mPanelView.isInSettings())
                     .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED,

@@ -84,7 +84,6 @@ cc_defaults {
                 "libGLESv3",
                 "libvulkan",
                 "libui",
-                "libgui",
                 "libnativedisplay",
                 "libnativewindow",
                 "libprotobuf-cpp-lite",
@@ -289,6 +288,13 @@ cc_defaults {
     name: "hwui_test_defaults",
     defaults: ["hwui_defaults"],
     test_suites: ["device-tests"],
+    target: {
+        android: {
+            shared_libs: [
+	        "libgui",
+	    ],
+	}
+    },
     srcs: [
         "tests/common/scenes/*.cpp",
         "tests/common/LeakChecker.cpp",

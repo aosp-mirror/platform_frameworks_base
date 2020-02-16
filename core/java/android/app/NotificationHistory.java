@@ -21,6 +21,7 @@ import android.annotation.UserIdInt;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +52,7 @@ public final class NotificationHistory implements Parcelable {
         private String mTitle;
         private String mText;
         private Icon mIcon;
+        private String mConversationId;
 
         private HistoricalNotification() {}
 
@@ -94,6 +96,10 @@ public final class NotificationHistory implements Parcelable {
             return mPackage + "|" + mUid + "|" + mPostedTimeMs;
         }
 
+        public String getConversationId() {
+            return mConversationId;
+        }
+
         @Override
         public String toString() {
             return "HistoricalNotification{" +
@@ -104,6 +110,7 @@ public final class NotificationHistory implements Parcelable {
                     ", mTitle='" + mTitle + '\'' +
                     ", mText='" + mText + '\'' +
                     ", mIcon=" + mIcon +
+                    ", mConversationId=" + mConversationId +
                     '}';
         }
 
@@ -123,6 +130,7 @@ public final class NotificationHistory implements Parcelable {
                     Objects.equals(getChannelId(), that.getChannelId()) &&
                     Objects.equals(getTitle(), that.getTitle()) &&
                     Objects.equals(getText(), that.getText()) &&
+                    Objects.equals(getConversationId(), that.getConversationId()) &&
                     iconsAreSame;
         }
 
@@ -130,7 +138,7 @@ public final class NotificationHistory implements Parcelable {
         public int hashCode() {
             return Objects.hash(getPackage(), getChannelName(), getChannelId(), getUid(),
                     getUserId(),
-                    getPostedTimeMs(), getTitle(), getText(), getIcon());
+                    getPostedTimeMs(), getTitle(), getText(), getIcon(), getConversationId());
         }
 
         public static final class Builder {
@@ -143,6 +151,7 @@ public final class NotificationHistory implements Parcelable {
             private String mTitle;
             private String mText;
             private Icon mIcon;
+            private String mConversationId;
 
             public Builder() {}
 
@@ -191,6 +200,11 @@ public final class NotificationHistory implements Parcelable {
                 return this;
             }
 
+            public Builder setConversationId(String conversationId) {
+                mConversationId = conversationId;
+                return this;
+            }
+
             public HistoricalNotification build() {
                 HistoricalNotification n = new HistoricalNotification();
                 n.mPackage = mPackage;
@@ -202,6 +216,7 @@ public final class NotificationHistory implements Parcelable {
                 n.mTitle = mTitle;
                 n.mText = mText;
                 n.mIcon = mIcon;
+                n.mConversationId = mConversationId;
                 return n;
             }
         }
@@ -299,6 +314,9 @@ public final class NotificationHistory implements Parcelable {
             mStringsToWrite.add(notification.getPackage());
             mStringsToWrite.add(notification.getChannelName());
             mStringsToWrite.add(notification.getChannelId());
+            if (!TextUtils.isEmpty(notification.getConversationId())) {
+                mStringsToWrite.add(notification.getConversationId());
+            }
         }
     }
 
@@ -423,9 +441,17 @@ public final class NotificationHistory implements Parcelable {
             channelIdIndex = -1;
         }
 
+        final int conversationIdIndex;
+        if (!TextUtils.isEmpty(notification.getConversationId())) {
+            conversationIdIndex = findStringIndex(notification.getConversationId());
+        } else {
+            conversationIdIndex = -1;
+        }
+
         p.writeInt(packageIndex);
         p.writeInt(channelNameIndex);
         p.writeInt(channelIdIndex);
+        p.writeInt(conversationIdIndex);
         p.writeInt(notification.getUid());
         p.writeInt(notification.getUserId());
         p.writeLong(notification.getPostedTimeMs());
@@ -459,6 +485,13 @@ public final class NotificationHistory implements Parcelable {
             notificationOut.setChannelId(mStringPool[channelIdIndex]);
         } else {
             notificationOut.setChannelId(null);
+        }
+
+        final int conversationIdIndex = p.readInt();
+        if (conversationIdIndex >= 0) {
+            notificationOut.setConversationId(mStringPool[conversationIdIndex]);
+        } else {
+            notificationOut.setConversationId(null);
         }
 
         notificationOut.setUid(p.readInt());

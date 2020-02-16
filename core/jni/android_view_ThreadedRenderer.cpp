@@ -17,40 +17,34 @@
 #define LOG_TAG "ThreadedRenderer"
 #define ATRACE_TAG ATRACE_TAG_VIEW
 
-#include <algorithm>
-#include <atomic>
-#include <inttypes.h>
-
-#include "jni.h"
-#include <nativehelper/JNIHelp.h>
-#include "core_jni_helpers.h"
-#include <GraphicsJNI.h>
-
-#include <gui/BufferItemConsumer.h>
-#include <gui/BufferQueue.h>
-#include <gui/Surface.h>
-
-#include "android_graphics_HardwareRendererObserver.h"
-
-#include <private/EGL/cache.h>
-
-#include <utils/RefBase.h>
-#include <utils/StrongPointer.h>
-#include <utils/Timers.h>
-#include <utils/TraceUtils.h>
-#include <android_runtime/android_view_Surface.h>
-#include <system/window.h>
-
 #include <FrameInfo.h>
+#include <GraphicsJNI.h>
 #include <Picture.h>
 #include <Properties.h>
 #include <RootRenderNode.h>
+#include <dlfcn.h>
+#include <inttypes.h>
+#include <media/NdkImage.h>
+#include <media/NdkImageReader.h>
+#include <nativehelper/JNIHelp.h>
+#include <pipeline/skia/ShaderCache.h>
+#include <private/EGL/cache.h>
 #include <renderthread/CanvasContext.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
-#include <pipeline/skia/ShaderCache.h>
 #include <utils/Color.h>
+#include <utils/RefBase.h>
+#include <utils/StrongPointer.h>
+#include <utils/Timers.h>
+#include <utils/TraceUtils.h>
+
+#include <algorithm>
+#include <atomic>
+
+#include "android_graphics_HardwareRendererObserver.h"
+#include "core_jni_helpers.h"
+#include "jni.h"
 
 namespace android {
 
@@ -77,6 +71,9 @@ static JNIEnv* getenv(JavaVM* vm) {
     }
     return env;
 }
+
+typedef ANativeWindow* (*ANW_fromSurface)(JNIEnv* env, jobject surface);
+ANW_fromSurface fromSurface;
 
 class JvmErrorReporter : public ErrorHandler {
 public:
@@ -178,9 +175,9 @@ static void android_view_ThreadedRenderer_setName(JNIEnv* env, jobject clazz,
 static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface, jboolean discardBuffer) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<Surface> surface;
+    ANativeWindow* window = nullptr;
     if (jsurface) {
-        surface = android_view_Surface_getSurface(env, jsurface);
+        window = fromSurface(env, jsurface);
     }
     bool enableTimeout = true;
     if (discardBuffer) {
@@ -188,7 +185,7 @@ static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
         enableTimeout = false;
         proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
     }
-    proxy->setSurface(surface, enableTimeout);
+    proxy->setSurface(window, enableTimeout);
 }
 
 static jboolean android_view_ThreadedRenderer_pause(JNIEnv* env, jobject clazz,
@@ -458,8 +455,10 @@ static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
         jint right, jint bottom, jlong bitmapPtr) {
     SkBitmap bitmap;
     bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
-    sp<Surface> surface = android_view_Surface_getSurface(env, jsurface);
-    return RenderProxy::copySurfaceInto(surface, left, top, right, bottom, &bitmap);
+    ANativeWindow* window = fromSurface(env, jsurface);
+    jint result = RenderProxy::copySurfaceInto(window, left, top, right, bottom, &bitmap);
+    ANativeWindow_release(window);
+    return result;
 }
 
 class ContextFactory : public IContextFactory {
@@ -480,23 +479,35 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
     uint32_t width = jwidth;
     uint32_t height = jheight;
 
-    // Create a Surface wired up to a BufferItemConsumer
-    sp<IGraphicBufferProducer> producer;
-    sp<IGraphicBufferConsumer> rawConsumer;
-    BufferQueue::createBufferQueue(&producer, &rawConsumer);
-    // We only need 1 buffer but some drivers have bugs so workaround it by setting max count to 2
-    rawConsumer->setMaxBufferCount(2);
-    sp<BufferItemConsumer> consumer = new BufferItemConsumer(rawConsumer,
-            GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_SW_READ_NEVER | GRALLOC_USAGE_SW_WRITE_NEVER);
-    consumer->setDefaultBufferSize(width, height);
-    sp<Surface> surface = new Surface(producer);
+    // Create an ImageReader wired up to a BufferItemConsumer
+    AImageReader* rawReader;
+    media_status_t result =
+            AImageReader_newWithUsage(width, height, AIMAGE_FORMAT_RGBA_8888,
+                                      AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE, 2, &rawReader);
+    std::unique_ptr<AImageReader, decltype(&AImageReader_delete)> reader(rawReader,
+                                                                         AImageReader_delete);
+
+    if (result != AMEDIA_OK) {
+        ALOGW("Error creating image reader!");
+        return nullptr;
+    }
+
+    // Note that ownership of this window is maintained by AImageReader, so we
+    // shouldn't need to wrap around a smart pointer.
+    ANativeWindow* window;
+    result = AImageReader_getWindow(rawReader, &window);
+
+    if (result != AMEDIA_OK) {
+        ALOGW("Error retrieving the native window!");
+        return nullptr;
+    }
 
     // Render into the surface
     {
         ContextFactory factory;
         RenderProxy proxy{true, renderNode, &factory};
         proxy.setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
-        proxy.setSurface(surface);
+        proxy.setSurface(window);
         // Shadows can't be used via this interface, so just set the light source
         // to all 0s.
         proxy.setLightAlpha(0, 0);
@@ -508,33 +519,34 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
         proxy.syncAndDrawFrame();
     }
 
-    // Yank out the GraphicBuffer
-    BufferItem bufferItem;
-    status_t err;
-    if ((err = consumer->acquireBuffer(&bufferItem, 0, true)) != OK) {
-        ALOGW("Failed to acquireBuffer, error %d (%s)", err, strerror(-err));
+    AImage* rawImage;
+    result = AImageReader_acquireNextImage(rawReader, &rawImage);
+    std::unique_ptr<AImage, decltype(&AImage_delete)> image(rawImage, AImage_delete);
+    if (result != AMEDIA_OK) {
+        ALOGW("Error reading image: %d!", result);
         return nullptr;
     }
-    sp<GraphicBuffer> buffer = bufferItem.mGraphicBuffer;
-    // We don't really care if this fails or not since we're just going to destroy this anyway
-    consumer->releaseBuffer(bufferItem);
-    if (!buffer.get()) {
-        ALOGW("GraphicBuffer is null?");
-        return nullptr;
-    }
-    if (buffer->getWidth() != width || buffer->getHeight() != height) {
-        ALOGW("GraphicBuffer size mismatch, got %dx%d expected %dx%d",
-                buffer->getWidth(), buffer->getHeight(), width, height);
+
+    AHardwareBuffer* buffer;
+    result = AImage_getHardwareBuffer(rawImage, &buffer);
+
+    AHardwareBuffer_Desc desc;
+    AHardwareBuffer_describe(buffer, &desc);
+
+    if (desc.width != width || desc.height != height) {
+        ALOGW("AHardwareBuffer size mismatch, got %dx%d expected %dx%d", desc.width, desc.height,
+              width, height);
         // Continue I guess?
     }
 
-    sk_sp<SkColorSpace> cs = uirenderer::DataSpaceToColorSpace(bufferItem.mDataSpace);
+    sk_sp<SkColorSpace> cs = uirenderer::DataSpaceToColorSpace(
+            static_cast<android_dataspace>(ANativeWindow_getBuffersDataSpace(window)));
     if (cs == nullptr) {
         // nullptr is treated as SRGB in Skia, thus explicitly use SRGB in order to make sure
         // the returned bitmap has a color space.
         cs = SkColorSpace::MakeSRGB();
     }
-    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer->toAHardwareBuffer(), cs);
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, cs);
     return bitmap::createBitmap(env, bitmap.release(),
             android::bitmap::kBitmapCreateFlag_Premultiplied);
 }
@@ -721,6 +733,11 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
             "android/graphics/HardwareRenderer$FrameCompleteCallback");
     gFrameCompleteCallback.onFrameComplete = GetMethodIDOrDie(env, frameCompleteClass,
             "onFrameComplete", "(J)V");
+
+    void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
+    fromSurface = (ANW_fromSurface)dlsym(handle_, "ANativeWindow_fromSurface");
+    LOG_ALWAYS_FATAL_IF(fromSurface == nullptr,
+                        "Failed to find required symbol ANativeWindow_fromSurface!");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }

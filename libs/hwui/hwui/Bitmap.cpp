@@ -32,7 +32,6 @@
 
 #ifndef _WIN32
 #include <binder/IServiceManager.h>
-#include <private/gui/ComposerService.h>
 #endif
 #include <ui/PixelFormat.h>
 

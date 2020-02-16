@@ -18,6 +18,8 @@ package com.android.internal.app;
 
 import android.app.AppOpsManager;
 import android.app.AsyncNotedAppOp;
+import android.app.SyncNotedAppOp;
+import android.app.RuntimeAppOpAccessMessage;
 import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.os.RemoteCallback;
@@ -25,6 +27,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsAsyncNotedCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
+import com.android.internal.app.MessageSamplingConfig;
 
 interface IAppOpsService {
     // These methods are also called by native code, so must
@@ -54,6 +57,9 @@ interface IAppOpsService {
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);
+    RuntimeAppOpAccessMessage collectRuntimeAppOpAccessMessage();
+    MessageSamplingConfig reportRuntimeAppOpAccessMessageAndGetConfig(String packageName,
+            in SyncNotedAppOp appOp, String message);
     @UnsupportedAppUsage
     List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
     @UnsupportedAppUsage

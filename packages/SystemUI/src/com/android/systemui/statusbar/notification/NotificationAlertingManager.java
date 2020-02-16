@@ -28,13 +28,10 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /** Handles heads-up and pulsing behavior driven by notification changes. */
-@Singleton
 public class NotificationAlertingManager {
 
     private static final String TAG = "NotifAlertManager";
@@ -47,7 +44,9 @@ public class NotificationAlertingManager {
 
     private HeadsUpManager mHeadsUpManager;
 
-    @Inject
+    /**
+     * Injected constructor. See {@link NotificationsModule}.
+     */
     public NotificationAlertingManager(
             NotificationEntryManager notificationEntryManager,
             NotificationRemoteInputManager remoteInputManager,

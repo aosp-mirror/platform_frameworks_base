@@ -16,6 +16,10 @@
 
 package android.app;
 
+import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__DEFAULT;
+import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
+import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -48,6 +52,8 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -63,6 +69,7 @@ import com.android.internal.app.IAppOpsAsyncNotedCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.MessageSamplingConfig;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.ZygoteInit;
 import com.android.internal.util.ArrayUtils;
@@ -141,6 +148,13 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     final IAppOpsService mService;
 
+    /**
+     * Service for the application context, to be used by static methods via
+     * {@link #getService()}
+     */
+    @GuardedBy("sLock")
+    static IAppOpsService sService;
+
     @GuardedBy("mModeWatchers")
     private final ArrayMap<OnOpChangedListener, IAppOpsCallback> mModeWatchers =
             new ArrayMap<>();
@@ -158,6 +172,50 @@ public class AppOpsManager {
     /** Current {@link AppOpsCollector}. Change via {@link #setNotedAppOpsCollector} */
     @GuardedBy("sLock")
     private static @Nullable AppOpsCollector sNotedAppOpsCollector;
+
+    /**
+     * Additional collector that collect accesses and forwards a few of them them via
+     * {@link IAppOpsService#reportRuntimeAppOpAccessMessageAndGetConfig}.
+     */
+    private static AppOpsCollector sMessageCollector =
+            new AppOpsCollector() {
+                @Override
+                public void onNoted(@NonNull SyncNotedAppOp op) {
+                    reportStackTraceIfNeeded(op);
+                }
+
+                @Override
+                public void onAsyncNoted(@NonNull AsyncNotedAppOp asyncOp) {
+                    // collected directly in AppOpsService
+                }
+
+                @Override
+                public void onSelfNoted(@NonNull SyncNotedAppOp op) {
+                    reportStackTraceIfNeeded(op);
+                }
+
+                private void reportStackTraceIfNeeded(@NonNull SyncNotedAppOp op) {
+                    if (sConfig.getSampledOpCode() == OP_NONE
+                            && sConfig.getExpirationTimeSinceBootMillis()
+                            >= SystemClock.elapsedRealtime()) {
+                        return;
+                    }
+
+                    MessageSamplingConfig config = sConfig;
+                    if (leftCircularDistance(strOpToOp(op.getOp()), config.getSampledOpCode(),
+                            _NUM_OP) <= config.getAcceptableLeftDistance()
+                            || config.getExpirationTimeSinceBootMillis()
+                            < SystemClock.elapsedRealtime()) {
+                        String stackTrace = getFormattedStackTrace();
+                        try {
+                            sConfig = getService().reportRuntimeAppOpAccessMessageAndGetConfig(
+                                    ActivityThread.currentOpPackageName(), op, stackTrace);
+                        } catch (RemoteException e) {
+                            e.rethrowFromSystemServer();
+                        }
+                    }
+                }
+            };
 
     static IBinder sClientId;
 
@@ -550,7 +608,6 @@ public class AppOpsManager {
     })
     public @interface OpFlags {}
 
-
     /** @hide */
     public static final String getFlagName(@OpFlags int flag) {
         switch (flag) {
@@ -568,6 +625,18 @@ public class AppOpsManager {
                 return "unknown";
         }
     }
+
+    /**
+     * Strategies used for message sampling
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"RUNTIME_APP_OPS_ACCESS__SAMPLING_STRATEGY__"}, value = {
+            RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__DEFAULT,
+            RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM,
+            RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED
+    })
+    public @interface SamplingStrategy {}
 
     private static final int UID_STATE_OFFSET = 31;
     private static final int FLAGS_MASK = 0xFFFFFFFF;
@@ -2224,6 +2293,10 @@ public class AppOpsManager {
             throw new IllegalStateException("notedAppOps collection code assumes < 128 appops");
         }
     }
+
+    /** Config used to control app ops access messages sampling */
+    private static MessageSamplingConfig sConfig =
+            new MessageSamplingConfig(OP_NONE, 0, 0);
 
     /** @hide */
     public static final String KEY_HISTORICAL_OPS = "historical_ops";
@@ -7268,6 +7341,17 @@ public class AppOpsManager {
         }
     }
 
+    /** @hide */
+    private static IAppOpsService getService() {
+        synchronized (sLock) {
+            if (sService == null) {
+                sService = IAppOpsService.Stub.asInterface(
+                        ServiceManager.getService(Context.APP_OPS_SERVICE));
+            }
+            return sService;
+        }
+    }
+
     /**
      * @deprecated use {@link #startOp(String, int, String, String, String)} instead
      */
@@ -7614,6 +7698,7 @@ public class AppOpsManager {
                 sNotedAppOpsCollector.onSelfNoted(new SyncNotedAppOp(op, featureId));
             }
         }
+        sMessageCollector.onSelfNoted(new SyncNotedAppOp(op, featureId));
     }
 
     /**
@@ -7763,6 +7848,10 @@ public class AppOpsManager {
                             sNotedAppOpsCollector.onNoted(new SyncNotedAppOp(code, featureId));
                         }
                     }
+                }
+                for (int code = notedAppOps.nextSetBit(0); code != -1;
+                        code = notedAppOps.nextSetBit(code + 1)) {
+                    sMessageCollector.onNoted(new SyncNotedAppOp(code, featureId));
                 }
             }
         }
@@ -7958,10 +8047,13 @@ public class AppOpsManager {
 
         StringBuilder sb = new StringBuilder();
         for (int i = firstInteresting; i <= lastInteresting; i++) {
-            sb.append(trace[i]);
-            if (i != lastInteresting) {
+            if (i != firstInteresting) {
                 sb.append('\n');
             }
+            if (sb.length() + trace[i].toString().length() > 600) {
+                break;
+            }
+            sb.append(trace[i]);
         }
 
         return sb.toString();
@@ -8083,6 +8175,22 @@ public class AppOpsManager {
     public void clearHistory() {
         try {
             mService.clearHistory();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Pulls current AppOps access report and picks package and op to watch for next access report
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
+    public @Nullable RuntimeAppOpAccessMessage collectRuntimeAppOpAccessMessage() {
+        try {
+            return mService.collectRuntimeAppOpAccessMessage();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8296,5 +8404,13 @@ public class AppOpsManager {
         }
 
         return AppOpsManager.MODE_DEFAULT;
+    }
+
+    /**
+     * Calculate left circular distance for two numbers modulo size.
+     * @hide
+     */
+    public static int leftCircularDistance(int from, int to, int size) {
+        return (to + size - from) % size;
     }
 }

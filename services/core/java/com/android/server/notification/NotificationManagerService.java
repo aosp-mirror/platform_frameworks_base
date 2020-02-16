@@ -6243,6 +6243,7 @@ public class NotificationManagerService extends SystemService {
         private final int mRank;
         private final int mCount;
         private final ManagedServiceInfo mListener;
+        private final long mWhen;
 
         CancelNotificationRunnable(final int callingUid, final int callingPid,
                 final String pkg, final String tag, final int id,
@@ -6262,6 +6263,7 @@ public class NotificationManagerService extends SystemService {
             this.mRank = rank;
             this.mCount = count;
             this.mListener = listener;
+            this.mWhen = System.currentTimeMillis();
         }
 
         @Override
@@ -6273,13 +6275,28 @@ public class NotificationManagerService extends SystemService {
             }
 
             synchronized (mNotificationLock) {
-                // If the notification is currently enqueued, repost this runnable so it has a
-                // chance to notify listeners
-                if ((findNotificationByListLocked(mEnqueuedNotifications, mPkg, mTag, mId, mUserId))
-                        != null) {
+                // Check to see if there is a notification in the enqueued list that hasn't had a
+                // chance to post yet.
+                List<NotificationRecord> enqueued = findEnqueuedNotificationsForCriteria(
+                        mPkg, mTag, mId, mUserId);
+                boolean repost = false;
+                if (enqueued.size() > 0) {
+                    // Found something, let's see what it was
+                    repost = true;
+                    // If all enqueues happened before this cancel then wait for them to happen,
+                    // otherwise we should let this cancel through so the next enqueue happens
+                    for (NotificationRecord r : enqueued) {
+                        if (r.mUpdateTimeMs > mWhen) {
+                            // At least one enqueue was posted after the cancel, so we're invalid
+                            return;
+                        }
+                    }
+                }
+                if (repost) {
                     mHandler.post(this);
                     return;
                 }
+
                 // Look for the notification in the posted list, since we already checked enqueued.
                 NotificationRecord r =
                         findNotificationByListLocked(mNotificationList, mPkg, mTag, mId, mUserId);
@@ -6296,6 +6313,10 @@ public class NotificationManagerService extends SystemService {
                         return;
                     }
                     if ((r.getNotification().flags & mMustNotHaveFlags) != 0) {
+                        return;
+                    }
+                    if (r.getUpdateTimeMs() > mWhen) {
+                        // In this case, a post must have slipped by when this runnable reposted
                         return;
                     }
 
@@ -8218,6 +8239,29 @@ public class NotificationManagerService extends SystemService {
             }
         }
         return null;
+    }
+
+    /**
+     * There may be multiple records that match your criteria. For instance if there have been
+     * multiple notifications posted which are enqueued for the same pkg, tag, id, userId. This
+     * method will find all of them in the given list
+     * @return
+     */
+    @GuardedBy("mNotificationLock")
+    private List<NotificationRecord> findEnqueuedNotificationsForCriteria(
+            String pkg, String tag, int id, int userId) {
+        final ArrayList<NotificationRecord> records = new ArrayList<>();
+        final int n = mEnqueuedNotifications.size();
+        for (int i = 0; i < n; i++) {
+            NotificationRecord r = mEnqueuedNotifications.get(i);
+            if (notificationMatchesUserId(r, userId)
+                    && r.getSbn().getId() == id
+                    && TextUtils.equals(r.getSbn().getTag(), tag)
+                    && r.getSbn().getPackageName().equals(pkg)) {
+                records.add(r);
+            }
+        }
+        return records;
     }
 
     @GuardedBy("mNotificationLock")

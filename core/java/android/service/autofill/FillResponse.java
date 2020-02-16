@@ -75,6 +75,7 @@ public final class FillResponse implements Parcelable {
     private final @Nullable SaveInfo mSaveInfo;
     private final @Nullable Bundle mClientState;
     private final @Nullable RemoteViews mPresentation;
+    private final @Nullable InlinePresentation mInlinePresentation;
     private final @Nullable RemoteViews mHeader;
     private final @Nullable RemoteViews mFooter;
     private final @Nullable IntentSender mAuthentication;
@@ -95,6 +96,7 @@ public final class FillResponse implements Parcelable {
         mSaveInfo = builder.mSaveInfo;
         mClientState = builder.mClientState;
         mPresentation = builder.mPresentation;
+        mInlinePresentation = builder.mInlinePresentation;
         mHeader = builder.mHeader;
         mFooter = builder.mFooter;
         mAuthentication = builder.mAuthentication;
@@ -128,6 +130,11 @@ public final class FillResponse implements Parcelable {
     /** @hide */
     public @Nullable RemoteViews getPresentation() {
         return mPresentation;
+    }
+
+    /** @hide */
+    public @Nullable InlinePresentation getInlinePresentation() {
+        return mInlinePresentation;
     }
 
     /** @hide */
@@ -219,6 +226,7 @@ public final class FillResponse implements Parcelable {
         private SaveInfo mSaveInfo;
         private Bundle mClientState;
         private RemoteViews mPresentation;
+        private InlinePresentation mInlinePresentation;
         private RemoteViews mHeader;
         private RemoteViews mFooter;
         private IntentSender mAuthentication;
@@ -313,6 +321,67 @@ public final class FillResponse implements Parcelable {
             }
             mAuthentication = authentication;
             mPresentation = presentation;
+            mAuthenticationIds = assertValid(ids);
+            return this;
+        }
+
+        /**
+         * Triggers a custom UI before before autofilling the screen with any data set in this
+         * response.
+         *
+         * <p><b>Note:</b> Although the name of this method suggests that it should be used just for
+         * authentication flow, it can be used for other advanced flows; see {@link AutofillService}
+         * for examples.
+         *
+         * <p>This method is similar to
+         * {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)}, but also accepts
+         * an {@link InlinePresentation} presentation which is required for authenticating through
+         * the inline autofill flow.
+         *
+         * <p><b>Note:</b> {@link #setHeader(RemoteViews)} or {@link #setFooter(RemoteViews)} does
+         * not work with {@link InlinePresentation}.</p>
+         *
+         * @param authentication Intent to an activity with your authentication flow.
+         * @param presentation The presentation to visualize the response.
+         * @param inlinePresentation The inlinePresentation to visualize the response inline.
+         * @param ids id of Views that when focused will display the authentication UI.
+         *
+         * @return This builder.
+         *
+         * @throws IllegalArgumentException if any of the following occurs:
+         * <ul>
+         *   <li>{@code ids} is {@code null}</li>
+         *   <li>{@code ids} is empty</li>
+         *   <li>{@code ids} contains a {@code null} element</li>
+         *   <li>both {@code authentication} and {@code presentation} are {@code null}</li>
+         *   <li>both {@code authentication} and {@code presentation} are non-{@code null}</li>
+         *   <li>both {@code authentication} and {@code inlinePresentation} are {@code null}</li>
+         *   <li>both {@code authentication} and {@code inlinePresentation} are
+         *   non-{@code null}</li>
+         * </ul>
+         *
+         * @throws IllegalStateException if a {@link #setHeader(RemoteViews) header} or a
+         * {@link #setFooter(RemoteViews) footer} are already set for this builder.
+         *
+         * @see android.app.PendingIntent#getIntentSender()
+         */
+        @NonNull
+        public Builder setAuthentication(@NonNull AutofillId[] ids,
+                @Nullable IntentSender authentication, @Nullable RemoteViews presentation,
+                @Nullable InlinePresentation inlinePresentation) {
+            throwIfDestroyed();
+            throwIfDisableAutofillCalled();
+            if (mHeader != null || mFooter != null) {
+                throw new IllegalStateException("Already called #setHeader() or #setFooter()");
+            }
+
+            if (authentication == null ^ (presentation == null && inlinePresentation == null)) {
+                throw new IllegalArgumentException("authentication and presentation "
+                        + "(dropdown or inline), must be both non-null or null");
+            }
+            mAuthentication = authentication;
+            mPresentation = presentation;
+            mInlinePresentation = inlinePresentation;
             mAuthenticationIds = assertValid(ids);
             return this;
         }
@@ -644,6 +713,8 @@ public final class FillResponse implements Parcelable {
                         break;
                     }
                 }
+            } else if (mInlinePresentation != null) {
+                mSupportsInlineSuggestions = true;
             }
 
             mDestroyed = true;
@@ -690,6 +761,9 @@ public final class FillResponse implements Parcelable {
         }
         if (mPresentation != null) {
             builder.append(", hasPresentation");
+        }
+        if (mInlinePresentation != null) {
+            builder.append(", hasInlinePresentation");
         }
         if (mHeader != null) {
             builder.append(", hasHeader");
@@ -740,6 +814,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelableArray(mAuthenticationIds, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeParcelable(mPresentation, flags);
+        parcel.writeParcelable(mInlinePresentation, flags);
         parcel.writeParcelable(mHeader, flags);
         parcel.writeParcelable(mFooter, flags);
         parcel.writeParcelable(mUserData, flags);
@@ -774,8 +849,10 @@ public final class FillResponse implements Parcelable {
                     AutofillId.class);
             final IntentSender authentication = parcel.readParcelable(null);
             final RemoteViews presentation = parcel.readParcelable(null);
+            final InlinePresentation inlinePresentation = parcel.readParcelable(null);
             if (authenticationIds != null) {
-                builder.setAuthentication(authenticationIds, authentication, presentation);
+                builder.setAuthentication(authenticationIds, authentication, presentation,
+                        inlinePresentation);
             }
             final RemoteViews header = parcel.readParcelable(null);
             if (header != null) {
