@@ -11055,14 +11055,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setAccountManagementDisabled(ComponentName who, String accountType,
-            boolean disabled) {
+            boolean disabled, boolean parent) {
         if (!mHasFeature) {
             return;
         }
         Objects.requireNonNull(who, "ComponentName is null");
         synchronized (getLockObject()) {
+            /*
+             * When called on the parent DPM instance (parent == true), affects active admin
+             * selection in two ways:
+             * * The ActiveAdmin must be of an org-owned profile owner.
+             * * The parent ActiveAdmin instance should be used for managing the restriction.
+             */
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+                    parent ? DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER
+                            : DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
             if (disabled) {
                 ap.accountTypesWithManagementDisabled.add(accountType);
             } else {
@@ -11074,22 +11081,34 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public String[] getAccountTypesWithManagementDisabled() {
-        return getAccountTypesWithManagementDisabledAsUser(UserHandle.getCallingUserId());
+        return getAccountTypesWithManagementDisabledAsUser(UserHandle.getCallingUserId(), false);
     }
 
     @Override
-    public String[] getAccountTypesWithManagementDisabledAsUser(int userId) {
+    public String[] getAccountTypesWithManagementDisabledAsUser(int userId, boolean parent) {
         enforceFullCrossUsersPermission(userId);
         if (!mHasFeature) {
             return null;
         }
         synchronized (getLockObject()) {
-            DevicePolicyData policy = getUserData(userId);
-            final int N = policy.mAdminList.size();
-            ArraySet<String> resultSet = new ArraySet<>();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = policy.mAdminList.get(i);
-                resultSet.addAll(admin.accountTypesWithManagementDisabled);
+            final ArraySet<String> resultSet = new ArraySet<>();
+
+            if (!parent) {
+                final DevicePolicyData policy = getUserData(userId);
+                for (ActiveAdmin admin : policy.mAdminList) {
+                    resultSet.addAll(admin.accountTypesWithManagementDisabled);
+                }
+            }
+
+            // Check if there's a profile owner of an org-owned device and the method is called for
+            // the parent user of this profile owner.
+            final ActiveAdmin orgOwnedAdmin =
+                    getProfileOwnerOfOrganizationOwnedDeviceLocked(userId);
+            final boolean shouldGetParentAccounts = orgOwnedAdmin != null && (parent
+                    || UserHandle.getUserId(orgOwnedAdmin.getUid()) != userId);
+            if (shouldGetParentAccounts) {
+                resultSet.addAll(
+                        orgOwnedAdmin.getParentActiveAdmin().accountTypesWithManagementDisabled);
             }
             return resultSet.toArray(new String[resultSet.size()]);
         }
