@@ -41,12 +41,12 @@ aidl_interface {
 
 java_library {
     name: "framework-tethering",
-    sdk_version: "system_current",
+    // TODO (b/146757305): change to module_app_current once available
+    sdk_version: "core_platform",
     srcs: [
         "src/android/net/TetheredClient.java",
         "src/android/net/TetheringManager.java",
         "src/android/net/TetheringConstants.java",
-        ":framework-tethering-annotations",
     ],
     static_libs: [
         "tethering-aidl-interfaces-java",
@@ -55,6 +55,7 @@ java_library {
     installable: true,
 
     libs: [
+        "framework-annotations-lib",
         "android_system_stubs_current",
     ],
 

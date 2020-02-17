@@ -16,7 +16,8 @@
 
 java_defaults {
     name: "TetheringAndroidLibraryDefaults",
-    sdk_version: "system_current",
+    // TODO (b/146757305): change to module API once available
+    sdk_version: "core_platform",
     srcs: [
         "src/**/*.java",
         ":framework-tethering-shared-srcs",
@@ -35,6 +36,8 @@ java_defaults {
     libs: [
         "framework-tethering",
         "unsupportedappusage",
+        "android_system_stubs_current",
+        "framework-res",
     ],
     plugins: ["java_api_finder"],
     manifest: "AndroidManifestBase.xml",
@@ -82,7 +85,8 @@ cc_library {
 // Common defaults for compiling the actual APK.
 java_defaults {
     name: "TetheringAppDefaults",
-    sdk_version: "system_current",
+    // TODO (b/146757305): change to module API once available
+    sdk_version: "core_platform",
     privileged: true,
     // Build system doesn't track transitive dependeicies for jni_libs, list all the dependencies
     // explicitly.
@@ -96,6 +100,8 @@ java_defaults {
     ],
     libs: [
         "framework-tethering",
+        "android_system_stubs_current",
+        "framework-res",
     ],
     jarjar_rules: "jarjar-rules.txt",
     optimize: {
