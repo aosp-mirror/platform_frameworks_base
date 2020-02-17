@@ -18,7 +18,7 @@
 
 #include "anomaly/indexed_priority_queue.h"
 
-#include <android/os/IStatsCompanionService.h>
+#include <aidl/android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
 
 #include <unordered_set>
@@ -26,7 +26,9 @@
 
 using namespace android;
 
-using android::os::IStatsCompanionService;
+using aidl::android::os::IStatsCompanionService;
+using std::function;
+using std::shared_ptr;
 using std::unordered_set;
 
 namespace android {
@@ -64,8 +66,9 @@ public:
      * alarm.
      */
     AlarmMonitor(uint32_t minDiffToUpdateRegisteredAlarmTimeSec,
-                 const std::function<void(const sp<IStatsCompanionService>&, int64_t)>& updateAlarm,
-                 const std::function<void(const sp<IStatsCompanionService>&)>& cancelAlarm);
+                 const function<void(const shared_ptr<IStatsCompanionService>&, int64_t)>&
+                         updateAlarm,
+                 const function<void(const shared_ptr<IStatsCompanionService>&)>& cancelAlarm);
     ~AlarmMonitor();
 
     /**
@@ -74,7 +77,7 @@ public:
      * If nullptr, AnomalyMonitor will continue to add/remove alarms, but won't
      * update IStatsCompanionService (until such time as it is set non-null).
      */
-    void setStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);
+    void setStatsCompanionService(shared_ptr<IStatsCompanionService> statsCompanionService);
 
     /**
      * Adds the given alarm (reference) to the queue.
@@ -123,7 +126,7 @@ private:
     /**
      * Binder interface for communicating with StatsCompanionService.
      */
-    sp<IStatsCompanionService> mStatsCompanionService = nullptr;
+    shared_ptr<IStatsCompanionService> mStatsCompanionService = nullptr;
 
     /**
      * Amount by which the soonest projected alarm must differ from
@@ -147,10 +150,10 @@ private:
     int64_t secToMs(uint32_t timeSec);
 
     // Callback function to update the alarm via StatsCompanionService.
-    std::function<void(const sp<IStatsCompanionService>, int64_t)> mUpdateAlarm;
+    std::function<void(const shared_ptr<IStatsCompanionService>, int64_t)> mUpdateAlarm;
 
     // Callback function to cancel the alarm via StatsCompanionService.
-    std::function<void(const sp<IStatsCompanionService>)> mCancelAlarm;
+    std::function<void(const shared_ptr<IStatsCompanionService>)> mCancelAlarm;
 
 };
 

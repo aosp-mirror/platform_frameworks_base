@@ -17,6 +17,7 @@
 #include "hash.h"
 #include "stats_log_util.h"
 
+#include <aidl/android/os/IStatsCompanionService.h>
 #include <private/android_filesystem_config.h>
 #include <set>
 #include <utils/SystemClock.h>
@@ -34,6 +35,10 @@ using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::FIELD_TYPE_UINT64;
 using android::util::ProtoOutputStream;
+
+using aidl::android::os::IStatsCompanionService;
+using std::shared_ptr;
+using std::string;
 
 namespace android {
 namespace os {
@@ -587,13 +592,13 @@ int64_t MillisToNano(const int64_t millis) {
 }
 
 bool checkPermissionForIds(const char* permission, pid_t pid, uid_t uid) {
-    sp<IStatsCompanionService> scs = getStatsCompanionService();
+    shared_ptr<IStatsCompanionService> scs = getStatsCompanionService();
     if (scs == nullptr) {
         return false;
     }
 
     bool success;
-    binder::Status status = scs->checkPermission(String16(permission), pid, uid, &success);
+    ::ndk::ScopedAStatus status = scs->checkPermission(string(permission), pid, uid, &success);
     if (!status.isOk()) {
         return false;
     }
