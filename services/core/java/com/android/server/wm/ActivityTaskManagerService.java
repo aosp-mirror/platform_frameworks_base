@@ -6254,11 +6254,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public int startActivityAsUser(IApplicationThread caller, String callerPackage,
-                @Nullable String callerFeatureId, Intent intent, Bundle options, int userId) {
+                @Nullable String callerFeatureId, Intent intent, @Nullable IBinder resultTo,
+                int startFlags, Bundle options, int userId) {
             return ActivityTaskManagerService.this.startActivityAsUser(
                     caller, callerPackage, callerFeatureId, intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options, userId,
+                    resultTo, null, 0, startFlags, null, options, userId,
                     false /*validateIncomingUser*/);
         }
 

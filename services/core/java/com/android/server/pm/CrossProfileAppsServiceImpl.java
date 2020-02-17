@@ -45,6 +45,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -167,6 +168,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         launchIntent.setComponent(component);
         mInjector.getActivityTaskManagerInternal().startActivityAsUser(
                 caller, callingPackage, callingFeatureId, launchIntent,
+                /* resultTo= */ null,
+                Intent.FLAG_ACTIVITY_NEW_TASK,
                 launchMainActivity
                         ? ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle()
                         : null,
@@ -179,7 +182,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             String callingPackage,
             String callingFeatureId,
             Intent intent,
-            @UserIdInt int userId) throws RemoteException {
+            @UserIdInt int userId,
+            IBinder callingActivity) throws RemoteException {
         Objects.requireNonNull(callingPackage);
         Objects.requireNonNull(intent);
         Objects.requireNonNull(intent.getComponent(), "The intent must have a Component set");
@@ -214,8 +218,16 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
         verifyActivityCanHandleIntent(launchIntent, callingUid, userId);
 
-        mInjector.getActivityTaskManagerInternal().startActivityAsUser(caller, callingPackage,
-                callingFeatureId, launchIntent, /* options= */ null, userId);
+        mInjector.getActivityTaskManagerInternal()
+                .startActivityAsUser(
+                        caller,
+                        callingPackage,
+                        callingFeatureId,
+                        launchIntent,
+                        callingActivity,
+                        /* startFlags= */ 0,
+                        /* options= */ null,
+                        userId);
         logStartActivityByIntent(callingPackage);
     }
 
