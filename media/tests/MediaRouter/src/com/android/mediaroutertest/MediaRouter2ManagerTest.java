@@ -413,7 +413,8 @@ public class MediaRouter2ManagerTest {
 
     Map<String, MediaRoute2Info> waitAndGetRoutesWithManager(List<String> routeFeatures)
             throws Exception {
-        CountDownLatch latch = new CountDownLatch(2);
+        CountDownLatch addedLatch = new CountDownLatch(1);
+        CountDownLatch featuresLatch = new CountDownLatch(1);
 
         // A dummy callback is required to send route feature info.
         RouteCallback routeCallback = new RouteCallback();
@@ -422,7 +423,7 @@ public class MediaRouter2ManagerTest {
             public void onRoutesAdded(List<MediaRoute2Info> routes) {
                 for (int i = 0; i < routes.size(); i++) {
                     if (!routes.get(i).isSystemRoute()) {
-                        latch.countDown();
+                        addedLatch.countDown();
                         break;
                     }
                 }
@@ -432,8 +433,8 @@ public class MediaRouter2ManagerTest {
             public void onControlCategoriesChanged(String packageName,
                     List<String> preferredFeatures) {
                 if (TextUtils.equals(mPackageName, packageName)
-                        && preferredFeatures.equals(preferredFeatures)) {
-                    latch.countDown();
+                        && preferredFeatures.equals(routeFeatures)) {
+                    featuresLatch.countDown();
                 }
             }
         };
@@ -441,7 +442,8 @@ public class MediaRouter2ManagerTest {
         mRouter2.registerRouteCallback(mExecutor, routeCallback,
                 new RouteDiscoveryPreference.Builder(routeFeatures, true).build());
         try {
-            latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            featuresLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
             return createRouteMap(mManager.getAvailableRoutes(mPackageName));
         } finally {
             mRouter2.unregisterRouteCallback(routeCallback);
