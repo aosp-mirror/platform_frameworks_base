@@ -52,6 +52,11 @@ message ConversationInfoProto {
   optional int32 conversation_flags = 6;
 }
 
+// On disk data of events.
+message PeopleEventsProto {
+  repeated PeopleEventProto events = 1;
+}
+
 // Individual event (com.android.server.people.data.Event).
 message PeopleEventProto {
 
@@ -65,11 +70,23 @@ message PeopleEventProto {
   optional int32 duration = 3;
 }
 
+// On disk data of event indexes.
+message PeopleEventIndexesProto {
+  repeated TypedPeopleEventIndexProto typed_indexes = 1;
+}
+
+// Mapping of event_type to event index.
+message TypedPeopleEventIndexProto {
+  optional int32 event_type = 1;
+  optional PeopleEventIndexProto index = 2;
+}
+
 // Index of events' time distributions (com.android.server.people.data.EventIndex).
 message PeopleEventIndexProto {
-    // Each long value in event_bitmaps represents a time slot, there should be 4 values. Further
-    // details can be found in class documentation.
-    repeated int64 event_bitmaps = 1;
+  // Each long value in event_bitmaps represents a time slot, there should be 4 values. Further
+  // details can be found in class documentation.
+  repeated int64 event_bitmaps = 1;
 
-    optional int64 last_updated_time = 2;
+  optional int64 last_updated_time = 2;
 }
+
