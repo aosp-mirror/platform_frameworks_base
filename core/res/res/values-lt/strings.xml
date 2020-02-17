@@ -195,6 +195,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratorius atmetė prašymą įrenginį naudoti asmeniniais tikslais"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Įrenginys yra tvarkomas"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Šį įrenginį tvarko organizacija ir gali stebėti tinklo srautą. Palieskite, kad gautumėte daugiau informacijos."</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"Vietovės nustatymus pakeitė administratorius"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"Palieskite, kad peržiūrėtumėte vietovės nustatymus."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Įrenginys bus ištrintas"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administratoriaus programos negalima naudoti. Dabar įrenginio duomenys bus ištrinti.\n\nJei turite klausimų, susisiekite su organizacijos administratoriumi."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Neleidžiama spausdinti (<xliff:g id="OWNER_APP">%s</xliff:g>)."</string>
@@ -435,6 +437,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Ši privilegijuota | sistemos programa gali daryti nuotraukas ir įrašyti vaizdo įrašus naudodama sistemos fotoaparatą bet kuriuo metu. Programai taip pat būtinas leidimas „android.permission.CAMERA“"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"valdyti vibraciją"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Leidžiama programai valdyti vibravimą."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Programai leidžiama pasiekti vibratoriaus būseną."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"skambinti tiesiogiai telefono numeriais"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Leidžiama programai skambinti telefonų numeriais be jūsų įsikišimo. Dėl to gali atsirasti nenumatytų apmokestinimų ar skambučių. Atminkite, kad programai neleidžiama skambinti pagalbos telefonų numeriais. Kenkėjiškos programos gali skambinti be jūsų patvirtinimo, o dėl to jums gali būti taikomi mokesčiai."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"pasiekti IMS skambučių paslaugą"</string>
@@ -549,6 +552,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Bandykite dar kartą."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Neužregistruota jokių kontrolinių kodų."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Šiame įrenginyje nėra kontrolinio kodo jutiklio."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> pirštas"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -592,6 +597,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nepavyko patvirtinti veido. Bandykite dar kartą."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Nenustatėte Atrakinimo pagal veidą."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Atrakinimas pagal veidą šiame įrenginyje nepalaikomas."</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> veidas"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1658,7 +1665,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Fone pradėtai priekinio plano paslaugai iš „<xliff:g id="PACKAGENAME">%1$s</xliff:g>“ nebus suteiktas leidimas naudojimo metu būsimose R versijose. Apsilankykite go/r-bg-fgs-restriction ir pateikite pranešimą apie riktą."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Padidinti garsą daugiau nei rekomenduojamas lygis?\n\nIlgai klausydami dideliu garsu galite pažeisti klausą."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Naudoti spartųjį pritaikymo neįgaliesiems klavišą?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kai spartusis klavišas įjungtas, spaudžiant abu garsumo mygtukus 3 sekundes bus paleista pritaikymo neįgaliesiems funkcija.\n\n Dabartinė pritaikymo neįgaliesiems funkcija:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>„\n“\n Funkciją galite pakeisti skiltyje „Nustatymai“ &gt; „Pritaikymas neįgaliesiems“."</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Redaguoti sparčiuosius klavišus"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Atšaukti"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Išjungti spartųjį klavišą"</string>
@@ -2078,4 +2086,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"„<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>“ įkeltas į grupę APRIBOTA"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Asmeninė"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Darbo"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

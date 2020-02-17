@@ -191,6 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ব্যক্তিগত কাজের জন্য অ্যাডমিন এই ডিভাইস ব্যবহার করার অনুমতি দেয়নি"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ডিভাইসটি পরিচালনা করা হচ্ছে"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"আপনার প্রতিষ্ঠান এই ডিভাইসটি পরিচালনা করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।,"</string>
+    <!-- no translation found for location_changed_notification_title (4119726617105166830) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (198907268219396399) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"অ্যাডমিন অ্যাপটি ব্যবহার করা যাবে না। আপনার ডিভাইসে থাকা সবকিছু এখন মুছে ফেলা হবে।\n\nকোনও প্রশ্ন থাকলে আপনার প্রতিষ্ঠানের অ্যাডমিনের সাথে যোগাযোগ করুন।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> প্রিন্টিং বন্ধ রেখেছে।"</string>
@@ -429,6 +433,8 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"এই প্রিভিলিজ | সিস্টেম অ্যাপটি যেকোনও সময়ে সিস্টেম ক্যামেরা ব্যবহার করে ছবি তুলতে এবং ভিডিও রেকর্ড করতে পারবে। এর জন্য অ্যাপের Android.permission.CAMERA -এর অনুমতি প্রয়োজন"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ভাইব্রেশন নিয়ন্ত্রণ করুন"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"অ্যাপ্লিকেশানকে কম্পক নিয়ন্ত্রণ করতে দেয়৷"</string>
+    <!-- no translation found for permdesc_vibrator_state (7050024956594170724) -->
+    <skip />
     <string name="permlab_callPhone" msgid="1798582257194643320">"সরাসরি ফোন নম্বরগুলিতে কল করে"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"অ্যাপ্লিকেশানটিকে আপনার হস্তক্ষেপ ছাড়াই ফোন নম্বরগুলিতে কল করতে মঞ্জুর করে৷ এটি অপ্রত্যাশিত পরিমাণ খরচা বা কলের কারণ হতে পারে৷ মনে রাখবেন, এটি অ্যাপ্লিকেশানটির দ্বারা জরুরি নম্বরগুলিতে কল করাকে অনুমতি দেয় না৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার সম্মতি ছাড়াই কল করার ফলে আপনাকে অহেতুক পেমেন্ট করতে হতে পারে৷"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS পরিষেবাতে অ্যাক্সেস"</string>
@@ -543,6 +549,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনও আঙ্গুলের ছাপ নথিভুক্ত করা হয়নি।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইসে আঙ্গুলের ছাপ নেওয়ার সেন্সর নেই।"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"আঙ্গুল <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +594,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"আপনার মুখ যাচাই করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"এখনও মুখের সাহায্যে আনলক করার সুবিধা সেট-আপ করেননি।"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"এই ডিভাইসে মুখের সাহায্যে আনলক করার সুবিধাটি কাজ করে না।"</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> ফেস"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1614,7 +1624,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> থেকে শুরু হওয়া ফোরগ্রাউন্ড পরিষেবাটির ভবিষ্যতে আর বিল্ডগুলিতে ব্যবহারের অনুমতি নেই। go/r-bg-fgs-restriction দেখুন এবং বাগরিপোর্ট জমা দিন।"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"প্রস্তাবিত স্তরের চেয়ে বেশি উঁচুতে ভলিউম বাড়াবেন?\n\nউঁচু ভলিউমে বেশি সময় ধরে কিছু শুনলে আপনার শ্রবনশক্তির ক্ষতি হতে পারে।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"অ্যাক্সেসযোগ্যতা শর্টকাট ব্যবহার করবেন?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"শর্টকাটটি চালু থাকলে দুটি ভলিউম বোতাম একসাথে ৩ সেকেন্ড টিপে ধরে রাখলে একটি অ্যাকসেসিবিলিটি বৈশিষ্ট্য চালু হবে।\n\n বর্তমান অ্যাকসেসিবিলিটি বৈশিষ্ট্য:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n আপনি এই বৈশিষ্ট্যটি সেটিংস &gt; অ্যাকসেসিবিলিটিতে গিয়ে পরিবর্তন করতে পারবেন।"</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"শর্টকাট এডিট করুন"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"বাতিল করুন"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"শর্টকাট বন্ধ করুন"</string>
@@ -2010,4 +2021,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> সীমাবদ্ধ গ্রুপে অন্তর্ভুক্ত করা হয়েছে"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ব্যক্তিগত"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"অফিস"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

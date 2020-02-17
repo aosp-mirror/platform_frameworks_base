@@ -191,6 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ອຸປະກອນທີ່ຍົກເລີກແລ້ວສຳລັບການໃຊ້ສ່ວນບຸກຄົນ"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ອຸປະກອນມີການຈັດການ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ອົງກອນຂອງທ່ານຈັດການອຸປະກອນນີ້ ແລະ ອາດກວດສອບທຣາບຟິກເຄືອຂ່າຍນຳ. ແຕະເພື່ອເບິ່ງລາຍລະອຽດ."</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"ຜູ້ເບິ່ງແຍງຂອງທ່ານປ່ຽນການຕັ້ງຄ່າສະຖານທີ່ແລ້ວ"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"ແຕະເພື່ອເບິ່ງການຕັ້ງຄ່າສະຖານທີ່ຂອງທ່ານ."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"ບໍ່ສາມາດໃຊ້ແອັບຜູ້ເບິ່ງແຍງລະບົບໄດ້. ອຸປະກອນຂອງທ່ານຈະຖືກລຶບຂໍ້ມູນໃນຕອນນີ້.\n\nຫາກທ່ານມີຄຳຖາມ, ໃຫ້ຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບອົງກອນຂອງທ່ານ."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ການພິມຖືກປິດໄວ້ໂດຍ <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -429,6 +431,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"ສິດນີ້ | ແອັບລະບົບສາມາດຖ່າຍຮູບ ແລະ ບັນທຶກວິດີໂອໄດ້ໂດຍໃຊ້ກ້ອງຂອງລະບົບຕອນໃດກໍໄດ້. ຕ້ອງໃຊ້ສິດອະນຸຍາດ android.permission.CAMERA ໃຫ້ແອັບຖືນຳ"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ຄວບຄຸມການສັ່ນ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ອະນຸຍາດໃຫ້ແອັບຯຄວບຄຸມໂຕສັ່ນ."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງສະຖານະການສັ່ນໄດ້."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ໂທຫາເບີໂທລະສັບໂດຍກົງ"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"ອະນຸຍາດໃຫ້ແອັບຯໂທຫາເບີໂທລະສັບໄດ້ ໂດຍບໍ່ຕ້ອງຖ້າການດຳເນີນການໃດໆຈາກທ່ານ. ຄຸນສົມບັດນີ້ອາດກໍ່ໃຫ້ເກີດຄ່າໃຊ້ຈ່າຍໃນການໂທທີ່ບໍ່ຄາດຄິດໄດ້. ໝາຍເຫດ: ຄຸນສົມບັດນີ້ບໍ່ໄດ້ເປັນການອະນຸຍາດໃຫ້ແອັບຯ ສາມາດໂທຫາເບີສຸກເສີນ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດເຮັດໃຫ້ທ່ານ ຕ້ອງເສຍຄ່າໂທໂດຍທີ່ບໍ່ໄດ້ຄາດຄິດ."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"ເຂົ້າ​ຫາ​ການ​ບໍ​ລິ​ການ​ໂທ IMS"</string>
@@ -543,6 +546,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ລອງໃໝ່ອີກຄັ້ງ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ບໍ່ມີການລົງທະບຽນລາຍນິ້ວມື."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ອຸປະກອນນີ້ບໍ່ມີເຊັນເຊີລາຍນິ້ວມື."</string>
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ປິດການເຮັດວຽກຂອງເຊັນເຊີໄວ້ຊົ່ວຄາວແລ້ວ."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ນີ້ວ​ມື <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +590,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ບໍ່ສາມາດຢັ້ງຢືນໃບໜ້າໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"ທ່ານຍັງບໍ່ໄດ້ຕັ້ງການປົດລັອກດ້ວຍໜ້າເທື່ອ."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"ບໍ່ຮອງຮັບການປົດລັອກດ້ວຍໜ້າຢູ່ອຸປະກອນນີ້."</string>
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"ປິດການເຮັດວຽກຂອງເຊັນເຊີໄວ້ຊົ່ວຄາວແລ້ວ."</string>
     <string name="face_name_template" msgid="3877037340223318119">"ໃບໜ້າ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1614,7 +1619,7 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"ບໍລິການພື້ນໜ້າທີ່ເລີ່ມຕົ້ນຈາກພື້ນຫຼັງຈາກ <xliff:g id="PACKAGENAME">%1$s</xliff:g> ຈະບໍ່ມີສິດອະນຸຍາດໃນຂະນະທີ່ໃຊ້ໃນ R builds ໃນອະນາຄົດ. ກະລຸນາອ່ານ go/r-bg-fgs-restriction ແລະ ລາຍງານຂໍ້ຜິດພາດ."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ເພີ່ມ​ລະ​ດັບ​ສຽງ​ໃຫ້​ເກີນກວ່າ​ລະ​ດັບ​ທີ່​ແນະ​ນຳ​ບໍ?\n\n​ການ​ຮັບ​ຟັງ​ສຽງ​ໃນ​ລະ​ດັບ​ທີ່​ສູງ​ເປັນ​ໄລ​ຍະ​ເວ​ລາ​ດົນ​​ອາດ​ເຮັດ​ໃຫ້​ການ​ຟັງ​ຂອງ​ທ່ານ​ມີ​ບັນ​ຫາ​ໄດ້."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ໃຊ້ປຸ່ມລັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ເມື່ອເປີດໃຊ້ປຸ່ມລັດແລ້ວ, ໃຫ້ກົດປຸ່ມສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີເພື່ອເລີ່ມຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ.\n\n ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງປັດຈຸບັນ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ທ່ານສາມາດປ່ຽນຄຸນສົມບັດໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ເມື່ອເປີດໃຊ້ທາງລັດແລ້ວ, ການກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີຈະເປັນການເລີ່ມຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ແກ້ໄຂທາງລັດ"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ຍົກເລີກ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ປິດປຸ່ມລັດ"</string>
@@ -2010,4 +2015,12 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ຖືກວາງໄວ້ໃນກະຕ່າ \"ຈຳກັດ\" ແລ້ວ"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ສ່ວນຕົວ"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ວຽກ"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ບໍ່ສາມາດແບ່ງປັນກັບແອັບວຽກໄດ້"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"ບໍ່ສາມາດແບ່ງປັນກັບແອັບສ່ວນຕົວໄດ້"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບລັອກການແບ່ງປັນລະຫວ່າງແອັບສ່ວນຕົວ ແລະ ແອັບວຽກໄວ້"</string>
+    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"ປຸ່ມເປີດຢູ່ແອັບວຽກ"</string>
+    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"ເປີດໃຊ້ແອັບວຽກເພື່ອເຂົ້າເຖິງແອັບ ແລະ ລາຍຊື່ຜູ້ຕິດຕໍ່ວຽກ"</string>
+    <string name="resolver_no_apps_available" msgid="7710339903040989654">"ບໍ່ມີແອັບທີ່ສາມາດໃຊ້ໄດ້"</string>
+    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"ພວກເຮົາບໍ່ພົບແອັບໃດໆເລີຍ"</string>
+    <string name="resolver_switch_on_work" msgid="8294542702883688533">"ປຸ່ມເປີດຢູ່ວຽກ"</string>
 </resources>

@@ -191,6 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ပုဂ္ဂိုလ်ရေးအသုံးပြုရန်အတွက် စီမံခန့်ခွဲသူက စက်ပစ္စည်းထိန်းချုပ်မှုကို ရပ်တန့်လိုက်သည်"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"စက်ပစ္စည်းကို စီမံခန့်ခွဲထားပါသည်"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ဤစက်ပစ္စည်းကို သင်၏ အဖွဲ့အစည်းက စီမံပြီး ကွန်ရက်အသွားအလာကို စောင့်ကြည့်နိုင်ပါသည်။ ထပ်မံလေ့လာရန် တို့ပါ။"</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"သင့်စီမံခန့်ခွဲသူက တည်နေရာပြ ဆက်တင်များကို ပြောင်းထားသည်"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"သင့်တည်နေရာပြ ဆက်တင်များကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"စီမံခန့်ခွဲမှု အက်ပ်ကို သုံး၍မရပါ။ သင်၏ စက်ပစ္စည်းအတွင်းရှိ အရာများကို ဖျက်လိုက်ပါမည်\n\nမေးစရာများရှိပါက သင့်အဖွဲ့အစည်း၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> က ပုံနှိပ်ထုတ်ယူခြင်းကို ပိတ်ထားသည်။"</string>
@@ -429,6 +431,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"ခွင့်ပြုချက်ရှိသည့် | ဤစနစ်အက်ပ်သည် စနစ်ကင်မရာကို အသုံးပြု၍ ဓာတ်ပုံနှင့် ဗီဒီယိုများကို အချိန်မရွေး ရိုက်ကူးနိုင်သည်။ အက်ပ်ကလည်း android.permission.CAMERA ခွင့်ပြုချက် ရှိရပါမည်"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"တုန်ခုန်မှုအား ထိန်းချုပ်ခြင်း"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"အက်ပ်အား တုန်ခါစက်ကို ထိန်းချုပ်ခွင့် ပြုသည်။"</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"အက်ပ်ကို တုန်ခါမှုအခြေအနေအား သုံးခွင့်ပေးပါ။"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ဖုန်းနံပါတ်များကိုတိုက်ရိုက်ခေါ်ဆိုခြင်း"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"အပလီကေးရှင်းအား အလိုအလျောက် ဖုန်းခေါ်ခွင့် ပြုပါ။ မလိုအပ်သော ဖုန်းခ များ ဖြစ်ပေါ်နိုင်ပါသည်။ ဒီခွင့်ပြုခြင်းမှာ အရေးပေါ်ဖုန်းခေါ်ခြင်း မပါဝင်ပါ။ သံသယဖြစ်စရာ အပလီကေးရှင်းများက သင့်မသိပဲ ဖုန်းခေါ်ခြင်းဖြင့် ဖုန်းခ ပိုမိုကျနိုင်ပါသည်။"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ဖုန်းခေါ်ဆိုမှု ဝန်ဆောင်ဌာန ဝင်ကြည့်ပါ"</string>
@@ -543,6 +546,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ပြန်ကြိုးစားပါ"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"မည်သည့် လက်ဗွေကိုမျှ ထည့်သွင်းမထားပါ။"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ဤစက်တွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ။"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"လက်ချောင်း <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +591,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို ထည့်သွင်းမထားပါ"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"ဤစက်ပစ္စည်းတွင် မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို သုံး၍မရပါ။"</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"မျက်နှာ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1614,7 +1621,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> တွင် မှ စတင်သည့် foreground ဝန်ဆောင်မှုသည် နောက်ထွက်ရှိမည့် R စုပေါင်းစပ်ပေါင်း ပရိုဂရမ်များတွင် အသုံးပြုစဉ်အတွင်း ခွင့်ပြုချက် ရရှိမည်မဟုတ်ပါ။ go/r-bg-fgs-ကန့်သတ်ချက်များကို ကြည့်ပြီး အမှားသတင်းပို့ချက်တစ်ခု တင်သွင်းပါ။"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"အသံကို အကြံပြုထားသည့် ပမာဏထက် မြှင့်ပေးရမလား?\n\nအသံကို မြင့်သည့် အဆင့်မှာ ကြာရှည်စွာ နားထောင်ခြင်းက သင်၏ နားကို ထိခိုက်စေနိုင်သည်။"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်ကို အသုံးပြုလိုပါသလား။"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ဖြတ်လမ်းလင့်ခ်ကို ဖွင့်ထားစဉ် အသံအတိုးအလျှော့ခလုတ် နှစ်ခုစလုံးကို ၃ စက္ကန့်ခန့် ဖိထားခြင်းဖြင့် အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုကို ဖွင့်နိုင်သည်။\n\n လက်ရှိ အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှု−\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ဝန်ဆောင်မှုကို ဆက်တင်များ &gt; အများသုံးစွဲနိုင်မှုတွင် ပြောင်းလဲနိုင်ပါသည်။"</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ဖြတ်လမ်းများကို တည်းဖြတ်ရန်"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"မလုပ်တော့"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ဖြတ်လမ်းလင့်ခ်ကို ပိတ်ရန်"</string>
@@ -2010,4 +2018,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ကို တားမြစ်ထားသော သိမ်းဆည်းမှုအတွင်းသို့ ထည့်ပြီးပါပြီ"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ကိုယ်ပိုင်"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"အလုပ်"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>
