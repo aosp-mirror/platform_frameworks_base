@@ -159,13 +159,6 @@ class Rollback {
     @Nullable public final String mInstallerPackageName;
 
     /**
-     * This array holds all of the rollback tokens associated with package sessions included in
-     * this rollback.
-     */
-    @GuardedBy("mLock")
-    private final IntArray mTokens = new IntArray();
-
-    /**
      * Session ids for all packages in the install. For multi-package sessions, this is the list
      * of child session ids. For normal sessions, this list is a single element with the normal
      * session id.
@@ -765,26 +758,6 @@ class Rollback {
                 }
             }
             return result;
-        }
-    }
-
-    /**
-     * Adds a rollback token to be associated with this rollback. This may be used to
-     * identify which rollback should be removed in case {@link PackageManager} sends an
-     * {@link Intent#ACTION_CANCEL_ENABLE_ROLLBACK} intent.
-     */
-    void addToken(int token) {
-        synchronized (mLock) {
-            mTokens.add(token);
-        }
-    }
-
-    /**
-     * Returns true if this rollback is associated with the provided {@code token}.
-     */
-    boolean hasToken(int token) {
-        synchronized (mLock) {
-            return mTokens.indexOf(token) != -1;
         }
     }
 
