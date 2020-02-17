@@ -359,7 +359,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mPasspointUniqueId = config.getUniqueId();
         mFqdn = config.getHomeSp().getFqdn();
         mProviderFriendlyName = config.getHomeSp().getFriendlyName();
-        mSubscriptionExpirationTimeInMillis = config.getSubscriptionExpirationTimeInMillis();
+        mSubscriptionExpirationTimeInMillis = config.getSubscriptionExpirationTimeMillis();
         if (config.isOsuProvisioned()) {
             mPasspointConfigurationVersion = PasspointConfigurationVersion.OSU_PROVISIONED;
         } else {

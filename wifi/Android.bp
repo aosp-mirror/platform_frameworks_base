@@ -86,6 +86,7 @@ java_library {
         // TODO(b/146757305): should be unnecessary once
         // sdk_version="module_lib_current"
         "android_system_stubs_current",
+        "framework_mediaprovider_annotation", // for android.annotation.CurrentTimeMillisLong
     ],
     srcs: [
         ":framework-wifi-updatable-sources",
