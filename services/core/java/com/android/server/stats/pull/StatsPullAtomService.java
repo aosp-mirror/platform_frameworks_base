@@ -40,6 +40,7 @@ import android.app.AppOpsManager.HistoricalPackageOps;
 import android.app.AppOpsManager.HistoricalUidOps;
 import android.app.INotificationManager;
 import android.app.ProcessMemoryState;
+import android.app.RuntimeAppOpAccessMessage;
 import android.app.StatsManager;
 import android.app.StatsManager.PullAtomMetadata;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -375,6 +376,8 @@ public class StatsPullAtomService extends SystemService {
                     return pullFaceSettings(atomTag, data);
                 case FrameworkStatsLog.APP_OPS:
                     return pullAppOps(atomTag, data);
+                case FrameworkStatsLog.RUNTIME_APP_OP_ACCESS:
+                    return pullRuntimeAppOpAccessMessage(atomTag, data);
                 case FrameworkStatsLog.NOTIFICATION_REMOTE_VIEWS:
                     return pullNotificationRemoteViews(atomTag, data);
                 case FrameworkStatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED:
@@ -537,6 +540,7 @@ public class StatsPullAtomService extends SystemService {
         registerAppsOnExternalStorageInfo();
         registerFaceSettings();
         registerAppOps();
+        registerRuntimeAppOpAccessMessage();
         registerNotificationRemoteViews();
         registerDangerousPermissionState();
         registerDangerousPermissionStateSampled();
@@ -2832,6 +2836,17 @@ public class StatsPullAtomService extends SystemService {
 
     }
 
+    private void registerRuntimeAppOpAccessMessage() {
+        int tagId = FrameworkStatsLog.RUNTIME_APP_OP_ACCESS;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mStatsCallbackImpl
+        );
+
+    }
+
     int pullAppOps(int atomTag, List<StatsEvent> pulledData) {
         final long token = Binder.clearCallingIdentity();
         try {
@@ -2885,6 +2900,41 @@ public class StatsPullAtomService extends SystemService {
         } catch (Throwable t) {
             // TODO: catch exceptions at a more granular level
             Slog.e(TAG, "Could not read appops", t);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int pullRuntimeAppOpAccessMessage(int atomTag, List<StatsEvent> pulledData) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+
+            RuntimeAppOpAccessMessage message = appOps.collectRuntimeAppOpAccessMessage();
+            if (message == null) {
+                Slog.i(TAG, "No runtime appop access message collected");
+                return StatsManager.PULL_SUCCESS;
+            }
+
+            StatsEvent.Builder e = StatsEvent.newBuilder();
+            e.setAtomId(atomTag);
+            e.writeInt(message.getUid());
+            e.writeString(message.getPackageName());
+            e.writeString(message.getOp());
+            if (message.getFeatureId() == null) {
+                e.writeString("");
+            } else {
+                e.writeString(message.getFeatureId());
+            }
+            e.writeString(message.getMessage());
+            e.writeInt(message.getSamplingStrategy());
+
+            pulledData.add(e.build());
+        } catch (Throwable t) {
+            // TODO: catch exceptions at a more granular level
+            Slog.e(TAG, "Could not read runtime appop access message", t);
             return StatsManager.PULL_SKIP;
         } finally {
             Binder.restoreCallingIdentity(token);
