@@ -3154,6 +3154,7 @@ public class ConnectivityServiceTest {
                 mCellNetworkAgent);
         cellNetworkCallback.expectCallback(CallbackEntry.SUSPENDED, mCellNetworkAgent);
         cellNetworkCallback.assertNoCallback();
+        assertEquals(NetworkInfo.State.SUSPENDED, mCm.getActiveNetworkInfo().getState());
 
         // Register a garden variety default network request.
         TestNetworkCallback dfltNetworkCallback = new TestNetworkCallback();
@@ -3169,6 +3170,7 @@ public class ConnectivityServiceTest {
                 mCellNetworkAgent);
         cellNetworkCallback.expectCallback(CallbackEntry.RESUMED, mCellNetworkAgent);
         cellNetworkCallback.assertNoCallback();
+        assertEquals(NetworkInfo.State.CONNECTED, mCm.getActiveNetworkInfo().getState());
 
         dfltNetworkCallback = new TestNetworkCallback();
         mCm.registerDefaultNetworkCallback(dfltNetworkCallback);
