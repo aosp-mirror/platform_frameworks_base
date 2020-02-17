@@ -83,6 +83,65 @@ public final class NetworkScore implements Parcelable {
             uplinkBandwidthKBps = uplinkBandwidth;
         }
 
+        /**
+         * Evaluate whether a metrics codes for faster network is faster than another.
+         *
+         * This is a simple comparison of expected speeds. If either of the tested attributes
+         * are unknown, this returns zero. This implementation just assumes downlink bandwidth
+         * is more important than uplink bandwidth, which is more important than latency. This
+         * is not a very good way of evaluating network speed, but it's a start.
+         * TODO : do something more representative of how fast the network feels
+         *
+         * @param other the Metrics to evaluate against
+         * @return a negative integer, zero, or a positive integer as this metrics is worse than,
+         *   equally good as (or unknown), or better than the passed Metrics.
+         * @see #compareToPreferringKnown(Metrics)
+         * @hide
+         */
+        // Can't implement Comparable<Metrics> because this is @hide.
+        public int compareTo(@NonNull final Metrics other) {
+            if (downlinkBandwidthKBps != BANDWIDTH_UNKNOWN
+                    && other.downlinkBandwidthKBps != BANDWIDTH_UNKNOWN) {
+                if (downlinkBandwidthKBps > other.downlinkBandwidthKBps) return 1;
+                if (downlinkBandwidthKBps < other.downlinkBandwidthKBps) return -1;
+            }
+            if (uplinkBandwidthKBps != BANDWIDTH_UNKNOWN
+                    && other.uplinkBandwidthKBps != BANDWIDTH_UNKNOWN) {
+                if (uplinkBandwidthKBps > other.uplinkBandwidthKBps) return 1;
+                if (uplinkBandwidthKBps < other.uplinkBandwidthKBps) return -1;
+            }
+            if (latencyMs != LATENCY_UNKNOWN && other.latencyMs != LATENCY_UNKNOWN) {
+                // Latency : lower is better
+                if (latencyMs > other.latencyMs) return -1;
+                if (latencyMs < other.latencyMs) return 1;
+            }
+            return 0;
+        }
+
+        /**
+         * Evaluate whether a metrics codes for faster network is faster than another.
+         *
+         * This is a simple comparison of expected speeds. If either of the tested attributes
+         * are unknown, this prefers the known attributes. This implementation just assumes
+         * downlink bandwidth is more important than uplink bandwidth, which is more important than
+         * latency. This is not a very good way of evaluating network speed, but it's a start.
+         * TODO : do something more representative of how fast the network feels
+         *
+         * @param other the Metrics to evaluate against
+         * @return a negative integer, zero, or a positive integer as this metrics is worse than,
+         *   equally good as (or unknown), or better than the passed Metrics.
+         * @see #compareTo(Metrics)
+         * @hide
+         */
+        public int compareToPreferringKnown(@NonNull final Metrics other) {
+            if (downlinkBandwidthKBps > other.downlinkBandwidthKBps) return 1;
+            if (downlinkBandwidthKBps < other.downlinkBandwidthKBps) return -1;
+            if (uplinkBandwidthKBps > other.uplinkBandwidthKBps) return 1;
+            if (uplinkBandwidthKBps < other.uplinkBandwidthKBps) return -1;
+            // Latency : lower is better
+            return -Integer.compare(latencyMs, other.latencyMs);
+        }
+
         /** toString */
         public String toString() {
             return "latency = " + latencyMs + " downlinkBandwidth = " + downlinkBandwidthKBps
@@ -344,6 +403,33 @@ public final class NetworkScore implements Parcelable {
      */
     public int getLegacyScore() {
         return mLegacyScore;
+    }
+
+    /**
+     * Use the metrics to evaluate whether a network is faster than another.
+     *
+     * This is purely based on the metrics, and explicitly ignores policy or exiting. It's
+     * provided to get a decision on two networks when policy can not decide, or to evaluate
+     * how a network is expected to compare to another if it should validate.
+     *
+     * @param other the score to evaluate against
+     * @return whether this network is probably faster than the other
+     * @hide
+     */
+    public boolean probablyFasterThan(@NonNull final NetworkScore other) {
+        if (mLegacyScore > other.mLegacyScore) return true;
+        final int atEndToEnd = mEndToEndMetrics.compareTo(other.mEndToEndMetrics);
+        if (atEndToEnd > 0) return true;
+        if (atEndToEnd < 0) return false;
+        final int atLinkLayer = mLinkLayerMetrics.compareTo(other.mLinkLayerMetrics);
+        if (atLinkLayer > 0) return true;
+        if (atLinkLayer < 0) return false;
+        final int atEndToEndPreferringKnown =
+                mEndToEndMetrics.compareToPreferringKnown(other.mEndToEndMetrics);
+        if (atEndToEndPreferringKnown > 0) return true;
+        if (atEndToEndPreferringKnown < 0) return false;
+        // If this returns 0, neither is "probably faster" so just return false.
+        return mLinkLayerMetrics.compareToPreferringKnown(other.mLinkLayerMetrics) > 0;
     }
 
     /** Builder for NetworkScore. */
