@@ -14113,6 +14113,13 @@ public final class Settings {
          */
         @SystemApi
         public static final String COMMON_CRITERIA_MODE = "common_criteria_mode";
+
+        /**
+         * The usage amount of advanced battery. The value is 0~100.
+         *
+         * @hide
+         */
+        public static final String ADVANCED_BATTERY_USAGE_AMOUNT = "advanced_battery_usage_amount";
     }
 
     /**
