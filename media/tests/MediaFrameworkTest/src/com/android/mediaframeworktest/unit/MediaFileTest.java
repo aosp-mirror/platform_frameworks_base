@@ -97,6 +97,9 @@ public class MediaFileTest {
         assertTrue(isDocumentMimeType("text/plain"));
         assertTrue(isDocumentMimeType("application/pdf"));
         assertTrue(isDocumentMimeType("application/msword"));
+        assertTrue(isDocumentMimeType("application/vnd.ms-excel.addin.macroEnabled.12"));
+        assertTrue(isDocumentMimeType("application/vnd.ms-powerpoint.addin.macroEnabled.12"));
+        assertTrue(isDocumentMimeType("application/vnd.ms-word.document.macroEnabled.12"));
         assertFalse(isDocumentMimeType("audio/mpeg"));
     }
 
