@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.AppGlobals;
+import android.app.admin.DevicePolicyEventLogger;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +28,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -251,6 +253,8 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     abstract @Nullable ViewGroup getInactiveAdapterView();
 
+    abstract String getMetricsCategory();
+
     /**
      * Rebuilds the tab that is currently visible to the user.
      * <p>Returns {@code true} if rebuild has completed.
@@ -282,6 +286,10 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         UserHandle listUserHandle = activeListAdapter.getUserHandle();
         if (listUserHandle == mWorkProfileUserHandle
                 && mInjector.isQuietModeEnabled(mWorkProfileUserHandle)) {
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.RESOLVER_EMPTY_STATE_WORK_APPS_DISABLED)
+                    .setStrings(getMetricsCategory())
+                    .write();
             showEmptyState(activeListAdapter,
                     R.drawable.ic_work_apps_off,
                     R.string.resolver_turn_on_work_apps,
@@ -294,11 +302,19 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
             if (!mInjector.hasCrossProfileIntents(activeListAdapter.getIntents(),
                     UserHandle.myUserId(), listUserHandle.getIdentifier())) {
                 if (listUserHandle == mPersonalProfileUserHandle) {
+                    DevicePolicyEventLogger.createEvent(
+                                DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL)
+                            .setStrings(getMetricsCategory())
+                            .write();
                     showEmptyState(activeListAdapter,
                             R.drawable.ic_sharing_disabled,
                             R.string.resolver_cant_share_with_personal_apps,
                             R.string.resolver_cant_share_cross_profile_explanation);
                 } else {
+                    DevicePolicyEventLogger.createEvent(
+                            DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_WORK)
+                            .setStrings(getMetricsCategory())
+                            .write();
                     showEmptyState(activeListAdapter,
                             R.drawable.ic_sharing_disabled,
                             R.string.resolver_cant_share_with_work_apps,
@@ -315,6 +331,12 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         UserHandle listUserHandle = listAdapter.getUserHandle();
         if (UserHandle.myUserId() == listUserHandle.getIdentifier()
                 || !hasAppsInOtherProfile(listAdapter)) {
+            if (mWorkProfileUserHandle != null) {
+                DevicePolicyEventLogger.createEvent(
+                        DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_APPS_RESOLVED)
+                        .setStrings(getMetricsCategory())
+                        .write();
+            }
             showEmptyState(listAdapter,
                     R.drawable.ic_no_apps,
                     R.string.resolver_no_apps_available,

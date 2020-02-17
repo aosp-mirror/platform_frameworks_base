@@ -150,6 +150,11 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
         return getListViewForIndex(1 - getCurrentPage());
     }
 
+    @Override
+    String getMetricsCategory() {
+        return ResolverActivity.METRICS_CATEGORY_RESOLVER;
+    }
+
     class ResolverProfileDescriptor extends ProfileDescriptor {
         private ResolverListAdapter resolverListAdapter;
         final ListView listView;
