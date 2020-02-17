@@ -1505,9 +1505,9 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     @Override
-    public void dumpUser(IndentingPrintWriter idpw, int userId, String pkg) {
+    public void dumpUser(IndentingPrintWriter idpw, int userId, List<String> pkgs) {
         synchronized (mAppIdleLock) {
-            mAppIdleHistory.dump(idpw, userId, pkg);
+            mAppIdleHistory.dump(idpw, userId, pkgs);
         }
     }
 
