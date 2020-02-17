@@ -1966,6 +1966,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 case ENABLE_ROLLBACK_TIMEOUT: {
                     final int enableRollbackToken = msg.arg1;
+                    final int sessionId = msg.arg2;
                     final InstallParams params = mPendingEnableRollback.get(enableRollbackToken);
                     if (params != null) {
                         final InstallArgs args = params.mArgs;
@@ -1983,6 +1984,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         rollbackTimeoutIntent.putExtra(
                                 PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
                                 enableRollbackToken);
+                        rollbackTimeoutIntent.putExtra(
+                                PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
+                                sessionId);
                         rollbackTimeoutIntent.addFlags(
                                 Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                         mContext.sendBroadcastAsUser(rollbackTimeoutIntent, UserHandle.SYSTEM,
@@ -14141,6 +14145,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final long requiredInstalledVersionCode;
         final boolean forceQueryableOverride;
         final int mDataLoaderType;
+        final int mSessionId;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
@@ -14164,6 +14169,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.requiredInstalledVersionCode = requiredInstalledVersionCode;
             this.forceQueryableOverride = false;
             this.mDataLoaderType = dataLoaderType;
+            this.mSessionId = -1;
         }
 
         InstallParams(ActiveInstallSession activeInstallSession) {
@@ -14199,6 +14205,7 @@ public class PackageManagerService extends IPackageManager.Stub
             forceQueryableOverride = sessionParams.forceQueryableOverride;
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
+            mSessionId = activeInstallSession.getSessionId();
         }
 
         @Override
@@ -14435,6 +14442,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER,
                             getRollbackUser().getIdentifier());
+                    enableRollbackIntent.putExtra(
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
+                            mSessionId);
                     enableRollbackIntent.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
                             PACKAGE_MIME_TYPE);
                     enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -14462,6 +14472,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                     final Message msg = mHandler.obtainMessage(
                                             ENABLE_ROLLBACK_TIMEOUT);
                                     msg.arg1 = enableRollbackToken;
+                                    msg.arg2 = mSessionId;
                                     mHandler.sendMessageDelayed(msg, rollbackTimeout);
                                 }
                             }, null, 0, null, null);
@@ -24368,6 +24379,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private final String mPackageName;
         private final File mStagedDir;
         private final IPackageInstallObserver2 mObserver;
+        private final int mSessionId;
         private final PackageInstaller.SessionParams mSessionParams;
         private final int mInstallerUid;
         @NonNull private final InstallSource mInstallSource;
@@ -24375,11 +24387,12 @@ public class PackageManagerService extends IPackageManager.Stub
         private final SigningDetails mSigningDetails;
 
         ActiveInstallSession(String packageName, File stagedDir, IPackageInstallObserver2 observer,
-                PackageInstaller.SessionParams sessionParams, int installerUid,
+                int sessionId, PackageInstaller.SessionParams sessionParams, int installerUid,
                 InstallSource installSource, UserHandle user, SigningDetails signingDetails) {
             mPackageName = packageName;
             mStagedDir = stagedDir;
             mObserver = observer;
+            mSessionId = sessionId;
             mSessionParams = sessionParams;
             mInstallerUid = installerUid;
             mInstallSource = Preconditions.checkNotNull(installSource);
@@ -24397,6 +24410,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public IPackageInstallObserver2 getObserver() {
             return mObserver;
+        }
+
+        public int getSessionId() {
+            return mSessionId;
         }
 
         public PackageInstaller.SessionParams getSessionParams() {
