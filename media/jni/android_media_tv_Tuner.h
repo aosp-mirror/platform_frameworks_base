@@ -109,7 +109,6 @@ struct FrontendCallback : public IFrontendCallback {
     FrontendCallback(jweak tunerObj, FrontendId id);
 
     virtual Return<void> onEvent(FrontendEventType frontendEventType);
-    virtual Return<void> onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
     virtual Return<void> onScanMessage(
             FrontendScanMessageType type, const FrontendScanMessage& message);
 
