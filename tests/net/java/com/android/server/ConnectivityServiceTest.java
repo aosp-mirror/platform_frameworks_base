@@ -78,6 +78,7 @@ import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
+import static android.system.OsConstants.IPPROTO_TCP;
 
 import static com.android.server.ConnectivityServiceTestUtilsKt.transportToLegacyType;
 import static com.android.testutils.ConcurrentUtilsKt.await;
@@ -137,6 +138,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.location.LocationManager;
 import android.net.CaptivePortalData;
+import android.net.ConnectionInfo;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.ConnectivityManager.PacketKeepalive;
@@ -152,6 +154,7 @@ import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
+import android.net.InetAddresses;
 import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.IpSecManager;
@@ -175,6 +178,7 @@ import android.net.RouteInfo;
 import android.net.SocketKeepalive;
 import android.net.UidRange;
 import android.net.Uri;
+import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.shared.NetworkMonitorUtils;
 import android.net.shared.PrivateDnsConfig;
@@ -271,6 +275,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import kotlin.reflect.KClass;
 
@@ -443,15 +448,21 @@ public class ConnectivityServiceTest {
             return mPackageManager;
         }
 
+        private int checkMockedPermission(String permission, Supplier<Integer> ifAbsent) {
+            final Integer granted = mMockedPermissions.get(permission);
+            return granted != null ? granted : ifAbsent.get();
+        }
+
         @Override
         public int checkPermission(String permission, int pid, int uid) {
-            final Integer granted = mMockedPermissions.get(permission);
-            if (granted == null) {
-                // All non-mocked permissions should be held by the test or unnecessary: check as
-                // normal to make sure the code does not rely on unexpected permissions.
-                return super.checkPermission(permission, pid, uid);
-            }
-            return granted;
+            return checkMockedPermission(
+                    permission, () -> super.checkPermission(permission, pid, uid));
+        }
+
+        @Override
+        public int checkCallingOrSelfPermission(String permission) {
+            return checkMockedPermission(
+                    permission, () -> super.checkCallingOrSelfPermission(permission));
         }
 
         @Override
@@ -1000,6 +1011,7 @@ public class ConnectivityServiceTest {
         // Careful ! This is different from mNetworkAgent, because MockNetworkAgent does
         // not inherit from NetworkAgent.
         private TestNetworkAgentWrapper mMockNetworkAgent;
+        private int mVpnType = VpnManager.TYPE_VPN_SERVICE;
 
         private VpnInfo mVpnInfo;
 
@@ -1020,6 +1032,10 @@ public class ConnectivityServiceTest {
             updateCapabilities(null /* defaultNetwork */);
         }
 
+        public void setVpnType(int vpnType) {
+            mVpnType = vpnType;
+        }
+
         @Override
         public int getNetId() {
             if (mMockNetworkAgent == null) {
@@ -1036,6 +1052,11 @@ public class ConnectivityServiceTest {
         @Override
         protected boolean isCallerEstablishedOwnerLocked() {
             return mConnected;  // Similar trickery
+        }
+
+        @Override
+        public int getActiveAppVpnType() {
+            return mVpnType;
         }
 
         private void connect(boolean isAlwaysMetered) {
@@ -6444,6 +6465,90 @@ public class ConnectivityServiceTest {
                         originalNc, Process.myPid(), callerUid);
 
         assertEquals(Process.INVALID_UID, newNc.getOwnerUid());
+    }
+
+    private void setupConnectionOwnerUid(int vpnOwnerUid, @VpnManager.VpnType int vpnType)
+            throws Exception {
+        final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(VPN_USER));
+        establishVpn(new LinkProperties(), vpnOwnerUid, vpnRange);
+        mMockVpn.setVpnType(vpnType);
+
+        final VpnInfo vpnInfo = new VpnInfo();
+        vpnInfo.ownerUid = vpnOwnerUid;
+        mMockVpn.setVpnInfo(vpnInfo);
+    }
+
+    private void setupConnectionOwnerUidAsVpnApp(int vpnOwnerUid, @VpnManager.VpnType int vpnType)
+            throws Exception {
+        setupConnectionOwnerUid(vpnOwnerUid, vpnType);
+
+        // Test as VPN app
+        mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
+        mServiceContext.setPermission(
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, PERMISSION_DENIED);
+    }
+
+    private ConnectionInfo getTestConnectionInfo() throws Exception {
+        return new ConnectionInfo(
+                IPPROTO_TCP,
+                new InetSocketAddress(InetAddresses.parseNumericAddress("1.2.3.4"), 1234),
+                new InetSocketAddress(InetAddresses.parseNumericAddress("2.3.4.5"), 2345));
+    }
+
+    @Test
+    public void testGetConnectionOwnerUidPlatformVpn() throws Exception {
+        final int myUid = Process.myUid();
+        setupConnectionOwnerUidAsVpnApp(myUid, VpnManager.TYPE_VPN_PLATFORM);
+
+        try {
+            mService.getConnectionOwnerUid(getTestConnectionInfo());
+            fail("Expected SecurityException for non-VpnService app");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    public void testGetConnectionOwnerUidVpnServiceWrongUser() throws Exception {
+        final int myUid = Process.myUid();
+        setupConnectionOwnerUidAsVpnApp(myUid + 1, VpnManager.TYPE_VPN_SERVICE);
+
+        try {
+            mService.getConnectionOwnerUid(getTestConnectionInfo());
+            fail("Expected SecurityException for non-VpnService app");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    public void testGetConnectionOwnerUidVpnServiceDoesNotThrow() throws Exception {
+        final int myUid = Process.myUid();
+        setupConnectionOwnerUidAsVpnApp(myUid, VpnManager.TYPE_VPN_SERVICE);
+
+        // TODO: Test the returned UID
+        mService.getConnectionOwnerUid(getTestConnectionInfo());
+    }
+
+    @Test
+    public void testGetConnectionOwnerUidVpnServiceNetworkStackDoesNotThrow() throws Exception {
+        final int myUid = Process.myUid();
+        setupConnectionOwnerUid(myUid, VpnManager.TYPE_VPN_SERVICE);
+        mServiceContext.setPermission(
+                android.Manifest.permission.NETWORK_STACK, PERMISSION_GRANTED);
+
+        // TODO: Test the returned UID
+        mService.getConnectionOwnerUid(getTestConnectionInfo());
+    }
+
+    @Test
+    public void testGetConnectionOwnerUidVpnServiceMainlineNetworkStackDoesNotThrow()
+            throws Exception {
+        final int myUid = Process.myUid();
+        setupConnectionOwnerUid(myUid, VpnManager.TYPE_VPN_SERVICE);
+        mServiceContext.setPermission(
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, PERMISSION_GRANTED);
+
+        // TODO: Test the returned UID
+        mService.getConnectionOwnerUid(getTestConnectionInfo());
     }
 
     private TestNetworkAgentWrapper establishVpn(

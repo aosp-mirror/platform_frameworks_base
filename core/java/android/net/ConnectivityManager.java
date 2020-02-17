@@ -4711,19 +4711,19 @@ public class ConnectivityManager {
     /**
      * Returns the {@code uid} of the owner of a network connection.
      *
-     * @param protocol The protocol of the connection. Only {@code IPPROTO_TCP} and
-     * {@code IPPROTO_UDP} currently supported.
+     * @param protocol The protocol of the connection. Only {@code IPPROTO_TCP} and {@code
+     *     IPPROTO_UDP} currently supported.
      * @param local The local {@link InetSocketAddress} of a connection.
      * @param remote The remote {@link InetSocketAddress} of a connection.
-     *
      * @return {@code uid} if the connection is found and the app has permission to observe it
-     * (e.g., if it is associated with the calling VPN app's tunnel) or
-     * {@link android.os.Process#INVALID_UID} if the connection is not found.
-     * Throws {@link SecurityException} if the caller is not the active VPN for the current user.
-     * Throws {@link IllegalArgumentException} if an unsupported protocol is requested.
+     *     (e.g., if it is associated with the calling VPN app's VpnService tunnel) or {@link
+     *     android.os.Process#INVALID_UID} if the connection is not found.
+     * @throws {@link SecurityException} if the caller is not the active VpnService for the current
+     *     user.
+     * @throws {@link IllegalArgumentException} if an unsupported protocol is requested.
      */
-    public int getConnectionOwnerUid(int protocol, @NonNull InetSocketAddress local,
-            @NonNull InetSocketAddress remote) {
+    public int getConnectionOwnerUid(
+            int protocol, @NonNull InetSocketAddress local, @NonNull InetSocketAddress remote) {
         ConnectionInfo connectionInfo = new ConnectionInfo(protocol, local, remote);
         try {
             return mService.getConnectionOwnerUid(connectionInfo);
