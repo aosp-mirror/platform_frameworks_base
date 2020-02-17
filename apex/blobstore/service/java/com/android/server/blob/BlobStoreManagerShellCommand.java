@@ -15,10 +15,13 @@
  */
 package com.android.server.blob;
 
+import android.app.ActivityManager;
+import android.app.blob.BlobHandle;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 
 import java.io.PrintWriter;
+import java.util.Base64;
 
 class BlobStoreManagerShellCommand extends ShellCommand {
 
@@ -39,6 +42,8 @@ class BlobStoreManagerShellCommand extends ShellCommand {
                 return runClearAllSessions(pw);
             case "clear-all-blobs":
                 return runClearAllBlobs(pw);
+            case "delete-blob":
+                return runDeleteBlob(pw);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -68,6 +73,17 @@ class BlobStoreManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runDeleteBlob(PrintWriter pw) {
+        final ParsedArgs args = new ParsedArgs();
+
+        if (parseOptions(pw, args) < 0) {
+            return -1;
+        }
+
+        mService.deleteBlob(args.getBlobHandle(), args.userId);
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -78,14 +94,24 @@ class BlobStoreManagerShellCommand extends ShellCommand {
         pw.println("clear-all-sessions [-u | --user USER_ID]");
         pw.println("    Remove all sessions.");
         pw.println("    Options:");
-        pw.println("      -u or --user: specify which user's sessions to be removed;");
+        pw.println("      -u or --user: specify which user's sessions to be removed.");
         pw.println("                    If not specified, sessions in all users are removed.");
         pw.println();
         pw.println("clear-all-blobs [-u | --user USER_ID]");
         pw.println("    Remove all blobs.");
         pw.println("    Options:");
+        pw.println("      -u or --user: specify which user's blobs to be removed.");
+        pw.println("                    If not specified, blobs in all users are removed.");
+        pw.println("delete-blob [-u | --user USER_ID] [--digest DIGEST] [--expiry EXPIRY_TIME] "
+                + "[--label LABEL] [--tag TAG]");
+        pw.println("    Delete a blob.");
+        pw.println("    Options:");
         pw.println("      -u or --user: specify which user's blobs to be removed;");
         pw.println("                    If not specified, blobs in all users are removed.");
+        pw.println("      --digest: Base64 encoded digest of the blob to delete.");
+        pw.println("      --expiry: Expiry time of the blob to delete, in milliseconds.");
+        pw.println("      --label: Label of the blob to delete.");
+        pw.println("      --tag: Tag of the blob to delete.");
         pw.println();
     }
 
@@ -97,15 +123,43 @@ class BlobStoreManagerShellCommand extends ShellCommand {
                 case "--user":
                     args.userId = Integer.parseInt(getNextArgRequired());
                     break;
+                case "--algo":
+                    args.algorithm = getNextArgRequired();
+                    break;
+                case "--digest":
+                    args.digest = Base64.getDecoder().decode(getNextArgRequired());
+                    break;
+                case "--label":
+                    args.label = getNextArgRequired();
+                    break;
+                case "--expiry":
+                    args.expiryTimeMillis = Long.parseLong(getNextArgRequired());
+                    break;
+                case "--tag":
+                    args.tag = getNextArgRequired();
+                    break;
                 default:
                     pw.println("Error: unknown option '" + opt + "'");
                     return -1;
             }
         }
+        if (args.userId == UserHandle.USER_CURRENT) {
+            args.userId = ActivityManager.getCurrentUser();
+        }
         return 0;
     }
 
     private static class ParsedArgs {
-        public int userId;
+        public int userId = UserHandle.USER_CURRENT;
+
+        public String algorithm = BlobHandle.ALGO_SHA_256;
+        public byte[] digest;
+        public long expiryTimeMillis;
+        public CharSequence label;
+        public String tag;
+
+        public BlobHandle getBlobHandle() {
+            return BlobHandle.create(algorithm, digest, label, expiryTimeMillis, tag);
+        }
     }
 }

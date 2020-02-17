@@ -43,7 +43,8 @@ import java.util.Objects;
  */
 // TODO: use datagen tool?
 public final class BlobHandle implements Parcelable {
-    private static final String ALGO_SHA_256 = "SHA-256";
+    /** @hide */
+    public static final String ALGO_SHA_256 = "SHA-256";
 
     private static final String[] SUPPORTED_ALGOS = {
             ALGO_SHA_256
