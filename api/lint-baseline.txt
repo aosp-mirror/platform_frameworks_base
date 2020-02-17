@@ -561,6 +561,9 @@ MissingNullability: android.media.MediaMetadataRetriever#getFrameAtTime(long, in
     
 MissingNullability: android.media.MediaMetadataRetriever#getScaledFrameAtTime(long, int, int, int, android.media.MediaMetadataRetriever.BitmapParams):
 
+    
+MissingNullability: java.time.chrono.JapaneseEra#REIWA:
+    Missing nullability on field `REIWA` in class `class java.time.chrono.JapaneseEra`
 
 
 RequiresPermission: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
