@@ -58,7 +58,7 @@ public class NetworkRanker {
         NetworkAgentInfo bestNetwork = null;
         int bestScore = Integer.MIN_VALUE;
         for (final NetworkAgentInfo nai : candidates) {
-            final int score = nai.getCurrentScore();
+            final int score = nai.getNetworkScore().getLegacyScore();
             if (score > bestScore) {
                 bestNetwork = nai;
                 bestScore = score;

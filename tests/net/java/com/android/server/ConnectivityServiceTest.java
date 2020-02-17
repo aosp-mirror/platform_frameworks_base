@@ -5846,7 +5846,7 @@ public class ConnectivityServiceTest {
 
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(true);
-        trustedCallback.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
+        trustedCallback.expectAvailableThenValidatedCallbacks(mWiFiNetworkAgent);
         verify(mNetworkManagementService).setDefaultNetId(eq(mWiFiNetworkAgent.getNetwork().netId));
         reset(mNetworkManagementService);
 
