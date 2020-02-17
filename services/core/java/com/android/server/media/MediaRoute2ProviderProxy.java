@@ -123,14 +123,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
-    public void sendControlRequest(String routeId, Intent request) {
-        if (mConnectionReady) {
-            mActiveConnection.sendControlRequest(routeId, request);
-            updateBinding();
-        }
-    }
-
-    @Override
     public void setRouteVolume(String routeId, int volume) {
         if (mConnectionReady) {
             mActiveConnection.setRouteVolume(routeId, volume);
@@ -505,14 +497,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
                 mProvider.transferToRoute(sessionId, routeId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "transferToRoute: Failed to deliver request.", ex);
-            }
-        }
-
-        public void sendControlRequest(String routeId, Intent request) {
-            try {
-                mProvider.notifyControlRequestSent(routeId, request);
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "sendControlRequest: Failed to deliver request.", ex);
             }
         }
 

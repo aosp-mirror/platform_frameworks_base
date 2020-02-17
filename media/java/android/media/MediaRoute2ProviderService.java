@@ -115,16 +115,6 @@ public abstract class MediaRoute2ProviderService extends Service {
     }
 
     /**
-     * Called when sendControlRequest is called on a route of the provider
-     *
-     * @param routeId the id of the target route
-     * @param request the media control request intent
-     * @hide
-     */
-    //TODO: Discuss what to use for request (e.g., Intent? Request class?)
-    public void onControlRequest(@NonNull String routeId, @NonNull Intent request) {}
-
-    /**
      * Called when a volume setting is requested on a route of the provider
      *
      * @param routeId the id of the route
@@ -510,15 +500,6 @@ public abstract class MediaRoute2ProviderService extends Service {
             }
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onTransferToRoute,
                     MediaRoute2ProviderService.this, sessionId, routeId));
-        }
-
-        @Override
-        public void notifyControlRequestSent(String routeId, Intent request) {
-            if (!checkCallerisSystem()) {
-                return;
-            }
-            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onControlRequest,
-                    MediaRoute2ProviderService.this, routeId, request));
         }
 
         @Override

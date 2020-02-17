@@ -25,7 +25,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.IMediaRouter2Client;
 import android.media.IMediaRouter2Manager;
@@ -282,22 +281,6 @@ class MediaRouter2ServiceImpl {
         try {
             synchronized (mLock) {
                 releaseSessionLocked(client, uniqueSessionId);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    public void sendControlRequest(@NonNull IMediaRouter2Client client,
-            @NonNull MediaRoute2Info route, @NonNull Intent request) {
-        Objects.requireNonNull(client, "client must not be null");
-        Objects.requireNonNull(route, "route must not be null");
-        Objects.requireNonNull(request, "request must not be null");
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                sendControlRequestLocked(client, route, request);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -602,18 +585,6 @@ class MediaRouter2ServiceImpl {
             clientRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::updateDiscoveryPreference,
                             clientRecord.mUserRecord.mHandler));
-        }
-    }
-
-    private void sendControlRequestLocked(IMediaRouter2Client client, MediaRoute2Info route,
-            Intent request) {
-        final IBinder binder = client.asBinder();
-        Client2Record clientRecord = mAllClientRecords.get(binder);
-
-        if (clientRecord != null) {
-            clientRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::sendControlRequest,
-                            clientRecord.mUserRecord.mHandler, route, request));
         }
     }
 
@@ -1443,13 +1414,6 @@ class MediaRouter2ServiceImpl {
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify client of the session release."
                         + " Client probably died.", ex);
-            }
-        }
-
-        private void sendControlRequest(MediaRoute2Info route, Intent request) {
-            final MediaRoute2Provider provider = findProvider(route.getProviderId());
-            if (provider != null) {
-                provider.sendControlRequest(route.getOriginalId(), request);
             }
         }
 

@@ -19,7 +19,6 @@ package com.android.server.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
@@ -61,7 +60,6 @@ abstract class MediaRoute2Provider {
     public abstract void deselectRoute(String sessionId, String routeId);
     public abstract void transferToRoute(String sessionId, String routeId);
 
-    public abstract void sendControlRequest(String routeId, Intent request);
     public abstract void setRouteVolume(String routeId, int volume);
     public abstract void setSessionVolume(String sessionId, int volume);
 
