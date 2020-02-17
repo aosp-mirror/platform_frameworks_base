@@ -145,9 +145,9 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     @Override
     public void transferToRoute(String sessionId, String routeId) {
         if (TextUtils.equals(routeId, mDefaultRoute.getId())) {
-            mBtRouteProvider.clearActiveDevices();
+            mBtRouteProvider.transferTo(null);
         } else {
-            mBtRouteProvider.setActiveDevice(routeId);
+            mBtRouteProvider.transferTo(routeId);
         }
     }
 
@@ -196,7 +196,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     private void initializeSessionInfo() {
-        mBluetoothRoutes = mBtRouteProvider.getBluetoothRoutes();
+        mBluetoothRoutes = mBtRouteProvider.getAllBluetoothRoutes();
 
         MediaRoute2ProviderInfo.Builder builder = new MediaRoute2ProviderInfo.Builder();
         builder.addRoute(mDefaultRoute);
@@ -251,7 +251,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
                 SYSTEM_SESSION_ID, "" /* clientPackageName */)
                 .setSystemSession(true);
-        String activeBtDeviceAddress = mBtRouteProvider.getActiveDeviceAddress();
+        String activeBtDeviceAddress = mBtRouteProvider.getSelectedRouteId();
         mSelectedRouteId = TextUtils.isEmpty(activeBtDeviceAddress) ? mDefaultRoute.getId()
                 : activeBtDeviceAddress;
         builder.addSelectedRoute(mSelectedRouteId);
@@ -311,7 +311,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, 0);
 
             if (newVolume != oldVolume) {
-                String activeBtDeviceAddress = mBtRouteProvider.getActiveDeviceAddress();
+                String activeBtDeviceAddress = mBtRouteProvider.getSelectedRouteId();
                 if (!TextUtils.isEmpty(activeBtDeviceAddress)) {
                     for (int i = mBluetoothRoutes.size() - 1; i >= 0; i--) {
                         MediaRoute2Info route = mBluetoothRoutes.get(i);
