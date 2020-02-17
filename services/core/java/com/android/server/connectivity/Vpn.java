@@ -794,10 +794,10 @@ public class Vpn {
                     // ignore
                 }
                 mContext.unbindService(mConnection);
-                mConnection = null;
+                cleanupVpnStateLocked();
             } else if (mVpnRunner != null) {
+                // cleanupVpnStateLocked() is called from mVpnRunner.exit()
                 mVpnRunner.exit();
-                mVpnRunner = null;
             }
 
             try {
@@ -1104,7 +1104,6 @@ public class Vpn {
      */
     public synchronized ParcelFileDescriptor establish(VpnConfig config) {
         // Check if the caller is already prepared.
-        UserManager mgr = UserManager.get(mContext);
         if (Binder.getCallingUid() != mOwnerUID) {
             return null;
         }
@@ -1118,10 +1117,7 @@ public class Vpn {
         long token = Binder.clearCallingIdentity();
         try {
             // Restricted users are not allowed to create VPNs, they are tied to Owner
-            UserInfo user = mgr.getUserInfo(mUserHandle);
-            if (user.isRestricted()) {
-                throw new SecurityException("Restricted users cannot establish VPNs");
-            }
+            enforceNotRestrictedUser();
 
             ResolveInfo info = AppGlobals.getPackageManager().resolveService(intent,
                     null, 0, mUserHandle);
@@ -1543,23 +1539,29 @@ public class Vpn {
         public void interfaceRemoved(String interfaze) {
             synchronized (Vpn.this) {
                 if (interfaze.equals(mInterface) && jniCheck(interfaze) == 0) {
-                    mStatusIntent = null;
-                    mNetworkCapabilities.setUids(null);
-                    mConfig = null;
-                    mInterface = null;
                     if (mConnection != null) {
                         mContext.unbindService(mConnection);
-                        mConnection = null;
-                        agentDisconnect();
+                        cleanupVpnStateLocked();
                     } else if (mVpnRunner != null) {
-                        // agentDisconnect must be called from mVpnRunner.exit()
+                        // cleanupVpnStateLocked() is called from mVpnRunner.exit()
                         mVpnRunner.exit();
-                        mVpnRunner = null;
                     }
                 }
             }
         }
     };
+
+    private void cleanupVpnStateLocked() {
+        mStatusIntent = null;
+        mNetworkCapabilities.setUids(null);
+        mConfig = null;
+        mInterface = null;
+
+        // Unconditionally clear both VpnService and VpnRunner fields.
+        mVpnRunner = null;
+        mConnection = null;
+        agentDisconnect();
+    }
 
     private void enforceControlPermission() {
         mContext.enforceCallingPermission(Manifest.permission.CONTROL_VPN, "Unauthorized Caller");
@@ -1670,6 +1672,25 @@ public class Vpn {
             return false;
         }
         return mNetworkCapabilities.appliesToUid(uid);
+    }
+
+    /**
+     * Gets the currently running App-based VPN type
+     *
+     * @return the {@link VpnManager.VpnType}. {@link VpnManager.TYPE_VPN_NONE} if not running an
+     *     app-based VPN. While VpnService-based VPNs are always app VPNs and LegacyVpn is always
+     *     Settings-based, the Platform VPNs can be initiated by both apps and Settings.
+     */
+    public synchronized int getActiveAppVpnType() {
+        if (VpnConfig.LEGACY_VPN.equals(mPackage)) {
+            return VpnManager.TYPE_VPN_NONE;
+        }
+
+        if (mVpnRunner != null && mVpnRunner instanceof IkeV2VpnRunner) {
+            return VpnManager.TYPE_VPN_PLATFORM;
+        } else {
+            return VpnManager.TYPE_VPN_SERVICE;
+        }
     }
 
     /**
@@ -1798,6 +1819,17 @@ public class Vpn {
         }
 
         throw new IllegalStateException("Unable to find IPv4 default gateway");
+    }
+
+    private void enforceNotRestrictedUser() {
+        Binder.withCleanCallingIdentity(() -> {
+            final UserManager mgr = UserManager.get(mContext);
+            final UserInfo user = mgr.getUserInfo(mUserHandle);
+
+            if (user.isRestricted()) {
+                throw new SecurityException("Restricted users cannot configure VPNs");
+            }
+        });
     }
 
     /**
@@ -2020,7 +2052,25 @@ public class Vpn {
 
         public abstract void run();
 
-        protected abstract void exit();
+        /**
+         * Disconnects the NetworkAgent and cleans up all state related to the VpnRunner.
+         *
+         * <p>All outer Vpn instance state is cleaned up in cleanupVpnStateLocked()
+         */
+        protected abstract void exitVpnRunner();
+
+        /**
+         * Triggers the cleanup of the VpnRunner, and additionally cleans up Vpn instance-wide state
+         *
+         * <p>This method ensures that simple calls to exit() will always clean up global state
+         * properly.
+         */
+        protected final void exit() {
+            synchronized (Vpn.this) {
+                exitVpnRunner();
+                cleanupVpnStateLocked();
+            }
+        }
     }
 
     interface IkeV2VpnRunnerCallback {
@@ -2350,17 +2400,6 @@ public class Vpn {
         }
 
         /**
-         * Triggers cleanup of outer class' state
-         *
-         * <p>Can be called from any thread, as it does not mutate state in the Ikev2VpnRunner.
-         */
-        private void cleanupVpnState() {
-            synchronized (Vpn.this) {
-                agentDisconnect();
-            }
-        }
-
-        /**
          * Cleans up all Ikev2VpnRunner internal state
          *
          * <p>This method MUST always be called on the mExecutor thread in order to ensure
@@ -2379,10 +2418,7 @@ public class Vpn {
         }
 
         @Override
-        public void exit() {
-            // Cleanup outer class' state immediately, otherwise race conditions may ensue.
-            cleanupVpnState();
-
+        public void exitVpnRunner() {
             mExecutor.execute(() -> {
                 shutdownVpnRunner();
             });
@@ -2481,10 +2517,9 @@ public class Vpn {
 
         /** Tears down this LegacyVpn connection */
         @Override
-        public void exit() {
+        public void exitVpnRunner() {
             // We assume that everything is reset after stopping the daemons.
             interrupt();
-            agentDisconnect();
             try {
                 mContext.unregisterReceiver(mBroadcastReceiver);
             } catch (IllegalArgumentException e) {}
@@ -2757,6 +2792,7 @@ public class Vpn {
         checkNotNull(keyStore, "KeyStore missing");
 
         verifyCallingUidAndPackage(packageName);
+        enforceNotRestrictedUser();
 
         final byte[] encodedProfile = profile.encode();
         if (encodedProfile.length > MAX_VPN_PROFILE_SIZE_BYTES) {
@@ -2792,6 +2828,7 @@ public class Vpn {
         checkNotNull(keyStore, "KeyStore missing");
 
         verifyCallingUidAndPackage(packageName);
+        enforceNotRestrictedUser();
 
         Binder.withCleanCallingIdentity(
                 () -> {
@@ -2833,6 +2870,8 @@ public class Vpn {
             @NonNull String packageName, @NonNull KeyStore keyStore) {
         checkNotNull(packageName, "No package name provided");
         checkNotNull(keyStore, "KeyStore missing");
+
+        enforceNotRestrictedUser();
 
         // Prepare VPN for startup
         if (!prepare(packageName, null /* newPackage */, VpnManager.TYPE_VPN_PLATFORM)) {
@@ -2898,6 +2937,8 @@ public class Vpn {
      */
     public synchronized void stopVpnProfile(@NonNull String packageName) {
         checkNotNull(packageName, "No package name provided");
+
+        enforceNotRestrictedUser();
 
         // To stop the VPN profile, the caller must be the current prepared package and must be
         // running an Ikev2VpnProfile.
