@@ -2145,6 +2145,12 @@ class Task extends WindowContainer<WindowContainer> {
                     // For floating tasks, calculate the smallest width from the bounds of the task
                     inOutConfig.smallestScreenWidthDp = (int) (
                             Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
+                } else if (WindowConfiguration.isSplitScreenWindowingMode(windowingMode)) {
+                    // Iterating across all screen orientations, and return the minimum of the task
+                    // width taking into account that the bounds might change because the snap
+                    // algorithm snaps to a different value
+                    inOutConfig.smallestScreenWidthDp =
+                            getSmallestScreenWidthDpForDockedBounds(mTmpFullBounds);
                 }
                 // otherwise, it will just inherit
             }
@@ -3249,10 +3255,6 @@ class Task extends WindowContainer<WindowContainer> {
     Task asTask() {
         // I'm a task!
         return this;
-    }
-
-    TaskTile asTile() {
-        return null;
     }
 
     // TODO(task-merge): Figure-out how this should work with hierarchy tasks.

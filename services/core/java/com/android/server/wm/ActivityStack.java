@@ -111,7 +111,6 @@ import static com.android.server.wm.TaskProto.ADJUST_DIVIDER_AMOUNT;
 import static com.android.server.wm.TaskProto.ADJUST_IME_AMOUNT;
 import static com.android.server.wm.TaskProto.ANIMATING_BOUNDS;
 import static com.android.server.wm.TaskProto.BOUNDS;
-import static com.android.server.wm.TaskProto.CREATED_BY_ORGANIZER;
 import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
 import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
 import static com.android.server.wm.TaskProto.DISPLAY_ID;
@@ -732,14 +731,53 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                         newBounds);
                 hasNewOverrideBounds = true;
             }
+
+            // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
+            if (overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                    || overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+                // If entering split screen or if something about the available split area changes,
+                // recalculate the split windows to match the new configuration.
+                if (rotationChanged || windowingModeChanged
+                        || prevDensity != getConfiguration().densityDpi
+                        || prevScreenW != getConfiguration().screenWidthDp
+                        || prevScreenH != getConfiguration().screenHeightDp) {
+                    calculateDockedBoundsForConfigChange(newParentConfig, newBounds);
+                    hasNewOverrideBounds = true;
+                }
+            }
         }
 
         if (windowingModeChanged) {
-            display.onStackWindowingModeChanged(this);
+            // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
+            if (overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                getStackDockedModeBounds(null /* dockedBounds */, null /* currentTempTaskBounds */,
+                        newBounds /* outStackBounds */, mTmpRect2 /* outTempTaskBounds */);
+                // immediately resize so docked bounds are available in onSplitScreenModeActivated
+                setTaskDisplayedBounds(null);
+                setTaskBounds(newBounds);
+                setBounds(newBounds);
+                newBounds.set(newBounds);
+            } else if (overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+                Rect dockedBounds = display.getRootSplitScreenPrimaryTask().getBounds();
+                final boolean isMinimizedDock =
+                        display.mDisplayContent.getDockedDividerController().isMinimizedDock();
+                if (isMinimizedDock) {
+                    Task topTask = display.getRootSplitScreenPrimaryTask().getTopMostTask();
+                    if (topTask != null) {
+                        dockedBounds = topTask.getBounds();
+                    }
+                }
+                getStackDockedModeBounds(dockedBounds, null /* currentTempTaskBounds */,
+                        newBounds /* outStackBounds */, mTmpRect2 /* outTempTaskBounds */);
+                hasNewOverrideBounds = true;
+            }
         }
         if (hasNewOverrideBounds) {
-            if (inSplitScreenWindowingMode()) {
-                setBounds(newBounds);
+            if (inSplitScreenPrimaryWindowingMode()) {
+                mStackSupervisor.resizeDockedStackLocked(new Rect(newBounds),
+                        null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                        null /* tempOtherTaskBounds */, null /* tempOtherTaskInsetBounds */,
+                        PRESERVE_WINDOWS, true /* deferResume */);
             } else if (overrideWindowingMode != WINDOWING_MODE_PINNED) {
                 // For pinned stack, resize is now part of the {@link WindowContainerTransaction}
                 resize(new Rect(newBounds), null /* tempTaskBounds */,
@@ -882,7 +920,11 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 // warning toast about it.
                 mAtmService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                display.onSplitScreenModeDismissed();
+                final ActivityStack primarySplitStack = display.getRootSplitScreenPrimaryTask();
+                primarySplitStack.setWindowingModeInSurfaceTransaction(WINDOWING_MODE_UNDEFINED,
+                        false /* animate */, false /* showRecents */,
+                        false /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */,
+                        primarySplitStack == this ? creating : false);
             }
         }
 
@@ -1176,7 +1218,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                     display.getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
             if (topFullScreenStack != null) {
                 final ActivityStack primarySplitScreenStack = display.getRootSplitScreenPrimaryTask();
-                if (primarySplitScreenStack != null && display.getIndexOf(topFullScreenStack)
+                if (display.getIndexOf(topFullScreenStack)
                         > display.getIndexOf(primarySplitScreenStack)) {
                     primarySplitScreenStack.moveToFront(reason + " splitScreenToTop");
                 }
@@ -3952,6 +3994,17 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 ? ((WindowContainer) oldParent).getDisplayContent() : null;
         super.onParentChanged(newParent, oldParent);
 
+        if (display != null && inSplitScreenPrimaryWindowingMode()
+                // only do this for the base stack
+                && !newParent.inSplitScreenPrimaryWindowingMode()) {
+            // If we created a docked stack we want to resize it so it resizes all other stacks
+            // in the system.
+            getStackDockedModeBounds(null /* dockedBounds */, null /* currentTempTaskBounds */,
+                    mTmpRect /* outStackBounds */, mTmpRect2 /* outTempTaskBounds */);
+            mStackSupervisor.resizeDockedStackLocked(getRequestedOverrideBounds(), mTmpRect,
+                    mTmpRect2, null, null, PRESERVE_WINDOWS);
+        }
+
         // Resume next focusable stack after reparenting to another display if we aren't removing
         // the prevous display.
         if (oldDisplay != null && oldDisplay.isRemoving()) {
@@ -4897,12 +4950,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     }
 
     @Override
-    public SurfaceControl getParentSurfaceControl() {
-        // Tile is a "virtual" parent, so we need to intercept the parent surface here
-        return mTile != null ? mTile.getSurfaceControl() : super.getParentSurfaceControl();
-    }
-
-    @Override
     void removeImmediately() {
         // TODO(task-hierarchy): remove this override when tiles are in hierarchy
         if (mTile != null) {
@@ -4955,10 +5002,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         if (!matchParentBounds()) {
             final Rect bounds = getRequestedOverrideBounds();
             bounds.dumpDebug(proto, BOUNDS);
-        } else if (getStack().getTile() != null) {
-            // use tile's bounds here for cts.
-            final Rect bounds = getStack().getTile().getRequestedOverrideBounds();
-            bounds.dumpDebug(proto, BOUNDS);
         }
         getOverrideDisplayedBounds().dumpDebug(proto, DISPLAYED_BOUNDS);
         mAdjustedBounds.dumpDebug(proto, ADJUSTED_BOUNDS);
@@ -4977,8 +5020,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
             proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
         }
-
-        proto.write(CREATED_BY_ORGANIZER, this instanceof TaskTile);
 
         proto.end(token);
     }
