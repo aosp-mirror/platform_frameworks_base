@@ -20,8 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.media.MediaCodec;
-import android.media.MediaParser;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -116,6 +114,7 @@ import java.util.stream.Collectors;
  * <table>
  * <tr><td>{@link #KEY_MIME}</td><td>String</td><td>The type of the format.</td></tr>
  * <tr><td>{@link #KEY_LANGUAGE}</td><td>String</td><td>The language of the content.</td></tr>
+ * <tr><td>{@link #KEY_CAPTION_SERVICE_NUMBER}</td><td>int</td><td>optional, the closed-caption service or channel number.</td></tr>
  * </table>
  *
  * Image formats have the following keys:
@@ -243,6 +242,13 @@ public final class MediaFormat {
      * or 639-2/T codes.  The associated value is a string.
      */
     public static final String KEY_LANGUAGE = "language";
+
+    /**
+     * A key describing the closed caption service number. For CEA-608 caption tracks, holds the
+     * channel number. For CEA-708, holds the service number.
+     * The associated value is an int.
+     */
+    public static final String KEY_CAPTION_SERVICE_NUMBER = "caption-service-number";
 
     /**
      * A key describing the sample rate of an audio format.
