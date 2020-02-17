@@ -272,7 +272,6 @@ cc_library_shared {
                 "libnativewindow",
                 "libdl",
                 "libdl_android",
-                "libstats_jni",
                 "libstatslog",
                 "server_configurable_flags",
                 "libstatspull",
