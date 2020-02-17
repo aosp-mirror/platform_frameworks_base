@@ -136,7 +136,7 @@ public class DreamBackend {
         if (mDreamManager == null)
             return null;
         try {
-            return mDreamManager.getDefaultDreamComponent();
+            return mDreamManager.getDefaultDreamComponentForUser(mContext.getUserId());
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get default dream", e);
             return null;
@@ -269,7 +269,7 @@ public class DreamBackend {
         if (mDreamManager == null || dreamInfo == null || dreamInfo.componentName == null)
             return;
         try {
-            mDreamManager.testDream(dreamInfo.componentName);
+            mDreamManager.testDream(mContext.getUserId(), dreamInfo.componentName);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to preview " + dreamInfo, e);
         }
