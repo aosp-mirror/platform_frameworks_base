@@ -1284,6 +1284,27 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testPostCancelPostNotifiesListeners() throws Exception {
+        // WHEN a notification is posted
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
+                sbn.getNotification(), sbn.getUserId());
+        // THEN it is canceled
+        mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", sbn.getId(), sbn.getUserId());
+        // THEN it is posted again (before the cancel has a chance to finish)
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
+                sbn.getNotification(), sbn.getUserId());
+        // THEN the later enqueue isn't swallowed by the cancel. I.e., ordering is respected
+        waitForIdle();
+
+        // The final enqueue made it to the listener instead of being canceled
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifs.length);
+        assertEquals(1, mService.getNotificationRecordCount());
+    }
+
+    @Test
     public void testCancelNotificationWhilePostedAndEnqueued() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, PKG,
                 "testCancelNotificationWhilePostedAndEnqueued", 0,

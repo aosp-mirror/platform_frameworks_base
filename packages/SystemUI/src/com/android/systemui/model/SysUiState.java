@@ -19,6 +19,7 @@ package com.android.systemui.model;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.NonNull;
+import android.util.Log;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -36,6 +37,9 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class SysUiState implements Dumpable {
+
+    private static final String TAG = SysUiState.class.getSimpleName();
+    public static final boolean DEBUG = true;
 
     private @QuickStepContract.SystemUiStateFlags int mFlags;
     private final List<SysUiStateCallback> mCallbacks = new ArrayList<>();
@@ -76,6 +80,7 @@ public class SysUiState implements Dumpable {
     private void updateFlags(int displayId) {
         if (displayId != DEFAULT_DISPLAY) {
             // Ignore non-default displays for now
+            Log.w(TAG, "Ignoring flag update for display: " + displayId, new Throwable());
             return;
         }
 
@@ -87,6 +92,9 @@ public class SysUiState implements Dumpable {
 
     /** Notify all those who are registered that the state has changed. */
     private void notifyAndSetSystemUiStateChanged(int newFlags, int oldFlags) {
+        if (DEBUG) {
+            Log.d(TAG, "SysUiState changed: old=" + oldFlags + " new=" + newFlags);
+        }
         if (newFlags != oldFlags) {
             mCallbacks.forEach(callback -> callback.onSystemUiStateChanged(newFlags));
             mFlags = newFlags;

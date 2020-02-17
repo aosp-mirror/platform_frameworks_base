@@ -88,33 +88,11 @@ public class NotificationShadeWindowView extends FrameLayout {
             boolean paddingChanged = insets.top != getPaddingTop()
                     || insets.bottom != getPaddingBottom();
 
-            int rightCutout = 0;
-            int leftCutout = 0;
-            DisplayCutout displayCutout = getRootWindowInsets().getDisplayCutout();
-            if (displayCutout != null) {
-                leftCutout = displayCutout.getSafeInsetLeft();
-                rightCutout = displayCutout.getSafeInsetRight();
-            }
-
-            int targetLeft = Math.max(insets.left, leftCutout);
-            int targetRight = Math.max(insets.right, rightCutout);
-
-            // Super-special right inset handling, because scrims and backdrop need to ignore it.
-            if (targetRight != mRightInset || targetLeft != mLeftInset) {
-                mRightInset = targetRight;
-                mLeftInset = targetLeft;
-                applyMargins();
-            }
             // Drop top inset, and pass through bottom inset.
             if (paddingChanged) {
                 setPadding(0, 0, 0, 0);
             }
         } else {
-            if (mRightInset != 0 || mLeftInset != 0) {
-                mRightInset = 0;
-                mLeftInset = 0;
-                applyMargins();
-            }
             boolean changed = getPaddingLeft() != 0
                     || getPaddingRight() != 0
                     || getPaddingTop() != 0
@@ -123,6 +101,17 @@ public class NotificationShadeWindowView extends FrameLayout {
                 setPadding(0, 0, 0, 0);
             }
         }
+
+        mLeftInset = 0;
+        mRightInset = 0;
+        DisplayCutout displayCutout = getRootWindowInsets().getDisplayCutout();
+        if (displayCutout != null) {
+            mLeftInset = displayCutout.getSafeInsetLeft();
+            mRightInset = displayCutout.getSafeInsetRight();
+        }
+        mLeftInset = Math.max(insets.left, mLeftInset);
+        mRightInset = Math.max(insets.right, mRightInset);
+        applyMargins();
         return windowInsets;
     }
 

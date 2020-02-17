@@ -50,10 +50,12 @@ import androidx.test.filters.Suppress;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.tests.R;
 
 import org.junit.Assert;
@@ -92,9 +94,14 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         ExpandableNotificationRow row = new NotificationTestHelper(mContext, mDependency).createRow(
                 mBuilder.build());
         mRow = spy(row);
+
+        final SmartReplyConstants smartReplyConstants = mock(SmartReplyConstants.class);
+        final SmartReplyController smartReplyController = mock(SmartReplyController.class);
         mNotificationInflater = new NotificationContentInflater(
                 mCache,
-                mock(NotificationRemoteInputManager.class));
+                mock(NotificationRemoteInputManager.class),
+                () -> smartReplyConstants,
+                () -> smartReplyController);
     }
 
     @Test

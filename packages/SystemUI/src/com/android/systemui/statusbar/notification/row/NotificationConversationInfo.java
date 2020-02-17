@@ -33,11 +33,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
@@ -61,6 +59,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -87,6 +86,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     private PackageManager mPm;
     private VisualStabilityManager mVisualStabilityManager;
     private ShadeController mShadeController;
+    private ConversationIconFactory mIconFactory;
 
     private String mPackageName;
     private String mAppName;
@@ -186,6 +186,7 @@ public class NotificationConversationInfo extends LinearLayout implements
             OnSettingsClickListener onSettingsClick,
             OnAppSettingsClickListener onAppSettingsClick,
             OnSnoozeClickListener onSnoozeClickListener,
+            ConversationIconFactory conversationIconFactory,
             boolean isDeviceProvisioned) {
         mSelectedAction = -1;
         mINotificationManager = iNotificationManager;
@@ -203,6 +204,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         mIsDeviceProvisioned = isDeviceProvisioned;
         mOnSnoozeClickListener = onSnoozeClickListener;
         mShadeController = Dependency.get(ShadeController.class);
+        mIconFactory = conversationIconFactory;
 
         mShortcutManager = shortcutManager;
         mLauncherApps = launcherApps;
@@ -320,8 +322,8 @@ public class NotificationConversationInfo extends LinearLayout implements
     private void bindIcon() {
         ImageView image = findViewById(R.id.conversation_icon);
         if (mShortcutInfo != null) {
-            image.setImageDrawable(mLauncherApps.getShortcutBadgedIconDrawable(mShortcutInfo,
-                    mContext.getResources().getDisplayMetrics().densityDpi));
+            image.setImageBitmap(mIconFactory.getConversationBitmap(
+                    mShortcutInfo, mPackageName, mAppUid));
         } else {
             if (mSbn.getNotification().extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION, false)) {
                 // TODO: maybe use a generic group icon, or a composite of recent senders

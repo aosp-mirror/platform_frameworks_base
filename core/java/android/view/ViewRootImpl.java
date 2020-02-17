@@ -1705,12 +1705,13 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     Surface getOrCreateBLASTSurface(int width, int height) {
-        if (mSurfaceControl == null || !mSurfaceControl.isValid()) {
+        if (mSurfaceControl == null
+                || !mSurfaceControl.isValid()
+                || mBlastSurfaceControl == null
+                || !mBlastSurfaceControl.isValid()) {
             return null;
         }
-        if ((mBlastSurfaceControl != null)
-                && (mBlastBufferQueue == null)
-                && mBlastSurfaceControl.isValid()) {
+        if (mBlastBufferQueue == null) {
             mBlastBufferQueue = new BLASTBufferQueue(
                 mBlastSurfaceControl, width, height);
         }

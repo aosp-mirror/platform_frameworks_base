@@ -19,6 +19,7 @@ import android.app.NotificationHistory;
 import android.app.NotificationHistory.HistoricalNotification;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -140,6 +141,16 @@ final class NotificationHistoryProtoHelper {
                     final long iconToken = parser.start(Notification.ICON);
                     loadIcon(parser, notification, pkg);
                     parser.end(iconToken);
+                    break;
+                case (int) Notification.CONVERSATION_ID_INDEX:
+                    String conversationId =
+                            stringPool.get(parser.readInt(Notification.CONVERSATION_ID_INDEX) - 1);
+                    notification.setConversationId(conversationId);
+                    break;
+                case (int) Notification.CONVERSATION_ID:
+                    conversationId = parser.readString(Notification.CONVERSATION_ID);
+                    notification.setConversationId(conversationId);
+                    stringPool.add(conversationId);
                     break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     return notification.build();
@@ -270,6 +281,17 @@ final class NotificationHistoryProtoHelper {
             Slog.w(TAG, "notification channel id (" + notification.getChannelId()
                     + ") not found in string cache");
             proto.write(Notification.CHANNEL_ID, notification.getChannelId());
+        }
+        if (!TextUtils.isEmpty(notification.getConversationId())) {
+            final int conversationIdIndex = Arrays.binarySearch(
+                    stringPool, notification.getConversationId());
+            if (conversationIdIndex >= 0) {
+                proto.write(Notification.CONVERSATION_ID_INDEX, conversationIdIndex + 1);
+            } else {
+                Slog.w(TAG, "notification conversation id (" + notification.getConversationId()
+                        + ") not found in string cache");
+                proto.write(Notification.CONVERSATION_ID, notification.getConversationId());
+            }
         }
         proto.write(Notification.UID, notification.getUid());
         proto.write(Notification.USER_ID, notification.getUserId());

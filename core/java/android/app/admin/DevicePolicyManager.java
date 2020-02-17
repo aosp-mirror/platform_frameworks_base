@@ -11580,12 +11580,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets the set of package names that are allowed to request user consent for cross-profile
-     * communication.
+     * Sets the set of admin-whitelisted package names that are allowed to request user consent for
+     * cross-profile communication.
      *
      * <p>Assumes that the caller is a profile owner and is the given {@code admin}.
      *
      * <p>Previous calls are overridden by each subsequent call to this method.
+     *
+     * <p>Note that other apps may be able to request user consent for cross-profile communication
+     * if they have been explicitly whitelisted by the OEM.
      *
      * <p>When previously-set cross-profile packages are missing from {@code packageNames}, the
      * app-op for {@code INTERACT_ACROSS_PROFILES} will be reset for those packages. This will not
@@ -11608,15 +11611,18 @@ public class DevicePolicyManager {
 
     /**
      * Returns the set of package names that the admin has previously set as allowed to request user
-     * consent for cross-profile communication, via {@link
-     * #setCrossProfilePackages(ComponentName, Set)}.
+     * consent for cross-profile communication, via {@link #setCrossProfilePackages(ComponentName,
+     * Set)}.
      *
      * <p>Assumes that the caller is a profile owner and is the given {@code admin}.
      *
+     * <p>Note that other apps not included in the returned set may be able to request user consent
+     * for cross-profile communication if they have been explicitly whitelisted by the OEM.
+     *
      * @param admin the {@link DeviceAdminReceiver} this request is associated with
      * @return the set of package names the admin has previously set as allowed to request user
-     * consent for cross-profile communication, via {@link
-     * #setCrossProfilePackages(ComponentName, Set)}
+     * consent for cross-profile communication, via {@link #setCrossProfilePackages(ComponentName,
+     * Set)}
      */
     public @NonNull Set<String> getCrossProfilePackages(@NonNull ComponentName admin) {
         throwIfParentInstance("getCrossProfilePackages");
@@ -11634,18 +11640,17 @@ public class DevicePolicyManager {
      * Returns the combined set of the following:
      * <ul>
      * <li>The package names that the admin has previously set as allowed to request user consent
-     * for cross-profile communication, via {@link
-     * #setCrossProfilePackages(ComponentName, Set)}.</li>
+     * for cross-profile communication, via {@link #setCrossProfilePackages(ComponentName,
+     * Set)}.</li>
      * <li>The default package names set by the OEM that are allowed to request user consent for
-     * cross-profile communication without being explicitly enabled by the admin, via
-     * {@link com.android.internal.R.array#cross_profile_apps} and
-     * {@link com.android.internal.R.array#vendor_cross_profile_apps}.</li>
+     * cross-profile communication without being explicitly enabled by the admin, via {@link
+     * com.android.internal.R.array#cross_profile_apps} and {@link com.android.internal.R.array
+     * #vendor_cross_profile_apps}.</li>
      * </ul>
      *
      * @return the combined set of whitelisted package names set via
-     * {@link #setCrossProfilePackages(ComponentName, Set)},
-     * {@link com.android.internal.R.array#cross_profile_apps},
-     * and {@link com.android.internal.R.array#vendor_cross_profile_apps}.
+     * {@link #setCrossProfilePackages(ComponentName, Set)}, {@link com.android.internal.R.array
+     * #cross_profile_apps}, and {@link com.android.internal.R.array#vendor_cross_profile_apps}.
      *
      * @hide
      */
@@ -11668,9 +11673,9 @@ public class DevicePolicyManager {
 
     /**
      * Returns the default package names set by the OEM that are allowed to request user consent for
-     * cross-profile communication without being explicitly enabled by the admin, via
-     * {@link com.android.internal.R.array#cross_profile_apps} and
-     * {@link com.android.internal.R.array#vendor_cross_profile_apps}.
+     * cross-profile communication without being explicitly enabled by the admin, via {@link
+     * com.android.internal.R.array#cross_profile_apps} and {@link com.android.internal.R.array
+     * #vendor_cross_profile_apps}.
      *
      * @hide
      */

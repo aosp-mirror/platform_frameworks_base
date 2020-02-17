@@ -16,6 +16,20 @@
 
 package com.android.systemui.controls.ui
 
+/**
+ * All controls need to respond to changes in state and handle user-generated events.
+ * Implementations of this interface provide these different means by adding their own
+ * event handlers, and will update the control ui as they see fit.
+ */
 interface Behavior {
-    fun apply(cvh: ControlViewHolder, cws: ControlWithState)
+
+    /**
+     * Only called once per instance
+     */
+    fun initialize(cvh: ControlViewHolder)
+
+    /**
+     * Will be invoked on every update provided to the Control
+     */
+    fun bind(cws: ControlWithState)
 }

@@ -17,25 +17,18 @@ package com.android.systemui;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
 import static com.android.systemui.ScreenDecorations.rectsToRegion;
-import static com.android.systemui.tuner.TunablePadding.FLAG_END;
-import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.Fragment;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -43,21 +36,12 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
-import android.view.View;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R.dimen;
-import com.android.systemui.ScreenDecorations.TunablePaddingTagListener;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.fragments.FragmentHostManager;
-import com.android.systemui.fragments.FragmentService;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarWindowView;
-import com.android.systemui.tuner.TunablePadding;
-import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
@@ -68,8 +52,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 
-import dagger.Lazy;
-
 @RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
@@ -77,19 +59,12 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
     private ScreenDecorations mScreenDecorations;
-    @Mock private StatusBar mStatusBar;
     private WindowManager mWindowManager;
-    private FragmentService mFragmentService;
-    private FragmentHostManager mFragmentHostManager;
-    private NotificationShadeWindowView mView;
-    private StatusBarWindowView mStatusBarWindowView;
-    private TunablePaddingService mTunablePaddingService;
     private Handler mMainHandler;
     @Mock
     private TunerService mTunerService;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
-    @Mock private Lazy<StatusBar> mStatusBarLazy;
 
     @Before
     public void setup() {
@@ -97,25 +72,14 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         mTestableLooper = TestableLooper.get(this);
         mMainHandler = new Handler(mTestableLooper.getLooper());
-        mTunablePaddingService = mDependency.injectMockDependency(TunablePaddingService.class);
-        mFragmentService = mDependency.injectMockDependency(FragmentService.class);
 
         mWindowManager = mock(WindowManager.class);
-        mView = spy(new NotificationShadeWindowView(mContext, null));
-        mStatusBarWindowView = spy(new StatusBarWindowView(mContext, null));
-        when(mStatusBarLazy.get()).thenReturn(mStatusBar);
-        when(mStatusBar.getNotificationShadeWindowView()).thenReturn(mView);
-        when(mStatusBar.getStatusBarWindow()).thenReturn(mStatusBarWindowView);
 
         Display display = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
         when(mWindowManager.getDefaultDisplay()).thenReturn(display);
         mContext.addMockSystemService(WindowManager.class, mWindowManager);
 
-        mFragmentHostManager = mock(FragmentHostManager.class);
-        when(mFragmentService.getFragmentHostManager(any())).thenReturn(mFragmentHostManager);
-
-
-        mScreenDecorations = new ScreenDecorations(mContext, mStatusBarLazy, mMainHandler,
+        mScreenDecorations = new ScreenDecorations(mContext, mMainHandler,
                 mBroadcastDispatcher, mTunerService) {
             @Override
             public void start() {
@@ -159,8 +123,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.start();
         // No views added.
         verify(mWindowManager, never()).addView(any(), any());
-        // No Fragments watched.
-        verify(mFragmentHostManager, never()).addTagListener(any(), any());
         // No Tuners tuned.
         verify(mTunerService, never()).addTunable(any(), any());
     }
@@ -178,12 +140,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Add 2 windows for rounded corners (top and bottom).
         verify(mWindowManager, times(2)).addView(any(), any());
 
-        // Add 2 tag listeners for each of the fragments that are needed.
-        verify(mFragmentHostManager, times(2)).addTagListener(any(), any());
         // One tunable.
         verify(mTunerService, times(1)).addTunable(any(), any());
-        // One TunablePadding.
-        verify(mTunablePaddingService, times(1)).add(any(), anyString(), anyInt(), anyInt());
     }
 
     @Test
@@ -224,29 +182,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         assertThat(mScreenDecorations.getWindowLayoutParams().privateFlags
                         & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                 is(PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY));
-    }
-
-    @Test
-    public void testPaddingTagListener() {
-        TunablePaddingTagListener tagListener = new TunablePaddingTagListener(14, 5);
-        View v = mock(View.class);
-        View child = mock(View.class);
-        Fragment f = mock(Fragment.class);
-        TunablePadding padding = mock(TunablePadding.class);
-
-        when(mTunablePaddingService.add(any(), anyString(), anyInt(), anyInt()))
-                .thenReturn(padding);
-        when(f.getView()).thenReturn(v);
-        when(v.findViewById(5)).thenReturn(child);
-
-        // Trigger callback and verify we get a TunablePadding created.
-        tagListener.onFragmentViewCreated(null, f);
-        verify(mTunablePaddingService).add(eq(child), eq(ScreenDecorations.PADDING), eq(14),
-                eq(FLAG_START | FLAG_END));
-
-        // Call again and verify destroy is called.
-        tagListener.onFragmentViewCreated(null, f);
-        verify(padding).destroy();
     }
 
     @Test

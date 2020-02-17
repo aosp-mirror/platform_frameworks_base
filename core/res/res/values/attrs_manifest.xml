@@ -1770,6 +1770,21 @@
              -->
         <attr name="requestLegacyExternalStorage" format="boolean" />
 
+        <!-- If {@code true} this app would like to preserve the legacy storage
+             model from a previously installed version. Note that this may not always be
+             respected due to policy or backwards compatibility reasons.
+
+             <p>This has no effect on the first install of an app on a device.
+             For an updating app, setting this to {@code true} will preserve the legacy behaviour
+             configured by the {@code requestLegacyExternalStorage} flag. If on an update, this
+             flag is set to {@code false} then the legacy access is not preserved, such an app can
+             only have legacy access with the {@code requestLegacyExternalStorage} flag.
+             <p>
+
+             The default value is {@code false}.
+             -->
+        <attr name="preserveLegacyExternalStorage" format="boolean" />
+
         <!-- If {@code true} this app declares that it should be visible to all other apps on
              device, regardless of what they declare via the {@code queries} tags in their
              manifest.

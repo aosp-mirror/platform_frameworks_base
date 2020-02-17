@@ -581,6 +581,9 @@ class ActivityMetricsLogger {
 
     /**
      * Notifies the tracker that all windows of the app have been drawn.
+     *
+     * @return Non-null info if the activity was pending to draw, otherwise it might have been set
+     *         to invisible (removed from active transition) or it was already drawn.
      */
     @Nullable
     TransitionInfoSnapshot notifyWindowsDrawn(@NonNull ActivityRecord r, long timestampNs) {

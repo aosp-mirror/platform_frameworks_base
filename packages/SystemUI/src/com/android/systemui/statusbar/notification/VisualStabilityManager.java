@@ -26,6 +26,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -33,14 +34,10 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * A manager that ensures that notifications are visually stable. It will suppress reorderings
  * and reorder at the right time when they are out of view.
  */
-@Singleton
 public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpable {
 
     private static final long TEMPORARY_REORDERING_ALLOWED_DURATION = 1000;
@@ -60,7 +57,9 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
     private ArraySet<View> mAddedChildren = new ArraySet<>();
     private boolean mPulsing;
 
-    @Inject
+    /**
+     * Injected constructor. See {@link NotificationsModule}.
+     */
     public VisualStabilityManager(
             NotificationEntryManager notificationEntryManager, @Main Handler handler) {
 

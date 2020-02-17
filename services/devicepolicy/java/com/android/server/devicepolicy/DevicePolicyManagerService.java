@@ -15230,13 +15230,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final ActiveAdmin admin =
                     getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             previousCrossProfilePackages = admin.mCrossProfilePackages;
+            if (packageNames.equals(previousCrossProfilePackages)) {
+                return;
+            }
             admin.mCrossProfilePackages = packageNames;
             saveSettingsLocked(mInjector.userHandleGetCallingUserId());
         }
+        logSetCrossProfilePackages(who, packageNames);
         final CrossProfileApps crossProfileApps = mContext.getSystemService(CrossProfileApps.class);
         mInjector.binderWithCleanCallingIdentity(
                 () -> crossProfileApps.resetInteractAcrossProfilesAppOps(
                         previousCrossProfilePackages, new HashSet<>(packageNames)));
+    }
+
+    private void logSetCrossProfilePackages(ComponentName who, List<String> packageNames) {
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_CROSS_PROFILE_PACKAGES)
+                .setAdmin(who)
+                .setStrings(packageNames.toArray(new String[packageNames.size()]))
+                .write();
     }
 
     @Override

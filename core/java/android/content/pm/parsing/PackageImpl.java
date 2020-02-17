@@ -289,6 +289,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     private String[] usesLibraryFiles;
     private List<SharedLibraryInfo> usesLibraryInfos;
     private String zygotePreloadName;
+    private boolean preserveLegacyExternalStorage;
 
     @VisibleForTesting
     public PackageImpl(
@@ -1515,6 +1516,12 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
                         .PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING
                 : this.privateFlags & ~ApplicationInfo
                         .PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING;
+        return this;
+    }
+
+    @Override
+    public PackageImpl setPreserveLegacyExternalStorage(boolean preserveLegacyExternalStorage) {
+        this.preserveLegacyExternalStorage = preserveLegacyExternalStorage;
         return this;
     }
 
@@ -2997,6 +3004,11 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     @Override
     public Set<String> getQueriesProviders() {
         return queriesProviders;
+    }
+
+    @Override
+    public boolean hasPreserveLegacyExternalStorage() {
+        return preserveLegacyExternalStorage;
     }
 
     private static void internStringArrayList(List<String> list) {

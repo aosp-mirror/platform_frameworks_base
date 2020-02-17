@@ -38,6 +38,14 @@ public final class TunerConstants {
      * Invalid stream ID.
      */
     public static final int INVALID_STREAM_ID = Constants.Constant.INVALID_STREAM_ID;
+    /**
+     * Invalid filter ID.
+     */
+    public static final int INVALID_FILTER_ID = Constants.Constant.INVALID_FILTER_ID;
+    /**
+     * Invalid AV Sync ID.
+     */
+    public static final int INVALID_AV_SYNC_ID = Constants.Constant.INVALID_AV_SYNC_ID;
 
     /** @hide */
     @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})
