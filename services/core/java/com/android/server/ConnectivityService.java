@@ -7528,6 +7528,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     public int getConnectionOwnerUid(ConnectionInfo connectionInfo) {
         final Vpn vpn = enforceActiveVpnOrNetworkStackPermission();
+
+        // Only VpnService based VPNs should be able to get this information.
+        if (vpn != null && vpn.getActiveAppVpnType() != VpnManager.TYPE_VPN_SERVICE) {
+            throw new SecurityException(
+                    "getConnectionOwnerUid() not allowed for non-VpnService VPNs");
+        }
+
         if (connectionInfo.protocol != IPPROTO_TCP && connectionInfo.protocol != IPPROTO_UDP) {
             throw new IllegalArgumentException("Unsupported protocol " + connectionInfo.protocol);
         }
