@@ -229,7 +229,6 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -3599,6 +3598,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         (new NetworkPolicyManagerShellCommand(mContext, this)).exec(
                 this, in, out, err, args, callback, resultReceiver);
+    }
+
+    void setDebugUid(int uid) {
+        mLogger.setDebugUid(uid);
     }
 
     @VisibleForTesting
