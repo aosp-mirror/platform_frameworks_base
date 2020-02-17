@@ -257,7 +257,6 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
-    field public static final int isAutofillInlineSuggestionTheme = 16844310; // 0x1010616
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844306; // 0x1010612
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
@@ -4912,8 +4911,10 @@ package android.media.tv.tuner {
   }
 
   public final class TunerConstants {
-    field public static final int INVALID_STREAM_ID = -1; // 0xffffffff
-    field public static final int INVALID_TS_PID = -1; // 0xffffffff
+    field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
+    field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
+    field public static final int INVALID_STREAM_ID = 65535; // 0xffff
+    field public static final int INVALID_TS_PID = 65535; // 0xffff
     field public static final int RESULT_INVALID_ARGUMENT = 4; // 0x4
     field public static final int RESULT_INVALID_STATE = 3; // 0x3
     field public static final int RESULT_NOT_INITIALIZED = 2; // 0x2
@@ -10202,6 +10203,7 @@ package android.service.autofill.augmented {
     method public void onConnected();
     method public void onDisconnected();
     method public void onFillRequest(@NonNull android.service.autofill.augmented.FillRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.augmented.FillController, @NonNull android.service.autofill.augmented.FillCallback);
+    method public final boolean requestAutofill(@NonNull android.content.ComponentName, @NonNull android.view.autofill.AutofillId);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.augmented.AugmentedAutofillService";
   }
 

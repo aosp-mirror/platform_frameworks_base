@@ -47,6 +47,7 @@ import javax.inject.Inject;
  * Must be public to be accessible to androidx...AppComponentFactory
  */
 public class BubbleOverflowActivity extends Activity {
+    public static final String KEY = "Overflow";
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleOverflowActivity" : TAG_BUBBLES;
 
     private LinearLayout mEmptyState;

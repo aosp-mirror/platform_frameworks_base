@@ -3012,19 +3012,14 @@
       <public name="sdkVersion" />
       <!-- @hide @SystemApi -->
       <public name="minExtensionVersion" />
-      <public name="autofillInlineSuggestionChip" />
-      <public name="autofillInlineSuggestionTitle" />
-      <public name="autofillInlineSuggestionSubtitle" />
-      <!-- @hide @SystemApi -->
-      <public name="isAutofillInlineSuggestionTheme" />
       <public name="allowNativeHeapPointerTagging" />
+      <public name="preserveLegacyExternalStorage" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">
     </public-group>
 
     <public-group type="style" first-id="0x010302e5">
-      <public name="Theme.AutofillInlineSuggestion" />
     </public-group>
 
     <public-group type="id" first-id="0x0102004a">

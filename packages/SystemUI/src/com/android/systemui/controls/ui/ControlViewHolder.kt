@@ -37,6 +37,8 @@ import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.R
 
+import kotlin.reflect.KClass
+
 private const val UPDATE_DELAY_IN_MILLIS = 3000L
 
 class ControlViewHolder(
@@ -54,6 +56,7 @@ class ControlViewHolder(
     val clipLayer: ClipDrawable
     lateinit var cws: ControlWithState
     var cancelUpdate: Runnable? = null
+    var behavior: Behavior? = null
 
     init {
         val ld = layout.getBackground() as LayerDrawable
@@ -83,7 +86,14 @@ class ControlViewHolder(
             })
         }
 
-        findBehavior(status, template).apply(this, cws)
+        val clazz = findBehavior(status, template)
+        if (behavior == null || behavior!!::class != clazz) {
+            // Behavior changes can signal a change in template from the app or
+            // first time setup
+            behavior = clazz.java.newInstance()
+            behavior?.initialize(this)
+        }
+        behavior?.bind(cws)
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
@@ -115,21 +125,14 @@ class ControlViewHolder(
         controlsController.action(cws.ci, action)
     }
 
-    private fun findBehavior(status: Int, template: ControlTemplate): Behavior {
+    private fun findBehavior(status: Int, template: ControlTemplate): KClass<out Behavior> {
         return when {
-            status == Control.STATUS_UNKNOWN -> UnknownBehavior()
-            template is ToggleTemplate -> ToggleBehavior()
-            template is ToggleRangeTemplate -> ToggleRangeBehavior()
-            template is TemperatureControlTemplate -> TemperatureControlBehavior()
-            template is ThumbnailTemplate -> StaticBehavior(uiExecutor, bgExecutor)
-            else -> {
-                object : Behavior {
-                    override fun apply(cvh: ControlViewHolder, cws: ControlWithState) {
-                        cvh.status.setText(cws.control?.getStatusText())
-                        cvh.applyRenderInfo(RenderInfo.lookup(cws.ci.deviceType, false))
-                    }
-                }
-            }
+            status == Control.STATUS_UNKNOWN -> UnknownBehavior::class
+            template is ToggleTemplate -> ToggleBehavior::class
+            template is ToggleRangeTemplate -> ToggleRangeBehavior::class
+            template is TemperatureControlTemplate -> TemperatureControlBehavior::class
+            template is ThumbnailTemplate -> StaticBehavior::class
+            else -> DefaultBehavior::class
         }
     }
 
@@ -142,9 +145,12 @@ class ControlViewHolder(
         icon.setImageIcon(Icon.createWithResource(context, ri.iconResourceId))
         icon.setImageTintList(fg)
 
-        clipLayer.getDrawable().setTintBlendMode(BlendMode.HUE)
-        clipLayer.getDrawable().setTintList(bg)
+        clipLayer.getDrawable().apply {
+            setTintBlendMode(BlendMode.HUE)
+            setTintList(bg)
+        }
     }
+
     fun setEnabled(enabled: Boolean) {
         status.setEnabled(enabled)
         icon.setEnabled(enabled)

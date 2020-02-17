@@ -2101,6 +2101,10 @@ public class ApkParseUtils {
             parsingPackage.setAllowNativeHeapPointerTagging(sa.getBoolean(
                     R.styleable.AndroidManifestApplication_allowNativeHeapPointerTagging, true));
 
+            parsingPackage.setPreserveLegacyExternalStorage(sa.getBoolean(
+                            R.styleable.AndroidManifestApplication_preserveLegacyExternalStorage,
+                            false));
+
             parsingPackage
                     .setMaxAspectRatio(
                             sa.getFloat(R.styleable.AndroidManifestApplication_maxAspectRatio, 0))

@@ -397,6 +397,8 @@ public interface AndroidPackage extends Parcelable {
 
     boolean hasComponentClassName(String className);
 
+    boolean hasPreserveLegacyExternalStorage();
+
     // App Info
 
     boolean hasRequestedLegacyExternalStorage();

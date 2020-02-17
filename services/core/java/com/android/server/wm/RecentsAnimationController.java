@@ -742,8 +742,10 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     boolean isWallpaperVisible(WindowState w) {
-        return w != null && w.mAttrs.type == TYPE_BASE_APPLICATION && w.mActivityRecord != null
-                && mTargetActivityRecord == w.mActivityRecord && isTargetOverWallpaper();
+        return w != null && w.mAttrs.type == TYPE_BASE_APPLICATION &&
+                ((w.mActivityRecord != null && mTargetActivityRecord == w.mActivityRecord)
+                        || isAnimatingTask(w.getTask()))
+                && isTargetOverWallpaper();
     }
 
     /**

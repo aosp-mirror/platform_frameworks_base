@@ -174,22 +174,25 @@ public final class WalletCard implements Parcelable {
          * @param cardId             The card id must be non-null and unique within the list of
          *                           cards returned. <b>Note:
          *                           </b> this card ID should <b>not</b> contain PII (Personally
-         *                           Identifiable Information, * such as username or email
-         *                           address).
+         *                           Identifiable Information, such as username or email address).
          * @param cardImage          The visual representation of the card. If the card image Icon
          *                           is a bitmap, it should have a width of {@link
          *                           GetWalletCardsRequest#getCardWidthPx()} and a height of {@link
          *                           GetWalletCardsRequest#getCardHeightPx()}. If the card image
          *                           does not have these dimensions, it may appear distorted when it
-         *                           is scaled to fit these dimensions on screen.
+         *                           is scaled to fit these dimensions on screen. Bitmaps should be
+         *                           of type {@link android.graphics.Bitmap.Config#HARDWARE} for
+         *                           performance reasons.
          * @param contentDescription The content description of the card image. This field is
-         *                           required.
+         *                           required and may not be null or empty.
          *                           <b>Note: </b> this message should <b>not</b> contain PII
          *                           (Personally Identifiable Information, such as username or email
          *                           address).
          * @param pendingIntent      If the user performs a click on the card, this PendingIntent
          *                           will be sent. If the device is locked, the wallet will first
-         *                           request device unlock before sending the pending intent.
+         *                           request device unlock before sending the pending intent. It is
+         *                           recommended that the pending intent be immutable (use {@link
+         *                           PendingIntent#FLAG_IMMUTABLE}).
          */
         public Builder(@NonNull String cardId,
                 @NonNull Icon cardImage,
