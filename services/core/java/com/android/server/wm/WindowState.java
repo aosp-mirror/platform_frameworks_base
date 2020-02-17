@@ -2662,6 +2662,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             mWmService.mTaskSnapshotController.onAppDied(win.mActivityRecord);
                         }
                         win.removeIfPossible(shouldKeepVisibleDeadAppWindow());
+                        if (win.mAttrs.type == TYPE_DOCK_DIVIDER) {
+                            // The owner of the docked divider died :( We reset the docked stack,
+                            // just in case they have the divider at an unstable position. Better
+                            // also reset drag resizing state, because the owner can't do it
+                            // anymore.
+                            final ActivityStack stack =
+                                    dc.getRootSplitScreenPrimaryTask();
+                            if (stack != null) {
+                                stack.resetDockedStackToMiddle();
+                            }
+                            resetSplitScreenResizing = true;
+                        }
                     } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
                         WindowState.this.removeIfPossible();

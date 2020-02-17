@@ -315,6 +315,11 @@ interface IActivityTaskManager {
     void positionTaskInStack(int taskId, int stackId, int position);
     void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
+    /**
+     * Dismisses split-screen multi-window mode.
+     * {@param toTop} If true the current primary split-screen stack will be placed or left on top.
+     */
+    void dismissSplitScreenMode(boolean toTop);
 
     /**
      * Dismisses PiP

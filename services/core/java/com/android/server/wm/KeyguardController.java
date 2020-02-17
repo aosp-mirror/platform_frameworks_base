@@ -31,14 +31,14 @@ import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.KeyguardControllerProto.AOD_SHOWING;
 import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_OCCLUDED_STATES;
 import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_SHOWING;
 import static com.android.server.wm.KeyguardOccludedProto.DISPLAY_ID;
 import static com.android.server.wm.KeyguardOccludedProto.KEYGUARD_OCCLUDED;
+import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -411,7 +411,8 @@ class KeyguardController {
             if (stack == null) {
                 return;
             }
-            mRootWindowContainer.getDefaultDisplay().onSplitScreenModeDismissed();
+            mStackSupervisor.moveTasksToFullscreenStackLocked(stack,
+                    stack.isFocusedStackOnDisplay());
         }
     }
 

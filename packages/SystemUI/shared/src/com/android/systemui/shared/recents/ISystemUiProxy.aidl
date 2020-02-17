@@ -123,9 +123,4 @@ interface ISystemUiProxy {
      */
      void handleImageAsScreenshot(in Bitmap screenImage, in Rect locationInScreen,
               in Insets visibleInsets, int taskId) = 21;
-
-    /**
-     * Sets the split-screen divider minimized state
-     */
-    void setSplitScreenMinimized(boolean minimized) = 22;
 }

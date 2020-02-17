@@ -35,7 +35,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.util.DisplayMetrics;
 import android.util.RotationUtils;
 import android.util.Size;
 import android.view.Display;
@@ -190,11 +189,6 @@ public class DisplayLayout {
     /** Get this layout's display density. */
     public int densityDpi() {
         return mDensityDpi;
-    }
-
-    /** Get the density scale for the display. */
-    public float density() {
-        return mDensityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
     }
 
     /** Get whether this layout is landscape. */

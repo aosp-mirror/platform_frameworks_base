@@ -51,10 +51,10 @@ import android.util.Pair;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.Dependency;
+import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.NotificationChannels;
@@ -80,13 +80,11 @@ public class InstantAppNotifier extends SystemUI
     private final CommandQueue mCommandQueue;
     private boolean mDockedStackExists;
     private KeyguardStateController mKeyguardStateController;
-    private final Divider mDivider;
 
     @Inject
     public InstantAppNotifier(Context context, CommandQueue commandQueue,
-            @UiBackground Executor uiBgExecutor, Divider divider) {
+            @UiBackground Executor uiBgExecutor) {
         super(context);
-        mDivider = divider;
         mCommandQueue = commandQueue;
         mUiBgExecutor = uiBgExecutor;
     }
@@ -105,7 +103,7 @@ public class InstantAppNotifier extends SystemUI
         mCommandQueue.addCallback(this);
         mKeyguardStateController.addCallback(this);
 
-        mDivider.registerInSplitScreenListener(
+        DockedStackExistsListener.register(
                 exists -> {
                     mDockedStackExists = exists;
                     updateForegroundInstantApps();
