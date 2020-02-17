@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.NetworkRequest;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -31,15 +32,15 @@ public class NetworkRanker {
     /**
      * Find the best network satisfying this request among the list of passed networks.
      */
-    // Almost equivalent to Collections.max(nais), but allows returning null if no network
-    // satisfies the request.
     @Nullable
     public NetworkAgentInfo getBestNetwork(@NonNull final NetworkRequest request,
             @NonNull final Collection<NetworkAgentInfo> nais) {
+        final ArrayList<NetworkAgentInfo> candidates = new ArrayList<>(nais);
+        candidates.removeIf(nai -> !nai.satisfies(request));
+
         NetworkAgentInfo bestNetwork = null;
         int bestScore = Integer.MIN_VALUE;
-        for (final NetworkAgentInfo nai : nais) {
-            if (!nai.satisfies(request)) continue;
+        for (final NetworkAgentInfo nai : candidates) {
             if (nai.getCurrentScore() > bestScore) {
                 bestNetwork = nai;
                 bestScore = nai.getCurrentScore();
