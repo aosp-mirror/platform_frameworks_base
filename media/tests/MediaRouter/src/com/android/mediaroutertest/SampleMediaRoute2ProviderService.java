@@ -16,9 +16,9 @@
 
 package com.android.mediaroutertest;
 
-import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_SPEAKER;
-import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -79,11 +79,11 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
                 .addFeature(FEATURE_SAMPLE)
-                .setDeviceType(DEVICE_TYPE_REMOTE_TV)
+                .setType(TYPE_REMOTE_TV)
                 .build();
         MediaRoute2Info route2 = new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2)
                 .addFeature(FEATURE_SAMPLE)
-                .setDeviceType(DEVICE_TYPE_REMOTE_SPEAKER)
+                .setType(TYPE_REMOTE_SPEAKER)
                 .build();
         MediaRoute2Info route3 = new MediaRoute2Info.Builder(
                 ROUTE_ID3_SESSION_CREATION_FAILED, ROUTE_NAME3)

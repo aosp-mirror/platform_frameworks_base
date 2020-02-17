@@ -213,7 +213,8 @@ class BluetoothRouteProvider {
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_DISCONNECTED)
                 .setDescription(mContext.getResources().getText(
                         R.string.bluetooth_a2dp_audio_route_name).toString())
-                .setDeviceType(MediaRoute2Info.DEVICE_TYPE_BLUETOOTH)
+                //TODO: Set type correctly (BLUETOOTH_A2DP or HEARING_AID)
+                .setType(MediaRoute2Info.TYPE_BLUETOOTH_A2DP)
                 .setVolumeHandling(MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .build();
         newBtRoute.connectedProfiles = new SparseBooleanArray();

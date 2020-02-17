@@ -104,10 +104,12 @@ public final class MediaRoute2Info implements Parcelable {
 
     /** @hide */
     @IntDef({
-            DEVICE_TYPE_UNKNOWN, DEVICE_TYPE_REMOTE_TV,
-            DEVICE_TYPE_REMOTE_SPEAKER, DEVICE_TYPE_BLUETOOTH})
+            TYPE_UNKNOWN, TYPE_BUILTIN_SPEAKER, TYPE_WIRED_HEADSET,
+            TYPE_WIRED_HEADPHONES, TYPE_BLUETOOTH_A2DP, TYPE_HDMI, TYPE_USB_DEVICE,
+            TYPE_USB_ACCESSORY, TYPE_DOCK, TYPE_USB_HEADSET, TYPE_HEARING_AID,
+            TYPE_REMOTE_TV, TYPE_REMOTE_SPEAKER, TYPE_GROUP})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface DeviceType {}
+    public @interface Type {}
 
     /**
      * The default receiver device type of the route indicating the type is unknown.
@@ -139,6 +141,121 @@ public final class MediaRoute2Info implements Parcelable {
      * @see #getDeviceType
      */
     public static final int DEVICE_TYPE_BLUETOOTH = 3;
+
+
+    /**
+     * The default route type indicating the type is unknown.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_UNKNOWN = 0;
+
+    /**
+     * A route type describing the speaker system (i.e. a mono speaker or stereo speakers) built
+     * in a device.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_BUILTIN_SPEAKER = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
+
+    /**
+     * A route type describing a headset, which is the combination of a headphones and microphone.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_WIRED_HEADSET = AudioDeviceInfo.TYPE_WIRED_HEADSET;
+
+    /**
+     * A route type describing a pair of wired headphones.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_WIRED_HEADPHONES = AudioDeviceInfo.TYPE_WIRED_HEADPHONES;
+
+    /**
+     * A route type indicating the presentation of the media is happening
+     * on a bluetooth device such as a bluetooth speaker.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_BLUETOOTH_A2DP = AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
+
+    /**
+     * A route type describing an HDMI connection.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_HDMI = AudioDeviceInfo.TYPE_HDMI;
+
+    /**
+     * A route type describing a USB audio device.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_USB_DEVICE = AudioDeviceInfo.TYPE_USB_DEVICE;
+
+    /**
+     * A route type describing a USB audio device in accessory mode.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_USB_ACCESSORY = AudioDeviceInfo.TYPE_USB_ACCESSORY;
+
+    /**
+     * A route type describing the audio device associated with a dock.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_DOCK = AudioDeviceInfo.TYPE_DOCK;
+
+    /**
+     * A device type describing a USB audio headset.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_USB_HEADSET = AudioDeviceInfo.TYPE_USB_HEADSET;
+
+    /**
+     * A route type describing a Hearing Aid.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_HEARING_AID = AudioDeviceInfo.TYPE_HEARING_AID;
+
+    /**
+     * A route type indicating the presentation of the media is happening on a TV.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_TV = 1001;
+
+    /**
+     * A route type indicating the presentation of the media is happening on a speaker.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_SPEAKER = 1002;
+
+    /**
+     * A route type indicating the presentation of the media is happening on multiple devices.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_GROUP = 2000;
 
     /**
      * Media feature: Live audio.
@@ -196,8 +313,8 @@ public final class MediaRoute2Info implements Parcelable {
     final String mId;
     final CharSequence mName;
     final List<String> mFeatures;
-    @DeviceType
-    final int mDeviceType;
+    @Type
+    final int mType;
     final boolean mIsSystem;
     final Uri mIconUri;
     final CharSequence mDescription;
@@ -214,7 +331,7 @@ public final class MediaRoute2Info implements Parcelable {
         mId = builder.mId;
         mName = builder.mName;
         mFeatures = builder.mFeatures;
-        mDeviceType = builder.mDeviceType;
+        mType = builder.mType;
         mIsSystem = builder.mIsSystem;
         mIconUri = builder.mIconUri;
         mDescription = builder.mDescription;
@@ -231,7 +348,7 @@ public final class MediaRoute2Info implements Parcelable {
         mId = in.readString();
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mFeatures = in.createStringArrayList();
-        mDeviceType = in.readInt();
+        mType = in.readInt();
         mIsSystem = in.readBoolean();
         mIconUri = in.readParcelable(null);
         mDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
@@ -285,9 +402,26 @@ public final class MediaRoute2Info implements Parcelable {
      * {@link #DEVICE_TYPE_REMOTE_TV}, {@link #DEVICE_TYPE_REMOTE_SPEAKER},
      * {@link #DEVICE_TYPE_BLUETOOTH}.
      */
-    @DeviceType
+    @Type
     public int getDeviceType() {
-        return mDeviceType;
+        return getType();
+    }
+
+    /**
+     * Gets the type of this route.
+     *
+     * @return The type of this route:
+     * {@link #TYPE_UNKNOWN},
+     * {@link #TYPE_BUILTIN_SPEAKER}, {@link #TYPE_WIRED_HEADSET}, {@link #TYPE_WIRED_HEADPHONES},
+     * {@link #TYPE_BLUETOOTH_A2DP}, {@link #TYPE_HDMI}, {@link #TYPE_DOCK},
+     * {@Link #TYPE_USB_DEVICE}, {@link #TYPE_USB_ACCESSORY}, {@link #TYPE_USB_HEADSET}
+     * {@link #TYPE_HEARING_AID},
+     * {@link #TYPE_REMOTE_TV}, {@link #TYPE_REMOTE_SPEAKER}, {@link #TYPE_GROUP}.
+     * @hide
+     */
+    @Type
+    public int getType() {
+        return mType;
     }
 
     /**
@@ -437,7 +571,7 @@ public final class MediaRoute2Info implements Parcelable {
         return Objects.equals(mId, other.mId)
                 && Objects.equals(mName, other.mName)
                 && Objects.equals(mFeatures, other.mFeatures)
-                && (mDeviceType == other.mDeviceType)
+                && (mType == other.mType)
                 && (mIsSystem == other.mIsSystem)
                 && Objects.equals(mIconUri, other.mIconUri)
                 && Objects.equals(mDescription, other.mDescription)
@@ -452,7 +586,7 @@ public final class MediaRoute2Info implements Parcelable {
     @Override
     public int hashCode() {
         // Note: mExtras is not included.
-        return Objects.hash(mId, mName, mFeatures, mDeviceType, mIsSystem, mIconUri, mDescription,
+        return Objects.hash(mId, mName, mFeatures, mType, mIsSystem, mIconUri, mDescription,
                 mConnectionState, mClientPackageName, mVolumeHandling, mVolumeMax, mVolume,
                 mProviderId);
     }
@@ -488,7 +622,7 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeString(mId);
         TextUtils.writeToParcel(mName, dest, flags);
         dest.writeStringList(mFeatures);
-        dest.writeInt(mDeviceType);
+        dest.writeInt(mType);
         dest.writeBoolean(mIsSystem);
         dest.writeParcelable(mIconUri, flags);
         TextUtils.writeToParcel(mDescription, dest, flags);
@@ -509,8 +643,8 @@ public final class MediaRoute2Info implements Parcelable {
         final CharSequence mName;
         final List<String> mFeatures;
 
-        @DeviceType
-        int mDeviceType = DEVICE_TYPE_UNKNOWN;
+        @Type
+        int mType = TYPE_UNKNOWN;
         boolean mIsSystem;
         Uri mIconUri;
         CharSequence mDescription;
@@ -557,7 +691,7 @@ public final class MediaRoute2Info implements Parcelable {
             mId = routeInfo.mId;
             mName = routeInfo.mName;
             mFeatures = new ArrayList<>(routeInfo.mFeatures);
-            mDeviceType = routeInfo.mDeviceType;
+            mType = routeInfo.mType;
             mIsSystem = routeInfo.mIsSystem;
             mIconUri = routeInfo.mIconUri;
             mDescription = routeInfo.mDescription;
@@ -621,8 +755,17 @@ public final class MediaRoute2Info implements Parcelable {
          * Sets the route's device type.
          */
         @NonNull
-        public Builder setDeviceType(@DeviceType int deviceType) {
-            mDeviceType = deviceType;
+        public Builder setDeviceType(@Type int type) {
+            return setType(type);
+        }
+
+        /**
+         * Sets the route's type.
+         * @hide
+         */
+        @NonNull
+        public Builder setType(@Type int type) {
+            mType = type;
             return this;
         }
 

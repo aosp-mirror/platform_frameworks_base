@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
 import static android.media.MediaRoute2Info.FEATURE_LIVE_VIDEO;
+import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -192,6 +193,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .setVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
+                //TODO: Guess the exact type using AudioDevice
+                .setType(TYPE_BUILTIN_SPEAKER)
                 .addFeature(FEATURE_LIVE_AUDIO)
                 .addFeature(FEATURE_LIVE_VIDEO)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_CONNECTED)
