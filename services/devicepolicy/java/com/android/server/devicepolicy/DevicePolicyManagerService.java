@@ -4640,20 +4640,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * </ul>
      *
      * @param userHandle the affected user for whom to get the active admins
-     * @param parent     whether the parent active admins should be included in the list of active
-     *                   admins or not
      * @return the list of active admins for the affected user
      */
-    private List<ActiveAdmin> getActiveAdminsForAffectedUser(int userHandle, boolean parent) {
-        if (!parent) {
+    @GuardedBy("getLockObject()")
+    private List<ActiveAdmin> getActiveAdminsForAffectedUserLocked(int userHandle) {
+        if (isManagedProfile(userHandle)) {
             return getUserDataUnchecked(userHandle).mAdminList;
         }
         ArrayList<ActiveAdmin> admins = new ArrayList<>();
         for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
-            DevicePolicyData policy = getUserData(userInfo.id);
-            if (!userInfo.isManagedProfile()) {
+            DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
+            if (userInfo.id == userHandle) {
                 admins.addAll(policy.mAdminList);
-            } else {
+            } else if (userInfo.isManagedProfile()) {
                 // For managed profiles, policies set on the parent profile will be included
                 for (int i = 0; i < policy.mAdminList.size(); i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -4661,6 +4660,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         admins.add(admin.getParentActiveAdmin());
                     }
                 }
+            } else {
+                Slog.w(LOG_TAG, "Unknown user type: " + userInfo);
             }
         }
         return admins;
@@ -7640,9 +7641,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return (admin != null) && admin.disableScreenCapture;
             }
 
-            boolean includeParent = isOrganizationOwnedDeviceWithManagedProfile()
-                    && !isManagedProfile(userHandle);
-            List<ActiveAdmin> admins = getActiveAdminsForAffectedUser(userHandle, includeParent);
+            final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
+            List<ActiveAdmin> admins = getActiveAdminsForAffectedUserLocked(affectedUserId);
             for (ActiveAdmin admin: admins) {
                 if (admin.disableScreenCapture) {
                     return true;
@@ -8151,8 +8151,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return true;
                 }
             }
+            final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
             // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins = getActiveAdminsForAffectedUser(userHandle, parent);
+            List<ActiveAdmin> admins = getActiveAdminsForAffectedUserLocked(affectedUserId);
             // Determine whether or not the device camera is disabled for any active admins.
             for (ActiveAdmin admin: admins) {
                 if (admin.disableCamera) {
