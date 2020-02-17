@@ -223,6 +223,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1670695197": {
+      "message": "Attempted to add presentation window to a non-suitable display.  Aborting.",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-1661704580": {
       "message": "Attempted to set replacing window on non-existing app token %s",
       "level": "WARN",
