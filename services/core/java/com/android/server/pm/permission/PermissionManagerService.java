@@ -1878,6 +1878,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return false;
         }
 
+        final long token = Binder.clearCallingIdentity();
         try {
             if (permName.equals(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                     && mPlatformCompat.isChangeEnabledByPackageName(BACKGROUND_RATIONALE_CHANGE_ID,
@@ -1886,6 +1887,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to check if compatibility change is enabled.", e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
