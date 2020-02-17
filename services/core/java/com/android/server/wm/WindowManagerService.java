@@ -1336,7 +1336,10 @@ public class WindowManagerService extends IWindowManager.Stub
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState) {
         int[] appOp = new int[1];
-        int res = mPolicy.checkAddPermission(attrs, appOp);
+        final boolean isRoundedCornerOverlay = (attrs.privateFlags
+                & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
+        int res = mPolicy.checkAddPermission(attrs.type, isRoundedCornerOverlay, attrs.packageName,
+                appOp);
         if (res != WindowManagerGlobal.ADD_OKAY) {
             return res;
         }
@@ -1410,8 +1413,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
                 final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
-                final boolean isRoundedCornerOverlay =
-                        (attrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
                 token = new WindowToken(this, binder, type, false, displayContent,
                         session.mCanAddInternalSystemWindow, isRoundedCornerOverlay);
             } else if (rootType >= FIRST_APPLICATION_WINDOW
@@ -2560,10 +2561,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean callerCanManageAppTokens =
                 checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()");
         if (!callerCanManageAppTokens) {
-            // TODO(window-context): refactor checkAddPermission to not take attrs.
-            LayoutParams attrs = new LayoutParams(type);
-            attrs.packageName = packageName;
-            final int res = mPolicy.checkAddPermission(attrs, new int[1]);
+            final int res = mPolicy.checkAddPermission(type, false /* isRoundedCornerOverlay */,
+                    packageName, new int[1]);
             if (res != ADD_OKAY) {
                 return res;
             }

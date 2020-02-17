@@ -686,17 +686,25 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             WindowManagerFuncs windowManagerFuncs);
 
     /**
-     * Check permissions when adding a window.
+     * Check permissions when adding a window or a window token from
+     * {@link android.app.WindowContext}.
      *
-     * @param attrs The window's LayoutParams.
+     * @param type The window type
+     * @param isRoundedCornerOverlay {@code true} to indicate the adding window is
+     *                                           round corner overlay.
+     * @param packageName package name
      * @param outAppOp First element will be filled with the app op corresponding to
      *                 this window, or OP_NONE.
      *
      * @return {@link WindowManagerGlobal#ADD_OKAY} if the add can proceed;
      *      else an error code, usually
      *      {@link WindowManagerGlobal#ADD_PERMISSION_DENIED}, to abort the add.
+     *
+     * @see IWindowManager#addWindowTokenWithOptions(IBinder, int, int, Bundle, String)
+     * @see WindowManager.LayoutParams#PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY
      */
-    public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp);
+    int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
+            int[] outAppOp);
 
     /**
      * After the window manager has computed the current configuration based
