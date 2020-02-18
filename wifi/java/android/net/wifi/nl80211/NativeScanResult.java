@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.wificond;
+package android.net.wifi.nl80211;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;

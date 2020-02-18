@@ -14,45 +14,41 @@
  * limitations under the License.
  */
 
-package android.net.wifi.wificond;
+package android.net.wifi.nl80211;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
-import java.util.Objects;
+import java.util.Arrays;
 
 /**
- * ChannelSettings for wificond
+ * HiddenNetwork for wificond
  *
  * @hide
  */
-public class ChannelSettings implements Parcelable {
-    private static final String TAG = "ChannelSettings";
+public class HiddenNetwork implements Parcelable {
+    private static final String TAG = "HiddenNetwork";
 
-    public int frequency;
+    public byte[] ssid;
 
     /** public constructor */
-    public ChannelSettings() { }
+    public HiddenNetwork() { }
 
     /** override comparator */
     @Override
     public boolean equals(Object rhs) {
         if (this == rhs) return true;
-        if (!(rhs instanceof ChannelSettings)) {
+        if (!(rhs instanceof HiddenNetwork)) {
             return false;
         }
-        ChannelSettings channel = (ChannelSettings) rhs;
-        if (channel == null) {
-            return false;
-        }
-        return frequency == channel.frequency;
+        HiddenNetwork network = (HiddenNetwork) rhs;
+        return Arrays.equals(ssid, network.ssid);
     }
 
     /** override hash code */
     @Override
     public int hashCode() {
-        return Objects.hash(frequency);
+        return Arrays.hashCode(ssid);
     }
 
     /** implement Parcelable interface */
@@ -64,32 +60,28 @@ public class ChannelSettings implements Parcelable {
     /**
      * implement Parcelable interface
      * |flags| is ignored.
-     **/
+     */
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(frequency);
+        out.writeByteArray(ssid);
     }
 
     /** implement Parcelable interface */
-    public static final Parcelable.Creator<ChannelSettings> CREATOR =
-            new Parcelable.Creator<ChannelSettings>() {
+    public static final Parcelable.Creator<HiddenNetwork> CREATOR =
+            new Parcelable.Creator<HiddenNetwork>() {
         /**
          * Caller is responsible for providing a valid parcel.
          */
         @Override
-        public ChannelSettings createFromParcel(Parcel in) {
-            ChannelSettings result = new ChannelSettings();
-            result.frequency = in.readInt();
-            if (in.dataAvail() != 0) {
-                Log.e(TAG, "Found trailing data after parcel parsing.");
-            }
-
+        public HiddenNetwork createFromParcel(Parcel in) {
+            HiddenNetwork result = new HiddenNetwork();
+            result.ssid = in.createByteArray();
             return result;
         }
 
         @Override
-        public ChannelSettings[] newArray(int size) {
-            return new ChannelSettings[size];
+        public HiddenNetwork[] newArray(int size) {
+            return new HiddenNetwork[size];
         }
     };
 }

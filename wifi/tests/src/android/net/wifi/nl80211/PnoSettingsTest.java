@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.wificond;
+package android.net.wifi.nl80211;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 /**
- * Unit tests for {@link android.net.wifi.wificond.PnoSettings}.
+ * Unit tests for {@link android.net.wifi.nl80211.PnoSettings}.
  */
 @SmallTest
 public class PnoSettingsTest {

@@ -132,7 +132,7 @@ import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
 import android.net.wifi.WifiFrameworkInitializer;
-import android.net.wifi.wificond.WifiNl80211Manager;
+import android.net.wifi.nl80211.WifiNl80211Manager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;

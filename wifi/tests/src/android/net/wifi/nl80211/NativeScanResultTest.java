@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.wificond;
+package android.net.wifi.nl80211;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Unit tests for {@link android.net.wifi.wificond.NativeScanResult}.
+ * Unit tests for {@link android.net.wifi.nl80211.NativeScanResult}.
  */
 @SmallTest
 public class NativeScanResultTest {

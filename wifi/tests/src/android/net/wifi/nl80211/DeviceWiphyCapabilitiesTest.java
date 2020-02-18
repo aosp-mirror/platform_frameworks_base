@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.wifi.wificond;
+package android.net.wifi.nl80211;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link android.net.wifi.wificond.DeviceWiphyCapabilities}.
+ * Unit tests for {@link android.net.wifi.nl80211.DeviceWiphyCapabilities}.
  */
 @SmallTest
 public class DeviceWiphyCapabilitiesTest {
