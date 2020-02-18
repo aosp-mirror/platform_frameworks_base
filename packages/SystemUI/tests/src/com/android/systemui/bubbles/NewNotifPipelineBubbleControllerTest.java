@@ -79,6 +79,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
@@ -126,6 +127,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     private SysuiStatusBarStateController mStatusBarStateController;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private FloatingContentCoordinator mFloatingContentCoordinator;
 
     @Captor
     private ArgumentCaptor<NotifCollectionListener> mNotifListenerCaptor;
@@ -232,7 +235,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mNotificationEntryManager,
                 mNotifPipeline,
                 mFeatureFlagsNewPipeline,
-                mDumpController);
+                mDumpController,
+                mFloatingContentCoordinator);
         mBubbleController.addNotifCallback(mNotifCallback);
         mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
         mBubbleController.setExpandListener(mBubbleExpandListener);
