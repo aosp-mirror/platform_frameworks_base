@@ -43,6 +43,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
@@ -2209,15 +2210,20 @@ public final class ViewRootImpl implements ViewParent,
     void dispatchApplyInsets(View host) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "dispatchApplyInsets");
         WindowInsets insets = getWindowInsets(true /* forceConstruct */);
-        final boolean dispatchCutout = (mWindowAttributes.layoutInDisplayCutoutMode
-                == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS);
-        if (!dispatchCutout) {
+        if (!shouldDispatchCutout()) {
             // Window is either not laid out in cutout or the status bar inset takes care of
             // clearing the cutout, so we don't need to dispatch the cutout to the hierarchy.
             insets = insets.consumeDisplayCutout();
         }
         host.dispatchApplyWindowInsets(insets);
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+    }
+
+    private boolean shouldDispatchCutout() {
+        return mWindowAttributes.layoutInDisplayCutoutMode
+                        == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                || mWindowAttributes.layoutInDisplayCutoutMode
+                        == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
     }
 
     private void updateVisibleInsets() {
