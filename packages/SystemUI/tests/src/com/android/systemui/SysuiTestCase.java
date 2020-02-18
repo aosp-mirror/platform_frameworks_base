@@ -25,6 +25,7 @@ import android.os.MessageQueue;
 import android.os.ParcelFileDescriptor;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.testing.LeakCheck;
+import android.testing.TestableLooper;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -32,7 +33,6 @@ import androidx.test.InstrumentationRegistry;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.util.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -86,9 +86,22 @@ public abstract class SysuiTestCase {
     public void SysuiTeardown() {
         InstrumentationRegistry.registerInstance(mRealInstrumentation,
                 InstrumentationRegistry.getArguments());
-        // Reset the assert's main looper.
-        Assert.sMainLooper = Looper.getMainLooper();
+        // Reset the assert's testable looper to null.
+        disallowTestableLooperAsMainThread();
         SystemUIFactory.cleanup();
+    }
+
+    /**
+     * Tests are run on the TestableLooper; however, there are parts of SystemUI that assert that
+     * the code is run from the main looper. Therefore, we allow the TestableLooper to pass these
+     * assertions since in a test, the TestableLooper is essentially the MainLooper.
+     */
+    protected void allowTestableLooperAsMainThread() {
+        com.android.systemui.util.Assert.setTestableLooper(TestableLooper.get(this).getLooper());
+    }
+
+    protected void disallowTestableLooperAsMainThread() {
+        com.android.systemui.util.Assert.setTestableLooper(null);
     }
 
     protected LeakCheck getLeakCheck() {
