@@ -656,16 +656,20 @@ public final class MediaFormat {
     public static final String KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count";
 
     /**
-     * A key describing a gain to be applied so that the output loudness matches the
-     * Target Reference Level. This is typically used to normalize loudness across program items.
-     * The gain is derived as the difference between the Target Reference Level and the
-     * Program Reference Level. The latter can be given in the bitstream and indicates the actual
-     * loudness value of the program item.
+     * A key describing the Target Reference Level (Target Loudness).
+     * <p>For normalizing loudness across program items, a gain is applied to the audio output so
+     * that the output loudness matches the Target Reference Level. The gain is derived as the
+     * difference between the Target Reference Level and the Program Reference Level (Program
+     * Loudness). The latter can be given in the bitstream and indicates the actual loudness value
+     * of the program item.</p>
      * <p>The Target Reference Level controls loudness normalization for both MPEG-4 DRC and
      * MPEG-D DRC.
      * <p>The value is given as an integer value between
      * 40 and 127, and is calculated as -4 * Target Reference Level in LKFS.
      * Therefore, it represents the range of -10 to -31.75 LKFS.
+     * <p>For MPEG-4 DRC, a value of -1 switches off loudness normalization and DRC processing.</p>
+     * <p>For MPEG-D DRC, a value of -1 switches off loudness normalization only. For DRC processing
+     * options of MPEG-D DRC, see {@link #KEY_AAC_DRC_EFFECT_TYPE}</p>
      * <p>The default value on mobile devices is 64 (-16 LKFS).
      * <p>This key is only used during decoding.
      */
@@ -686,7 +690,7 @@ public final class MediaFormat {
      * <tr><th>6</th><th>General compression</th></tr>
      * </table>
      * <p>The value -1 (Off) disables DRC processing, while loudness normalization may still be
-     * active and dependent on KEY_AAC_DRC_TARGET_REFERENCE_LEVEL.<br>
+     * active and dependent on {@link #KEY_AAC_DRC_TARGET_REFERENCE_LEVEL}.<br>
      * The value 0 (None) automatically enables DRC processing if necessary to prevent signal
      * clipping<br>
      * The value 6 (General compression) can be used for enabling MPEG-D DRC without particular
@@ -703,8 +707,8 @@ public final class MediaFormat {
      * 0 and 127, which is calculated as -4 * Encoded Target Level in LKFS.
      * If the Encoded Target Level is unknown, the value can be set to -1.
      * <p>The default value is -1 (unknown).
-     * <p>The value is ignored when heavy compression is used (see
-     * {@link #KEY_AAC_DRC_HEAVY_COMPRESSION}).
+     * <p>The value is ignored when heavy compression (see {@link #KEY_AAC_DRC_HEAVY_COMPRESSION})
+     * or MPEG-D DRC is used.
      * <p>This key is only used during decoding.
      */
     public static final String KEY_AAC_ENCODED_TARGET_LEVEL = "aac-encoded-target-level";
@@ -745,17 +749,17 @@ public final class MediaFormat {
     public static final String KEY_AAC_DRC_ATTENUATION_FACTOR = "aac-drc-cut-level";
 
     /**
-     * A key describing the selection of the heavy compression profile for DRC.
-     * Two separate DRC gain sequences can be transmitted in one bitstream: MPEG-4 DRC light
-     * compression, and DVB-specific heavy compression. When selecting the application of the heavy
-     * compression, one of the sequences is selected:
+     * A key describing the selection of the heavy compression profile for MPEG-4 DRC.
+     * <p>Two separate DRC gain sequences can be transmitted in one bitstream: light compression
+     * and heavy compression. When selecting the application of the heavy compression, one of
+     * the sequences is selected:
      * <ul>
      * <li>0 enables light compression,</li>
      * <li>1 enables heavy compression instead.
      * </ul>
-     * Note that only light compression offers the features of scaling of DRC gains
+     * Note that heavy compression doesn't offer the features of scaling of DRC gains
      * (see {@link #KEY_AAC_DRC_BOOST_FACTOR} and {@link #KEY_AAC_DRC_ATTENUATION_FACTOR} for the
-     * boost and attenuation factors, and frequency-selective (multiband) DRC.
+     * boost and attenuation factors), and frequency-selective (multiband) DRC.
      * Light compression usually contains clipping prevention for stereo downmixing while heavy
      * compression, if additionally provided in the bitstream, is usually stronger, and contains
      * clipping prevention for stereo and mono downmixing.
