@@ -61,7 +61,8 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
      * Injected constructor. See {@link NotificationsModule}.
      */
     public VisualStabilityManager(
-            NotificationEntryManager notificationEntryManager, @Main Handler handler) {
+            NotificationEntryManager notificationEntryManager,
+            @Main Handler handler) {
 
         mHandler = handler;
 

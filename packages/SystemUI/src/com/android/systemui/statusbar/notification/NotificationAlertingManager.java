@@ -53,12 +53,14 @@ public class NotificationAlertingManager {
             VisualStabilityManager visualStabilityManager,
             StatusBarStateController statusBarStateController,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
-            NotificationListener notificationListener) {
+            NotificationListener notificationListener,
+            HeadsUpManager headsUpManager) {
         mRemoteInputManager = remoteInputManager;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarStateController = statusBarStateController;
         mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
         mNotificationListener = notificationListener;
+        mHeadsUpManager = headsUpManager;
 
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
@@ -79,10 +81,6 @@ public class NotificationAlertingManager {
                 stopAlerting(entry.getKey());
             }
         });
-    }
-
-    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
-        mHeadsUpManager = headsUpManager;
     }
 
     /**

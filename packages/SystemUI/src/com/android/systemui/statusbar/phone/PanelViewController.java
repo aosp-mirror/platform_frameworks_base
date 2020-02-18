@@ -73,6 +73,7 @@ public abstract class PanelViewController {
 
     protected StatusBar mStatusBar;
     protected HeadsUpManagerPhone mHeadsUpManager;
+    protected final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
 
     private float mPeekHeight;
     private float mHintDistance;
@@ -206,7 +207,9 @@ public abstract class PanelViewController {
             FalsingManager falsingManager, DozeLog dozeLog,
             KeyguardStateController keyguardStateController,
             SysuiStatusBarStateController statusBarStateController, VibratorHelper vibratorHelper,
-            LatencyTracker latencyTracker, FlingAnimationUtils.Builder flingAnimationUtilsBuilder) {
+            LatencyTracker latencyTracker,
+            FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
+            StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
         mView = view;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
@@ -251,6 +254,7 @@ public abstract class PanelViewController {
                 R.bool.config_enableNotificationShadeDrag);
         mVibratorHelper = vibratorHelper;
         mVibrateOnOpening = mResources.getBoolean(R.bool.config_vibrateOnIconAnimation);
+        mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
     }
 
     protected void loadDimens() {

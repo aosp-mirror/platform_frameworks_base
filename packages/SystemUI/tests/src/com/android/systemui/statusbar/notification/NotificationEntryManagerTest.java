@@ -255,7 +255,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 mLeakDetector,
                 mock(ForegroundServiceDismissalFeatureController.class)
         );
-        mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
+        mEntryManager.setUpWithPresenter(mPresenter);
         mEntryManager.addNotificationEntryListener(mEntryListener);
         mEntryManager.addNotificationRemoveInterceptor(mRemoveInterceptor);
 
