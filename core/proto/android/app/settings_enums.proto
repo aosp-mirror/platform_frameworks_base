@@ -2617,4 +2617,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     ADB_WIRELESS_DEVICE_QR_PAIRING_DIALOG = 1833;
+
+    // OPEN: Settings > apps & notifications > notifications > conversations
+    // CATEGORY: SETTINGS
+    // OS: R
+    NOTIFICATION_CONVERSATION_LIST_SETTINGS = 1834;
 }
