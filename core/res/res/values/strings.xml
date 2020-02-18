@@ -421,14 +421,6 @@
          [CHAR LIMIT=NONE] -->
     <string name="location_changed_notification_text">Tap to see your location settings.</string>
 
-    <!-- Feature Id for Country Detector. [CHAR LIMIT=NONE]-->
-    <string name="country_detector">Country Detector</string>
-    <!-- Feature Id for Location service. [CHAR LIMIT=NONE]-->
-    <string name="location_service">Location Service</string>
-    <!-- Feature Id for Sensor Notification service. [CHAR LIMIT=NONE]-->
-    <string name="sensor_notification_service">Sensor Notification Service</string>
-    <!-- Feature Id for Twilight service. [CHAR LIMIT=NONE]-->
-    <string name="twilight_service">Twilight Service</string>
 
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
