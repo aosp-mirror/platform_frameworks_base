@@ -14605,6 +14605,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (index < 0) {
                 ProcessList.remove(app.pid);
             }
+
+            // Remove provider publish timeout because we will start a new timeout when the
+            // restarted process is attaching (if the process contains launching providers).
+            mHandler.removeMessages(CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG, app);
+
             mProcessList.addProcessNameLocked(app);
             app.pendingStart = false;
             mProcessList.startProcessLocked(app,
