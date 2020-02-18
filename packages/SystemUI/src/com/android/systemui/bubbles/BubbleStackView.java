@@ -32,7 +32,6 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.annotation.NonNull;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -47,7 +46,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Choreographer;
@@ -56,6 +54,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -66,6 +65,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.FloatPropertyCompat;
@@ -81,7 +81,10 @@ import com.android.systemui.bubbles.animation.ExpandedAnimationController;
 import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.systemui.util.animation.PhysicsAnimator;
+import com.android.systemui.util.magnetictarget.MagnetizedObject;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -227,8 +230,6 @@ public class BubbleStackView extends FrameLayout {
         pw.print("  gestureInProgress:    "); pw.println(mIsGestureInProgress);
         pw.print("  showingDismiss:       "); pw.println(mShowingDismiss);
         pw.print("  isExpansionAnimating: "); pw.println(mIsExpansionAnimating);
-        pw.print("  draggingInDismiss:    "); pw.println(mDraggingInDismissTarget);
-        pw.print("  animatingMagnet:      "); pw.println(mAnimatingMagnet);
         mStackAnimationController.dump(fd, pw, args);
         mExpandedAnimationController.dump(fd, pw, args);
     }
@@ -239,16 +240,6 @@ public class BubbleStackView extends FrameLayout {
     private boolean mViewUpdatedRequested = false;
     private boolean mIsExpansionAnimating = false;
     private boolean mShowingDismiss = false;
-
-    /**
-     * Whether the user is currently dragging their finger within the dismiss target. In this state
-     * the stack will be magnetized to the center of the target, so we shouldn't move it until the
-     * touch exits the dismiss target area.
-     */
-    private boolean mDraggingInDismissTarget = false;
-
-    /** Whether the stack is magneting towards the dismiss target. */
-    private boolean mAnimatingMagnet = false;
 
     /** The view to desaturate/darken when magneted to the dismiss target. */
     private View mDesaturateAndDarkenTargetView;
@@ -331,8 +322,100 @@ public class BubbleStackView extends FrameLayout {
     @NonNull
     private final SurfaceSynchronizer mSurfaceSynchronizer;
 
-    private BubbleDismissView mDismissContainer;
-    private Runnable mAfterMagnet;
+    /**
+     * The currently magnetized object, which is being dragged and will be attracted to the magnetic
+     * dismiss target.
+     *
+     * This is either the stack itself, or an individual bubble.
+     */
+    private MagnetizedObject<?> mMagnetizedObject;
+
+    /**
+     * The action to run when the magnetized object is released in the dismiss target.
+     *
+     * This will actually perform the dismissal of either the stack or an individual bubble.
+     */
+    private Runnable mReleasedInDismissTargetAction;
+
+    /**
+     * The MagneticTarget instance for our circular dismiss view. This is added to the
+     * MagnetizedObject instances for the stack and any dragged-out bubbles.
+     */
+    private MagnetizedObject.MagneticTarget mMagneticTarget;
+
+    /** Magnet listener that handles animating and dismissing individual dragged-out bubbles. */
+    private final MagnetizedObject.MagnetListener mIndividualBubbleMagnetListener =
+            new MagnetizedObject.MagnetListener() {
+                @Override
+                public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                    animateDesaturateAndDarken(
+                            mExpandedAnimationController.getDraggedOutBubble(), true);
+                }
+
+                @Override
+                public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                        float velX, float velY, boolean wasFlungOut) {
+                    animateDesaturateAndDarken(
+                            mExpandedAnimationController.getDraggedOutBubble(), false);
+
+                    if (wasFlungOut) {
+                        mExpandedAnimationController.snapBubbleBack(
+                                mExpandedAnimationController.getDraggedOutBubble(), velX, velY);
+                        hideDismissTarget();
+                    } else {
+                        mExpandedAnimationController.onUnstuckFromTarget();
+                    }
+                }
+
+                @Override
+                public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                    mExpandedAnimationController.dismissDraggedOutBubble(
+                            mExpandedAnimationController.getDraggedOutBubble(),
+                            mReleasedInDismissTargetAction);
+                    hideDismissTarget();
+                }
+            };
+
+    /** Magnet listener that handles animating and dismissing the entire stack. */
+    private final MagnetizedObject.MagnetListener mStackMagnetListener =
+            new MagnetizedObject.MagnetListener() {
+                @Override
+                public void onStuckToTarget(
+                        @NonNull MagnetizedObject.MagneticTarget target) {
+                    animateDesaturateAndDarken(mBubbleContainer, true);
+                }
+
+                @Override
+                public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                        float velX, float velY, boolean wasFlungOut) {
+                    animateDesaturateAndDarken(mBubbleContainer, false);
+
+                    if (wasFlungOut) {
+                        mStackAnimationController.flingStackThenSpringToEdge(
+                                mStackAnimationController.getStackPosition().x, velX, velY);
+                        hideDismissTarget();
+                    } else {
+                        mStackAnimationController.onUnstuckFromTarget();
+                    }
+                }
+
+                @Override
+                public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                    mStackAnimationController.implodeStack(
+                            () -> {
+                                resetDesaturationAndDarken();
+                                mReleasedInDismissTargetAction.run();
+                            }
+                    );
+
+                    hideDismissTarget();
+                }
+            };
+
+    private ViewGroup mDismissTargetContainer;
+    private PhysicsAnimator<View> mDismissTargetAnimator;
+    private PhysicsAnimator.SpringConfig mDismissTargetSpring = new PhysicsAnimator.SpringConfig(
+            SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
@@ -409,12 +492,30 @@ public class BubbleStackView extends FrameLayout {
                 .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
         mFlyoutTransitionSpring.addEndListener(mAfterFlyoutTransitionSpring);
 
-        mDismissContainer = new BubbleDismissView(mContext);
-        mDismissContainer.setLayoutParams(new FrameLayout.LayoutParams(
+        final View targetView = new DismissCircleView(context);
+        final FrameLayout.LayoutParams newParams =
+                new FrameLayout.LayoutParams(targetView.getLayoutParams());
+        newParams.gravity = Gravity.CENTER;
+        targetView.setLayoutParams(newParams);
+        mDismissTargetAnimator = PhysicsAnimator.getInstance(targetView);
+
+        mDismissTargetContainer = new FrameLayout(context);
+        mDismissTargetContainer.setLayoutParams(new FrameLayout.LayoutParams(
                 MATCH_PARENT,
                 getResources().getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height),
                 Gravity.BOTTOM));
-        addView(mDismissContainer);
+        mDismissTargetContainer.setClipChildren(false);
+        mDismissTargetContainer.addView(targetView);
+        mDismissTargetContainer.setVisibility(View.INVISIBLE);
+        addView(mDismissTargetContainer);
+
+        // Start translated down so the target springs up.
+        targetView.setTranslationY(
+                getResources().getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height));
+
+        // Save the MagneticTarget instance for the newly set up view - we'll add this to the
+        // MagnetizedObjects.
+        mMagneticTarget = new MagnetizedObject.MagneticTarget(targetView, mBubbleSize * 2);
 
         mExpandedViewXAnim =
                 new SpringAnimation(mExpandedViewContainer, DynamicAnimation.TRANSLATION_X);
@@ -1059,6 +1160,14 @@ public class BubbleStackView extends FrameLayout {
         }
     }
 
+    /*
+     * Sets the action to run to dismiss the currently dragging object (either the stack or an
+     * individual bubble).
+     */
+    public void setReleasedInDismissTargetAction(Runnable action) {
+        mReleasedInDismissTargetAction = action;
+    }
+
     /**
      * Dismiss the stack of bubbles.
      *
@@ -1254,7 +1363,12 @@ public class BubbleStackView extends FrameLayout {
             Log.d(TAG, "onBubbleDragStart: bubble=" + bubble);
         }
         maybeShowManageEducation(false);
-        mExpandedAnimationController.prepareForBubbleDrag(bubble);
+        mExpandedAnimationController.prepareForBubbleDrag(bubble, mMagneticTarget);
+
+        // We're dragging an individual bubble, so set the magnetized object to the magnetized
+        // bubble.
+        mMagnetizedObject = mExpandedAnimationController.getMagnetizedBubbleDraggingOut();
+        mMagnetizedObject.setMagnetListener(mIndividualBubbleMagnetListener);
     }
 
     /** Called with the coordinates to which an individual bubble has been dragged. */
@@ -1296,7 +1410,9 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.setActiveController(mStackAnimationController);
         hideFlyoutImmediate();
 
-        mDraggingInDismissTarget = false;
+        // Since we're dragging the stack, set the magnetized object to the magnetized stack.
+        mMagnetizedObject = mStackAnimationController.getMagnetizedStack(mMagneticTarget);
+        mMagnetizedObject.setMagnetListener(mStackMagnetListener);
     }
 
     void onDragged(float x, float y) {
@@ -1417,6 +1533,11 @@ public class BubbleStackView extends FrameLayout {
         }
     }
 
+    /** Passes the MotionEvent to the magnetized object and returns true if it was consumed. */
+    boolean passEventToMagnetizedObject(MotionEvent event) {
+        return mMagnetizedObject != null && mMagnetizedObject.maybeConsumeMotionEvent(event);
+    }
+
     /** Prepares and starts the desaturate/darken animation on the bubble stack. */
     private void animateDesaturateAndDarken(View targetView, boolean desaturateAndDarken) {
         mDesaturateAndDarkenTargetView = targetView;
@@ -1447,102 +1568,6 @@ public class BubbleStackView extends FrameLayout {
         mDesaturateAndDarkenTargetView.setLayerType(View.LAYER_TYPE_NONE, null);
     }
 
-    /**
-     * Magnets the stack to the target, while also transforming the target to encircle the stack and
-     * desaturating/darkening the bubbles.
-     */
-    void animateMagnetToDismissTarget(
-            View magnetView, boolean toTarget, float x, float y, float velX, float velY) {
-        mDraggingInDismissTarget = toTarget;
-
-        if (toTarget) {
-            // The Y-value for the bubble stack to be positioned in the center of the dismiss target
-            final float destY = mDismissContainer.getDismissTargetCenterY() - mBubbleSize / 2f;
-
-            mAnimatingMagnet = true;
-
-            final Runnable afterMagnet = () -> {
-                mAnimatingMagnet = false;
-                if (mAfterMagnet != null) {
-                    mAfterMagnet.run();
-                }
-            };
-
-            if (magnetView == this) {
-                mStackAnimationController.magnetToDismiss(velX, velY, destY, afterMagnet);
-                animateDesaturateAndDarken(mBubbleContainer, true);
-            } else {
-                mExpandedAnimationController.magnetBubbleToDismiss(
-                        magnetView, velX, velY, destY, afterMagnet);
-
-                animateDesaturateAndDarken(magnetView, true);
-            }
-        } else {
-            mAnimatingMagnet = false;
-
-            if (magnetView == this) {
-                mStackAnimationController.demagnetizeFromDismissToPoint(x, y, velX, velY);
-                animateDesaturateAndDarken(mBubbleContainer, false);
-            } else {
-                mExpandedAnimationController.demagnetizeBubbleTo(x, y, velX, velY);
-                animateDesaturateAndDarken(magnetView, false);
-            }
-        }
-
-        mVibrator.vibrate(VibrationEffect.get(toTarget
-                ? VibrationEffect.EFFECT_CLICK
-                : VibrationEffect.EFFECT_TICK));
-    }
-
-    /**
-     * Magnets the stack to the dismiss target if it's not already there. Then, dismiss the stack
-     * using the 'implode' animation and animate out the target.
-     */
-    void magnetToStackIfNeededThenAnimateDismissal(
-            View touchedView, float velX, float velY, Runnable after) {
-        final View draggedOutBubble = mExpandedAnimationController.getDraggedOutBubble();
-        final Runnable animateDismissal = () -> {
-            mAfterMagnet = null;
-
-            mVibrator.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
-            mDismissContainer.springOut();
-
-            // 'Implode' the stack and then hide the dismiss target.
-            if (touchedView == this) {
-                mStackAnimationController.implodeStack(
-                        () -> {
-                            mAnimatingMagnet = false;
-                            mShowingDismiss = false;
-                            mDraggingInDismissTarget = false;
-                            after.run();
-                            resetDesaturationAndDarken();
-                        });
-            } else {
-                mExpandedAnimationController.dismissDraggedOutBubble(draggedOutBubble, () -> {
-                    mAnimatingMagnet = false;
-                    mShowingDismiss = false;
-                    mDraggingInDismissTarget = false;
-                    resetDesaturationAndDarken();
-                    after.run();
-                });
-            }
-        };
-
-        if (mAnimatingMagnet) {
-            // If the magnet animation is currently playing, dismiss the stack after it's done. This
-            // happens if the stack is flung towards the target.
-            mAfterMagnet = animateDismissal;
-        } else if (mDraggingInDismissTarget) {
-            // If we're in the dismiss target, but not animating, we already magneted - dismiss
-            // immediately.
-            animateDismissal.run();
-        } else {
-            // Otherwise, we need to start the magnet animation and then dismiss afterward.
-            animateMagnetToDismissTarget(touchedView, true, -1 /* x */, -1 /* y */, velX, velY);
-            mAfterMagnet = animateDismissal;
-        }
-    }
-
     /** Animates in the dismiss target. */
     private void springInDismissTarget() {
         if (mShowingDismiss) {
@@ -1551,10 +1576,14 @@ public class BubbleStackView extends FrameLayout {
 
         mShowingDismiss = true;
 
-        // Show the dismiss container and bring it to the front so the bubbles will go behind it.
-        mDismissContainer.springIn();
-        mDismissContainer.bringToFront();
-        mDismissContainer.setZ(Short.MAX_VALUE - 1);
+        mDismissTargetContainer.bringToFront();
+        mDismissTargetContainer.setZ(Short.MAX_VALUE - 1);
+        mDismissTargetContainer.setVisibility(VISIBLE);
+
+        mDismissTargetAnimator.cancel();
+        mDismissTargetAnimator
+                .spring(DynamicAnimation.TRANSLATION_Y, 0f, mDismissTargetSpring)
+                .start();
     }
 
     /**
@@ -1566,13 +1595,13 @@ public class BubbleStackView extends FrameLayout {
             return;
         }
 
-        mDismissContainer.springOut();
         mShowingDismiss = false;
-    }
 
-    /** Whether the location of the given MotionEvent is within the dismiss target area. */
-    boolean isInDismissTarget(MotionEvent ev) {
-        return isIntersecting(mDismissContainer.getDismissTarget(), ev.getRawX(), ev.getRawY());
+        mDismissTargetAnimator
+                .spring(DynamicAnimation.TRANSLATION_Y, mDismissTargetContainer.getHeight(),
+                        mDismissTargetSpring)
+                .withEndActions(() -> mDismissTargetContainer.setVisibility(View.INVISIBLE))
+                .start();
     }
 
     /** Animates the flyout collapsed (to dot), or the reverse, starting with the given velocity. */
