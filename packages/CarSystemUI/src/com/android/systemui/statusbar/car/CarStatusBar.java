@@ -916,7 +916,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             Dependency.get(KeyguardUpdateMonitor.class).dump(fd, pw, args);
         }
 
-        Dependency.get(FalsingManager.class).dump(pw);
         FalsingLog.dump(pw);
 
         pw.println("SharedPreferences:");
