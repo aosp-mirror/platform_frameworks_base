@@ -20,7 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"Stillingageymsla"</string>
-    <string name="wifi_softap_config_change" msgid="5338670993556993667">"Breytingar á stillingum heits reits"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"Tíðnisvið heita reitsins hefur breyst."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"Þetta tæki styður ekki val þitt fyrir aðeins 5 GHz. Í staðinn mun þetta tæki nota 5 GHz tíðnisvið þegar það er í boði."</string>
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"Stillingum heits reits hefur verið breytt"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"Ýttu til að sjá upplýsingar"</string>
 </resources>
