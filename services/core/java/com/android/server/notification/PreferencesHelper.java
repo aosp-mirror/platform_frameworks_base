@@ -1223,6 +1223,33 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
+    public @NonNull List<String> deleteConversation(String pkg, int uid, String conversationId) {
+        synchronized (mPackagePreferences) {
+            List<String> deletedChannelIds = new ArrayList<>();
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return deletedChannelIds;
+            }
+            int N = r.channels.size();
+            for (int i = 0; i < N; i++) {
+                final NotificationChannel nc = r.channels.valueAt(i);
+                if (conversationId.equals(nc.getConversationId())) {
+                    nc.setDeleted(true);
+                    LogMaker lm = getChannelLog(nc, pkg);
+                    lm.setType(
+                            com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_CLOSE);
+                    MetricsLogger.action(lm);
+
+                    deletedChannelIds.add(nc.getId());
+                }
+            }
+            if (!deletedChannelIds.isEmpty() && mAreChannelsBypassingDnd) {
+                updateChannelsBypassingDnd(mContext.getUserId());
+            }
+            return deletedChannelIds;
+        }
+    }
+
     @Override
     public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,
             boolean includeDeleted) {

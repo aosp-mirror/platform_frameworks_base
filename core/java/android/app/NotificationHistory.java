@@ -384,6 +384,26 @@ public final class NotificationHistory implements Parcelable {
     }
 
     /**
+     * Removes all notifications from a conversation and regenerates the string pool
+     */
+    public boolean removeConversationFromWrite(String packageName, String conversationId) {
+        boolean removed = false;
+        for (int i = mNotificationsToWrite.size() - 1; i >= 0; i--) {
+            HistoricalNotification hn = mNotificationsToWrite.get(i);
+            if (packageName.equals(hn.getPackage())
+                    && conversationId.equals(hn.getConversationId())) {
+                removed = true;
+                mNotificationsToWrite.remove(i);
+            }
+        }
+        if (removed) {
+            poolStringsFromNotifications();
+        }
+
+        return removed;
+    }
+
+    /**
      * Gets pooled strings in order to write them to disk
      */
     public @NonNull String[] getPooledStringsToWrite() {
