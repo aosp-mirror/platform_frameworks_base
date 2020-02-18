@@ -666,7 +666,22 @@ public final class ViewRootImpl implements ViewParent,
         int localChanges;
     }
 
+    // If set, ViewRootImpl will call BLASTBufferQueue::setNextTransaction with
+    // mRtBLASTSyncTransaction, prior to invoking draw. This provides a way
+    // to redirect the buffers in to transactions.
     private boolean mNextDrawUseBLASTSyncTransaction;
+    // Set when calling setNextTransaction, we can't just reuse mNextDrawUseBLASTSyncTransaction
+    // because, imagine this scenario:
+    //     1. First draw is using BLAST, mNextDrawUseBLAST = true
+    //     2. We call perform draw and are waiting on the callback
+    //     3. After the first perform draw but before the first callback and the
+    //        second perform draw, a second draw sets mNextDrawUseBLAST = true (it already was)
+    //     4. At this point the callback fires and we set mNextDrawUseBLAST = false;
+    //     5. We get to performDraw and fail to sync as we intended because mNextDrawUseBLAST
+    //        is now false.
+    // This is why we use a two-step latch with the two booleans, one consumed from
+    // performDraw and one consumed from finishBLASTSync()
+    private boolean mNextReportConsumeBLAST;
     // Be very careful with the threading here. This is used from the render thread while
     // the UI thread is paused and then applied and cleared from the UI thread right after
     // draw returns.
@@ -3719,9 +3734,9 @@ public final class ViewRootImpl implements ViewParent,
             usingAsyncReport = mReportNextDraw;
             if (needFrameCompleteCallback) {
                 final Handler handler = mAttachInfo.mHandler;
-                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
+                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
+                        finishBLASTSync();
                         handler.postAtFrontOfQueue(() -> {
-                            finishBLASTSync();
                             if (reportNextDraw) {
                                 // TODO: Use the frame number
                                 pendingDrawFinished();
@@ -3731,12 +3746,23 @@ public final class ViewRootImpl implements ViewParent,
                                     commitCallbacks.get(i).run();
                                 }
                             }
-                        }));
+                        });});
             }
         }
 
         try {
             if (mNextDrawUseBLASTSyncTransaction) {
+                // TODO(b/149747443)
+                // We aren't prepared to handle overlapping use of mRtBLASTSyncTransaction
+                // so if we are BLAST syncing we make sure the previous draw has
+                // totally finished.
+                if (mAttachInfo.mThreadedRenderer != null) {
+                    mAttachInfo.mThreadedRenderer.fence();
+                }
+
+                mNextReportConsumeBLAST = true;
+                mNextDrawUseBLASTSyncTransaction = false;
+
                 mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
             }
             boolean canUseAsync = draw(fullRedrawNeeded);
@@ -9556,8 +9582,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void finishBLASTSync() {
-        if (mNextDrawUseBLASTSyncTransaction) {
-            mNextDrawUseBLASTSyncTransaction = false;
+        if (mNextReportConsumeBLAST) {
+            mNextReportConsumeBLAST = false;
             mRtBLASTSyncTransaction.apply();
         }
     }
