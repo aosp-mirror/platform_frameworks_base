@@ -55,21 +55,23 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.wm.DisplayController;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Manages the picture-in-picture (PIP) UI and states.
  */
+@Singleton
 public class PipManager implements BasePipManager {
     private static final String TAG = "PipManager";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String SETTINGS_PACKAGE_AND_CLASS_DELIMITER = "/";
 
-    private static PipManager sPipManager;
     private static List<Pair<String, String>> sSettingsPackageAndClassNamePairList;
 
     /**
@@ -224,13 +226,8 @@ public class PipManager implements BasePipManager {
         }
     }
 
-    private PipManager() { }
-
-    /**
-     * Initializes {@link PipManager}.
-     */
-    public void initialize(Context context, BroadcastDispatcher broadcastDispatcher,
-            DisplayController displayController) {
+    @Inject
+    public PipManager(Context context, BroadcastDispatcher broadcastDispatcher) {
         if (mInitialized) {
             return;
         }
@@ -289,7 +286,7 @@ public class PipManager implements BasePipManager {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
 
-        mPipNotification = new PipNotification(context, broadcastDispatcher);
+        mPipNotification = new PipNotification(context, broadcastDispatcher, this);
     }
 
     private void loadConfigurationsAndApply(Configuration newConfig) {
@@ -737,16 +734,6 @@ public class PipManager implements BasePipManager {
     public interface MediaListener {
         /** Invoked when the MediaController on PIPed activity is changed. */
         void onMediaControllerChanged();
-    }
-
-    /**
-     * Gets an instance of {@link PipManager}.
-     */
-    public static PipManager getInstance() {
-        if (sPipManager == null) {
-            sPipManager = new PipManager();
-        }
-        return sPipManager;
     }
 
     private void updatePipVisibility(final boolean visible) {
