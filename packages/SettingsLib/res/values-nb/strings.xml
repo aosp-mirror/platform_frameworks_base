@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB-feilsøking"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Feilsøkingsmodus når USB kobles til"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB-feilsøking – opphev autorisasjon"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Trådløs feilsøking"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Feilsøkingsmodus når Wi-Fi er tilkoblet"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Feil"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Trådløs feilsøking"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"For å se og bruke tilgjengelige enheter, slå på trådløs feilsøking"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Koble til enheten med en QR-kode"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Koble til nye enheter med en QR-kodeskanner"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Koble til enheten med en tilkoblingskode"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Koble til nye enheter med en sekssifret kode"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Tilkoblede enheter"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Tilkoblet nå"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Enhetsdetaljer"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Glem"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Enhetens fingeravtrykk: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Tilkoblingen mislyktes"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Sørg for at <xliff:g id="DEVICE_NAME">%1$s</xliff:g> er koblet til riktig nettverk"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Koble til enheten"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi-tilkoblingskode"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Tilkoblingen mislyktes"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Sørg for at enheten er koblet til samme nettverk."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Koble til enheten via Wi-Fi ved å skanne en QR-kode"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Kobler til enheten …"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Kunne ikke koble til enheten. Enten var QR-koden feil, eller enheten er ikke koblet til samme nettverk."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adresse og port"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skann QR-koden"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Koble til enheten via Wi-Fi ved å skanne en QR-kode"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, feilsøking, utvikler"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Snarvei til feilrapport"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vis en knapp for generering av feilrapport i batterimenyen"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Forbli våken"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Bruk maskinvareakselerasjon for internettdeling hvis det er tilgjengelig"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Tillate USB-feilsøking?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-feilsøking er bare ment for utviklingsformål. Bruk det til å kopiere data mellom datamaskinen og enheten, installere apper på enheten uten varsel og lese loggdata."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Vil du tillate trådløs feilsøking?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Trådløs feilsøking er bare ment for utviklingsformål. Bruk det til å kopiere data mellom datamaskinen og enheten, installere apper på enheten uten varsel og lese loggdata."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Vil du oppheve tilgangen til USB-feilsøking fra alle datamaskiner du tidligere har autorisert?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Vil du aktivere utviklingsinnstillingene?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Disse innstillingene er bare beregnet for bruk under programutvikling. De kan forårsake problemer med enheten din og tilhørende apper."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (rød-grønn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (blå-gul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Fargekorrigering"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Med fargekorrigering kan personer med fargeblindhet se mer nøyaktige farger"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overstyres av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Mindre enn <xliff:g id="THRESHOLD">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Mer enn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Mer enn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Telefonen slås kanskje av snart"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Nettbrettet slås kanskje av snart"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Enheten slås kanskje av snart"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Telefonen slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Nettbrettet slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Enheten slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefonen slås kanskje av snart"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Nettbrettet slås kanskje av snart"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Enheten slås kanskje av snart"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Telefonen slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Nettbrettet slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Enheten slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> til batteriet er fulladet"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> til batteriet er fulladet"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ukjent"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Lader"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Lader raskt"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Lader sakte"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Lader ikke"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Laderen er koblet til – kan ikke lade akkurat nå"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Fullt"</string>

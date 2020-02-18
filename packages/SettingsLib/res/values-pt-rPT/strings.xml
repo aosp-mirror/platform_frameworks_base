@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"Depuração USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Modo de depuração com USB ligado"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revogar autorizações de depur. USB"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Depuração sem fios"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modo de depuração quando o Wi-Fi está ligado"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Erro."</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuração sem fios"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e utilizar dispositivos disponíveis, ative a depuração sem fios."</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Sincronize o dispositivo com o código QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Sincronize novos dispositivos com o leitor de códigos QR."</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Sincronize dispositivo com código de sincronização"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Sincronize novos dispositivos através do código de seis dígitos."</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositivos sincronizados"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Atualmente ligado."</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Detalhes do dispositivo"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Esquecer"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Impressão digital do dispositivo: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"A ligação falhou"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Certifique-se de que o dispositivo <xliff:g id="DEVICE_NAME">%1$s</xliff:g> está ligado à rede correta."</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Sincronize com o dispositivo"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Código de sincronização de Wi‑Fi"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Sincronização sem êxito"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Certifique-se de que o dispositivo está ligado à mesma rede."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Sincronize o dispositivo através de Wi-Fi ao ler um código QR."</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"A sincronizar o dispositivo…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Falha ao sincronizar o dispositivo. O código QR estava incorreto ou o dispositivo não está ligado à mesma rede."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Porta e endereço IP"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Leia o código QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Sincronize o dispositivo através de Wi-Fi ao ler um código QR."</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depurar, programador"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Atalho para relatório de erro"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostrar um botão no menu ligar/desligar para criar um relatório de erro"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Manter ativo"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Se disponível, utilizar a aceleração de hardware para ligação (à Internet) via telemóvel"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Permitir depuração USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"A depuração USB é utilizada apenas para fins de programação. Utilize-a para copiar dados entre o computador e o aparelho, instalar aplicações no aparelho sem notificação e ler dados de registo."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Pretende permitir a depuração sem fios?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"A depuração sem fios é utilizada apenas para fins de programação. Utilize-a para copiar dados entre o computador e o dispositivo, instalar apps no dispositivo sem notificação e ler dados de registo."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Revogar acesso à depuração USB de todos os computadores anteriormente autorizados?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Permitir definições de programação?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Estas definições destinam-se apenas a programação. Podem fazer com que o seu aparelho e as aplicações nele existentes falhem ou funcionem mal."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalia (vermelho-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalia (azul-amarelo)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correção da cor"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"A correção de cor ajuda as pessoas com daltonismo a ver cores mais precisas."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Substituído por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Resta(m) cerca de <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Resta(m) menos de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Resta(m) mais de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Resta(m) mais de <xliff:g id="TIME_REMAINING">%1$s</xliff:g>."</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"O telemóvel poderá ser encerrado em breve."</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"O tablet poderá ser encerrado em breve."</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"O dispositivo poderá ser encerrado em breve."</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"O telemóvel poderá ser encerrado em breve (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"O tablet poderá ser encerrado em breve (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"O dispositivo poderá ser encerrado em breve (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"O telemóvel poderá ser encerrado em breve"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"O tablet poderá ser encerrado em breve"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"O dispositivo poderá ser encerrado em breve"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"O telemóvel poderá ser encerrado em breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"O tablet poderá ser encerrado em breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"O dispositivo poderá ser encerrado em breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Falta(m) <xliff:g id="TIME">%1$s</xliff:g> até ficar carregada"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> até ficar carregada"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconhecido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"A carregar"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregamento rápido"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carregamento lento"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Não está a carregar"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Ligada à corrente, não é possível carregar neste momento"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Completo"</string>

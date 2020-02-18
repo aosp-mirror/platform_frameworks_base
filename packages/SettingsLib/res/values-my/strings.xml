@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB အမှားရှာခြင်း"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB နှင့်ချိတ်ထားလျှင် အမှားရှာဖွေဖယ်ရှားမှုစနစ် စတင်ရန်"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB အမှားရှာပြင်ဆင်ခွင့်များ ပြန်ရုပ်သိမ်းခြင်း"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်း"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi ချိတ်ဆက်ထားစဉ် အမှားရှာပြင်ပုံစံ"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"အမှား"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်း"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ရနိုင်သည့် စက်ပစ္စည်းများကို ကြည့်ပြီး အသုံးပြုနိုင်ရန် ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ဖွင့်ပါ"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR ကုဒ်ဖြင့် စက်ပစ္စည်းကို အတူတွဲပါ"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR ကုဒ်ဖတ်စက် သုံး၍ စက်ပစ္စည်းသစ်များကို အတူတွဲပါ"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"တွဲချိတ်ကုဒ်ဖြင့် စက်ပစ္စည်းကို အတူတွဲပါ"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ဂဏန်းခြောက်လုံးကုဒ်ဖြင့် စက်ပစ္စည်းသစ်များကို အတူတွဲပါ"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"တွဲချိတ်ပြီး စက်ပစ္စည်းများ"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"လက်ရှိ ချိတ်ဆက်ထားသည်"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"စက်ပစ္စည်း အသေးစိတ်"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"မေ့ပစ်ရန်"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"စက်ပစ္စည်း လက်ဗွေ- <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"ချိတ်ဆက်ခြင်း မအောင်မြင်ပါ"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> သည် မှန်ကန်သည့် ကွန်ရက်သို့ ချိတ်ဆက်ထားခြင်းရှိမရှိ စစ်ဆေးပါ"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"စက်ပစ္စည်းနှင့် အတူတွဲပါ"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi အတူတွဲချိတ်ရန် ကုဒ်"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"တွဲချိတ်ခြင်း မအောင်မြင်ပါ"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"စက်ပစ္စည်းသည် ကွန်ရက်တစ်ခုတည်းသို့ ချိတ်ဆက်ထားခြင်းရှိမရှိ စစ်ဆေးပါ။"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR ကုဒ် စကင်ဖတ်ခြင်းဖြင့် Wi-Fi ပေါ်တွင် စက်ပစ္စည်းကို အတူတွဲပါ"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"စက်ပစ္စည်းနှင့် တွဲချိတ်နေသည်…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"စက်ပစ္စည်းကို အတူတွဲ၍မရပါ။ QR ကုဒ်မမှန်ပါ သို့မဟုတ် စက်ပစ္စည်းသည် ကွန်ရက်တစ်ခုတည်းသို့ ချိတ်ဆက်မထားပါ။"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"အိုင်ပီ (IP) လိပ်စာနှင့် ပို့တ်"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR ကုဒ်ကို စကင်ဖတ်ပါ"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR ကုဒ် စကင်ဖတ်ခြင်းဖြင့် Wi-Fi ပေါ်တွင် စက်ပစ္စည်းကို အတူတွဲပါ"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ချွတ်ယွင်းမှု အစီရင်ခံရန် ဖြတ်လမ်း"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ချွတ်ယွင်းမှု အစီရင်ခံစာကို တင်ရန် ပါဝါမီနူးမှ ခလုတ်ကို ပြပါ"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"ဖွင့်လျက်သား"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"အရှိန်မြှင့်တင်ရန် မိုဘိုင်းဖုန်းသုံး ချိတ်ဆက်မျှဝေခြင်း စက်ပစ္စည်းကို ရနိုင်လျှင် သုံးပါ"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ပြသနာရှာခြင်း ခွင့်ပြုပါမလား?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USBအမှားရှားခြင်းမှာ ဆော့ဝဲလ်ရေးသားရန်အတွက်သာ ရည်ရွယ်ပါသည်။ သင့်ကွန်ပြုတာနှင့်သင့်စက်ကြားတွင် ဒေတာများကိုကူးယူရန်၊ အကြောင်းမကြားပဲနှင့် သင့်စက်အတွင်းသို့ အပလီကေးရှင်းများထည့်သွင်းခြင်းနှင့် ဒေတာမှတ်တမ်းများဖတ်ရန်အတွက် အသုံးပြုပါ"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ခွင့်ပြုမလား။"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ဆော့ဖ်ဝဲရေးရန်အတွက်သာ ရည်ရွယ်ပါသည်။ သင့်ကွန်ပျူတာနှင့် စက်ပစ္စည်းကြားတွင် ဒေတာများကို ကူးယူရန်၊ အကြောင်းမကြားဘဲ သင့်စက်ပစ္စည်းတွင် အက်ပ်ထည့်သွင်းရန်နှင့် ဒေတာမှတ်တမ်းဖတ်ရန်အတွက် ၎င်းကို အသုံးပြုပါ။"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"သင် ယခင်က ခွင့်ပြုခဲ့သော ကွန်ပျူတာအားလုံးမှ ယူအက်စ်ဘီ အမှားစစ်ခွင့်ကို ရုတ်သိမ်းမည်လား ?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"တည်ဆောက်ပြုပြင်ရန်ဆက်တင်များကို အသုံးပြုခွင့်ပေးမည်လား?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ဤဆက်တင်းများကို တည်ဆောက်ပြုပြင်ရာတွင် သုံးရန်အတွက်သာ ရည်ရွယ်သည်။ ၎င်းတို့သည် သင်၏စက်နှင့် အပလီကေးရှင်းများကို ရပ်စေခြင်း သို့ လုပ်ဆောင်ချက်မမှန်ကန်ခြင်းများ ဖြစ်ပေါ်စေနိုင်သည်။"</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (အပြာ-အဝါ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင်ပြင်ဆင်မှု"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"အရောင်ပြင်ဆင်ခြင်းက အရောင်မကွဲသူများအတွက် ပိုမိုတိကျသော အရောင်များ ကြည့်နိုင်ရန် ကူညီပေးသည်"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ခန့် ကျန်သည်"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> အောက်သာ ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ကျော် ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ကျော် ကျန်သေးသည်"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"မကြာမီ ဖုန်းပိတ်သွားနိုင်သည်"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"မကြာမီ တက်ဘလက်ပိတ်သွားနိုင်သည်"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"မကြာမီ စက်ပိတ်သွားနိုင်သည်"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"မကြာမီ ဖုန်းပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"မကြာမီ တက်ဘလက် ပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"မကြာမီ စက်ပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"မကြာမီ ဖုန်းပိတ်သွားနိုင်သည်"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"မကြာမီ တက်ဘလက် ပိတ်သွားနိုင်သည်"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"မကြာမီ စက်ပိတ်သွားနိုင်သည်"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"မကြာမီ ဖုန်းပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"မကြာမီ တက်ဘလက် ပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"မကြာမီ စက်ပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"အားပြည့်ရန် <xliff:g id="TIME">%1$s</xliff:g> ကျန်သည်"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - အားပြည့်ရန် <xliff:g id="TIME">%2$s</xliff:g> ကျန်သည်"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"မသိ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"အားသွင်းနေပါသည်"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"အမြန် အားသွင်းနေသည်"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"နှေးကွေးစွာ အားသွင်း"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"အားသွင်းမနေပါ"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ပလပ်ထိုးထားသောကြောင့် ယခုအားသွင်း၍ မရသေးပါ"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"အပြည့်"</string>

@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB atkļūdošana"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Atkļūdošanas režīms, kad ir pievienota kopne USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Atsaukt piekļuvi USB atkļūdošanai"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Bezvadu atkļūdošana"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Atkļūdošanas režīms, kad Wi-Fi savienojums ir izslēgts"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Kļūda"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Bezvadu atkļūdošana"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Lai skatītu un izmantotu pieejamās ierīces, ieslēdziet bezvadu atkļūdošanu."</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Ierīču savienošana pārī, izmantojot QR kodu"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Savienot pārī jaunas ierīces, izmantojot QR koda skeneri"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Ierīču savienošana pārī, izmantojot kodu"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Savienojiet pārī jaunas ierīces, izmantojot sešu ciparu kodu"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Pārī savienotās ierīces"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Pašlaik pievienota"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Ierīces dati"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Neiegaumēt"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Ierīces ciparnospiedums: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Neizdevās izveidot savienojumu"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Ierīcei <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ir jābūt izveidotam savienojumam ar pareizo tīklu."</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Savienošana pārī ar ierīci"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi kods savienošanai pārī"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Neizdevās izveidot savienojumu pārī"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Ierīcei ir jābūt izveidotam savienojumam ar to pašu tīklu."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Izveidojiet savienojumu pārī ar ierīci Wi‑Fi tīklā, skenējot QR kodu."</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Notiek savienošana pārī ar ierīci…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Neizdevās izveidot savienojumu pārī ar ierīci. QR kods nebija pareizs, vai ierīcei nebija izveidots savienojums ar to pašu tīklu."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP adrese un ports"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR koda skenēšana"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Izveidojiet savienojumu pārī ar ierīci Wi‑Fi tīklā, skenējot QR kodu."</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, atkļūdošana, izstrādātājiem"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Kļūdu pārskata saīsne"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Izslēgšanas izvēlnē rādīt kļūdu pārskata veidošanas pogu"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Atstāt nomodā"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Izmantot paātrinātu aparatūras darbību piesaistei, ja tā ir pieejama"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Vai atļaut USB atkļūdošanu?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB atkļūdošana ir paredzēta tikai ar izstrādi saistītām darbībām. Izmantojiet to datu kopēšanai no datora uz ierīci un pretēji, lietotņu instalēšanai ierīcē bez paziņojumiem un žurnāla datu lasīšanai."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Vai atļaut bezvadu atkļūdošanu?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Bezvadu atkļūdošana ir paredzēta tikai ar izstrādi saistītām darbībām. Izmantojiet to datu kopēšanai no datora uz ierīci un pretēji, lietotņu instalēšanai ierīcē bez paziņojumiem un žurnāla datu lasīšanai."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Vai atcelt piekļuvi USB atkļūdošanai no visiem datoriem, kuriem iepriekš piešķīrāt piekļuvi?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Vai atļaut izstrādes iestatījumus?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Šie iestatījumi ir paredzēti tikai izstrādei. To dēļ var tikt pārtraukta vai traucēta ierīces un lietojumprogrammu darbība."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomālija (sarkans/zaļš)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomālija (zils/dzeltens)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Krāsu korekcija"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Krāsu korekcija palīdz lietotājiem ar krāsu aklumu redzēt precīzākas krāsas."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Jaunā preference: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> — <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Aptuvenais atlikušais laiks: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Atlicis mazāk nekā <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Atlicis vairāk nekā <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Atlicis vairāk nekā <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Iespējams, tālrunis drīz izslēgsies"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Iespējams, planšetdators drīz izslēgsies"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Iespējams, ierīce drīz izslēgsies"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Iespējams, tālrunis drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Iespējams, planšetdators drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Iespējams, ierīce drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Tālrunis, iespējams, drīz izslēgsies."</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Planšetdators, iespējams, drīz izslēgsies."</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Ierīce, iespējams, drīz izslēgsies."</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Tālrunis, iespējams, drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Planšetdators, iespējams, drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Ierīce, iespējams, drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> — <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Vēl <xliff:g id="TIME">%1$s</xliff:g> līdz pilnai uzlādei"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> — <xliff:g id="TIME">%2$s</xliff:g> līdz pilnai uzlādei"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nezināms"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Uzlāde"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Notiek ātrā uzlāde"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Notiek lēnā uzlāde"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nenotiek uzlāde"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Pievienots, taču pašlaik nevar veikt uzlādi"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Pilns"</string>

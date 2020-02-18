@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"‏USB ڈیبگ کرنا"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"‏USB مربوط ہونے پر ڈيبگ کرنے کی وضع"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"‏USB ڈیبگ کرنے کی اجازت دہندگیوں کو منسوخ کریں"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"وائرلیس ڈیبگنگ"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"‏Wi-Fi سے منسلک ہونے پر ڈیبگ موڈ"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"خرابی"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"وائرلیس ڈیبگنگ"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"دستیاب آلات کو دیکھنے اور استعمال کرنے کے لیے، وائرلیس ڈیبگنگ آن کریں"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"‏QR کوڈ کے ذریعے آلہ کا جوڑا بنائیں"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"‏QR کوڈ اسکینر کا استعمال کر کے نئے آلہ کا جوڑا بنائیں"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"جوڑا بنانے کے کوڈ کے ذریعے آلہ کا جوڑا بنائیں"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"چھ ہندسوں کا کوڈ استعمال کر کے نئے آلات کا جوڑا بنائیں"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"جوڑا بنائے گئے آلات"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"فی الحال منسلک ہے"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"آلہ کی تفصیلات"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"بھول جائیں"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"آلہ کا فنگر پرنٹ: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"کنکشن ناکام ہو گیا"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"یقینی بنائیں کہ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> درست نیٹ ورک سے منسلک ہے"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"آلہ کے ساتھ جوڑا بنائیں"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"‏Wi-Fi سے جوڑا بنانے کا کوڈ"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"جوڑا بنانے میں ناکام"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"یقینی بنائیں کہ آلہ اسی نیٹ ورک سے منسلک ہے۔"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"‏QR کوڈ اسکین کر کے Wi-Fi پر آلہ کا جوڑا بنائیں"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"آلہ کا جوڑا بنایا جا رہا ہے…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"‏آلہ کا جوڑا بنانے میں ناکام۔ یا تو QR کوڈ غلط تھا، یا آلہ اسی نیٹ ورک سے منسلک نہیں ہے۔"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏IP پتہ اور پورٹ"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"‏QR کوڈ اسکین کریں"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"‏QR کوڈ اسکین کر کے Wi-Fi پر آلہ کا جوڑا بنائیں"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb، ڈیبگ، dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"بگ رپورٹ کا شارٹ کٹ"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"بگ رپورٹ لینے کیلئے پاور مینو میں ایک بٹن دکھائیں"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"بیدار رکھیں"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"اگر دستیاب ہو تو ٹیدرنگ ہارڈویئر سرعت کاری کا استعمال کریں"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"‏USB ڈیبگ کرنے کی اجازت دیں؟"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"‏USB ڈیبگ کرنا صرف ڈیولپمنٹ کے مقاصد کیلئے ہے۔ اپنے کمپیوٹر اور اپنے آلہ کے درمیان ڈیٹا کاپی کرنے کیلئے اسے استعمال کریں، بغیر اطلاع کے اپنے آلہ پر ایپس انسٹال کریں اور لاگ ڈیٹا پڑھیں۔"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"وائرلیس ڈیبگ کرنے کی اجازت دیں؟"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"وائرلیس ڈیبگ کرنا صرف ڈیولپمنٹ کے مقاصد کے لیے ہے۔ اپنے کمپیوٹر اور اپنے آلہ کے درمیان ڈیٹا کاپی کرنے کے لیے اسے استعمال کریں، بغیر اطلاع کے اپنے آلہ پر ایپس انسٹال کریں اور لاگ ڈیٹا پڑھیں۔"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"‏اپنے ذریعہ پہلے سے اجازت یافتہ سبھی کمپیوٹرز سے USB ڈیبگ کرنے کی رسائی کو کالعدم کریں؟"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"ڈویلپمنٹ ترتیبات کی اجازت دیں؟"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"یہ ترتیبات صرف ڈویلپمنٹ استعمال کے ارادے سے ہیں۔ ان سے آپ کا آلہ اور اس پر موجود ایپلیکیشنز بریک ہو سکتی یا غلط برتاؤ کر سکتی ہیں۔"</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"‏Protanomaly (سرخ سبز)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"‏Tritanomaly (نیلا پیلا)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"رنگ کی اصلاح"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"رنگ کی درستگی رنگ نہ دکھائی دینے والے لوگوں کی رنگوں کو مزید درست طریقے سے دیکھنے میں مدد کرتی ہے"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> کے ذریعہ منسوخ کردیا گیا"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"تقریباً <xliff:g id="TIME_REMAINING">%1$s</xliff:g> باقی ہے"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"فون جلد ہی بند ہو سکتا ہے"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"ٹیبلیٹ جلد ہی بند ہو سکتا ہے"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"آلہ جلد ہی بند ہو سکتا ہے"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"فون جلد ہی بند ہو سکتا ہے (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"ٹیبلیٹ جلد ہی بند ہو سکتا ہے (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"آلہ جلد ہی بند ہو سکتا ہے (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"فون جلد ہی بند ہو سکتا ہے"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ٹیبلیٹ جلد ہی بند ہو سکتا ہے"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"آلہ جلد ہی بند ہو سکتا ہے"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"فون جلد ہی بند ہو سکتا ہے (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ٹیبلیٹ جلد ہی بند ہو سکتا ہے (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"آلہ جلد ہی بند ہو سکتا ہے (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"‎<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>‎"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"چارج ہونے میں <xliff:g id="TIME">%1$s</xliff:g> باقی"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> چارج ہونے تک"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"نامعلوم"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"چارج ہو رہا ہے"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"تیزی سے چارج ہو رہا ہے"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"آہستہ چارج ہو رہا ہے"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"چارج نہیں ہو رہا ہے"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"پلگ ان ہے، ابھی چارج نہیں کر سکتے"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"مکمل"</string>
