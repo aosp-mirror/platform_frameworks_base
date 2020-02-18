@@ -2622,4 +2622,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     NOTIFICATION_CONVERSATION_LIST_SETTINGS = 1834;
+
+    // Panel for Media Output Group operation
+    // CATEGORY: SETTINGS
+    // OS: R
+    PANEL_MEDIA_OUTPUT_GROUP = 1835;
 }
