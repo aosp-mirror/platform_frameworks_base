@@ -9566,7 +9566,10 @@ public final class ViewRootImpl implements ViewParent,
         return mRtBLASTSyncTransaction;
     }
 
-    SurfaceControl getRenderSurfaceControl() {
+    /**
+     * @hide
+     */
+    public SurfaceControl getRenderSurfaceControl() {
         if (mUseBLASTAdapter) {
             return mBlastSurfaceControl;
         } else {

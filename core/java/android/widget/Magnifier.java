@@ -1257,7 +1257,8 @@ public final class Magnifier {
                             return;
                         }
                         // Show or move the window at the content draw frame.
-                        mTransaction.deferTransactionUntilSurface(mSurfaceControl, mSurface, frame);
+                        mTransaction.deferTransactionUntil(mSurfaceControl, mSurfaceControl,
+                                frame);
                         if (updateWindowPosition) {
                             mTransaction.setPosition(mSurfaceControl, pendingX, pendingY);
                         }
