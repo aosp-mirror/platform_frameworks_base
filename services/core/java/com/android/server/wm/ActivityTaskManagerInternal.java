@@ -231,7 +231,8 @@ public abstract class ActivityTaskManagerInternal {
      * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
      */
     public abstract int startActivityAsUser(IApplicationThread caller, String callingPackage,
-            @Nullable String callingFeatureId, Intent intent, @Nullable Bundle options, int userId);
+            @Nullable String callingFeatureId, Intent intent, @Nullable IBinder resultTo,
+            int startFlags, @Nullable Bundle options, int userId);
 
     /**
      * Called when Keyguard flags might have changed.

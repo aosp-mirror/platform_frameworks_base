@@ -31,6 +31,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
@@ -237,6 +238,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -260,6 +263,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -285,6 +290,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -310,6 +317,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -333,6 +342,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -356,6 +367,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -381,6 +394,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -411,6 +426,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -434,6 +451,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -457,6 +476,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -480,6 +501,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -503,6 +526,8 @@ public class CrossProfileAppsServiceImplTest {
                         anyString(),
                         nullable(String.class),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         anyInt());
     }
@@ -525,6 +550,8 @@ public class CrossProfileAppsServiceImplTest {
                         eq(PACKAGE_ONE),
                         eq(FEATURE_ID),
                         any(Intent.class),
+                        nullable(IBinder.class),
+                        anyInt(),
                         nullable(Bundle.class),
                         eq(PRIMARY_USER));
     }
