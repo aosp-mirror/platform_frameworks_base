@@ -1096,18 +1096,18 @@ public class AudioSystem
      * @return an empty list if there was an issue with the request, a list of audio devices
      *   otherwise (typically one device, except for duplicated paths).
      */
-    public static @NonNull ArrayList<AudioDevice> getDevicesForAttributes(
+    public static @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
         Objects.requireNonNull(attributes);
-        final AudioDevice[] devices = new AudioDevice[MAX_DEVICE_ROUTING];
+        final AudioDeviceAttributes[] devices = new AudioDeviceAttributes[MAX_DEVICE_ROUTING];
         final int res = getDevicesForAttributes(attributes, devices);
-        final ArrayList<AudioDevice> routeDevices = new ArrayList<>();
+        final ArrayList<AudioDeviceAttributes> routeDevices = new ArrayList<>();
         if (res != SUCCESS) {
             Log.e(TAG, "error " + res + " in getDevicesForAttributes for " + attributes);
             return routeDevices;
         }
 
-        for (AudioDevice device : devices) {
+        for (AudioDeviceAttributes device : devices) {
             if (device != null) {
                 routeDevices.add(device);
             }
@@ -1117,12 +1117,12 @@ public class AudioSystem
 
     /**
      * Maximum number of audio devices a track is ever routed to, determines the size of the
-     * array passed to {@link #getDevicesForAttributes(AudioAttributes, AudioDevice[])}
+     * array passed to {@link #getDevicesForAttributes(AudioAttributes, AudioDeviceAttributes[])}
      */
     private static final int MAX_DEVICE_ROUTING = 4;
 
     private static native int getDevicesForAttributes(@NonNull AudioAttributes aa,
-                                                      @NonNull AudioDevice[] devices);
+                                                      @NonNull AudioDeviceAttributes[] devices);
 
     /** @hide returns true if master mono is enabled. */
     public static native boolean getMasterMono();
@@ -1257,7 +1257,7 @@ public class AudioSystem
      * @return {@link #SUCCESS} if successfully set
      */
     public static int setPreferredDeviceForStrategy(
-            int strategy, @NonNull AudioDevice device) {
+            int strategy, @NonNull AudioDeviceAttributes device) {
         return setPreferredDeviceForStrategy(strategy,
                 AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType()),
                 device.getAddress());
@@ -1288,7 +1288,7 @@ public class AudioSystem
      *     and written to the array
      */
     public static native int getPreferredDeviceForStrategy(int strategy,
-                                                           AudioDevice[] device);
+                                                           AudioDeviceAttributes[] device);
 
     // Items shared with audio service
 

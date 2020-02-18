@@ -17,7 +17,7 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
-import android.media.AudioDevice;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 import android.util.Log;
 
@@ -86,12 +86,12 @@ public class AudioSystemAdapter {
     }
 
     /**
-     * Same as {@link AudioSystem#setPreferredDeviceForStrategy(int, AudioDevice)}
+     * Same as {@link AudioSystem#setPreferredDeviceForStrategy(int, AudioDeviceAttributes)}
      * @param strategy
      * @param device
      * @return
      */
-    public int setPreferredDeviceForStrategy(int strategy, @NonNull AudioDevice device) {
+    public int setPreferredDeviceForStrategy(int strategy, @NonNull AudioDeviceAttributes device) {
         return AudioSystem.setPreferredDeviceForStrategy(strategy, device);
     }
 
@@ -138,7 +138,8 @@ public class AudioSystemAdapter {
         }
 
         @Override
-        public int setPreferredDeviceForStrategy(int strategy, @NonNull AudioDevice device) {
+        public int setPreferredDeviceForStrategy(int strategy,
+                                                 @NonNull AudioDeviceAttributes device) {
             return AudioSystem.AUDIO_STATUS_OK;
         }
 

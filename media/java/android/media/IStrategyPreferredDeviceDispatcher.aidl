@@ -16,7 +16,7 @@
 
 package android.media;
 
-import android.media.AudioDevice;
+import android.media.AudioDeviceAttributes;
 
 /**
  * AIDL for AudioService to signal audio strategy-preferred device updates.
@@ -25,6 +25,6 @@ import android.media.AudioDevice;
  */
 oneway interface IStrategyPreferredDeviceDispatcher {
 
-    void dispatchPrefDeviceChanged(int strategyId, in AudioDevice device);
+    void dispatchPrefDeviceChanged(int strategyId, in AudioDeviceAttributes device);
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "android_media_AudioDevice.h"
+#include "android_media_AudioDeviceAttributes.h"
 #include "android_media_AudioErrors.h"
 #include "core_jni_helpers.h"
 
@@ -22,29 +22,30 @@
 
 using namespace android;
 
-static jclass gAudioDeviceClass;
-static jmethodID gAudioDeviceCstor;
+static jclass gAudioDeviceAttributesClass;
+static jmethodID gAudioDeviceAttributesCstor;
 
 namespace android {
 
-jint createAudioDeviceFromNative(JNIEnv *env, jobject *jAudioDevice,
+jint createAudioDeviceAttributesFromNative(JNIEnv *env, jobject *jAudioDeviceAttributes,
                                  const AudioDeviceTypeAddr *devTypeAddr) {
     jint jStatus = (jint)AUDIO_JAVA_SUCCESS;
     jint jNativeType = (jint)devTypeAddr->mType;
     ScopedLocalRef<jstring> jAddress(env, env->NewStringUTF(devTypeAddr->mAddress.data()));
 
-    *jAudioDevice =
-            env->NewObject(gAudioDeviceClass, gAudioDeviceCstor, jNativeType, jAddress.get());
+    *jAudioDeviceAttributes = env->NewObject(gAudioDeviceAttributesClass, gAudioDeviceAttributesCstor,
+            jNativeType, jAddress.get());
 
     return jStatus;
 }
 
 } // namespace android
 
-int register_android_media_AudioDevice(JNIEnv *env) {
-    jclass audioDeviceTypeAddressClass = FindClassOrDie(env, "android/media/AudioDevice");
-    gAudioDeviceClass = MakeGlobalRefOrDie(env, audioDeviceTypeAddressClass);
-    gAudioDeviceCstor =
+int register_android_media_AudioDeviceAttributes(JNIEnv *env) {
+    jclass audioDeviceTypeAddressClass =
+            FindClassOrDie(env, "android/media/AudioDeviceAttributes");
+    gAudioDeviceAttributesClass = MakeGlobalRefOrDie(env, audioDeviceTypeAddressClass);
+    gAudioDeviceAttributesCstor =
             GetMethodIDOrDie(env, audioDeviceTypeAddressClass, "<init>", "(ILjava/lang/String;)V");
 
     return 0;
