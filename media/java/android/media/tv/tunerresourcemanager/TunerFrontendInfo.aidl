@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tunerresourcemanager;
 
 /**
- * Information required to request a Tuner Lnb.
+ * Simple container of the FrontendInfo struct defined in the TunerHAL 1.0 interface.
  *
  * @hide
  */
-parcelable TunerLnbRequest;
+parcelable TunerFrontendInfo;

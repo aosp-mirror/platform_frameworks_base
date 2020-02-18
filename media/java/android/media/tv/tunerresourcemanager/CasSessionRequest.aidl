@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tunerresourcemanager;
 
 /**
- * Interface to receive callbacks from ITunerResourceManager.
+ * A wrapper of a cas session requests that contains all the request info of the client.
  *
  * @hide
  */
-oneway interface ITunerResourceManagerListener {
-    /*
-     * TRM invokes this method when the client's resources need to be reclaimed.
-     *
-     * <p>This method is implemented in Tuner Framework to take the reclaiming
-     * actions. It's a synchonized call. TRM would wait on the call to finish
-     * then grant the resource.
-     */
-    void onResourcesReclaim();
-}
+parcelable CasSessionRequest;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tunerresourcemanager;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
@@ -42,10 +42,10 @@ import java.util.concurrent.Executor;
  * <ul>
  * <li>Tuner Java/MediaCas/TIF update resources of the current device with TRM.
  * <li>Client registers its profile through {@link #registerClientProfile(ResourceClientProfile,
- * Executor, ResourceListener, int[])}.
+ * Executor, ResourcesReclaimListener, int[])}.
  * <li>Client requests resources through request APIs.
  * <li>If the resource needs to be handed to a higher priority client from a lower priority
- * one, TRM calls ITunerResourceManagerListener registered by the lower priority client to release
+ * one, TRM calls IResourcesReclaimListener registered by the lower priority client to release
  * the resource.
  * <ul>
  *
@@ -85,25 +85,26 @@ public class TunerResourceManager {
      * @param profile {@link ResourceClientProfile} profile of the current client. Undefined use
      *                case would cause IllegalArgumentException.
      * @param executor the executor on which the listener would be invoked.
-     * @param listener {@link ResourceListener} callback to reclaim clients' resources when needed.
+     * @param listener {@link ResourcesReclaimListener} callback to reclaim clients' resources when
+     *                 needed.
      * @param clientId returned a clientId from the resource manager when the
      *                 the client registeres.
      * @throws IllegalArgumentException when {@code profile} contains undefined use case.
      */
     public void registerClientProfile(@NonNull ResourceClientProfile profile,
                         @NonNull @CallbackExecutor Executor executor,
-                        @NonNull ResourceListener listener,
+                        @NonNull ResourcesReclaimListener listener,
                         @NonNull int[] clientId) {
         // TODO: throw new IllegalArgumentException("Unknown client use case")
         // when the use case is not defined.
         try {
             mService.registerClientProfile(profile,
-                    new ITunerResourceManagerListener.Stub() {
+                    new IResourcesReclaimListener.Stub() {
                     @Override
-                public void onResourcesReclaim() {
+                public void onReclaimResources() {
                         final long identity = Binder.clearCallingIdentity();
                         try {
-                            executor.execute(() -> listener.onResourcesReclaim());
+                            executor.execute(() -> listener.onReclaimResources());
                         } finally {
                             Binder.restoreCallingIdentity(identity);
                         }
@@ -214,7 +215,7 @@ public class TunerResourceManager {
      *
      * <li>If no Frontend is available but the current request info can show higher priority than
      * other uses of Frontend, the API will send
-     * {@link ITunerResourceManagerListener#onResourcesReclaim()} to the {@link Tuner}. Tuner would
+     * {@link IResourcesReclaimListener#onReclaimResources()} to the {@link Tuner}. Tuner would
      * handle the resource reclaim on the holder of lower priority and notify the holder of its
      * resource loss.
      *
@@ -267,7 +268,7 @@ public class TunerResourceManager {
      *
      * <li>If no Cas system is available but the current request info can show higher priority than
      * other uses of the cas sessions under the requested cas system, the API will send
-     * {@link ITunerResourceManagerListener#onResourcesReclaim()} to the {@link Tuner}. Tuner would
+     * {@link IResourcesReclaimListener#onReclaimResources()} to the {@link Tuner}. Tuner would
      * handle the resource reclaim on the holder of lower priority and notify the holder of its
      * resource loss.
      *
@@ -300,7 +301,7 @@ public class TunerResourceManager {
      * <li>If there is Lnb available, the API would send the id back.
      *
      * <li>If no Lnb is available but the current request has a higher priority than other uses of
-     * lnbs, the API will send {@link ITunerResourceManagerListener#onResourcesReclaim()} to the
+     * lnbs, the API will send {@link IResourcesReclaimListener#onReclaimResources()} to the
      * {@link Tuner}. Tuner would handle the resource reclaim on the holder of lower priority and
      * notify the holder of its resource loss.
      *
@@ -398,10 +399,10 @@ public class TunerResourceManager {
     /**
      * Interface used to receive events from TunerResourceManager.
      */
-    public abstract static class ResourceListener {
+    public abstract static class ResourcesReclaimListener {
         /*
          * To reclaim all the resources of the callack owner.
          */
-        public abstract void onResourcesReclaim();
+        public abstract void onReclaimResources();
     }
 }
