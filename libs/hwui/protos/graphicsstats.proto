@@ -30,8 +30,9 @@ message GraphicsStatsServiceDumpProto {
 
 message GraphicsStatsProto {
     enum PipelineType {
-        GL = 0;
-        VULKAN = 1;
+        UNKNOWN = 0;
+        GL = 1;
+        VULKAN = 2;
     }
 
     // The package name of the app
