@@ -27,6 +27,8 @@ import static org.testng.Assert.assertThrows;
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
+import com.android.tradefed.util.CommandResult;
+import com.android.tradefed.util.CommandStatus;
 
 import org.junit.After;
 import org.junit.Before;
@@ -83,14 +85,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
     @Before
     public void setUp() throws Exception {
-        if (!getDevice().isAdbRoot()) {
-            getDevice().enableAdbRoot();
-        }
-        getDevice().remountSystemWritable();
-        getDevice().executeShellCommand(
-                "rm -f /system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex "
-                        + "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
-        getDevice().reboot();
+        deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
+                "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
         runPhase("testCleanUp");
         mLogger.start(getDevice());
     }
@@ -99,19 +95,36 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     public void tearDown() throws Exception {
         mLogger.stop();
         runPhase("testCleanUp");
+        deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
+                "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
+                apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + "*",
+                apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "*");
+    }
 
-        if (!getDevice().isAdbRoot()) {
-            getDevice().enableAdbRoot();
+    /**
+     * Deletes files and reboots the device if necessary.
+     * @param files the paths of files which might contain wildcards
+     */
+    private void deleteFiles(String... files) throws Exception {
+        boolean found = false;
+        for (String file : files) {
+            CommandResult result = getDevice().executeShellV2Command("ls " + file);
+            if (result.getStatus() == CommandStatus.SUCCESS) {
+                found = true;
+                break;
+            }
         }
-        getDevice().remountSystemWritable();
-        getDevice().executeShellCommand(
-                "rm -f /system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex "
-                        + "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
-        getDevice().executeShellCommand(
-                "rm -rf " + apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + "*");
-        getDevice().executeShellCommand(
-                "rm -rf " + apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "*");
-        getDevice().reboot();
+
+        if (found) {
+            if (!getDevice().isAdbRoot()) {
+                getDevice().enableAdbRoot();
+            }
+            getDevice().remountSystemWritable();
+            for (String file : files) {
+                getDevice().executeShellCommand("rm -rf " + file);
+            }
+            getDevice().reboot();
+        }
     }
 
     /**
