@@ -22,6 +22,7 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
+import static android.provider.Settings.Secure.BUBBLE_IMPORTANT_CONVERSATIONS;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -112,7 +113,8 @@ public class NotificationConversationInfo extends LinearLayout implements
     boolean mSkipPost = false;
 
     @Retention(SOURCE)
-    @IntDef({ACTION_BUBBLE, ACTION_HOME, ACTION_FAVORITE, ACTION_SNOOZE, ACTION_MUTE})
+    @IntDef({ACTION_BUBBLE, ACTION_HOME, ACTION_FAVORITE, ACTION_SNOOZE, ACTION_MUTE,
+            ACTION_UNBUBBLE, ACTION_SETTINGS})
     private @interface Action {}
     static final int ACTION_BUBBLE = 0;
     static final int ACTION_HOME = 1;
@@ -128,8 +130,6 @@ public class NotificationConversationInfo extends LinearLayout implements
             mBubbleController.onUserDemotedBubbleFromNotification(mEntry);
         } else {
             mBubbleController.onUserCreatedBubbleFromNotification(mEntry);
-            Settings.Global.putInt(
-                    mContext.getContentResolver(), Settings.Global.NOTIFICATION_BUBBLES, 1);
         }
         closeControls(v, true);
     };
@@ -225,7 +225,9 @@ public class NotificationConversationInfo extends LinearLayout implements
             mShortcutInfo = shortcuts.get(0);
         }
 
-        mIsBubbleable = mEntry.getBubbleMetadata() != null;
+        mIsBubbleable = mEntry.getBubbleMetadata() != null
+            && Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.NOTIFICATION_BUBBLES, 0) == 1;
         mStartedAsBubble = mEntry.isBubble();
 
         createConversationChannelIfNeeded();
@@ -380,6 +382,11 @@ public class NotificationConversationInfo extends LinearLayout implements
         } catch (PackageManager.NameNotFoundException e) {
         }
         ((TextView) findViewById(R.id.pkg_name)).setText(mAppName);
+    }
+
+    private boolean bubbleImportantConversations() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                BUBBLE_IMPORTANT_CONVERSATIONS, 1) == 1;
     }
 
     private void bindDelegate() {
@@ -575,6 +582,10 @@ public class NotificationConversationInfo extends LinearLayout implements
                     case ACTION_FAVORITE:
                         mChannelToUpdate.setImportantConversation(
                                 !mChannelToUpdate.isImportantConversation());
+                        if (mChannelToUpdate.isImportantConversation()
+                                && bubbleImportantConversations()) {
+                            mChannelToUpdate.setAllowBubbles(true);
+                        }
                         break;
                     case ACTION_MUTE:
                         if (mChannelToUpdate.getImportance() == IMPORTANCE_UNSPECIFIED

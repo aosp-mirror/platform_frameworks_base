@@ -8592,6 +8592,15 @@ public final class Settings {
         public static final String NOTIFICATION_HISTORY_ENABLED = "notification_history_enabled";
 
         /**
+         * When enabled conversations marked as favorites will be set to bubble.
+         *
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String BUBBLE_IMPORTANT_CONVERSATIONS
+                = "bubble_important_conversations";
+
+        /**
          * Whether notifications are dismissed by a right-to-left swipe (instead of a left-to-right
          * swipe).
          *
