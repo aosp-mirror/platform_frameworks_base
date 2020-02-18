@@ -186,6 +186,7 @@ static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
         proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
     }
     proxy->setSurface(window, enableTimeout);
+    ANativeWindow_release(window);
 }
 
 static jboolean android_view_ThreadedRenderer_pause(JNIEnv* env, jobject clazz,
