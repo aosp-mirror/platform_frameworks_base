@@ -241,6 +241,7 @@ public class ChooserActivity extends ResolverActivity implements
     private int mChooserRowServiceSpacing;
 
     private int mCurrAvailableWidth = 0;
+    private int mLastNumberOfChildren = -1;
 
     private static final String TARGET_DETAILS_FRAGMENT_TAG = "targetDetailsFragment";
     // TODO: Update to handle landscape instead of using static value
@@ -967,6 +968,7 @@ public class ChooserActivity extends ResolverActivity implements
         super.onConfigurationChanged(newConfig);
 
         adjustPreviewWidth(newConfig.orientation, null);
+        updateStickyContentPreview();
     }
 
     private boolean shouldDisplayLandscape(int orientation) {
@@ -987,8 +989,6 @@ public class ChooserActivity extends ResolverActivity implements
         updateLayoutWidth(R.id.content_preview_text_layout, width, parent);
         updateLayoutWidth(R.id.content_preview_title_layout, width, parent);
         updateLayoutWidth(R.id.content_preview_file_layout, width, parent);
-        findViewById(R.id.content_preview_container)
-                .setVisibility(shouldShowStickyContentPreview() ? View.VISIBLE : View.GONE);
     }
 
     private void updateLayoutWidth(int layoutResourceId, int width, View parent) {
@@ -2398,14 +2398,17 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         final int availableWidth = right - left - v.getPaddingLeft() - v.getPaddingRight();
+        if (mChooserMultiProfilePagerAdapter.getCurrentUserHandle() != getUser()) {
+            gridAdapter.calculateChooserTargetWidth(availableWidth);
+            return;
+        }
+
         if (gridAdapter.consumeLayoutRequest()
                 || gridAdapter.calculateChooserTargetWidth(availableWidth)
                 || recyclerView.getAdapter() == null
+                || mLastNumberOfChildren != recyclerView.getChildCount()
                 || availableWidth != mCurrAvailableWidth) {
             mCurrAvailableWidth = availableWidth;
-            recyclerView.setAdapter(gridAdapter);
-            ((GridLayoutManager) recyclerView.getLayoutManager())
-                    .setSpanCount(gridAdapter.getMaxTargetsPerRow());
 
             getMainThreadHandler().post(() -> {
                 if (mResolverDrawerLayout == null || gridAdapter == null) {
@@ -2415,7 +2418,8 @@ public class ChooserActivity extends ResolverActivity implements
                 final int bottomInset = mSystemWindowInsets != null
                                             ? mSystemWindowInsets.bottom : 0;
                 int offset = bottomInset;
-                int rowsToShow = gridAdapter.getProfileRowCount()
+                int rowsToShow = gridAdapter.getContentPreviewRowCount()
+                        + gridAdapter.getProfileRowCount()
                         + gridAdapter.getServiceTargetRowCount()
                         + gridAdapter.getCallerAndRankedTargetRowCount();
 
@@ -2434,8 +2438,9 @@ public class ChooserActivity extends ResolverActivity implements
                     return;
                 }
 
-                if (shouldShowStickyContentPreview()) {
-                    offset += findViewById(R.id.content_preview_container).getHeight();
+                View stickyContentPreview = findViewById(R.id.content_preview_container);
+                if (shouldShowStickyContentPreview() && isStickyContentPreviewShowing()) {
+                    offset += stickyContentPreview.getHeight();
                 }
 
                 if (shouldShowTabs()) {
@@ -2444,6 +2449,7 @@ public class ChooserActivity extends ResolverActivity implements
 
                 int directShareHeight = 0;
                 rowsToShow = Math.min(4, rowsToShow);
+                mLastNumberOfChildren = recyclerView.getChildCount();
                 for (int i = 0, childCount = recyclerView.getChildCount();
                         i < childCount && rowsToShow > 0; i++) {
                     View child = recyclerView.getChildAt(i);
@@ -2526,6 +2532,14 @@ public class ChooserActivity extends ResolverActivity implements
         setupScrollListener();
 
         ChooserListAdapter chooserListAdapter = (ChooserListAdapter) listAdapter;
+        if (chooserListAdapter.getUserHandle()
+                == mChooserMultiProfilePagerAdapter.getCurrentUserHandle()) {
+            mChooserMultiProfilePagerAdapter.getActiveAdapterView()
+                    .setAdapter(mChooserMultiProfilePagerAdapter.getCurrentRootAdapter());
+            mChooserMultiProfilePagerAdapter
+                    .setupListAdapter(mChooserMultiProfilePagerAdapter.getCurrentPage());
+        }
+
         if (chooserListAdapter.mDisplayList == null
                 || chooserListAdapter.mDisplayList.isEmpty()) {
             chooserListAdapter.notifyDataSetChanged();
@@ -2617,14 +2631,29 @@ public class ChooserActivity extends ResolverActivity implements
      * we instead show the content preview as a regular list item.
      */
     private boolean shouldShowStickyContentPreview() {
-        return shouldShowTabs()
-                && mMultiProfilePagerAdapter.getListAdapterForUserHandle(
-                        UserHandle.of(UserHandle.myUserId())).getCount() > 0
-                && isSendAction(getTargetIntent())
+        return shouldShowStickyContentPreviewNoOrientationCheck()
                 && getResources().getBoolean(R.bool.sharesheet_show_content_preview);
     }
 
+    private boolean shouldShowStickyContentPreviewNoOrientationCheck() {
+        return shouldShowTabs()
+                && mMultiProfilePagerAdapter.getListAdapterForUserHandle(
+                UserHandle.of(UserHandle.myUserId())).getCount() > 0
+                && isSendAction(getTargetIntent());
+    }
+
     private void updateStickyContentPreview() {
+        if (shouldShowStickyContentPreviewNoOrientationCheck()) {
+            // The sticky content preview is only shown when we show the work and personal tabs.
+            // We don't show it in landscape as otherwise there is no room for scrolling.
+            // If the sticky content preview will be shown at some point with orientation change,
+            // then always preload it to avoid subsequent resizing of the share sheet.
+            ViewGroup contentPreviewContainer = findViewById(R.id.content_preview_container);
+            if (contentPreviewContainer.getChildCount() == 0) {
+                ViewGroup contentPreviewView = createContentPreviewView(contentPreviewContainer);
+                contentPreviewContainer.addView(contentPreviewView);
+            }
+        }
         if (shouldShowStickyContentPreview()) {
             showStickyContentPreview();
         } else {
@@ -2633,15 +2662,23 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private void showStickyContentPreview() {
+        if (isStickyContentPreviewShowing()) {
+            return;
+        }
         ViewGroup contentPreviewContainer = findViewById(R.id.content_preview_container);
         contentPreviewContainer.setVisibility(View.VISIBLE);
-        ViewGroup contentPreviewView = createContentPreviewView(contentPreviewContainer);
-        contentPreviewContainer.addView(contentPreviewView);
+    }
+
+    private boolean isStickyContentPreviewShowing() {
+        ViewGroup contentPreviewContainer = findViewById(R.id.content_preview_container);
+        return contentPreviewContainer.getVisibility() == View.VISIBLE;
     }
 
     private void hideStickyContentPreview() {
+        if (!isStickyContentPreviewShowing()) {
+            return;
+        }
         ViewGroup contentPreviewContainer = findViewById(R.id.content_preview_container);
-        contentPreviewContainer.removeAllViews();
         contentPreviewContainer.setVisibility(View.GONE);
     }
 

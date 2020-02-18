@@ -144,7 +144,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     @Override
     public ViewGroup instantiateItem(ViewGroup container, int position) {
         final ProfileDescriptor profileDescriptor = getItem(position);
-        setupListAdapter(position);
         container.addView(profileDescriptor.rootView);
         return profileDescriptor.rootView;
     }
@@ -198,8 +197,8 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     abstract int getItemCount();
 
     /**
-     * Responsible for assigning an adapter to the list view for the relevant page, specified by
-     * <code>pageIndex</code>, and other list view-related initialization procedures.
+     * Performs view-related initialization procedures for the adapter specified
+     * by <code>pageIndex</code>.
      */
     abstract void setupListAdapter(int pageIndex);
 
