@@ -96,7 +96,6 @@ import android.test.MoreAsserts;
 import android.util.ArraySet;
 import android.util.Pair;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
@@ -6056,6 +6055,55 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(mContext.getResources()
                 .getStringArray(eq(R.array.vendor_cross_profile_apps)))
                 .thenReturn(packages);
+    }
+
+    public void testSetAccountTypesWithManagementDisabledOnManagedProfile() throws Exception {
+        setupProfileOwner();
+
+        final String accountType = "com.example.account.type";
+        int originalUid = mContext.binder.callingUid;
+        dpm.setAccountManagementDisabled(admin1, accountType, true);
+        assertThat(dpm.getAccountTypesWithManagementDisabled()).asList().containsExactly(
+                accountType);
+        mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
+        assertThat(dpm.getAccountTypesWithManagementDisabled()).isEmpty();
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        assertThat(dpm.getAccountTypesWithManagementDisabled()).isEmpty();
+
+        mContext.binder.callingUid = originalUid;
+        dpm.setAccountManagementDisabled(admin1, accountType, false);
+        assertThat(dpm.getAccountTypesWithManagementDisabled()).isEmpty();
+    }
+
+    public void testSetAccountTypesWithManagementDisabledOnOrgOwnedManagedProfile()
+            throws Exception {
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        mContext.binder.callingUid = managedProfileAdminUid;
+
+        configureProfileOwnerOfOrgOwnedDevice(admin1, managedProfileUserId);
+
+        int originalUid = mContext.binder.callingUid;
+        final String accountType = "com.example.account.type";
+        dpm.getParentProfileInstance(admin1).setAccountManagementDisabled(admin1, accountType,
+                true);
+        assertThat(dpm.getAccountTypesWithManagementDisabled()).isEmpty();
+        mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
+        assertThat(dpm.getAccountTypesWithManagementDisabled()).asList().containsExactly(
+                accountType);
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        assertThat(dpm.getAccountTypesWithManagementDisabled()).asList().containsExactly(
+                accountType);
+
+        mContext.binder.callingUid = originalUid;
+        dpm.getParentProfileInstance(admin1).setAccountManagementDisabled(admin1, accountType,
+                false);
+        mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
+        assertThat(dpm.getAccountTypesWithManagementDisabled()).isEmpty();
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        assertThat(dpm.getAccountTypesWithManagementDisabled()).isEmpty();
     }
 
     // admin1 is the outgoing DPC, adminAnotherPakcage is the incoming one.

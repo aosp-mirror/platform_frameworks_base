@@ -16,17 +16,12 @@
 
 #include "PullResultReceiver.h"
 
-using namespace android::binder;
-using namespace android::util;
-using namespace std;
-
 namespace android {
 namespace os {
 namespace statsd {
 
 PullResultReceiver::PullResultReceiver(
-        std::function<void(int32_t, bool, const vector<android::util::StatsEventParcel>&)>
-             pullFinishCb)
+        std::function<void(int32_t, bool, const vector<StatsEventParcel>&)> pullFinishCb)
     : pullFinishCallback(std::move(pullFinishCb)) {
 }
 

@@ -25,6 +25,7 @@ namespace statsd {
 
 using std::string;
 using std::vector;
+using android::base::StringPrintf;
 
 // These constants must be kept in sync with those in StatsDimensionsValue.java
 const static int STATS_DIMENSIONS_VALUE_STRING_TYPE = 2;
@@ -73,7 +74,7 @@ static void populateStatsDimensionsValueParcelChildren(StatsDimensionsValueParce
                     break;
                 case STRING:
                     childParcel.valueType = STATS_DIMENSIONS_VALUE_STRING_TYPE;
-                    childParcel.stringValue = String16(dim.mValue.str_value.c_str());
+                    childParcel.stringValue = dim.mValue.str_value;
                     break;
                 default:
                     ALOGE("Encountered FieldValue with unsupported value type.");

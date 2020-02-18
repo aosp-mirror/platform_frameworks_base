@@ -34,27 +34,6 @@ using testing::StrictMock;
 
 #ifdef __ANDROID__
 
-class MyResultReceiver : public BnResultReceiver {
-public:
-    Mutex mMutex;
-    Condition mCondition;
-    bool mHaveResult = false;
-    int32_t mResult = 0;
-
-    virtual void send(int32_t resultCode) {
-        AutoMutex _l(mMutex);
-        mResult = resultCode;
-        mHaveResult = true;
-        mCondition.signal();
-    }
-
-    int32_t waitForResult() {
-        AutoMutex _l(mMutex);
-        mCondition.waitRelative(mMutex, 1000000000);
-        return mResult;
-    }
-};
-
 void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
                   sp<MockStatsPullerManager> pullerManager,
                   const vector<std::shared_ptr<LogEvent>>& pushedEvents,
@@ -67,10 +46,7 @@ void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
     ASSERT_EQ(0, pipe(fds_data));
 
     size_t bufferSize = config.ByteSize();
-
     // write the config to pipe, first write size of the config
-    vector<uint8_t> size_buffer(sizeof(bufferSize));
-    std::memcpy(size_buffer.data(), &bufferSize, sizeof(bufferSize));
     write(fds_config[1], &bufferSize, sizeof(bufferSize));
     // then write config itself
     vector<uint8_t> buffer(bufferSize);
@@ -79,11 +55,10 @@ void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
     close(fds_config[1]);
 
     sp<ShellSubscriber> shellClient = new ShellSubscriber(uidMap, pullerManager);
-    sp<MyResultReceiver> resultReceiver = new MyResultReceiver();
 
     // mimic a binder thread that a shell subscriber runs on. it would block.
-    std::thread reader([&resultReceiver, &fds_config, &fds_data, &shellClient] {
-        shellClient->startNewSubscription(fds_config[0], fds_data[1], resultReceiver, -1);
+    std::thread reader([&shellClient, &fds_config, &fds_data] {
+        shellClient->startNewSubscription(fds_config[0], fds_data[1], /*timeoutSec=*/-1);
     });
     reader.detach();
 

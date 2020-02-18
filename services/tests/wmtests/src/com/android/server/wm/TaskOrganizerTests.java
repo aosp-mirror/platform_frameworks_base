@@ -28,17 +28,19 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -47,7 +49,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.PictureInPictureParams;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -55,6 +56,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
+import android.content.pm.ActivityInfo;
 import android.util.Rational;
 import android.view.Display;
 import android.view.ITaskOrganizer;
@@ -456,9 +458,9 @@ public class TaskOrganizerTests extends WindowTestsBase {
     private List<TaskTile> getTaskTiles(DisplayContent dc) {
         ArrayList<TaskTile> out = new ArrayList<>();
         for (int i = dc.getStackCount() - 1; i >= 0; --i) {
-            final TaskTile t = dc.getStackAt(i).asTile();
-            if (t != null) {
-                out.add(t);
+            final Task t = dc.getStackAt(i);
+            if (t instanceof TaskTile) {
+                out.add((TaskTile) t);
             }
         }
         return out;

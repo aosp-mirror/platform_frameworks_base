@@ -16,9 +16,8 @@
 
 #pragma once
 
-#include <android/os/IPullAtomCallback.h>
-#include <android/os/IStatsCompanionService.h>
-#include <binder/IServiceManager.h>
+#include <aidl/android/os/IPullAtomCallback.h>
+#include <aidl/android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
 #include <utils/threads.h>
 
@@ -30,10 +29,13 @@
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 
+using aidl::android::os::IPullAtomCallback;
+using aidl::android::os::IStatsCompanionService;
+using std::shared_ptr;
+
 namespace android {
 namespace os {
 namespace statsd {
-
 
 typedef struct PullerKey {
     // The uid of the process that registers this puller.
@@ -93,18 +95,18 @@ public:
     // Clear pull data cache if it is beyond respective cool down time.
     int ClearPullerCacheIfNecessary(int64_t timestampNs);
 
-    void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);
+    void SetStatsCompanionService(shared_ptr<IStatsCompanionService> statsCompanionService);
 
     void RegisterPullAtomCallback(const int uid, const int32_t atomTag, const int64_t coolDownNs,
                                   const int64_t timeoutNs, const vector<int32_t>& additiveFields,
-                                  const sp<IPullAtomCallback>& callback);
+                                  const shared_ptr<IPullAtomCallback>& callback);
 
     void UnregisterPullAtomCallback(const int uid, const int32_t atomTag);
 
     std::map<const PullerKey, sp<StatsPuller>> kAllPullAtomInfo;
 
 private:
-    sp<IStatsCompanionService> mStatsCompanionService = nullptr;
+    shared_ptr<IStatsCompanionService> mStatsCompanionService = nullptr;
 
     typedef struct {
         int64_t nextPullTimeNs;

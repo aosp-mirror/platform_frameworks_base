@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <android/binder_interface_utils.h>
 #include <gtest/gtest.h>
 
 #include "src/StatsLogProcessor.h"
@@ -19,6 +20,8 @@
 #include "tests/statsd_test_util.h"
 
 #include <vector>
+
+using ::ndk::SharedRefBase;
 
 namespace android {
 namespace os {
@@ -70,7 +73,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
-                                             new FakeSubsystemSleepCallback(),
+                                             SharedRefBase::make<FakeSubsystemSleepCallback>(),
                                              android::util::SUBSYSTEM_SLEEP_STATE);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
@@ -175,7 +178,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
-                                             new FakeSubsystemSleepCallback(),
+                                             SharedRefBase::make<FakeSubsystemSleepCallback>(),
                                              android::util::SUBSYSTEM_SLEEP_STATE);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
@@ -288,7 +291,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
-                                             new FakeSubsystemSleepCallback(),
+                                             SharedRefBase::make<FakeSubsystemSleepCallback>(),
                                              android::util::SUBSYSTEM_SLEEP_STATE);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());

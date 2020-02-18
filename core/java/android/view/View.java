@@ -112,8 +112,7 @@ import android.view.AccessibilityIterators.WordTextSegmentIterator;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Window.OnContentApplyWindowInsetsListener;
 import android.view.WindowInsets.Type;
-import android.view.WindowInsetsAnimationCallback.AnimationBounds;
-import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
+import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
@@ -4672,7 +4671,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         private ArrayList<OnUnhandledKeyEventListener> mUnhandledKeyListeners;
 
-        WindowInsetsAnimationCallback mWindowInsetsAnimationCallback;
+        WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback;
 
         /**
          * This lives here since it's only valid for interactive views.
@@ -11200,43 +11199,45 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets a {@link WindowInsetsAnimationCallback} to be notified about animations of windows that
+     * Sets a {@link WindowInsetsAnimation.Callback} to be notified about animations of windows that
      * cause insets.
      * <p>
-     * When setting a listener, it's {@link WindowInsetsAnimationCallback#getDispatchMode() dispatch
-     * mode} will be retrieved and recorded until another listener will be set.
+     * The callback's {@link WindowInsetsAnimation.Callback#getDispatchMode()
+     * dispatch mode} will affect whether animation callbacks are dispatched to the children of
+     * this view.
      * </p>
-     * @param listener The listener to set.
+     * @param callback The callback to set.
      */
-    public void setWindowInsetsAnimationCallback(@Nullable WindowInsetsAnimationCallback listener) {
-        getListenerInfo().mWindowInsetsAnimationCallback = listener;
+    public void setWindowInsetsAnimationCallback(
+            @Nullable WindowInsetsAnimation.Callback callback) {
+        getListenerInfo().mWindowInsetsAnimationCallback = callback;
     }
 
     /**
-     * Dispatches {@link WindowInsetsAnimationCallback#onPrepare(InsetsAnimation)}
+     * Dispatches {@link WindowInsetsAnimation.Callback#onPrepare(WindowInsetsAnimation)}
      * when Window Insets animation is being prepared.
      * @param animation current animation
      *
-     * @see WindowInsetsAnimationCallback#onPrepare(InsetsAnimation)
+     * @see WindowInsetsAnimation.Callback#onPrepare(WindowInsetsAnimation)
      */
     public void dispatchWindowInsetsAnimationPrepare(
-            @NonNull InsetsAnimation animation) {
+            @NonNull WindowInsetsAnimation animation) {
         if (mListenerInfo != null && mListenerInfo.mWindowInsetsAnimationCallback != null) {
             mListenerInfo.mWindowInsetsAnimationCallback.onPrepare(animation);
         }
     }
 
     /**
-     * Dispatches {@link WindowInsetsAnimationCallback#onStart(InsetsAnimation, AnimationBounds)}
+     * Dispatches {@link WindowInsetsAnimation.Callback#onStart(WindowInsetsAnimation, Bounds)}
      * when Window Insets animation is started.
      * @param animation current animation
-     * @param bounds the upper and lower {@link AnimationBounds} that provides range of
-     *  {@link InsetsAnimation}.
-     * @return the upper and lower {@link AnimationBounds}.
+     * @param bounds the upper and lower {@link Bounds} that provides range of
+     *  {@link WindowInsetsAnimation}.
+     * @return the upper and lower {@link Bounds}.
      */
     @NonNull
-    public AnimationBounds dispatchWindowInsetsAnimationStart(
-            @NonNull InsetsAnimation animation, @NonNull AnimationBounds bounds) {
+    public Bounds dispatchWindowInsetsAnimationStart(
+            @NonNull WindowInsetsAnimation animation, @NonNull Bounds bounds) {
         if (mListenerInfo != null && mListenerInfo.mWindowInsetsAnimationCallback != null) {
             return mListenerInfo.mWindowInsetsAnimationCallback.onStart(animation, bounds);
         }
@@ -11244,28 +11245,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Dispatches {@link WindowInsetsAnimationCallback#onProgress(WindowInsets)}
+     * Dispatches {@link WindowInsetsAnimation.Callback#onProgress(WindowInsets, List)}
      * when Window Insets animation makes progress.
      * @param insets The current {@link WindowInsets}.
+     * @param runningAnimations The currently running {@link WindowInsetsAnimation}s.
      * @return current {@link WindowInsets}.
      */
     @NonNull
-    public WindowInsets dispatchWindowInsetsAnimationProgress(@NonNull WindowInsets insets) {
+    public WindowInsets dispatchWindowInsetsAnimationProgress(@NonNull WindowInsets insets,
+            @NonNull List<WindowInsetsAnimation> runningAnimations) {
         if (mListenerInfo != null && mListenerInfo.mWindowInsetsAnimationCallback != null) {
-            return mListenerInfo.mWindowInsetsAnimationCallback.onProgress(insets);
+            return mListenerInfo.mWindowInsetsAnimationCallback.onProgress(insets,
+                    runningAnimations);
         } else {
             return insets;
         }
     }
 
     /**
-     * Dispatches {@link WindowInsetsAnimationCallback#onFinish(InsetsAnimation)}
-     * when Window Insets animation finishes.
-     * @param animation The current ongoing {@link InsetsAnimation}.
+     * Dispatches {@link WindowInsetsAnimation.Callback#onEnd(WindowInsetsAnimation)}
+     * when Window Insets animation ends.
+     * @param animation The current ongoing {@link WindowInsetsAnimation}.
      */
-    public void dispatchWindowInsetsAnimationFinish(@NonNull InsetsAnimation animation) {
+    public void dispatchWindowInsetsAnimationEnd(@NonNull WindowInsetsAnimation animation) {
         if (mListenerInfo != null && mListenerInfo.mWindowInsetsAnimationCallback != null) {
-            mListenerInfo.mWindowInsetsAnimationCallback.onFinish(animation);
+            mListenerInfo.mWindowInsetsAnimationCallback.onEnd(animation);
         }
     }
 
@@ -28785,11 +28789,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Hack to force certain system UI visibility flags to be cleared.
          */
         int mDisabledSystemUiVisibility;
-
-        /**
-         * Last global system UI visibility reported by the window manager.
-         */
-        int mGlobalSystemUiVisibility = -1;
 
         /**
          * True if a view in this hierarchy has an OnSystemUiVisibilityChangeListener

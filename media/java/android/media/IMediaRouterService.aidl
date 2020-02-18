@@ -49,8 +49,6 @@ interface IMediaRouterService {
     RoutingSessionInfo getSystemSessionInfo();
     void registerClient2(IMediaRouter2Client client, String packageName);
     void unregisterClient2(IMediaRouter2Client client);
-    void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route,
-            in Intent request);
     void setRouteVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int volume);
     void setSessionVolume2(IMediaRouter2Client client, String sessionId, int volume);
 

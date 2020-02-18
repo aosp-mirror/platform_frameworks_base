@@ -19,7 +19,6 @@
 #include "logd/LogEvent.h"
 
 #include <android/util/ProtoOutputStream.h>
-#include <binder/IResultReceiver.h>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
@@ -56,7 +55,7 @@ namespace statsd {
  * Only one shell subscriber allowed at a time, because each shell subscriber blocks one thread
  * until it exits.
  */
-class ShellSubscriber : public virtual IBinder::DeathRecipient {
+class ShellSubscriber : public virtual RefBase {
 public:
     ShellSubscriber(sp<UidMap> uidMap, sp<StatsPullerManager> pullerMgr)
         : mUidMap(uidMap), mPullerMgr(pullerMgr){};
@@ -64,10 +63,7 @@ public:
     /**
      * Start a new subscription.
      */
-    void startNewSubscription(int inFd, int outFd, sp<IResultReceiver> resultReceiver,
-                              int timeoutSec);
-
-    void binderDied(const wp<IBinder>& who);
+    void startNewSubscription(int inFd, int outFd, int timeoutSec);
 
     void onLogEvent(const LogEvent& event);
 
@@ -80,7 +76,7 @@ private:
         int64_t mInterval;
         int64_t mPrevPullElapsedRealtimeMs;
     };
-    void readConfig(int in);
+    bool readConfig();
 
     void updateConfig(const ShellSubscription& config);
 
@@ -101,15 +97,15 @@ private:
 
     std::condition_variable mShellDied;  // semaphore for waiting until shell exits.
 
-    int mInput;  // The input file descriptor
+    int mInput = -1;  // The input file descriptor
 
-    int mOutput;  // The output file descriptor
-
-    sp<IResultReceiver> mResultReceiver;
+    int mOutput = -1;  // The output file descriptor
 
     std::vector<SimpleAtomMatcher> mPushedMatchers;
 
     std::vector<PullInfo> mPulledInfo;
+
+    int64_t mSubscriberId = 0; // A unique id to identify a subscriber.
 
     int64_t mPullToken = 0;  // A unique token to identify a puller thread.
 };

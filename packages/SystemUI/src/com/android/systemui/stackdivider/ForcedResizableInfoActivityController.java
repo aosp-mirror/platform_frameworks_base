@@ -31,8 +31,6 @@ import com.android.systemui.R;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 
-import java.util.function.Consumer;
-
 /**
  * Controller that decides when to show the {@link ForcedResizableInfoActivity}.
  */
@@ -54,12 +52,6 @@ public class ForcedResizableInfoActivityController {
         }
     };
 
-    private final Consumer<Boolean> mDockedStackExistsListener = exists -> {
-        if (!exists) {
-            mPackagesShownInSession.clear();
-        }
-    };
-
     /** Record of force resized task that's pending to be handled. */
     private class PendingTaskRecord {
         int taskId;
@@ -75,7 +67,7 @@ public class ForcedResizableInfoActivityController {
         }
     }
 
-    public ForcedResizableInfoActivityController(Context context, Divider divider) {
+    public ForcedResizableInfoActivityController(Context context) {
         mContext = context;
         ActivityManagerWrapper.getInstance().registerTaskStackListener(
                 new TaskStackChangeListener() {
@@ -95,7 +87,12 @@ public class ForcedResizableInfoActivityController {
                         activityLaunchOnSecondaryDisplayFailed();
                     }
                 });
-        divider.registerInSplitScreenListener(mDockedStackExistsListener);
+    }
+
+    public void notifyDockedStackExistsChanged(boolean exists) {
+        if (!exists) {
+            mPackagesShownInSession.clear();
+        }
     }
 
     public void onAppTransitionFinished() {

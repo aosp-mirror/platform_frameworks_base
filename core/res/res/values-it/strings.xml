@@ -191,6 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"L\'amministratore ha abbandonato il dispositivo per uso personale"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Il dispositivo è gestito"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Questo dispositivo è gestito dalla tua organizzazione, che potrebbe monitorare il traffico di rete. Tocca per i dettagli."</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"Impostazioni di geolocalizzazione modificate dal tuo amministratore"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"Tocca per vedere le tue impostazioni di geolocalizzazione."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Il dispositivo verrà resettato"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Impossibile usare l\'app di amministrazione. Il dispositivo verrà resettato.\n\nPer eventuali domande, contatta l\'amministratore della tua organizzazione."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Stampa disattivata da <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -429,6 +431,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Questa app di sistema | privilegiata può fare foto e video tramite una videocamera del sistema in qualsiasi momento. Richiede che l\'autorizzazione android.permission.CAMERA sia concessa anche all\'app"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controllo vibrazione"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Consente all\'applicazione di controllare la vibrazione."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Consente all\'app di accedere allo stato di vibrazione."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"chiamata diretta n. telefono"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Consente all\'applicazione di chiamare numeri di telefono senza il tuo intervento. Ciò può comportare chiamate o addebiti imprevisti. Tieni presente che ciò non consente all\'applicazione di chiamare numeri di emergenza. Applicazioni dannose potrebbero generare dei costi effettuando chiamate senza la tua conferma."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accesso al servizio di chiamata IMS"</string>
@@ -543,6 +546,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Riprova."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nessuna impronta digitale registrata."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Questo dispositivo non dispone di sensore di impronte."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dito <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +591,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossibile verificare il volto. Riprova."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Non hai configurato Sblocco con il volto."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Sblocco con il volto non supportato su questo dispositivo."</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"Volto <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1184,7 +1191,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostra sempre"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> è stata realizzata per una versione non compatibile del sistema operativo Android e potrebbe avere un comportamento imprevisto. Potrebbe essere disponibile una versione aggiornata dell\'app."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Mostra sempre"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Verifica la presenza di aggiornamenti"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Cerca aggiornamenti"</string>
     <string name="smv_application" msgid="3775183542777792638">"L\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) ha violato la norma StrictMode autoimposta."</string>
     <string name="smv_process" msgid="1398801497130695446">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> ha violato la norma StrictMode autoimposta."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Aggiornamento del telefono…"</string>
@@ -1614,7 +1621,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Il servizio in primo piano avviato in background da <xliff:g id="PACKAGENAME">%1$s</xliff:g> non avrà l\'autorizzazione \"durante l\'uso\" nelle future build R. Visita la pagina go/r-bg-fgs-restriction e invia una segnalazione di bug."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vuoi aumentare il volume oltre il livello consigliato?\n\nL\'ascolto ad alto volume per lunghi periodi di tempo potrebbe danneggiare l\'udito."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usare la scorciatoia Accessibilità?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Quando la scorciatoia è attiva, puoi premere entrambi i pulsanti del volume per tre secondi per avviare una funzione di accessibilità.\n\n Funzione di accessibilità corrente:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Puoi cambiare la funzione in Impostazioni &gt; Accessibilità."</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Modifica scorciatoie"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Annulla"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Disattiva scorciatoia"</string>
@@ -1856,7 +1864,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> non è al momento disponibile."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Questa app è stata realizzata per una versione precedente di Android e potrebbe non funzionare correttamente. Prova a verificare la disponibilità di aggiornamenti o contatta lo sviluppatore."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Verifica la presenza di aggiornamenti"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Cerca aggiornamenti"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Hai nuovi messaggi"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Apri l\'app SMS per la visualizzazione"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Alcune funzionalità sono limitate"</string>
@@ -2010,4 +2018,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> è stato inserito nel bucket RESTRICTED"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personale"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Lavoro"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

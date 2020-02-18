@@ -756,7 +756,7 @@ public class IpServer extends StateMachine {
                 final IpPrefix ipv4Prefix = new IpPrefix(mIpv4Address.getAddress(),
                         mIpv4Address.getPrefixLength());
                 NetdUtils.tetherInterface(mNetd, mIfaceName, ipv4Prefix);
-            } catch (RemoteException | ServiceSpecificException e) {
+            } catch (RemoteException | ServiceSpecificException | IllegalStateException e) {
                 mLog.e("Error Tethering: " + e);
                 mLastError = TetheringManager.TETHER_ERROR_TETHER_IFACE_ERROR;
                 return;

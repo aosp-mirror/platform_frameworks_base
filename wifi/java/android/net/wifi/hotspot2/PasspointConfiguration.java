@@ -19,6 +19,7 @@ package android.net.wifi.hotspot2;
 import static android.net.wifi.WifiConfiguration.METERED_OVERRIDE_NONE;
 import static android.net.wifi.WifiConfiguration.MeteredOverride;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -247,12 +248,12 @@ public final class PasspointConfiguration implements Parcelable {
      *
      * Use Long.MIN_VALUE to indicate unset value.
      */
-    private long mSubscriptionExpirationTimeInMillis = Long.MIN_VALUE;
+    private long mSubscriptionExpirationTimeMillis = Long.MIN_VALUE;
     /**
      * @hide
      */
     public void setSubscriptionExpirationTimeInMillis(long subscriptionExpirationTimeInMillis) {
-        mSubscriptionExpirationTimeInMillis = subscriptionExpirationTimeInMillis;
+        mSubscriptionExpirationTimeMillis = subscriptionExpirationTimeInMillis;
     }
     /**
      *  Utility method to get the time this subscription will expire. It is in the format of number
@@ -260,8 +261,9 @@ public final class PasspointConfiguration implements Parcelable {
      *
      *  @return The time this subscription will expire, or Long.MIN_VALUE to indicate unset value
      */
-    public long getSubscriptionExpirationTimeInMillis() {
-        return mSubscriptionExpirationTimeInMillis;
+    @CurrentTimeMillisLong
+    public long getSubscriptionExpirationTimeMillis() {
+        return mSubscriptionExpirationTimeMillis;
     }
 
     /**
@@ -561,7 +563,7 @@ public final class PasspointConfiguration implements Parcelable {
         mUpdateIdentifier = source.mUpdateIdentifier;
         mCredentialPriority = source.mCredentialPriority;
         mSubscriptionCreationTimeInMillis = source.mSubscriptionCreationTimeInMillis;
-        mSubscriptionExpirationTimeInMillis = source.mSubscriptionExpirationTimeInMillis;
+        mSubscriptionExpirationTimeMillis = source.mSubscriptionExpirationTimeMillis;
         mSubscriptionType = source.mSubscriptionType;
         mUsageLimitDataLimit = source.mUsageLimitDataLimit;
         mUsageLimitStartTimeInMillis = source.mUsageLimitStartTimeInMillis;
@@ -590,7 +592,7 @@ public final class PasspointConfiguration implements Parcelable {
         dest.writeInt(mUpdateIdentifier);
         dest.writeInt(mCredentialPriority);
         dest.writeLong(mSubscriptionCreationTimeInMillis);
-        dest.writeLong(mSubscriptionExpirationTimeInMillis);
+        dest.writeLong(mSubscriptionExpirationTimeMillis);
         dest.writeString(mSubscriptionType);
         dest.writeLong(mUsageLimitUsageTimePeriodInMinutes);
         dest.writeLong(mUsageLimitStartTimeInMillis);
@@ -628,7 +630,7 @@ public final class PasspointConfiguration implements Parcelable {
                 && mUpdateIdentifier == that.mUpdateIdentifier
                 && mCredentialPriority == that.mCredentialPriority
                 && mSubscriptionCreationTimeInMillis == that.mSubscriptionCreationTimeInMillis
-                && mSubscriptionExpirationTimeInMillis == that.mSubscriptionExpirationTimeInMillis
+                && mSubscriptionExpirationTimeMillis == that.mSubscriptionExpirationTimeMillis
                 && TextUtils.equals(mSubscriptionType, that.mSubscriptionType)
                 && mUsageLimitUsageTimePeriodInMinutes == that.mUsageLimitUsageTimePeriodInMinutes
                 && mUsageLimitStartTimeInMillis == that.mUsageLimitStartTimeInMillis
@@ -646,7 +648,7 @@ public final class PasspointConfiguration implements Parcelable {
     public int hashCode() {
         return Objects.hash(mHomeSp, mCredential, mPolicy, mSubscriptionUpdate, mTrustRootCertList,
                 mUpdateIdentifier, mCredentialPriority, mSubscriptionCreationTimeInMillis,
-                mSubscriptionExpirationTimeInMillis, mUsageLimitUsageTimePeriodInMinutes,
+                mSubscriptionExpirationTimeMillis, mUsageLimitUsageTimePeriodInMinutes,
                 mUsageLimitStartTimeInMillis, mUsageLimitDataLimit, mUsageLimitTimeLimitInMinutes,
                 mServiceFriendlyNames, mCarrierId, mIsAutojoinEnabled, mIsMacRandomizationEnabled,
                 mMeteredOverride);
@@ -661,8 +663,8 @@ public final class PasspointConfiguration implements Parcelable {
                 mSubscriptionCreationTimeInMillis != Long.MIN_VALUE
                 ? new Date(mSubscriptionCreationTimeInMillis) : "Not specified").append("\n");
         builder.append("SubscriptionExpirationTime: ").append(
-                mSubscriptionExpirationTimeInMillis != Long.MIN_VALUE
-                ? new Date(mSubscriptionExpirationTimeInMillis) : "Not specified").append("\n");
+                mSubscriptionExpirationTimeMillis != Long.MIN_VALUE
+                ? new Date(mSubscriptionExpirationTimeMillis) : "Not specified").append("\n");
         builder.append("UsageLimitStartTime: ").append(mUsageLimitStartTimeInMillis != Long.MIN_VALUE
                 ? new Date(mUsageLimitStartTimeInMillis) : "Not specified").append("\n");
         builder.append("UsageTimePeriod: ").append(mUsageLimitUsageTimePeriodInMinutes)

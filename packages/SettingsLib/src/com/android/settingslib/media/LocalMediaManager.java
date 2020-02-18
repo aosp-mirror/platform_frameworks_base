@@ -252,6 +252,62 @@ public class LocalMediaManager implements BluetoothCallback {
         return devices;
     }
 
+    /**
+     * Add a MediaDevice to let it play current media.
+     *
+     * @param device MediaDevice
+     * @return If add device successful return {@code true}, otherwise return {@code false}
+     */
+    public boolean addDeviceToPlayMedia(MediaDevice device) {
+        return mInfoMediaManager.addDeviceToPlayMedia(device);
+    }
+
+    /**
+     * Remove a {@code device} from current media.
+     *
+     * @param device MediaDevice
+     * @return If device stop successful return {@code true}, otherwise return {@code false}
+     */
+    public boolean removeDeviceFromPlayMedia(MediaDevice device) {
+        return mInfoMediaManager.removeDeviceFromPlayMedia(device);
+    }
+
+    /**
+     * Get the MediaDevice list that can be added to current media.
+     *
+     * @return list of MediaDevice
+     */
+    public List<MediaDevice> getSelectableMediaDevice() {
+        return mInfoMediaManager.getSelectableMediaDevice();
+    }
+
+    /**
+     * Adjust the volume of session.
+     *
+     * @param volume the value of volume
+     */
+    public void adjustSessionVolume(int volume) {
+        mInfoMediaManager.adjustSessionVolume(volume);
+    }
+
+    /**
+     * Gets the maximum volume of the {@link android.media.RoutingSessionInfo}.
+     *
+     * @return  maximum volume of the session, and return -1 if not found.
+     */
+    public int getSessionVolumeMax() {
+        return mInfoMediaManager.getSessionVolumeMax();
+    }
+
+    /**
+     * Gets the current volume of the {@link android.media.RoutingSessionInfo}.
+     *
+     * @return current volume of the session, and return -1 if not found.
+     */
+    public int getSessionVolume() {
+        return mInfoMediaManager.getSessionVolume();
+    }
+
     private MediaDevice updateCurrentConnectedDevice() {
         MediaDevice phoneMediaDevice = null;
         for (MediaDevice device : mMediaDevices) {

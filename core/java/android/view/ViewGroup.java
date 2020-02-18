@@ -17,8 +17,8 @@
 package android.view;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
-import static android.view.WindowInsetsAnimationCallback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
-import static android.view.WindowInsetsAnimationCallback.DISPATCH_MODE_STOP;
+import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
+import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import android.animation.LayoutTransition;
 import android.annotation.CallSuper;
@@ -48,17 +48,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pools;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.view.Window.OnContentApplyWindowInsetsListener;
-import android.view.WindowInsetsAnimationCallback.AnimationBounds;
-import android.view.WindowInsetsAnimationCallback.DispatchMode;
-import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
+import android.view.WindowInsetsAnimation.Bounds;
+import android.view.WindowInsetsAnimation.Callback.DispatchMode;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -615,7 +612,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Current dispatch mode of animation events
      *
-     * @see WindowInsetsAnimationCallback#getDispatchMode()
+     * @see WindowInsetsAnimation.Callback#getDispatchMode()
      */
     private @DispatchMode int mInsetsAnimationDispatchMode = DISPATCH_MODE_CONTINUE_ON_SUBTREE;
 
@@ -7228,16 +7225,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public void setWindowInsetsAnimationCallback(@Nullable WindowInsetsAnimationCallback listener) {
-        super.setWindowInsetsAnimationCallback(listener);
-        mInsetsAnimationDispatchMode = listener != null
-                ? listener.getDispatchMode()
+    public void setWindowInsetsAnimationCallback(
+            @Nullable WindowInsetsAnimation.Callback callback) {
+        super.setWindowInsetsAnimationCallback(callback);
+        mInsetsAnimationDispatchMode = callback != null
+                ? callback.getDispatchMode()
                 : DISPATCH_MODE_CONTINUE_ON_SUBTREE;
     }
 
     @Override
     public void dispatchWindowInsetsAnimationPrepare(
-            @NonNull InsetsAnimation animation) {
+            @NonNull WindowInsetsAnimation animation) {
         super.dispatchWindowInsetsAnimationPrepare(animation);
 
         // If we are root-level content view that fits insets, set dispatch mode to stop to imitate
@@ -7262,8 +7260,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     @NonNull
-    public AnimationBounds dispatchWindowInsetsAnimationStart(
-            @NonNull InsetsAnimation animation, @NonNull AnimationBounds bounds) {
+    public Bounds dispatchWindowInsetsAnimationStart(
+            @NonNull WindowInsetsAnimation animation, @NonNull Bounds bounds) {
         bounds = super.dispatchWindowInsetsAnimationStart(animation, bounds);
         if (mInsetsAnimationDispatchMode == DISPATCH_MODE_STOP) {
             return bounds;
@@ -7277,27 +7275,28 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     @NonNull
-    public WindowInsets dispatchWindowInsetsAnimationProgress(@NonNull WindowInsets insets) {
-        insets = super.dispatchWindowInsetsAnimationProgress(insets);
+    public WindowInsets dispatchWindowInsetsAnimationProgress(@NonNull WindowInsets insets,
+            @NonNull List<WindowInsetsAnimation> runningAnimations) {
+        insets = super.dispatchWindowInsetsAnimationProgress(insets, runningAnimations);
         if (mInsetsAnimationDispatchMode == DISPATCH_MODE_STOP) {
             return insets;
         }
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
-            getChildAt(i).dispatchWindowInsetsAnimationProgress(insets);
+            getChildAt(i).dispatchWindowInsetsAnimationProgress(insets, runningAnimations);
         }
         return insets;
     }
 
     @Override
-    public void dispatchWindowInsetsAnimationFinish(@NonNull InsetsAnimation animation) {
-        super.dispatchWindowInsetsAnimationFinish(animation);
+    public void dispatchWindowInsetsAnimationEnd(@NonNull WindowInsetsAnimation animation) {
+        super.dispatchWindowInsetsAnimationEnd(animation);
         if (mInsetsAnimationDispatchMode == DISPATCH_MODE_STOP) {
             return;
         }
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
-            getChildAt(i).dispatchWindowInsetsAnimationFinish(animation);
+            getChildAt(i).dispatchWindowInsetsAnimationEnd(animation);
         }
     }
 

@@ -34,6 +34,7 @@ import android.app.VoiceInteractor.PickOptionRequest;
 import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -168,6 +169,8 @@ public class ResolverActivity extends Activity implements
 
     // Intent extra for connected audio devices
     public static final String EXTRA_IS_AUDIO_CAPTURE_DEVICE = "is_audio_capture_device";
+
+    private BroadcastReceiver mWorkProfileStateReceiver;
 
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
@@ -387,10 +390,12 @@ public class ResolverActivity extends Activity implements
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             rdl.setOnApplyWindowInsetsListener(this::onApplyWindowInsets);
 
-            rdl.setMaxCollapsedHeight(hasWorkProfile() && ENABLE_TABBED_VIEW
-                    ? getResources().getDimensionPixelSize(
-                            R.dimen.resolver_empty_state_height_with_tabs)
-                    : getResources().getDimensionPixelSize(R.dimen.resolver_empty_state_height));
+            if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+                rdl.setMaxCollapsedHeight(getResources().getDimensionPixelSize(
+                        R.dimen.resolver_empty_state_height_with_tabs));
+                findViewById(R.id.profile_pager).setMinimumHeight(
+                        getResources().getDimensionPixelSize(R.dimen.resolver_empty_state_height));
+            }
 
             mResolverDrawerLayout = rdl;
         }
@@ -738,6 +743,22 @@ public class ResolverActivity extends Activity implements
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+            mWorkProfileStateReceiver = createWorkProfileStateReceiver();
+            registerWorkProfileStateReceiver();
+        }
+    }
+
+    private void registerWorkProfileStateReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+        registerReceiverAsUser(mWorkProfileStateReceiver, UserHandle.ALL, filter, null, null);
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         if (mRegistered) {
@@ -760,6 +781,10 @@ public class ResolverActivity extends Activity implements
             if (!isChangingConfigurations()) {
                 finish();
             }
+        }
+        if (mWorkPackageMonitor != null) {
+            unregisterReceiver(mWorkProfileStateReceiver);
+            mWorkPackageMonitor = null;
         }
     }
 
@@ -1677,6 +1702,25 @@ public class ResolverActivity extends Activity implements
         } else {
             mMultiProfilePagerAdapter.clearInactiveProfileCache();
         }
+    }
+
+    private BroadcastReceiver createWorkProfileStateReceiver() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (!TextUtils.equals(action, Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
+                        && !TextUtils.equals(action, Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)) {
+                    return;
+                }
+                if (mMultiProfilePagerAdapter.getCurrentUserHandle()
+                        == getWorkProfileUserHandle()) {
+                    mMultiProfilePagerAdapter.rebuildActiveTab(true);
+                } else {
+                    mMultiProfilePagerAdapter.clearInactiveProfileCache();
+                }
+            }
+        };
     }
 
     @VisibleForTesting

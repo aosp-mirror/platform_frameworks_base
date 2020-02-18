@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <android/os/StatsDimensionsValueParcel.h>
+#include <aidl/android/os/StatsDimensionsValueParcel.h>
 #include <utils/JenkinsHash.h>
 #include <vector>
 #include "android-base/stringprintf.h"
@@ -27,7 +27,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-using android::base::StringPrintf;
+using ::aidl::android::os::StatsDimensionsValueParcel;
 
 struct Metric2Condition {
     int64_t conditionId;

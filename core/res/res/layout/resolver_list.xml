@@ -21,7 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:maxWidth="@dimen/resolver_max_width"
-    android:maxCollapsedHeight="@dimen/resolver_empty_state_height"
+    android:maxCollapsedHeight="192dp"
     android:maxCollapsedHeightSmall="56dp"
     android:id="@id/contentPanel">
 
@@ -102,7 +102,6 @@
                     android:id="@+id/profile_pager"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="@dimen/resolver_empty_state_height"
                     android:divider="?attr/dividerVertical"
                     android:footerDividersEnabled="false"
                     android:headerDividersEnabled="false"
