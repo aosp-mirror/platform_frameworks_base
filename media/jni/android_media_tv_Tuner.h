@@ -101,8 +101,10 @@ struct FilterCallback : public IFilterCallback {
     virtual Return<void> onFilterStatus(const DemuxFilterStatus status);
 
     void setFilter(const jobject filter);
+    jobject handleToLinearBlock(const native_handle_t* handle, uint32_t size);
 private:
     jweak mFilter;
+    jobject getMediaEvent(const DemuxFilterEvent::Event& event);
 };
 
 struct FrontendCallback : public IFrontendCallback {
@@ -158,7 +160,7 @@ private:
     hidl_vec<LnbId> mLnbIds;
     sp<ILnb> mLnb;
     sp<IDemux> mDemux;
-    int mDemuxId;
+    uint32_t mDemuxId;
     static jobject getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
     static jobject getAtsc3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
     static jobject getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);

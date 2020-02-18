@@ -136,17 +136,23 @@ cc_library_shared {
     ],
 
     shared_libs: [
+        "android.hardware.graphics.bufferqueue@2.0",
         "android.hardware.tv.tuner@1.0",
         "libandroid_runtime",
         "libcutils",
         "libfmq",
         "libhidlbase",
         "liblog",
+        "libmedia",
         "libnativehelper",
         "libutils",
     ],
+    defaults: [
+        "libcodec2-impl-defaults",
+    ],
 
     header_libs: [
+        "libcodec2_internal",
         "libstagefright_foundation_headers",
     ],
 
