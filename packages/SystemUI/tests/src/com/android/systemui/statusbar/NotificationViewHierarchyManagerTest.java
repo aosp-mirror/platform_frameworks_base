@@ -54,7 +54,6 @@ import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectio
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.util.Assert;
 
 import com.google.android.collect.Lists;
 
@@ -90,7 +89,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
-        Assert.sMainLooper = mTestableLooper.getLooper();
+        allowTestableLooperAsMainThread();
         mHandler = Handler.createAsync(mTestableLooper.getLooper());
 
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
