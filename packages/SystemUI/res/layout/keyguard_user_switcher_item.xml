@@ -29,7 +29,8 @@
         android:background="@drawable/ripple_drawable"
         android:clipChildren="false"
         android:clipToPadding="false"
-        sysui:activatedFontFamily="sans-serif-medium">
+        sysui:regularTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher"
+        sysui:activatedTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher.Activated">
     <TextView android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

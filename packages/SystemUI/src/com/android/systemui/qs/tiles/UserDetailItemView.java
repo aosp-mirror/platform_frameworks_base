@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -43,8 +42,8 @@ public class UserDetailItemView extends LinearLayout {
 
     private UserAvatarView mAvatar;
     private TextView mName;
-    private Typeface mRegularTypeface;
-    private Typeface mActivatedTypeface;
+    private int mActivatedStyle;
+    private int mRegularStyle;
     private View mRestrictedPadlock;
 
     public UserDetailItemView(Context context) {
@@ -68,10 +67,10 @@ public class UserDetailItemView extends LinearLayout {
         final int N = a.getIndexCount();
         for (int i = 0; i < N; i++) {
             int attr = a.getIndex(i);
-            if (attr == R.styleable.UserDetailItemView_regularFontFamily) {
-                mRegularTypeface = Typeface.create(a.getString(attr), 0 /* style */);
-            } else if (attr == R.styleable.UserDetailItemView_activatedFontFamily) {
-                mActivatedTypeface = Typeface.create(a.getString(attr), 0 /* style */);
+            if (attr == R.styleable.UserDetailItemView_regularTextAppearance) {
+                mRegularStyle = a.getResourceId(attr, 0);
+            } else if (attr == R.styleable.UserDetailItemView_activatedTextAppearance) {
+                mActivatedStyle = a.getResourceId(attr, 0);
             }
         }
         a.recycle();
@@ -115,13 +114,16 @@ public class UserDetailItemView extends LinearLayout {
     protected void onFinishInflate() {
         mAvatar = findViewById(R.id.user_picture);
         mName = findViewById(R.id.user_name);
-        if (mRegularTypeface == null) {
-            mRegularTypeface = mName.getTypeface();
+
+        if (mRegularStyle == 0) {
+            mRegularStyle = mName.getExplicitStyle();
         }
-        if (mActivatedTypeface == null) {
-            mActivatedTypeface = mName.getTypeface();
+
+        if (mActivatedStyle == 0) {
+            mActivatedStyle = mName.getExplicitStyle();
         }
-        updateTypeface();
+
+        updateTextStyle();
         mRestrictedPadlock = findViewById(R.id.restricted_padlock);
     }
 
@@ -134,12 +136,12 @@ public class UserDetailItemView extends LinearLayout {
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        updateTypeface();
+        updateTextStyle();
     }
 
-    private void updateTypeface() {
+    private void updateTextStyle() {
         boolean activated = ArrayUtils.contains(getDrawableState(), android.R.attr.state_activated);
-        mName.setTypeface(activated ? mActivatedTypeface : mRegularTypeface);
+        mName.setTextAppearance(activated ? mActivatedStyle : mRegularStyle);
     }
 
     @Override
