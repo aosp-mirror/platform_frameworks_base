@@ -1304,8 +1304,11 @@ public class ResolverActivity extends Activity implements
                     + "cannot be null.");
         }
         // We partially rebuild the inactive adapter to determine if we should auto launch
-        boolean rebuildActiveCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
-        boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false);
+        boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
+        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+            boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false);
+            rebuildCompleted = rebuildCompleted && rebuildInactiveCompleted;
+        }
 
         if (useLayoutWithDefault()) {
             mLayoutId = R.layout.resolver_list_with_default;
@@ -1314,7 +1317,7 @@ public class ResolverActivity extends Activity implements
         }
         setContentView(mLayoutId);
         mMultiProfilePagerAdapter.setupViewPager(findViewById(R.id.profile_pager));
-        return postRebuildList(rebuildActiveCompleted && rebuildInactiveCompleted);
+        return postRebuildList(rebuildCompleted);
     }
 
     /**
@@ -1375,6 +1378,10 @@ public class ResolverActivity extends Activity implements
     private boolean maybeAutolaunchIfSingleTarget() {
         int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
         if (count != 1) {
+            return false;
+        }
+
+        if (mMultiProfilePagerAdapter.getActiveListAdapter().getOtherProfile() != null) {
             return false;
         }
 
