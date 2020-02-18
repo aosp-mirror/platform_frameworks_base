@@ -213,6 +213,7 @@ import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.dreams.DreamActivity;
+import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.sysprop.DisplayProperties;
@@ -1233,12 +1234,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public boolean startDreamActivity(Intent intent) {
+        final WindowProcessController process = mProcessMap.getProcess(Binder.getCallingPid());
+        final long origId = Binder.clearCallingIdentity();
+
+        // The dream activity is only called for non-doze dreams.
+        final ComponentName currentDream = LocalServices.getService(DreamManagerInternal.class)
+                .getActiveDreamComponent(/* doze= */ false);
+
+        if (currentDream == null || currentDream.getPackageName() == null
+                || !currentDream.getPackageName().equals(process.mInfo.packageName)) {
+            Slog.e(TAG, "Calling package is not the current dream package. "
+                    + "Aborting startDreamActivity...");
+            return false;
+        }
+
         final ActivityInfo a = new ActivityInfo();
         a.theme = com.android.internal.R.style.Theme_Dream;
         a.exported = true;
         a.name = DreamActivity.class.getName();
 
-        final WindowProcessController process = mProcessMap.getProcess(Binder.getCallingPid());
 
         a.packageName = process.mInfo.packageName;
         a.applicationInfo = process.mInfo;
@@ -1253,7 +1267,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         a.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
         a.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
 
-        final long origId = Binder.clearCallingIdentity();
         try {
             getActivityStartController().obtainStarter(intent, "dream")
                     .setActivityInfo(a)
