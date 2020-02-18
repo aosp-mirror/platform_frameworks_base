@@ -62,7 +62,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private final BluetoothRouteProvider mBtRouteProvider;
 
     private static ComponentName sComponentName = new ComponentName(
-            SystemMediaRoute2Provider.class.getPackageName$(),
+            SystemMediaRoute2Provider.class.getPackage().getName(),
             SystemMediaRoute2Provider.class.getName());
 
     private String mSelectedRouteId;
