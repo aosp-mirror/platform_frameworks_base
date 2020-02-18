@@ -559,8 +559,10 @@ class TaskSnapshotController {
                         }
                     });
                     // Allow taking snapshot of home when turning screen off to reduce the delay of
-                    // unlocking/waking to home.
-                    snapshotTasks(mTmpTasks, true /* allowSnapshotHome */);
+                    // waking from secure lock to home.
+                    final boolean allowSnapshotHome =
+                            mService.mPolicy.isKeyguardSecure(mService.mCurrentUserId);
+                    snapshotTasks(mTmpTasks, allowSnapshotHome);
                 }
             } finally {
                 listener.onScreenOff();
