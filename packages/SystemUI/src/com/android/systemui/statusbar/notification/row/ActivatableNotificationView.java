@@ -336,6 +336,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return false;
     }
 
+    boolean superPerformClick() {
+        return super.performClick();
+    }
+
     /**
      * Cancels the hotspot and makes the notification inactive.
      */
