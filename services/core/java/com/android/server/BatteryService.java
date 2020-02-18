@@ -26,8 +26,10 @@ import android.content.Intent;
 import android.database.ContentObserver;
 import android.hardware.health.V1_0.HealthInfo;
 import android.hardware.health.V2_0.IHealth;
-import android.hardware.health.V2_0.IHealthInfoCallback;
 import android.hardware.health.V2_0.Result;
+import android.hardware.health.V2_1.BatteryCapacityLevel;
+import android.hardware.health.V2_1.Constants;
+import android.hardware.health.V2_1.IHealthInfoCallback;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
 import android.metrics.LogMaker;
@@ -144,6 +146,7 @@ public final class BatteryService extends SystemService {
 
     private HealthInfo mHealthInfo;
     private final HealthInfo mLastHealthInfo = new HealthInfo();
+    private android.hardware.health.V2_1.HealthInfo mHealthInfo2p1;
     private boolean mBatteryLevelCritical;
     private int mLastBatteryStatus;
     private int mLastBatteryHealth;
@@ -358,6 +361,9 @@ public final class BatteryService extends SystemService {
     }
 
     private boolean shouldShutdownLocked() {
+        if (mHealthInfo2p1.batteryCapacityLevel != BatteryCapacityLevel.UNSUPPORTED) {
+            return (mHealthInfo2p1.batteryCapacityLevel == BatteryCapacityLevel.CRITICAL);
+        }
         if (mHealthInfo.batteryLevel > 0) {
             return false;
         }
@@ -415,22 +421,23 @@ public final class BatteryService extends SystemService {
         }
     }
 
-    private void update(android.hardware.health.V2_0.HealthInfo info) {
+    private void update(android.hardware.health.V2_1.HealthInfo info) {
         traceBegin("HealthInfoUpdate");
 
         Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryChargeCounter",
-                info.legacy.batteryChargeCounter);
+                info.legacy.legacy.batteryChargeCounter);
         Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryCurrent",
-                info.legacy.batteryCurrent);
+                info.legacy.legacy.batteryCurrent);
 
         synchronized (mLock) {
             if (!mUpdatesStopped) {
-                mHealthInfo = info.legacy;
+                mHealthInfo = info.legacy.legacy;
+                mHealthInfo2p1 = info;
                 // Process the new values.
                 processValuesLocked(false);
                 mLock.notifyAll(); // for any waiters on new info
             } else {
-                copy(mLastHealthInfo, info.legacy);
+                copy(mLastHealthInfo, info.legacy.legacy);
             }
         }
         traceEnd();
@@ -484,7 +491,8 @@ public final class BatteryService extends SystemService {
             mBatteryStats.setBatteryState(mHealthInfo.batteryStatus, mHealthInfo.batteryHealth,
                     mPlugType, mHealthInfo.batteryLevel, mHealthInfo.batteryTemperature,
                     mHealthInfo.batteryVoltage, mHealthInfo.batteryChargeCounter,
-                    mHealthInfo.batteryFullCharge);
+                    mHealthInfo.batteryFullCharge,
+                    mHealthInfo2p1.batteryChargeTimeToFullNowSeconds);
         } catch (RemoteException e) {
             // Should never happen.
         }
@@ -1120,8 +1128,21 @@ public final class BatteryService extends SystemService {
     private final class HealthHalCallback extends IHealthInfoCallback.Stub
             implements HealthServiceWrapper.Callback {
         @Override public void healthInfoChanged(android.hardware.health.V2_0.HealthInfo props) {
+            android.hardware.health.V2_1.HealthInfo propsLatest =
+                    new android.hardware.health.V2_1.HealthInfo();
+            propsLatest.legacy = props;
+
+            propsLatest.batteryCapacityLevel = BatteryCapacityLevel.UNSUPPORTED;
+            propsLatest.batteryChargeTimeToFullNowSeconds =
+                Constants.BATTERY_CHARGE_TIME_TO_FULL_NOW_SECONDS_UNSUPPORTED;
+
+            BatteryService.this.update(propsLatest);
+        }
+
+        @Override public void healthInfoChanged_2_1(android.hardware.health.V2_1.HealthInfo props) {
             BatteryService.this.update(props);
         }
+
         // on new service registered
         @Override public void onRegistration(IHealth oldService, IHealth newService,
                 String instance) {
