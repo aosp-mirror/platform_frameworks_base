@@ -16,12 +16,16 @@
 
 package com.android.internal.util;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.util.ExceptionUtils;
 
+import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -217,5 +221,21 @@ public class FunctionalUtils {
                 throw ExceptionUtils.propagate(ex);
             }
         }
+    }
+
+    /**
+     * Find the first element in the list that matches the predicate.
+     *
+     * The standard Java way of doing this is to use streams, which is very expensive.
+     *
+     * @return the first matching element, or null if none.
+     */
+    @Nullable
+    public static <T> T findFirst(@NonNull final Collection<T> haystack,
+            @NonNull final Predicate<T> p) {
+        for (final T needle : haystack) {
+            if (p.test(needle)) return needle;
+        }
+        return null;
     }
 }

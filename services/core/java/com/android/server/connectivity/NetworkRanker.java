@@ -16,8 +16,13 @@
 
 package com.android.server.connectivity;
 
+import static android.net.NetworkScore.POLICY_IGNORE_ON_WIFI;
+
+import static com.android.internal.util.FunctionalUtils.findFirst;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 
 import java.util.ArrayList;
@@ -37,15 +42,33 @@ public class NetworkRanker {
             @NonNull final Collection<NetworkAgentInfo> nais) {
         final ArrayList<NetworkAgentInfo> candidates = new ArrayList<>(nais);
         candidates.removeIf(nai -> !nai.satisfies(request));
+        // Enforce policy.
+        filterBadWifiAvoidancePolicy(candidates);
 
         NetworkAgentInfo bestNetwork = null;
         int bestScore = Integer.MIN_VALUE;
         for (final NetworkAgentInfo nai : candidates) {
-            if (nai.getCurrentScore() > bestScore) {
+            final int score = nai.getCurrentScore();
+            if (score > bestScore) {
                 bestNetwork = nai;
-                bestScore = nai.getCurrentScore();
+                bestScore = score;
             }
         }
         return bestNetwork;
+    }
+
+    // If some network with wifi transport is present, drop all networks with POLICY_IGNORE_ON_WIFI.
+    private void filterBadWifiAvoidancePolicy(
+            @NonNull final ArrayList<NetworkAgentInfo> candidates) {
+        final NetworkAgentInfo wifi = findFirst(candidates,
+                nai -> nai.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                        && nai.everValidated
+                        // Horrible hack : there is old UI that will let a user say they want to
+                        // override the policy only for this network only at this time and it
+                        // feeds into the following member. This old UI should probably be removed
+                        // but for now keep backward compatibility.
+                        && !nai.avoidUnvalidated);
+        if (null == wifi) return; // No wifi : this policy doesn't apply
+        candidates.removeIf(nai -> nai.getNetworkScore().hasPolicy(POLICY_IGNORE_ON_WIFI));
     }
 }
