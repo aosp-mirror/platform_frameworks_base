@@ -160,6 +160,22 @@ public class UsbManager {
             "android.hardware.usb.action.USB_ACCESSORY_DETACHED";
 
     /**
+     * Broadcast Action:  A broadcast for USB accessory handshaking information delivery
+     *
+     * This intent is sent when a USB accessory connect attempt
+     *
+     * <p>For more information about communicating with USB accessory handshake, refer to
+     * <a href="https://source.android.com/devices/accessories/aoa">AOA</a> developer guide.</p>
+     *
+     * {@hide}
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public static final String ACTION_USB_ACCESSORY_HANDSHAKE =
+            "android.hardware.usb.action.USB_ACCESSORY_HANDSHAKE";
+
+    /**
      * Boolean extra indicating whether USB is connected or disconnected.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
      *
@@ -301,6 +317,52 @@ public class UsbManager {
      * containing the {@link UsbAccessory} object for the accessory.
      */
     public static final String EXTRA_ACCESSORY = "accessory";
+
+    /**
+     * A long extra indicating ms from boot to get get_protocol UEvent
+     * This is obtained with SystemClock.elapsedRealtime()
+     * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static final String EXTRA_ACCESSORY_UEVENT_TIME =
+            "android.hardware.usb.extra.ACCESSORY_UEVENT_TIME";
+
+    /**
+     * An integer extra indicating numbers of send string during handshake
+     * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts
+     *
+     * <p>For more information about control request with identifying string information
+     * between communicating with USB accessory handshake, refer to
+     * <a href="https://source.android.com/devices/accessories/aoa">AOA</a> developer guide.</p>
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static final String EXTRA_ACCESSORY_STRING_COUNT =
+            "android.hardware.usb.extra.ACCESSORY_STRING_COUNT";
+
+    /**
+     * Boolean extra indicating whether got start accessory or not
+     * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static final String EXTRA_ACCESSORY_START =
+            "android.hardware.usb.extra.ACCESSORY_START";
+
+    /**
+     * A long extra indicating ms from boot to sent {@link #ACTION_USB_ACCESSORY_HANDSHAKE}
+     * This is obtained with SystemClock.elapsedRealtime()
+     * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static final String EXTRA_ACCESSORY_HANDSHAKE_END =
+            "android.hardware.usb.extra.ACCESSORY_HANDSHAKE_END";
 
     /**
      * Name of extra added to the {@link android.app.PendingIntent}
