@@ -111,6 +111,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Icon;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -119,6 +120,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.DisplayInfo;
@@ -1720,8 +1722,8 @@ class Task extends WindowContainer<WindowContainer> {
             if (td.getLabel() == null) {
                 td.setLabel(atd.getLabel());
             }
-            if (td.getIconResource() == 0) {
-                td.setIcon(atd.getIconResource());
+            if (td.getRawIcon() == null) {
+                td.setIcon(atd.getRawIcon());
             }
             if (td.getIconFilename() == null) {
                 td.setIconFilename(atd.getIconFilename());
@@ -3739,13 +3741,12 @@ class Task extends WindowContainer<WindowContainer> {
                         persistTaskVersion = Integer.parseInt(attrValue);
                         break;
                     default:
-                        if (attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
-                            taskDescription.restoreFromXml(attrName, attrValue);
-                        } else {
+                        if (!attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
                             Slog.w(TAG, "Task: Unknown attribute=" + attrName);
                         }
                 }
             }
+            taskDescription.restoreFromXml(in);
 
             int event;
             while (((event = in.next()) != XmlPullParser.END_DOCUMENT)

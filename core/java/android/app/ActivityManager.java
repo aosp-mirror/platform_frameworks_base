@@ -50,6 +50,7 @@ import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Icon;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
@@ -84,6 +85,7 @@ import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.FileDescriptor;
@@ -1012,10 +1014,12 @@ public class ActivityManager {
                 ATTR_TASKDESCRIPTION_PREFIX + "icon_filename";
         private static final String ATTR_TASKDESCRIPTIONICON_RESOURCE =
                 ATTR_TASKDESCRIPTION_PREFIX + "icon_resource";
+        private static final String ATTR_TASKDESCRIPTIONICON_RESOURCE_PACKAGE =
+                ATTR_TASKDESCRIPTION_PREFIX + "icon_package";
 
         private String mLabel;
-        private Bitmap mIcon;
-        private int mIconRes;
+        @Nullable
+        private Icon mIcon;
         private String mIconFilename;
         private int mColorPrimary;
         private int mColorBackground;
@@ -1026,6 +1030,52 @@ public class ActivityManager {
         private int mResizeMode;
         private int mMinWidth;
         private int mMinHeight;
+
+
+        /**
+         * Creates the TaskDescription to the specified values.
+         *
+         * @param label A label and description of the current state of this task.
+         * @param iconRes A drawable resource of an icon that represents the current state of this
+         *                activity.
+         * @param colorPrimary A color to override the theme's primary color.  This color must be
+         *                     opaque.
+         */
+        public TaskDescription(String label, @DrawableRes int iconRes, int colorPrimary) {
+            this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
+                    colorPrimary, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
+            if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
+                throw new RuntimeException("A TaskDescription's primary color should be opaque");
+            }
+        }
+
+        /**
+         * Creates the TaskDescription to the specified values.
+         *
+         * @param label A label and description of the current state of this activity.
+         * @param iconRes A drawable resource of an icon that represents the current state of this
+         *                activity.
+         */
+        public TaskDescription(String label, @DrawableRes int iconRes) {
+            this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
+                    0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
+        }
+
+        /**
+         * Creates the TaskDescription to the specified values.
+         *
+         * @param label A label and description of the current state of this activity.
+         */
+        public TaskDescription(String label) {
+            this(label, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
+        }
+
+        /**
+         * Creates an empty TaskDescription.
+         */
+        public TaskDescription() {
+            this(null, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
+        }
 
         /**
          * Creates the TaskDescription to the specified values.
@@ -1038,25 +1088,8 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
-            this(label, icon, 0, null, colorPrimary, 0, 0, 0, false, false,
-                    RESIZE_MODE_RESIZEABLE, -1, -1);
-            if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
-                throw new RuntimeException("A TaskDescription's primary color should be opaque");
-            }
-        }
-
-        /**
-         * Creates the TaskDescription to the specified values.
-         *
-         * @param label A label and description of the current state of this task.
-         * @param iconRes A drawable resource of an icon that represents the current state of this
-         *                activity.
-         * @param colorPrimary A color to override the theme's primary color.  This color must be
-         *                     opaque.
-         */
-        public TaskDescription(String label, @DrawableRes int iconRes, int colorPrimary) {
-            this(label, null, iconRes, null, colorPrimary, 0, 0, 0, false, false,
-                    RESIZE_MODE_RESIZEABLE, -1, -1);
+            this(label, icon != null ? Icon.createWithBitmap(icon) : null, colorPrimary, 0, 0, 0,
+                    false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1071,47 +1104,19 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon) {
-            this(label, icon, 0, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
-        }
-
-        /**
-         * Creates the TaskDescription to the specified values.
-         *
-         * @param label A label and description of the current state of this activity.
-         * @param iconRes A drawable resource of an icon that represents the current state of this
-         *                activity.
-         */
-        public TaskDescription(String label, @DrawableRes int iconRes) {
-            this(label, null, iconRes, null, 0, 0, 0, 0, false, false,
+            this(label, icon != null ? Icon.createWithBitmap(icon) : null, 0, 0, 0, 0, false, false,
                     RESIZE_MODE_RESIZEABLE, -1, -1);
         }
 
-        /**
-         * Creates the TaskDescription to the specified values.
-         *
-         * @param label A label and description of the current state of this activity.
-         */
-        public TaskDescription(String label) {
-            this(label, null, 0, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
-        }
-
-        /**
-         * Creates an empty TaskDescription.
-         */
-        public TaskDescription() {
-            this(null, null, 0, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
-        }
-
         /** @hide */
-        public TaskDescription(String label, Bitmap bitmap, int iconRes, String iconFilename,
-                int colorPrimary, int colorBackground, int statusBarColor, int navigationBarColor,
+        public TaskDescription(@Nullable String label, @Nullable Icon icon,
+                int colorPrimary, int colorBackground,
+                int statusBarColor, int navigationBarColor,
                 boolean ensureStatusBarContrastWhenTransparent,
                 boolean ensureNavigationBarContrastWhenTransparent, int resizeMode, int minWidth,
                 int minHeight) {
             mLabel = label;
-            mIcon = bitmap;
-            mIconRes = iconRes;
-            mIconFilename = iconFilename;
+            mIcon = icon;
             mColorPrimary = colorPrimary;
             mColorBackground = colorBackground;
             mStatusBarColor = statusBarColor;
@@ -1138,7 +1143,6 @@ public class ActivityManager {
         public void copyFrom(TaskDescription other) {
             mLabel = other.mLabel;
             mIcon = other.mIcon;
-            mIconRes = other.mIconRes;
             mIconFilename = other.mIconFilename;
             mColorPrimary = other.mColorPrimary;
             mColorBackground = other.mColorBackground;
@@ -1160,7 +1164,6 @@ public class ActivityManager {
         public void copyFromPreserveHiddenFields(TaskDescription other) {
             mLabel = other.mLabel;
             mIcon = other.mIcon;
-            mIconRes = other.mIconRes;
             mIconFilename = other.mIconFilename;
             mColorPrimary = other.mColorPrimary;
 
@@ -1240,20 +1243,11 @@ public class ActivityManager {
         }
 
         /**
-         * Sets the icon for this task description.
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public void setIcon(Bitmap icon) {
-            mIcon = icon;
-        }
-
-        /**
          * Sets the icon resource for this task description.
          * @hide
          */
-        public void setIcon(int iconRes) {
-            mIconRes = iconRes;
+        public void setIcon(Icon icon) {
+            mIcon = icon;
         }
 
         /**
@@ -1263,7 +1257,10 @@ public class ActivityManager {
          */
         public void setIconFilename(String iconFilename) {
             mIconFilename = iconFilename;
-            mIcon = null;
+            if (iconFilename != null) {
+                // Only reset the icon if an actual persisted icon filepath was set
+                mIcon = null;
+            }
         }
 
         /**
@@ -1301,19 +1298,57 @@ public class ActivityManager {
         }
 
         /**
-         * @return The icon that represents the current state of this task.
+         * @return The actual icon that represents the current state of this task if it is in memory
+         *         or loads it from disk if available.
+         * @hide
          */
-        public Bitmap getIcon() {
+        public Icon loadIcon() {
             if (mIcon != null) {
                 return mIcon;
+            }
+            Bitmap loadedIcon = loadTaskDescriptionIcon(mIconFilename, UserHandle.myUserId());
+            if (loadedIcon != null) {
+                return Icon.createWithBitmap(loadedIcon);
+            }
+            return null;
+        }
+
+        /**
+         * @return The in-memory or loaded icon that represents the current state of this task.
+         * @deprecated This call is no longer supported.
+         */
+        @Deprecated
+        public Bitmap getIcon() {
+            Bitmap icon = getInMemoryIcon();
+            if (icon != null) {
+                return icon;
             }
             return loadTaskDescriptionIcon(mIconFilename, UserHandle.myUserId());
         }
 
         /** @hide */
+        @Nullable
+        public Icon getRawIcon() {
+            return mIcon;
+        }
+
+        /** @hide */
+        @TestApi
+        @Nullable
+        public String getIconResourcePackage() {
+            if (mIcon != null && mIcon.getType() == Icon.TYPE_RESOURCE) {
+                return mIcon.getResPackage();
+            }
+            return "";
+        }
+
+        /** @hide */
         @TestApi
         public int getIconResource() {
-            return mIconRes;
+            if (mIcon != null && mIcon.getType() == Icon.TYPE_RESOURCE) {
+                return mIcon.getResId();
+            }
+            return 0;
         }
 
         /** @hide */
@@ -1325,7 +1360,10 @@ public class ActivityManager {
         /** @hide */
         @UnsupportedAppUsage
         public Bitmap getInMemoryIcon() {
-            return mIcon;
+            if (mIcon != null && mIcon.getType() == Icon.TYPE_BITMAP) {
+                return mIcon.getBitmap();
+            }
+            return null;
         }
 
         /** @hide */
@@ -1440,23 +1478,42 @@ public class ActivityManager {
             if (mIconFilename != null) {
                 out.attribute(null, ATTR_TASKDESCRIPTIONICON_FILENAME, mIconFilename);
             }
-            if (mIconRes != 0) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONICON_RESOURCE, Integer.toString(mIconRes));
+            if (mIcon != null && mIcon.getType() == Icon.TYPE_RESOURCE) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONICON_RESOURCE,
+                        Integer.toString(mIcon.getResId()));
+                out.attribute(null, ATTR_TASKDESCRIPTIONICON_RESOURCE_PACKAGE,
+                        mIcon.getResPackage());
             }
         }
 
         /** @hide */
-        public void restoreFromXml(String attrName, String attrValue) {
-            if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
-                setLabel(attrValue);
-            } else if (ATTR_TASKDESCRIPTIONCOLOR_PRIMARY.equals(attrName)) {
-                setPrimaryColor((int) Long.parseLong(attrValue, 16));
-            } else if (ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND.equals(attrName)) {
-                setBackgroundColor((int) Long.parseLong(attrValue, 16));
-            } else if (ATTR_TASKDESCRIPTIONICON_FILENAME.equals(attrName)) {
-                setIconFilename(attrValue);
-            } else if (ATTR_TASKDESCRIPTIONICON_RESOURCE.equals(attrName)) {
-                setIcon(Integer.parseInt(attrValue, 10));
+        public void restoreFromXml(XmlPullParser in) {
+            final String label = in.getAttributeValue(null, ATTR_TASKDESCRIPTIONLABEL);
+            if (label != null) {
+                setLabel(label);
+            }
+            final String colorPrimary = in.getAttributeValue(null,
+                    ATTR_TASKDESCRIPTIONCOLOR_PRIMARY);
+            if (colorPrimary != null) {
+                setPrimaryColor((int) Long.parseLong(colorPrimary, 16));
+            }
+            final String colorBackground = in.getAttributeValue(null,
+                    ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND);
+            if (colorBackground != null) {
+                setBackgroundColor((int) Long.parseLong(colorBackground, 16));
+            }
+            final String iconFilename = in.getAttributeValue(null,
+                    ATTR_TASKDESCRIPTIONICON_FILENAME);
+            if (iconFilename != null) {
+                setIconFilename(iconFilename);
+            }
+            final String iconResourceId = in.getAttributeValue(null,
+                    ATTR_TASKDESCRIPTIONICON_RESOURCE);
+            final String iconResourcePackage = in.getAttributeValue(null,
+                    ATTR_TASKDESCRIPTIONICON_RESOURCE_PACKAGE);
+            if (iconResourceId != null && iconResourcePackage != null) {
+                setIcon(Icon.createWithResource(iconResourcePackage,
+                        Integer.parseInt(iconResourceId, 10)));
             }
         }
 
@@ -1473,13 +1530,15 @@ public class ActivityManager {
                 dest.writeInt(1);
                 dest.writeString(mLabel);
             }
-            if (mIcon == null || mIcon.isRecycled()) {
+            final Bitmap bitmapIcon = getInMemoryIcon();
+            if (mIcon == null || (bitmapIcon != null && bitmapIcon.isRecycled())) {
+                // If there is no icon, or if the icon is a bitmap that has been recycled, then
+                // don't write anything to disk
                 dest.writeInt(0);
             } else {
                 dest.writeInt(1);
                 mIcon.writeToParcel(dest, 0);
             }
-            dest.writeInt(mIconRes);
             dest.writeInt(mColorPrimary);
             dest.writeInt(mColorBackground);
             dest.writeInt(mStatusBarColor);
@@ -1499,8 +1558,9 @@ public class ActivityManager {
 
         public void readFromParcel(Parcel source) {
             mLabel = source.readInt() > 0 ? source.readString() : null;
-            mIcon = source.readInt() > 0 ? Bitmap.CREATOR.createFromParcel(source) : null;
-            mIconRes = source.readInt();
+            if (source.readInt() > 0) {
+                mIcon = Icon.CREATOR.createFromParcel(source);
+            }
             mColorPrimary = source.readInt();
             mColorBackground = source.readInt();
             mStatusBarColor = source.readInt();
@@ -1526,7 +1586,7 @@ public class ActivityManager {
         @Override
         public String toString() {
             return "TaskDescription Label: " + mLabel + " Icon: " + mIcon
-                    + " IconRes: " + mIconRes + " IconFilename: " + mIconFilename
+                    + " IconFilename: " + mIconFilename
                     + " colorPrimary: " + mColorPrimary + " colorBackground: " + mColorBackground
                     + " statusBarColor: " + mStatusBarColor
                     + (mEnsureStatusBarContrastWhenTransparent ? " (contrast when transparent)"
@@ -1643,7 +1703,7 @@ public class ActivityManager {
                 pw.print(" taskDescription {");
                 pw.print(" colorBackground=#" + Integer.toHexString(td.getBackgroundColor()));
                 pw.print(" colorPrimary=#" + Integer.toHexString(td.getPrimaryColor()));
-                pw.print(" iconRes=" + (td.getIconResource() != 0));
+                pw.print(" iconRes=" + td.getIconResourcePackage() + "/" + td.getIconResource());
                 pw.print(" iconBitmap=" + (td.getIconFilename() != null
                         || td.getInMemoryIcon() != null));
                 pw.print(" resizeMode=" + ActivityInfo.resizeModeToString(td.getResizeMode()));
