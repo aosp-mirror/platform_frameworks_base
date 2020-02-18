@@ -18,24 +18,30 @@ package com.android.systemui.keyguard;
 
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -60,6 +66,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock NotificationShadeWindowController mNotificationShadeWindowController;
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
     private @Mock DismissCallbackRegistry mDismissCallbackRegistry;
+    private @Mock DumpController mDumpController;
+    private @Mock PowerManager mPowerManager;
+    private @Mock TrustManager mTrustManager;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     private FalsingManagerFake mFalsingManager;
@@ -69,24 +78,33 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mFalsingManager = new FalsingManagerFake();
 
-        mDependency.injectTestDependency(FalsingManager.class, mFalsingManager);
-        mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mUpdateMonitor);
-
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
+        when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
 
-        TestableLooper.get(this).runWithLooper(() -> {
-            mViewMediator = new KeyguardViewMediator(
-                    mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
-                    mNotificationShadeWindowController, () -> mStatusBarKeyguardViewManager,
-                    mDismissCallbackRegistry, mUiBgExecutor);
-        });
+        mViewMediator = new KeyguardViewMediator(
+                mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
+                mNotificationShadeWindowController, () -> mStatusBarKeyguardViewManager,
+                mDismissCallbackRegistry, mUpdateMonitor, mDumpController, mUiBgExecutor,
+                mPowerManager, mTrustManager);
+        mViewMediator.start();
     }
 
     @Test
     public void testOnGoingToSleep_UpdatesKeyguardGoingAway() {
-        mViewMediator.start();
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
         verify(mUpdateMonitor).setKeyguardGoingAway(false);
         verify(mNotificationShadeWindowController, never()).setKeyguardGoingAway(anyBoolean());
+    }
+
+    @Test
+    public void testRegisterDumpable() {
+        verify(mDumpController).registerDumpable(eq(mViewMediator));
+        verify(mNotificationShadeWindowController, never()).setKeyguardGoingAway(anyBoolean());
+    }
+
+    @Test
+    public void testKeyguardGone_notGoingaway() {
+        mViewMediator.mViewMediatorCallback.keyguardGone();
+        verify(mNotificationShadeWindowController).setKeyguardGoingAway(eq(false));
     }
 }
