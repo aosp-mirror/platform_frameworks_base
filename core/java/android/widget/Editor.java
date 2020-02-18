@@ -151,9 +151,6 @@ public class Editor {
     private static final String TAG = "Editor";
     private static final boolean DEBUG_UNDO = false;
 
-    // Specifies whether to allow starting a cursor drag by dragging anywhere over the text.
-    @VisibleForTesting
-    public static boolean FLAG_ENABLE_CURSOR_DRAG = true;
     // Specifies whether to use the magnifier when pressing the insertion or selection handles.
     private static final boolean FLAG_USE_MAGNIFIER = true;
 
@@ -387,9 +384,8 @@ public class Editor {
 
     private final SuggestionHelper mSuggestionHelper = new SuggestionHelper();
 
-    // Specifies whether the cursor control feature set is enabled.
-    // This can only be true if the text view is editable.
-    private boolean mCursorControlEnabled;
+    private boolean mFlagCursorDragFromAnywhereEnabled;
+    private boolean mFlagInsertionHandleGesturesEnabled;
 
     // Specifies whether the new magnifier (with fish-eye effect) is enabled.
     private final boolean mNewMagnifierEnabled;
@@ -402,26 +398,40 @@ public class Editor {
         mHapticTextHandleEnabled = mTextView.getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
 
-        mCursorControlEnabled = AppGlobals.getIntCoreSetting(
-                WidgetFlags.KEY_ENABLE_CURSOR_CONTROL , 0) != 0;
+        mFlagCursorDragFromAnywhereEnabled = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE , 1) != 0;
+        mFlagInsertionHandleGesturesEnabled = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_ENABLE_INSERTION_HANDLE_GESTURES , 0) != 0;
         mNewMagnifierEnabled = AppGlobals.getIntCoreSetting(
                 WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER, 0) != 0;
         if (TextView.DEBUG_CURSOR) {
-            logCursor("Editor", "Cursor control is %s.",
-                    mCursorControlEnabled ? "enabled" : "disabled");
+            logCursor("Editor", "Cursor drag from anywhere is %s.",
+                    mFlagCursorDragFromAnywhereEnabled ? "enabled" : "disabled");
+            logCursor("Editor", "Insertion handle gestures is %s.",
+                    mFlagInsertionHandleGesturesEnabled ? "enabled" : "disabled");
             logCursor("Editor", "New magnifier is %s.",
                     mNewMagnifierEnabled ? "enabled" : "disabled");
         }
     }
 
     @VisibleForTesting
-    public void setCursorControlEnabled(boolean enabled) {
-        mCursorControlEnabled = enabled;
+    public boolean getFlagCursorDragFromAnywhereEnabled() {
+        return mFlagCursorDragFromAnywhereEnabled;
     }
 
     @VisibleForTesting
-    public boolean getCursorControlEnabled() {
-        return mCursorControlEnabled;
+    public void setFlagCursorDragFromAnywhereEnabled(boolean enabled) {
+        mFlagCursorDragFromAnywhereEnabled = enabled;
+    }
+
+    @VisibleForTesting
+    public boolean getFlagInsertionHandleGesturesEnabled() {
+        return mFlagInsertionHandleGesturesEnabled;
+    }
+
+    @VisibleForTesting
+    public void setFlagInsertionHandleGesturesEnabled(boolean enabled) {
+        mFlagInsertionHandleGesturesEnabled = enabled;
     }
 
     // Lazy creates the magnifier animator.
@@ -5259,7 +5269,7 @@ public class Editor {
 
             int deltaHeight = 0;
             int opacity = 255;
-            if (mCursorControlEnabled) {
+            if (mFlagInsertionHandleGesturesEnabled) {
                 deltaHeight = AppGlobals.getIntCoreSetting(
                         WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT, 25);
                 opacity = AppGlobals.getIntCoreSetting(
@@ -5329,7 +5339,7 @@ public class Editor {
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            if (mCursorControlEnabled) {
+            if (mFlagInsertionHandleGesturesEnabled) {
                 final int height = Math.max(
                         getPreferredHeight() + mDeltaHeight, mDrawable.getIntrinsicHeight());
                 setMeasuredDimension(getPreferredWidth(), height);
@@ -5340,7 +5350,7 @@ public class Editor {
 
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
-            if (mCursorControlEnabled && FLAG_ENABLE_CURSOR_DRAG) {
+            if (mFlagInsertionHandleGesturesEnabled && mFlagCursorDragFromAnywhereEnabled) {
                 // Should only enable touch through when cursor drag is enabled.
                 // Otherwise the insertion handle view cannot be moved.
                 return touchThrough(ev);
@@ -6025,7 +6035,7 @@ public class Editor {
                     }
                     if (mIsDraggingCursor) {
                         performCursorDrag(event);
-                    } else if (FLAG_ENABLE_CURSOR_DRAG
+                    } else if (mFlagCursorDragFromAnywhereEnabled
                                 && mTextView.getLayout() != null
                                 && mTextView.isFocused()
                                 && mTouchState.isMovedEnoughForDrag()

@@ -17,23 +17,36 @@
 package android.widget;
 
 /**
- * Keeps the flags related to the Widget namespace in {@link DeviceConfig}.
+ * Flags in the {@link android.provider.DeviceConfig#NAMESPACE_WIDGET "widget" namespace}.
  *
  * @hide
  */
 public final class WidgetFlags {
 
     /**
-     * Whether the cursor control feature set is enabled.
-     * TODO: Makes this flag key visible to webview/chrome.
+     * Whether starting a cursor drag from anywhere in the text should be enabled.
      */
-    public static final String ENABLE_CURSOR_CONTROL =
-            "CursorControlFeature__enable_cursor_control";
+    public static final String ENABLE_CURSOR_DRAG_FROM_ANYWHERE =
+            "CursorControlFeature__enable_cursor_drag_from_anywhere";
 
     /**
-     * The key name used in app core settings for enable cursor control.
+     * The key used in app core settings for the flag {@link #ENABLE_CURSOR_DRAG_FROM_ANYWHERE}.
      */
-    public static final String KEY_ENABLE_CURSOR_CONTROL = "widget__enable_cursor_control";
+    public static final String KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE =
+            "widget__enable_cursor_drag_from_anywhere";
+
+    /**
+     * Whether additional gestures should be enabled for the insertion cursor handle (e.g.
+     * long-press or double-tap on the handle to trigger selection).
+     */
+    public static final String ENABLE_INSERTION_HANDLE_GESTURES =
+            "CursorControlFeature__enable_insertion_handle_gestures";
+
+    /**
+     * The key used in app core settings for the flag {@link #ENABLE_INSERTION_HANDLE_GESTURES}.
+     */
+    public static final String KEY_ENABLE_INSERTION_HANDLE_GESTURES =
+            "widget__enable_insertion_handle_gestures";
 
     /**
      * The flag of delta height applies to the insertion handle when cursor control flag is enabled.

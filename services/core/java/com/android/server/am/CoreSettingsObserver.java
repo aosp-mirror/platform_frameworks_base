@@ -106,8 +106,11 @@ final class CoreSettingsObserver extends ContentObserver {
         // add other global settings here...
 
         sDeviceConfigEntries.add(new DeviceConfigEntry(
-                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_CURSOR_CONTROL,
-                WidgetFlags.KEY_ENABLE_CURSOR_CONTROL, boolean.class));
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE,
+                WidgetFlags.KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE, boolean.class));
+        sDeviceConfigEntries.add(new DeviceConfigEntry(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_INSERTION_HANDLE_GESTURES,
+                WidgetFlags.KEY_ENABLE_INSERTION_HANDLE_GESTURES, boolean.class));
         sDeviceConfigEntries.add(new DeviceConfigEntry(
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.INSERTION_HANDLE_DELTA_HEIGHT,
                 WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT, int.class));

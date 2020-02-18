@@ -44,7 +44,6 @@ import com.android.frameworks.coretests.R;
 
 import com.google.common.base.Strings;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,7 +56,6 @@ public class EditorCursorDragTest {
     public ActivityTestRule<TextViewActivity> mActivityRule = new ActivityTestRule<>(
             TextViewActivity.class);
 
-    private boolean mOriginalFlagValue;
     private Instrumentation mInstrumentation;
     private Activity mActivity;
 
@@ -65,13 +63,6 @@ public class EditorCursorDragTest {
     public void before() throws Throwable {
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mActivity = mActivityRule.getActivity();
-        mOriginalFlagValue = Editor.FLAG_ENABLE_CURSOR_DRAG;
-        Editor.FLAG_ENABLE_CURSOR_DRAG = true;
-    }
-
-    @After
-    public void after() throws Throwable {
-        Editor.FLAG_ENABLE_CURSOR_DRAG = mOriginalFlagValue;
     }
 
     @Test
