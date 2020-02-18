@@ -39,7 +39,6 @@ import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
-import android.telephony.PhoneCapability;
 import android.telephony.PhoneNumberRange;
 import android.telephony.RadioAccessFamily;
 import android.telephony.RadioAccessSpecifier;
@@ -1899,17 +1898,12 @@ interface ITelephony {
     /**
      * Return the network selection mode on the subscription with id {@code subId}.
      */
-    int getNetworkSelectionMode(int subId);
+     int getNetworkSelectionMode(int subId);
 
-    /**
-     * Return the PhoneCapability for the device.
-     */
-    PhoneCapability getPhoneCapability(int subId, String callingPackage, String callingFeatureId);
-
-    /**
+     /**
      * Return true if the device is in emergency sms mode, false otherwise.
      */
-    boolean isInEmergencySmsMode();
+     boolean isInEmergencySmsMode();
 
     /**
      * Return the modem radio power state for slot index.
