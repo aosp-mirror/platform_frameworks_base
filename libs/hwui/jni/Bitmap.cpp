@@ -12,7 +12,6 @@
 #include "SkStream.h"
 #include "SkWebpEncoder.h"
 
-#include "android_os_Parcel.h"
 #include "android_nio_utils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 #include <hwui/Paint.h>
@@ -20,7 +19,7 @@
 #include <utils/Color.h>
 
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer, parcel or render thread
-#include <android_runtime/android_graphics_GraphicBuffer.h>
+#include <private/android/AHardwareBufferHelpers.h>
 #include <binder/Parcel.h>
 #include <dlfcn.h>
 #include <renderthread/RenderProxy.h>
@@ -568,6 +567,25 @@ static void Bitmap_setHasMipMap(JNIEnv* env, jobject, jlong bitmapHandle,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef __ANDROID__ // Layoutlib does not support parcel
+static struct parcel_offsets_t
+{
+  jclass clazz;
+  jfieldID mNativePtr;
+} gParcelOffsets;
+
+static Parcel* parcelForJavaObject(JNIEnv* env, jobject obj) {
+    if (obj) {
+        Parcel* p = (Parcel*)env->GetLongField(obj, gParcelOffsets.mNativePtr);
+        if (p != NULL) {
+            return p;
+        }
+        jniThrowException(env, "java/lang/IllegalStateException", "Parcel has been finalized!");
+    }
+    return NULL;
+}
+#endif
+
 // This is the maximum possible size because the SkColorSpace must be
 // representable (and therefore serializable) using a matrix and numerical
 // transfer function.  If we allow more color space representations in the
@@ -581,7 +599,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         return NULL;
     }
 
-    android::Parcel* p = android::parcelForJavaObject(env, parcel);
+    android::Parcel* p = parcelForJavaObject(env, parcel);
 
     const SkColorType colorType = (SkColorType)p->readInt32();
     const SkAlphaType alphaType = (SkAlphaType)p->readInt32();
@@ -704,7 +722,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
         return JNI_FALSE;
     }
 
-    android::Parcel* p = android::parcelForJavaObject(env, parcel);
+    android::Parcel* p = parcelForJavaObject(env, parcel);
     SkBitmap bitmap;
 
     auto bitmapWrapper = reinterpret_cast<BitmapWrapper*>(bitmapHandle);
@@ -1048,19 +1066,6 @@ static jobject Bitmap_wrapHardwareBufferBitmap(JNIEnv* env, jobject, jobject har
 #endif
 }
 
-static jobject Bitmap_createGraphicBufferHandle(JNIEnv* env, jobject, jlong bitmapPtr) {
-#ifdef __ANDROID__ // Layoutlib does not support graphic buffer
-    LocalScopedBitmap bitmapHandle(bitmapPtr);
-    LOG_ALWAYS_FATAL_IF(!bitmapHandle->isHardware(),
-            "Hardware config is only supported config in Bitmap_getGraphicBuffer");
-
-    Bitmap& bitmap = bitmapHandle->bitmap();
-    return android_graphics_GraphicBuffer_createFromAHardwareBuffer(env, bitmap.hardwareBuffer());
-#else
-    return NULL;
-#endif
-}
-
 static jobject Bitmap_getHardwareBuffer(JNIEnv* env, jobject, jlong bitmapPtr) {
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer
     LocalScopedBitmap bitmapHandle(bitmapPtr);
@@ -1138,8 +1143,6 @@ static const JNINativeMethod gBitmapMethods[] = {
         (void*)Bitmap_copyPreserveInternalConfig },
     {   "nativeWrapHardwareBufferBitmap", "(Landroid/hardware/HardwareBuffer;J)Landroid/graphics/Bitmap;",
         (void*) Bitmap_wrapHardwareBufferBitmap },
-    {   "nativeCreateGraphicBufferHandle", "(J)Landroid/graphics/GraphicBuffer;",
-        (void*) Bitmap_createGraphicBufferHandle },
     {   "nativeGetHardwareBuffer", "(J)Landroid/hardware/HardwareBuffer;",
         (void*) Bitmap_getHardwareBuffer },
     {   "nativeComputeColorSpace",  "(J)Landroid/graphics/ColorSpace;", (void*)Bitmap_computeColorSpace },
@@ -1153,6 +1156,8 @@ static const JNINativeMethod gBitmapMethods[] = {
 
 };
 
+const char* const kParcelPathName = "android/os/Parcel";
+
 int register_android_graphics_Bitmap(JNIEnv* env)
 {
     gBitmap_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Bitmap"));
@@ -1160,7 +1165,7 @@ int register_android_graphics_Bitmap(JNIEnv* env)
     gBitmap_constructorMethodID = GetMethodIDOrDie(env, gBitmap_class, "<init>", "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
     gBitmap_reinitMethodID = GetMethodIDOrDie(env, gBitmap_class, "reinit", "(IIZ)V");
 
-#ifdef __ANDROID__ // Layoutlib does not support graphic buffer
+#ifdef __ANDROID__ // Layoutlib does not support graphic buffer or parcel
     void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
     AHardwareBuffer_fromHardwareBuffer =
             (AHB_from_HB)dlsym(handle_, "AHardwareBuffer_fromHardwareBuffer");
@@ -1170,6 +1175,9 @@ int register_android_graphics_Bitmap(JNIEnv* env)
     AHardwareBuffer_toHardwareBuffer = (AHB_to_HB)dlsym(handle_, "AHardwareBuffer_toHardwareBuffer");
     LOG_ALWAYS_FATAL_IF(AHardwareBuffer_toHardwareBuffer == nullptr,
                         " Failed to find required symbol AHardwareBuffer_toHardwareBuffer!");
+
+    gParcelOffsets.clazz = MakeGlobalRefOrDie(env, FindClassOrDie(env, kParcelPathName));
+    gParcelOffsets.mNativePtr = GetFieldIDOrDie(env, gParcelOffsets.clazz, "mNativePtr", "J");
 #endif
     return android::RegisterMethodsOrDie(env, "android/graphics/Bitmap", gBitmapMethods,
                                          NELEM(gBitmapMethods));

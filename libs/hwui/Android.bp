@@ -311,7 +311,6 @@ cc_defaults {
 
     shared_libs: [
         "libbase",
-        "libbinder",
         "libcutils",
         "libharfbuzz_ng",
         "liblog",
@@ -341,6 +340,7 @@ cc_defaults {
             ],
             shared_libs: [
                 "libandroidfw",
+                "libbinder",
                 "libbinder_ndk",
                 "libmediandk",
                 "libnativedisplay",
