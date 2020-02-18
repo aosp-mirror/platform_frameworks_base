@@ -14,6 +14,11 @@
 
 #include "statsd_test_util.h"
 
+#include <aidl/android/util/StatsEventParcel.h>
+
+using aidl::android::util::StatsEventParcel;
+using std::shared_ptr;
+
 namespace android {
 namespace os {
 namespace statsd {
@@ -581,7 +586,7 @@ std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
 
 sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
                                               const StatsdConfig& config, const ConfigKey& key,
-                                              const sp<IPullAtomCallback>& puller,
+                                              const shared_ptr<IPullAtomCallback>& puller,
                                               const int32_t atomTag) {
     sp<UidMap> uidMap = new UidMap();
     sp<StatsPullerManager> pullerManager = new StatsPullerManager();
@@ -590,11 +595,13 @@ sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const in
                                                 puller);
     }
     sp<AlarmMonitor> anomalyAlarmMonitor =
-        new AlarmMonitor(1,  [](const sp<IStatsCompanionService>&, int64_t){},
-                [](const sp<IStatsCompanionService>&){});
+        new AlarmMonitor(1,
+                         [](const shared_ptr<IStatsCompanionService>&, int64_t){},
+                         [](const shared_ptr<IStatsCompanionService>&){});
     sp<AlarmMonitor> periodicAlarmMonitor =
-        new AlarmMonitor(1,  [](const sp<IStatsCompanionService>&, int64_t){},
-                [](const sp<IStatsCompanionService>&){});
+        new AlarmMonitor(1,
+                         [](const shared_ptr<IStatsCompanionService>&, int64_t){},
+                         [](const shared_ptr<IStatsCompanionService>&){});
     sp<StatsLogProcessor> processor =
             new StatsLogProcessor(uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
                                   timeBaseNs, [](const ConfigKey&) { return true; },
@@ -948,10 +955,10 @@ void backfillStartEndTimestamp(ConfigMetricsReportList *config_report_list) {
     }
 }
 
-binder::Status FakeSubsystemSleepCallback::onPullAtom(
-        int atomTag, const sp<IPullAtomResultReceiver>& resultReceiver) {
+Status FakeSubsystemSleepCallback::onPullAtom(int atomTag,
+        const shared_ptr<IPullAtomResultReceiver>& resultReceiver) {
     // Convert stats_events into StatsEventParcels.
-    std::vector<android::util::StatsEventParcel> parcels;
+    std::vector<StatsEventParcel> parcels;
     for (int i = 1; i < 3; i++) {
         AStatsEvent* event = AStatsEvent_obtain();
         AStatsEvent_setAtomId(event, atomTag);
@@ -965,7 +972,7 @@ binder::Status FakeSubsystemSleepCallback::onPullAtom(
         size_t size;
         uint8_t* buffer = AStatsEvent_getBuffer(event, &size);
 
-        android::util::StatsEventParcel p;
+        StatsEventParcel p;
         // vector.assign() creates a copy, but this is inevitable unless
         // stats_event.h/c uses a vector as opposed to a buffer.
         p.buffer.assign(buffer, buffer + size);
@@ -973,7 +980,7 @@ binder::Status FakeSubsystemSleepCallback::onPullAtom(
         AStatsEvent_write(event);
     }
     resultReceiver->pullFinished(atomTag, /*success=*/true, parcels);
-    return binder::Status::ok();
+    return Status::ok();
 }
 
 }  // namespace statsd

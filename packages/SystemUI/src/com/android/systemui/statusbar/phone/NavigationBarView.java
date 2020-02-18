@@ -63,6 +63,7 @@ import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
+import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistHandleViewController;
@@ -74,7 +75,6 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.policy.DeadZone;
@@ -869,8 +869,7 @@ public class NavigationBarView extends FrameLayout implements
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
-        Divider divider = Dependency.get(Divider.class);
-        divider.registerInSplitScreenListener(mDockedListener);
+        DockedStackExistsListener.register(mDockedListener);
         updateOrientationViews();
         reloadNavIcons();
     }

@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.os.CancellationSignal;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
 import android.view.animation.Interpolator;
 
 import java.lang.annotation.Retention;
@@ -148,19 +147,19 @@ public interface WindowInsetsController {
      * @param durationMillis Duration of animation in
      *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}, or -1 if the
      *                       animation doesn't have a predetermined duration. This value will be
-     *                       passed to {@link InsetsAnimation#getDurationMillis()}
+     *                       passed to {@link WindowInsetsAnimation#getDurationMillis()}
      * @param interpolator The interpolator used for this animation, or {@code null} if this
      *                     animation doesn't follow an interpolation curve. This value will be
-     *                     passed to {@link InsetsAnimation#getInterpolator()} and used to calculate
-     *                     {@link InsetsAnimation#getInterpolatedFraction()}.
+     *                     passed to {@link WindowInsetsAnimation#getInterpolator()} and used to
+     *                     calculate {@link WindowInsetsAnimation#getInterpolatedFraction()}.
      * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
      *                 windows are ready to be controlled, among other callbacks.
      * @return A cancellation signal that the caller can use to cancel the request to obtain
      *         control, or once they have control, to cancel the control.
-     * @see InsetsAnimation#getFraction()
-     * @see InsetsAnimation#getInterpolatedFraction()
-     * @see InsetsAnimation#getInterpolator()
-     * @see InsetsAnimation#getDurationMillis()
+     * @see WindowInsetsAnimation#getFraction()
+     * @see WindowInsetsAnimation#getInterpolatedFraction()
+     * @see WindowInsetsAnimation#getInterpolator()
+     * @see WindowInsetsAnimation#getDurationMillis()
      */
     @NonNull
     CancellationSignal controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,

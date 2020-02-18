@@ -16,23 +16,25 @@
 
 package com.google.android.test.windowinsetstests;
 
+import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
+
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.graphics.Insets;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Property;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
-import android.view.WindowInsetsAnimationCallback;
-import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
+import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimationControlListener;
 import android.view.WindowInsetsAnimationController;
 
 import com.google.android.test.windowinsetstests.R;
+
+import java.util.List;
 
 public class WindowInsetsActivity extends Activity {
 
@@ -70,7 +72,7 @@ public class WindowInsetsActivity extends Activity {
 
     float startY;
     float endY;
-    InsetsAnimation imeAnim;
+    WindowInsetsAnimation imeAnim;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,15 +87,11 @@ public class WindowInsetsActivity extends Activity {
                 v.getWindowInsetsController().hide(Type.ime());
             }
         });
-        mRoot.setWindowInsetsAnimationCallback(new WindowInsetsAnimationCallback() {
+        mRoot.setWindowInsetsAnimationCallback(new WindowInsetsAnimation.Callback(
+                DISPATCH_MODE_STOP) {
 
             @Override
-            public int getDispatchMode() {
-                return DISPATCH_MODE_STOP;
-            }
-
-            @Override
-            public void onPrepare(InsetsAnimation animation) {
+            public void onPrepare(WindowInsetsAnimation animation) {
                 if ((animation.getTypeMask() & Type.ime()) != 0) {
                     imeAnim = animation;
                 }
@@ -101,20 +99,21 @@ public class WindowInsetsActivity extends Activity {
             }
 
             @Override
-            public WindowInsets onProgress(WindowInsets insets) {
+            public WindowInsets onProgress(WindowInsets insets,
+                    List<WindowInsetsAnimation> runningAnimations) {
                 mButton.setY(startY + (endY - startY) * imeAnim.getInterpolatedFraction());
                 return insets;
             }
 
             @Override
-            public AnimationBounds onStart(InsetsAnimation animation,
-                    AnimationBounds bounds) {
+            public WindowInsetsAnimation.Bounds onStart(WindowInsetsAnimation animation,
+                    WindowInsetsAnimation.Bounds bounds) {
                 endY = mButton.getTop();
                 return bounds;
             }
 
             @Override
-            public void onFinish(InsetsAnimation animation) {
+            public void onEnd(WindowInsetsAnimation animation) {
                 imeAnim = null;
             }
         });

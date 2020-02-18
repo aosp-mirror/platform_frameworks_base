@@ -71,7 +71,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Fylla skjá með aðdrætti"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Teygja yfir allan skjáinn"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skjámynd"</string>
-    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"Mynd sett inn"</string>
+    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"sendi mynd"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Vistar skjámynd…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Vistar skjámynd…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Skjámynd vistuð"</string>
@@ -80,11 +80,19 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Prófaðu að taka skjámynd aftur"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Ekki tókst að vista skjámynd vegna takmarkaðs geymslupláss"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Forritið eða fyrirtækið þitt leyfir ekki skjámyndatöku"</string>
-    <string name="screenrecord_name" msgid="6286499308042305686">"Skjáupptaka"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Upptökutæki á skjá"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Áframhaldandi tilkynning fyrir skjáupptökulotu"</string>
-    <string name="screenrecord_start_label" msgid="1539048263178882562">"Hefja upptöku"</string>
-    <string name="screenrecord_mic_label" msgid="6134198080740031632">"Taka upp talsetningu"</string>
-    <string name="screenrecord_taps_label" msgid="2518244240225925076">"Sýna snertingar"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Hefja upptöku?"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Á meðan tekið er upp getur Android kerfið fangað viðkvæmar upplýsingar sem sjást á skjánum eða spilast í tækinu. Þar á meðal eru upplýsingar á borð við aðgangsorð, greiðsluupplýsingar, myndir, skilaboð og hljóð."</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Taka upp hljóð"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Hljóð tækis"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Hljóð úr tækinu á borð við tónlist, símtöl og hringitóna"</string>
+    <string name="screenrecord_mic_label" msgid="2111264835791332350">"Hljóðnemi"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Hljóð og hljóðnemi tækis"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Byrja"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Tekur upp skjá"</string>
+    <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Tekur upp skjá og hljóð"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Sýna snertingu skjás"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Ýttu til að stöðva"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Stöðva"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Hlé"</string>
@@ -97,6 +105,7 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"Skjáupptöku eytt"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Villa við að eyða skjáupptöku"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Ekki tókst að fá heimildir"</string>
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"Villa við að hefja upptöku skjás"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Valkostir USB-skráaflutnings"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"Tengja sem efnisspilara (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Tengja sem myndavél (PTP)"</string>
@@ -477,6 +486,7 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Ekki sýna þetta aftur"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hreinsa allt"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Stjórna"</string>
+    <string name="manage_notifications_history_text" msgid="57055985396576230">"Ferill"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Þöglar tilkynningar"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Samtöl"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Hreinsa allar þöglar tilkynningar"</string>
@@ -676,6 +686,10 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Auðveldar þér að einbeita þér án hljóðs eða titrings."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Fangar athygli þína með hljóði eða titringi."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Fangar athygli þína með fljótandi flýtileið á þetta efni."</string>
+    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
+    <skip />
+    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ekki er hægt að breyta þessum tilkynningum."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ekki er hægt að stilla þessar tilkynningar hér"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Staðgengilstilkynning"</string>
@@ -698,17 +712,18 @@
     <string name="notification_done" msgid="6215117625922713976">"Lokið"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Afturkalla"</string>
     <string name="demote" msgid="6225813324237153980">"Merkja þessa tilkynningu sem „ekki samtal“"</string>
-    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Eftirlæti"</string>
-    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Fjarlægja úr eftirlæti"</string>
-    <string name="notification_conversation_mute" msgid="477431709687199671">"Þagga"</string>
-    <string name="notification_conversation_unmute" msgid="410885000669775294">"Hætta að þagga"</string>
-    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Sýna sem blöðru"</string>
-    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Slökkva á blöðrum"</string>
+    <string name="notification_conversation_favorite" msgid="1905240206975921907">"Mikilvægt samtal"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Ekki mikilvægt samtal"</string>
+    <string name="notification_conversation_mute" msgid="268951550222925548">"Hljóð tekið af"</string>
+    <string name="notification_conversation_unmute" msgid="2692255619510896710">"Viðvörun"</string>
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"Sýna blöðru"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Fjarlægja blöðrur"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Bæta á heimaskjá"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"tilkynningastýringar"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"þöggunarstillingar tilkynninga"</string>
-    <string name="notification_menu_snooze_action" msgid="8411152711279433989">"Fresta"</string>
+    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Minna mig á"</string>
+    <string name="notification_menu_settings_action" msgid="7085494017202764285">"Stillingar"</string>
     <string name="snooze_undo" msgid="60890935148417175">"AFTURKALLA"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Þaggað í <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
@@ -780,6 +795,7 @@
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Slökkt er á gagnasparnaði"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Kveikt"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Slökkt"</string>
+    <string name="tile_unavailable" msgid="3095879009136616920">"Ekki í boði"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Yfirlitsstika"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Útlit"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Gerð aukahnapps til vinstri"</string>
@@ -965,4 +981,18 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Stækkunargluggi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Stækkunarstillingar glugga"</string>
     <string name="quick_controls_title" msgid="525285759614231333">"Flýtistýringar"</string>
+    <string name="controls_providers_title" msgid="8844124515157926071">"Bæta við stýringum"</string>
+    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Veldu forrit sem bæta á við stýringum frá"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> núverandi eftirlæti.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> núverandi eftirlæti.</item>
+    </plurals>
+    <string name="controls_favorite_default_title" msgid="967742178688938137">"Stýringar"</string>
+    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Veldu stýringar fyrir skjótan aðgang"</string>
+    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
+    <skip />
+    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <skip />
 </resources>

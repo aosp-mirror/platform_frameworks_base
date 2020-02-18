@@ -14,8 +14,10 @@
 
 #include "src/external/StatsCallbackPuller.h"
 
-#include <android/os/BnPullAtomCallback.h>
-#include <android/os/IPullAtomResultReceiver.h>
+#include <aidl/android/os/BnPullAtomCallback.h>
+#include <aidl/android/os/IPullAtomResultReceiver.h>
+#include <aidl/android/util/StatsEventParcel.h>
+#include <android/binder_interface_utils.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <stdio.h>
@@ -35,6 +37,11 @@ namespace os {
 namespace statsd {
 
 using namespace testing;
+using Status = ::ndk::ScopedAStatus;
+using aidl::android::os::BnPullAtomCallback;
+using aidl::android::os::IPullAtomResultReceiver;
+using aidl::android::util::StatsEventParcel;
+using ::ndk::SharedRefBase;
 using std::make_shared;
 using std::shared_ptr;
 using std::vector;
@@ -58,15 +65,15 @@ AStatsEvent* createSimpleEvent(int64_t value) {
     return event;
 }
 
-void executePull(const sp<IPullAtomResultReceiver>& resultReceiver) {
+void executePull(const shared_ptr<IPullAtomResultReceiver>& resultReceiver) {
     // Convert stats_events into StatsEventParcels.
-    std::vector<android::util::StatsEventParcel> parcels;
+    vector<StatsEventParcel> parcels;
     for (int i = 0; i < values.size(); i++) {
         AStatsEvent* event = createSimpleEvent(values[i]);
         size_t size;
         uint8_t* buffer = AStatsEvent_getBuffer(event, &size);
 
-        android::util::StatsEventParcel p;
+        StatsEventParcel p;
         // vector.assign() creates a copy, but this is inevitable unless
         // stats_event.h/c uses a vector as opposed to a buffer.
         p.buffer.assign(buffer, buffer + size);
@@ -80,11 +87,11 @@ void executePull(const sp<IPullAtomResultReceiver>& resultReceiver) {
 
 class FakePullAtomCallback : public BnPullAtomCallback {
 public:
-    binder::Status onPullAtom(int atomTag,
-                              const sp<IPullAtomResultReceiver>& resultReceiver) override {
+    Status onPullAtom(int atomTag,
+                      const shared_ptr<IPullAtomResultReceiver>& resultReceiver) override {
         // Force pull to happen in separate thread to simulate binder.
         pullThread = std::thread(executePull, resultReceiver);
-        return binder::Status::ok();
+        return Status::ok();
     }
 };
 
@@ -111,7 +118,7 @@ public:
 }  // Anonymous namespace.
 
 TEST_F(StatsCallbackPullerTest, PullSuccess) {
-    sp<FakePullAtomCallback> cb = new FakePullAtomCallback();
+    shared_ptr<FakePullAtomCallback> cb = SharedRefBase::make<FakePullAtomCallback>();
     int64_t value = 43;
     pullSuccess = true;
     values.push_back(value);
@@ -132,20 +139,20 @@ TEST_F(StatsCallbackPullerTest, PullSuccess) {
 }
 
 TEST_F(StatsCallbackPullerTest, PullFail) {
-    sp<FakePullAtomCallback> cb = new FakePullAtomCallback();
+    shared_ptr<FakePullAtomCallback> cb = SharedRefBase::make<FakePullAtomCallback>();
     pullSuccess = false;
     int64_t value = 1234;
     values.push_back(value);
 
     StatsCallbackPuller puller(pullTagId, cb, pullCoolDownNs, pullTimeoutNs, {});
 
-    vector<std::shared_ptr<LogEvent>> dataHolder;
+    vector<shared_ptr<LogEvent>> dataHolder;
     EXPECT_FALSE(puller.PullInternal(&dataHolder));
     EXPECT_EQ(0, dataHolder.size());
 }
 
 TEST_F(StatsCallbackPullerTest, PullTimeout) {
-    sp<FakePullAtomCallback> cb = new FakePullAtomCallback();
+    shared_ptr<FakePullAtomCallback> cb = SharedRefBase::make<FakePullAtomCallback>();
     pullSuccess = true;
     pullDelayNs = 500000000;  // 500ms.
     pullTimeoutNs = 10000;    // 10 microseconds.
@@ -154,7 +161,7 @@ TEST_F(StatsCallbackPullerTest, PullTimeout) {
 
     StatsCallbackPuller puller(pullTagId, cb, pullCoolDownNs, pullTimeoutNs, {});
 
-    vector<std::shared_ptr<LogEvent>> dataHolder;
+    vector<shared_ptr<LogEvent>> dataHolder;
     int64_t startTimeNs = getElapsedRealtimeNs();
     // Returns true to let StatsPuller code evaluate the timeout.
     EXPECT_TRUE(puller.PullInternal(&dataHolder));
@@ -174,7 +181,7 @@ TEST_F(StatsCallbackPullerTest, PullTimeout) {
 
 // Register a puller and ensure that the timeout logic works.
 TEST_F(StatsCallbackPullerTest, RegisterAndTimeout) {
-    sp<FakePullAtomCallback> cb = new FakePullAtomCallback();
+    shared_ptr<FakePullAtomCallback> cb = SharedRefBase::make<FakePullAtomCallback>();
     pullSuccess = true;
     pullDelayNs = 500000000;  // 500 ms.
     pullTimeoutNs = 10000;    // 10 microsseconds.
@@ -184,7 +191,7 @@ TEST_F(StatsCallbackPullerTest, RegisterAndTimeout) {
     StatsPullerManager pullerManager;
     pullerManager.RegisterPullAtomCallback(/*uid=*/-1, pullTagId, pullCoolDownNs, pullTimeoutNs,
                                            vector<int32_t>(), cb);
-    vector<std::shared_ptr<LogEvent>> dataHolder;
+    vector<shared_ptr<LogEvent>> dataHolder;
     int64_t startTimeNs = getElapsedRealtimeNs();
     // Returns false, since StatsPuller code will evaluate the timeout.
     EXPECT_FALSE(pullerManager.Pull(pullTagId, &dataHolder));

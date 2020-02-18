@@ -934,17 +934,17 @@ public class DisplayPolicy {
      * @return If ok, WindowManagerImpl.ADD_OKAY.  If too many singletons,
      * WindowManagerImpl.ADD_MULTIPLE_SINGLETON
      */
-    int validateAddingWindowLw(WindowManager.LayoutParams attrs) {
+    int validateAddingWindowLw(WindowManager.LayoutParams attrs, int callingPid, int callingUid) {
         if ((attrs.privateFlags & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.STATUS_BAR_SERVICE,
+            mContext.enforcePermission(
+                    android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                     "DisplayPolicy");
         }
 
         switch (attrs.type) {
             case TYPE_STATUS_BAR:
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                mContext.enforcePermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                         "DisplayPolicy");
                 if (mStatusBar != null) {
                     if (mStatusBar.isAlive()) {
@@ -953,8 +953,8 @@ public class DisplayPolicy {
                 }
                 break;
             case TYPE_NOTIFICATION_SHADE:
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                mContext.enforcePermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                         "DisplayPolicy");
                 if (mNotificationShade != null) {
                     if (mNotificationShade.isAlive()) {
@@ -963,8 +963,8 @@ public class DisplayPolicy {
                 }
                 break;
             case TYPE_NAVIGATION_BAR:
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                mContext.enforcePermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                         "DisplayPolicy");
                 if (mNavigationBar != null) {
                     if (mNavigationBar.isAlive()) {
@@ -974,16 +974,17 @@ public class DisplayPolicy {
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
                 // Check for permission if the caller is not the recents component.
-                if (!mService.mAtmInternal.isCallerRecents(Binder.getCallingUid())) {
-                    mContext.enforceCallingOrSelfPermission(
-                            android.Manifest.permission.STATUS_BAR_SERVICE, "DisplayPolicy");
+                if (!mService.mAtmInternal.isCallerRecents(callingUid)) {
+                    mContext.enforcePermission(
+                            android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                            "DisplayPolicy");
                 }
                 break;
             case TYPE_STATUS_BAR_PANEL:
             case TYPE_STATUS_BAR_SUB_PANEL:
             case TYPE_VOICE_INTERACTION_STARTING:
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                mContext.enforcePermission(
+                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                         "DisplayPolicy");
                 break;
         }

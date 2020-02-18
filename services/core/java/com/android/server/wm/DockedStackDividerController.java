@@ -745,7 +745,7 @@ public class DockedStackDividerController {
      * @param minimizedDock Whether the docked stack is currently minimized.
      * @param animate Whether to animate the change.
      */
-    void setMinimizedDockedStack(boolean minimizedDock, boolean animate) {
+    private void setMinimizedDockedStack(boolean minimizedDock, boolean animate) {
         final boolean wasMinimized = mMinimizedDock;
         mMinimizedDock = minimizedDock;
         if (minimizedDock == wasMinimized) {

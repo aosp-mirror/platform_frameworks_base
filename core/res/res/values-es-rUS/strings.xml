@@ -191,6 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"El administrador no permite hacer un uso personal del dispositivo"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dispositivo administrado"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tu organización administra este dispositivo y es posible que controle el tráfico de red. Presiona para obtener más información."</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"Tu administrador cambió la configuración de la ubicación"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"Presiona para ver la configuración de la ubicación."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Se borrarán los datos del dispositivo"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"No se puede usar la app de administrador. Ahora se borrará tu dispositivo.\n\nSi tienes preguntas, comunícate con el administrador de tu organización."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> inhabilitó la impresión."</string>
@@ -429,6 +431,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Esta privilegiada | app del sistema puede tomar fotos y grabar videos con una cámara del sistema en cualquier momento. También se requiere que la app posea el permiso android.permission.CAMERA."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la vibración."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que la app acceda al estado del vibrador."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"llamar directamente a números de teléfono"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Permite que la aplicación haga llamadas a números de teléfono sin intervención del usuario, lo que puede dar lugar a llamadas o cargos inesperados. Ten en cuenta que las aplicaciones no pueden usar este servicio para realizar llamadas a números de emergencia, pero las aplicaciones malintencionadas pueden causarte gastos imprevistos al realizar llamadas sin tu confirmación."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"acceder al servicio IMS para realizar llamadas"</string>
@@ -543,6 +546,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Vuelve a intentarlo."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No se registraron huellas digitales."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo no tiene sensor de huellas digitales."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +591,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"No se pudo verificar la cara. Vuelve a intentarlo."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"No configuraste el Desbloqueo facial."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"No se admite el Desbloqueo facial en este dispositivo."</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"Rostro <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1217,7 +1224,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Tienes un volcado del montón del proceso de <xliff:g id="PROC">%1$s</xliff:g> disponible para compartir. Ten cuidado: Es posible que este volcado contenga información personal sensible (incluido el contenido que hayas escrito) a la que puede acceder el proceso."</string>
     <string name="sendText" msgid="493003724401350724">"Seleccionar una acción para el texto"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Volumen del timbre"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Volumen de los medios"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Volumen multimedia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Reproduciendo a través de Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Tono de silencio establecido"</string>
     <string name="volume_call" msgid="7625321655265747433">"Volumen de llamadas entrantes"</string>
@@ -1228,7 +1235,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volumen de Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Volumen del tono de llamada"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volumen de la llamada"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volumen de los medios"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volumen multimedia"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volumen de notificación"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Tono predeterminado"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1614,7 +1621,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"El servicio que pasó del segundo al primer plano de <xliff:g id="PACKAGENAME">%1$s</xliff:g> no tendrá permiso durante el uso en las próximas compilaciones de R. Ve a go/r-bg-fgs-restriction y envía un informe de errores."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar a un alto volumen durante largos períodos puede dañar tu audición."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"¿Usar acceso directo de accesibilidad?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Cuando el acceso directo está activado, puedes presionar los botones de volumen durante 3 segundos para iniciar una función de accesibilidad.\n\n Función de accesibilidad actual:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Puedes cambiar la función en Configuración &gt; Accesibilidad."</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar accesos directos"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Cancelar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactivar acceso directo"</string>
@@ -2010,4 +2018,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Se colocó <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> en el depósito RESTRICTED"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabajo"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

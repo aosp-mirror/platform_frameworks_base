@@ -41,7 +41,7 @@ import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.ViewRootImpl;
-import android.view.WindowInsetsAnimationCallback;
+import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimationControlListener;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -403,8 +403,8 @@ class InsetsPolicy {
             @Override
             public void startAnimation(InsetsAnimationControlImpl controller,
                     WindowInsetsAnimationControlListener listener, int types,
-                    WindowInsetsAnimationCallback.InsetsAnimation animation,
-                    WindowInsetsAnimationCallback.AnimationBounds bounds,
+                    WindowInsetsAnimation animation,
+                    WindowInsetsAnimation.Bounds bounds,
                     int layoutDuringAnimation) {
             }
         }

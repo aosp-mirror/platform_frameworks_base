@@ -199,6 +199,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"تنازل المشرف عن الجهاز للاستخدام الشخصي"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"تتم إدارة الجهاز"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"تدير مؤسستك هذا الجهاز ويمكنها مراقبة حركة بيانات الشبكة. يمكنك النقر للحصول على تفاصيل."</string>
+    <!-- no translation found for location_changed_notification_title (4119726617105166830) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (198907268219396399) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"تعذّر استخدام تطبيق المشرف. سيتم محو بيانات جهازك الآن.\n\nإذا كانت لديك أسئلة، اتصل بمشرف مؤسستك."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"تم إيقاف الطباعة بواسطة <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -210,23 +214,23 @@
     <string name="power_dialog" product="default" msgid="1107775420270203046">"خيارات الهاتف"</string>
     <string name="silent_mode" msgid="8796112363642579333">"وضع صامت"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"تشغيل اللاسلكي"</string>
-    <string name="turn_off_radio" msgid="7222573978109933360">"إيقاف تشغيل الشبكة اللاسلكية"</string>
+    <string name="turn_off_radio" msgid="7222573978109933360">"إيقاف تفعيل الشبكة اللاسلكية"</string>
     <string name="screen_lock" msgid="2072642720826409809">"قفل الشاشة"</string>
     <string name="power_off" msgid="4111692782492232778">"إيقاف التشغيل"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"إيقاف الرنين"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"اهتزاز الرنين"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"تشغيل الرنين"</string>
-    <string name="reboot_to_update_title" msgid="2125818841916373708">"‏تحديث نظام Android"</string>
+    <string name="reboot_to_update_title" msgid="2125818841916373708">"‏إعادة تحميل نظام Android"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"جارٍ الإعداد للتحديث…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"جارٍ معالجة حزمة التحديث…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"جارٍ إعادة التشغيل…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"إعادة الضبط على الإعدادات الأصلية"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"جارٍ إعادة التشغيل…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"جارٍ إيقاف التشغيل..."</string>
-    <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"سيتم إيقاف تفعيل الجهاز اللوحي."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"‏سيتم إيقاف جهاز Android TV."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"سيتم إيقاف المشاهدة."</string>
-    <string name="shutdown_confirm" product="default" msgid="136816458966692315">"سيتم إيقاف تشغيل هاتفك."</string>
+    <string name="shutdown_confirm" product="default" msgid="136816458966692315">"سيتم إيقاف تفعيل هاتفك."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"هل تريد إيقاف التشغيل؟"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"إعادة تشغيل في الوضع الآمن"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"هل تريد إعادة تشغيل الكمبيوتر في الوضع الآمن؟ سيؤدي ذلك إلى إيقاف جميع تطبيقات الجهات الخارجية التي تم تثبيتها. ستتم استعادتها عند إعادة التشغيل مرة أخرى."</string>
@@ -441,6 +445,8 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"‏إذا حصل تطبيق النظام على هذا الإذن، سيمكن لهذا التطبيق التقاط صور وتسجيل فيديوهات باستخدام كاميرا النظام في أي وقت. ويجب أن يحصل التطبيق أيضًا على الإذن android.permission.CAMERA."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"التحكم في الاهتزاز"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"للسماح للتطبيق بالتحكم في الهزّاز."</string>
+    <!-- no translation found for permdesc_vibrator_state (7050024956594170724) -->
+    <skip />
     <string name="permlab_callPhone" msgid="1798582257194643320">"اتصال مباشر بأرقام الهواتف"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"للسماح للتطبيق بطلب أرقام هاتفية بدون تدخل منك. وقد يؤدي ذلك إلى تحمل رسوم غير متوقعة أو إجراء مكالمات غير متوقعة. ومن الجدير بالذكر أن ذلك لا يتيح للتطبيق الاتصال بأرقام الطوارئ. وقد تؤدي التطبيقات الضارة إلى تحملك تكاليف مالية من خلال إجراء مكالمات بدون موافقة منك."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"الوصول إلى خدمة الاتصال عبر الرسائل الفورية"</string>
@@ -555,6 +561,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"أعد المحاولة."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ليست هناك بصمات إصبع مسجَّلة."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"لا يحتوي هذا الجهاز على مستشعِر بصمات إصبع."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"الإصبع <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -598,6 +606,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"يتعذّر التحقق من الوجه. حاول مرة أخرى."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"لم يسبق لك إعداد \"فتح القفل بالوجه\"."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"\"فتح القفل بالوجه\" غير متوفر على هذا الجهاز."</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"الوجه <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -979,8 +989,8 @@
     <string name="searchview_description_submit" msgid="6771060386117334686">"إرسال طلب البحث"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"البحث الصوتي"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"‏هل تريد تفعيل ميزة Explore by Touch؟"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تفعيل ميزة Explore by Touch. عند تشغيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الجهاز اللوحي."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تفعيل ميزة Explore by Touch. عند تشغيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الهاتف."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تفعيل ميزة Explore by Touch. عند تفعيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الجهاز اللوحي."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تفعيل ميزة Explore by Touch. عند تفعيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الهاتف."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"قبل شهر واحد"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"قبل شهر واحد"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1264,18 +1274,18 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"العرض دائمًا"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"‏تم تصميم <xliff:g id="APP_NAME">%1$s</xliff:g> لإصدار غير متوافق من نظام تشغيل Android وقد يحدث خلل في أدائه. قد يتوفّر إصدار محدّث من التطبيق."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"الإظهار دائمًا"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"البحث عن تحديث"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"البحث عن إعادة تحميل"</string>
     <string name="smv_application" msgid="3775183542777792638">"‏انتهك التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> (العملية <xliff:g id="PROCESS">%2$s</xliff:g>) سياسة StrictMode المفروضة ذاتيًا."</string>
     <string name="smv_process" msgid="1398801497130695446">"‏انتهكت العملية <xliff:g id="PROCESS">%1$s</xliff:g> سياسة StrictMode المفروضة ذاتيًا."</string>
-    <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"جارٍ تحديث الهاتف…"</string>
-    <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"جارٍ تحديث الجهاز اللوحي…"</string>
-    <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"جارٍ تحديث الجهاز…"</string>
+    <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"جارٍ إعادة تحميل الهاتف…"</string>
+    <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"جارٍ إعادة تحميل الجهاز اللوحي…"</string>
+    <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"جارٍ إعادة تحميل الجهاز…"</string>
     <string name="android_start_title" product="default" msgid="4036708252778757652">"جارٍ بدء تشغيل الهاتف…"</string>
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"‏جارٍ تشغيل Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"جارٍ بدء تشغيل الجهاز اللوحي…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"جارٍ بدء تشغيل الجهاز…"</string>
     <string name="android_upgrading_fstrim" msgid="3259087575528515329">"جارٍ تحسين مساحة التخزين."</string>
-    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"جارٍ إنهاء تحديث النظام…"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"جارٍ إنهاء إعادة تحميل النظام…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"جارٍ ترقية <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="1339564803894466737">"جارٍ تحسين التطبيق <xliff:g id="NUMBER_0">%1$d</xliff:g> من <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"جارٍ تحضير <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
@@ -1702,7 +1712,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"‏لن يتم منح إذن الوصول إلى الموقع الجغرافي أثناء الاستخدام للخدمات التي تعمل في المقدّمة من <xliff:g id="PACKAGENAME">%1$s</xliff:g> والتي تبدأ من الخلفية في إصدارات R القادمة. يُرجى مراجعة go/r-bg-fgs-restriction وتقديم تقرير خطأ."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"هل تريد رفع مستوى الصوت فوق المستوى الموصى به؟\n\nقد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"هل تريد استخدام اختصار \"سهولة الاستخدام\"؟"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"عند تشغيل الاختصار، يؤدي الضغط على زرّي مستوى الصوت لمدة 3 ثوانٍ إلى تفعيل ميزة \"سهولة الاستخدام\".\n\n ميزة \"سهولة الاستخدام\" الحالية:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n يمكنك تغيير الميزة من \"الإعدادات\" &gt; \"سهولة الاستخدام\"."</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"تعديل الاختصارات"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"إلغاء"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"إيقاف الاختصار"</string>
@@ -1984,7 +1995,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> غير متاح الآن."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏تمّ إنشاء هذا التطبيق لإصدار قديم من Android وقد لا يعمل بشكل صحيح. جرِّب البحث عن تحديثات أو الاتصال بمطوّر البرامج."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"البحث عن تحديث"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"البحث عن إعادة تحميل"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"لديك رسائل جديدة"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"‏فتح تطبيق الرسائل القصيرة SMS للعرض"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"قد تكون بعض الوظائف مُقيّدة."</string>
@@ -2037,9 +2048,9 @@
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"؟"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g> في "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"؟"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"هل تريد التحديث في "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"؟"</string>
-    <string name="autofill_update_title_with_type" msgid="5264152633488495704">"هل تريد تحديث <xliff:g id="TYPE">%1$s</xliff:g> في "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"؟"</string>
-    <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"هل تريد تحديث <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"؟"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"هل تريد تحديث هذه العناصر في "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g>؟"</string>
+    <string name="autofill_update_title_with_type" msgid="5264152633488495704">"هل تريد إعادة تحميل <xliff:g id="TYPE">%1$s</xliff:g> في "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"هل تريد إعادة تحميل <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"هل تريد إعادة تحميل هذه العناصر في "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g>؟"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"حفظ"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"لا، شكرًا"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ليس الآن"</string>
@@ -2146,4 +2157,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"تم وضع <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> في الحزمة \"محظورة\"."</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"شخصي"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"عمل"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

@@ -525,15 +525,9 @@ public class DisplayRotation {
             }
             mService.mH.removeCallbacks(mDisplayRotationHandlerTimeout);
             mIsWaitingForRemoteRotation = false;
-            mService.mAtmService.deferWindowLayout();
-            try {
-                mDisplayContent.sendNewConfiguration();
-                if (t != null) {
-                    mService.mAtmService.mTaskOrganizerController.applyContainerTransaction(t,
-                            null /* organizer */);
-                }
-            } finally {
-                mService.mAtmService.continueWindowLayout();
+            mDisplayContent.sendNewConfiguration();
+            if (t != null) {
+                mService.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
             }
         }
     }

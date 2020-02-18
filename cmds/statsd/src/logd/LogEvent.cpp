@@ -20,7 +20,8 @@
 #include "stats_log_util.h"
 #include "statslog.h"
 
-#include <binder/IPCThreadState.h>
+#include <android/binder_ibinder.h>
+#include <android-base/stringprintf.h>
 #include <private/android_filesystem_config.h>
 
 namespace android {
@@ -31,6 +32,7 @@ namespace statsd {
 const int FIELD_ID_EXPERIMENT_ID = 1;
 
 using namespace android::util;
+using android::base::StringPrintf;
 using android::util::ProtoOutputStream;
 using std::string;
 using std::vector;
@@ -180,8 +182,8 @@ LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requi
     mLogdTimestampNs = getWallClockNs();
     mElapsedTimestampNs = getElapsedRealtimeNs();
     mTagId = android::util::BINARY_PUSH_STATE_CHANGED;
-    mLogUid = android::IPCThreadState::self()->getCallingUid();
-    mLogPid = android::IPCThreadState::self()->getCallingPid();
+    mLogUid = AIBinder_getCallingUid();
+    mLogPid = AIBinder_getCallingPid();
 
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)), Value(trainName)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(trainVersionCode)));

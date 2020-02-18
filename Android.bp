@@ -471,7 +471,6 @@ java_library {
         "framework-platform-compat-config",
         "libcore-platform-compat-config",
         "services-platform-compat-config",
-        "media-provider-platform-compat-config",
     ],
     static_libs: [
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
@@ -761,17 +760,6 @@ filegroup {
     ],
 }
 
-filegroup {
-    name: "framework-tethering-annotations",
-    srcs: [
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/RequiresPermission.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/com/android/internal/annotations/GuardedBy.java",
-    ],
-}
 // Build ext.jar
 // ============================================================
 java_library {

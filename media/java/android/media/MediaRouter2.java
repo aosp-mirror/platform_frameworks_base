@@ -22,7 +22,6 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -409,32 +408,6 @@ public class MediaRouter2 {
             }
         }
         return result;
-    }
-
-    /**
-     * Sends a media control request to be performed asynchronously by the route's destination.
-     *
-     * @param route the route that will receive the control request
-     * @param request the media control request
-     * @hide
-     */
-    //TODO: Discuss what to use for request (e.g., Intent? Request class?)
-    //TODO: Provide a way to obtain the result
-    public void sendControlRequest(@NonNull MediaRoute2Info route, @NonNull Intent request) {
-        Objects.requireNonNull(route, "route must not be null");
-        Objects.requireNonNull(request, "request must not be null");
-
-        Client2 client;
-        synchronized (sRouterLock) {
-            client = mClient;
-        }
-        if (client != null) {
-            try {
-                mMediaRouterService.sendControlRequest(client, route, request);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to send control request.", ex);
-            }
-        }
     }
 
     /**

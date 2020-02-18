@@ -65,6 +65,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
+import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
@@ -1336,14 +1337,18 @@ public class WindowManagerService extends IWindowManager.Stub
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState) {
         int[] appOp = new int[1];
-        int res = mPolicy.checkAddPermission(attrs, appOp);
+        final boolean isRoundedCornerOverlay = (attrs.privateFlags
+                & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
+        int res = mPolicy.checkAddPermission(attrs.type, isRoundedCornerOverlay, attrs.packageName,
+                appOp);
         if (res != WindowManagerGlobal.ADD_OKAY) {
             return res;
         }
 
         WindowState parentWindow = null;
-        long origId;
         final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final long origId = Binder.clearCallingIdentity();
         final int type = attrs.type;
 
         synchronized (mGlobalLock) {
@@ -1392,6 +1397,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_PERMISSION_DENIED;
             }
 
+            if (type == TYPE_PRESENTATION && !displayContent.getDisplay().isPublicPresentation()) {
+                ProtoLog.w(WM_ERROR,
+                        "Attempted to add presentation window to a non-suitable display.  "
+                                + "Aborting.");
+                return WindowManagerGlobal.ADD_INVALID_DISPLAY;
+            }
+
             ActivityRecord activity = null;
             final boolean hasParent = parentWindow != null;
             // Use existing parent window token for child windows since they go in the same token
@@ -1410,8 +1422,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
                 final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
-                final boolean isRoundedCornerOverlay =
-                        (attrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
                 token = new WindowToken(this, binder, type, false, displayContent,
                         session.mCanAddInternalSystemWindow, isRoundedCornerOverlay);
             } else if (rootType >= FIRST_APPLICATION_WINDOW
@@ -1504,10 +1514,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
-            displayPolicy.adjustWindowParamsLw(win, win.mAttrs, Binder.getCallingPid(),
-                    Binder.getCallingUid());
+            displayPolicy.adjustWindowParamsLw(win, win.mAttrs, callingPid, callingUid);
 
-            res = displayPolicy.validateAddingWindowLw(attrs);
+            res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
             if (res != WindowManagerGlobal.ADD_OKAY) {
                 return res;
             }
@@ -1558,8 +1567,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (excludeWindowTypeFromTapOutTask(type)) {
                 displayContent.mTapExcludedWindows.add(win);
             }
-
-            origId = Binder.clearCallingIdentity();
 
             win.attach();
             mWindowMap.put(client.asBinder(), win);
@@ -2560,43 +2567,48 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean callerCanManageAppTokens =
                 checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()");
         if (!callerCanManageAppTokens) {
-            // TODO(window-context): refactor checkAddPermission to not take attrs.
-            LayoutParams attrs = new LayoutParams(type);
-            attrs.packageName = packageName;
-            final int res = mPolicy.checkAddPermission(attrs, new int[1]);
+            final int res = mPolicy.checkAddPermission(type, false /* isRoundedCornerOverlay */,
+                    packageName, new int[1]);
             if (res != ADD_OKAY) {
                 return res;
             }
         }
 
-        synchronized (mGlobalLock) {
-            if (!callerCanManageAppTokens) {
-                if (!unprivilegedAppCanCreateTokenWith(null, Binder.getCallingUid(), type, type,
-                        null, packageName) || packageName == null) {
-                    throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                if (!callerCanManageAppTokens) {
+                    if (packageName == null || !unprivilegedAppCanCreateTokenWith(
+                            null /* parentWindow */, callingUid, type, type, null /* tokenForLog */,
+                            packageName)) {
+                        throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+                    }
+                }
+
+                final DisplayContent dc = getDisplayContentOrCreate(displayId, null /* token */);
+                if (dc == null) {
+                    ProtoLog.w(WM_ERROR, "addWindowToken: Attempted to add token: %s"
+                            + " for non-exiting displayId=%d", binder, displayId);
+                    return WindowManagerGlobal.ADD_INVALID_DISPLAY;
+                }
+
+                WindowToken token = dc.getWindowToken(binder);
+                if (token != null) {
+                    ProtoLog.w(WM_ERROR, "addWindowToken: Attempted to add binder token: %s"
+                            + " for already created window token: %s"
+                            + " displayId=%d", binder, token, displayId);
+                    return WindowManagerGlobal.ADD_DUPLICATE_ADD;
+                }
+                // TODO(window-container): Clean up dead tokens
+                if (type == TYPE_WALLPAPER) {
+                    new WallpaperWindowToken(this, binder, true, dc, callerCanManageAppTokens);
+                } else {
+                    new WindowToken(this, binder, type, true, dc, callerCanManageAppTokens);
                 }
             }
-
-            final DisplayContent dc = getDisplayContentOrCreate(displayId, null /* token */);
-            if (dc == null) {
-                ProtoLog.w(WM_ERROR, "addWindowToken: Attempted to add token: %s"
-                        + " for non-exiting displayId=%d", binder, displayId);
-                return WindowManagerGlobal.ADD_INVALID_DISPLAY;
-            }
-
-            WindowToken token = dc.getWindowToken(binder);
-            if (token != null) {
-                ProtoLog.w(WM_ERROR, "addWindowToken: Attempted to add binder token: %s"
-                        + " for already created window token: %s"
-                        + " displayId=%d", binder, token, displayId);
-                return WindowManagerGlobal.ADD_DUPLICATE_ADD;
-            }
-            // TODO(window-container): Clean up dead tokens
-            if (type == TYPE_WALLPAPER) {
-                new WallpaperWindowToken(this, binder, true, dc, callerCanManageAppTokens);
-            } else {
-                new WindowToken(this, binder, type, true, dc, callerCanManageAppTokens);
-            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
         return WindowManagerGlobal.ADD_OKAY;
     }
@@ -6843,34 +6855,32 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
 
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-            if (displayContent == null) {
-                ProtoLog.w(WM_ERROR,
-                        "Attempted to set windowing mode to a display that does not exist: %d",
-                        displayId);
-                return;
-            }
-
-            int lastWindowingMode = displayContent.getWindowingMode();
-            mDisplayWindowSettings.setWindowingModeLocked(displayContent, mode);
-
-            displayContent.reconfigureDisplayLocked();
-
-            if (lastWindowingMode != displayContent.getWindowingMode()) {
-                // reconfigure won't detect this change in isolation because the windowing mode is
-                // already set on the display, so fire off a new config now.
-
-                final long origId = Binder.clearCallingIdentity();
-                try {
-                    // direct call since lock is shared.
-                    displayContent.sendNewConfiguration();
-                } finally {
-                    Binder.restoreCallingIdentity(origId);
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                if (displayContent == null) {
+                    ProtoLog.w(WM_ERROR,
+                            "Attempted to set windowing mode to a display that does not exist: %d",
+                            displayId);
+                    return;
                 }
-                // Now that all configurations are updated, execute pending transitions
-                displayContent.executeAppTransition();
+
+                int lastWindowingMode = displayContent.getWindowingMode();
+                mDisplayWindowSettings.setWindowingModeLocked(displayContent, mode);
+
+                displayContent.reconfigureDisplayLocked();
+
+                if (lastWindowingMode != displayContent.getWindowingMode()) {
+                    // reconfigure won't detect this change in isolation because the windowing mode
+                    // is already set on the display, so fire off a new config now.
+                    displayContent.sendNewConfiguration();
+                    // Now that all configurations are updated, execute pending transitions.
+                    displayContent.executeAppTransition();
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -6898,18 +6908,22 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
 
-        synchronized (mGlobalLock) {
-            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-            if (displayContent == null) {
-                ProtoLog.w(WM_ERROR,
-                        "Attempted to set remove mode to a display that does not exist: %d",
-                        displayId);
-                return;
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                if (displayContent == null) {
+                    ProtoLog.w(WM_ERROR,
+                            "Attempted to set remove mode to a display that does not exist: %d",
+                            displayId);
+                    return;
+                }
+
+                mDisplayWindowSettings.setRemoveContentModeLocked(displayContent, mode);
+                displayContent.reconfigureDisplayLocked();
             }
-
-            mDisplayWindowSettings.setRemoveContentModeLocked(displayContent, mode);
-
-            displayContent.reconfigureDisplayLocked();
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -7320,9 +7334,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
                 if (imeTarget != null) {
-                    InsetsControlTarget controlTarget =
-                            imeTarget.getDisplayContent().computeImeControlTarget(imeTarget);
-                    imeTarget.getDisplayContent().updateImeControlTarget(controlTarget);
+                    imeTarget.getDisplayContent().updateImeControlTarget(imeTarget);
                 }
             }
         }

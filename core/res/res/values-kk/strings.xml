@@ -191,6 +191,10 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Әкімші құрылғыны жеке пайдалануға ұсынды."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Құрылғы басқарылады"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ұйымыңыз осы құрылғыны басқарады және желі трафигін бақылауы мүмкін. Мәліметтер алу үшін түртіңіз."</string>
+    <!-- no translation found for location_changed_notification_title (4119726617105166830) -->
+    <skip />
+    <!-- no translation found for location_changed_notification_text (198907268219396399) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Құрылғыңыздағы деректер өшіріледі"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Әкімші қолданбасын пайдалану мүмкін емес. Қазір құрылғыдағы деректер өшіріледі\n\nСұрақтарыңыз болса, ұйым әкімшісіне хабарласыңыз."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Басып шығаруды <xliff:g id="OWNER_APP">%s</xliff:g> өшірді."</string>
@@ -429,6 +433,8 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Осы айрықша | жүйе қолданбасы кез келген уақытта жүйелік камера арқылы суретке не бейнеге түсіре алады. Қолданбаға android.permission.CAMERA рұқсаты қажет болады."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"тербелісті басқару"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Қолданбаға вибраторды басқаруға рұқсат береді."</string>
+    <!-- no translation found for permdesc_vibrator_state (7050024956594170724) -->
+    <skip />
     <string name="permlab_callPhone" msgid="1798582257194643320">"нөмірлерге тікелей телефон шалу"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Қолданбаға сіздің қатысуыңызсыз қоңырау шалу мүмкіндігін береді. Нәтижесінде қосымша төлем немесе күтпеген қоңырау алуыңыз мүмкін. Есіңізде болсын, қолданба төтенше байланыстарға қоңырау шала алмайды. Залалды қолданбалар сіздің рұқсатыңызсыз қоңыраулар шалып, күтпеген төлемдерге себеп болуы мүмкін."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS қоңырау қызметін пайдалану"</string>
@@ -543,6 +549,8 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Әрекетті қайталаңыз."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Саусақ іздері тіркелмеген."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Бұл құрылғыда саусақ ізін оқу сканері жоқ."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> саусағы"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +594,8 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Бетті тану мүмкін емес. Әрекетті қайталаңыз."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Face Unlock реттелмеді."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Бұл құрылғыда Face Unlock функциясы істемейді."</string>
+    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
+    <skip />
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> беті"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1614,7 +1624,8 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Фондық режимде іске қосылған <xliff:g id="PACKAGENAME">%1$s</xliff:g> белсенді пакетінің алдағы R құрамаларында \"Пайдаланғанда ғана рұқсат ету\" рұқсаты болмайды. go/r-bg-fgs-restriction бетіне өтіп, қате туралы есеп жіберіңіз."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Дыбыс деңгейін ұсынылған деңгейден көтеру керек пе?\n\nЖоғары дыбыс деңгейінде ұзақ кезеңдер бойы тыңдау есту қабілетіңізге зиян тигізуі мүмкін."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Арнайы мүмкіндік төте жолын пайдалану керек пе?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Бұл төте жол қосулы кезде дыбыс деңгейі түймелерінің екеуін де 3 секунд бойы басқанда арнайы мүмкіндік іске қосылады.\n\n Ағымдағы арнайы мүмкіндік:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Бұл мүмкіндікті \"Параметрлер\" &gt; \"Арнайы мүмкіндіктер\" тармағында өзгертуге болады."</string>
+    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Таңбашаларды өзгерту"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Бас тарту"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Төте жолды өшіру"</string>
@@ -2010,4 +2021,20 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ШЕКТЕЛГЕН себетке салынды."</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Жеке"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Жұмыс"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <skip />
+    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <skip />
 </resources>

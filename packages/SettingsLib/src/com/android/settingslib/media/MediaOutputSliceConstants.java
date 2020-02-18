@@ -27,6 +27,11 @@ public class MediaOutputSliceConstants {
     public static final String KEY_MEDIA_OUTPUT = "media_output";
 
     /**
+     * Key for the Media output group setting.
+     */
+    public static final String KEY_MEDIA_OUTPUT_GROUP = "media_output_group";
+
+    /**
      * Key for the Remote Media slice.
      */
     public static final String KEY_REMOTE_MEDIA = "remote_media";
@@ -46,6 +51,13 @@ public class MediaOutputSliceConstants {
      */
     public static final String ACTION_MEDIA_OUTPUT =
             "com.android.settings.panel.action.MEDIA_OUTPUT";
+
+    /**
+     * Activity Action: Show a settings dialog containing {@link MediaDevice} to handle media group
+     * operation.
+     */
+    public static final String ACTION_MEDIA_OUTPUT_GROUP =
+            "com.android.settings.panel.action.MEDIA_OUTPUT_GROUP";
 
     /**
      * An string extra specifying a media package name.

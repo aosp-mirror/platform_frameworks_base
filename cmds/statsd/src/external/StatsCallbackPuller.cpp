@@ -18,24 +18,24 @@
 #include "Log.h"
 
 #include "StatsCallbackPuller.h"
-
-#include <android/os/IPullAtomCallback.h>
-#include <android/util/StatsEventParcel.h>
-
 #include "PullResultReceiver.h"
 #include "StatsPullerManager.h"
 #include "logd/LogEvent.h"
 #include "stats_log_util.h"
 
-using namespace android::binder;
-using namespace android::util;
+#include <aidl/android/util/StatsEventParcel.h>
+
 using namespace std;
+
+using Status = ::ndk::ScopedAStatus;
+using aidl::android::util::StatsEventParcel;
+using ::ndk::SharedRefBase;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-StatsCallbackPuller::StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>& callback,
+StatsCallbackPuller::StatsCallbackPuller(int tagId, const shared_ptr<IPullAtomCallback>& callback,
                                          const int64_t coolDownNs, int64_t timeoutNs,
                                          const vector<int> additiveFields)
     : StatsPuller(tagId, coolDownNs, timeoutNs, additiveFields), mCallback(callback) {
@@ -57,7 +57,7 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
     shared_ptr<vector<shared_ptr<LogEvent>>> sharedData =
             make_shared<vector<shared_ptr<LogEvent>>>();
 
-    sp<PullResultReceiver> resultReceiver = new PullResultReceiver(
+    shared_ptr<PullResultReceiver> resultReceiver = SharedRefBase::make<PullResultReceiver>(
             [cv_mutex, cv, pullFinish, pullSuccess, sharedData](
                     int32_t atomTag, bool success, const vector<StatsEventParcel>& output) {
                 // This is the result of the pull, executing in a statsd binder thread.
@@ -66,9 +66,11 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
                 {
                     lock_guard<mutex> lk(*cv_mutex);
                     for (const StatsEventParcel& parcel: output) {
+                        uint8_t* buf = reinterpret_cast<uint8_t*>(
+                                const_cast<int8_t*>(parcel.buffer.data()));
                         shared_ptr<LogEvent> event = make_shared<LogEvent>(
-                                const_cast<uint8_t*>(parcel.buffer.data()), parcel.buffer.size(),
-                                /*uid=*/-1, /*pid=*/-1, /*useNewSchema=*/true);
+                                buf, parcel.buffer.size(), /*uid=*/-1, /*pid=*/-1,
+                                /*useNewSchema=*/true);
                         sharedData->push_back(event);
                     }
                     *pullSuccess = success;

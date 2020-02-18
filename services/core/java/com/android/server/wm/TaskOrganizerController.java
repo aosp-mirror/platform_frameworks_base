@@ -492,10 +492,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         if (!(container instanceof Task)) {
             throw new IllegalArgumentException("Invalid container in hierarchy op");
         }
-        if (container.getDisplayContent() == null) {
-            Slog.w(TAG, "Container is no longer attached: " + container);
-            return 0;
-        }
         if (hop.isReparent()) {
             // special case for tiles since they are "virtual" parents
             if (container instanceof ActivityStack && ((ActivityStack) container).isRootTask()) {

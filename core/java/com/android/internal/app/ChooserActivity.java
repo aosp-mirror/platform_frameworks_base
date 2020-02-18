@@ -1476,7 +1476,6 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override
     public void addUseDifferentAppLabelIfNecessary(ResolverListAdapter adapter) {
-        mChooserMultiProfilePagerAdapter.getActiveAdapterView().setVisibility(View.VISIBLE);
         if (mCallerChooserTargets != null && mCallerChooserTargets.length > 0) {
             mChooserMultiProfilePagerAdapter.getActiveListAdapter().addServiceResults(
                     /* origTarget */ null,

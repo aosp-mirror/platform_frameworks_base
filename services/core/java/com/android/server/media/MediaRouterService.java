@@ -498,13 +498,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void sendControlRequest(IMediaRouter2Client client, MediaRoute2Info route,
-            Intent request) {
-        mService2.sendControlRequest(client, route, request);
-    }
-
-    // Binder call
-    @Override
     public void registerManager(IMediaRouter2Manager manager, String packageName) {
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {

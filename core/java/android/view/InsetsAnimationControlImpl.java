@@ -35,8 +35,7 @@ import android.view.InsetsState.InternalInsetsSide;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowInsetsAnimationCallback.AnimationBounds;
-import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
+import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Interpolator;
 
@@ -67,7 +66,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private final InsetsState mInitialInsetsState;
     private final @InsetsType int mTypes;
     private final InsetsAnimationControlCallbacks mController;
-    private final WindowInsetsAnimationCallback.InsetsAnimation mAnimation;
+    private final WindowInsetsAnimation mAnimation;
     private final Rect mFrame;
     private final boolean mFade;
     private Insets mCurrentInsets;
@@ -100,11 +99,11 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mFrame = new Rect(frame);
         buildTypeSourcesMap(mTypeSideMap, mSideSourceMap, mControls);
 
-        mAnimation = new WindowInsetsAnimationCallback.InsetsAnimation(mTypes, interpolator,
+        mAnimation = new WindowInsetsAnimation(mTypes, interpolator,
                 durationMs);
         mAnimation.setAlpha(getCurrentAlpha());
         mController.startAnimation(this, listener, types, mAnimation,
-                new AnimationBounds(mHiddenInsets, mShownInsets), layoutInsetsDuringAnimation);
+                new Bounds(mHiddenInsets, mShownInsets), layoutInsetsDuringAnimation);
     }
 
     @Override
@@ -212,7 +211,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         return mCancelled;
     }
 
-    InsetsAnimation getAnimation() {
+    WindowInsetsAnimation getAnimation() {
         return mAnimation;
     }
 

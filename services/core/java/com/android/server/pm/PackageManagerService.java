@@ -6698,6 +6698,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // cross-profile app linking works only towards the parent.
             final int callingUid = Binder.getCallingUid();
             final UserInfo parent = getProfileParent(sourceUserId);
+            if (parent == null) {
+                return false;
+            }
             synchronized (mLock) {
                 int flags = updateFlagsForResolve(0, parent.id, callingUid,
                         false /*includeInstantApps*/);

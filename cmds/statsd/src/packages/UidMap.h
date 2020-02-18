@@ -21,10 +21,11 @@
 #include "packages/PackageInfoListener.h"
 #include "stats_util.h"
 
-#include <binder/IShellCallback.h>
 #include <gtest/gtest_prod.h>
 #include <stdio.h>
 #include <utils/RefBase.h>
+#include <utils/String16.h>
+
 #include <list>
 #include <mutex>
 #include <set>
