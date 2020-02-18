@@ -18,6 +18,7 @@ package com.android.server.people.prediction;
 
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppTarget;
@@ -42,25 +43,28 @@ public class AppTargetPredictor {
     /** Creates a {@link AppTargetPredictor} instance based on the prediction context. */
     public static AppTargetPredictor create(@NonNull AppPredictionContext predictionContext,
             @NonNull Consumer<List<AppTarget>> updatePredictionsMethod,
-            @NonNull DataManager dataManager) {
+            @NonNull DataManager dataManager, @UserIdInt int callingUserId) {
         if (UI_SURFACE_SHARE.equals(predictionContext.getUiSurface())) {
             return new ShareTargetPredictor(
-                    predictionContext, updatePredictionsMethod, dataManager);
+                    predictionContext, updatePredictionsMethod, dataManager, callingUserId);
         }
-        return new AppTargetPredictor(predictionContext, updatePredictionsMethod, dataManager);
+        return new AppTargetPredictor(
+                predictionContext, updatePredictionsMethod, dataManager, callingUserId);
     }
 
     private final AppPredictionContext mPredictionContext;
     private final Consumer<List<AppTarget>> mUpdatePredictionsMethod;
     private final DataManager mDataManager;
+    final int mCallingUserId;
     private final ExecutorService mCallbackExecutor;
 
     AppTargetPredictor(@NonNull AppPredictionContext predictionContext,
             @NonNull Consumer<List<AppTarget>> updatePredictionsMethod,
-            @NonNull DataManager dataManager) {
+            @NonNull DataManager dataManager, @UserIdInt int callingUserId) {
         mPredictionContext = predictionContext;
         mUpdatePredictionsMethod = updatePredictionsMethod;
         mDataManager = dataManager;
+        mCallingUserId = callingUserId;
         mCallbackExecutor = Executors.newSingleThreadExecutor();
     }
 
