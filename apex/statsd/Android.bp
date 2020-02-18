@@ -27,6 +27,7 @@ apex_defaults {
         "framework-statsd",
         "service-statsd",
     ],
+    compile_multilib: "both",
     // prebuilts: ["my_prebuilt"],
     name: "com.android.os.statsd-defaults",
     key: "com.android.os.statsd.key",
