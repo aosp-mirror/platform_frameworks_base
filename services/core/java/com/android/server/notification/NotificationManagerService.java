@@ -8896,7 +8896,9 @@ public class NotificationManagerService extends SystemService {
                 final StatusBarNotification sbn,
                 final boolean isVisible) {
             final String key = sbn.getKey();
-            Slog.d(TAG, "notifyAssistantVisibilityChangedLocked: " + key);
+            if (DBG) {
+                Slog.d(TAG, "notifyAssistantVisibilityChangedLocked: " + key);
+            }
             notifyAssistantLocked(
                     sbn,
                     false /* sameUserOnly */,
