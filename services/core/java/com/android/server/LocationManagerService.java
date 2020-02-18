@@ -215,11 +215,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     private PackageManager mPackageManager;
     private PowerManager mPowerManager;
 
-    // TODO: sharing a location fudger with mock providers can leak information as the mock provider
-    //   can be used to retrieve offset information. the fudger should likely be reset whenever mock
-    //   providers are added or removed
-    private LocationFudger mLocationFudger;
-
     private GeofenceManager mGeofenceManager;
     private GeocoderProxy mGeocodeProvider;
 
@@ -287,8 +282,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             mPackageManager = mContext.getPackageManager();
             mAppOps = mContext.getSystemService(AppOpsManager.class);
             mPowerManager = mContext.getSystemService(PowerManager.class);
-
-            mLocationFudger = new LocationFudger(mSettingsHelper.getCoarseLocationAccuracyM());
             mGeofenceManager = new GeofenceManager(mContext, mSettingsHelper);
 
             PowerManagerInternal localPowerManager =
@@ -665,6 +658,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         private final String mName;
 
+        private final LocationFudger mLocationFudger;
+
         // if the provider is enabled for a given user id - null or not present means unknown
         @GuardedBy("mLock")
         private final SparseArray<Boolean> mEnabled;
@@ -682,6 +677,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         private LocationProviderManager(String name) {
             mName = name;
+            mLocationFudger = new LocationFudger(mSettingsHelper.getCoarseLocationAccuracyM());
             mEnabled = new SparseArray<>(2);
             mLastLocation = new SparseArray<>(2);
             mLastCoarseLocation = new SparseArray<>(2);
@@ -706,7 +702,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             synchronized (mLock) {
                 mProvider.setMockProvider(provider);
 
-                // when removing a mock provider, also clear any mock last locations
+                // when removing a mock provider, also clear any mock last locations and reset the
+                // location fudger. the mock provider could have been used to infer the current
+                // location fudger offsets.
                 if (provider == null) {
                     for (int i = 0; i < mLastLocation.size(); i++) {
                         Location lastLocation = mLastLocation.valueAt(i);
@@ -721,6 +719,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                             mLastCoarseLocation.setValueAt(i, null);
                         }
                     }
+
+                    mLocationFudger.resetOffsets();
                 }
             }
         }
