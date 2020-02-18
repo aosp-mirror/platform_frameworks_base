@@ -509,15 +509,19 @@ public class RingtoneManager {
      * @return The position of the {@link Uri}, or -1 if it cannot be found.
      */
     public int getRingtonePosition(Uri ringtoneUri) {
-        if (ringtoneUri == null) return -1;
-        final long ringtoneId = ContentUris.parseId(ringtoneUri);
-        
-        final Cursor cursor = getCursor();
-        cursor.moveToPosition(-1);
-        while (cursor.moveToNext()) {
-            if (ringtoneId == cursor.getLong(ID_COLUMN_INDEX)) {
-                return cursor.getPosition();
+        try {
+            if (ringtoneUri == null) return -1;
+            final long ringtoneId = ContentUris.parseId(ringtoneUri);
+
+            final Cursor cursor = getCursor();
+            cursor.moveToPosition(-1);
+            while (cursor.moveToNext()) {
+                if (ringtoneId == cursor.getLong(ID_COLUMN_INDEX)) {
+                    return cursor.getPosition();
+                }
             }
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "NumberFormatException while getting ringtone position, returning -1", e);
         }
         return -1;
     }
