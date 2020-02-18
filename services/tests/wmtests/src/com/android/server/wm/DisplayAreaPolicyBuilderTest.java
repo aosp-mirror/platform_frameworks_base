@@ -40,6 +40,8 @@ import static java.util.stream.Collectors.toList;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 
+import androidx.test.filters.FlakyTest;
+
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -65,6 +67,7 @@ public class DisplayAreaPolicyBuilderTest {
     private TestWindowManagerPolicy mPolicy = new TestWindowManagerPolicy(null, null);
 
     @Test
+    @FlakyTest(bugId = 149760939)
     public void testBuilder() {
         WindowManagerService wms = mSystemServices.getWindowManagerService();
         DisplayArea.Root root = new SurfacelessDisplayAreaRoot(wms);
