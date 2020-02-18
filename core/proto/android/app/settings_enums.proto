@@ -2627,4 +2627,10 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     PANEL_MEDIA_OUTPUT_GROUP = 1835;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Click on paired device
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_DETAILS = 1836;
 }
