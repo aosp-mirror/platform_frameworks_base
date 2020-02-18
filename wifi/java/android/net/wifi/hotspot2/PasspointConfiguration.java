@@ -900,12 +900,15 @@ public final class PasspointConfiguration implements Parcelable {
     }
 
     /**
-     * Get a unique identifier for a PasspointConfiguration object.
+     * Get a unique identifier for a PasspointConfiguration object. The identifier depends on the
+     * configuration that identify the service provider under the HomeSp subtree, and on the
+     * credential configuration under the Credential subtree.
+     * The method throws an {@link IllegalStateException} if the configuration under HomeSp subtree
+     * or the configuration under Credential subtree are not initialized.
      *
      * @return A unique identifier
-     * @throws IllegalStateException if Credential or HomeSP nodes are not initialized
      */
-    public @NonNull String getUniqueId() throws IllegalStateException {
+    public @NonNull String getUniqueId() {
         if (mCredential == null || mHomeSp == null || TextUtils.isEmpty(mHomeSp.getFqdn())) {
             throw new IllegalStateException("Credential or HomeSP are not initialized");
         }
