@@ -678,17 +678,32 @@ message CachedKillReported {
  *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiDataStall.java
  */
 message WifiHealthStatReported {
+    enum Band {
+        UNKNOWN = 0;
+        // All of 2.4GHz band
+        BAND_2G = 1;
+        // Frequencies in the range of [5150, 5250) GHz
+        BAND_5G_LOW = 2;
+        // Frequencies in the range of [5250, 5725) GHz
+        BAND_5G_MIDDLE = 3;
+        // Frequencies in the range of [5725, 5850) GHz
+        BAND_5G_HIGH = 4;
+        // Frequencies in the range of [5925, 6425) GHz
+        BAND_6G_LOW = 5;
+        // Frequencies in the range of [6425, 6875) GHz
+        BAND_6G_MIDDLE = 6;
+        // Frequencies in the range of [6875, 7125) GHz
+        BAND_6G_HIGH = 7;
+    }
     // duration this stat is obtained over in milliseconds
     optional int32 duration_millis = 1;
     // whether wifi is classified as sufficient for the user's data traffic, determined
     // by whether the calculated throughput exceeds the average demand within |duration_millis|
     optional bool is_sufficient = 2;
-    // whether the calculated throughput is exceeds the minimum required for typical usage
-    optional bool is_throughput_good = 3;
     // whether cellular data is available
-    optional bool is_cell_data_available = 4;
-    // the WLAN channel the connected network is on (ie. 2412)
-    optional int32 frequency = 5;
+    optional bool is_cell_data_available = 3;
+    // the Band bucket the connected network is on
+    optional Band band = 4;
 }
 
 /**
