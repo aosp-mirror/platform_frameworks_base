@@ -33,6 +33,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
@@ -5739,6 +5740,25 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns whether the admin has enabled always-on VPN lockdown for the current user.
+     *
+     * Only callable by the system.
+    * @hide
+    */
+    @UserHandleAware
+    public boolean isAlwaysOnVpnLockdownEnabled() {
+        throwIfParentInstance("isAlwaysOnVpnLockdownEnabled");
+        if (mService != null) {
+            try {
+                return mService.isAlwaysOnVpnLockdownEnabledForUser(myUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by device or profile owner to query the set of packages that are allowed to access
      * the network directly when always-on VPN is in lockdown mode but not connected. Returns
      * {@code null} when always-on VPN is not active or not in lockdown mode.
@@ -5777,6 +5797,26 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getAlwaysOnVpnPackage(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the VPN package name if the admin has enabled always-on VPN on the current user,
+     * or {@code null} if none is set.
+     *
+     * Only callable by the system.
+     * @hide
+     */
+    @UserHandleAware
+    public @Nullable String getAlwaysOnVpnPackage() {
+        throwIfParentInstance("getAlwaysOnVpnPackage");
+        if (mService != null) {
+            try {
+                return mService.getAlwaysOnVpnPackageForUser(myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -1072,7 +1072,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String TAG_SUSPEND_PERSONAL_APPS = "suspend-personal-apps";
         private static final String TAG_PROFILE_MAXIMUM_TIME_OFF = "profile-max-time-off";
         private static final String TAG_PROFILE_OFF_DEADLINE = "profile-off-deadline";
-
+        private static final String TAG_ALWAYS_ON_VPN_PACKAGE = "vpn-package";
+        private static final String TAG_ALWAYS_ON_VPN_LOCKDOWN = "vpn-lockdown";
         DeviceAdminInfo info;
 
 
@@ -1200,6 +1201,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         long mProfileMaximumTimeOff = 0;
         // Time by which the profile should be turned on according to System.currentTimeMillis().
         long mProfileOffDeadline = 0;
+
+        public String mAlwaysOnVpnPackage;
+        public boolean mAlwaysOnVpnLockdown;
 
 
         ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
@@ -1440,6 +1444,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             if (mProfileMaximumTimeOff != 0) {
                 writeAttributeValueToXml(out, TAG_PROFILE_OFF_DEADLINE, mProfileOffDeadline);
+            }
+            if (!TextUtils.isEmpty(mAlwaysOnVpnPackage)) {
+                writeAttributeValueToXml(out, TAG_ALWAYS_ON_VPN_PACKAGE, mAlwaysOnVpnPackage);
+            }
+            if (mAlwaysOnVpnLockdown) {
+                writeAttributeValueToXml(out, TAG_ALWAYS_ON_VPN_LOCKDOWN, mAlwaysOnVpnLockdown);
             }
         }
 
@@ -1686,6 +1696,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 } else if (TAG_PROFILE_OFF_DEADLINE.equals(tag)) {
                     mProfileOffDeadline =
                             Long.parseLong(parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_ALWAYS_ON_VPN_PACKAGE.equals(tag)) {
+                    mAlwaysOnVpnPackage = parser.getAttributeValue(null, ATTR_VALUE);
+                } else if (TAG_ALWAYS_ON_VPN_LOCKDOWN.equals(tag)) {
+                    mAlwaysOnVpnLockdown = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -1918,6 +1933,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 pw.println(mProfileMaximumTimeOff);
             pw.print("mProfileOffDeadline=");
                 pw.println(mProfileOffDeadline);
+            pw.print("mAlwaysOnVpnPackage=");
+            pw.println(mAlwaysOnVpnPackage);
+            pw.print("mAlwaysOnVpnLockdown=");
+            pw.println(mAlwaysOnVpnLockdown);
         }
     }
 
@@ -6775,10 +6794,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @throws UnsupportedOperationException if the package does not support being set as always-on.
      */
     @Override
-    public boolean setAlwaysOnVpnPackage(ComponentName admin, String vpnPackage, boolean lockdown,
+    public boolean setAlwaysOnVpnPackage(ComponentName who, String vpnPackage, boolean lockdown,
             List<String> lockdownWhitelist)
             throws SecurityException {
-        enforceProfileOrDeviceOwner(admin);
+        enforceProfileOrDeviceOwner(who);
 
         final int userId = mInjector.userHandleGetCallingUserId();
         mInjector.binderWithCleanCallingIdentity(() -> {
@@ -6804,12 +6823,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_ALWAYS_ON_VPN_PACKAGE)
-                    .setAdmin(admin)
+                    .setAdmin(who)
                     .setStrings(vpnPackage)
                     .setBoolean(lockdown)
                     .setInt(lockdownWhitelist != null ? lockdownWhitelist.size() : 0)
                     .write();
         });
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (!TextUtils.equals(vpnPackage, admin.mAlwaysOnVpnPackage)
+                    || lockdown != admin.mAlwaysOnVpnLockdown) {
+                admin.mAlwaysOnVpnPackage = vpnPackage;
+                admin.mAlwaysOnVpnLockdown = lockdown;
+                saveSettingsLocked(userId);
+            }
+        }
         return true;
     }
 
@@ -6823,12 +6852,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public String getAlwaysOnVpnPackageForUser(int userHandle) {
+        enforceSystemCaller("getAlwaysOnVpnPackageForUser");
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userHandle);
+            return admin != null ? admin.mAlwaysOnVpnPackage : null;
+        }
+    }
+
+    @Override
     public boolean isAlwaysOnVpnLockdownEnabled(ComponentName admin) throws SecurityException {
         enforceProfileOrDeviceOwner(admin);
 
         final int userId = mInjector.userHandleGetCallingUserId();
         return mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getConnectivityManager().isVpnLockdownEnabled(userId));
+    }
+
+    @Override
+    public boolean isAlwaysOnVpnLockdownEnabledForUser(int userHandle) {
+        enforceSystemCaller("isAlwaysOnVpnLockdownEnabledForUser");
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userHandle);
+            return admin != null ? admin.mAlwaysOnVpnLockdown : null;
+        }
     }
 
     @Override
@@ -8975,6 +9022,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the ActiveAdmin associated wit the PO or DO on the given user.
+     * @param userHandle
+     * @return
+     */
+    private @Nullable ActiveAdmin getDeviceOrProfileOwnerAdminLocked(int userHandle) {
+        ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
+        if (admin == null && getDeviceOwnerUserId() == userHandle) {
+            admin = getDeviceOwnerAdminLocked();
+        }
+        return admin;
     }
 
     @GuardedBy("getLockObject()")
