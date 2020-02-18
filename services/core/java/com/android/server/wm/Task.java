@@ -2184,7 +2184,7 @@ class Task extends WindowContainer<WindowContainer> {
                 if (rotation != ROTATION_UNDEFINED && compatInsets != null) {
                     mTmpNonDecorBounds.set(mTmpFullBounds);
                     mTmpStableBounds.set(mTmpFullBounds);
-                    compatInsets.getDisplayBoundsByRotation(mTmpBounds, rotation);
+                    compatInsets.getBoundsByRotation(mTmpBounds, rotation);
                     intersectWithInsetsIfFits(mTmpNonDecorBounds, mTmpBounds,
                             compatInsets.mNonDecorInsets[rotation]);
                     intersectWithInsetsIfFits(mTmpStableBounds, mTmpBounds,
