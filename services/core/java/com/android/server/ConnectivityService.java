@@ -4791,7 +4791,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return false;
             }
 
-            return vpn.startAlwaysOnVpn();
+            return vpn.startAlwaysOnVpn(mKeyStore);
         }
     }
 
@@ -4806,7 +4806,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Slog.w(TAG, "User " + userId + " has no Vpn configuration");
                 return false;
             }
-            return vpn.isAlwaysOnPackageSupported(packageName);
+            return vpn.isAlwaysOnPackageSupported(packageName, mKeyStore);
         }
     }
 
@@ -4827,11 +4827,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Slog.w(TAG, "User " + userId + " has no Vpn configuration");
                 return false;
             }
-            if (!vpn.setAlwaysOnPackage(packageName, lockdown, lockdownWhitelist)) {
+            if (!vpn.setAlwaysOnPackage(packageName, lockdown, lockdownWhitelist, mKeyStore)) {
                 return false;
             }
             if (!startAlwaysOnVpn(userId)) {
-                vpn.setAlwaysOnPackage(null, false, null);
+                vpn.setAlwaysOnPackage(null, false, null, mKeyStore);
                 return false;
             }
         }
@@ -5017,7 +5017,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 loge("Starting user already has a VPN");
                 return;
             }
-            userVpn = new Vpn(mHandler.getLooper(), mContext, mNMS, userId);
+            userVpn = new Vpn(mHandler.getLooper(), mContext, mNMS, userId, mKeyStore);
             mVpns.put(userId, userVpn);
             if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
                 updateLockdownVpn();
@@ -5088,7 +5088,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (TextUtils.equals(vpn.getAlwaysOnPackage(), packageName)) {
                 Slog.d(TAG, "Restarting always-on VPN package " + packageName + " for user "
                         + userId);
-                vpn.startAlwaysOnVpn();
+                vpn.startAlwaysOnVpn(mKeyStore);
             }
         }
     }
@@ -5110,7 +5110,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (TextUtils.equals(vpn.getAlwaysOnPackage(), packageName) && !isReplacing) {
                 Slog.d(TAG, "Removing always-on VPN package " + packageName + " for user "
                         + userId);
-                vpn.setAlwaysOnPackage(null, false, null);
+                vpn.setAlwaysOnPackage(null, false, null, mKeyStore);
             }
         }
     }
