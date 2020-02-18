@@ -339,6 +339,14 @@ public final class ProcessList {
     @EnabledAfter(targetSdkVersion = VersionCodes.Q)
     private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
 
+    /**
+     * Apps have no access to the private data directories of any other app, even if the other
+     * app has made them world-readable.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = VersionCodes.Q)
+    private static final long APP_DATA_DIRECTORY_ISOLATION = 143937733; // See b/143937733
+
     ActivityManagerService mService = null;
 
     // To kill process groups asynchronously
@@ -2060,7 +2068,14 @@ public final class ProcessList {
         }
         final int minTargetSdk = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ANDROID_APP_DATA_ISOLATION_MIN_SDK, Build.VERSION_CODES.R);
-        return app.info.targetSdkVersion >= minTargetSdk;
+        if (app.info.targetSdkVersion < minTargetSdk) {
+            return false;
+        }
+
+        // TODO(b/147266020): Remove non-standard gating above & switch to isChangeEnabled.
+        mPlatformCompat.reportChange(APP_DATA_DIRECTORY_ISOLATION, app.info);
+
+        return true;
     }
 
     private Map<String, Pair<String, Long>> getPackageAppDataInfoMap(PackageManagerInternal pmInt,
