@@ -6224,6 +6224,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mRemoteAnimationDefinition;
     }
 
+    @Override
+    void applyFixedRotationTransform(DisplayInfo info, DisplayFrames displayFrames,
+            Configuration config) {
+        super.applyFixedRotationTransform(info, displayFrames, config);
+        ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+    }
+
     void setRequestedOrientation(int requestedOrientation) {
         setOrientation(requestedOrientation, mayFreezeScreenLocked());
         mAtmService.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
@@ -6462,11 +6469,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void resolveOverrideConfiguration(Configuration newParentConfiguration) {
-        Configuration resolvedConfig = getResolvedOverrideConfiguration();
+        super.resolveOverrideConfiguration(newParentConfiguration);
+        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+        if (isFixedRotationTransforming()) {
+            // The resolved configuration is applied with rotated display configuration. If this
+            // activity matches its parent (the following resolving procedures are no-op), then it
+            // can use the resolved configuration directly. Otherwise (e.g. fixed aspect ratio),
+            // the rotated configuration is used as parent configuration to compute the actual
+            // resolved configuration. It is like putting the activity in a rotated container.
+            mTmpConfig.setTo(resolvedConfig);
+            newParentConfiguration = mTmpConfig;
+        }
         if (mCompatDisplayInsets != null) {
             resolveSizeCompatModeConfiguration(newParentConfiguration);
         } else {
-            super.resolveOverrideConfiguration(newParentConfiguration);
             // We ignore activities' requested orientation in multi-window modes. Task level may
             // take them into consideration when calculating bounds.
             if (getParent() != null && getParent().inMultiWindowMode()) {
@@ -6495,7 +6511,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * inheriting the parent bounds.
      */
     private void resolveSizeCompatModeConfiguration(Configuration newParentConfiguration) {
-        super.resolveOverrideConfiguration(newParentConfiguration);
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
 
@@ -6669,28 +6684,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mTmpPrevBounds.set(getBounds());
         super.onConfigurationChanged(newParentConfig);
 
-        final Rect overrideBounds = getResolvedOverrideBounds();
-        if (task != null && !overrideBounds.isEmpty()
-                // If the changes come from change-listener, the incoming parent configuration is
-                // still the old one. Make sure their orientations are the same to reduce computing
-                // the compatibility bounds for the intermediate state.
-                && (task.getConfiguration().orientation == newParentConfig.orientation)) {
-            final Rect taskBounds = task.getBounds();
-            // Since we only center the activity horizontally, if only the fixed height is smaller
-            // than its container, the override bounds don't need to take effect.
-            if ((overrideBounds.width() != taskBounds.width()
-                    || overrideBounds.height() > taskBounds.height())) {
-                calculateCompatBoundsTransformation(newParentConfig);
-                updateSurfacePosition();
-            } else if (mSizeCompatBounds != null) {
+        if (shouldUseSizeCompatMode()) {
+            final Rect overrideBounds = getResolvedOverrideBounds();
+            if (task != null && !overrideBounds.isEmpty()) {
+                final Rect taskBounds = task.getBounds();
+                // Since we only center the activity horizontally, if only the fixed height is
+                // smaller than its container, the override bounds don't need to take effect.
+                if ((overrideBounds.width() != taskBounds.width()
+                        || overrideBounds.height() > taskBounds.height())) {
+                    calculateCompatBoundsTransformation(newParentConfig);
+                    updateSurfacePosition();
+                } else if (mSizeCompatBounds != null) {
+                    mSizeCompatBounds = null;
+                    mSizeCompatScale = 1f;
+                    updateSurfacePosition();
+                }
+            } else if (overrideBounds.isEmpty()) {
                 mSizeCompatBounds = null;
                 mSizeCompatScale = 1f;
                 updateSurfacePosition();
             }
-        } else if (overrideBounds.isEmpty()) {
-            mSizeCompatBounds = null;
-            mSizeCompatScale = 1f;
-            updateSurfacePosition();
         }
 
         final int newWinMode = getWindowingMode();
@@ -7710,6 +7723,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         win.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
+        if (isFixedRotationTransforming()) {
+            // This activity has been rotated but the display is still in old rotation. Because the
+            // animation applies in display space coordinates, the rotated animation frames need to
+            // be unrotated to avoid being cropped.
+            unrotateAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
+        }
     }
 
     void setPictureInPictureParams(PictureInPictureParams p) {
