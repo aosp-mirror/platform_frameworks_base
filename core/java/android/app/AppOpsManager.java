@@ -97,15 +97,77 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * AppOps are mappings of [package/uid, op-name] -> [mode]. The list of existing appops is defined
- * by the system and cannot be amended by apps. Only system apps can change appop-modes.
+ * App-ops are used for two purposes: Access control and tracking.
  *
- * <p>Beside a mode the system tracks when an op was {@link #noteOp noted}. The tracked data can
- * only be read by system components.
+ * <p>App-ops cover a wide variety of functionality from helping with runtime permissions access
+ * control and tracking to battery consumption tracking.
  *
- * <p>Installed apps can usually only listen to changes and events on their own ops. E.g.
- * {@link AppOpsCollector} allows to get a callback each time an app called {@link #noteOp} or
- * {@link #startOp} for an op belonging to the app.
+ * <h2>Access control</h2>
+ *
+ * <p>App-ops can either be controlled for each uid or for each package. Which one is used depends
+ * on the API provider maintaining this app-op. For any security or privacy related app-op the
+ * provider needs to control the app-op for per uid as all security and privacy is based on uid in
+ * Android.
+ *
+ * <p>To control access the app-op can be set to a mode to:
+ * <dl>
+ *     <dt>{@link #MODE_DEFAULT}
+ *     <dd>Default behavior, might differ from app-op or app-op
+ *     <dt>{@link #MODE_ALLOWED}
+ *     <dd>Allow the access
+ *     <dt>{@link #MODE_IGNORED}
+ *     <dd>Don't allow the access, i.e. don't perform the requested action or return no or dummy
+ *     data
+ *     <dt>{@link #MODE_ERRORED}
+ *     <dd>Throw a {@link SecurityException} on access. This can be suppressed by using a
+ *     {@code ...noThrow} method to check the mode
+ * </dl>
+ *
+ * <p>API providers need to check the mode returned by {@link #noteOp} if they are are allowing
+ * access to operations gated by the app-op. {@link #unsafeCheckOp} should be used to check the
+ * mode if no access is granted. E.g. this can be used for displaying app-op state in the UI or
+ * when checking the state before later calling {@link #noteOp} anyway.
+ *
+ * <p>If an operation refers to a time span (e.g. a audio-recording session) the API provider
+ * should use {@link #startOp} and {@link #finishOp} instead of {@link #noteOp}.
+ *
+ * <h3>Runtime permissions and app-ops</h3>
+ *
+ * <p>Each platform defined runtime permission (beside background modifiers) has an associated app
+ * op which is used for tracking but also to allow for silent failures. I.e. if the runtime
+ * permission is denied the caller gets a {@link SecurityException}, but if the permission is
+ * granted and the app-op is {@link #MODE_IGNORED} then the callers gets dummy behavior, e.g.
+ * location callbacks would not happen.
+ *
+ * <h3>App-op permissions</h3>
+ *
+ * <p>App-ops permissions are platform defined permissions that can be overridden. The security
+ * check for app-op permissions should by {@link #MODE_DEFAULT default} check the permission grant
+ * state. If the app-op state is set to {@link #MODE_ALLOWED} or {@link #MODE_IGNORED} the app-op
+ * state should be checked instead of the permission grant state.
+ *
+ * <p>This functionality allows to grant access by default to apps fulfilling the requirements for
+ * a certain permission level. Still the behavior can be overridden when needed.
+ *
+ * <h2>Tracking</h2>
+ *
+ * <p>App-ops track many important events, including all accesses to runtime permission protected
+ * APIs. This is done by tracking when an app-op was {@link #noteOp noted} or
+ * {@link #startOp started}. The tracked data can only be read by system components.
+ *
+ * <p><b>Only {@link #noteOp}/{@link #startOp} are tracked; {@link #unsafeCheckOp} is not tracked.
+ * Hence it is important to eventually call {@link #noteOp} or {@link #startOp} when providing
+ * access to protected operations or data.</b>
+ *
+ * <p>Some apps are forwarding access to other apps. E.g. an app might get the location from the
+ * system's location provider and then send the location further to a 3rd app. In this case the
+ * app passing on the data needs to call {@link #noteProxyOp} to signal the access proxying. This
+ * might also make sense inside of a single app if the access is forwarded between two features of
+ * the app.
+ *
+ * <p>An app can register an {@link AppOpsCollector} to get informed about what accesses the
+ * system is tracking for it. As each runtime permission has an associated app-op this API is
+ * particularly useful for an app that want to find unexpected private data accesses.
  */
 @SystemService(Context.APP_OPS_SERVICE)
 public class AppOpsManager {
@@ -120,28 +182,6 @@ public class AppOpsManager {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     public static final long CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE = 148180766L;
-
-    /**
-     * <p>App ops allows callers to:</p>
-     *
-     * <ul>
-     * <li> Note when operations are happening, and find out if they are allowed for the current
-     * caller.</li>
-     * <li> Disallow specific apps from doing specific operations.</li>
-     * <li> Collect all of the current information about operations that have been executed or
-     * are not being allowed.</li>
-     * <li> Monitor for changes in whether an operation is allowed.</li>
-     * </ul>
-     *
-     * <p>Each operation is identified by a single integer; these integers are a fixed set of
-     * operations, enumerated by the OP_* constants.
-     *
-     * <p></p>When checking operations, the result is a "mode" integer indicating the current
-     * setting for the operation under that caller: MODE_ALLOWED, MODE_IGNORED (don't execute
-     * the operation but fake its behavior enough so that the caller doesn't crash),
-     * MODE_ERRORED (throw a SecurityException back to the caller; the normal operation calls
-     * will do this for you).
-     */
 
     final Context mContext;
 
@@ -1093,7 +1133,7 @@ public class AppOpsManager {
     /** Required to draw on top of other apps. */
     public static final String OPSTR_SYSTEM_ALERT_WINDOW
             = "android:system_alert_window";
-    /** Required to write/modify/update system settingss. */
+    /** Required to write/modify/update system settings. */
     public static final String OPSTR_WRITE_SETTINGS
             = "android:write_settings";
     /** @hide Get device accounts. */
@@ -6115,7 +6155,7 @@ public class AppOpsManager {
      */
     public interface OnOpActiveChangedListener {
         /**
-         * Called when the active state of an app op changes.
+         * Called when the active state of an app-op changes.
          *
          * @param op The operation that changed.
          * @param packageName The package performing the operation.
@@ -6406,7 +6446,7 @@ public class AppOpsManager {
     @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
-    public void setUidMode(String appOp, int uid, @Mode int mode) {
+    public void setUidMode(@NonNull String appOp, int uid, @Mode int mode) {
         try {
             mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
         } catch (RemoteException e) {
@@ -6461,7 +6501,8 @@ public class AppOpsManager {
     @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
-    public void setMode(String op, int uid, String packageName, @Mode int mode) {
+    public void setMode(@NonNull String op, int uid, @Nullable String packageName,
+            @Mode int mode) {
         try {
             mService.setMode(strOpToOp(op), uid, packageName, mode);
         } catch (RemoteException e) {
@@ -6504,16 +6545,17 @@ public class AppOpsManager {
     }
 
     /**
-     * Gets the app op name associated with a given permission.
-     * The app op name is one of the public constants defined
+     * Gets the app-op name associated with a given permission.
+     *
+     * <p>The app-op name is one of the public constants defined
      * in this class such as {@link #OPSTR_COARSE_LOCATION}.
      * This API is intended to be used for mapping runtime
-     * permissions to the corresponding app op.
+     * permissions to the corresponding app-op.
      *
      * @param permission The permission.
-     * @return The app op associated with the permission or null.
+     * @return The app-op associated with the permission or {@code null}.
      */
-    public static String permissionToOp(String permission) {
+    public static @Nullable String permissionToOp(@NonNull String permission) {
         final Integer opCode = sPermToOp.get(permission);
         if (opCode == null) {
             return null;
@@ -6631,7 +6673,7 @@ public class AppOpsManager {
     }
 
     /**
-     * Start watching for changes to the active state of app ops. An app op may be
+     * Start watching for changes to the active state of app-ops. An app-op may be
      * long running and it has a clear start and stop delimiters. If an op is being
      * started or stopped by any package you will get a callback. To change the
      * watched ops for a registered callback you need to unregister and register it
@@ -6690,7 +6732,7 @@ public class AppOpsManager {
     }
 
     /**
-     * Stop watching for changes to the active state of an app op. An app op may be
+     * Stop watching for changes to the active state of an app-op. An app-op may be
      * long running and it has a clear start and stop delimiters. Unregistering a
      * non-registered callback has no effect.
      *
@@ -6921,7 +6963,8 @@ public class AppOpsManager {
      * @param op The operation to note.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The feature in the app or {@code null} for default feature
+     * @param featureId The {@link Context#createFeatureContext feature} in the package or {@code
+     * null} for default feature
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -6996,6 +7039,8 @@ public class AppOpsManager {
      * @param op The operation to note.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
+     * @param featureId The {@link Context#createFeatureContext feature} in the package or {@code
+     * null} for default feature
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -7003,8 +7048,8 @@ public class AppOpsManager {
      * causing the app to crash).
      */
     public int noteOpNoThrow(@NonNull String op, int uid, @NonNull String packageName,
-            @Nullable String feature, @Nullable String message) {
-        return noteOpNoThrow(strOpToOp(op), uid, packageName, feature, message);
+            @Nullable String featureId, @Nullable String message) {
+        return noteOpNoThrow(strOpToOp(op), uid, packageName, featureId, message);
     }
 
     /**
@@ -7273,11 +7318,9 @@ public class AppOpsManager {
     }
 
     /**
-     * Do a quick check to validate if a package name belongs to a UID.
-     *
-     * @throws SecurityException if the package name doesn't belong to the given
-     *             UID, or if ownership cannot be verified.
+     * @deprecated Use {@link PackageManager#getPackageUid} instead
      */
+    @Deprecated
     public void checkPackage(int uid, @NonNull String packageName) {
         try {
             if (mService.checkPackage(uid, packageName) != MODE_ALLOWED) {
@@ -7396,7 +7439,8 @@ public class AppOpsManager {
      * @param op The operation to start.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The feature in the app or {@code null} for default feature
+     * @param featureId The {@link Context#createFeatureContext feature} in the package or {@code
+     * null} for default feature
      * @param message Description why op was started
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -7587,7 +7631,8 @@ public class AppOpsManager {
     }
 
     /**
-     * Checks whether the given op for a package is active.
+     * Checks whether the given op for a package is active, i.e. did someone call {@link #startOp}
+     * without {@link #finishOp} yet.
      * <p>
      * If you don't hold the {@code android.Manifest.permission#WATCH_APPOPS}
      * permission you can query only for your UID.
@@ -7917,18 +7962,19 @@ public class AppOpsManager {
     }
 
     /**
-     * Callback an app can choose to {@link #setNotedAppOpsCollector register} to monitor it's noted
-     * appops. I.e. each time any app calls {@link #noteOp} or {@link #startOp} one of the callback
-     * methods of this object is called.
+     * Callback an app can {@link #setNotedAppOpsCollector register} to monitor the app-ops the
+     * system has tracked for it. I.e. each time any app calls {@link #noteOp} or {@link #startOp}
+     * one of the callback methods of this object is called.
      *
-     * <p><b>Only appops related to dangerous permissions are collected.</b>
+     * <p><b>There will be a callback for all app-ops related to runtime permissions, but not
+     * necessarily for all other app-ops.
      *
      * <pre>
      * setNotedAppOpsCollector(new AppOpsCollector() {
      *     ArraySet<Pair<String, String>> opsNotedForThisProcess = new ArraySet<>();
      *
      *     private synchronized void addAccess(String op, String accessLocation) {
-     *         // Ops are often noted when permission protected APIs were called.
+     *         // Ops are often noted when runtime permission protected APIs were called.
      *         // In this case permissionToOp() allows to resolve the permission<->op
      *         opsNotedForThisProcess.add(new Pair(accessType, accessLocation));
      *     }
@@ -7970,20 +8016,21 @@ public class AppOpsManager {
         }
 
         /**
-         * Called when an app-op was noted for this package inside of a two-way binder-call.
+         * Called when an app-op was {@link #noteOp noted} for this package inside of a synchronous
+         * API call, i.e. a API call that returned data or waited until the action was performed.
          *
-         * <p>Called on the calling thread just after executing the binder-call. This allows
-         * the app to e.g. collect stack traces to figure out where the access came from.
+         * <p>Called on the calling thread before the API returns. This allows the app to e.g.
+         * collect stack traces to figure out where the access came from.
          *
          * @param op The op noted
          */
         public abstract void onNoted(@NonNull SyncNotedAppOp op);
 
         /**
-         * Called when this app noted an app-op for its own package.
+         * Called when this app noted an app-op for its own package,
          *
-         * <p>Called on the thread the noted the op. This allows the app to e.g. collect stack
-         * traces to figure out where the access came from.
+         * <p>This is very similar to {@link #onNoted} only that the tracking was not caused by the
+         * API provider in a separate process, but by one in the app's own process.
          *
          * @param op The op noted
          */
