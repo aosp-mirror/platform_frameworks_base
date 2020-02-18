@@ -71,11 +71,6 @@ public:
     explicit LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid);
 
     /**
-     * Temp constructor to use for pulled atoms until we flip the socket schema.
-     */
-    explicit LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid, bool useNewSchema);
-
-    /**
      * Constructs a LogEvent with synthetic data for testing. Must call init() before reading.
      */
     explicit LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs);
@@ -170,12 +165,6 @@ public:
      * Write this object to a ProtoOutputStream.
      */
     void ToProto(android::util::ProtoOutputStream& out) const;
-
-    /**
-     * Used with the constructor where tag is passed in. Converts the log_event_list to read mode
-     * and prepares the list for reading.
-     */
-    void init();
 
     /**
      * Set elapsed timestamp if the original timestamp is missing.
@@ -303,11 +292,6 @@ private:
 
     uint8_t getTypeId(uint8_t typeInfo);
     uint8_t getNumAnnotations(uint8_t typeInfo);
-
-    /**
-     * Parses a log_msg into a LogEvent object.
-     */
-    void init(android_log_context context);
 
     // The items are naturally sorted in DFS order as we read them. this allows us to do fast
     // matching.

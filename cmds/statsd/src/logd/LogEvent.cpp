@@ -74,29 +74,7 @@ LogEvent::LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid)
       mLogUid(uid),
       mLogPid(pid)
 {
-#ifdef NEW_ENCODING_SCHEME
     initNew();
-# else
-    mContext = create_android_log_parser((char*)msg, len);
-    init(mContext);
-    if (mContext) android_log_destroy(&mContext); // set mContext to NULL
-#endif
-}
-
-LogEvent::LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid, bool useNewSchema)
-    : mBuf(msg),
-      mRemainingLen(len),
-      mLogdTimestampNs(time(nullptr)),
-      mLogUid(uid),
-      mLogPid(pid)
-{
-    if (useNewSchema) {
-        initNew();
-    } else {
-        mContext = create_android_log_parser((char*)msg, len);
-        init(mContext);
-        if (mContext) android_log_destroy(&mContext);  // set mContext to NULL
-    }
 }
 
 LogEvent::LogEvent(const LogEvent& event) {
@@ -222,22 +200,6 @@ LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {
     if (mContext) {
         android_log_write_int64(mContext, timestampNs);
         android_log_write_int32(mContext, tagId);
-    }
-}
-
-void LogEvent::init() {
-    if (mContext) {
-        const char* buffer;
-        size_t len = android_log_write_list_buffer(mContext, &buffer);
-        // turns to reader mode
-        android_log_context contextForRead = create_android_log_parser(buffer, len);
-        if (contextForRead) {
-            init(contextForRead);
-            // destroy the context to save memory.
-            // android_log_destroy will set mContext to NULL
-            android_log_destroy(&contextForRead);
-        }
-        android_log_destroy(&mContext);
     }
 }
 
@@ -575,132 +537,6 @@ uint8_t LogEvent::getTypeId(uint8_t typeInfo) {
 
 uint8_t LogEvent::getNumAnnotations(uint8_t typeInfo) {
     return (typeInfo >> 4) & 0x0F;
-}
-
-/**
- * The elements of each log event are stored as a vector of android_log_list_elements.
- * The goal is to do as little preprocessing as possible, because we read a tiny fraction
- * of the elements that are written to the log.
- *
- * The idea here is to read through the log items once, we get as much information we need for
- * matching as possible. Because this log will be matched against lots of matchers.
- */
-void LogEvent::init(android_log_context context) {
-    android_log_list_element elem;
-    int i = 0;
-    int depth = -1;
-    int pos[] = {1, 1, 1};
-    bool isKeyValuePairAtom = false;
-    do {
-        elem = android_log_read_next(context);
-        switch ((int)elem.type) {
-            case EVENT_TYPE_INT:
-                // elem at [0] is EVENT_TYPE_LIST, [1] is the timestamp, [2] is tag id.
-                if (i == 2) {
-                    mTagId = elem.data.int32;
-                    isKeyValuePairAtom = (mTagId == android::util::KEY_VALUE_PAIRS_ATOM);
-                } else {
-                    if (depth < 0 || depth > 2) {
-                        return;
-                    }
-
-                    mValues.push_back(
-                            FieldValue(Field(mTagId, pos, depth), Value((int32_t)elem.data.int32)));
-
-                    pos[depth]++;
-                }
-                break;
-            case EVENT_TYPE_FLOAT: {
-                if (depth < 0 || depth > 2) {
-                    ALOGE("Depth > 2. Not supported!");
-                    return;
-                }
-
-                // Handles the oneof field in KeyValuePair atom.
-                if (isKeyValuePairAtom && depth == 2) {
-                    pos[depth] = 5;
-                }
-
-                mValues.push_back(FieldValue(Field(mTagId, pos, depth), Value(elem.data.float32)));
-
-                pos[depth]++;
-
-            } break;
-            case EVENT_TYPE_STRING: {
-                if (depth < 0 || depth > 2) {
-                    ALOGE("Depth > 2. Not supported!");
-                    return;
-                }
-
-                // Handles the oneof field in KeyValuePair atom.
-                if (isKeyValuePairAtom && depth == 2) {
-                    pos[depth] = 4;
-                }
-                mValues.push_back(FieldValue(Field(mTagId, pos, depth),
-                                             Value(string(elem.data.string, elem.len))));
-
-                pos[depth]++;
-
-            } break;
-            case EVENT_TYPE_LONG: {
-                if (i == 1) {
-                    mElapsedTimestampNs = elem.data.int64;
-                } else {
-                    if (depth < 0 || depth > 2) {
-                        ALOGE("Depth > 2. Not supported!");
-                        return;
-                    }
-                    // Handles the oneof field in KeyValuePair atom.
-                    if (isKeyValuePairAtom && depth == 2) {
-                        pos[depth] = 3;
-                    }
-                    mValues.push_back(
-                            FieldValue(Field(mTagId, pos, depth), Value((int64_t)elem.data.int64)));
-
-                    pos[depth]++;
-                }
-            } break;
-            case EVENT_TYPE_LIST:
-                depth++;
-                if (depth > 2) {
-                    ALOGE("Depth > 2. Not supported!");
-                    return;
-                }
-                pos[depth] = 1;
-
-                break;
-            case EVENT_TYPE_LIST_STOP: {
-                int prevDepth = depth;
-                depth--;
-                if (depth >= 0 && depth < 2) {
-                    // Now go back to decorate the previous items that are last at prevDepth.
-                    // So that we can later easily match them with Position=Last matchers.
-                    pos[prevDepth]--;
-                    int path = getEncodedField(pos, prevDepth, false);
-                    for (auto it = mValues.rbegin(); it != mValues.rend(); ++it) {
-                        if (it->mField.getDepth() >= prevDepth &&
-                            it->mField.getPath(prevDepth) == path) {
-                            it->mField.decorateLastPos(prevDepth);
-                        } else {
-                            // Safe to break, because the items are in DFS order.
-                            break;
-                        }
-                    }
-                    pos[depth]++;
-                }
-                break;
-            }
-            case EVENT_TYPE_UNKNOWN:
-                break;
-            default:
-                break;
-        }
-        i++;
-    } while ((elem.type != EVENT_TYPE_UNKNOWN) && !elem.complete);
-    if (isKeyValuePairAtom && mValues.size() > 0) {
-        mValues[0] = FieldValue(Field(android::util::KEY_VALUE_PAIRS_ATOM, getSimpleField(1)),
-                                Value((int32_t)mLogUid));
-    }
 }
 
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {
