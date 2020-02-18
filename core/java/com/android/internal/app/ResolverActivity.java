@@ -362,7 +362,7 @@ public class ResolverActivity extends Activity implements
                 mMultiProfilePagerAdapter.getPersonalListAdapter());
         mPersonalPackageMonitor.register(
                 this, getMainLooper(), getPersonalProfileUserHandle(), false);
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             mWorkPackageMonitor = createPackageMonitor(
                     mMultiProfilePagerAdapter.getWorkListAdapter());
             mWorkPackageMonitor.register(this, getMainLooper(), getWorkProfileUserHandle(), false);
@@ -390,7 +390,7 @@ public class ResolverActivity extends Activity implements
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             rdl.setOnApplyWindowInsetsListener(this::onApplyWindowInsets);
 
-            if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+            if (shouldShowTabs()) {
                 rdl.setMaxCollapsedHeight(getResources().getDimensionPixelSize(
                         R.dimen.resolver_empty_state_height_with_tabs));
                 findViewById(R.id.profile_pager).setMinimumHeight(
@@ -419,7 +419,7 @@ public class ResolverActivity extends Activity implements
             List<ResolveInfo> rList,
             boolean filterLastUsed) {
         AbstractMultiProfilePagerAdapter resolverMultiProfilePagerAdapter = null;
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             resolverMultiProfilePagerAdapter =
                     createResolverMultiProfilePagerAdapterForTwoProfiles(
                             initialIntents, rList, filterLastUsed);
@@ -500,8 +500,12 @@ public class ResolverActivity extends Activity implements
         return null;
     }
 
-    protected boolean hasWorkProfile() {
+    private boolean hasWorkProfile() {
         return getWorkProfileUserHandle() != null;
+    }
+
+    protected boolean shouldShowTabs() {
+        return hasWorkProfile() && ENABLE_TABBED_VIEW;
     }
 
     protected void onProfileClick(View v) {
@@ -728,7 +732,7 @@ public class ResolverActivity extends Activity implements
         if (!mRegistered) {
             mPersonalPackageMonitor.register(this, getMainLooper(),
                     getPersonalProfileUserHandle(), false);
-            if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+            if (shouldShowTabs()) {
                 if (mWorkPackageMonitor == null) {
                     mWorkPackageMonitor = createPackageMonitor(
                             mMultiProfilePagerAdapter.getWorkListAdapter());
@@ -745,7 +749,7 @@ public class ResolverActivity extends Activity implements
     @Override
     protected void onStart() {
         super.onStart();
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             mWorkProfileStateReceiver = createWorkProfileStateReceiver();
             registerWorkProfileStateReceiver();
         }
@@ -1343,7 +1347,7 @@ public class ResolverActivity extends Activity implements
 
         setupViewVisibilities();
 
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             setupProfileTabs();
         }
 
@@ -1562,7 +1566,7 @@ public class ResolverActivity extends Activity implements
             stub.setVisibility(View.VISIBLE);
             TextView textView = (TextView) LayoutInflater.from(this).inflate(
                     R.layout.resolver_different_item_header, null, false);
-            if (ENABLE_TABBED_VIEW) {
+            if (shouldShowTabs()) {
                 textView.setGravity(Gravity.CENTER);
             }
             stub.addView(textView);

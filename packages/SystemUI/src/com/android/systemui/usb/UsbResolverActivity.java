@@ -190,4 +190,9 @@ public class UsbResolverActivity extends ResolverActivity {
         }
         return true;
     }
+
+    @Override
+    protected boolean shouldShowTabs() {
+        return false;
+    }
 }

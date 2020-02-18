@@ -373,7 +373,7 @@ public class ChooserActivity extends ResolverActivity implements
                 Log.i(TAG, "Hiding image preview area. Timed out waiting for preview to load"
                         + " within " + mImageLoadTimeoutMillis + "ms.");
                 collapseParentView();
-                if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+                if (shouldShowTabs()) {
                     hideStickyContentPreview();
                 } else if (mChooserMultiProfilePagerAdapter.getCurrentRootAdapter() != null) {
                     mChooserMultiProfilePagerAdapter.getCurrentRootAdapter().hideContentPreview();
@@ -773,7 +773,7 @@ public class ChooserActivity extends ResolverActivity implements
             Intent[] initialIntents,
             List<ResolveInfo> rList,
             boolean filterLastUsed) {
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             mChooserMultiProfilePagerAdapter = createChooserMultiProfilePagerAdapterForTwoProfiles(
                     initialIntents, rList, filterLastUsed);
         } else {
@@ -2434,7 +2434,7 @@ public class ChooserActivity extends ResolverActivity implements
                     offset += findViewById(R.id.content_preview_container).getHeight();
                 }
 
-                if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+                if (shouldShowTabs()) {
                     offset += findViewById(R.id.tabs).getHeight();
                 }
 
@@ -2562,7 +2562,7 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private void setupScrollListener() {
-        if (mResolverDrawerLayout == null || (hasWorkProfile() && ENABLE_TABBED_VIEW)) {
+        if (mResolverDrawerLayout == null || shouldShowTabs()) {
             return;
         }
         final View chooserHeader = mResolverDrawerLayout.findViewById(R.id.chooser_header);
@@ -2613,8 +2613,7 @@ public class ChooserActivity extends ResolverActivity implements
      * we instead show the content preview as a regular list item.
      */
     private boolean shouldShowStickyContentPreview() {
-        return hasWorkProfile()
-                && ENABLE_TABBED_VIEW
+        return shouldShowTabs()
                 && mMultiProfilePagerAdapter.getListAdapterForUserHandle(
                         UserHandle.of(UserHandle.myUserId())).getCount() > 0
                 && isSendAction(getTargetIntent())
@@ -2824,7 +2823,7 @@ public class ChooserActivity extends ResolverActivity implements
         public int getContentPreviewRowCount() {
             // For the tabbed case we show the sticky content preview above the tabs,
             // please refer to shouldShowStickyContentPreview
-            if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+            if (shouldShowTabs()) {
                 return 0;
             }
             if (!isSendAction(getTargetIntent())) {
@@ -2840,7 +2839,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         public int getProfileRowCount() {
-            if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+            if (shouldShowTabs()) {
                 return 0;
             }
             return mChooserListAdapter.getOtherProfile() == null ? 0 : 1;
