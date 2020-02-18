@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2Info;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
@@ -23,12 +24,11 @@ import android.os.Bundle;
 /**
  * @hide
  */
-oneway interface IMediaRouter2Client {
-    void notifyRestoreRoute();
-    void notifyRoutesAdded(in List<MediaRoute2Info> routes);
-    void notifyRoutesRemoved(in List<MediaRoute2Info> routes);
-    void notifyRoutesChanged(in List<MediaRoute2Info> routes);
-    void notifySessionCreated(in @nullable RoutingSessionInfo sessionInfo, int requestId);
-    void notifySessionInfoChanged(in RoutingSessionInfo sessionInfo);
+oneway interface IMediaRoute2ProviderServiceCallback {
+    // TODO: Change it to updateRoutes?
+    void updateState(in MediaRoute2ProviderInfo providerInfo);
+    void notifySessionCreated(in RoutingSessionInfo sessionInfo, long requestId);
+    void notifySessionCreationFailed(long requestId);
+    void notifySessionUpdated(in RoutingSessionInfo sessionInfo);
     void notifySessionReleased(in RoutingSessionInfo sessionInfo);
 }

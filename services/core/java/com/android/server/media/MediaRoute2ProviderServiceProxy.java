@@ -21,8 +21,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.IMediaRoute2Provider;
-import android.media.IMediaRoute2ProviderClient;
+import android.media.IMediaRoute2ProviderService;
+import android.media.IMediaRoute2ProviderServiceCallback;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
 import android.media.RouteDiscoveryPreference;
@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
@@ -41,11 +42,12 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 /**
- * Maintains a connection to a particular media route provider service.
+ * Maintains a connection to a particular {@link MediaRoute2ProviderService}.
  */
 // TODO: Need to revisit the bind/unbind/connect/disconnect logic in this class.
-final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements ServiceConnection {
-    private static final String TAG = "MR2ProviderProxy";
+final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
+        implements ServiceConnection {
+    private static final String TAG = "MR2ProviderSvcProxy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
@@ -58,12 +60,12 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     private Connection mActiveConnection;
     private boolean mConnectionReady;
 
-    MediaRoute2ProviderProxy(@NonNull Context context, @NonNull ComponentName componentName,
+    MediaRoute2ProviderServiceProxy(@NonNull Context context, @NonNull ComponentName componentName,
             int userId) {
         super(componentName);
         mContext = Objects.requireNonNull(context, "Context must not be null.");
         mUserId = userId;
-        mHandler = new Handler();
+        mHandler = new Handler(Looper.myLooper());
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -79,8 +81,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     public void requestCreateSession(String packageName, String routeId, long requestId,
             Bundle sessionHints) {
         if (mConnectionReady) {
-            mActiveConnection.requestCreateSession(
-                    packageName, routeId, requestId, sessionHints);
+            mActiveConnection.requestCreateSession(packageName, routeId, requestId, sessionHints);
             updateBinding();
         }
     }
@@ -229,10 +230,10 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
 
         if (mBound) {
             disconnect();
-
-            IMediaRoute2Provider provider = IMediaRoute2Provider.Stub.asInterface(service);
-            if (provider != null) {
-                Connection connection = new Connection(provider);
+            IMediaRoute2ProviderService serviceBinder =
+                    IMediaRoute2ProviderService.Stub.asInterface(service);
+            if (serviceBinder != null) {
+                Connection connection = new Connection(serviceBinder);
                 if (connection.register()) {
                     mActiveConnection = connection;
                 } else {
@@ -241,7 +242,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
                     }
                 }
             } else {
-                Slog.e(TAG, this + ": Service returned invalid remote display provider binder");
+                Slog.e(TAG, this + ": Service returned invalid binder");
             }
         }
     }
@@ -426,18 +427,18 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     private final class Connection implements DeathRecipient {
-        private final IMediaRoute2Provider mProvider;
-        private final ProviderClient mClient;
+        private final IMediaRoute2ProviderService mService;
+        private final ServiceCallbackStub mCallbackStub;
 
-        Connection(IMediaRoute2Provider provider) {
-            mProvider = provider;
-            mClient = new ProviderClient(this);
+        Connection(IMediaRoute2ProviderService serviceBinder) {
+            mService = serviceBinder;
+            mCallbackStub = new ServiceCallbackStub(this);
         }
 
         public boolean register() {
             try {
-                mProvider.asBinder().linkToDeath(this, 0);
-                mProvider.setClient(mClient);
+                mService.asBinder().linkToDeath(this, 0);
+                mService.setCallback(mCallbackStub);
                 mHandler.post(() -> onConnectionReady(Connection.this));
                 return true;
             } catch (RemoteException ex) {
@@ -447,14 +448,14 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
 
         public void dispose() {
-            mProvider.asBinder().unlinkToDeath(this, 0);
-            mClient.dispose();
+            mService.asBinder().unlinkToDeath(this, 0);
+            mCallbackStub.dispose();
         }
 
         public void requestCreateSession(String packageName, String routeId, long requestId,
                 Bundle sessionHints) {
             try {
-                mProvider.requestCreateSession(packageName, routeId, requestId, sessionHints);
+                mService.requestCreateSession(packageName, routeId, requestId, sessionHints);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "requestCreateSession: Failed to deliver request.");
             }
@@ -462,7 +463,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
 
         public void releaseSession(String sessionId) {
             try {
-                mProvider.releaseSession(sessionId);
+                mService.releaseSession(sessionId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "releaseSession: Failed to deliver request.");
             }
@@ -470,7 +471,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
 
         public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
             try {
-                mProvider.updateDiscoveryPreference(discoveryPreference);
+                mService.updateDiscoveryPreference(discoveryPreference);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "updateDiscoveryPreference: Failed to deliver request.");
             }
@@ -478,7 +479,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
 
         public void selectRoute(String sessionId, String routeId) {
             try {
-                mProvider.selectRoute(sessionId, routeId);
+                mService.selectRoute(sessionId, routeId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "selectRoute: Failed to deliver request.", ex);
             }
@@ -486,7 +487,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
 
         public void deselectRoute(String sessionId, String routeId) {
             try {
-                mProvider.deselectRoute(sessionId, routeId);
+                mService.deselectRoute(sessionId, routeId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "deselectRoute: Failed to deliver request.", ex);
             }
@@ -494,7 +495,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
 
         public void transferToRoute(String sessionId, String routeId) {
             try {
-                mProvider.transferToRoute(sessionId, routeId);
+                mService.transferToRoute(sessionId, routeId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "transferToRoute: Failed to deliver request.", ex);
             }
@@ -502,7 +503,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
 
         public void setRouteVolume(String routeId, int volume) {
             try {
-                mProvider.setRouteVolume(routeId, volume);
+                mService.setRouteVolume(routeId, volume);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "setRouteVolume: Failed to deliver request.", ex);
             }
@@ -510,7 +511,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
 
         public void setSessionVolume(String sessionId, int volume) {
             try {
-                mProvider.setSessionVolume(sessionId, volume);
+                mService.setSessionVolume(sessionId, volume);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "setSessionVolume: Failed to deliver request.", ex);
             }
@@ -542,10 +543,11 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
     }
 
-    private static final class ProviderClient extends IMediaRoute2ProviderClient.Stub  {
+    private static final class ServiceCallbackStub extends
+            IMediaRoute2ProviderServiceCallback.Stub {
         private final WeakReference<Connection> mConnectionRef;
 
-        ProviderClient(Connection connection) {
+        ServiceCallbackStub(Connection connection) {
             mConnectionRef = new WeakReference<>(connection);
         }
 

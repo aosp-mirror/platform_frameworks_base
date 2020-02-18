@@ -83,7 +83,7 @@ public class MediaRouter2 {
 
     // TODO: Make MediaRouter2 is always connected to the MediaRouterService.
     @GuardedBy("sRouterLock")
-    Client2 mClient;
+    MediaRouter2Stub mStub;
 
     @GuardedBy("sRouterLock")
     private Map<String, RoutingController> mRoutingControllers = new ArrayMap<>();
@@ -177,18 +177,18 @@ public class MediaRouter2 {
         mRouteCallbackRecords.addIfAbsent(record);
 
         synchronized (sRouterLock) {
-            if (mClient == null) {
-                Client2 client = new Client2();
+            if (mStub == null) {
+                MediaRouter2Stub stub = new MediaRouter2Stub();
                 try {
-                    mMediaRouterService.registerClient2(client, mPackageName);
-                    mClient = client;
+                    mMediaRouterService.registerRouter2(stub, mPackageName);
+                    mStub = stub;
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "registerRouteCallback: Unable to register client.", ex);
+                    Log.e(TAG, "registerRouteCallback: Unable to register MediaRouter2.", ex);
                 }
             }
-            if (mClient != null && updateDiscoveryPreferenceIfNeededLocked()) {
+            if (mStub != null && updateDiscoveryPreferenceIfNeededLocked()) {
                 try {
-                    mMediaRouterService.setDiscoveryRequest2(mClient, mDiscoveryPreference);
+                    mMediaRouterService.setDiscoveryRequestWithRouter2(mStub, mDiscoveryPreference);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "registerRouteCallback: Unable to set discovery request.");
                 }
@@ -213,24 +213,26 @@ public class MediaRouter2 {
         }
 
         synchronized (sRouterLock) {
-            if (mClient != null) {
-                if (updateDiscoveryPreferenceIfNeededLocked()) {
-                    try {
-                        mMediaRouterService.setDiscoveryRequest2(mClient, mDiscoveryPreference);
-                    } catch (RemoteException ex) {
-                        Log.e(TAG, "unregisterRouteCallback: Unable to set discovery request.");
-                    }
-                }
-                if (mRouteCallbackRecords.size() == 0) {
-                    try {
-                        mMediaRouterService.unregisterClient2(mClient);
-                    } catch (RemoteException ex) {
-                        Log.e(TAG, "Unable to unregister media router.", ex);
-                    }
-                }
-                mShouldUpdateRoutes = true;
-                mClient = null;
+            if (mStub == null) {
+                return;
             }
+            if (updateDiscoveryPreferenceIfNeededLocked()) {
+                try {
+                    mMediaRouterService.setDiscoveryRequestWithRouter2(
+                            mStub, mDiscoveryPreference);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "unregisterRouteCallback: Unable to set discovery request.");
+                }
+            }
+            if (mRouteCallbackRecords.size() == 0) {
+                try {
+                    mMediaRouterService.unregisterRouter2(mStub);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Unable to unregister media router.", ex);
+                }
+            }
+            mShouldUpdateRoutes = true;
+            mStub = null;
         }
     }
 
@@ -360,13 +362,14 @@ public class MediaRouter2 {
             }
         }
 
-        Client2 client;
+        MediaRouter2Stub stub;
         synchronized (sRouterLock) {
-            client = mClient;
+            stub = mStub;
         }
-        if (client != null) {
+        if (stub != null) {
             try {
-                mMediaRouterService.requestCreateSession(client, route, requestId, controllerHints);
+                mMediaRouterService.requestCreateSessionWithRouter2(
+                        stub, route, requestId, controllerHints);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to request to create controller.", ex);
                 mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
@@ -422,13 +425,13 @@ public class MediaRouter2 {
     public void setRouteVolume(@NonNull MediaRoute2Info route, int volume) {
         Objects.requireNonNull(route, "route must not be null");
 
-        Client2 client;
+        MediaRouter2Stub stub;
         synchronized (sRouterLock) {
-            client = mClient;
+            stub = mStub;
         }
-        if (client != null) {
+        if (stub != null) {
             try {
-                mMediaRouterService.setRouteVolume2(client, route, volume);
+                mMediaRouterService.setRouteVolumeWithRouter2(stub, route, volume);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
             }
@@ -941,13 +944,13 @@ public class MediaRouter2 {
                 return;
             }
 
-            Client2 client;
+            MediaRouter2Stub stub;
             synchronized (sRouterLock) {
-                client = mClient;
+                stub = mStub;
             }
-            if (client != null) {
+            if (stub != null) {
                 try {
-                    mMediaRouterService.selectRoute(client, getId(), route);
+                    mMediaRouterService.selectRouteWithRouter2(stub, getId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to select route for session.", ex);
                 }
@@ -988,13 +991,13 @@ public class MediaRouter2 {
                 return;
             }
 
-            Client2 client;
+            MediaRouter2Stub stub;
             synchronized (sRouterLock) {
-                client = mClient;
+                stub = mStub;
             }
-            if (client != null) {
+            if (stub != null) {
                 try {
-                    mMediaRouterService.deselectRoute(client, getId(), route);
+                    mMediaRouterService.deselectRouteWithRouter2(stub, getId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to remove route from session.", ex);
                 }
@@ -1036,13 +1039,13 @@ public class MediaRouter2 {
                 return;
             }
 
-            Client2 client;
+            MediaRouter2Stub stub;
             synchronized (sRouterLock) {
-                client = mClient;
+                stub = mStub;
             }
-            if (client != null) {
+            if (stub != null) {
                 try {
-                    mMediaRouterService.transferToRoute(client, getId(), route);
+                    mMediaRouterService.transferToRouteWithRouter2(stub, getId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to transfer to route for session.", ex);
                 }
@@ -1072,13 +1075,13 @@ public class MediaRouter2 {
                     return;
                 }
             }
-            Client2 client;
+            MediaRouter2Stub stub;
             synchronized (sRouterLock) {
-                client = mClient;
+                stub = mStub;
             }
-            if (client != null) {
+            if (stub != null) {
                 try {
-                    mMediaRouterService.setSessionVolume2(client, getId(), volume);
+                    mMediaRouterService.setSessionVolumeWithRouter2(stub, getId(), volume);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "setVolume: Failed to deliver request.", ex);
                 }
@@ -1100,20 +1103,20 @@ public class MediaRouter2 {
                 mIsReleased = true;
             }
 
-            Client2 client;
+            MediaRouter2Stub stub;
             boolean removed;
             synchronized (sRouterLock) {
                 removed = mRoutingControllers.remove(getId(), this);
-                client = mClient;
+                stub = mStub;
             }
 
             if (removed) {
                 mHandler.post(() -> notifyControllerReleased(RoutingController.this));
             }
 
-            if (client != null) {
+            if (stub != null) {
                 try {
-                    mMediaRouterService.releaseSession(client, getId());
+                    mMediaRouterService.releaseSessionWithRouter2(stub, getId());
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to notify of controller release", ex);
                 }
@@ -1269,7 +1272,7 @@ public class MediaRouter2 {
         }
     }
 
-    class Client2 extends IMediaRouter2Client.Stub {
+    class MediaRouter2Stub extends IMediaRouter2.Stub {
         @Override
         public void notifyRestoreRoute() throws RemoteException {}
 
