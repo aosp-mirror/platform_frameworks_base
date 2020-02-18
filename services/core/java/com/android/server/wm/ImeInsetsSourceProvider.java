@@ -118,6 +118,7 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
 
         return (!dcTarget.isClosing() && mImeTargetFromIme == dcTarget)
                 || (mImeTargetFromIme != null && dcTarget.getParentWindow() == mImeTargetFromIme
-                && dcTarget.mSubLayer > mImeTargetFromIme.mSubLayer);
+                        && dcTarget.mSubLayer > mImeTargetFromIme.mSubLayer)
+                || mImeTargetFromIme == mDisplayContent.getImeFallback();
     }
 }

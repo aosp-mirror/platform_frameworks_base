@@ -3597,6 +3597,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (target != null && target.getDisplayContent().canShowIme()) {
             return target;
         }
+        return getImeFallback();
+    }
+
+    WindowState getImeFallback() {
 
         // host is in non-default display that doesn't support system decor, default to
         // default display's StatusBar to control IME.
