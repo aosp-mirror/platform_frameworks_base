@@ -2875,11 +2875,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         @Override
         public void onDisplayRemoved(int displayId) {
             synchronized (mLock) {
-                for (int i = 0; i < mDisplaysList.size(); i++) {
-                    if (mDisplaysList.get(i).getDisplayId() == displayId) {
-                        mDisplaysList.remove(i);
-                        break;
-                    }
+                if (!removeDisplayFromList(displayId)) {
+                    return;
                 }
                 if (mInputFilter != null) {
                     mInputFilter.onDisplayChanged();
@@ -2899,6 +2896,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mA11yWindowManager.stopTrackingWindows(displayId);
         }
 
+        @GuardedBy("mLock")
+        private boolean removeDisplayFromList(int displayId) {
+            for (int i = 0; i < mDisplaysList.size(); i++) {
+                if (mDisplaysList.get(i).getDisplayId() == displayId) {
+                    mDisplaysList.remove(i);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         @Override
         public void onDisplayChanged(int displayId) {
             /* do nothing */
@@ -2910,8 +2918,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             // Private virtual displays are created by the ap and is not allowed to access by other
             // aps. We assume we could ignore them.
-            if ((display.getType() == Display.TYPE_VIRTUAL
-                    && (display.getFlags() & Display.FLAG_PRIVATE) != 0)) {
+            if (display.getType() == Display.TYPE_VIRTUAL
+                    && (display.getFlags() & Display.FLAG_PRIVATE) != 0) {
                 return false;
             }
             return true;
