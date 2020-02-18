@@ -359,8 +359,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Before
     public void setUp() throws Exception {
+        // Shell permisssions will override permissions of our app, so add all necessary permissions
+        // fo this test here:
         InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
-                "android.permission.WRITE_DEVICE_CONFIG", "android.permission.READ_DEVICE_CONFIG");
+                "android.permission.WRITE_DEVICE_CONFIG",
+                "android.permission.READ_DEVICE_CONFIG",
+                "android.permission.READ_CONTACTS");
 
         MockitoAnnotations.initMocks(this);
 
