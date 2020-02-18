@@ -384,24 +384,27 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     private void onStateChangedInternal(@NonNull BlobStoreSession session) {
-        synchronized (mBlobsLock) {
-            switch (session.getState()) {
-                case STATE_ABANDONED:
-                case STATE_VERIFIED_INVALID:
-                    session.getSessionFile().delete();
+        switch (session.getState()) {
+            case STATE_ABANDONED:
+            case STATE_VERIFIED_INVALID:
+                session.getSessionFile().delete();
+                synchronized (mBlobsLock) {
                     getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
                             .remove(session.getSessionId());
                     mKnownBlobIds.remove(session.getSessionId());
                     if (LOGV) {
                         Slog.v(TAG, "Session is invalid; deleted " + session);
                     }
-                    break;
-                case STATE_COMMITTED:
-                    session.verifyBlobData();
-                    break;
-                case STATE_VERIFIED_VALID:
+                }
+                break;
+            case STATE_COMMITTED:
+                session.verifyBlobData();
+                break;
+            case STATE_VERIFIED_VALID:
+                synchronized (mBlobsLock) {
                     final int userId = UserHandle.getUserId(session.getOwnerUid());
-                    final ArrayMap<BlobHandle, BlobMetadata> userBlobs = getUserBlobsLocked(userId);
+                    final ArrayMap<BlobHandle, BlobMetadata> userBlobs = getUserBlobsLocked(
+                            userId);
                     BlobMetadata blob = userBlobs.get(session.getBlobHandle());
                     if (blob == null) {
                         blob = new BlobMetadata(mContext,
@@ -424,11 +427,13 @@ public class BlobStoreManagerService extends SystemService {
                     if (LOGV) {
                         Slog.v(TAG, "Successfully committed session " + session);
                     }
-                    break;
-                default:
-                    Slog.wtf(TAG, "Invalid session state: "
-                            + stateToString(session.getState()));
-            }
+                }
+                break;
+            default:
+                Slog.wtf(TAG, "Invalid session state: "
+                        + stateToString(session.getState()));
+        }
+        synchronized (mBlobsLock) {
             try {
                 writeBlobSessionsLocked();
             } catch (Exception e) {
