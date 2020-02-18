@@ -268,6 +268,10 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
+    private ComponentName getActiveDreamComponentInternal(boolean doze) {
+        return chooseDreamForUser(doze, ActivityManager.getCurrentUser());
+    }
+
     private ComponentName chooseDreamForUser(boolean doze, int userId) {
         if (doze) {
             ComponentName dozeComponent = getDozeComponent(userId);
@@ -670,6 +674,11 @@ public final class DreamManagerService extends SystemService {
         @Override
         public boolean isDreaming() {
             return isDreamingInternal();
+        }
+
+        @Override
+        public ComponentName getActiveDreamComponent(boolean doze) {
+            return getActiveDreamComponentInternal(doze);
         }
     }
 
