@@ -2357,10 +2357,11 @@ public class Vpn {
 
                     // TODO: Remove the need for adding two unused addresses with
                     // IPsec tunnels.
+                    final InetAddress address = InetAddress.getLocalHost();
                     mTunnelIface =
                             mIpSecManager.createIpSecTunnelInterface(
-                                    ikeSessionParams.getServerAddress() /* unused */,
-                                    ikeSessionParams.getServerAddress() /* unused */,
+                                    address /* unused */,
+                                    address /* unused */,
                                     network);
                     mNetd.setInterfaceUp(mTunnelIface.getInterfaceName());
 
