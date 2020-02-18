@@ -3023,6 +3023,18 @@ public abstract class PackageManager {
     public static final String FEATURE_TUNER = "android.hardware.tv.tuner";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the necessary changes to support app enumeration.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_APP_ENUMERATION = "android.software.app_enumeration";
+
+    /** @hide */
+    public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
+
+    /**
      * Extra field name for the URI to a verification file. Passed to a package
      * verifier.
      *

@@ -1160,6 +1160,10 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY, 0);
         }
 
+        if (PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT) {
+            addFeature(PackageManager.FEATURE_APP_ENUMERATION, 0);
+        }
+
         for (String featureName : mUnavailableFeatures) {
             removeFeature(featureName);
         }

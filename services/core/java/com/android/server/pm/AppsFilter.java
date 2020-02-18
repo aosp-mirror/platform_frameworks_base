@@ -69,7 +69,6 @@ public class AppsFilter {
     // Logs all filtering instead of enforcing
     private static final boolean DEBUG_ALLOW_ALL = false;
     private static final boolean DEBUG_LOGGING = false;
-    private static final boolean FEATURE_ENABLED_BY_DEFAULT = true;
 
     /**
      * This contains a list of app UIDs that are implicitly queryable because another app explicitly
@@ -135,7 +134,8 @@ public class AppsFilter {
     private static class FeatureConfigImpl implements FeatureConfig {
         private static final String FILTERING_ENABLED_NAME = "package_query_filtering_enabled";
         private final PackageManagerService.Injector mInjector;
-        private volatile boolean mFeatureEnabled = FEATURE_ENABLED_BY_DEFAULT;
+        private volatile boolean mFeatureEnabled =
+                PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT;
 
         private FeatureConfigImpl(PackageManagerService.Injector injector) {
             mInjector = injector;
@@ -145,14 +145,14 @@ public class AppsFilter {
         public void onSystemReady() {
             mFeatureEnabled = DeviceConfig.getBoolean(
                     NAMESPACE_PACKAGE_MANAGER_SERVICE, FILTERING_ENABLED_NAME,
-                    FEATURE_ENABLED_BY_DEFAULT);
+                    PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT);
             DeviceConfig.addOnPropertiesChangedListener(
                     NAMESPACE_PACKAGE_MANAGER_SERVICE, FgThread.getExecutor(),
                     properties -> {
                         if (properties.getKeyset().contains(FILTERING_ENABLED_NAME)) {
                             synchronized (FeatureConfigImpl.this) {
                                 mFeatureEnabled = properties.getBoolean(FILTERING_ENABLED_NAME,
-                                        FEATURE_ENABLED_BY_DEFAULT);
+                                        PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT);
                             }
                         }
                     });
