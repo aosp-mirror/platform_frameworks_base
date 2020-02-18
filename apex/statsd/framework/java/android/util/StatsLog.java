@@ -36,11 +36,6 @@ import com.android.internal.util.StatsdStatsLog;
  * define custom metrics inside statsd.
  */
 public final class StatsLog {
-
-    // Load JNI library
-    static {
-        System.loadLibrary("stats_jni");
-    }
     private static final String TAG = "StatsLog";
     private static final boolean DEBUG = false;
     private static final int EXPERIMENT_IDS_FIELD_ID = 1;
