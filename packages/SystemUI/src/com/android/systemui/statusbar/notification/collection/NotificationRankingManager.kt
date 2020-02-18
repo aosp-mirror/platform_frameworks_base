@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationSectionsMan
 import com.android.systemui.statusbar.phone.NotificationGroupManager
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import dagger.Lazy
+import java.util.Comparator
 import java.util.Objects
 import javax.inject.Inject
 
@@ -73,6 +74,9 @@ open class NotificationRankingManager @Inject constructor(
         val aIsPeople = a.isPeopleNotification()
         val bIsPeople = b.isPeopleNotification()
 
+        val aIsImportantPeople = a.isImportantPeopleNotification()
+        val bIsImportantPeople = b.isImportantPeopleNotification()
+
         val aMedia = isImportantMedia(a)
         val bMedia = isImportantMedia(b)
 
@@ -87,6 +91,8 @@ open class NotificationRankingManager @Inject constructor(
 
         when {
             usePeopleFiltering && aIsPeople != bIsPeople -> if (aIsPeople) -1 else 1
+            usePeopleFiltering && aIsImportantPeople != bIsImportantPeople ->
+                if (aIsImportantPeople) -1 else 1
             aHeadsUp != bHeadsUp -> if (aHeadsUp) -1 else 1
             // Provide consistent ranking with headsUpManager
             aHeadsUp -> headsUpManager.compare(a, b)
@@ -191,6 +197,9 @@ open class NotificationRankingManager @Inject constructor(
 
     private fun NotificationEntry.isPeopleNotification() =
             peopleNotificationIdentifier.isPeopleNotification(sbn, ranking)
+
+    private fun NotificationEntry.isImportantPeopleNotification() =
+            peopleNotificationIdentifier.isImportantPeopleNotification(sbn, ranking)
 
     private fun NotificationEntry.isHighPriority() =
             highPriorityProvider.isHighPriority(this)
