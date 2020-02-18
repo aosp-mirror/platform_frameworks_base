@@ -282,6 +282,15 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
+     * Get the MediaDevice list that has been selected to current media.
+     *
+     * @return list of MediaDevice
+     */
+    public List<MediaDevice> getSelectedMediaDevice() {
+        return mInfoMediaManager.getSelectedMediaDevice();
+    }
+
+    /**
      * Adjust the volume of session.
      *
      * @param volume the value of volume
