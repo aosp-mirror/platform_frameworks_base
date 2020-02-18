@@ -14230,7 +14230,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
         @RequiresPermission(Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS)
         public static void registerMonitorCallback(@NonNull ContentResolver resolver,
                 @NonNull RemoteCallback callback) {
