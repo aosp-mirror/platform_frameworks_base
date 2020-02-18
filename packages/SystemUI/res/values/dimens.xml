@@ -1182,6 +1182,9 @@
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
 
+    <dimen name="dismiss_circle_size">52dp</dimen>
+    <dimen name="dismiss_target_x_size">24dp</dimen>
+
     <!-- Size of the RAT type for CellularTile -->
     <dimen name="celltile_rat_type_size">10sp</dimen>
 
