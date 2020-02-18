@@ -960,7 +960,7 @@ public abstract class AccessibilityService extends Service {
             return false;
         }
         List<GestureDescription.GestureStep> steps =
-                MotionEventGenerator.getGestureStepsFromGestureDescription(gesture, 100);
+                MotionEventGenerator.getGestureStepsFromGestureDescription(gesture, 16);
         try {
             synchronized (mLock) {
                 mGestureStatusCallbackSequence++;
