@@ -49,6 +49,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.ServiceStartArgs;
+import android.app.admin.DevicePolicyEventLogger;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ComponentName;
 import android.content.ComponentName.WithComponentName;
@@ -79,6 +80,7 @@ import android.os.SystemProperties;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1912,6 +1914,8 @@ public final class ActiveServices {
                 requestServiceBindingLocked(s, b.intent, callerFg, false);
             }
 
+            maybeLogBindCrossProfileService(userId, callingPackage, callerApp.info.uid);
+
             getServiceMapLocked(s.userId).ensureNotStartingBackgroundLocked(s);
 
         } finally {
@@ -1919,6 +1923,21 @@ public final class ActiveServices {
         }
 
         return 1;
+    }
+
+    private void maybeLogBindCrossProfileService(
+            int userId, String callingPackage, int callingUid) {
+        if (UserHandle.isCore(callingUid)) {
+            return;
+        }
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId == userId
+                || !mAm.mUserController.isSameProfileGroup(callingUserId, userId)) {
+            return;
+        }
+        DevicePolicyEventLogger.createEvent(DevicePolicyEnums.BIND_CROSS_PROFILE_SERVICE)
+                .setStrings(callingPackage)
+                .write();
     }
 
     void publishServiceLocked(ServiceRecord r, Intent intent, IBinder service) {
