@@ -118,15 +118,15 @@ public class PackageManagerServiceTest {
         String[] partitions = { "system", "vendor", "odm", "oem", "product", "system_ext" };
         String[] appdir = { "app", "priv-app" };
         for (int i = 0; i < partitions.length; i++) {
-            final PackageManagerService.SystemPartition systemPartition =
+            final PackageManagerService.ScanPartition scanPartition =
                     PackageManagerService.SYSTEM_PARTITIONS.get(i);
             for (int j = 0; j < appdir.length; j++) {
                 String canonical = new File("/" + partitions[i]).getCanonicalPath();
                 String path = String.format("%s/%s/A.apk", canonical, appdir[j]);
 
-                Assert.assertEquals(j == 1 && i != 3, systemPartition.containsPrivPath(path));
+                Assert.assertEquals(j == 1 && i != 3, scanPartition.containsPrivPath(path));
 
-                final int scanFlag = systemPartition.scanFlag;
+                final int scanFlag = scanPartition.scanFlag;
                 Assert.assertEquals(i == 1, scanFlag == PackageManagerService.SCAN_AS_VENDOR);
                 Assert.assertEquals(i == 2, scanFlag == PackageManagerService.SCAN_AS_ODM);
                 Assert.assertEquals(i == 3, scanFlag == PackageManagerService.SCAN_AS_OEM);

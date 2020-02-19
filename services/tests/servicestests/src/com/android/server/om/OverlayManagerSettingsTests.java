@@ -58,7 +58,7 @@ public class OverlayManagerSettingsTests {
             STATE_DISABLED,
             0,
             0,
-            false);
+            true);
 
     private static final OverlayInfo OVERLAY_B0 = new OverlayInfo(
             "com.dummy.overlay_b",
@@ -69,7 +69,7 @@ public class OverlayManagerSettingsTests {
             STATE_DISABLED,
             0,
             0,
-            false);
+            true);
 
     private static final OverlayInfo OVERLAY_C0 = new OverlayInfo(
             "com.dummy.overlay_c",
@@ -80,7 +80,7 @@ public class OverlayManagerSettingsTests {
             STATE_DISABLED,
             0,
             0,
-            false);
+            true);
 
     private static final OverlayInfo OVERLAY_A1 = new OverlayInfo(
             "com.dummy.overlay_a",
@@ -91,7 +91,7 @@ public class OverlayManagerSettingsTests {
             STATE_DISABLED,
             1,
             0,
-            false);
+            true);
 
     private static final OverlayInfo OVERLAY_B1 = new OverlayInfo(
             "com.dummy.overlay_b",
@@ -102,7 +102,7 @@ public class OverlayManagerSettingsTests {
             STATE_DISABLED,
             1,
             0,
-            false);
+            true);
 
     @Before
     public void setUp() throws Exception {
@@ -238,7 +238,7 @@ public class OverlayManagerSettingsTests {
                 STATE_DISABLED,
                 0,
                 0,
-                false);
+                true);
         insert(otherTarget);
         changed = mSettings.setPriority(OVERLAY_A0.packageName, otherTarget.packageName,
                 OVERLAY_A0.userId);
@@ -435,7 +435,7 @@ public class OverlayManagerSettingsTests {
 
     private void insert(OverlayInfo oi) throws Exception {
         mSettings.init(oi.packageName, oi.userId, oi.targetPackageName, null, oi.baseCodePath,
-                false, 0, oi.category);
+                true, false,0, oi.category);
         mSettings.setState(oi.packageName, oi.userId, oi.state);
         mSettings.setEnabled(oi.packageName, oi.userId, false);
     }

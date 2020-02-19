@@ -114,6 +114,7 @@ java_genrule {
         ":FrameworksCoreTests_keyset_splata_api",
         ":FrameworksCoreTests_keyset_splat_api",
         ":FrameworksCoreTests_locales",
+        ":FrameworksCoreTests_overlay_config",
         ":FrameworksCoreTests_version_1",
         ":FrameworksCoreTests_version_1_diff",
         ":FrameworksCoreTests_version_1_nosys",

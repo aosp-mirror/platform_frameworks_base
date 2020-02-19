@@ -483,6 +483,9 @@ public class PackageParser {
         public final boolean isolatedSplits;
         public final boolean isSplitRequired;
         public final boolean useEmbeddedDex;
+        public final String targetPackageName;
+        public final boolean overlayIsStatic;
+        public final int overlayPriority;
 
         public ApkLite(String codePath, String packageName, String splitName,
                 boolean isFeatureSplit,
@@ -492,6 +495,7 @@ public class PackageParser {
                 SigningDetails signingDetails, boolean coreApp,
                 boolean debuggable, boolean multiArch, boolean use32bitAbi,
                 boolean useEmbeddedDex, boolean extractNativeLibs, boolean isolatedSplits,
+                String targetPackageName, boolean overlayIsStatic, int overlayPriority,
                 int minSdkVersion, int targetSdkVersion) {
             this.codePath = codePath;
             this.packageName = packageName;
@@ -513,6 +517,9 @@ public class PackageParser {
             this.extractNativeLibs = extractNativeLibs;
             this.isolatedSplits = isolatedSplits;
             this.isSplitRequired = isSplitRequired;
+            this.targetPackageName = targetPackageName;
+            this.overlayIsStatic = overlayIsStatic;
+            this.overlayPriority = overlayPriority;
             this.minSdkVersion = minSdkVersion;
             this.targetSdkVersion = targetSdkVersion;
         }
@@ -1784,6 +1791,12 @@ public class PackageParser {
         boolean useEmbeddedDex = false;
         String configForSplit = null;
         String usesSplitName = null;
+        String targetPackage = null;
+        boolean overlayIsStatic = false;
+        int overlayPriority = 0;
+
+        String requiredSystemPropertyName = null;
+        String requiredSystemPropertyValue = null;
 
         for (int i = 0; i < attrs.getAttributeCount(); i++) {
             final String attr = attrs.getAttributeName(i);
@@ -1848,6 +1861,21 @@ public class PackageParser {
                         useEmbeddedDex = attrs.getAttributeBooleanValue(i, false);
                     }
                 }
+            } else if (PackageParser.TAG_OVERLAY.equals(parser.getName())) {
+                for (int i = 0; i < attrs.getAttributeCount(); ++i) {
+                    final String attr = attrs.getAttributeName(i);
+                    if ("requiredSystemPropertyName".equals(attr)) {
+                        requiredSystemPropertyName = attrs.getAttributeValue(i);
+                    } else if ("requiredSystemPropertyValue".equals(attr)) {
+                        requiredSystemPropertyValue = attrs.getAttributeValue(i);
+                    } else if ("targetPackage".equals(attr)) {
+                        targetPackage = attrs.getAttributeValue(i);;
+                    } else if ("isStatic".equals(attr)) {
+                        overlayIsStatic = attrs.getAttributeBooleanValue(i, false);
+                    } else if ("priority".equals(attr)) {
+                        overlayPriority = attrs.getAttributeIntValue(i, 0);
+                    }
+                }
             } else if (TAG_USES_SPLIT.equals(parser.getName())) {
                 if (usesSplitName != null) {
                     Slog.w(TAG, "Only one <uses-split> permitted. Ignoring others.");
@@ -1874,11 +1902,22 @@ public class PackageParser {
             }
         }
 
+        // Check to see if overlay should be excluded based on system property condition
+        if (!checkRequiredSystemProperty(requiredSystemPropertyName,
+                requiredSystemPropertyValue)) {
+            Slog.i(TAG, "Skipping target and overlay pair " + targetPackage + " and "
+                    + codePath + ": overlay ignored due to required system property: "
+                    + requiredSystemPropertyName + " with value: " + requiredSystemPropertyValue);
+            targetPackage = null;
+            overlayIsStatic = false;
+            overlayPriority = 0;
+        }
+
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
                 configForSplit, usesSplitName, isSplitRequired, versionCode, versionCodeMajor,
                 revisionCode, installLocation, verifiers, signingDetails, coreApp, debuggable,
                 multiArch, use32bitAbi, useEmbeddedDex, extractNativeLibs, isolatedSplits,
-                minSdkVersion, targetSdkVersion);
+                targetPackage, overlayIsStatic, overlayPriority, minSdkVersion, targetSdkVersion);
     }
 
     /**
@@ -2162,7 +2201,7 @@ public class PackageParser {
                 }
 
                 // check to see if overlay should be excluded based on system property condition
-                if (!checkOverlayRequiredSystemProperty(propName, propValue)) {
+                if (!checkRequiredSystemProperty(propName, propValue)) {
                     Slog.i(TAG, "Skipping target and overlay pair " + pkg.mOverlayTarget + " and "
                         + pkg.baseCodePath+ ": overlay ignored due to required system property: "
                         + propName + " with value: " + propValue);
@@ -2590,8 +2629,11 @@ public class PackageParser {
         return pkg;
     }
 
-    private boolean checkOverlayRequiredSystemProperty(String propName, String propValue) {
-
+    /**
+     * Returns {@code true} if both the property name and value are empty or if the given system
+     * property is set to the specified value. In all other cases, returns {@code false}
+     */
+    public static boolean checkRequiredSystemProperty(String propName, String propValue) {
         if (TextUtils.isEmpty(propName) || TextUtils.isEmpty(propValue)) {
             if (!TextUtils.isEmpty(propName) || !TextUtils.isEmpty(propValue)) {
                 // malformed condition - incomplete

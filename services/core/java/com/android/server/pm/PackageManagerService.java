@@ -186,6 +186,8 @@ import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.ParseFlags;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
+import android.content.pm.PackagePartitions;
+import android.content.pm.PackagePartitions.SystemPartition;
 import android.content.pm.PackageStats;
 import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
@@ -306,6 +308,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
@@ -793,22 +796,12 @@ public class PackageManagerService extends IPackageManager.Stub
      * specificity (the more generic, the earlier in the list a partition appears).
      */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    public static final List<SystemPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
-            Arrays.asList(
-                    new SystemPartition(Environment.getRootDirectory(), 0 /* scanFlag */,
-                            false /* hasOverlays */),
-                    new SystemPartition(Environment.getVendorDirectory(), SCAN_AS_VENDOR,
-                            true /* hasOverlays */),
-                    new SystemPartition(Environment.getOdmDirectory(), SCAN_AS_ODM,
-                            true /* hasOverlays */),
-                    new SystemPartition(Environment.getOemDirectory(), SCAN_AS_OEM,
-                            true /* hasOverlays */),
-                    new SystemPartition(Environment.getProductDirectory(), SCAN_AS_PRODUCT,
-                            true /* hasOverlays */),
-                    new SystemPartition(Environment.getSystemExtDirectory(), SCAN_AS_SYSTEM_EXT,
-                            true /* hasOverlays */)));
+    public static final List<ScanPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
+            PackagePartitions.getOrderedPartitions(ScanPartition::new));
 
-    private final List<SystemPartition> mDirsToScanAsSystem;
+    private final List<ScanPartition> mDirsToScanAsSystem;
+
+    private final OverlayConfig mOverlayConfig;
 
     /**
      * Unit tests will instantiate, extend and/or mock to mock dependencies / behaviors.
@@ -2589,66 +2582,44 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    public static class SystemPartition {
-        public final File folder;
+    @VisibleForTesting
+    public static class ScanPartition extends SystemPartition {
+        @ScanFlags
         public final int scanFlag;
-        public final File appFolder;
-        @Nullable
-        public final File privAppFolder;
-        @Nullable
-        public final File overlayFolder;
 
-
-        private static boolean shouldScanPrivApps(@ScanFlags int scanFlags) {
-            if ((scanFlags & SCAN_AS_OEM) != 0) {
-                return false;
-            }
-            if (scanFlags == 0) {  // /system partition
-                return true;
-            }
-            if ((scanFlags
-                    & (SCAN_AS_VENDOR | SCAN_AS_ODM | SCAN_AS_PRODUCT | SCAN_AS_SYSTEM_EXT)) != 0) {
-                return true;
-            }
-            if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
-                return true;
-            }
-            return false;
+        public ScanPartition(@NonNull SystemPartition partition) {
+            super(partition);
+            scanFlag = scanFlagForPartition(partition);
         }
 
-        private SystemPartition(File folder, int scanFlag, boolean hasOverlays) {
-            this.folder = folder;
-            this.scanFlag = scanFlag;
-            this.appFolder = toCanonical(new File(folder, "app"));
-            this.privAppFolder = shouldScanPrivApps(scanFlag)
-                    ? toCanonical(new File(folder, "priv-app"))
-                    : null;
-            this.overlayFolder = hasOverlays ? toCanonical(new File(folder, "overlay")) : null;
+        /**
+         * Creates a partition containing the same folders as the original partition but with a
+         * different root folder. The new partition will include the scan flags of the original
+         * partition along with any specified additional scan flags.
+         */
+        public ScanPartition(@NonNull File folder, @NonNull ScanPartition original,
+                @ScanFlags int additionalScanFlag) {
+            super(folder, original);
+            this.scanFlag = original.scanFlag | additionalScanFlag;
         }
 
-        public boolean containsPrivApp(File scanFile) {
-            return FileUtils.contains(privAppFolder, scanFile);
-        }
-
-        public boolean containsApp(File scanFile) {
-            return FileUtils.contains(appFolder, scanFile);
-        }
-
-        public boolean containsPath(String path) {
-            return path.startsWith(folder.getPath() + "/");
-        }
-
-        public boolean containsPrivPath(String path) {
-            return privAppFolder != null && path.startsWith(privAppFolder.getPath() + "/");
-        }
-
-        private static File toCanonical(File dir) {
-            try {
-                return dir.getCanonicalFile();
-            } catch (IOException e) {
-                // failed to look up canonical path, continue with original one
-                return dir;
+        private static int scanFlagForPartition(PackagePartitions.SystemPartition partition) {
+            switch (partition.type) {
+                case PackagePartitions.PARTITION_SYSTEM:
+                    return 0;
+                case PackagePartitions.PARTITION_VENDOR:
+                    return SCAN_AS_VENDOR;
+                case PackagePartitions.PARTITION_ODM:
+                    return SCAN_AS_ODM;
+                case PackagePartitions.PARTITION_OEM:
+                    return SCAN_AS_OEM;
+                case PackagePartitions.PARTITION_PRODUCT:
+                    return SCAN_AS_PRODUCT;
+                case PackagePartitions.PARTITION_SYSTEM_EXT:
+                    return SCAN_AS_SYSTEM_EXT;
+                default:
+                    throw new IllegalStateException("Unable to determine scan flag for "
+                            + partition.folder);
             }
         }
     }
@@ -2752,7 +2723,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mDirsToScanAsSystem = new ArrayList<>();
         mDirsToScanAsSystem.addAll(SYSTEM_PARTITIONS);
         mDirsToScanAsSystem.addAll(mApexManager.getActiveApexInfos().stream()
-                .map(ai -> resolveApexToSystemPartition(ai))
+                .map(PackageManagerService::resolveApexToScanPartition)
                 .filter(Objects::nonNull).collect(Collectors.toList()));
         Slog.d(TAG,
                 "Directories scanned as system partitions: [" + mDirsToScanAsSystem.stream().map(
@@ -2901,11 +2872,11 @@ public class PackageManagerService extends IPackageManager.Stub
             // For security and version matching reason, only consider overlay packages if they
             // reside in the right directory.
             for (int i = mDirsToScanAsSystem.size() - 1; i >= 0; i--) {
-                final SystemPartition partition = mDirsToScanAsSystem.get(i);
-                if (partition.overlayFolder == null) {
+                final ScanPartition partition = mDirsToScanAsSystem.get(i);
+                if (partition.getOverlayFolder() == null) {
                     continue;
                 }
-                scanDirTracedLI(partition.overlayFolder, systemParseFlags,
+                scanDirTracedLI(partition.getOverlayFolder(), systemParseFlags,
                         systemScanFlags | partition.scanFlag, 0,
                         packageParser, executorService);
             }
@@ -2918,17 +2889,20 @@ public class PackageManagerService extends IPackageManager.Stub
                         "Failed to load frameworks package; check log for warnings");
             }
             for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
-                final SystemPartition partition = mDirsToScanAsSystem.get(i);
-                if (partition.privAppFolder != null) {
-                    scanDirTracedLI(partition.privAppFolder, systemParseFlags,
+                final ScanPartition partition = mDirsToScanAsSystem.get(i);
+                if (partition.getPrivAppFolder() != null) {
+                    scanDirTracedLI(partition.getPrivAppFolder(), systemParseFlags,
                             systemScanFlags | SCAN_AS_PRIVILEGED | partition.scanFlag, 0,
                             packageParser, executorService);
                 }
-                scanDirTracedLI(partition.appFolder, systemParseFlags,
+                scanDirTracedLI(partition.getAppFolder(), systemParseFlags,
                         systemScanFlags | partition.scanFlag, 0,
                         packageParser, executorService);
             }
 
+            // Parse overlay configuration files to set default enable state, mutability, and
+            // priority of system overlays.
+            mOverlayConfig = OverlayConfig.initializeSystemInstance(mPmInternal::forEachPackage);
 
             // Prune any system packages that no longer exist.
             final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<>();
@@ -3106,7 +3080,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         @ParseFlags int reparseFlags = 0;
                         @ScanFlags int rescanFlags = 0;
                         for (int i1 = 0, size = mDirsToScanAsSystem.size(); i1 < size; i1++) {
-                            SystemPartition partition = mDirsToScanAsSystem.get(i1);
+                            final ScanPartition partition = mDirsToScanAsSystem.get(i1);
                             if (partition.containsPrivApp(scanFile)) {
                                 reparseFlags = systemParseFlags;
                                 rescanFlags = systemScanFlags | SCAN_AS_PRIVILEGED
@@ -11579,50 +11553,17 @@ public class PackageManagerService extends IPackageManager.Stub
                     // We are scanning a system overlay. This can be the first scan of the
                     // system/vendor/oem partition, or an update to the system overlay.
                     if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                        // This must be an update to a system overlay.
-                        final PackageSetting previousPkg = assertNotNull(
-                                mSettings.getPackageLPr(pkg.getPackageName()),
-                                "previous package state not present");
-
-                        // previousPkg.pkg may be null: the package will be not be scanned if the
-                        // package manager knows there is a newer version on /data.
-                        // TODO[b/79435695]: Find a better way to keep track of the "static"
-                        // property for RROs instead of having to parse packages on /system
-                        AndroidPackage ppkg = previousPkg.pkg;
-                        if (ppkg == null) {
-                            try {
-                                final PackageParser pp = new PackageParser();
-                                // TODO(b/135203078): Do we really need to parse here? Maybe use
-                                //  a shortened path?
-                                ppkg = pp.parseParsedPackage(previousPkg.codePath,
-                                        parseFlags | PackageParser.PARSE_IS_SYSTEM_DIR,
-                                        false)
-                                        .hideAsFinal();
-                            } catch (PackageParserException e) {
-                                Slog.w(TAG, "failed to parse " + previousPkg.codePath, e);
-                            }
-                        }
-
-                        // Static overlays cannot be updated.
-                        if (ppkg != null && ppkg.isOverlayIsStatic()) {
+                        // This must be an update to a system overlay. Immutable overlays cannot be
+                        // upgraded.
+                        Objects.requireNonNull(mOverlayConfig,
+                                "Parsing non-system dir before overlay configs are initialized");
+                        if (!mOverlayConfig.isMutable(pkg.getPackageName())) {
                             throw new PackageManagerException("Overlay "
                                     + pkg.getPackageName()
                                     + " is static and cannot be upgraded.");
-                        // Non-static overlays cannot be converted to static overlays.
-                        } else if (pkg.isOverlayIsStatic()) {
-                            throw new PackageManagerException("Overlay "
-                                    + pkg.getPackageName()
-                                    + " cannot be upgraded into a static overlay.");
                         }
                     }
                 } else {
-                    // The overlay is a non-system overlay. Non-system overlays cannot be static.
-                    if (pkg.isOverlayIsStatic()) {
-                        throw new PackageManagerException("Overlay "
-                                + pkg.getPackageName()
-                                + " is static but not pre-installed.");
-                    }
-
                     // A non-preloaded overlay packages must have targetSdkVersion >= Q, or be
                     // signed with the platform certificate. Check this in increasing order of
                     // computational cost.
@@ -17980,14 +17921,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private static @Nullable SystemPartition resolveApexToSystemPartition(
+    private static @Nullable ScanPartition resolveApexToScanPartition(
             ApexManager.ActiveApexInfo apexInfo) {
         for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
-            SystemPartition sp = SYSTEM_PARTITIONS.get(i);
+            ScanPartition sp = SYSTEM_PARTITIONS.get(i);
             if (apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
                     sp.folder.getAbsolutePath())) {
-                return new SystemPartition(apexInfo.apexDirectory,
-                        sp.scanFlag | SCAN_AS_APK_IN_APEX, false /* hasOverlays */);
+                return new ScanPartition(apexInfo.apexDirectory, sp, SCAN_AS_APK_IN_APEX);
             }
         }
         return null;
@@ -18088,7 +18028,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 | PackageParser.PARSE_IS_SYSTEM_DIR;
         @ScanFlags int scanFlags = SCAN_AS_SYSTEM;
         for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
-            SystemPartition partition = mDirsToScanAsSystem.get(i);
+            ScanPartition partition = mDirsToScanAsSystem.get(i);
             if (partition.containsPath(codePathString)) {
                 scanFlags |= partition.scanFlag;
                 if (partition.containsPrivPath(codePathString)) {

@@ -289,6 +289,12 @@ public class ApkLiteParseUtils {
         boolean useEmbeddedDex = false;
         String configForSplit = null;
         String usesSplitName = null;
+        String targetPackage = null;
+        boolean overlayIsStatic = false;
+        int overlayPriority = 0;
+
+        String requiredSystemPropertyName = null;
+        String requiredSystemPropertyValue = null;
 
         for (int i = 0; i < attrs.getAttributeCount(); i++) {
             final String attr = attrs.getAttributeName(i);
@@ -365,6 +371,21 @@ public class ApkLiteParseUtils {
                             break;
                     }
                 }
+            } else if (PackageParser.TAG_OVERLAY.equals(parser.getName())) {
+                for (int i = 0; i < attrs.getAttributeCount(); ++i) {
+                    final String attr = attrs.getAttributeName(i);
+                    if ("requiredSystemPropertyName".equals(attr)) {
+                        requiredSystemPropertyName = attrs.getAttributeValue(i);
+                    } else if ("requiredSystemPropertyValue".equals(attr)) {
+                        requiredSystemPropertyValue = attrs.getAttributeValue(i);
+                    } else if ("targetPackage".equals(attr)) {
+                        targetPackage = attrs.getAttributeValue(i);;
+                    } else if ("isStatic".equals(attr)) {
+                        overlayIsStatic = attrs.getAttributeBooleanValue(i, false);
+                    } else if ("priority".equals(attr)) {
+                        overlayPriority = attrs.getAttributeIntValue(i, 0);
+                    }
+                }
             } else if (PackageParser.TAG_USES_SPLIT.equals(parser.getName())) {
                 if (usesSplitName != null) {
                     Slog.w(TAG, "Only one <uses-split> permitted. Ignoring others.");
@@ -391,11 +412,23 @@ public class ApkLiteParseUtils {
             }
         }
 
+        // Check to see if overlay should be excluded based on system property condition
+        if (!PackageParser.checkRequiredSystemProperty(requiredSystemPropertyName,
+                requiredSystemPropertyValue)) {
+            Slog.i(TAG, "Skipping target and overlay pair " + targetPackage + " and "
+                    + codePath + ": overlay ignored due to required system property: "
+                    + requiredSystemPropertyName + " with value: " + requiredSystemPropertyValue);
+            targetPackage = null;
+            overlayIsStatic = false;
+            overlayPriority = 0;
+        }
+
         return new PackageParser.ApkLite(codePath, packageSplit.first, packageSplit.second,
                 isFeatureSplit, configForSplit, usesSplitName, isSplitRequired, versionCode,
                 versionCodeMajor, revisionCode, installLocation, verifiers, signingDetails,
                 coreApp, debuggable, multiArch, use32bitAbi, useEmbeddedDex, extractNativeLibs,
-                isolatedSplits, minSdkVersion, targetSdkVersion);
+                isolatedSplits, targetPackage, overlayIsStatic, overlayPriority, minSdkVersion,
+                targetSdkVersion);
     }
 
     public static VerifierInfo parseVerifier(AttributeSet attrs) {
