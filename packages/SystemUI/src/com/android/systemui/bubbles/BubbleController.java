@@ -52,6 +52,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.ZenModeConfig;
 import android.util.ArraySet;
@@ -146,12 +147,14 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
     private BubbleIconFactory mBubbleIconFactory;
-    private int mMaxBubbles;
 
     // Tracks the id of the current (foreground) user.
     private int mCurrentUserId;
     // Saves notification keys of active bubbles when users are switched.
     private final SparseSetArray<String> mSavedBubbleKeysPerUser;
+
+    // Used when ranking updates occur and we check if things should bubble / unbubble
+    private NotificationListenerService.Ranking mTmpRanking;
 
     // Saves notification keys of user created "fake" bubbles so that we can allow notifications
     // like these to bubble by default. Doesn't persist across reboots, not a long-term solution.
@@ -338,7 +341,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         configurationController.addCallback(this /* configurationListener */);
 
-        mMaxBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_rendered);
         mBubbleData = data;
         mBubbleData.setListener(mBubbleDataListener);
         mBubbleData.setSuppressionChangedListener(new NotificationSuppressionChangedListener() {
@@ -939,9 +941,29 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
+    /**
+     * Called when NotificationListener has received adjusted notification rank and reapplied
+     * filtering and sorting. This is used to dismiss or create bubbles based on changes in
+     * permissions on the notification channel or the global setting.
+     *
+     * @param rankingMap the updated ranking map from NotificationListenerService
+     */
     private void onRankingUpdated(RankingMap rankingMap) {
-        // Forward to BubbleData to block any bubbles which should no longer be shown
-        mBubbleData.notificationRankingUpdated(rankingMap);
+        if (mTmpRanking == null) {
+            mTmpRanking = new NotificationListenerService.Ranking();
+        }
+        String[] orderedKeys = rankingMap.getOrderedKeys();
+        for (int i = 0; i < orderedKeys.length; i++) {
+            String key = orderedKeys[i];
+            NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(key);
+            rankingMap.getRanking(key, mTmpRanking);
+            if (mBubbleData.hasBubbleWithKey(key) && !mTmpRanking.canBubble()) {
+                mBubbleData.notificationEntryRemoved(entry, BubbleController.DISMISS_BLOCKED);
+            } else if (entry != null && mTmpRanking.isBubble()) {
+                entry.setFlagBubble(true);
+                onEntryUpdated(entry);
+            }
+        }
     }
 
     @SuppressWarnings("FieldCanBeLocal")

@@ -41,8 +41,6 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
-import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
-import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -204,6 +202,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private TestableNotificationManagerService mService;
     private INotificationManager mBinderService;
     private NotificationManagerInternal mInternalService;
+    private TestableBubbleChecker mTestableBubbleChecker;
+    private ShortcutHelper mShortcutHelper;
     @Mock
     private IPackageManager mPackageManager;
     @Mock
@@ -286,6 +286,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             super(context, logger, notificationInstanceIdSequence);
         }
 
+        RankingHelper getRankingHelper() {
+            return mRankingHelper;
+        }
+
         @Override
         protected boolean isCallingUidSystem() {
             countSystemChecks++;
@@ -336,6 +340,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         interface NotificationAssistantAccessGrantedCallback {
             void onGranted(ComponentName assistant, int userId, boolean granted);
+        }
+    }
+
+    private class TestableBubbleChecker extends BubbleExtractor.BubbleChecker {
+
+        TestableBubbleChecker(Context context, ShortcutHelper helper, RankingConfig config,
+                ActivityManager manager) {
+            super(context, helper, config, manager);
         }
 
         @Override
@@ -448,7 +460,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);
-        mService.setLauncherApps(mLauncherApps);
+
+        mShortcutHelper = mService.getShortcutHelper();
+        mShortcutHelper.setLauncherApps(mLauncherApps);
+
+        // Set the testable bubble extractor
+        RankingHelper rankingHelper = mService.getRankingHelper();
+        BubbleExtractor extractor = rankingHelper.findExtractor(BubbleExtractor.class);
+        mTestableBubbleChecker = new TestableBubbleChecker(mContext, mShortcutHelper,
+                mService.mPreferencesHelper, mActivityManager);
+        extractor.setBubbleChecker(mTestableBubbleChecker);
 
         // Tests call directly into the Binder.
         mBinderService = mService.getBinderService();
@@ -5710,6 +5731,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testOnBubbleNotificationSuppressionChanged() throws Exception {
+        // Bubbles are allowed!
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
+
         // Bubble notification
         NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel, "tag");
 
@@ -6111,8 +6135,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertTrue(notif.isBubbleNotification());
 
         // Test: Remove the shortcut
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(null);
         launcherAppsCallback.getValue().onShortcutsChanged(PKG, Collections.emptyList(),
                 new UserHandle(mUid));
+        waitForIdle();
 
         // Verify:
 
@@ -6123,6 +6149,58 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification notif2 = mService.getNotificationRecord(
                 nr.getSbn().getKey()).getNotification();
         assertFalse(notif2.isBubbleNotification());
+    }
+
+
+    @Test
+    public void testNotificationBubbles_shortcut_stopListeningWhenNotifRemoved()
+            throws RemoteException {
+        // Bubbles are allowed!
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
+
+        ArgumentCaptor<LauncherApps.Callback> launcherAppsCallback =
+                ArgumentCaptor.forClass(LauncherApps.Callback.class);
+
+        // Messaging notification with shortcut info
+        Notification.BubbleMetadata metadata =
+                getBubbleMetadataBuilder().createShortcutBubble("someshortcutId").build();
+        Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
+                null /* groupKey */, false /* isSummary */);
+        nb.setBubbleMetadata(metadata);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "tag", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        // Pretend the shortcut exists
+        List<ShortcutInfo> shortcutInfos = new ArrayList<>();
+        ShortcutInfo info = mock(ShortcutInfo.class);
+        when(info.isLongLived()).thenReturn(true);
+        shortcutInfos.add(info);
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
+
+        // Test: Send the bubble notification
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // Verify:
+
+        // Make sure we register the callback for shortcut changes
+        verify(mLauncherApps, times(1)).registerCallback(launcherAppsCallback.capture(), any());
+
+        // yes allowed, yes messaging w/shortcut, yes bubble
+        Notification notif = mService.getNotificationRecord(nr.getSbn().getKey()).getNotification();
+        assertTrue(notif.isBubbleNotification());
+
+        // Test: Remove the notification
+        mBinderService.cancelNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // Verify:
+
+        // Make sure callback is unregistered
+        verify(mLauncherApps, times(1)).unregisterCallback(launcherAppsCallback.getValue());
     }
 
     @Test
