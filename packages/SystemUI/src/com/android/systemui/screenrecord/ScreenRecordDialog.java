@@ -34,6 +34,7 @@ import javax.inject.Inject;
  */
 public class ScreenRecordDialog extends Activity {
     private static final long DELAY_MS = 3000;
+    private static final long INTERVAL_MS = 1000;
 
     private final RecordingController mController;
     private Switch mAudioSwitch;
@@ -83,6 +84,6 @@ public class ScreenRecordDialog extends Activity {
                 RecordingService.REQUEST_CODE,
                 RecordingService.getStopIntent(this),
                 PendingIntent.FLAG_UPDATE_CURRENT);
-        mController.startCountdown(DELAY_MS, startIntent, stopIntent);
+        mController.startCountdown(DELAY_MS, INTERVAL_MS, startIntent, stopIntent);
     }
 }

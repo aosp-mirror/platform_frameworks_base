@@ -108,7 +108,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         Log.d(TAG, "Starting countdown");
         // Close QS, otherwise the permission dialog appears beneath it
         getHost().collapsePanels();
-        mController.launchRecordPrompt(this);
+        mController.launchRecordPrompt();
     }
 
     private void cancelCountdown() {
@@ -125,6 +125,11 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         @Override
         public void onCountdown(long millisUntilFinished) {
             mMillisUntilFinished = millisUntilFinished;
+            refreshState();
+        }
+
+        @Override
+        public void onCountdownEnd() {
             refreshState();
         }
 

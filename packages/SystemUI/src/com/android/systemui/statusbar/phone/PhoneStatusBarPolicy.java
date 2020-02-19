@@ -678,6 +678,12 @@ public class PhoneStatusBarPolicy
     }
 
     @Override
+    public void onCountdownEnd() {
+        if (DEBUG) Log.d(TAG, "screenrecord: hiding icon during countdown");
+        mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
+    }
+
+    @Override
     public void onRecordingStart() {
         if (DEBUG) Log.d(TAG, "screenrecord: showing icon");
         mIconController.setIcon(mSlotScreenRecord,
@@ -687,7 +693,7 @@ public class PhoneStatusBarPolicy
 
     @Override
     public void onRecordingEnd() {
-        // Ensure this is on the main thread, since it could be called during countdown
+        // Ensure this is on the main thread
         if (DEBUG) Log.d(TAG, "screenrecord: hiding icon");
         mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
     }
