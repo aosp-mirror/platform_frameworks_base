@@ -163,7 +163,10 @@ using android::hardware::gnss::V2_0::ElapsedRealtimeFlags;
 using MeasurementCorrections_V1_0 = android::hardware::gnss::measurement_corrections::V1_0::MeasurementCorrections;
 using MeasurementCorrections_V1_1 = android::hardware::gnss::measurement_corrections::V1_1::MeasurementCorrections;
 
-using android::hardware::gnss::measurement_corrections::V1_0::SingleSatCorrection;
+using SingleSatCorrection_V1_0 =
+        android::hardware::gnss::measurement_corrections::V1_0::SingleSatCorrection;
+using SingleSatCorrection_V1_1 =
+        android::hardware::gnss::measurement_corrections::V1_1::SingleSatCorrection;
 using android::hardware::gnss::measurement_corrections::V1_0::ReflectingPlane;
 
 using android::hidl::base::V1_0::IBase;
@@ -3105,6 +3108,91 @@ static jboolean
     return JNI_FALSE;
 }
 
+static SingleSatCorrection_V1_0 getSingleSatCorrection_1_0_withoutConstellation(
+        JNIEnv* env, jobject singleSatCorrectionObj) {
+    jint correctionFlags = env->CallIntMethod(singleSatCorrectionObj, method_correctionSatFlags);
+    jint satId = env->CallIntMethod(singleSatCorrectionObj, method_correctionSatId);
+    jfloat carrierFreqHz =
+            env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatCarrierFreq);
+    jfloat probSatIsLos =
+            env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatIsLosProb);
+    jfloat eplMeters = env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEpl);
+    jfloat eplUncMeters = env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEplUnc);
+    uint16_t corrFlags = static_cast<uint16_t>(correctionFlags);
+    jobject reflectingPlaneObj;
+    bool has_ref_plane = (corrFlags & GnssSingleSatCorrectionFlags::HAS_REFLECTING_PLANE) != 0;
+    if (has_ref_plane) {
+        reflectingPlaneObj =
+                env->CallObjectMethod(singleSatCorrectionObj, method_correctionSatRefPlane);
+    }
+
+    ReflectingPlane reflectingPlane;
+    if (has_ref_plane) {
+        jdouble latitudeDegreesRefPlane =
+                env->CallDoubleMethod(reflectingPlaneObj, method_correctionPlaneLatDeg);
+        jdouble longitudeDegreesRefPlane =
+                env->CallDoubleMethod(reflectingPlaneObj, method_correctionPlaneLngDeg);
+        jdouble altitudeDegreesRefPlane =
+                env->CallDoubleMethod(reflectingPlaneObj, method_correctionPlaneAltDeg);
+        jdouble azimuthDegreeRefPlane =
+                env->CallDoubleMethod(reflectingPlaneObj, method_correctionPlaneAzimDeg);
+        reflectingPlane = {
+                .latitudeDegrees = latitudeDegreesRefPlane,
+                .longitudeDegrees = longitudeDegreesRefPlane,
+                .altitudeMeters = altitudeDegreesRefPlane,
+                .azimuthDegrees = azimuthDegreeRefPlane,
+        };
+    }
+
+    SingleSatCorrection_V1_0 singleSatCorrection = {
+            .singleSatCorrectionFlags = corrFlags,
+            .svid = static_cast<uint16_t>(satId),
+            .carrierFrequencyHz = carrierFreqHz,
+            .probSatIsLos = probSatIsLos,
+            .excessPathLengthMeters = eplMeters,
+            .excessPathLengthUncertaintyMeters = eplUncMeters,
+            .reflectingPlane = reflectingPlane,
+    };
+
+    return singleSatCorrection;
+}
+
+static void getSingleSatCorrectionList_1_1(JNIEnv* env, jobject singleSatCorrectionList,
+                                           hidl_vec<SingleSatCorrection_V1_1>& list) {
+    for (uint16_t i = 0; i < list.size(); ++i) {
+        jobject singleSatCorrectionObj =
+                env->CallObjectMethod(singleSatCorrectionList, method_correctionListGet, i);
+
+        SingleSatCorrection_V1_0 singleSatCorrection_1_0 =
+                getSingleSatCorrection_1_0_withoutConstellation(env, singleSatCorrectionObj);
+
+        jint constType = env->CallIntMethod(singleSatCorrectionObj, method_correctionSatConstType);
+
+        SingleSatCorrection_V1_1 singleSatCorrection_1_1 = {
+                .v1_0 = singleSatCorrection_1_0,
+                .constellation = static_cast<GnssConstellationType_V2_0>(constType),
+        };
+
+        list[i] = singleSatCorrection_1_1;
+    }
+}
+
+static void getSingleSatCorrectionList_1_0(JNIEnv* env, jobject singleSatCorrectionList,
+                                           hidl_vec<SingleSatCorrection_V1_0>& list) {
+    for (uint16_t i = 0; i < list.size(); ++i) {
+        jobject singleSatCorrectionObj =
+                env->CallObjectMethod(singleSatCorrectionList, method_correctionListGet, i);
+
+        SingleSatCorrection_V1_0 singleSatCorrection =
+                getSingleSatCorrection_1_0_withoutConstellation(env, singleSatCorrectionObj);
+
+        jint constType = env->CallIntMethod(singleSatCorrectionObj, method_correctionSatConstType);
+
+        singleSatCorrection.constellation = static_cast<GnssConstellationType_V1_0>(constType),
+
+        list[i] = singleSatCorrection;
+    }
+}
 static jboolean
     android_location_GnssMeasurementCorrectionsProvider_inject_gnss_measurement_corrections(
         JNIEnv* env,
@@ -3127,64 +3215,6 @@ static jboolean
         ALOGI("Empty correction list injected....Returning with no HAL injection");
         return JNI_TRUE;
     }
-    hidl_vec<SingleSatCorrection> list(len);
-
-    for (uint16_t i = 0; i < len; ++i) {
-        jobject singleSatCorrectionObj = env->CallObjectMethod(
-            singleSatCorrectionList, method_correctionListGet, i);
-
-        jint correctionFlags =
-            env->CallIntMethod(singleSatCorrectionObj, method_correctionSatFlags);
-        jint constType = env->CallIntMethod(singleSatCorrectionObj,
-            method_correctionSatConstType);
-        jint satId =
-            env->CallIntMethod(singleSatCorrectionObj, method_correctionSatId);
-        jfloat carrierFreqHz = env->CallFloatMethod(
-            singleSatCorrectionObj, method_correctionSatCarrierFreq);
-        jfloat probSatIsLos = env->CallFloatMethod(singleSatCorrectionObj,
-            method_correctionSatIsLosProb);
-        jfloat eplMeters =
-            env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEpl);
-        jfloat eplUncMeters = env->CallFloatMethod(singleSatCorrectionObj,
-            method_correctionSatEplUnc);
-        uint16_t corrFlags = static_cast<uint16_t>(correctionFlags);
-        jobject reflectingPlaneObj;
-        bool has_ref_plane = (corrFlags & GnssSingleSatCorrectionFlags::HAS_REFLECTING_PLANE) != 0;
-        if (has_ref_plane) {
-            reflectingPlaneObj = env->CallObjectMethod(
-                singleSatCorrectionObj, method_correctionSatRefPlane);
-        }
-
-        ReflectingPlane reflectingPlane;
-        if (has_ref_plane) {
-            jdouble latitudeDegreesRefPlane = env->CallDoubleMethod(
-                reflectingPlaneObj, method_correctionPlaneLatDeg);
-            jdouble longitudeDegreesRefPlane = env->CallDoubleMethod(
-                reflectingPlaneObj, method_correctionPlaneLngDeg);
-            jdouble altitudeDegreesRefPlane = env->CallDoubleMethod(
-                reflectingPlaneObj, method_correctionPlaneAltDeg);
-            jdouble azimuthDegreeRefPlane = env->CallDoubleMethod(
-                reflectingPlaneObj, method_correctionPlaneAzimDeg);
-            reflectingPlane = {
-                .latitudeDegrees = latitudeDegreesRefPlane,
-                .longitudeDegrees = longitudeDegreesRefPlane,
-                .altitudeMeters = altitudeDegreesRefPlane,
-                .azimuthDegrees = azimuthDegreeRefPlane,
-            };
-        }
-
-        SingleSatCorrection singleSatCorrection = {
-            .singleSatCorrectionFlags = corrFlags,
-            .constellation = static_cast<GnssConstellationType_V1_0>(constType),
-            .svid = static_cast<uint16_t>(satId),
-            .carrierFrequencyHz = carrierFreqHz,
-            .probSatIsLos = probSatIsLos,
-            .excessPathLengthMeters = eplMeters,
-            .excessPathLengthUncertaintyMeters = eplUncMeters,
-            .reflectingPlane = reflectingPlane,
-        };
-        list[i] = singleSatCorrection;
-    }
 
     jdouble latitudeDegreesCorr = env->CallDoubleMethod(
         correctionsObj, method_correctionsGetLatitudeDegrees);
@@ -3206,7 +3236,6 @@ static jboolean
         .horizontalPositionUncertaintyMeters = horizontalPositionUncertaintyMeters,
         .verticalPositionUncertaintyMeters = verticalPositionUncertaintyMeters,
         .toaGpsNanosecondsOfWeek = static_cast<uint64_t>(toaGpsNanosOfWeek),
-        .satCorrections = list,
     };
 
     if (gnssCorrectionsIface_V1_1 != nullptr) {
@@ -3218,16 +3247,24 @@ static jboolean
         jfloat environmentBearingUncertaintyDegreesCorr = env->CallFloatMethod(
             correctionsObj, method_correctionsGetEnvironmentBearingUncertaintyDegrees);
 
+        hidl_vec<SingleSatCorrection_V1_1> list(len);
+        getSingleSatCorrectionList_1_1(env, singleSatCorrectionList, list);
+
         MeasurementCorrections_V1_1 measurementCorrections_1_1 = {
-            .v1_0 = measurementCorrections_1_0,
-            .hasEnvironmentBearing = static_cast<bool>(hasEnvironmentBearingCorr),
-            .environmentBearingDegrees = environmentBearingDegreesCorr,
-            .environmentBearingUncertaintyDegrees = environmentBearingUncertaintyDegreesCorr,
+                .v1_0 = measurementCorrections_1_0,
+                .hasEnvironmentBearing = static_cast<bool>(hasEnvironmentBearingCorr),
+                .environmentBearingDegrees = environmentBearingDegreesCorr,
+                .environmentBearingUncertaintyDegrees = environmentBearingUncertaintyDegreesCorr,
+                .satCorrections = list,
         };
 
         auto result = gnssCorrectionsIface_V1_1->setCorrections_1_1(measurementCorrections_1_1);
         return checkHidlReturn(result, "IMeasurementCorrections 1.1 setCorrections() failed.");
     }
+
+    hidl_vec<SingleSatCorrection_V1_0> list(len);
+    getSingleSatCorrectionList_1_0(env, singleSatCorrectionList, list);
+    measurementCorrections_1_0.satCorrections = list;
 
     auto result = gnssCorrectionsIface_V1_0->setCorrections(measurementCorrections_1_0);
     return checkHidlReturn(result, "IMeasurementCorrections 1.0 setCorrections() failed.");
