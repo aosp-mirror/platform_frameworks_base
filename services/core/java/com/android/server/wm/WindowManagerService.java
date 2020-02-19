@@ -912,7 +912,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void setShadowRenderer() {
         mRenderShadowsInCompositor = Settings.Global.getInt(mContext.getContentResolver(),
-                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 0) != 0;
+                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
     }
 
     PowerManager mPowerManager;
