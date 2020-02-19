@@ -788,9 +788,16 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         final boolean sizeChanged = mSurfaceWidth != myWidth || mSurfaceHeight != myHeight;
         final boolean windowVisibleChanged = mWindowVisibility != mLastWindowVisibility;
         boolean redrawNeeded = false;
+        getLocationInSurface(mLocation);
+        final boolean positionChanged = mWindowSpaceLeft != mLocation[0]
+            || mWindowSpaceTop != mLocation[1];
+        final boolean layoutSizeChanged = getWidth() != mScreenRect.width()
+            || getHeight() != mScreenRect.height();
 
-        if (creating || formatChanged || sizeChanged || visibleChanged || (mUseAlpha
-                && alphaChanged) || windowVisibleChanged) {
+
+        if (creating || formatChanged || sizeChanged || visibleChanged ||
+                (mUseAlpha && alphaChanged) || windowVisibleChanged ||
+                positionChanged || layoutSizeChanged) {
             getLocationInWindow(mLocation);
 
             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
@@ -922,6 +929,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             mTmpTransaction.setWindowCrop(mSurfaceControl, mSurfaceWidth,
                                     mSurfaceHeight);
                         }
+                    } else if ((layoutSizeChanged || positionChanged) &&
+                            WindowManagerGlobal.useBLAST()) {
+                        viewRoot.setUseBLASTSyncTransaction();
                     }
                     mTmpTransaction.setCornerRadius(mSurfaceControl, mCornerRadius);
                     if (sizeChanged && !creating) {
@@ -1058,11 +1068,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         } else {
             // Calculate the window position in case RT loses the window
             // and we need to fallback to a UI-thread driven position update
-            getLocationInSurface(mLocation);
-            final boolean positionChanged = mWindowSpaceLeft != mLocation[0]
-                    || mWindowSpaceTop != mLocation[1];
-            final boolean layoutSizeChanged = getWidth() != mScreenRect.width()
-                    || getHeight() != mScreenRect.height();
             if (positionChanged || layoutSizeChanged) { // Only the position has changed
                 mWindowSpaceLeft = mLocation[0];
                 mWindowSpaceTop = mLocation[1];
@@ -1537,21 +1542,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         SurfaceControl viewRoot = getViewRootImpl().getSurfaceControl();
         t.setRelativeLayer(mBackgroundControl, viewRoot, Integer.MIN_VALUE);
         t.setRelativeLayer(mSurfaceControl, viewRoot, mSubLayer);
-    }
-
-    /**
-     * @hide
-     * Note: Base class method is @UnsupportedAppUsage
-     */
-    @Override
-    public void invalidate(boolean invalidateCache) {
-        super.invalidate(invalidateCache);
-        if (!WindowManagerGlobal.useBLAST()) {
-            return;
-        }
-        final ViewRootImpl viewRoot = getViewRootImpl();
-        if (viewRoot == null) return;
-        viewRoot.setUseBLASTSyncTransaction();
     }
 
     /**
