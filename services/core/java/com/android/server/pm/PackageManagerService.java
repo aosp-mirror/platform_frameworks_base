@@ -10894,7 +10894,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     parsedPackage.getVersionCode(), parsedPackage.getFlags(),
                     parsedPackage.getPrivateFlags(), user, true /*allowInstall*/, instantApp,
                     virtualPreload, UserManagerService.getInstance(), usesStaticLibraries,
-                    parsedPackage.getUsesStaticLibrariesVersions());
+                    parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups());
         } else {
             // make a deep copy to avoid modifying any existing system state.
             pkgSetting = new PackageSetting(pkgSetting);
@@ -10911,7 +10911,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     parsedPackage.getPrimaryCpuAbi(), parsedPackage.getSecondaryCpuAbi(),
                     parsedPackage.getFlags(), parsedPackage.getPrivateFlags(),
                     UserManagerService.getInstance(),
-                    usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions());
+                    usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
+                    parsedPackage.getMimeGroups());
         }
         if (createNewPackage && originalPkgSetting != null) {
             // This is the initial transition from the original package, so,
@@ -18378,15 +18379,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
             clearDefaultBrowserIfNeededForUser(ps.name, nextUserId);
             removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId, ps.appId);
-            final SparseBooleanArray changedUsers = new SparseBooleanArray();
-            clearPackagePreferredActivitiesLPw(ps.name, changedUsers, nextUserId);
-            if (changedUsers.size() > 0) {
-                updateDefaultHomeNotLocked(changedUsers);
-                postPreferredActivityChangedBroadcast(nextUserId);
-                synchronized (mLock) {
-                    scheduleWritePackageRestrictionsLocked(nextUserId);
-                }
-            }
+            clearPackagePreferredActivities(ps.name, nextUserId);
             mPermissionManager.resetRuntimePermissions(pkg, nextUserId);
         }
 
@@ -18875,13 +18868,19 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         int callingUserId = UserHandle.getCallingUserId();
+        clearPackagePreferredActivities(packageName, callingUserId);
+    }
+
+    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    private void clearPackagePreferredActivities(String packageName, int userId) {
         final SparseBooleanArray changedUsers = new SparseBooleanArray();
-        clearPackagePreferredActivitiesLPw(packageName, changedUsers, callingUserId);
+
+        clearPackagePreferredActivitiesLPw(packageName, changedUsers, userId);
         if (changedUsers.size() > 0) {
             updateDefaultHomeNotLocked(changedUsers);
-            postPreferredActivityChangedBroadcast(callingUserId);
+            postPreferredActivityChangedBroadcast(userId);
             synchronized (mLock) {
-                scheduleWritePackageRestrictionsLocked(callingUserId);
+                scheduleWritePackageRestrictionsLocked(userId);
             }
         }
     }
@@ -23883,6 +23882,11 @@ public class PackageManagerService extends IPackageManager.Stub
             msg.obj = verificationResult;
             mHandler.sendMessage(msg);
         }
+
+        @Override
+        public List<String> getMimeGroup(String packageName, String mimeGroup) {
+            return PackageManagerService.this.getMimeGroup(packageName, mimeGroup);
+        }
     }
 
     @GuardedBy("mLock")
@@ -24316,6 +24320,38 @@ public class PackageManagerService extends IPackageManager.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private void applyMimeGroupChanges(String packageName, String mimeGroup) {
+        if (mComponentResolver.updateMimeGroup(packageName, mimeGroup)) {
+            clearPackagePreferredActivities(packageName, UserHandle.USER_ALL);
+        }
+
+        mPmInternal.writeSettings(false);
+    }
+
+    @Override
+    public void setMimeGroup(String packageName, String mimeGroup, List<String> mimeTypes) {
+        boolean changed = mSettings.mPackages.get(packageName)
+                .setMimeGroup(mimeGroup, mimeTypes);
+
+        if (changed) {
+            applyMimeGroupChanges(packageName, mimeGroup);
+        }
+    }
+
+    @Override
+    public void clearMimeGroup(String packageName, String mimeGroup) {
+        boolean changed = mSettings.mPackages.get(packageName).clearMimeGroup(mimeGroup);
+
+        if (changed) {
+            applyMimeGroupChanges(packageName, mimeGroup);
+        }
+    }
+
+    @Override
+    public List<String> getMimeGroup(String packageName, String mimeGroup) {
+        return mSettings.mPackages.get(packageName).getMimeGroup(mimeGroup);
     }
 
     static class ActiveInstallSession {

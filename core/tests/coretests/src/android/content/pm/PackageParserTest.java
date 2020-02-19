@@ -31,6 +31,7 @@ import android.content.pm.parsing.ParsedPackage;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -421,17 +422,7 @@ public class PackageParserTest {
                 "com.android.frameworks.coretests.install_complete_package_info.test_permission",
                 PermissionInfo.PROTECTION_NORMAL, p.getPermissions().get(0));
 
-        // Hidden "app details" activity is added to every package.
-        boolean foundAppDetailsActivity = false;
-        for (int i = 0; i < ArrayUtils.size(p.getActivities()); i++) {
-            if (p.getActivities().get(i).className.equals(
-                    PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME)) {
-                foundAppDetailsActivity = true;
-                p.getActivities().remove(i);
-                break;
-            }
-        }
-        assertTrue("Did not find app details activity", foundAppDetailsActivity);
+        findAndRemoveAppDetailsActivity(p);
 
         assertOneComponentOfEachType("com.android.frameworks.coretests.Test%s", p);
 
@@ -450,6 +441,53 @@ public class PackageParserTest {
         assertMetadata(p.getProviders().get(0).getMetaData(),
                 "key1", "value1",
                 "key2", "this_is_provider");
+
+    }
+
+    private void findAndRemoveAppDetailsActivity(ParsedPackage p) {
+        // Hidden "app details" activity is added to every package.
+        boolean foundAppDetailsActivity = false;
+        for (int i = 0; i < ArrayUtils.size(p.getActivities()); i++) {
+            if (p.getActivities().get(i).className.equals(
+                    PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME)) {
+                foundAppDetailsActivity = true;
+                p.getActivities().remove(i);
+                break;
+            }
+        }
+        assertTrue("Did not find app details activity", foundAppDetailsActivity);
+    }
+
+    @Test
+    public void testPackageWithIntentFilters_no_cache() throws Exception {
+        checkPackageWithIntentFilters(p -> p);
+    }
+
+    @Test
+    public void testPackageWithIntentFilters_cached() throws Exception {
+        checkPackageWithIntentFilters(p ->
+                PackageParser.fromCacheEntryStatic(PackageParser.toCacheEntryStatic(p)));
+    }
+
+    private void checkPackageWithIntentFilters(
+            Function<ParsedPackage, ParsedPackage> converter) throws Exception {
+        ParsedPackage p = parsePackage(
+                "install_intent_filters.apk", R.raw.install_intent_filters,
+                converter);
+        String packageName = "com.android.frameworks.coretests.install_intent_filters";
+
+        assertEquals(packageName, p.getPackageName());
+
+        findAndRemoveAppDetailsActivity(p);
+
+        Log.e("ParserTest", "" + p.getActivities());
+        assertEquals("Expected exactly one activity", 1, p.getActivities().size());
+        assertEquals("Expected exactly one intent filter",
+                1, p.getActivities().get(0).intents.size());
+        assertEquals("Expected exactly one mime group in intent filter",
+                1, p.getActivities().get(0).intents.get(0).countMimeGroups());
+        assertTrue("Did not find expected mime group 'mime_group_1'",
+                p.getActivities().get(0).intents.get(0).hasMimeGroup("mime_group_1"));
     }
 
     @Test

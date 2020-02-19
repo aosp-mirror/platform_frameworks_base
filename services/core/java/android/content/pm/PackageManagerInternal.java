@@ -945,4 +945,9 @@ public abstract class PackageManagerInternal {
      */
     public abstract void setIntegrityVerificationResult(int verificationId,
             @IntegrityVerificationResult int verificationResult);
+
+    /**
+     * Returns MIME types contained in {@code mimeGroup} from {@code packageName} package
+     */
+    public abstract List<String> getMimeGroup(String packageName, String mimeGroup);
 }

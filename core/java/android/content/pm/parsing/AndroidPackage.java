@@ -206,6 +206,9 @@ public interface AndroidPackage extends Parcelable {
 
     Bundle getMetaData(); // TODO(b/135203078): Make all the Bundles immutable
 
+    @Nullable
+    Set<String> getMimeGroups();
+
     float getMinAspectRatio();
 
     int getMinSdkVersion();

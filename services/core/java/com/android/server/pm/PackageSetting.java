@@ -16,18 +16,25 @@
 
 package com.android.server.pm;
 
+import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ParsedPackage;
 import android.service.pm.PackageProto;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.server.pm.permission.PermissionsState;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Settings data for a particular package we know about.
@@ -50,17 +57,26 @@ public final class PackageSetting extends PackageSettingBase implements
      */
     private int sharedUserId;
 
+    /**
+     *  Maps mime group name to the set of Mime types in a group. Mime groups declared
+     *  by app are populated with empty sets at construction.
+     *  Mime groups can not be created/removed at runtime, thus keys in this map should not change
+     */
+    @Nullable
+    Map<String, ArraySet<String>> mimeGroups;
+
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
             long pVersionCode, int pkgFlags, int privateFlags,
             int sharedUserId, String[] usesStaticLibraries,
-            long[] usesStaticLibrariesVersions) {
+            long[] usesStaticLibrariesVersions, Map<String, ArraySet<String>> mimeGroups) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
                 pVersionCode, pkgFlags, privateFlags,
                 usesStaticLibraries, usesStaticLibrariesVersions);
         this.sharedUserId = sharedUserId;
+        copyMimeGroups(mimeGroups);
     }
 
     /**
@@ -110,6 +126,53 @@ public final class PackageSetting extends PackageSettingBase implements
         pkg = orig.pkg;
         sharedUser = orig.sharedUser;
         sharedUserId = orig.sharedUserId;
+        copyMimeGroups(orig.mimeGroups);
+    }
+
+    private void copyMimeGroups(@Nullable Map<String, ArraySet<String>> newMimeGroups) {
+        if (newMimeGroups == null) {
+            mimeGroups = null;
+            return;
+        }
+
+        mimeGroups = new ArrayMap<>(newMimeGroups.size());
+        for (String mimeGroup : newMimeGroups.keySet()) {
+            ArraySet<String> mimeTypes = newMimeGroups.get(mimeGroup);
+
+            if (mimeTypes != null) {
+                mimeGroups.put(mimeGroup, new ArraySet<>(mimeTypes));
+            } else {
+                mimeGroups.put(mimeGroup, new ArraySet<>());
+            }
+        }
+    }
+
+    /**
+     * Updates declared MIME groups, removing no longer declared groups
+     * and keeping previous state of MIME groups
+     */
+    void updateMimeGroups(@Nullable Set<String> newMimeGroupNames) {
+        if (newMimeGroupNames == null) {
+            mimeGroups = null;
+            return;
+        }
+
+        if (mimeGroups == null) {
+            // set mimeGroups to empty map to avoid repeated null-checks in the next loop
+            mimeGroups = Collections.emptyMap();
+        }
+
+        ArrayMap<String, ArraySet<String>> updatedMimeGroups =
+                new ArrayMap<>(newMimeGroupNames.size());
+
+        for (String mimeGroup : newMimeGroupNames) {
+            if (mimeGroups.containsKey(mimeGroup)) {
+                updatedMimeGroups.put(mimeGroup, mimeGroups.get(mimeGroup));
+            } else {
+                updatedMimeGroups.put(mimeGroup, new ArraySet<>());
+            }
+        }
+        mimeGroups = updatedMimeGroups;
     }
 
     @Override
@@ -176,6 +239,41 @@ public final class PackageSetting extends PackageSettingBase implements
         return true;
     }
 
+    public boolean setMimeGroup(String mimeGroup, List<String> mimeTypes) {
+        ArraySet<String> oldMimeTypes = getMimeGroupInternal(mimeGroup);
+        if (oldMimeTypes == null) {
+            return false;
+        }
+
+        ArraySet<String> newMimeTypes = new ArraySet<>(mimeTypes);
+        boolean hasChanges = !newMimeTypes.equals(oldMimeTypes);
+        mimeGroups.put(mimeGroup, newMimeTypes);
+        return hasChanges;
+    }
+
+    public boolean clearMimeGroup(String mimeGroup) {
+        ArraySet<String> mimeTypes = getMimeGroupInternal(mimeGroup);
+
+        if (mimeTypes == null || mimeTypes.isEmpty()) {
+            return false;
+        }
+
+        mimeTypes.clear();
+        return true;
+    }
+
+    public List<String> getMimeGroup(String mimeGroup) {
+        ArraySet<String> mimeTypes = getMimeGroupInternal(mimeGroup);
+        if (mimeTypes == null) {
+            return null;
+        }
+        return new ArrayList<>(mimeTypes);
+    }
+
+    private ArraySet<String> getMimeGroupInternal(String mimeGroup) {
+        return mimeGroups != null ? mimeGroups.get(mimeGroup) : null;
+    }
+
     public void dumpDebug(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {
         final long packageToken = proto.start(fieldId);
         proto.write(PackageProto.NAME, (realName != null ? realName : name));
@@ -221,6 +319,9 @@ public final class PackageSetting extends PackageSettingBase implements
         pkg = other.pkg;
         sharedUserId = other.sharedUserId;
         sharedUser = other.sharedUser;
+
+        Set<String> mimeGroupNames = other.mimeGroups != null ? other.mimeGroups.keySet() : null;
+        updateMimeGroups(mimeGroupNames);
     }
 
     // TODO(b/135203078): Move to constructor

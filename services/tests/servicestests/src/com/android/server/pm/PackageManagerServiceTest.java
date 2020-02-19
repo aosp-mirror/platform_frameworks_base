@@ -88,7 +88,7 @@ public class PackageManagerServiceTest {
                 new File("resourcePath"), "legacyNativeLibraryPathString",
                 "primaryCpuAbiString", "secondaryCpuAbiString",
                 "cpuAbiOverrideString", 0, 0, 0, 0,
-                null, null);
+                null, null, null);
         pri.populateUsers(new int[] {
                 1, 2, 3, 4, 5
         }, setting);
