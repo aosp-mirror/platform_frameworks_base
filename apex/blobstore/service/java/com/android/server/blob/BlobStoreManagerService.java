@@ -485,6 +485,9 @@ public class BlobStoreManagerService extends SystemService {
         if (sessionsIndexFile == null) {
             Slog.wtf(TAG, "Error creating sessions index file");
             return;
+        } else if (!sessionsIndexFile.exists()) {
+            Slog.w(TAG, "Sessions index file not available: " + sessionsIndexFile.getBaseFile());
+            return;
         }
 
         mSessions.clear();
@@ -573,6 +576,9 @@ public class BlobStoreManagerService extends SystemService {
         final AtomicFile blobsIndexFile = prepareBlobsIndexFile();
         if (blobsIndexFile == null) {
             Slog.wtf(TAG, "Error creating blobs index file");
+            return;
+        } else if (!blobsIndexFile.exists()) {
+            Slog.w(TAG, "Blobs index file not available: " + blobsIndexFile.getBaseFile());
             return;
         }
 
