@@ -43,6 +43,8 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
 
+import java.util.concurrent.Executor;
+
 import javax.inject.Singleton;
 
 import dagger.Lazy;
@@ -88,14 +90,16 @@ public interface StatusBarDependenciesModule {
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
-            KeyguardBypassController keyguardBypassController) {
+            KeyguardBypassController keyguardBypassController,
+            @Main Executor mainExecutor) {
         return new NotificationMediaManager(
                 context,
                 statusBarLazy,
                 notificationShadeWindowController,
                 notificationEntryManager,
                 mediaArtworkProcessor,
-                keyguardBypassController);
+                keyguardBypassController,
+                mainExecutor);
     }
 
     /** */
