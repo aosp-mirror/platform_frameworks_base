@@ -175,6 +175,14 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone">
             </TabWidget>
+            <View
+                android:id="@+id/resolver_tab_divider"
+                android:visibility="gone"
+                android:layout_alwaysShow="true"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/colorBackgroundFloating"
+                android:foreground="?attr/dividerVertical" />
             <FrameLayout
                 android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"
@@ -183,10 +191,7 @@
                     android:id="@+id/profile_pager"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:dividerHeight="1dp"
-                    android:divider="?attr/dividerVertical"
-                    android:footerDividersEnabled="false"
-                    android:headerDividersEnabled="false"/>
+                    android:minHeight="@dimen/resolver_empty_state_height" />
             </FrameLayout>
         </LinearLayout>
     </TabHost>

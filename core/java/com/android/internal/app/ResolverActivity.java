@@ -1566,6 +1566,7 @@ public class ResolverActivity extends Activity implements
         viewPager.setVisibility(View.VISIBLE);
         tabHost.setCurrentTab(mMultiProfilePagerAdapter.getCurrentPage());
         mMultiProfilePagerAdapter.setOnProfileSelectedListener(tabHost::setCurrentTab);
+        findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
     }
 
     private void resetTabsHeaderStyle(TabWidget tabWidget) {

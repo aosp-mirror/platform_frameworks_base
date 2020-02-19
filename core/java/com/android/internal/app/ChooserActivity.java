@@ -3100,7 +3100,7 @@ public class ChooserActivity extends ResolverActivity implements
             final ViewGroup viewGroup = (ViewGroup) holder.itemView;
             int start = getListPosition(position);
             int startType = getRowType(start);
-            if (viewGroup.getForeground() == null) {
+            if (viewGroup.getForeground() == null && position > 0) {
                 viewGroup.setForeground(
                         getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
             }
