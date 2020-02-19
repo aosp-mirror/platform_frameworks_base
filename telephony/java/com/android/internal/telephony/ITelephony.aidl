@@ -1624,16 +1624,6 @@ interface ITelephony {
     void carrierActionResetAll(int subId);
 
     /**
-     * Get aggregated video call data usage since boot.
-     * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
-     *
-     * @param perUidStats True if requesting data usage per uid, otherwise overall usage.
-     * @return Snapshot of video call data usage
-     * @hide
-     */
-    NetworkStats getVtDataUsage(int subId, boolean perUidStats);
-
-    /**
      * Gets the voice call forwarding info {@link CallForwardingInfo}, given the call forward
      * reason.
      *
