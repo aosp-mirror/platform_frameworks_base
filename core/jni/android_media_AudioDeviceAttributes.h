@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_MEDIA_AUDIODEVICE_H
-#define ANDROID_MEDIA_AUDIODEVICE_H
+#ifndef ANDROID_MEDIA_AUDIODEVICEATTRIBUTES_H
+#define ANDROID_MEDIA_AUDIODEVICEATTRIBUTES_H
 
 #include <media/AudioDeviceTypeAddr.h>
 #include <system/audio.h>
@@ -24,9 +24,9 @@
 
 namespace android {
 
-// Create a Java AudioDevice instance from a C++ AudioDeviceTypeAddress
+// Create a Java AudioDeviceAttributes instance from a C++ AudioDeviceTypeAddress
 
-extern jint createAudioDeviceFromNative(JNIEnv *env, jobject *jAudioDevice,
+extern jint createAudioDeviceAttributesFromNative(JNIEnv *env, jobject *jAudioDeviceAttributes,
                                         const AudioDeviceTypeAddr *devTypeAddr);
 } // namespace android
 

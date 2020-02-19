@@ -24,7 +24,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
-import android.media.AudioDevice;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioDevicePort;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -77,7 +77,7 @@ public class AudioDeviceInventory {
     private final ArrayMap<Integer, String> mApmConnectedDevices = new ArrayMap<>();
 
     // List of preferred devices for strategies
-    private final ArrayMap<Integer, AudioDevice> mPreferredDevices = new ArrayMap<>();
+    private final ArrayMap<Integer, AudioDeviceAttributes> mPreferredDevices = new ArrayMap<>();
 
     // the wrapper for AudioSystem static methods, allows us to spy AudioSystem
     private final @NonNull AudioSystemAdapter mAudioSystem;
@@ -474,7 +474,7 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ void onSaveSetPreferredDevice(int strategy, @NonNull AudioDevice device) {
+    /*package*/ void onSaveSetPreferredDevice(int strategy, @NonNull AudioDeviceAttributes device) {
         mPreferredDevices.put(strategy, device);
         dispatchPreferredDevice(strategy, device);
     }
@@ -488,7 +488,7 @@ public class AudioDeviceInventory {
     //
 
     /*package*/ int setPreferredDeviceForStrategySync(int strategy,
-                                                      @NonNull AudioDevice device) {
+                                                      @NonNull AudioDeviceAttributes device) {
         final long identity = Binder.clearCallingIdentity();
         final int status = mAudioSystem.setPreferredDeviceForStrategy(strategy, device);
         Binder.restoreCallingIdentity(identity);
@@ -1112,7 +1112,7 @@ public class AudioDeviceInventory {
         }
     }
 
-    private void dispatchPreferredDevice(int strategy, @Nullable AudioDevice device) {
+    private void dispatchPreferredDevice(int strategy, @Nullable AudioDeviceAttributes device) {
         final int nbDispatchers = mPrefDevDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; i++) {
             try {
