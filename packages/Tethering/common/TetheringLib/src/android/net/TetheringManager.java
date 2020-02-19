@@ -375,6 +375,9 @@ public class TetheringManager {
             mTetherStatesParcel = states;
         }
 
+        @Override
+        public void onTetherClientsChanged(List<TetheredClient> clients) { }
+
         public void waitForStarted() {
             mWaitForCallback.block(DEFAULT_TIMEOUT_MS);
             throwIfPermissionFailure(mError);
@@ -921,6 +924,7 @@ public class TetheringManager {
                         sendRegexpsChanged(parcel.config);
                         maybeSendTetherableIfacesChangedCallback(parcel.states);
                         maybeSendTetheredIfacesChangedCallback(parcel.states);
+                        callback.onClientsChanged(parcel.tetheredClients);
                     });
                 }
 
@@ -950,6 +954,11 @@ public class TetheringManager {
                         maybeSendTetherableIfacesChangedCallback(states);
                         maybeSendTetheredIfacesChangedCallback(states);
                     });
+                }
+
+                @Override
+                public void onTetherClientsChanged(final List<TetheredClient> clients) {
+                    executor.execute(() -> callback.onClientsChanged(clients));
                 }
             };
             getConnector(c -> c.registerTetheringEventCallback(remoteCallback, callerPkg));
