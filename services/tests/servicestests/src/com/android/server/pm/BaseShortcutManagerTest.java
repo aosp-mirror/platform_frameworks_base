@@ -562,6 +562,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
             return true;
         }
+
+        @Override
+        boolean injectHasInteractAcrossUsersFullPermission(int callingPid, int callingUid) {
+            return false;
+        }
     }
 
     protected class LauncherAppsTestable extends LauncherApps {
