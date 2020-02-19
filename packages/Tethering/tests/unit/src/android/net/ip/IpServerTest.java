@@ -29,6 +29,11 @@ import static android.net.ip.IpServer.STATE_AVAILABLE;
 import static android.net.ip.IpServer.STATE_LOCAL_ONLY;
 import static android.net.ip.IpServer.STATE_TETHERED;
 import static android.net.ip.IpServer.STATE_UNAVAILABLE;
+import static android.net.netlink.NetlinkConstants.RTM_DELNEIGH;
+import static android.net.netlink.NetlinkConstants.RTM_NEWNEIGH;
+import static android.net.netlink.StructNdMsg.NUD_FAILED;
+import static android.net.netlink.StructNdMsg.NUD_REACHABLE;
+import static android.net.netlink.StructNdMsg.NUD_STALE;
 import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 
 import static org.junit.Assert.assertEquals;
@@ -41,6 +46,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -52,6 +58,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.net.INetd;
+import android.net.InetAddresses;
 import android.net.InterfaceConfigurationParcel;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
@@ -61,6 +68,8 @@ import android.net.RouteInfo;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServer;
 import android.net.dhcp.IDhcpServerCallbacks;
+import android.net.ip.IpNeighborMonitor.NeighborEvent;
+import android.net.ip.IpNeighborMonitor.NeighborEventConsumer;
 import android.net.util.InterfaceParams;
 import android.net.util.InterfaceSet;
 import android.net.util.SharedLog;
@@ -81,6 +90,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.net.Inet4Address;
+import java.net.InetAddress;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -88,6 +98,8 @@ public class IpServerTest {
     private static final String IFACE_NAME = "testnet1";
     private static final String UPSTREAM_IFACE = "upstream0";
     private static final String UPSTREAM_IFACE2 = "upstream1";
+    private static final int UPSTREAM_IFINDEX = 101;
+    private static final int UPSTREAM_IFINDEX2 = 102;
     private static final String BLUETOOTH_IFACE_ADDR = "192.168.42.1";
     private static final int BLUETOOTH_DHCP_PREFIX_LENGTH = 24;
     private static final int DHCP_LEASE_TIME_SECS = 3600;
@@ -102,6 +114,7 @@ public class IpServerTest {
     @Mock private SharedLog mSharedLog;
     @Mock private IDhcpServer mDhcpServer;
     @Mock private RouterAdvertisementDaemon mRaDaemon;
+    @Mock private IpNeighborMonitor mIpNeighborMonitor;
     @Mock private IpServer.Dependencies mDependencies;
 
     @Captor private ArgumentCaptor<DhcpServingParamsParcel> mDhcpParamsCaptor;
@@ -111,6 +124,7 @@ public class IpServerTest {
             ArgumentCaptor.forClass(LinkProperties.class);
     private IpServer mIpServer;
     private InterfaceConfigurationParcel mInterfaceConfiguration;
+    private NeighborEventConsumer mNeighborEventConsumer;
 
     private void initStateMachine(int interfaceType) throws Exception {
         initStateMachine(interfaceType, false /* usingLegacyDhcp */);
@@ -130,16 +144,28 @@ public class IpServerTest {
         }).when(mDependencies).makeDhcpServer(any(), mDhcpParamsCaptor.capture(), any());
         when(mDependencies.getRouterAdvertisementDaemon(any())).thenReturn(mRaDaemon);
         when(mDependencies.getInterfaceParams(IFACE_NAME)).thenReturn(TEST_IFACE_PARAMS);
+
+        when(mDependencies.getIfindex(eq(UPSTREAM_IFACE))).thenReturn(UPSTREAM_IFINDEX);
+        when(mDependencies.getIfindex(eq(UPSTREAM_IFACE2))).thenReturn(UPSTREAM_IFINDEX2);
+
         mInterfaceConfiguration = new InterfaceConfigurationParcel();
         mInterfaceConfiguration.flags = new String[0];
         if (interfaceType == TETHERING_BLUETOOTH) {
             mInterfaceConfiguration.ipv4Addr = BLUETOOTH_IFACE_ADDR;
             mInterfaceConfiguration.prefixLength = BLUETOOTH_DHCP_PREFIX_LENGTH;
         }
+
+        ArgumentCaptor<NeighborEventConsumer> neighborCaptor =
+                ArgumentCaptor.forClass(NeighborEventConsumer.class);
+        doReturn(mIpNeighborMonitor).when(mDependencies).getIpNeighborMonitor(any(), any(),
+                neighborCaptor.capture());
+
         mIpServer = new IpServer(
                 IFACE_NAME, mLooper.getLooper(), interfaceType, mSharedLog, mNetd,
                 mCallback, usingLegacyDhcp, mDependencies);
         mIpServer.start();
+        mNeighborEventConsumer = neighborCaptor.getValue();
+
         // Starting the state machine always puts us in a consistent state and notifies
         // the rest of the world that we've changed from an unknown to available state.
         mLooper.dispatchAll();
@@ -172,6 +198,8 @@ public class IpServerTest {
 
     @Test
     public void startsOutAvailable() {
+        when(mDependencies.getIpNeighborMonitor(any(), any(), any()))
+                .thenReturn(mIpNeighborMonitor);
         mIpServer = new IpServer(IFACE_NAME, mLooper.getLooper(), TETHERING_BLUETOOTH, mSharedLog,
                 mNetd, mCallback, false /* usingLegacyDhcp */, mDependencies);
         mIpServer.start();
@@ -467,6 +495,89 @@ public class IpServerTest {
         dispatchTetherConnectionChanged(UPSTREAM_IFACE);
 
         verify(mDependencies, never()).makeDhcpServer(any(), any(), any());
+    }
+
+    private InetAddress addr(String addr) throws Exception {
+        return InetAddresses.parseNumericAddress(addr);
+    }
+
+    private void recvNewNeigh(int ifindex, InetAddress addr, short nudState, MacAddress mac) {
+        mNeighborEventConsumer.accept(new NeighborEvent(0, RTM_NEWNEIGH, ifindex, addr,
+                nudState, mac));
+        mLooper.dispatchAll();
+    }
+
+    private void recvDelNeigh(int ifindex, InetAddress addr, short nudState, MacAddress mac) {
+        mNeighborEventConsumer.accept(new NeighborEvent(0, RTM_DELNEIGH, ifindex, addr,
+                nudState, mac));
+        mLooper.dispatchAll();
+    }
+
+    @Test
+    public void addRemoveipv6ForwardingRules() throws Exception {
+        initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, false /* usingLegacyDhcp */);
+
+        final int myIfindex = TEST_IFACE_PARAMS.index;
+        final int notMyIfindex = myIfindex - 1;
+
+        final MacAddress myMac = TEST_IFACE_PARAMS.macAddr;
+        final InetAddress neighA = InetAddresses.parseNumericAddress("2001:db8::1");
+        final InetAddress neighB = InetAddresses.parseNumericAddress("2001:db8::2");
+        final InetAddress neighLL = InetAddresses.parseNumericAddress("fe80::1");
+        final InetAddress neighMC = InetAddresses.parseNumericAddress("ff02::1234");
+        final MacAddress macA = MacAddress.fromString("00:00:00:00:00:0a");
+        final MacAddress macB = MacAddress.fromString("11:22:33:00:00:0b");
+
+        reset(mNetd);
+
+        // Events on other interfaces are ignored.
+        recvNewNeigh(notMyIfindex, neighA, NUD_REACHABLE, macA);
+        verifyNoMoreInteractions(mNetd);
+
+        // Events on this interface are received and sent to netd.
+        recvNewNeigh(myIfindex, neighA, NUD_REACHABLE, macA);
+        verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX),
+                eq(neighA.getAddress()), eq(myMac.toByteArray()), eq(macA.toByteArray()));
+        reset(mNetd);
+
+        recvNewNeigh(myIfindex, neighB, NUD_REACHABLE, macB);
+        verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX),
+                eq(neighB.getAddress()), eq(myMac.toByteArray()), eq(macB.toByteArray()));
+        reset(mNetd);
+
+        // Link-local and multicast neighbors are ignored.
+        recvNewNeigh(notMyIfindex, neighLL, NUD_REACHABLE, macA);
+        verifyNoMoreInteractions(mNetd);
+        recvNewNeigh(notMyIfindex, neighMC, NUD_REACHABLE, macA);
+        verifyNoMoreInteractions(mNetd);
+
+        // A neighbor that is no longer valid causes the rule to be removed.
+        recvNewNeigh(myIfindex, neighA, NUD_FAILED, macA);
+        verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX), eq(neighA.getAddress()));
+        reset(mNetd);
+
+        // A neighbor that is deleted causes the rule to be removed.
+        recvDelNeigh(myIfindex, neighB, NUD_STALE, macB);
+        verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX), eq(neighB.getAddress()));
+        reset(mNetd);
+
+        // Upstream changes result in deleting and re-adding the rules.
+        recvNewNeigh(myIfindex, neighA, NUD_REACHABLE, macA);
+        recvNewNeigh(myIfindex, neighB, NUD_REACHABLE, macB);
+        reset(mNetd);
+
+        InOrder inOrder = inOrder(mNetd);
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(UPSTREAM_IFACE2);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE2, lp);
+        inOrder.verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX2),
+                eq(neighA.getAddress()), eq(myMac.toByteArray()), eq(macA.toByteArray()));
+        inOrder.verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX),
+                    eq(neighA.getAddress()));
+        inOrder.verify(mNetd).tetherRuleAddDownstreamIpv6(eq(myIfindex), eq(UPSTREAM_IFINDEX2),
+                eq(neighB.getAddress()), eq(myMac.toByteArray()), eq(macB.toByteArray()));
+        inOrder.verify(mNetd).tetherRuleRemoveDownstreamIpv6(eq(UPSTREAM_IFINDEX),
+                eq(neighB.getAddress()));
     }
 
     private void assertDhcpStarted(IpPrefix expectedPrefix) throws Exception {
