@@ -33,6 +33,7 @@ import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
 import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
+import android.app.admin.DevicePolicyEventLogger;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -60,6 +61,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -84,6 +86,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.Profile;
+import com.android.internal.app.chooser.ChooserTargetInfo;
 import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.content.PackageMonitor;
@@ -98,6 +101,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
 
 /**
  * This activity is displayed when the system attempts to start an Intent for
@@ -152,6 +156,8 @@ public class ResolverActivity extends Activity implements
     private static final String EXTRA_SHOW_FRAGMENT_ARGS = ":settings:show_fragment_args";
     private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
     private static final String OPEN_LINKS_COMPONENT_KEY = "app_link_state";
+    protected static final String METRICS_CATEGORY_RESOLVER = "intent_resolver";
+    protected static final String METRICS_CATEGORY_CHOOSER = "intent_chooser";
 
     /**
      * TODO(arangelov): Remove a couple of weeks after work/personal tabs are finalized.
@@ -1201,12 +1207,14 @@ public class ResolverActivity extends Activity implements
         if (!mSafeForwardingMode) {
             if (cti.startAsUser(this, null, currentUserHandle)) {
                 onActivityStarted(cti);
+                maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
             }
             return;
         }
         try {
             if (cti.startAsCaller(this, null, currentUserHandle.getIdentifier())) {
                 onActivityStarted(cti);
+                maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
             }
         } catch (RuntimeException e) {
             String launchedFromPackage;
@@ -1220,6 +1228,18 @@ public class ResolverActivity extends Activity implements
                     + " package " + launchedFromPackage + ", while running in "
                     + ActivityThread.currentProcessName(), e);
         }
+    }
+
+    private void maybeLogCrossProfileTargetLaunch(TargetInfo cti, UserHandle currentUserHandle) {
+        if (!hasWorkProfile() || currentUserHandle == getUser()) {
+            return;
+        }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.RESOLVER_CROSS_PROFILE_TARGET_OPENED)
+                .setBoolean(currentUserHandle == getPersonalProfileUserHandle())
+                .setStrings(getMetricsCategory(),
+                        cti instanceof ChooserTargetInfo ? "direct_share" : "other_target")
+                .write();
     }
 
 
@@ -1425,7 +1445,8 @@ public class ResolverActivity extends Activity implements
      * - The target app has declared it supports cross-profile communication via manifest metadata
      */
     private boolean maybeAutolaunchIfCrossProfileSupported() {
-        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
+        ResolverListAdapter activeListAdapter = mMultiProfilePagerAdapter.getActiveListAdapter();
+        int count = activeListAdapter.getUnfilteredCount();
         if (count != 1) {
             return false;
         }
@@ -1434,7 +1455,7 @@ public class ResolverActivity extends Activity implements
         if (inactiveListAdapter.getUnfilteredCount() != 1) {
             return false;
         }
-        TargetInfo activeProfileTarget = mMultiProfilePagerAdapter.getActiveListAdapter()
+        TargetInfo activeProfileTarget = activeListAdapter
                 .targetInfoForPosition(0, false);
         TargetInfo inactiveProfileTarget = inactiveListAdapter.targetInfoForPosition(0, false);
         if (!Objects.equals(activeProfileTarget.getResolvedComponentName(),
@@ -1449,6 +1470,11 @@ public class ResolverActivity extends Activity implements
             return false;
         }
 
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.RESOLVER_AUTOLAUNCH_CROSS_PROFILE_TARGET)
+                .setBoolean(activeListAdapter.getUserHandle() == getPersonalProfileUserHandle())
+                .setStrings(getMetricsCategory())
+                .write();
         safelyStartActivity(activeProfileTarget);
         finish();
         return true;
@@ -1530,6 +1556,11 @@ public class ResolverActivity extends Activity implements
                 viewPager.setCurrentItem(1);
             }
             setupViewVisibilities();
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.RESOLVER_SWITCH_TABS)
+                    .setInt(viewPager.getCurrentItem())
+                    .setStrings(getMetricsCategory())
+                    .write();
         });
 
         viewPager.setVisibility(View.VISIBLE);
@@ -1695,6 +1726,10 @@ public class ResolverActivity extends Activity implements
                 : lhs.activityInfo == null ? rhs.activityInfo == null
                 : Objects.equals(lhs.activityInfo.name, rhs.activityInfo.name)
                 && Objects.equals(lhs.activityInfo.packageName, rhs.activityInfo.packageName);
+    }
+
+    protected String getMetricsCategory() {
+        return METRICS_CATEGORY_RESOLVER;
     }
 
     @Override // ResolverListCommunicator
