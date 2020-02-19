@@ -221,6 +221,19 @@ interface IWindowSession {
      */
     void setWallpaperPosition(IBinder windowToken, float x, float y, float xstep, float ystep);
 
+    /**
+     * For wallpaper windows, sets the scale of the wallpaper based on
+     * SystemUI behavior.
+     */
+    void setWallpaperZoomOut(IBinder windowToken, float scale);
+
+    /**
+     * For wallpaper windows, sets whether the wallpaper should actually be
+     * scaled when setWallpaperZoomOut is called. If set to false, the WallpaperService will
+     * receive the zoom out value but the surface won't be scaled.
+     */
+    void setShouldZoomOutWallpaper(IBinder windowToken, boolean shouldZoom);
+
     @UnsupportedAppUsage
     void wallpaperOffsetsComplete(IBinder window);
 

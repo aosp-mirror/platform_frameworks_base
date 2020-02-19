@@ -77,7 +77,8 @@ public class TestIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep, boolean sync)
+    public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep, float zoom,
+            boolean sync)
             throws RemoteException {
     }
 
@@ -85,7 +86,6 @@ public class TestIWindow extends IWindow.Stub {
     public void dispatchWallpaperCommand(String action, int x, int y, int z, Bundle extras,
             boolean sync) throws RemoteException {
     }
-
     @Override
     public void dispatchDragEvent(DragEvent event) throws RemoteException {
     }

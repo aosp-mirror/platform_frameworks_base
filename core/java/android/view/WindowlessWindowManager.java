@@ -312,6 +312,14 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
+    public void setWallpaperZoomOut(android.os.IBinder windowToken, float zoom) {
+    }
+
+    @Override
+    public void setShouldZoomOutWallpaper(android.os.IBinder windowToken, boolean shouldZoom) {
+    }
+
+    @Override
     public void wallpaperOffsetsComplete(android.os.IBinder window) {
     }
 

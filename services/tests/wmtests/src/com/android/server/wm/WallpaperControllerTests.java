@@ -17,19 +17,29 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -138,5 +148,125 @@ public class WallpaperControllerTests extends WindowTestsBase {
         // Check that the wallpaper has the same frame in landscape than in portrait
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, dc.getConfiguration().orientation);
         assertEquals(portraitFrame, wallpaperWindow.getFrameLw());
+    }
+
+    @Test
+    public void testWallpaperZoom() throws RemoteException {
+        final DisplayContent dc = mWm.mRoot.getDefaultDisplay();
+        final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
+                mock(IBinder.class), true,  dc, true /* ownerCanManageAppTokens */);
+        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
+                "wallpaperWindow");
+        wallpaperWindow.getAttrs().privateFlags |=
+                WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS;
+
+        final WindowState homeWindow = createWallpaperTargetWindow(dc);
+
+        spyOn(dc.mWallpaperController);
+        doReturn(true).when(dc.mWallpaperController).isWallpaperVisible();
+
+        dc.mWallpaperController.adjustWallpaperWindows();
+
+        spyOn(wallpaperWindow.mClient);
+
+        float zoom = .5f;
+        dc.mWallpaperController.setWallpaperZoomOut(homeWindow, zoom);
+        assertEquals(zoom, wallpaperWindow.mWallpaperZoomOut, .01f);
+        verify(wallpaperWindow.mClient).dispatchWallpaperOffsets(anyFloat(), anyFloat(), anyFloat(),
+                anyFloat(), eq(zoom), anyBoolean());
+    }
+
+    @Test
+    public void testWallpaperZoom_shouldNotScaleWallpaper() throws RemoteException {
+        final DisplayContent dc = mWm.mRoot.getDefaultDisplay();
+        final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
+                mock(IBinder.class), true,  dc, true /* ownerCanManageAppTokens */);
+        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
+                "wallpaperWindow");
+        wallpaperWindow.getAttrs().privateFlags |=
+                WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS;
+
+        final WindowState homeWindow = createWallpaperTargetWindow(dc);
+
+        spyOn(dc.mWallpaperController);
+        doReturn(true).when(dc.mWallpaperController).isWallpaperVisible();
+
+        dc.mWallpaperController.adjustWallpaperWindows();
+
+        spyOn(wallpaperWindow.mClient);
+
+        float newZoom = .5f;
+        wallpaperWindow.mShouldScaleWallpaper = false;
+        // Set zoom, and make sure the window animator scale didn't actually change, but the zoom
+        // value did, and we do dispatch the zoom to the wallpaper service
+        dc.mWallpaperController.setWallpaperZoomOut(homeWindow, newZoom);
+        assertEquals(newZoom, wallpaperWindow.mWallpaperZoomOut, .01f);
+        assertEquals(1f, wallpaperWindow.mWinAnimator.mWallpaperScale, .01f);
+        verify(wallpaperWindow.mClient).dispatchWallpaperOffsets(anyFloat(), anyFloat(), anyFloat(),
+                anyFloat(), eq(newZoom), anyBoolean());
+    }
+
+    @Test
+    public void testWallpaperZoom_multipleCallers() {
+        final DisplayContent dc = mWm.mRoot.getDefaultDisplay();
+        final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
+                mock(IBinder.class), true,  dc,
+                true /* ownerCanManageAppTokens */);
+        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
+                "wallpaperWindow");
+        wallpaperWindow.getAttrs().privateFlags |=
+                WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS;
+
+
+        spyOn(dc.mWallpaperController);
+        doReturn(true).when(dc.mWallpaperController).isWallpaperVisible();
+
+        final WindowState homeWindow = createWallpaperTargetWindow(dc);
+
+        WindowState otherWindow = createWindow(null /* parent */, TYPE_APPLICATION, dc,
+                "otherWindow");
+
+        dc.mWallpaperController.adjustWallpaperWindows();
+
+        spyOn(wallpaperWindow.mClient);
+
+        // Set zoom from 2 windows
+        float homeWindowInitialZoom = .5f;
+        float otherWindowInitialZoom = .7f;
+        dc.mWallpaperController.setWallpaperZoomOut(homeWindow, homeWindowInitialZoom);
+        dc.mWallpaperController.setWallpaperZoomOut(otherWindow, otherWindowInitialZoom);
+        // Make sure the largest one wins
+        assertEquals(otherWindowInitialZoom, wallpaperWindow.mWallpaperZoomOut, .01f);
+
+        // Change zoom to a larger zoom from homeWindow
+        float homeWindowZoom2 = .8f;
+        dc.mWallpaperController.setWallpaperZoomOut(homeWindow, homeWindowZoom2);
+        // New zoom should be current
+        assertEquals(homeWindowZoom2, wallpaperWindow.mWallpaperZoomOut, .01f);
+
+        // Set homeWindow zoom to a lower zoom, but keep the one from otherWindow
+        dc.mWallpaperController.setWallpaperZoomOut(homeWindow, homeWindowInitialZoom);
+
+        // Zoom from otherWindow should be the current.
+        assertEquals(otherWindowInitialZoom, wallpaperWindow.mWallpaperZoomOut, .01f);
+    }
+
+
+    private WindowState createWallpaperTargetWindow(DisplayContent dc) {
+        final ActivityRecord homeActivity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                .setStack(dc.getRootHomeTask())
+                .setCreateTask(true)
+                .build();
+        homeActivity.setVisibility(true);
+
+        WindowState appWindow = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
+                homeActivity, "wallpaperTargetWindow");
+        appWindow.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
+        appWindow.mHasSurface = true;
+        spyOn(appWindow);
+        doReturn(true).when(appWindow).isDrawFinishedLw();
+
+        homeActivity.addWindow(appWindow);
+        return appWindow;
     }
 }

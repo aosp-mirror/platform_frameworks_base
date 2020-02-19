@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 
-import android.annotation.Nullable;
 import android.app.StatusBarManager;
 import android.graphics.RectF;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -44,7 +43,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.NotificationShadeWindowBlurController;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -82,7 +81,7 @@ public class NotificationShadeWindowViewController {
     private final CommandQueue mCommandQueue;
     private final NotificationShadeWindowView mView;
     private final ShadeController mShadeController;
-    private final NotificationShadeWindowBlurController mBlurController;
+    private final NotificationShadeDepthController mDepthController;
 
     private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
@@ -126,7 +125,7 @@ public class NotificationShadeWindowViewController {
             CommandQueue commandQueue,
             ShadeController shadeController,
             DockManager dockManager,
-            @Nullable NotificationShadeWindowBlurController blurController,
+            NotificationShadeDepthController depthController,
             NotificationShadeWindowView notificationShadeWindowView,
             NotificationPanelViewController notificationPanelViewController,
             SuperStatusBarViewFactory statusBarViewFactory) {
@@ -149,7 +148,7 @@ public class NotificationShadeWindowViewController {
         mShadeController = shadeController;
         mDockManager = dockManager;
         mNotificationPanelViewController = notificationPanelViewController;
-        mBlurController = blurController;
+        mDepthController = depthController;
         mStatusBarViewFactory = statusBarViewFactory;
 
         // This view is not part of the newly inflated expanded status bar.
@@ -394,10 +393,8 @@ public class NotificationShadeWindowViewController {
                         mView.getContext(), mView, expandHelperCallback,
                         dragDownCallback, mFalsingManager));
 
-        if (mBlurController != null) {
-            mBlurController.setRoot(mView);
-            mNotificationPanelViewController.addExpansionListener(mBlurController);
-        }
+        mDepthController.setRoot(mView);
+        mNotificationPanelViewController.addExpansionListener(mDepthController);
     }
 
     public NotificationShadeWindowView getView() {

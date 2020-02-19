@@ -116,7 +116,8 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep, boolean sync) {
+    public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep, float zoom,
+            boolean sync) {
         if (sync) {
             try {
                 mSession.wallpaperOffsetsComplete(asBinder());

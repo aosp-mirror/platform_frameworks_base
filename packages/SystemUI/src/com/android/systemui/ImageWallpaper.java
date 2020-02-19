@@ -203,6 +203,11 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
+        @Override
+        public boolean shouldZoomOutWallpaper() {
+            return true;
+        }
+
         private void waitForBackgroundRendering() {
             synchronized (mMonitor) {
                 try {

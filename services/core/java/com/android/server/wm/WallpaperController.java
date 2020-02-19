@@ -41,6 +41,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArraySet;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
@@ -52,6 +53,7 @@ import com.android.internal.util.ToBooleanFunction;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Controls wallpaper windows visibility, ordering, and so on.
@@ -75,8 +77,10 @@ class WallpaperController {
     private float mLastWallpaperY = -1;
     private float mLastWallpaperXStep = -1;
     private float mLastWallpaperYStep = -1;
+    private float mLastWallpaperZoomOut = 0;
     private int mLastWallpaperDisplayOffsetX = Integer.MIN_VALUE;
     private int mLastWallpaperDisplayOffsetY = Integer.MIN_VALUE;
+    private final float mMaxWallpaperScale;
 
     // This is set when we are waiting for a wallpaper to tell us it is done
     // changing its scroll position.
@@ -191,9 +195,21 @@ class WallpaperController {
         return false;
     };
 
+    /**
+     * @see #computeLastWallpaperZoomOut()
+     */
+    private Consumer<WindowState>  mComputeMaxZoomOutFunction = windowState -> {
+        if (!windowState.mIsWallpaper
+                && Float.compare(windowState.mWallpaperZoomOut, mLastWallpaperZoomOut) > 0) {
+            mLastWallpaperZoomOut = windowState.mWallpaperZoomOut;
+        }
+    };
+
     WallpaperController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
+        mMaxWallpaperScale = service.mContext.getResources()
+                .getFloat(com.android.internal.R.dimen.config_wallpaperMaxScale);
     }
 
     WindowState getWallpaperTarget() {
@@ -325,20 +341,30 @@ class WallpaperController {
             rawChanged = true;
         }
 
-        boolean changed = wallpaperWin.mWinAnimator.setWallpaperOffset(xOffset, yOffset);
+        if (Float.compare(wallpaperWin.mWallpaperZoomOut, mLastWallpaperZoomOut) != 0) {
+            wallpaperWin.mWallpaperZoomOut = mLastWallpaperZoomOut;
+            rawChanged = true;
+        }
+
+        boolean changed = wallpaperWin.mWinAnimator.setWallpaperOffset(xOffset, yOffset,
+                wallpaperWin.mShouldScaleWallpaper
+                        ? zoomOutToScale(wallpaperWin.mWallpaperZoomOut) : 1);
 
         if (rawChanged && (wallpaperWin.mAttrs.privateFlags &
                 WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS) != 0) {
             try {
                 if (DEBUG_WALLPAPER) Slog.v(TAG, "Report new wp offset "
                         + wallpaperWin + " x=" + wallpaperWin.mWallpaperX
-                        + " y=" + wallpaperWin.mWallpaperY);
+                        + " y=" + wallpaperWin.mWallpaperY
+                        + " zoom=" + wallpaperWin.mWallpaperZoomOut);
                 if (sync) {
                     mWaitingOnWallpaper = wallpaperWin;
                 }
                 wallpaperWin.mClient.dispatchWallpaperOffsets(
                         wallpaperWin.mWallpaperX, wallpaperWin.mWallpaperY,
-                        wallpaperWin.mWallpaperXStep, wallpaperWin.mWallpaperYStep, sync);
+                        wallpaperWin.mWallpaperXStep, wallpaperWin.mWallpaperYStep,
+                        wallpaperWin.mWallpaperZoomOut, sync);
+
                 if (sync) {
                     if (mWaitingOnWallpaper != null) {
                         long start = SystemClock.uptimeMillis();
@@ -375,6 +401,20 @@ class WallpaperController {
             window.mWallpaperXStep = xStep;
             window.mWallpaperYStep = yStep;
             updateWallpaperOffsetLocked(window, true);
+        }
+    }
+
+    void setWallpaperZoomOut(WindowState window, float zoom) {
+        if (Float.compare(window.mWallpaperZoomOut, zoom) != 0) {
+            window.mWallpaperZoomOut = zoom;
+            updateWallpaperOffsetLocked(window, false);
+        }
+    }
+
+    void setShouldZoomOutWallpaper(WindowState window, boolean shouldZoom) {
+        if (shouldZoom != window.mShouldScaleWallpaper) {
+            window.mShouldScaleWallpaper = shouldZoom;
+            updateWallpaperOffsetLocked(window, false);
         }
     }
 
@@ -420,6 +460,7 @@ class WallpaperController {
             } else if (changingTarget.mWallpaperY >= 0) {
                 mLastWallpaperY = changingTarget.mWallpaperY;
             }
+            computeLastWallpaperZoomOut();
             if (target.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
                 mLastWallpaperDisplayOffsetX = target.mWallpaperDisplayOffsetX;
             } else if (changingTarget.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
@@ -593,6 +634,9 @@ class WallpaperController {
                 mLastWallpaperX = mWallpaperTarget.mWallpaperX;
                 mLastWallpaperXStep = mWallpaperTarget.mWallpaperXStep;
             }
+            if (mWallpaperTarget.mWallpaperZoomOut >= 0) {
+                mLastWallpaperZoomOut = mWallpaperTarget.mWallpaperZoomOut;
+            }
             if (mWallpaperTarget.mWallpaperY >= 0) {
                 mLastWallpaperY = mWallpaperTarget.mWallpaperY;
                 mLastWallpaperYStep = mWallpaperTarget.mWallpaperYStep;
@@ -760,6 +804,23 @@ class WallpaperController {
         }
 
         return mTmpTopWallpaper;
+    }
+
+    /**
+     * Each window can request a zoom, example:
+     * - User is in overview, zoomed out.
+     * - User also pulls down the shade.
+     *
+     * This means that we always have to choose the largest zoom out that we have, otherwise
+     * we'll have conflicts and break the "depth system" mental model.
+     */
+    private void computeLastWallpaperZoomOut() {
+        mLastWallpaperZoomOut = 0;
+        mDisplayContent.forAllWindows(mComputeMaxZoomOutFunction, true);
+    }
+
+    private float zoomOutToScale(float zoom) {
+        return MathUtils.lerp(1, mMaxWallpaperScale, 1 - zoom);
     }
 
     void dump(PrintWriter pw, String prefix) {

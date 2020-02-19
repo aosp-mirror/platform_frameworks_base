@@ -16,6 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.graphics.Matrix.MSCALE_X;
+import static android.graphics.Matrix.MSCALE_Y;
+import static android.graphics.Matrix.MSKEW_X;
+import static android.graphics.Matrix.MSKEW_Y;
+import static android.graphics.Matrix.MTRANS_X;
+import static android.graphics.Matrix.MTRANS_Y;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
@@ -216,6 +222,10 @@ class WindowStateAnimator {
     // a cache.
     int mXOffset = 0;
     int mYOffset = 0;
+
+    // A scale factor for the surface contents, that will be applied from the center of the visible
+    // region.
+    float mWallpaperScale = 1f;
 
     /**
      * A flag to determine if the WSA needs to offset its position to compensate for the stack's
@@ -1033,7 +1043,12 @@ class WindowStateAnimator {
                         }
                     }
                 }
-                mSurfaceController.setPositionInTransaction(xOffset, yOffset, recoveringMemory);
+                if (!mIsWallpaper) {
+                    mSurfaceController.setPositionInTransaction(xOffset, yOffset, recoveringMemory);
+                } else {
+                    setWallpaperPositionAndScale(
+                            xOffset, yOffset, mWallpaperScale, recoveringMemory);
+                }
             }
         }
 
@@ -1050,11 +1065,15 @@ class WindowStateAnimator {
 
 
         if (!w.mSeamlesslyRotated) {
-            applyCrop(clipRect, recoveringMemory);
-            mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale * mExtraHScale,
-                    mDtDx * w.mVScale * mExtraVScale,
-                    mDtDy * w.mHScale * mExtraHScale,
-                    mDsDy * w.mVScale * mExtraVScale, recoveringMemory);
+            if (!mIsWallpaper) {
+                applyCrop(clipRect, recoveringMemory);
+                mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale * mExtraHScale,
+                        mDtDx * w.mVScale * mExtraVScale,
+                        mDtDy * w.mHScale * mExtraHScale,
+                        mDsDy * w.mVScale * mExtraVScale, recoveringMemory);
+            } else {
+                setWallpaperPositionAndScale(mXOffset, mYOffset, mWallpaperScale, recoveringMemory);
+            }
         }
 
         if (mSurfaceResized) {
@@ -1201,18 +1220,18 @@ class WindowStateAnimator {
         mSurfaceController.setTransparentRegionHint(region);
     }
 
-    boolean setWallpaperOffset(int dx, int dy) {
-        if (mXOffset == dx && mYOffset == dy) {
+    boolean setWallpaperOffset(int dx, int dy, float scale) {
+        if (mXOffset == dx && mYOffset == dy && Float.compare(mWallpaperScale, scale) == 0) {
             return false;
         }
         mXOffset = dx;
         mYOffset = dy;
+        mWallpaperScale = scale;
 
         try {
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
             mService.openSurfaceTransaction();
-            mSurfaceController.setPositionInTransaction(dx, dy, false);
-            applyCrop(null, false);
+            setWallpaperPositionAndScale(dx, dy, scale, false);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error positioning surface of " + mWin
                     + " pos=(" + dx + "," + dy + ")", e);
@@ -1222,6 +1241,27 @@ class WindowStateAnimator {
                     "<<< CLOSE TRANSACTION setWallpaperOffset");
             return true;
         }
+    }
+
+    private void setWallpaperPositionAndScale(int dx, int dy, float scale,
+            boolean recoveringMemory) {
+        DisplayInfo displayInfo = mWin.getDisplayInfo();
+        Matrix matrix = mWin.mTmpMatrix;
+        matrix.setTranslate(dx, dy);
+        matrix.postScale(scale, scale, displayInfo.logicalWidth / 2f,
+                displayInfo.logicalHeight / 2f);
+        matrix.getValues(mWin.mTmpMatrixArray);
+        matrix.reset();
+
+        mSurfaceController.setPositionInTransaction(mWin.mTmpMatrixArray[MTRANS_X],
+                mWin.mTmpMatrixArray[MTRANS_Y], recoveringMemory);
+        mSurfaceController.setMatrixInTransaction(
+                mDsDx * mWin.mTmpMatrixArray[MSCALE_X] * mWin.mHScale * mExtraHScale,
+                mDtDx * mWin.mTmpMatrixArray[MSKEW_Y] * mWin.mVScale * mExtraVScale,
+                mDtDy * mWin.mTmpMatrixArray[MSKEW_X] * mWin.mHScale * mExtraHScale,
+                mDsDy * mWin.mTmpMatrixArray[MSCALE_Y] * mWin.mVScale * mExtraVScale,
+                recoveringMemory);
+        applyCrop(null, recoveringMemory);
     }
 
     /**

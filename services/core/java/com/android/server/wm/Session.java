@@ -356,6 +356,31 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
+    public void setWallpaperZoomOut(IBinder window, float zoom) {
+        if (Float.compare(0f, zoom) > 0 || Float.compare(1f, zoom) < 0 || Float.isNaN(zoom)) {
+            throw new IllegalArgumentException("Zoom must be a valid float between 0 and 1: "
+                    + zoom);
+        }
+        synchronized (mService.mGlobalLock) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                actionOnWallpaper(window, (wpController, windowState) ->
+                        wpController.setWallpaperZoomOut(windowState, zoom));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
+    public void setShouldZoomOutWallpaper(IBinder window, boolean shouldZoom) {
+        synchronized (mService.mGlobalLock) {
+            actionOnWallpaper(window, (wpController, windowState) ->
+                    wpController.setShouldZoomOutWallpaper(windowState, shouldZoom));
+        }
+    }
+
+    @Override
     public void wallpaperOffsetsComplete(IBinder window) {
         synchronized (mService.mGlobalLock) {
             actionOnWallpaper(window, (wpController, windowState) ->

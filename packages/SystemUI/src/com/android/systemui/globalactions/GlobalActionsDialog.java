@@ -1793,7 +1793,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         int alpha = (int) (animatedValue * mScrimAlpha * 255);
                         mBackgroundDrawable.setAlpha(alpha);
                         mBlurUtils.applyBlur(mGlobalActionsLayout.getViewRootImpl(),
-                                mBlurUtils.radiusForRatio(animatedValue));
+                                mBlurUtils.blurRadiusOfRatio(animatedValue));
                     })
                     .start();
             if (mControlsUiController != null) {
@@ -1823,7 +1823,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         int alpha = (int) (animatedValue * mScrimAlpha * 255);
                         mBackgroundDrawable.setAlpha(alpha);
                         mBlurUtils.applyBlur(mGlobalActionsLayout.getViewRootImpl(),
-                                mBlurUtils.radiusForRatio(animatedValue));
+                                mBlurUtils.blurRadiusOfRatio(animatedValue));
                     })
                     .start();
             dismissPanel();

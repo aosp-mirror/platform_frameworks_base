@@ -324,7 +324,7 @@ public class SystemWindows {
 
         @Override
         public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep,
-                boolean sync) {}
+                float zoom, boolean sync) {}
 
         @Override
         public void dispatchWallpaperCommand(String action, int x, int y,
