@@ -83,7 +83,6 @@ java_library {
     name: "framework-tethering-stubs",
     srcs: [":framework-tethering-stubs-sources"],
     libs: ["framework-all"],
-    static_libs: ["tethering-aidl-interfaces-java"],
     sdk_version: "core_platform",
 }
 
