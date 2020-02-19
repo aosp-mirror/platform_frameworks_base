@@ -2624,6 +2624,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mService.getServicePackageName(), mComponentName,
                 serviceLabel, serviceIcon, this, id, mCompatMode);
 
+        mService.logDatasetShown(id, mClientState);
+
         synchronized (mLock) {
             if (mUiShownTime == 0) {
                 // Log first time UI is shown.
