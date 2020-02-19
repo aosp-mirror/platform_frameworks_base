@@ -1966,10 +1966,15 @@ public class CarrierConfigManager {
             "allow_add_call_during_video_call";
 
     /**
-     * When false, indicates that holding a video call is disabled
+     * When {@code true}, indicates that video calls can be put on hold in order to swap to another
+     * call (e.g. a new outgoing call).
+     * When {@code false}, indicates that video calls will be disconnected when swapping to another
+     * call.
+     * <p>
+     * This is {@code true} by default.
      */
-    public static final String KEY_ALLOW_HOLDING_VIDEO_CALL_BOOL =
-            "allow_holding_video_call";
+    public static final String KEY_ALLOW_HOLD_VIDEO_CALL_BOOL =
+            "allow_hold_video_call_bool";
 
     /**
      * When true, indicates that the HD audio icon in the in-call screen should not be shown for
@@ -3714,7 +3719,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
-        sDefaults.putBoolean(KEY_ALLOW_HOLDING_VIDEO_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_ALLOW_HOLD_VIDEO_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_WIFI_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_GSM_CDMA_CALLS_CAN_BE_HD_AUDIO, false);
