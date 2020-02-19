@@ -21,6 +21,8 @@ apex {
 apex_defaults {
     native_shared_libs: [
         "libstats_jni",
+        "libstatspull",
+        "libstatssocket",
     ],
     // binaries: ["vold"],
     java_libs: [
