@@ -54,7 +54,6 @@ public class BubbleOverflowActivity extends Activity {
     private BubbleOverflowAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private List<Bubble> mOverflowBubbles = new ArrayList<>();
-    private int mMaxBubbles;
 
     @Inject
     public BubbleOverflowActivity(BubbleController controller) {
@@ -67,7 +66,6 @@ public class BubbleOverflowActivity extends Activity {
         setContentView(R.layout.bubble_overflow_activity);
         setBackgroundColor();
 
-        mMaxBubbles = getResources().getInteger(R.integer.bubbles_max_rendered);
         mEmptyState = findViewById(R.id.bubble_overflow_empty_state);
         mRecyclerView = findViewById(R.id.bubble_overflow_recycler);
         mRecyclerView.setLayoutManager(
@@ -94,11 +92,7 @@ public class BubbleOverflowActivity extends Activity {
 
     void onDataChanged(List<Bubble> bubbles) {
         mOverflowBubbles.clear();
-        if (bubbles.size() > mMaxBubbles) {
-            mOverflowBubbles.addAll(bubbles.subList(mMaxBubbles, bubbles.size()));
-        } else {
-            mOverflowBubbles.addAll(bubbles);
-        }
+        mOverflowBubbles.addAll(bubbles);
         mAdapter.notifyDataSetChanged();
 
         if (mOverflowBubbles.isEmpty()) {
