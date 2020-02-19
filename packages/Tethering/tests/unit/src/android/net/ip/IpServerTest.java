@@ -158,7 +158,9 @@ public class IpServerTest {
         initStateMachine(interfaceType, usingLegacyDhcp);
         dispatchCommand(IpServer.CMD_TETHER_REQUESTED, STATE_TETHERED);
         if (upstreamIface != null) {
-            dispatchTetherConnectionChanged(upstreamIface);
+            LinkProperties lp = new LinkProperties();
+            lp.setInterfaceName(upstreamIface);
+            dispatchTetherConnectionChanged(upstreamIface, lp);
         }
         reset(mNetd, mCallback);
     }
@@ -508,11 +510,19 @@ public class IpServerTest {
      *
      * @see #dispatchCommand(int)
      * @param upstreamIface String name of upstream interface (or null)
+     * @param v6lp IPv6 LinkProperties of the upstream interface, or null for an IPv4-only upstream.
      */
-    private void dispatchTetherConnectionChanged(String upstreamIface) {
+    private void dispatchTetherConnectionChanged(String upstreamIface, LinkProperties v6lp) {
         mIpServer.sendMessage(IpServer.CMD_TETHER_CONNECTION_CHANGED,
                 new InterfaceSet(upstreamIface));
+        if (v6lp != null) {
+            mIpServer.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, v6lp);
+        }
         mLooper.dispatchAll();
+    }
+
+    private void dispatchTetherConnectionChanged(String upstreamIface) {
+        dispatchTetherConnectionChanged(upstreamIface, null);
     }
 
     private void assertIPv4AddressAndDirectlyConnectedRoute(LinkProperties lp) {
