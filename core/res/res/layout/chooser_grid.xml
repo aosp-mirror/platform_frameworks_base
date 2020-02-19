@@ -82,7 +82,7 @@
                 android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-                <com.android.internal.app.ResolverViewPager
+                <com.android.internal.widget.ViewPager
                     android:id="@+id/profile_pager"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
