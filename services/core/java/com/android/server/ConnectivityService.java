@@ -3817,8 +3817,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return avoidBadWifi();
     }
 
-
     private void rematchForAvoidBadWifiUpdate() {
+        ensureRunningOnConnectivityServiceThread();
+        mixInAllNetworkScores();
         rematchAllNetworksAndRequests();
         for (NetworkAgentInfo nai: mNetworkAgentInfos.values()) {
             if (nai.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
@@ -4790,7 +4791,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return false;
             }
 
-            return vpn.startAlwaysOnVpn();
+            return vpn.startAlwaysOnVpn(mKeyStore);
         }
     }
 
@@ -4805,7 +4806,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Slog.w(TAG, "User " + userId + " has no Vpn configuration");
                 return false;
             }
-            return vpn.isAlwaysOnPackageSupported(packageName);
+            return vpn.isAlwaysOnPackageSupported(packageName, mKeyStore);
         }
     }
 
@@ -4826,11 +4827,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Slog.w(TAG, "User " + userId + " has no Vpn configuration");
                 return false;
             }
-            if (!vpn.setAlwaysOnPackage(packageName, lockdown, lockdownWhitelist)) {
+            if (!vpn.setAlwaysOnPackage(packageName, lockdown, lockdownWhitelist, mKeyStore)) {
                 return false;
             }
             if (!startAlwaysOnVpn(userId)) {
-                vpn.setAlwaysOnPackage(null, false, null);
+                vpn.setAlwaysOnPackage(null, false, null, mKeyStore);
                 return false;
             }
         }
@@ -5016,7 +5017,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 loge("Starting user already has a VPN");
                 return;
             }
-            userVpn = new Vpn(mHandler.getLooper(), mContext, mNMS, userId);
+            userVpn = new Vpn(mHandler.getLooper(), mContext, mNMS, userId, mKeyStore);
             mVpns.put(userId, userVpn);
             if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
                 updateLockdownVpn();
@@ -5087,7 +5088,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (TextUtils.equals(vpn.getAlwaysOnPackage(), packageName)) {
                 Slog.d(TAG, "Restarting always-on VPN package " + packageName + " for user "
                         + userId);
-                vpn.startAlwaysOnVpn();
+                vpn.startAlwaysOnVpn(mKeyStore);
             }
         }
     }
@@ -5109,7 +5110,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (TextUtils.equals(vpn.getAlwaysOnPackage(), packageName) && !isReplacing) {
                 Slog.d(TAG, "Removing always-on VPN package " + packageName + " for user "
                         + userId);
-                vpn.setAlwaysOnPackage(null, false, null);
+                vpn.setAlwaysOnPackage(null, false, null, mKeyStore);
             }
         }
     }
@@ -7035,9 +7036,45 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    /**
+     * Re-mixin all network scores.
+     * This is called when some global setting like avoidBadWifi has changed.
+     * TODO : remove this when all usages have been removed.
+     */
+    private void mixInAllNetworkScores() {
+        ensureRunningOnConnectivityServiceThread();
+        for (final NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            nai.setNetworkScore(mixInNetworkScore(nai, nai.getNetworkScore()));
+        }
+    }
+
+    /**
+     * Mix in the Connectivity-managed parts of the NetworkScore.
+     * @param nai The NAI this score applies to.
+     * @param sourceScore the score sent by the network agent, or the previous score of this NAI.
+     * @return A new score with the Connectivity-managed parts mixed in.
+     */
+    @NonNull
+    private NetworkScore mixInNetworkScore(@NonNull final NetworkAgentInfo nai,
+            @NonNull final NetworkScore sourceScore) {
+        final NetworkScore.Builder score = new NetworkScore.Builder(sourceScore);
+
+        // TODO : this should be done in Telephony. It should be handled per-network because
+        // it's a carrier-dependent config.
+        if (nai.networkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+            if (mMultinetworkPolicyTracker.getAvoidBadWifi()) {
+                score.clearPolicy(NetworkScore.POLICY_IGNORE_ON_WIFI);
+            } else {
+                score.addPolicy(NetworkScore.POLICY_IGNORE_ON_WIFI);
+            }
+        }
+
+        return score.build();
+    }
+
     private void updateNetworkScore(NetworkAgentInfo nai, NetworkScore ns) {
         if (VDBG || DDBG) log("updateNetworkScore for " + nai.toShortString() + " to " + ns);
-        nai.setNetworkScore(ns);
+        nai.setNetworkScore(mixInNetworkScore(nai, ns));
         rematchAllNetworksAndRequests();
         sendUpdatedScoreToFactories(nai);
     }
@@ -7519,6 +7556,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     public int getConnectionOwnerUid(ConnectionInfo connectionInfo) {
         final Vpn vpn = enforceActiveVpnOrNetworkStackPermission();
+
+        // Only VpnService based VPNs should be able to get this information.
+        if (vpn != null && vpn.getActiveAppVpnType() != VpnManager.TYPE_VPN_SERVICE) {
+            throw new SecurityException(
+                    "getConnectionOwnerUid() not allowed for non-VpnService VPNs");
+        }
+
         if (connectionInfo.protocol != IPPROTO_TCP && connectionInfo.protocol != IPPROTO_UDP) {
             throw new IllegalArgumentException("Unsupported protocol " + connectionInfo.protocol);
         }

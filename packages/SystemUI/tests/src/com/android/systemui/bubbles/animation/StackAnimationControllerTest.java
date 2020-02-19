@@ -18,6 +18,10 @@ package com.android.systemui.bubbles.animation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.graphics.PointF;
@@ -30,13 +34,14 @@ import androidx.dynamicanimation.animation.SpringForce;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
+import com.android.systemui.util.FloatingContentCoordinator;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -45,8 +50,10 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidTestingRunner.class)
 public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase {
 
-    @Spy
-    private TestableStackController mStackController = new TestableStackController();
+    @Mock
+    private FloatingContentCoordinator mFloatingContentCoordinator;
+
+    private TestableStackController mStackController;
 
     private int mStackOffset;
     private Runnable mCheckStartPosSet;
@@ -54,6 +61,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        mStackController = spy(new TestableStackController(mFloatingContentCoordinator));
         mLayout.setActiveController(mStackController);
         addOneMoreThanBubbleLimitBubbles();
         mStackOffset = mLayout.getResources().getDimensionPixelSize(R.dimen.bubble_stack_offset);
@@ -288,6 +296,21 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
         assertEquals(30, mStackController.getStackPosition().y, 1f);
     }
 
+    @Test
+    public void testFloatingCoordinator() {
+        // We should have called onContentAdded only once while adding all of the bubbles in
+        // setup().
+        verify(mFloatingContentCoordinator, times(1)).onContentAdded(any());
+        verify(mFloatingContentCoordinator, never()).onContentRemoved(any());
+
+        // Remove all views and verify that we called onContentRemoved only once.
+        while (mLayout.getChildCount() > 0) {
+            mLayout.removeView(mLayout.getChildAt(0));
+        }
+
+        verify(mFloatingContentCoordinator, times(1)).onContentRemoved(any());
+    }
+
     /**
      * Checks every child view to make sure it's stacked at the given coordinates, off to the left
      * or right side depending on offset multiplier.
@@ -328,6 +351,11 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
      * Testable version of the stack controller that dispatches its animations on the main thread.
      */
     private class TestableStackController extends StackAnimationController {
+        TestableStackController(
+                FloatingContentCoordinator floatingContentCoordinator) {
+            super(floatingContentCoordinator);
+        }
+
         @Override
         protected void flingThenSpringFirstBubbleWithStackFollowing(
                 DynamicAnimation.ViewProperty property, float vel, float friction,

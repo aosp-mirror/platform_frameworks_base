@@ -17,6 +17,9 @@
 package android.content.pm;
 
 import android.annotation.UserIdInt;
+import android.os.UserHandle;
+
+import java.util.List;
 
 /**
  * Exposes internal methods from {@link com.android.server.pm.CrossProfileAppsServiceImpl} to other
@@ -52,4 +55,11 @@ public abstract class CrossProfileAppsInternal {
      */
     public abstract boolean verifyUidHasInteractAcrossProfilePermission(String packageName,
             int uid);
+
+    /**
+     * Returns the list of target user profiles for the given package on the given user. See {@link
+     * CrossProfileApps#getTargetUserProfiles()}.
+     */
+    public abstract List<UserHandle> getTargetUserProfiles(
+            String packageName, @UserIdInt int userId);
 }

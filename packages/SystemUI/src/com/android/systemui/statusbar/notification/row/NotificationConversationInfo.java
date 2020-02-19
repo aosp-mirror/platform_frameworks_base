@@ -513,7 +513,11 @@ public class NotificationConversationInfo extends LinearLayout implements
 
     @Override
     public boolean shouldBeSaved() {
-        return mSelectedAction > -1;
+        // Toggle actions are already saved by the time the guts are closed; save for any other
+        // taps
+        return mSelectedAction > -1
+                && mSelectedAction != ACTION_FAVORITE
+                && mSelectedAction != ACTION_MUTE;
     }
 
     @Override

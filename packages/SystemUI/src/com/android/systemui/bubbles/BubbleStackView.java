@@ -72,6 +72,7 @@ import com.android.systemui.bubbles.animation.ExpandedAnimationController;
 import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.util.FloatingContentCoordinator;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -319,7 +320,8 @@ public class BubbleStackView extends FrameLayout {
     private BubbleOverflow mBubbleOverflow;
 
     public BubbleStackView(Context context, BubbleData data,
-            @Nullable SurfaceSynchronizer synchronizer) {
+            @Nullable SurfaceSynchronizer synchronizer,
+            FloatingContentCoordinator floatingContentCoordinator) {
         super(context);
 
         mBubbleData = data;
@@ -353,7 +355,7 @@ public class BubbleStackView extends FrameLayout {
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
 
-        mStackAnimationController = new StackAnimationController();
+        mStackAnimationController = new StackAnimationController(floatingContentCoordinator);
 
         mExpandedAnimationController = new ExpandedAnimationController(
                 mDisplaySize, mExpandedViewPadding, res.getConfiguration().orientation);
@@ -620,16 +622,16 @@ public class BubbleStackView extends FrameLayout {
             mBubbleData.setExpanded(true);
             return true;
         } else if (action == R.id.action_move_top_left) {
-            mStackAnimationController.springStack(stackBounds.left, stackBounds.top);
+            mStackAnimationController.springStackAfterFling(stackBounds.left, stackBounds.top);
             return true;
         } else if (action == R.id.action_move_top_right) {
-            mStackAnimationController.springStack(stackBounds.right, stackBounds.top);
+            mStackAnimationController.springStackAfterFling(stackBounds.right, stackBounds.top);
             return true;
         } else if (action == R.id.action_move_bottom_left) {
-            mStackAnimationController.springStack(stackBounds.left, stackBounds.bottom);
+            mStackAnimationController.springStackAfterFling(stackBounds.left, stackBounds.bottom);
             return true;
         } else if (action == R.id.action_move_bottom_right) {
-            mStackAnimationController.springStack(stackBounds.right, stackBounds.bottom);
+            mStackAnimationController.springStackAfterFling(stackBounds.right, stackBounds.bottom);
             return true;
         }
         return false;

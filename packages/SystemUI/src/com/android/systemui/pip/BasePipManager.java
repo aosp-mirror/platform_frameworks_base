@@ -16,17 +16,12 @@
 
 package com.android.systemui.pip;
 
-import android.content.Context;
 import android.content.res.Configuration;
-
-import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.wm.DisplayController;
 
 import java.io.PrintWriter;
 
+
 public interface BasePipManager {
-    void initialize(Context context, BroadcastDispatcher broadcastDispatcher,
-            DisplayController displayController);
     void showPictureInPictureMenu();
     default void expandPip() {}
     default void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {}

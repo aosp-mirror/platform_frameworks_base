@@ -209,6 +209,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 149760957)
     public void testSizeCompatBounds() {
         // Disable the real configuration resolving because we only simulate partial flow.
         // TODO: Have test use full flow.

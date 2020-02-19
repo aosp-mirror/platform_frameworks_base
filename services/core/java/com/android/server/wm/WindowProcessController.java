@@ -221,7 +221,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // has been sent to client by {@link android.app.IApplicationThread#bindApplication}.
             // If this process is system server, it is fine because system is booting and a new
             // configuration will update when display is ready.
-            setLastReportedConfiguration(getConfiguration());
+            if (thread != null) {
+                setLastReportedConfiguration(getConfiguration());
+            }
         }
     }
 

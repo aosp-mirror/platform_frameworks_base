@@ -4741,7 +4741,8 @@ public class DevicePolicyManager {
      * @hide
      */
     public static final int ORG_OWNED_PROFILE_KEYGUARD_FEATURES_PARENT_ONLY =
-            KEYGUARD_DISABLE_SECURE_CAMERA;
+            DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA
+                    | DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
 
     /**
      * Keyguard features that when set on a normal or organization-owned managed profile, have
@@ -6146,14 +6147,17 @@ public class DevicePolicyManager {
      * <ul>
      * <li>{@link #KEYGUARD_DISABLE_SECURE_CAMERA} which affects the parent user when called on the
      * parent profile.
+     * <li>{@link #KEYGUARD_DISABLE_SECURE_NOTIFICATIONS} which affects the parent user when called
+     * on the parent profile.
      * </ul>
      * {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, {@link #KEYGUARD_DISABLE_FINGERPRINT},
-     * {@link #KEYGUARD_DISABLE_FACE}, {@link #KEYGUARD_DISABLE_IRIS} and
-     * {@link #KEYGUARD_DISABLE_SECURE_CAMERA} can also be set on the {@link DevicePolicyManager}
-     * instance returned by {@link #getParentProfileInstance(ComponentName)} in order to set
-     * restrictions on the parent profile. {@link #KEYGUARD_DISABLE_SECURE_CAMERA} can only be set
-     * on the parent profile instance if the calling device admin is the profile owner of an
-     * organization-owned managed profile.
+     * {@link #KEYGUARD_DISABLE_FACE}, {@link #KEYGUARD_DISABLE_IRIS},
+     * {@link #KEYGUARD_DISABLE_SECURE_CAMERA} and {@link #KEYGUARD_DISABLE_SECURE_NOTIFICATIONS}
+     * can also be set on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile. {@link #KEYGUARD_DISABLE_SECURE_CAMERA} can only be set on the parent profile
+     * instance if the calling device admin is the profile owner of an organization-owned
+     * managed profile.
      * <p>
      * Requests to disable other features on a managed profile will be ignored.
      * <p>

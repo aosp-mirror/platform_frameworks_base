@@ -453,10 +453,11 @@ public class NotificationPanelViewController extends PanelViewController {
             KeyguardUpdateMonitor keyguardUpdateMonitor, MetricsLogger metricsLogger,
             ActivityManager activityManager, ZenModeController zenModeController,
             ConfigurationController configurationController,
-            FlingAnimationUtils.Builder flingAnimationUtilsBuilder) {
+            FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
+            StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
-                latencyTracker, flingAnimationUtilsBuilder);
+                latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
         mView = view;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
@@ -704,9 +705,9 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private Rect calculateGestureExclusionRect() {
         Rect exclusionRect = null;
-        Region touchableRegion = mHeadsUpManager.calculateTouchableRegion();
+        Region touchableRegion = mStatusBarTouchableRegionManager.calculateTouchableRegion();
         if (isFullyCollapsed() && touchableRegion != null) {
-            // Note: The heads up manager also calculates the non-pinned touchable region
+            // Note: The manager also calculates the non-pinned touchable region
             exclusionRect = touchableRegion.getBounds();
         }
         return exclusionRect != null ? exclusionRect : EMPTY_RECT;
@@ -1914,6 +1915,7 @@ public class NotificationPanelViewController extends PanelViewController {
         boolean isExpanded = !isFullyCollapsed() || mExpectingSynthesizedDown;
         if (mPanelExpanded != isExpanded) {
             mHeadsUpManager.setIsPanelExpanded(isExpanded);
+            mStatusBarTouchableRegionManager.setPanelExpanded(isExpanded);
             mStatusBar.setPanelExpanded(isExpanded);
             mPanelExpanded = isExpanded;
         }

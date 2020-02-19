@@ -176,8 +176,10 @@ public class BatterySaverStateMachine {
     @GuardedBy("mLock")
     private int mSettingBatterySaverStickyAutoDisableThreshold;
 
-    /** Config flag to track default disable threshold for Dynamic Power Savings enabled battery
-     * saver. */
+    /**
+     * Config flag to track default disable threshold for Dynamic Power Savings enabled battery
+     * saver.
+     */
     @GuardedBy("mLock")
     private final int mDynamicPowerSavingsDefaultDisableThreshold;
 
@@ -192,8 +194,9 @@ public class BatterySaverStateMachine {
     @GuardedBy("mLock")
     private int mSettingAutomaticBatterySaver;
 
-    /** When to disable battery saver again if it was enabled due to an external suggestion.
-     *  Corresponds to Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD.
+    /**
+     * When to disable battery saver again if it was enabled due to an external suggestion.
+     * Corresponds to Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD.
      */
     @GuardedBy("mLock")
     private int mDynamicPowerSavingsDisableThreshold;
@@ -203,7 +206,7 @@ public class BatterySaverStateMachine {
      * Updates when Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED changes.
      */
     @GuardedBy("mLock")
-    private boolean mDynamicPowerSavingsBatterySaver;
+    private boolean mDynamicPowerSavingsEnableBatterySaver;
 
     /**
      * Last reason passed to {@link #enableBatterySaverLocked}.
@@ -265,7 +268,7 @@ public class BatterySaverStateMachine {
     /** @return true if the dynamic mode should be used */
     private boolean isDynamicModeActiveLocked() {
         return mSettingAutomaticBatterySaver == PowerManager.POWER_SAVE_MODE_TRIGGER_DYNAMIC
-                && mDynamicPowerSavingsBatterySaver;
+                && mDynamicPowerSavingsEnableBatterySaver;
     }
 
     /**
@@ -428,7 +431,7 @@ public class BatterySaverStateMachine {
         final boolean dynamicPowerSavingsThresholdChanged =
                 mDynamicPowerSavingsDisableThreshold != dynamicPowerSavingsDisableThreshold;
         final boolean dynamicPowerSavingsBatterySaverChanged =
-                mDynamicPowerSavingsBatterySaver != dynamicPowerSavingsBatterySaver;
+                mDynamicPowerSavingsEnableBatterySaver != dynamicPowerSavingsBatterySaver;
 
         if (!(enabledChanged || stickyChanged || thresholdChanged || automaticModeChanged
                 || stickyAutoDisableEnabledChanged || stickyAutoDisableThresholdChanged
@@ -443,7 +446,7 @@ public class BatterySaverStateMachine {
         mSettingBatterySaverStickyAutoDisableThreshold = stickyAutoDisableThreshold;
         mSettingAutomaticBatterySaver = automaticBatterySaver;
         mDynamicPowerSavingsDisableThreshold = dynamicPowerSavingsDisableThreshold;
-        mDynamicPowerSavingsBatterySaver = dynamicPowerSavingsBatterySaver;
+        mDynamicPowerSavingsEnableBatterySaver = dynamicPowerSavingsBatterySaver;
 
         if (thresholdChanged) {
             // To avoid spamming the event log, we throttle logging here.
@@ -923,6 +926,8 @@ public class BatterySaverStateMachine {
             pw.print("  mIsBatteryLevelLow=");
             pw.println(mIsBatteryLevelLow);
 
+            pw.print("  mSettingAutomaticBatterySaver=");
+            pw.println(mSettingAutomaticBatterySaver);
             pw.print("  mSettingBatterySaverEnabled=");
             pw.println(mSettingBatterySaverEnabled);
             pw.print("  mSettingBatterySaverEnabledSticky=");
@@ -935,6 +940,13 @@ public class BatterySaverStateMachine {
             pw.println(mSettingBatterySaverTriggerThreshold);
             pw.print("  mBatterySaverStickyBehaviourDisabled=");
             pw.println(mBatterySaverStickyBehaviourDisabled);
+
+            pw.print("  mDynamicPowerSavingsDefaultDisableThreshold=");
+            pw.println(mDynamicPowerSavingsDefaultDisableThreshold);
+            pw.print("  mDynamicPowerSavingsDisableThreshold=");
+            pw.println(mDynamicPowerSavingsDisableThreshold);
+            pw.print("  mDynamicPowerSavingsEnableBatterySaver=");
+            pw.println(mDynamicPowerSavingsEnableBatterySaver);
 
             pw.print("  mLastAdaptiveBatterySaverChangedExternallyElapsed=");
             pw.println(mLastAdaptiveBatterySaverChangedExternallyElapsed);
@@ -964,6 +976,8 @@ public class BatterySaverStateMachine {
             proto.write(BatterySaverStateMachineProto.BATTERY_LEVEL, mBatteryLevel);
             proto.write(BatterySaverStateMachineProto.IS_BATTERY_LEVEL_LOW, mIsBatteryLevelLow);
 
+            proto.write(BatterySaverStateMachineProto.SETTING_AUTOMATIC_TRIGGER,
+                    mSettingAutomaticBatterySaver);
             proto.write(BatterySaverStateMachineProto.SETTING_BATTERY_SAVER_ENABLED,
                     mSettingBatterySaverEnabled);
             proto.write(BatterySaverStateMachineProto.SETTING_BATTERY_SAVER_ENABLED_STICKY,
@@ -977,6 +991,16 @@ public class BatterySaverStateMachine {
                     BatterySaverStateMachineProto
                             .SETTING_BATTERY_SAVER_STICKY_AUTO_DISABLE_THRESHOLD,
                     mSettingBatterySaverStickyAutoDisableThreshold);
+
+            proto.write(
+                    BatterySaverStateMachineProto.DEFAULT_DYNAMIC_DISABLE_THRESHOLD,
+                    mDynamicPowerSavingsDefaultDisableThreshold);
+            proto.write(
+                    BatterySaverStateMachineProto.DYNAMIC_DISABLE_THRESHOLD,
+                    mDynamicPowerSavingsDisableThreshold);
+            proto.write(
+                    BatterySaverStateMachineProto.DYNAMIC_BATTERY_SAVER_ENABLED,
+                    mDynamicPowerSavingsEnableBatterySaver);
 
             proto.write(
                     BatterySaverStateMachineProto

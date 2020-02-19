@@ -137,6 +137,7 @@ public class SystemServicesTestRule implements TestRule {
                         }
                         throw t;
                     }
+                    if (throwable != null) throw throwable;
                 }
             }
         };

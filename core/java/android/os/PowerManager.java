@@ -26,6 +26,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.service.dreams.Sandman;
@@ -877,6 +878,39 @@ public final class PowerManager {
         }
     }
 
+    private static final String CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY =
+            "cache_key.is_power_save_mode";
+
+    private static final String CACHE_KEY_IS_INTERACTIVE_PROPERTY = "cache_key.is_interactive";
+
+    private static final int MAX_CACHE_ENTRIES = 1;
+
+    private PropertyInvalidatedCache<Void, Boolean> mPowerSaveModeCache =
+            new PropertyInvalidatedCache<Void, Boolean>(MAX_CACHE_ENTRIES,
+                CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY) {
+                @Override
+                protected Boolean recompute(Void query) {
+                    try {
+                        return mService.isPowerSaveMode();
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+            };
+
+    private PropertyInvalidatedCache<Void, Boolean> mInteractiveCache =
+            new PropertyInvalidatedCache<Void, Boolean>(MAX_CACHE_ENTRIES,
+                CACHE_KEY_IS_INTERACTIVE_PROPERTY) {
+                @Override
+                protected Boolean recompute(Void query) {
+                    try {
+                        return mService.isInteractive();
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+            };
+
     final Context mContext;
     @UnsupportedAppUsage
     final IPowerManager mService;
@@ -1440,11 +1474,7 @@ public final class PowerManager {
      * @see android.content.Intent#ACTION_SCREEN_OFF
      */
     public boolean isInteractive() {
-        try {
-            return mService.isInteractive();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mInteractiveCache.query(null);
     }
 
     /**
@@ -1504,11 +1534,7 @@ public final class PowerManager {
      * @return Returns true if currently in low power mode, else false.
      */
     public boolean isPowerSaveMode() {
-        try {
-            return mService.isPowerSaveMode();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mPowerSaveModeCache.query(null);
     }
 
     /**
@@ -2507,5 +2533,19 @@ public final class PowerManager {
                 }
             };
         }
+    }
+
+    /**
+     * @hide
+     */
+    public static void invalidatePowerSaveModeCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY);
+    }
+
+    /**
+     * @hide
+     */
+    public static void invalidateIsInteractiveCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_IS_INTERACTIVE_PROPERTY);
     }
 }

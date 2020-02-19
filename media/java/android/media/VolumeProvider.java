@@ -89,7 +89,7 @@ public abstract class VolumeProvider {
      *            this provider.
      * @param maxVolume The maximum allowed volume.
      * @param currentVolume The current volume on the output.
-     * @param volumeControlId The volume control id of this provider.
+     * @param volumeControlId The volume control ID of this provider.
      */
     public VolumeProvider(@ControlType int volumeControl, int maxVolume, int currentVolume,
             @Nullable String volumeControlId) {
@@ -142,10 +142,10 @@ public abstract class VolumeProvider {
     }
 
     /**
-     * Gets the volume control id. It can be used to identify which volume provider is
+     * Gets the volume control ID. It can be used to identify which volume provider is
      * used by the session.
      *
-     * @return the volume control id or {@code null} if it isn't set.
+     * @return the volume control ID or {@code null} if it isn't set.
      */
     @Nullable
     public final String getVolumeControlId() {

@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.FloatingContentCoordinator;
 
 import javax.inject.Singleton;
 
@@ -60,7 +61,8 @@ public interface BubbleModule {
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
-            DumpController dumpController) {
+            DumpController dumpController,
+            FloatingContentCoordinator floatingContentCoordinator) {
         return new BubbleController(
                 context,
                 notificationShadeWindowController,
@@ -76,6 +78,7 @@ public interface BubbleModule {
                 entryManager,
                 notifPipeline,
                 featureFlags,
-                dumpController);
+                dumpController,
+                floatingContentCoordinator);
     }
 }

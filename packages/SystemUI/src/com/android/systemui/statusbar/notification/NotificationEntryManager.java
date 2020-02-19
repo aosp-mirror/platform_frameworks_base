@@ -49,9 +49,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -230,9 +228,7 @@ public class NotificationEntryManager implements
         mRemoveInterceptors.remove(interceptor);
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationListContainer listContainer,
-            HeadsUpManager headsUpManager) {
+    public void setUpWithPresenter(NotificationPresenter presenter) {
         mPresenter = presenter;
     }
 

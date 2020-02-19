@@ -137,7 +137,7 @@ public class SyncStorageEngine {
     /**
      * String names for the sync source types.
      *
-     * KEEP THIS AND {@link SyncStatusInfo#SOURCE_COUNT} IN SYNC.
+     * KEEP THIS AND {@link SyncStatusInfo}.SOURCE_COUNT IN SYNC.
      */
     public static final String[] SOURCES = {
             "OTHER",
@@ -1117,7 +1117,7 @@ public class SyncStorageEngine {
                 Slog.v(TAG, "setActiveSync: account="
                         + " auth=" + activeSyncContext.mSyncOperation.target
                         + " src=" + activeSyncContext.mSyncOperation.syncSource
-                        + " extras=" + activeSyncContext.mSyncOperation.extras);
+                        + " extras=" + activeSyncContext.mSyncOperation.getExtrasAsString());
             }
             final EndPoint info = activeSyncContext.mSyncOperation.target;
             AuthorityInfo authorityInfo = getOrCreateAuthorityLocked(
@@ -1179,7 +1179,7 @@ public class SyncStorageEngine {
             item.eventTime = now;
             item.source = op.syncSource;
             item.reason = op.reason;
-            item.extras = op.extras;
+            item.extras = op.getClonedExtras();
             item.event = EVENT_START;
             item.syncExemptionFlag = op.syncExemptionFlag;
             mSyncHistory.add(0, item);

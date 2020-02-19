@@ -16,8 +16,10 @@
 
 package com.android.systemui.bubbles.animation;
 
+import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
 import android.view.View;
@@ -31,6 +33,8 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
+import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.systemui.util.animation.PhysicsAnimator;
 
 import com.google.android.collect.Sets;
 
@@ -94,6 +98,12 @@ public class StackAnimationController extends
      * no bubbles, or the first bubble was just added and being animated to its new position.
      */
     private PointF mStackPosition = new PointF(-1, -1);
+
+    /**
+     * The area that Bubbles will occupy after all animations end. This is used to move other
+     * floating content out of the way proactively.
+     */
+    private Rect mAnimatingToBounds = new Rect();
 
     /** Whether or not the stack's start position has been set. */
     private boolean mStackMovedToStartPosition = false;
@@ -163,11 +173,70 @@ public class StackAnimationController extends
     /** Height of the status bar. */
     private float mStatusBarHeight;
 
+    /** FloatingContentCoordinator instance for resolving floating content conflicts. */
+    private FloatingContentCoordinator mFloatingContentCoordinator;
+
+    /**
+     * FloatingContent instance that returns the stack's location on the screen, and moves it when
+     * requested.
+     */
+    private final FloatingContentCoordinator.FloatingContent mStackFloatingContent =
+            new FloatingContentCoordinator.FloatingContent() {
+
+        private final Rect mFloatingBoundsOnScreen = new Rect();
+
+        @Override
+        public void moveToBounds(@NonNull Rect bounds) {
+            springStack(bounds.left, bounds.top, SpringForce.STIFFNESS_LOW);
+        }
+
+        @NonNull
+        @Override
+        public Rect getAllowedFloatingBoundsRegion() {
+            final Rect floatingBounds = getFloatingBoundsOnScreen();
+            final Rect allowableStackArea = new Rect();
+            getAllowableStackPositionRegion().roundOut(allowableStackArea);
+            allowableStackArea.right += floatingBounds.width();
+            allowableStackArea.bottom += floatingBounds.height();
+            return allowableStackArea;
+        }
+
+        @NonNull
+        @Override
+        public Rect getFloatingBoundsOnScreen() {
+            if (!mAnimatingToBounds.isEmpty()) {
+                return mAnimatingToBounds;
+            }
+
+            if (mLayout.getChildCount() > 0) {
+                // Calculate the bounds using stack position + bubble size so that we don't need to
+                // wait for the bubble views to lay out.
+                mFloatingBoundsOnScreen.set(
+                        (int) mStackPosition.x,
+                        (int) mStackPosition.y,
+                        (int) mStackPosition.x + mBubbleSize,
+                        (int) mStackPosition.y + mBubbleSize + mBubblePaddingTop);
+            } else {
+                mFloatingBoundsOnScreen.setEmpty();
+            }
+
+            return mFloatingBoundsOnScreen;
+        }
+    };
+
+    public StackAnimationController(
+            FloatingContentCoordinator floatingContentCoordinator) {
+        mFloatingContentCoordinator = floatingContentCoordinator;
+    }
+
     /**
      * Instantly move the first bubble to the given point, and animate the rest of the stack behind
      * it with the 'following' effect.
      */
     public void moveFirstBubbleWithStackFollowing(float x, float y) {
+        // If we're moving the bubble around, we're not animating to any bounds.
+        mAnimatingToBounds.setEmpty();
+
         // If we manually move the bubbles with the IME open, clear the return point since we don't
         // want the stack to snap away from the new position.
         mPreImeY = Float.MIN_VALUE;
@@ -204,20 +273,30 @@ public class StackAnimationController extends
      * Note that we need new SpringForce instances per animation despite identical configs because
      * SpringAnimation uses SpringForce's internal (changing) velocity while the animation runs.
      */
-    public void springStack(float destinationX, float destinationY) {
+    public void springStack(float destinationX, float destinationY, float stiffness) {
+        notifyFloatingCoordinatorStackAnimatingTo(destinationX, destinationY);
+
         springFirstBubbleWithStackFollowing(DynamicAnimation.TRANSLATION_X,
                 new SpringForce()
-                        .setStiffness(SPRING_AFTER_FLING_STIFFNESS)
+                        .setStiffness(stiffness)
                         .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
                 0 /* startXVelocity */,
                 destinationX);
 
         springFirstBubbleWithStackFollowing(DynamicAnimation.TRANSLATION_Y,
                 new SpringForce()
-                        .setStiffness(SPRING_AFTER_FLING_STIFFNESS)
+                        .setStiffness(stiffness)
                         .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
                 0 /* startYVelocity */,
                 destinationY);
+    }
+
+    /**
+     * Springs the stack to the specified x/y coordinates, with the stiffness used for springs after
+     * flings.
+     */
+    public void springStackAfterFling(float destinationX, float destinationY) {
+        springStack(destinationX, destinationY, SPRING_AFTER_FLING_STIFFNESS);
     }
 
     /**
@@ -252,6 +331,13 @@ public class StackAnimationController extends
         // regardless.
         final float minimumVelocityToReachEdge =
                 (destinationRelativeX - x) * (FLING_FRICTION_X * 4.2f);
+
+        final float estimatedY = PhysicsAnimator.estimateFlingEndValue(
+                mStackPosition.y, velY,
+                new PhysicsAnimator.FlingConfig(
+                        FLING_FRICTION_Y, stackBounds.top, stackBounds.bottom));
+
+        notifyFloatingCoordinatorStackAnimatingTo(destinationRelativeX, estimatedY);
 
         // Use the touch event's velocity if it's sufficient, otherwise use the minimum velocity so
         // that it'll make it all the way to the side of the screen.
@@ -426,14 +512,28 @@ public class StackAnimationController extends
                             .setStiffness(SpringForce.STIFFNESS_LOW),
                     /* startVel */ 0f,
                     destinationY);
+
+            notifyFloatingCoordinatorStackAnimatingTo(mStackPosition.x, destinationY);
         }
     }
 
     /**
-     * Returns the region within which the stack is allowed to rest. This goes slightly off the left
+     * Notifies the floating coordinator that we're moving, and sets {@link #mAnimatingToBounds} so
+     * we return these bounds from
+     * {@link FloatingContentCoordinator.FloatingContent#getFloatingBoundsOnScreen()}.
+     */
+    private void notifyFloatingCoordinatorStackAnimatingTo(float x, float y) {
+        final Rect floatingBounds = mStackFloatingContent.getFloatingBoundsOnScreen();
+        floatingBounds.offsetTo((int) x, (int) y);
+        mAnimatingToBounds = floatingBounds;
+        mFloatingContentCoordinator.onContentMoved(mStackFloatingContent);
+    }
+
+    /**
+     * Returns the region that the stack position must stay within. This goes slightly off the left
      * and right sides of the screen, below the status bar/cutout and above the navigation bar.
-     * While the stack is not allowed to rest outside of these bounds, it can temporarily be
-     * animated or dragged beyond them.
+     * While the stack position is not allowed to rest outside of these bounds, it can temporarily
+     * be animated or dragged beyond them.
      */
     public RectF getAllowableStackPositionRegion() {
         final WindowInsets insets = mLayout.getRootWindowInsets();
@@ -690,6 +790,10 @@ public class StackAnimationController extends
             setStackPosition(mRestingStackPosition == null
                     ? getDefaultStartPosition()
                     : mRestingStackPosition);
+
+            // Remove the stack from the coordinator since we don't have any bubbles and aren't
+            // visible.
+            mFloatingContentCoordinator.onContentRemoved(mStackFloatingContent);
         }
     }
 
@@ -741,6 +845,10 @@ public class StackAnimationController extends
 
             // Animate in the top bubble now that we're visible.
             if (mLayout.getChildCount() > 0) {
+                // Add the stack to the floating content coordinator now that we have a bubble and
+                // are visible.
+                mFloatingContentCoordinator.onContentAdded(mStackFloatingContent);
+
                 animateInBubble(mLayout.getChildAt(0), 0 /* index */);
             }
         });

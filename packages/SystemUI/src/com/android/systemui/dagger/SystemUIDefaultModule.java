@@ -38,8 +38,10 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.ShadeControllerImpl;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -92,10 +94,14 @@ public abstract class SystemUIDefaultModule {
 
     @Singleton
     @Provides
-    static HeadsUpManagerPhone provideHeadsUpManagerPhone(Context context,
+    static HeadsUpManagerPhone provideHeadsUpManagerPhone(
+            Context context,
             StatusBarStateController statusBarStateController,
-            KeyguardBypassController bypassController) {
-        return new HeadsUpManagerPhone(context, statusBarStateController, bypassController);
+            KeyguardBypassController bypassController,
+            NotificationGroupManager groupManager,
+            ConfigurationController configurationController) {
+        return new HeadsUpManagerPhone(context, statusBarStateController, bypassController,
+                groupManager, configurationController);
     }
 
     @Binds

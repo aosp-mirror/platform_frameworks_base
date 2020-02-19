@@ -259,6 +259,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         implements WindowManagerPolicy.DisplayContentInfo {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayContent" : TAG_WM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
+    private static final int NO_ROTATION = -1;
 
     /** The default scaling mode that scales content automatically. */
     static final int FORCE_SCALING_MODE_AUTO = 0;
@@ -514,6 +515,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * new task the user wants to interact with.
      */
     ActivityRecord mFocusedApp = null;
+
+    /**
+     * The launching activity which is using fixed rotation transformation.
+     *
+     * @see #handleTopActivityLaunchingInDifferentOrientation
+     */
+    ActivityRecord mFixedRotationLaunchingApp;
 
     /** Windows added since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
     final ArrayList<WindowState> mWinAddedSinceNullFocus = new ArrayList<>();
@@ -1308,6 +1316,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mDisplayRotation.isWaitingForRemoteRotation()) {
             return;
         }
+        // Clear the record because the display will sync to current rotation.
+        mFixedRotationLaunchingApp = null;
+
         final boolean configUpdated = updateDisplayOverrideConfigurationLocked();
         if (configUpdated) {
             return;
@@ -1367,7 +1378,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      *         {@link #sendNewConfiguration} if the method returns {@code true}.
      */
     boolean updateOrientation() {
-        return mDisplayRotation.updateOrientation(getOrientation(), false /* forceUpdate */);
+        return updateOrientation(false /* forceUpdate */);
     }
 
     /**
@@ -1390,7 +1401,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         Configuration config = null;
-        if (mDisplayRotation.updateOrientation(getOrientation(), forceUpdate)) {
+        if (updateOrientation(forceUpdate)) {
             // If we changed the orientation but mOrientationChangeComplete is already true,
             // we used seamless rotation, and we don't need to freeze the screen.
             if (freezeDisplayToken != null && !mWmService.mRoot.mOrientationChangeComplete) {
@@ -1419,6 +1430,126 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         return config;
+    }
+
+    private boolean updateOrientation(boolean forceUpdate) {
+        final int orientation = getOrientation();
+        // The last orientation source is valid only after getOrientation.
+        final WindowContainer orientationSource = getLastOrientationSource();
+        final ActivityRecord r =
+                orientationSource != null ? orientationSource.asActivityRecord() : null;
+        // Currently there is no use case from non-activity.
+        if (r != null && handleTopActivityLaunchingInDifferentOrientation(r)) {
+            mFixedRotationLaunchingApp = r;
+            // Display orientation should be deferred until the top fixed rotation is finished.
+            return false;
+        }
+        return mDisplayRotation.updateOrientation(orientation, forceUpdate);
+    }
+
+    /** @return a valid rotation if the activity can use different orientation than the display. */
+    @Surface.Rotation
+    private int rotationForActivityInDifferentOrientation(@NonNull ActivityRecord r) {
+        if (!mWmService.mIsFixedRotationTransformEnabled) {
+            return NO_ROTATION;
+        }
+        if (r.inMultiWindowMode()
+                || r.getRequestedConfigurationOrientation() == getConfiguration().orientation) {
+            return NO_ROTATION;
+        }
+        final int currentRotation = getRotation();
+        final int rotation = mDisplayRotation.rotationForOrientation(r.getRequestedOrientation(),
+                currentRotation);
+        if (rotation == currentRotation) {
+            return NO_ROTATION;
+        }
+        return rotation;
+    }
+
+    /**
+     * We need to keep display rotation fixed for a while when the activity in different orientation
+     * is launching until the launch animation is done to avoid showing the previous activity
+     * inadvertently in a wrong orientation.
+     *
+     * @return {@code true} if the fixed rotation is started.
+     */
+    private boolean handleTopActivityLaunchingInDifferentOrientation(@NonNull ActivityRecord r) {
+        if (!mWmService.mIsFixedRotationTransformEnabled) {
+            return false;
+        }
+        if (r.isFinishingFixedRotationTransform()) {
+            return false;
+        }
+        if (r.hasFixedRotationTransform()) {
+            // It has been set and not yet finished.
+            return true;
+        }
+        if (!mAppTransition.isTransitionSet()) {
+            // Apply normal rotation animation in case of the activity set different requested
+            // orientation without activity switch.
+            return false;
+        }
+        if (!mOpeningApps.contains(r)
+                // Without screen rotation, the rotation behavior of non-top visible activities is
+                // undefined. So the fixed rotated activity needs to cover the screen.
+                && r.findMainWindow() != mDisplayPolicy.getTopFullscreenOpaqueWindow()) {
+            return false;
+        }
+        final int rotation = rotationForActivityInDifferentOrientation(r);
+        if (rotation == NO_ROTATION) {
+            return false;
+        }
+        if (!r.getParent().matchParentBounds()) {
+            // Because the fixed rotated configuration applies to activity directly, if its parent
+            // has it own policy for bounds, the activity bounds based on parent is unknown.
+            return false;
+        }
+
+        startFixedRotationTransform(r, rotation);
+        mAppTransition.registerListenerLocked(new WindowManagerInternal.AppTransitionListener() {
+            void done() {
+                r.clearFixedRotationTransform();
+                mAppTransition.unregisterListener(this);
+            }
+
+            @Override
+            public void onAppTransitionFinishedLocked(IBinder token) {
+                if (token == r.token) {
+                    done();
+                }
+            }
+
+            @Override
+            public void onAppTransitionCancelledLocked(int transit) {
+                done();
+            }
+
+            @Override
+            public void onAppTransitionTimeoutLocked() {
+                done();
+            }
+        });
+        return true;
+    }
+
+    /** @return {@code true} if the display orientation will be changed. */
+    boolean continueUpdateOrientationForDiffOrienLaunchingApp(WindowToken token) {
+        if (token != mFixedRotationLaunchingApp) {
+            return false;
+        }
+        if (updateOrientation()) {
+            sendNewConfiguration();
+            return true;
+        }
+        return false;
+    }
+
+    private void startFixedRotationTransform(WindowToken token, int rotation) {
+        mTmpConfiguration.unset();
+        final DisplayInfo info = computeScreenConfiguration(mTmpConfiguration, rotation);
+        final WmDisplayCutout cutout = calculateDisplayCutoutForRotation(rotation);
+        final DisplayFrames displayFrames = new DisplayFrames(mDisplayId, info, cutout);
+        token.applyFixedRotationTransform(info, displayFrames, mTmpConfiguration);
     }
 
     /**
@@ -1622,6 +1753,63 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
+     * Compute display info and configuration according to the given rotation without changing
+     * current display.
+     */
+    DisplayInfo computeScreenConfiguration(Configuration outConfig, int rotation) {
+        final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+        final int dw = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
+        final int dh = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
+        outConfig.windowConfiguration.getBounds().set(0, 0, dw, dh);
+
+        final int uiMode = getConfiguration().uiMode;
+        final DisplayCutout displayCutout =
+                calculateDisplayCutoutForRotation(rotation).getDisplayCutout();
+        computeScreenAppConfiguration(outConfig, dw, dh, rotation, uiMode, displayCutout);
+
+        final DisplayInfo displayInfo = new DisplayInfo(mDisplayInfo);
+        displayInfo.rotation = rotation;
+        displayInfo.logicalWidth = dw;
+        displayInfo.logicalHeight = dh;
+        final Rect appBounds = outConfig.windowConfiguration.getAppBounds();
+        displayInfo.appWidth = appBounds.width();
+        displayInfo.appHeight = appBounds.height();
+        displayInfo.displayCutout = displayCutout.isEmpty() ? null : displayCutout;
+        computeSizeRangesAndScreenLayout(displayInfo, rotated, uiMode, dw, dh,
+                mDisplayMetrics.density, outConfig);
+        return displayInfo;
+    }
+
+    /** Compute configuration related to application without changing current display. */
+    private void computeScreenAppConfiguration(Configuration outConfig, int dw, int dh,
+            int rotation, int uiMode, DisplayCutout displayCutout) {
+        final int appWidth = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
+                displayCutout);
+        final int appHeight = mDisplayPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode,
+                displayCutout);
+        mDisplayPolicy.getNonDecorInsetsLw(rotation, dw, dh, displayCutout, mTmpRect);
+        final int leftInset = mTmpRect.left;
+        final int topInset = mTmpRect.top;
+        // AppBounds at the root level should mirror the app screen size.
+        outConfig.windowConfiguration.setAppBounds(leftInset /* left */, topInset /* top */,
+                leftInset + appWidth /* right */, topInset + appHeight /* bottom */);
+        outConfig.windowConfiguration.setRotation(rotation);
+        outConfig.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+
+        final float density = mDisplayMetrics.density;
+        outConfig.screenWidthDp = (int) (mDisplayPolicy.getConfigDisplayWidth(dw, dh, rotation,
+                uiMode, displayCutout) / density);
+        outConfig.screenHeightDp = (int) (mDisplayPolicy.getConfigDisplayHeight(dw, dh, rotation,
+                uiMode, displayCutout) / density);
+        outConfig.compatScreenWidthDp = (int) (outConfig.screenWidthDp / mCompatibleScreenScale);
+        outConfig.compatScreenHeightDp = (int) (outConfig.screenHeightDp / mCompatibleScreenScale);
+
+        final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+        outConfig.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, uiMode, dw,
+                dh, displayCutout);
+    }
+
+    /**
      * Compute display configuration based on display properties and policy settings.
      * Do not call if mDisplayReady == false.
      */
@@ -1629,42 +1817,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final DisplayInfo displayInfo = updateDisplayAndOrientation(config.uiMode, config);
         calculateBounds(displayInfo, mTmpBounds);
         config.windowConfiguration.setBounds(mTmpBounds);
+        config.windowConfiguration.setWindowingMode(getWindowingMode());
+        config.windowConfiguration.setDisplayWindowingMode(getWindowingMode());
 
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
-        config.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
-        config.windowConfiguration.setWindowingMode(getWindowingMode());
-        config.windowConfiguration.setDisplayWindowingMode(getWindowingMode());
-        config.windowConfiguration.setRotation(displayInfo.rotation);
-
-        final float density = mDisplayMetrics.density;
-        config.screenWidthDp =
-                (int)(mDisplayPolicy.getConfigDisplayWidth(dw, dh, displayInfo.rotation,
-                        config.uiMode, displayInfo.displayCutout) / density);
-        config.screenHeightDp =
-                (int)(mDisplayPolicy.getConfigDisplayHeight(dw, dh, displayInfo.rotation,
-                        config.uiMode, displayInfo.displayCutout) / density);
-
-        mDisplayPolicy.getNonDecorInsetsLw(displayInfo.rotation, dw, dh,
-                displayInfo.displayCutout, mTmpRect);
-        final int leftInset = mTmpRect.left;
-        final int topInset = mTmpRect.top;
-        // appBounds at the root level should mirror the app screen size.
-        config.windowConfiguration.setAppBounds(leftInset /* left */, topInset /* top */,
-                leftInset + displayInfo.appWidth /* right */,
-                topInset + displayInfo.appHeight /* bottom */);
-        final boolean rotated = (displayInfo.rotation == Surface.ROTATION_90
-                || displayInfo.rotation == Surface.ROTATION_270);
+        computeScreenAppConfiguration(config, dw, dh, displayInfo.rotation, config.uiMode,
+                displayInfo.displayCutout);
 
         config.screenLayout = (config.screenLayout & ~Configuration.SCREENLAYOUT_ROUND_MASK)
                 | ((displayInfo.flags & Display.FLAG_ROUND) != 0
                 ? Configuration.SCREENLAYOUT_ROUND_YES
                 : Configuration.SCREENLAYOUT_ROUND_NO);
 
-        config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
-        config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
-        config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, config.uiMode, dw,
-                dh, displayInfo.displayCutout);
         config.densityDpi = displayInfo.logicalDensityDpi;
 
         config.colorMode =
@@ -2111,19 +2276,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /**
      * In the general case, the orientation is computed from the above app windows first. If none of
      * the above app windows specify orientation, the orientation is computed from the child window
-     * container, e.g. {@link AppWindowToken#getOrientation(int)}.
+     * container, e.g. {@link ActivityRecord#getOrientation(int)}.
      */
     @ScreenOrientation
     @Override
     int getOrientation() {
-        final WindowManagerPolicy policy = mWmService.mPolicy;
+        mLastOrientationSource = null;
 
         if (mIgnoreRotationForApps) {
             return SCREEN_ORIENTATION_USER;
         }
 
         if (mWmService.mDisplayFrozen) {
-            if (policy.isKeyguardLocked()) {
+            if (mWmService.mPolicy.isKeyguardLocked()) {
                 // Use the last orientation the while the display is frozen with the keyguard
                 // locked. This could be the keyguard forced orientation or from a SHOW_WHEN_LOCKED
                 // window. We don't want to check the show when locked window directly though as
@@ -2135,7 +2300,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 return getLastOrientation();
             }
         }
-        return mRootDisplayArea.getOrientation();
+        final int rootOrientation = mRootDisplayArea.getOrientation();
+        mLastOrientationSource = mRootDisplayArea.getLastOrientationSource();
+        return rootOrientation;
     }
 
     void updateDisplayInfo() {
@@ -3430,6 +3597,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (target != null && target.getDisplayContent().canShowIme()) {
             return target;
         }
+        return getImeFallback();
+    }
+
+    WindowState getImeFallback() {
 
         // host is in non-default display that doesn't support system decor, default to
         // default display's StatusBar to control IME.

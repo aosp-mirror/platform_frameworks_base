@@ -24,8 +24,12 @@ import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 
 import com.android.systemui.R;
+import com.android.systemui.pip.tv.dagger.TvPipComponent;
 
 import java.util.Collections;
+
+import javax.inject.Inject;
+
 /**
  * Activity to show the PIP menu to control PIP.
  */
@@ -34,12 +38,22 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     static final String EXTRA_CUSTOM_ACTIONS = "custom_actions";
 
-    private final PipManager mPipManager = PipManager.getInstance();
+    private final TvPipComponent.Builder mPipComponentBuilder;
+    private TvPipComponent mTvPipComponent;
+    private final PipManager mPipManager;
 
     private Animator mFadeInAnimation;
     private Animator mFadeOutAnimation;
-    private PipControlsView mPipControlsView;
     private boolean mRestorePipSizeWhenClose;
+    private PipControlsViewController mPipControlsViewController;
+
+
+    @Inject
+    public PipMenuActivity(TvPipComponent.Builder pipComponentBuilder, PipManager pipManager) {
+        super();
+        mPipComponentBuilder = pipComponentBuilder;
+        mPipManager = pipManager;
+    }
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -48,16 +62,19 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
             finish();
         }
         setContentView(R.layout.tv_pip_menu);
+        mTvPipComponent = mPipComponentBuilder.pipControlsView(
+                findViewById(R.id.pip_controls)).build();
+        mPipControlsViewController = mTvPipComponent.getPipControlsViewController();
+
         mPipManager.addListener(this);
 
         mRestorePipSizeWhenClose = true;
-        mPipControlsView = findViewById(R.id.pip_controls);
         mFadeInAnimation = AnimatorInflater.loadAnimator(
                 this, R.anim.tv_pip_menu_fade_in_animation);
-        mFadeInAnimation.setTarget(mPipControlsView);
+        mFadeInAnimation.setTarget(mPipControlsViewController.getView());
         mFadeOutAnimation = AnimatorInflater.loadAnimator(
                 this, R.anim.tv_pip_menu_fade_out_animation);
-        mFadeOutAnimation.setTarget(mPipControlsView);
+        mFadeOutAnimation.setTarget(mPipControlsViewController.getView());
 
         onPipMenuActionsChanged(getIntent().getParcelableExtra(EXTRA_CUSTOM_ACTIONS));
     }
@@ -114,7 +131,8 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     @Override
     public void onPipMenuActionsChanged(ParceledListSlice actions) {
         boolean hasCustomActions = actions != null && !actions.getList().isEmpty();
-        mPipControlsView.setActions(hasCustomActions ? actions.getList() : Collections.EMPTY_LIST);
+        mPipControlsViewController.setActions(
+                hasCustomActions ? actions.getList() : Collections.EMPTY_LIST);
     }
 
     @Override

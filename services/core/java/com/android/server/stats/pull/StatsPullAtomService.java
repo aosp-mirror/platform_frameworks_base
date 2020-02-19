@@ -16,7 +16,8 @@
 
 package com.android.server.stats.pull;
 
-import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
+import static android.app.AppOpsManager.OP_FLAG_SELF;
+import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.os.Debug.getIonHeapsSizeKb;
@@ -184,6 +185,7 @@ public class StatsPullAtomService extends SystemService {
 
     private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
     private static final int CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES = 8;
+    private static final int OP_FLAGS_PULLED = OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED;
 
     private final Object mNetworkStatsLock = new Object();
     @GuardedBy("mNetworkStatsLock")
@@ -2838,8 +2840,8 @@ public class StatsPullAtomService extends SystemService {
             AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
 
             CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
-            HistoricalOpsRequest histOpsRequest =
-                    new HistoricalOpsRequest.Builder(0, Long.MAX_VALUE).build();
+            HistoricalOpsRequest histOpsRequest = new HistoricalOpsRequest.Builder(0,
+                    Long.MAX_VALUE).setFlags(OP_FLAGS_PULLED).build();
             appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
 
             HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
@@ -2851,19 +2853,19 @@ public class StatsPullAtomService extends SystemService {
                 for (int pkgIdx = 0; pkgIdx < uidOps.getPackageCount(); pkgIdx++) {
                     final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
                     for (int opIdx = 0; opIdx < packageOps.getOpCount(); opIdx++) {
-                        final AppOpsManager.HistoricalOp op  = packageOps.getOpAt(opIdx);
+                        final AppOpsManager.HistoricalOp op = packageOps.getOpAt(opIdx);
 
                         StatsEvent.Builder e = StatsEvent.newBuilder();
                         e.setAtomId(atomTag);
                         e.writeInt(uid);
                         e.writeString(packageOps.getPackageName());
                         e.writeInt(op.getOpCode());
-                        e.writeLong(op.getForegroundAccessCount(OP_FLAGS_ALL_TRUSTED));
-                        e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_ALL_TRUSTED));
-                        e.writeLong(op.getForegroundRejectCount(OP_FLAGS_ALL_TRUSTED));
-                        e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_ALL_TRUSTED));
-                        e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
-                        e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getForegroundAccessCount(OP_FLAGS_PULLED));
+                        e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_PULLED));
+                        e.writeLong(op.getForegroundRejectCount(OP_FLAGS_PULLED));
+                        e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_PULLED));
+                        e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_PULLED));
+                        e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_PULLED));
 
                         String perm = AppOpsManager.opToPermission(op.getOpCode());
                         if (perm == null) {

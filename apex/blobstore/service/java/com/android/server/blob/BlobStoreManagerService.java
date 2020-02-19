@@ -874,6 +874,20 @@ public class BlobStoreManagerService extends SystemService {
         }
     }
 
+    void deleteBlob(@NonNull BlobHandle blobHandle, @UserIdInt int userId) {
+        synchronized (mBlobsLock) {
+            final ArrayMap<BlobHandle, BlobMetadata> userBlobs = getUserBlobsLocked(userId);
+            final BlobMetadata blobMetadata = userBlobs.get(blobHandle);
+            if (blobMetadata == null) {
+                return;
+            }
+            blobMetadata.getBlobFile().delete();
+            userBlobs.remove(blobHandle);
+            mKnownBlobIds.remove(blobMetadata.getBlobId());
+            writeBlobsInfoAsync();
+        }
+    }
+
     @GuardedBy("mBlobsLock")
     private void dumpSessionsLocked(IndentingPrintWriter fout, DumpArgs dumpArgs) {
         for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {

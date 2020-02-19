@@ -39,7 +39,7 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
 import android.media.MediaRouter2.RouteCallback;
-import android.media.MediaRouter2.RoutingControllerCallback;
+import android.media.MediaRouter2.TransferCallback;
 import android.media.MediaRouter2Manager;
 import android.media.MediaRouter2Utils;
 import android.media.RouteDiscoveryPreference;
@@ -79,7 +79,7 @@ public class MediaRouter2ManagerTest {
 
     private final List<MediaRouter2Manager.Callback> mManagerCallbacks = new ArrayList<>();
     private final List<RouteCallback> mRouteCallbacks = new ArrayList<>();
-    private final List<RoutingControllerCallback> mControllerCallbacks = new ArrayList<>();
+    private final List<MediaRouter2.TransferCallback> mTransferCallbacks = new ArrayList<>();
 
     public static final List<String> FEATURES_ALL = new ArrayList();
     public static final List<String> FEATURES_SPECIAL = new ArrayList();
@@ -153,18 +153,14 @@ public class MediaRouter2ManagerTest {
 
         MediaRoute2Info routeToRemove = routes.get(ROUTE_ID2);
 
-        try {
-            SampleMediaRoute2ProviderService sInstance =
-                    SampleMediaRoute2ProviderService.getInstance();
-            assertNotNull(sInstance);
-            sInstance.removeRoute(ROUTE_ID2);
-            assertTrue(removedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        SampleMediaRoute2ProviderService sInstance =
+                SampleMediaRoute2ProviderService.getInstance();
+        assertNotNull(sInstance);
+        sInstance.removeRoute(ROUTE_ID2);
+        assertTrue(removedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
-            sInstance.addRoute(routeToRemove);
-            assertTrue(addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-        } finally {
-            mRouter2.unregisterRouteCallback(routeCallback);
-        }
+        sInstance.addRoute(routeToRemove);
+        assertTrue(addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
 
     /**
@@ -198,10 +194,14 @@ public class MediaRouter2ManagerTest {
         addManagerCallback(new MediaRouter2Manager.Callback());
         //TODO: remove this when it's not necessary.
         addRouterCallback(new MediaRouter2.RouteCallback());
-        addSessionCallback(new RoutingControllerCallback() {
+        addTransferCallback(new MediaRouter2.TransferCallback() {
             @Override
-            public void onControllerCreated(MediaRouter2.RoutingController controller) {
-                if (createRouteMap(controller.getSelectedRoutes()).containsKey(ROUTE_ID1)) {
+            public void onTransferred(MediaRouter2.RoutingController oldController,
+                    MediaRouter2.RoutingController newController) {
+                if (newController == null) {
+                    return;
+                }
+                if (createRouteMap(newController.getSelectedRoutes()).containsKey(ROUTE_ID1)) {
                     latch.countDown();
                 }
             }
@@ -363,7 +363,7 @@ public class MediaRouter2ManagerTest {
         int currentVolume = sessionInfo.getVolume();
         int targetVolume = (currentVolume == 0) ? 1 : (currentVolume - 1);
 
-        RoutingControllerCallback routingControllerCallback = new RoutingControllerCallback() {
+        MediaRouter2.ControllerCallback controllerCallback = new MediaRouter2.ControllerCallback() {
             @Override
             public void onControllerUpdated(MediaRouter2.RoutingController controller) {
                 if (!TextUtils.equals(sessionInfo.getId(), controller.getId())) {
@@ -374,7 +374,6 @@ public class MediaRouter2ManagerTest {
                 }
             }
         };
-        mRouter2.registerControllerCallback(mExecutor, routingControllerCallback);
 
         addManagerCallback(new MediaRouter2Manager.Callback() {
             @Override
@@ -390,12 +389,12 @@ public class MediaRouter2ManagerTest {
             }
         });
 
-        mManager.setSessionVolume(sessionInfo, targetVolume);
-
         try {
+            mRouter2.registerControllerCallback(mExecutor, controllerCallback);
+            mManager.setSessionVolume(sessionInfo, targetVolume);
             assertTrue(volumeChangedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
         } finally {
-            mRouter2.unregisterControllerCallback(routingControllerCallback);
+            mRouter2.unregisterControllerCallback(controllerCallback);
         }
     }
 
@@ -491,9 +490,9 @@ public class MediaRouter2ManagerTest {
         mRouter2.registerRouteCallback(mExecutor, routeCallback, RouteDiscoveryPreference.EMPTY);
     }
 
-    private void addSessionCallback(RoutingControllerCallback controllerCallback) {
-        mControllerCallbacks.add(controllerCallback);
-        mRouter2.registerControllerCallback(mExecutor, controllerCallback);
+    private void addTransferCallback(TransferCallback transferCallback) {
+        mTransferCallbacks.add(transferCallback);
+        mRouter2.registerTransferCallback(mExecutor, transferCallback);
     }
 
     private void clearCallbacks() {
@@ -507,10 +506,10 @@ public class MediaRouter2ManagerTest {
         }
         mRouteCallbacks.clear();
 
-        for (RoutingControllerCallback controllerCallback : mControllerCallbacks) {
-            mRouter2.unregisterControllerCallback(controllerCallback);
+        for (MediaRouter2.TransferCallback transferCallback : mTransferCallbacks) {
+            mRouter2.unregisterTransferCallback(transferCallback);
         }
-        mControllerCallbacks.clear();
+        mTransferCallbacks.clear();
     }
 
     private void releaseAllSessions() {

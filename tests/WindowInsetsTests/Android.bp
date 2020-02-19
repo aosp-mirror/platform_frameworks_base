@@ -18,5 +18,10 @@ android_test {
     resource_dirs: ["res"],
     certificate: "platform",
     platform_apis: true,
+    static_libs: [
+        "androidx.core_core",
+        "androidx.appcompat_appcompat",
+        "com.google.android.material_material",
+    ],
 }
 

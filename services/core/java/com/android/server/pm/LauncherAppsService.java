@@ -896,7 +896,8 @@ public class LauncherAppsService extends SystemService {
             i.setSourceBounds(sourceBounds);
 
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, i, opts, userId);
+                    callingFeatureId, i, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK, opts,
+                    userId);
         }
 
         @Override
@@ -955,7 +956,8 @@ public class LauncherAppsService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, launchIntent, opts, user.getIdentifier());
+                    callingFeatureId, launchIntent, /* resultTo= */ null,
+                    Intent.FLAG_ACTIVITY_NEW_TASK, opts, user.getIdentifier());
         }
 
         @Override
@@ -978,7 +980,8 @@ public class LauncherAppsService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, intent, opts, user.getIdentifier());
+                    callingFeatureId, intent, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK,
+                    opts, user.getIdentifier());
         }
 
         /** Checks if user is a profile of or same as listeningUser.

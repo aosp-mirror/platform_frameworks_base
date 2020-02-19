@@ -2087,7 +2087,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void setUidMode(int code, int uid, int mode,
-            @Nullable IAppOpsCallback callbackToIgnore) {
+            @Nullable IAppOpsCallback permissionPolicyCallback) {
         if (DEBUG) {
             Slog.i(TAG, "uid " + uid + " OP_" + opToName(code) + " := " + modeToName(mode)
                     + " by uid " + Binder.getCallingUid());
@@ -2097,7 +2097,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingOp(code);
         code = AppOpsManager.opToSwitch(code);
 
-        updatePermissionRevokedCompat(uid, code, mode);
+        if (permissionPolicyCallback == null) {
+            updatePermissionRevokedCompat(uid, code, mode);
+        }
 
         synchronized (this) {
             final int defaultMode = AppOpsManager.opToDefaultMode(code);
@@ -2135,7 +2137,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             uidState.evalForegroundOps(mOpModeWatchers);
         }
 
-        notifyOpChangedForAllPkgsInUid(code, uid, false, callbackToIgnore);
+        notifyOpChangedForAllPkgsInUid(code, uid, false, permissionPolicyCallback);
         notifyOpChangedSync(code, uid, null, mode);
     }
 
@@ -2337,7 +2339,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void setMode(int code, int uid, @NonNull String packageName, int mode,
-            @Nullable IAppOpsCallback callbackToIgnore) {
+            @Nullable IAppOpsCallback permissionPolicyCallback) {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
         ArraySet<ModeCallback> repCbs = null;
@@ -2381,8 +2383,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                         }
                         repCbs.addAll(cbs);
                     }
-                    if (repCbs != null && callbackToIgnore != null) {
-                        repCbs.remove(mModeWatchers.get(callbackToIgnore.asBinder()));
+                    if (repCbs != null && permissionPolicyCallback != null) {
+                        repCbs.remove(mModeWatchers.get(permissionPolicyCallback.asBinder()));
                     }
                     if (mode == AppOpsManager.opToDefaultMode(op.op)) {
                         // If going into the default mode, prune this op
@@ -6036,15 +6038,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         @Override
-        public void setUidModeIgnoringCallback(int code, int uid, int mode,
-                @Nullable IAppOpsCallback callbackToIgnore) {
-            setUidMode(code, uid, mode, callbackToIgnore);
+        public void setUidModeFromPermissionPolicy(int code, int uid, int mode,
+                @Nullable IAppOpsCallback callback) {
+            setUidMode(code, uid, mode, callback);
         }
 
         @Override
-        public void setModeIgnoringCallback(int code, int uid, @NonNull String packageName,
-                int mode, @Nullable IAppOpsCallback callbackToIgnore) {
-            setMode(code, uid, packageName, mode, callbackToIgnore);
+        public void setModeFromPermissionPolicy(int code, int uid, @NonNull String packageName,
+                int mode, @Nullable IAppOpsCallback callback) {
+            setMode(code, uid, packageName, mode, callback);
         }
     }
 }

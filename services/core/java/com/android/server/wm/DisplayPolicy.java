@@ -1430,7 +1430,7 @@ public class DisplayPolicy {
         }
     }
 
-    private void simulateLayoutDecorWindow(WindowState win, DisplayFrames displayFrames, int uiMode,
+    private void simulateLayoutDecorWindow(WindowState win, DisplayFrames displayFrames,
             InsetsState insetsState, WindowFrames simulatedWindowFrames, Runnable layout) {
         win.setSimulatedWindowFrames(simulatedWindowFrames);
         try {
@@ -1454,7 +1454,7 @@ public class DisplayPolicy {
         final WindowFrames simulatedWindowFrames = new WindowFrames();
         if (mNavigationBar != null) {
             simulateLayoutDecorWindow(
-                    mNavigationBar, displayFrames, uiMode, insetsState, simulatedWindowFrames,
+                    mNavigationBar, displayFrames, insetsState, simulatedWindowFrames,
                     () -> layoutNavigationBar(displayFrames, uiMode, mLastNavVisible,
                             mLastNavTranslucent, mLastNavAllowedHidden,
                             mLastNotificationShadeForcesShowingNavigation,
@@ -1462,7 +1462,7 @@ public class DisplayPolicy {
         }
         if (mStatusBar != null) {
             simulateLayoutDecorWindow(
-                    mStatusBar, displayFrames, uiMode, insetsState, simulatedWindowFrames,
+                    mStatusBar, displayFrames, insetsState, simulatedWindowFrames,
                     () -> layoutStatusBar(displayFrames, mLastSystemUiFlags,
                             false /* isRealLayout */));
         }
@@ -1536,7 +1536,7 @@ public class DisplayPolicy {
         if (updateSysUiVisibility) {
             updateSystemUiVisibilityLw();
         }
-        layoutScreenDecorWindows(displayFrames, null /* transientFrames */);
+        layoutScreenDecorWindows(displayFrames, null /* simulatedFrames */);
         postAdjustDisplayFrames(displayFrames);
         mLastNavVisible = navVisible;
         mLastNavTranslucent = navTranslucent;
@@ -1939,6 +1939,7 @@ public class DisplayPolicy {
         final int requestedSysUiFl = PolicyControl.getSystemUiVisibility(null, attrs);
         final int sysUiFl = requestedSysUiFl | getImpliedSysUiFlagsForLayout(attrs);
 
+        displayFrames = win.getDisplayFrames(displayFrames);
         final WindowFrames windowFrames = win.getWindowFrames();
 
         sTmpLastParentFrame.set(windowFrames.mParentFrame);

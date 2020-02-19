@@ -98,7 +98,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.util.Assert;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -205,7 +204,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mCountDownLatch = new CountDownLatch(1);
 
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 Handler.createAsync(TestableLooper.get(this).getLooper()));
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
@@ -256,7 +255,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 mLeakDetector,
                 mock(ForegroundServiceDismissalFeatureController.class)
         );
-        mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
+        mEntryManager.setUpWithPresenter(mPresenter);
         mEntryManager.addNotificationEntryListener(mEntryListener);
         mEntryManager.addNotificationRemoveInterceptor(mRemoveInterceptor);
 

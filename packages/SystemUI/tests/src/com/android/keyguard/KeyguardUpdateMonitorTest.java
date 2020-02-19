@@ -147,6 +147,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         context.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
 
         mTestableLooper = TestableLooper.get(this);
+        allowTestableLooperAsMainThread();
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(context);
     }
 

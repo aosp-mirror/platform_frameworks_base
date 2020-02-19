@@ -21,14 +21,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.animation.Animator;
-import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +43,7 @@ public class KeepAwakeAnimationListenerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
         KeepAwakeAnimationListener.sWakeLock = mWakeLock;
         mKeepAwakeAnimationListener = new KeepAwakeAnimationListener(getContext());
@@ -63,7 +61,10 @@ public class KeepAwakeAnimationListenerTest extends SysuiTestCase {
 
     @Test(expected = IllegalStateException.class)
     public void initThrows_onNonMainThread() {
-        Assert.sMainLooper = Looper.getMainLooper();
+        disallowTestableLooperAsMainThread();
+
+        // we are creating the KeepAwakeAnimationListener from the TestableLooper, not the main
+        // looper, so we expect an IllegalStateException:
         new KeepAwakeAnimationListener(getContext());
     }
 }

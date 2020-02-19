@@ -223,13 +223,6 @@ public final class ViewRootImpl implements ViewParent,
      * @see #USE_NEW_INSETS_PROPERTY
      * @hide
      */
-    public static int sNewInsetsMode =
-            SystemProperties.getInt(USE_NEW_INSETS_PROPERTY, 0);
-
-    /**
-     * @see #USE_NEW_INSETS_PROPERTY
-     * @hide
-     */
     public static final int NEW_INSETS_MODE_NONE = 0;
 
     /**
@@ -243,6 +236,13 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     public static final int NEW_INSETS_MODE_FULL = 2;
+
+    /**
+     * @see #USE_NEW_INSETS_PROPERTY
+     * @hide
+     */
+    public static int sNewInsetsMode =
+            SystemProperties.getInt(USE_NEW_INSETS_PROPERTY, NEW_INSETS_MODE_FULL);
 
     /**
      * Set this system property to true to force the view hierarchy to render
@@ -666,7 +666,22 @@ public final class ViewRootImpl implements ViewParent,
         int localChanges;
     }
 
+    // If set, ViewRootImpl will call BLASTBufferQueue::setNextTransaction with
+    // mRtBLASTSyncTransaction, prior to invoking draw. This provides a way
+    // to redirect the buffers in to transactions.
     private boolean mNextDrawUseBLASTSyncTransaction;
+    // Set when calling setNextTransaction, we can't just reuse mNextDrawUseBLASTSyncTransaction
+    // because, imagine this scenario:
+    //     1. First draw is using BLAST, mNextDrawUseBLAST = true
+    //     2. We call perform draw and are waiting on the callback
+    //     3. After the first perform draw but before the first callback and the
+    //        second perform draw, a second draw sets mNextDrawUseBLAST = true (it already was)
+    //     4. At this point the callback fires and we set mNextDrawUseBLAST = false;
+    //     5. We get to performDraw and fail to sync as we intended because mNextDrawUseBLAST
+    //        is now false.
+    // This is why we use a two-step latch with the two booleans, one consumed from
+    // performDraw and one consumed from finishBLASTSync()
+    private boolean mNextReportConsumeBLAST;
     // Be very careful with the threading here. This is used from the render thread while
     // the UI thread is paused and then applied and cleared from the UI thread right after
     // draw returns.
@@ -2206,8 +2221,9 @@ public final class ViewRootImpl implements ViewParent,
         return insets;
     }
 
-    void dispatchApplyInsets(View host) {
+    public void dispatchApplyInsets(View host) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "dispatchApplyInsets");
+        mApplyInsetsRequested = false;
         WindowInsets insets = getWindowInsets(true /* forceConstruct */);
         final boolean dispatchCutout = (mWindowAttributes.layoutInDisplayCutoutMode
                 == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS);
@@ -2444,7 +2460,6 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (mApplyInsetsRequested) {
-            mApplyInsetsRequested = false;
             updateVisibleInsets();
             dispatchApplyInsets(host);
             if (mLayoutRequested) {
@@ -2621,7 +2636,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (contentInsetsChanged || mLastSystemUiVisibility !=
                         mAttachInfo.mSystemUiVisibility || mApplyInsetsRequested) {
                     mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
-                    mApplyInsetsRequested = false;
                     dispatchApplyInsets(host);
                     // We applied insets so force contentInsetsChanged to ensure the
                     // hierarchy is measured below.
@@ -3719,9 +3733,9 @@ public final class ViewRootImpl implements ViewParent,
             usingAsyncReport = mReportNextDraw;
             if (needFrameCompleteCallback) {
                 final Handler handler = mAttachInfo.mHandler;
-                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
+                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
+                        finishBLASTSync();
                         handler.postAtFrontOfQueue(() -> {
-                            finishBLASTSync();
                             if (reportNextDraw) {
                                 // TODO: Use the frame number
                                 pendingDrawFinished();
@@ -3731,12 +3745,23 @@ public final class ViewRootImpl implements ViewParent,
                                     commitCallbacks.get(i).run();
                                 }
                             }
-                        }));
+                        });});
             }
         }
 
         try {
             if (mNextDrawUseBLASTSyncTransaction) {
+                // TODO(b/149747443)
+                // We aren't prepared to handle overlapping use of mRtBLASTSyncTransaction
+                // so if we are BLAST syncing we make sure the previous draw has
+                // totally finished.
+                if (mAttachInfo.mThreadedRenderer != null) {
+                    mAttachInfo.mThreadedRenderer.fence();
+                }
+
+                mNextReportConsumeBLAST = true;
+                mNextDrawUseBLASTSyncTransaction = false;
+
                 mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
             }
             boolean canUseAsync = draw(fullRedrawNeeded);
@@ -9556,8 +9581,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void finishBLASTSync() {
-        if (mNextDrawUseBLASTSyncTransaction) {
-            mNextDrawUseBLASTSyncTransaction = false;
+        if (mNextReportConsumeBLAST) {
+            mNextReportConsumeBLAST = false;
             mRtBLASTSyncTransaction.apply();
         }
     }
@@ -9566,7 +9591,10 @@ public final class ViewRootImpl implements ViewParent,
         return mRtBLASTSyncTransaction;
     }
 
-    SurfaceControl getRenderSurfaceControl() {
+    /**
+     * @hide
+     */
+    public SurfaceControl getRenderSurfaceControl() {
         if (mUseBLASTAdapter) {
             return mBlastSurfaceControl;
         } else {

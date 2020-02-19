@@ -74,8 +74,6 @@ public abstract class ControlTemplate {
             TYPE_TOGGLE,
             TYPE_RANGE,
             TYPE_THUMBNAIL,
-            TYPE_DISCRETE_TOGGLE,
-            TYPE_COORD_RANGE,
             TYPE_TOGGLE_RANGE,
             TYPE_TEMPERATURE,
             TYPE_STATELESS
@@ -103,16 +101,6 @@ public abstract class ControlTemplate {
      * Type identifier of {@link ThumbnailTemplate}.
      */
     public static final @TemplateType int TYPE_THUMBNAIL = 3;
-
-    /**
-     * Type identifier of {@link DiscreteToggleTemplate}.
-     */
-    public static final @TemplateType int TYPE_DISCRETE_TOGGLE = 4;
-
-    /**
-     * @hide
-     */
-    public static final @TemplateType int TYPE_COORD_RANGE = 5;
 
     public static final @TemplateType int TYPE_TOGGLE_RANGE = 6;
 
@@ -190,10 +178,6 @@ public abstract class ControlTemplate {
                     return new RangeTemplate(bundle);
                 case TYPE_THUMBNAIL:
                     return new ThumbnailTemplate(bundle);
-                case TYPE_DISCRETE_TOGGLE:
-                    return new DiscreteToggleTemplate(bundle);
-                case TYPE_COORD_RANGE:
-                    return new CoordinatedRangeTemplate(bundle);
                 case TYPE_TOGGLE_RANGE:
                     return new ToggleRangeTemplate(bundle);
                 case TYPE_TEMPERATURE:

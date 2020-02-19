@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.Activity;
 import android.app.AppOpsManager.Mode;
 import android.content.ComponentName;
 import android.content.Context;
@@ -116,18 +117,25 @@ public class CrossProfileApps {
      * @param targetUser The {@link UserHandle} of the profile; must be one of the users returned by
      *        {@link #getTargetUserProfiles()} if different to the calling user, otherwise a
      *        {@link SecurityException} will be thrown.
+     * @param callingActivity The activity to start the new activity from for the purposes of
+     *        deciding which task the new activity should belong to. If {@code null}, the activity
+     *        will always be started in a new task.
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.INTERACT_ACROSS_PROFILES,
             android.Manifest.permission.INTERACT_ACROSS_USERS})
-    public void startActivity(@NonNull Intent intent, @NonNull UserHandle targetUser) {
+    public void startActivity(
+            @NonNull Intent intent,
+            @NonNull UserHandle targetUser,
+            @Nullable Activity callingActivity) {
         try {
             mService.startActivityAsUserByIntent(
                     mContext.getIApplicationThread(),
                     mContext.getPackageName(),
                     mContext.getFeatureId(),
                     intent,
-                    targetUser.getIdentifier());
+                    targetUser.getIdentifier(),
+                    callingActivity != null ? callingActivity.getActivityToken() : null);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

@@ -412,6 +412,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
 
+    // TODO(b/143053092): Remove the settings if it becomes stable.
+    private static final String FIXED_ROTATION_TRANSFORM_SETTING_NAME = "fixed_rotation_transform";
+    boolean mIsFixedRotationTransformEnabled;
+
     final WindowManagerConstants mConstants;
 
     final WindowTracing mWindowTracing;
@@ -738,6 +742,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM);
         private final Uri mRenderShadowsInCompositorUri = Settings.Global.getUriFor(
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR);
+        private final Uri mFixedRotationTransformUri = Settings.Global.getUriFor(
+                FIXED_ROTATION_TRANSFORM_SETTING_NAME);
 
         public SettingsObserver() {
             super(new Handler());
@@ -761,6 +767,8 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mSizeCompatFreeformUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mRenderShadowsInCompositorUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mFixedRotationTransformUri, false, this,
                     UserHandle.USER_ALL);
         }
 
@@ -805,6 +813,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
+            if (mFixedRotationTransformUri.equals(uri)) {
+                updateFixedRotationTransform();
+                return;
+            }
+
             @UpdateAnimationScaleMode
             final int mode;
             if (mWindowAnimationScaleUri.equals(uri)) {
@@ -819,6 +832,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             Message m = mH.obtainMessage(H.UPDATE_ANIMATION_SCALE, mode, 0);
             mH.sendMessage(m);
+        }
+
+        void loadSettings() {
+            updateSystemUiSettings();
+            updatePointerLocation();
+            updateFixedRotationTransform();
         }
 
         void updateSystemUiSettings() {
@@ -883,6 +902,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM, 0) != 0;
 
             mAtmService.mSizeCompatFreeform = sizeCompatFreeform;
+        }
+
+        void updateFixedRotationTransform() {
+            mIsFixedRotationTransformEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                    FIXED_ROTATION_TRANSFORM_SETTING_NAME, 0) != 0;
         }
     }
 
@@ -1651,7 +1675,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     outFrame, outContentInsets, outStableInsets, outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
-            outInsetsState.set(displayContent.getInsetsPolicy().getInsetsForDispatch(win),
+            outInsetsState.set(win.getInsetsState(),
                     win.mClient instanceof IWindow.Stub /* copySource */);
 
             if (mInTouchMode) {
@@ -2389,7 +2413,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     outStableInsets);
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
-            outInsetsState.set(displayContent.getInsetsPolicy().getInsetsForDispatch(win),
+            outInsetsState.set(win.getInsetsState(),
                     win.mClient instanceof IWindow.Stub /* copySource */);
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
@@ -4574,8 +4598,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mTaskSnapshotController.systemReady();
         mHasWideColorGamutSupport = queryWideColorGamutSupport();
         mHasHdrSupport = queryHdrSupport();
-        UiThread.getHandler().post(mSettingsObserver::updateSystemUiSettings);
-        UiThread.getHandler().post(mSettingsObserver::updatePointerLocation);
+        UiThread.getHandler().post(mSettingsObserver::loadSettings);
         IVrManager vrManager = IVrManager.Stub.asInterface(
                 ServiceManager.getService(Context.VR_SERVICE));
         if (vrManager != null) {

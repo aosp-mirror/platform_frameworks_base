@@ -81,6 +81,7 @@ import com.android.server.power.PowerManagerService.BatteryReceiver;
 import com.android.server.power.PowerManagerService.Injector;
 import com.android.server.power.PowerManagerService.NativeWrapper;
 import com.android.server.power.PowerManagerService.UserSwitchedReceiver;
+import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySavingStats;
 
@@ -106,6 +107,7 @@ public class PowerManagerServiceTest {
     private static final float BRIGHTNESS_FACTOR = 0.7f;
     private static final boolean BATTERY_SAVER_ENABLED = true;
 
+    @Mock private BatterySaverController mBatterySaverControllerMock;
     @Mock private BatterySaverPolicy mBatterySaverPolicyMock;
     @Mock private LightsManager mLightsManagerMock;
     @Mock private DisplayManagerInternal mDisplayManagerInternalMock;
@@ -207,6 +209,13 @@ public class PowerManagerServiceTest {
             }
 
             @Override
+            BatterySaverController createBatterySaverController(
+                    Object lock, Context context, BatterySaverPolicy batterySaverPolicy,
+                    BatterySavingStats batterySavingStats) {
+                return mBatterySaverControllerMock;
+            }
+
+            @Override
             NativeWrapper createNativeWrapper() {
                 return mNativeWrapperMock;
             }
@@ -230,6 +239,11 @@ public class PowerManagerServiceTest {
             @Override
             public SystemPropertiesWrapper createSystemPropertiesWrapper() {
                 return mSystemPropertiesMock;
+            }
+
+            @Override
+            void invalidateIsInteractiveCaches() {
+                // Avoids an SELinux failure.
             }
         });
         return mService;
@@ -369,7 +383,7 @@ public class PowerManagerServiceTest {
     @Test
     public void testWakefulnessAwake_InitialValue() throws Exception {
         createService();
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
     }
 
     @Test
@@ -377,12 +391,12 @@ public class PowerManagerServiceTest {
         createService();
         // Start with AWAKE state
         startSystem();
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
 
         // Take a nap and verify.
         mService.getBinderServiceInstance().goToSleep(SystemClock.uptimeMillis(),
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION, PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 
     @Test
@@ -399,21 +413,21 @@ public class PowerManagerServiceTest {
         int flags = PowerManager.FULL_WAKE_LOCK;
         mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
                 null /* workSource */, null /* historyTag */);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
 
         // Ensure that the flag does *NOT* work with a partial wake lock.
         flags = PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP;
         mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
                 null /* workSource */, null /* historyTag */);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
 
         // Verify that flag forces a wakeup when paired to a FULL_WAKE_LOCK
         flags = PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP;
         mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
                 null /* workSource */, null /* historyTag */);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
     }
 
@@ -424,7 +438,7 @@ public class PowerManagerServiceTest {
         forceSleep();
         mService.getBinderServiceInstance().wakeUp(SystemClock.uptimeMillis(),
                 PowerManager.WAKE_REASON_UNKNOWN, "testing IPowerManager.wakeUp()", "pkg.name");
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
     }
 
     /**
@@ -445,7 +459,7 @@ public class PowerManagerServiceTest {
                 .thenReturn(false);
         mService.readConfigurationLocked();
         setPluggedIn(true);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         when(mResourcesSpy.getBoolean(com.android.internal.R.bool.config_unplugTurnsOnScreen))
                 .thenReturn(true);
         mService.readConfigurationLocked();
@@ -460,20 +474,20 @@ public class PowerManagerServiceTest {
         when(mWirelessChargerDetectorMock.update(true /* isPowered */,
                 BatteryManager.BATTERY_PLUGGED_WIRELESS)).thenReturn(false);
         setPluggedIn(true);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
 
         // Test 3:
         // Do not wake up if the phone is being REMOVED from a wireless charger
         when(mBatteryManagerInternalMock.getPlugType()).thenReturn(0);
         setPluggedIn(false);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
 
         // Test 4:
         // Do not wake if we are dreaming.
         forceAwake();  // Needs to be awake first before it can dream.
         forceDream();
         setPluggedIn(true);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_DREAMING);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
         forceSleep();
 
         // Test 5:
@@ -486,7 +500,7 @@ public class PowerManagerServiceTest {
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromUnplug))
                 .thenReturn(false);
         setPluggedIn(false);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         Settings.Global.putInt(
                 mContextSpy.getContentResolver(), Settings.Global.THEATER_MODE_ON, 0);
         mUserSwitchedReceiver.onReceive(mContextSpy, new Intent(Intent.ACTION_USER_SWITCHED));
@@ -499,14 +513,14 @@ public class PowerManagerServiceTest {
         forceAwake();
         forceDozing();
         setPluggedIn(true);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_DOZING);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
 
         // Test 7:
         // Finally, take away all the factors above and ensure the device wakes up!
         forceAwake();
         forceSleep();
         setPluggedIn(false);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
     }
 
     @Test
@@ -514,12 +528,12 @@ public class PowerManagerServiceTest {
         createService();
         // Start with AWAKE state
         startSystem();
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
 
         // Take a nap and verify.
         mService.getBinderServiceInstance().goToSleep(SystemClock.uptimeMillis(),
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_DOZING);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
     }
 
     @Test
@@ -546,12 +560,12 @@ public class PowerManagerServiceTest {
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         // Verify that we start awake
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
 
         // Grab the wakefulness value when PowerManager finally calls into the
         // native component to actually perform the suspend.
         when(mNativeWrapperMock.nativeForceSuspend()).then(inv -> {
-            assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+            assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
             return true;
         });
 
@@ -559,7 +573,7 @@ public class PowerManagerServiceTest {
         assertThat(retval).isTrue();
 
         // Still asleep when the function returns.
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 
     @Test
@@ -592,7 +606,7 @@ public class PowerManagerServiceTest {
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         // Verify that we start awake
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
 
         // Create a wakelock
         mService.getBinderServiceInstance().acquireWakeLock(new Binder(), flags, tag, pkg,
@@ -647,7 +661,7 @@ public class PowerManagerServiceTest {
 
         // Start with AWAKE state
         startSystem();
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         assertTrue(isAcquired[0]);
 
         // Take a nap and verify we no longer hold the blocker
@@ -657,7 +671,7 @@ public class PowerManagerServiceTest {
         when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
         mService.getBinderServiceInstance().goToSleep(SystemClock.uptimeMillis(),
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_DOZING);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
         assertFalse(isAcquired[0]);
 
         // Override the display state by DreamManager and verify is reacquires the blocker.
@@ -737,7 +751,7 @@ public class PowerManagerServiceTest {
         createService();
         startSystem();
         SystemClock.sleep(20);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 
     @FlakyTest
@@ -757,7 +771,7 @@ public class PowerManagerServiceTest {
                 null /* workSource */, null /* historyTag */);
 
         SystemClock.sleep(11);
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 
     @Test
@@ -765,7 +779,7 @@ public class PowerManagerServiceTest {
         createService();
         startSystem();
 
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         verify(mNotifierMock, never()).onWakefulnessChangeStarted(anyInt(), anyInt(), anyLong());
     }
 
@@ -784,7 +798,7 @@ public class PowerManagerServiceTest {
         createService();
         startSystem();
 
-        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         verify(mNotifierMock).onWakefulnessChangeStarted(eq(WAKEFULNESS_ASLEEP), anyInt(),
                 anyLong());
     }

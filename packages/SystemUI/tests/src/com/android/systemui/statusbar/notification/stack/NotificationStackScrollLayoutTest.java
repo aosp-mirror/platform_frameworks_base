@@ -144,7 +144,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Before
     @UiThreadTest
     public void setUp() throws Exception {
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
 
         mOriginalInterruptionModelSetting = Settings.Secure.getInt(mContext.getContentResolver(),
                 NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
@@ -185,7 +185,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(LeakDetector.class),
                 mock(ForegroundServiceDismissalFeatureController.class)
         );
-        mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, mHeadsUpManager);
+        mEntryManager.setUpForTest(mock(NotificationPresenter.class));
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
         NotificationShelf notificationShelf = mock(NotificationShelf.class);

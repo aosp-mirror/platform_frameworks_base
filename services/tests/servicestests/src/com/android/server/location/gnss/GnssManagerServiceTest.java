@@ -16,6 +16,8 @@
 
 package com.android.server.location.gnss;
 
+import static android.location.LocationManager.GPS_PROVIDER;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -293,6 +295,9 @@ public class GnssManagerServiceTest {
                     }
                     return AppOpsManager.MODE_ERRORED;
                 });
+
+        when(mLocationManagerInternal.isProviderEnabledForUser(eq(GPS_PROVIDER), anyInt()))
+                .thenReturn(true);
     }
 
     private void disableLocationPermissions() {
@@ -303,6 +308,9 @@ public class GnssManagerServiceTest {
 
         when(mAppOpsManager.checkOp(anyInt(), anyInt(),
                 anyString())).thenReturn(AppOpsManager.MODE_ERRORED);
+
+        when(mLocationManagerInternal.isProviderEnabledForUser(eq(GPS_PROVIDER), anyInt()))
+                .thenReturn(false);
     }
 
     private GnssStatusListenerHelper createGnssStatusListenerHelper(Context context,
@@ -527,6 +535,7 @@ public class GnssManagerServiceTest {
         assertThrows(SecurityException.class,
                 () -> mGnssManagerService.removeGnssBatchingCallback());
 
+        enableLocationPermissions();
         mGnssManagerService.onReportLocation(mockLocationList);
 
         verify(mockBatchedLocationCallback, times(1)).onLocationBatch(mockLocationList);

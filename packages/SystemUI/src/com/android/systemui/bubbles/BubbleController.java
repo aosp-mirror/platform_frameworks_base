@@ -94,6 +94,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.FloatingContentCoordinator;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -140,6 +141,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
     private final NotificationGroupManager mNotificationGroupManager;
     private final ShadeController mShadeController;
+    private final FloatingContentCoordinator mFloatingContentCoordinator;
 
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
@@ -284,11 +286,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
-            DumpController dumpController) {
+            DumpController dumpController,
+            FloatingContentCoordinator floatingContentCoordinator) {
         this(context, notificationShadeWindowController, statusBarStateController, shadeController,
                 data, null /* synchronizer */, configurationController, interruptionStateProvider,
                 zenModeController, notifUserManager, groupManager, entryManager,
-                notifPipeline, featureFlags, dumpController);
+                notifPipeline, featureFlags, dumpController, floatingContentCoordinator);
     }
 
     /**
@@ -308,13 +311,15 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
-            DumpController dumpController) {
+            DumpController dumpController,
+            FloatingContentCoordinator floatingContentCoordinator) {
         dumpController.registerDumpable(TAG, this);
         mContext = context;
         mShadeController = shadeController;
         mNotificationInterruptionStateProvider = interruptionStateProvider;
         mNotifUserManager = notifUserManager;
         mZenModeController = zenModeController;
+        mFloatingContentCoordinator = floatingContentCoordinator;
         mZenModeController.addCallback(new ZenModeController.Callback() {
             @Override
             public void onZenChanged(int zen) {
@@ -584,7 +589,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      */
     private void ensureStackViewCreated() {
         if (mStackView == null) {
-            mStackView = new BubbleStackView(mContext, mBubbleData, mSurfaceSynchronizer);
+            mStackView = new BubbleStackView(
+                    mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator);
             ViewGroup nsv = mNotificationShadeWindowController.getNotificationShadeView();
             int bubbleScrimIndex = nsv.indexOfChild(nsv.findViewById(R.id.scrim_for_bubble));
             int stackIndex = bubbleScrimIndex + 1;  // Show stack above bubble scrim.

@@ -209,7 +209,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             };
 
             mViewHierarchyManager.setUpWithPresenter(this, notifListContainer);
-            mEntryManager.setUpWithPresenter(this, notifListContainer, mHeadsUpManager);
+            mEntryManager.setUpWithPresenter(this);
             mEntryManager.addNotificationEntryListener(notificationEntryListener);
             mEntryManager.addNotificationLifetimeExtender(mHeadsUpManager);
             mEntryManager.addNotificationLifetimeExtender(mGutsManager);
@@ -230,8 +230,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             onUserSwitched(mLockscreenUserManager.getCurrentUserId());
         });
         Dependency.get(ConfigurationController.class).addCallback(this);
-
-        notificationAlertingManager.setHeadsUpManager(mHeadsUpManager);
     }
 
     @Override

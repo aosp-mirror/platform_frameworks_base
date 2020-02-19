@@ -683,7 +683,7 @@ public final class PermissionPolicyService extends SystemService {
                     opCode), uid, pkgsOfUid[0]);
             if (currentMode != MODE_ALLOWED) {
                 if (currentMode != MODE_IGNORED) {
-                    mAppOpsManagerInternal.setUidModeIgnoringCallback(opCode, uid, MODE_IGNORED,
+                    mAppOpsManagerInternal.setUidModeFromPermissionPolicy(opCode, uid, MODE_IGNORED,
                             mAppOpsCallback);
                 }
                 return true;
@@ -700,7 +700,7 @@ public final class PermissionPolicyService extends SystemService {
             final int oldMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager.opToPublicName(
                     opCode), uid, pkgsOfUid[0]);
             if (oldMode != mode) {
-                mAppOpsManagerInternal.setUidModeIgnoringCallback(opCode, uid, mode,
+                mAppOpsManagerInternal.setUidModeFromPermissionPolicy(opCode, uid, mode,
                         mAppOpsCallback);
                 final int newMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager.opToPublicName(
                         opCode), uid, pkgsOfUid[0]);
@@ -708,7 +708,7 @@ public final class PermissionPolicyService extends SystemService {
                     // Work around incorrectly-set package mode. It never makes sense for app ops
                     // related to runtime permissions, but can get in the way and we have to reset
                     // it.
-                    mAppOpsManagerInternal.setModeIgnoringCallback(opCode, uid, pkgsOfUid[0],
+                    mAppOpsManagerInternal.setModeFromPermissionPolicy(opCode, uid, pkgsOfUid[0],
                             AppOpsManager.opToDefaultMode(opCode), mAppOpsCallback);
                 }
             }

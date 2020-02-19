@@ -1216,7 +1216,7 @@ public class SyncManager {
         for (SyncOperation op: ops) {
             if (op.isPeriodic && op.target.matchesSpec(target)) {
                 periodicSyncs.add(new PeriodicSync(op.target.account, op.target.provider,
-                        op.extras, op.periodMillis / 1000, op.flexMillis / 1000));
+                        op.getClonedExtras(), op.periodMillis / 1000, op.flexMillis / 1000));
             }
         }
 
@@ -1478,7 +1478,7 @@ public class SyncManager {
             Slog.e(TAG, "Can't schedule null sync operation.");
             return;
         }
-        if (!syncOperation.ignoreBackoff()) {
+        if (!syncOperation.hasIgnoreBackoff()) {
             Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(syncOperation.target);
             if (backoff == null) {
                 Slog.e(TAG, "Couldn't find backoff values for "
@@ -1631,7 +1631,7 @@ public class SyncManager {
             getSyncStorageEngine().markPending(syncOperation.target, true);
         }
 
-        if (syncOperation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_REQUIRE_CHARGING)) {
+        if (syncOperation.hasRequireCharging()) {
             b.setRequiresCharging(true);
         }
 
@@ -1686,7 +1686,7 @@ public class SyncManager {
         List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {
             if (!op.isPeriodic && op.target.matchesSpec(info)
-                    && syncExtrasEquals(extras, op.extras, false)) {
+                    && op.areExtrasEqual(extras, /*includeSyncSettings=*/ false)) {
                 cancelJob(op, "cancelScheduledSyncOperation");
             }
         }
@@ -1704,15 +1704,9 @@ public class SyncManager {
             Log.d(TAG, "encountered error(s) during the sync: " + syncResult + ", " + operation);
         }
 
-        // The SYNC_EXTRAS_IGNORE_BACKOFF only applies to the first attempt to sync a given
-        // request. Retries of the request will always honor the backoff, so clear the
-        // flag in case we retry this request.
-        if (operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)) {
-            operation.extras.remove(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF);
-        }
+        operation.enableBackoff();
 
-        if (operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false)
-                && !syncResult.syncAlreadyInProgress) {
+        if (operation.hasDoNotRetry() && !syncResult.syncAlreadyInProgress) {
             // syncAlreadyInProgress flag is set by AbstractThreadedSyncAdapter. The sync adapter
             // has no way of knowing that a sync error occured. So we DO retry if the error is
             // syncAlreadyInProgress.
@@ -1720,10 +1714,9 @@ public class SyncManager {
                 Log.d(TAG, "not retrying sync operation because SYNC_EXTRAS_DO_NOT_RETRY was specified "
                         + operation);
             }
-        } else if (operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, false)
-                && !syncResult.syncAlreadyInProgress) {
+        } else if (operation.isUpload() && !syncResult.syncAlreadyInProgress) {
             // If this was an upward sync then schedule a two-way sync immediately.
-            operation.extras.remove(ContentResolver.SYNC_EXTRAS_UPLOAD);
+            operation.enableTwoWaySync();
             if (isLoggable) {
                 Log.d(TAG, "retrying sync operation as a two-way sync because an upload-only sync "
                         + "encountered an error: " + operation);
@@ -3326,7 +3319,7 @@ public class SyncManager {
             List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
                 if (op.isPeriodic && op.target.matchesSpec(target)
-                        && syncExtrasEquals(op.extras, extras, true /* includeSyncSettings */)) {
+                        && op.areExtrasEqual(extras, /*includeSyncSettings=*/ true)) {
                     maybeUpdateSyncPeriodH(op, pollFrequencyMillis, flexMillis);
                     return;
                 }
@@ -3408,7 +3401,7 @@ public class SyncManager {
             List<SyncOperation> ops = getAllPendingSyncs();
             for (SyncOperation op: ops) {
                 if (op.isPeriodic && op.target.matchesSpec(target)
-                        && syncExtrasEquals(op.extras, extras, true /* includeSyncSettings */)) {
+                        && op.areExtrasEqual(extras, /*includeSyncSettings=*/ true)) {
                     removePeriodicSyncInternalH(op, why);
                 }
             }
@@ -3559,16 +3552,18 @@ public class SyncManager {
                 activeSyncContext.mIsLinkedToDeath = true;
                 syncAdapter.linkToDeath(activeSyncContext, 0);
 
-                mLogger.log("Sync start: account=" + syncOperation.target.account,
-                        " authority=", syncOperation.target.provider,
-                        " reason=", SyncOperation.reasonToString(null, syncOperation.reason),
-                        " extras=", SyncOperation.extrasToString(syncOperation.extras),
-                        " adapter=", activeSyncContext.mSyncAdapter);
+                if (mLogger.enabled()) {
+                    mLogger.log("Sync start: account=" + syncOperation.target.account,
+                            " authority=", syncOperation.target.provider,
+                            " reason=", SyncOperation.reasonToString(null, syncOperation.reason),
+                            " extras=", syncOperation.getExtrasAsString(),
+                            " adapter=", activeSyncContext.mSyncAdapter);
+                }
 
                 activeSyncContext.mSyncAdapter = ISyncAdapter.Stub.asInterface(syncAdapter);
                 activeSyncContext.mSyncAdapter
                         .startSync(activeSyncContext, syncOperation.target.provider,
-                                syncOperation.target.account, syncOperation.extras);
+                                syncOperation.target.account, syncOperation.getClonedExtras());
 
                 mLogger.log("Sync is running now...");
             } catch (RemoteException remoteExc) {
@@ -3602,9 +3597,8 @@ public class SyncManager {
                         continue;
                     }
                     if (extras != null &&
-                            !syncExtrasEquals(activeSyncContext.mSyncOperation.extras,
-                                    extras,
-                                    false /* no config settings */)) {
+                            !activeSyncContext.mSyncOperation.areExtrasEqual(extras,
+                                    /*includeSyncSettings=*/ false)) {
                         continue;
                     }
                     SyncJobService.callJobFinished(activeSyncContext.mSyncOperation.jobId, false,
