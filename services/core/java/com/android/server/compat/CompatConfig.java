@@ -16,7 +16,6 @@
 
 package com.android.server.compat;
 
-import android.app.compat.ChangeIdStateCache;
 import android.compat.Compatibility.ChangeConfig;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -79,7 +78,6 @@ final class CompatConfig {
     void addChange(CompatChange change) {
         synchronized (mChanges) {
             mChanges.put(change.getId(), change);
-            invalidateCache();
         }
     }
 
@@ -172,7 +170,6 @@ final class CompatConfig {
                 addChange(c);
             }
             c.addPackageOverride(packageName, enabled);
-            invalidateCache();
         }
         return alreadyKnown;
     }
@@ -229,7 +226,6 @@ final class CompatConfig {
                 // Should never occur, since validator is in the same process.
                 throw new RuntimeException("Unable to call override validator!", e);
             }
-            invalidateCache();
         }
         return overrideExists;
     }
@@ -252,7 +248,6 @@ final class CompatConfig {
                 addOverride(changeId, packageName, false);
 
             }
-            invalidateCache();
         }
     }
 
@@ -282,7 +277,6 @@ final class CompatConfig {
                     throw new RuntimeException("Unable to call override validator!", e);
                 }
             }
-            invalidateCache();
         }
     }
 
@@ -401,9 +395,5 @@ final class CompatConfig {
 
     IOverrideValidator getOverrideValidator() {
         return mOverrideValidator;
-    }
-
-    private void invalidateCache() {
-        ChangeIdStateCache.invalidate();
     }
 }
