@@ -121,9 +121,8 @@ cc_library {
     shared_libs: [
         "liblog",
         "libcutils",
+        "libstatssocket",
     ],
-    static_libs: ["libstatssocket"],
-
     apex_available: [
         "//apex_available:platform",
         //TODO(b/149781190): Remove this once statsd no longer depends on libstatslog
