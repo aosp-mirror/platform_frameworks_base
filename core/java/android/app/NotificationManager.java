@@ -592,10 +592,7 @@ public class NotificationManager {
         }
 
         notification.reduceImageSizes(mContext);
-
-        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        boolean isLowRam = am.isLowRamDevice();
-        return Builder.maybeCloneStrippedForDelivery(notification, isLowRam, mContext);
+        return Builder.maybeCloneStrippedForDelivery(notification);
     }
 
     private void fixLegacySmallIcon(Notification n, String pkg) {

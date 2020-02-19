@@ -86,8 +86,8 @@ import java.util.Objects;
  * or after {@link #onListenerDisconnected()}.
  * </p>
  * <p> Notification listeners cannot get notification access or be bound by the system on
- * {@linkplain ActivityManager#isLowRamDevice() low-RAM} devices. The system also ignores
- * notification listeners running in a work profile. A
+ * {@linkplain ActivityManager#isLowRamDevice() low-RAM} devices running Android Q (and below).
+ * The system also ignores notification listeners running in a work profile. A
  * {@link android.app.admin.DevicePolicyManager} might block notifications originating from a work
  * profile.</p>
  * <p>

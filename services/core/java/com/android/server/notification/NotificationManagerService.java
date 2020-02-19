@@ -8609,21 +8609,11 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     boolean canUseManagedServices(String pkg, Integer userId, String requiredPermission) {
-        boolean canUseManagedServices = !mActivityManager.isLowRamDevice()
-                || mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_WATCH);
-
-        for (String whitelisted : getContext().getResources().getStringArray(
-                R.array.config_allowedManagedServicesOnLowRamDevices)) {
-            if (whitelisted.equals(pkg)) {
-                canUseManagedServices = true;
-                break;
-            }
-        }
-
+        boolean canUseManagedServices = true;
         if (requiredPermission != null) {
             try {
                 if (mPackageManager.checkPermission(requiredPermission, pkg, userId)
-                    != PackageManager.PERMISSION_GRANTED) {
+                        != PackageManager.PERMISSION_GRANTED) {
                     canUseManagedServices = false;
                 }
             } catch (RemoteException e) {
