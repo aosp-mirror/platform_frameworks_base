@@ -21,17 +21,16 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.content.ComponentName;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.View;
-import android.view.autofill.AutofillId;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 /**
  * The InputMethod interface represents an input method which can generate key
@@ -114,14 +113,13 @@ public interface InputMethod {
     /**
      * Called to notify the IME that Autofill Frameworks requested an inline suggestions request.
      *
-     * @param componentName {@link ComponentName} of current app/activity.
-     * @param autofillId {@link AutofillId} of currently focused field.
+     * @param requestInfo information needed to create an {@link InlineSuggestionsRequest}.
      * @param cb {@link IInlineSuggestionsRequestCallback} used to pass back the request object.
      *
      * @hide
      */
-    default void onCreateInlineSuggestionsRequest(ComponentName componentName,
-            AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
+    default void onCreateInlineSuggestionsRequest(InlineSuggestionsRequestInfo requestInfo,
+            IInlineSuggestionsRequestCallback cb) {
         try {
             cb.onInlineSuggestionsUnsupported();
         } catch (RemoteException e) {

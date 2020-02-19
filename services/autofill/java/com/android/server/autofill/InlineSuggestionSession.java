@@ -21,6 +21,7 @@ import static com.android.server.autofill.Helper.sDebug;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.autofill.AutofillId;
@@ -29,6 +30,7 @@ import android.view.inputmethod.InlineSuggestionsRequest;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.util.concurrent.CancellationException;
@@ -71,8 +73,10 @@ final class InlineSuggestionSession {
         synchronized (mLock) {
             cancelCurrentRequest();
             mPendingImeResponse = new CompletableFuture<>();
+            // TODO(b/146454892): pipe the uiExtras from the ExtServices.
             mInputMethodManagerInternal.onCreateInlineSuggestionsRequest(
-                    mUserId, mComponentName, currentViewId,
+                    mUserId,
+                    new InlineSuggestionsRequestInfo(mComponentName, currentViewId, new Bundle()),
                     new InlineSuggestionsRequestCallbackImpl(mPendingImeResponse));
         }
     }

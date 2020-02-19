@@ -25,6 +25,7 @@ import android.app.Service;
 import android.app.slice.Slice;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -114,6 +115,14 @@ public abstract class InlineSuggestionRenderService extends Service {
         }
 
         Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
+        return null;
+    }
+
+    /**
+     *  Returns the metadata about the renderer. Returns {@code null} if no metadata is provided.
+     */
+    @Nullable
+    public Bundle onGetInlineSuggestionsRendererInfo() {
         return null;
     }
 
