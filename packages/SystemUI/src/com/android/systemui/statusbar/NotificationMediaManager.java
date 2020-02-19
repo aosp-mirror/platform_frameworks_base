@@ -42,6 +42,7 @@ import android.provider.DeviceConfig.Properties;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -670,7 +671,8 @@ public class NotificationMediaManager implements Dumpable {
     };
 
     private Bitmap processArtwork(Bitmap artwork) {
-        return mMediaArtworkProcessor.processArtwork(mContext, artwork);
+        return mMediaArtworkProcessor.processArtwork(mContext, artwork,
+                WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE);
     }
 
     @MainThread

@@ -130,8 +130,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private val listingCallback = object : ControlsListingController.ControlsListingCallback {
         override fun onServicesUpdated(candidates: List<CandidateInfo>) {
             bgExecutor.execute {
-                val collator = Collator.getInstance(context.getResources()
-                        .getConfiguration().locale)
+                val collator = Collator.getInstance(context.resources.configuration.locales[0])
                 val localeComparator = compareBy<CandidateInfo, CharSequence>(collator) {
                     it.loadLabel()
                 }

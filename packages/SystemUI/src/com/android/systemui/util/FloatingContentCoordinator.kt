@@ -132,7 +132,6 @@ class FloatingContentCoordinator @Inject constructor() {
      *
      * @param content The content that has moved.
      */
-    @JvmOverloads
     fun onContentMoved(content: FloatingContent) {
 
         // Ignore calls when we are currently resolving conflicts, since those calls are from
