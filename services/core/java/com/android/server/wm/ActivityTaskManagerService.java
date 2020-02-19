@@ -356,6 +356,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     ActivityManagerInternal mAmInternal;
     UriGrantsManagerInternal mUgmInternal;
     private PackageManagerInternal mPmInternal;
+    /** The cached sys ui service component name from package manager. */
+    private ComponentName mSysUiServiceComponent;
     private PermissionPolicyInternal mPermissionPolicyInternal;
     @VisibleForTesting
     final ActivityTaskManagerInternal mInternal;
@@ -5867,6 +5869,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mPmInternal = LocalServices.getService(PackageManagerInternal.class);
         }
         return mPmInternal;
+    }
+
+    ComponentName getSysUiServiceComponentLocked() {
+        if (mSysUiServiceComponent == null) {
+            final PackageManagerInternal pm = getPackageManagerInternalLocked();
+            mSysUiServiceComponent = pm.getSystemUiServiceComponent();
+        }
+        return mSysUiServiceComponent;
     }
 
     PermissionPolicyInternal getPermissionPolicyInternal() {
