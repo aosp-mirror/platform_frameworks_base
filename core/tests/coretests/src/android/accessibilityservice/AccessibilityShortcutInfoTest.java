@@ -90,6 +90,12 @@ public class AccessibilityShortcutInfoTest {
     }
 
     @Test
+    public void testLoadAnimatedImage() {
+        assertNotNull("Can't find animated image",
+                mShortcutInfo.loadAnimatedImage(mPackageManager));
+    }
+
+    @Test
     public void testHtmlDescription() {
         final String htmlDescription = mTargetContext.getResources()
                 .getString(R.string.accessibility_shortcut_html_description);
