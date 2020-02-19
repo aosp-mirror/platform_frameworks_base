@@ -688,6 +688,7 @@ filegroup {
     srcs: [
         "core/java/android/annotation/CallbackExecutor.java",
         "core/java/android/annotation/CheckResult.java",
+        "core/java/android/annotation/CurrentTimeMillisLong.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
         "core/java/android/annotation/NonNull.java",
@@ -1127,7 +1128,6 @@ filegroup {
     srcs: [
         ":framework-annotations",
         "core/java/android/annotation/BytesLong.java",
-        "core/java/android/annotation/CurrentTimeMillisLong.java",
         "core/java/android/annotation/CurrentTimeSecondsLong.java",
         "core/java/android/annotation/DurationMillisLong.java",
     ],
