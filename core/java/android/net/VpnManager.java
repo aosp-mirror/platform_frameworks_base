@@ -126,7 +126,11 @@ public class VpnManager {
         return getIntentForConfirmation();
     }
 
-    /** Delete the VPN profile configuration that was provisioned by the calling app */
+    /**
+     * Delete the VPN profile configuration that was provisioned by the calling app
+     *
+     * @throws SecurityException if this would violate user settings
+     */
     public void deleteProvisionedVpnProfile() {
         try {
             mService.deleteVpnProfile(mContext.getOpPackageName());
