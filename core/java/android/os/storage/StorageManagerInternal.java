@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IVold;
 
+import java.util.Set;
+
 /**
  * Mount service local interface.
  *
@@ -96,6 +98,12 @@ public abstract class StorageManagerInternal {
          */
         void onReset(IVold vold);
     }
+
+    /**
+     * Check if fuse is running in target user, if it's running then setup its obb directories.
+     * TODO: System server should store a list of active pids that obb is not mounted and use it.
+     */
+    public abstract void prepareObbDirs(int userId, Set<String> packageList, String processName);
 
     /**
      * Add a listener to listen to reset event in StorageManagerService.

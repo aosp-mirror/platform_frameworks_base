@@ -80,11 +80,13 @@ import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IVold;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -142,9 +144,13 @@ import java.util.Map;
 public final class ProcessList {
     static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
 
-    // A device config to control the minimum target SDK to enable app data isolation
+    // A system property to control if app data isolation is enabled.
     static final String ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.zygote.app_data_isolation";
+
+    // A system property to control if obb app data isolation is enabled in vold.
+    static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
+            "persist.sys.vold_app_data_isolation_enabled";
 
     // A device config to control the minimum target SDK to enable app data isolation
     static final String ANDROID_APP_DATA_ISOLATION_MIN_SDK = "android_app_data_isolation_min_sdk";
@@ -378,6 +384,8 @@ public final class ProcessList {
     private boolean mOomLevelsSet = false;
 
     private boolean mAppDataIsolationEnabled = false;
+
+    private boolean mVoldAppDataIsolationEnabled = false;
 
     private ArrayList<String> mAppDataIsolationWhitelistedApps;
 
@@ -691,6 +699,8 @@ public final class ProcessList {
         // want some apps enabled while some apps disabled
         mAppDataIsolationEnabled =
                 SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
+        mVoldAppDataIsolationEnabled = SystemProperties.getBoolean(
+                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
         mAppDataIsolationWhitelistedApps = new ArrayList<>(
                 SystemConfig.getInstance().getAppDataIsolationWhitelistedApps());
 
@@ -2113,6 +2123,13 @@ public final class ProcessList {
                         app.info.packageName, app.userId);
                 pkgDataInfoMap = getPackageAppDataInfoMap(pmInt, sharedPackages.length == 0
                         ? new String[]{app.info.packageName} : sharedPackages, uid);
+
+                if (mVoldAppDataIsolationEnabled) {
+                    StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                                StorageManagerInternal.class);
+                    storageManagerInternal.prepareObbDirs(UserHandle.getUserId(uid),
+                            pkgDataInfoMap.keySet(), app.processName);
+                }
             } else {
                 pkgDataInfoMap = null;
             }
