@@ -6012,7 +6012,13 @@ public class Editor {
     @VisibleForTesting
     public class InsertionPointCursorController implements CursorController {
         private InsertionHandleView mHandle;
+        // Tracks whether the cursor is currently being dragged.
         private boolean mIsDraggingCursor;
+        // During a drag, tracks whether the user's finger has adjusted to be over the handle rather
+        // than the cursor bar.
+        private boolean mIsTouchSnappedToHandleDuringDrag;
+        // During a drag, tracks the line of text where the cursor was last positioned.
+        private int mPrevLineDuringDrag;
 
         public void onTouchEvent(MotionEvent event) {
             if (hasSelectionController() && getSelectionController().isCursorBeingModified()) {
@@ -6043,8 +6049,8 @@ public class Editor {
         }
 
         private void positionCursorDuringDrag(MotionEvent event) {
-            int line = mTextView.getLineAtCoordinate(event.getY());
-            int offset = mTextView.getOffsetAtCoordinate(line, event.getX());
+            mPrevLineDuringDrag = getLineDuringDrag(event);
+            int offset = mTextView.getOffsetAtCoordinate(mPrevLineDuringDrag, event.getX());
             int oldSelectionStart = mTextView.getSelectionStart();
             int oldSelectionEnd = mTextView.getSelectionEnd();
             if (offset == oldSelectionStart && offset == oldSelectionEnd) {
@@ -6057,11 +6063,58 @@ public class Editor {
             }
         }
 
+        /**
+         * Returns the line where the cursor should be positioned during a cursor drag. Rather than
+         * simply returning the line directly at the touch position, this function has the following
+         * additional logic:
+         * 1) Apply some slop to avoid switching lines if the touch moves just slightly off the
+         * current line.
+         * 2) Allow the user's finger to slide down and "snap" to the handle to provide better
+         * visibility of the cursor and text.
+         */
+        private int getLineDuringDrag(MotionEvent event) {
+            final Layout layout = mTextView.getLayout();
+            if (mTouchState.isOnHandle()) {
+                // The drag was initiated from the handle, so no need to apply the snap logic. See
+                // InsertionHandleView.touchThrough().
+                return getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, event.getY());
+            }
+            if (mIsTouchSnappedToHandleDuringDrag) {
+                float cursorY = event.getY() - getHandle().getIdealVerticalOffset();
+                return getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, cursorY);
+            }
+            int line = getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, event.getY());
+            if (mPrevLineDuringDrag == UNSET_LINE || line <= mPrevLineDuringDrag) {
+                // User's finger is on the same line or moving up; continue positioning the cursor
+                // directly at the touch location.
+                return line;
+            }
+            // User's finger is moving downwards; delay jumping to the lower line to allow the
+            // touch to move to the handle.
+            float cursorY = event.getY() - getHandle().getIdealVerticalOffset();
+            line = getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, cursorY);
+            if (line < mPrevLineDuringDrag) {
+                return mPrevLineDuringDrag;
+            }
+            // User's finger is now over the handle, at the ideal offset from the cursor. From now
+            // on, position the cursor higher up from the actual touch location so that the user's
+            // finger stays "snapped" to the handle. This provides better visibility of the text.
+            mIsTouchSnappedToHandleDuringDrag = true;
+            if (TextView.DEBUG_CURSOR) {
+                logCursor("InsertionPointCursorController",
+                        "snapped touch to handle: eventY=%d, cursorY=%d, mLastLine=%d, line=%d",
+                        (int) event.getY(), (int) cursorY, mPrevLineDuringDrag, line);
+            }
+            return line;
+        }
+
         private void startCursorDrag(MotionEvent event) {
             if (TextView.DEBUG_CURSOR) {
                 logCursor("InsertionPointCursorController", "start cursor drag");
             }
             mIsDraggingCursor = true;
+            mIsTouchSnappedToHandleDuringDrag = false;
+            mPrevLineDuringDrag = UNSET_LINE;
             // We don't want the parent scroll/long-press handlers to take over while dragging.
             mTextView.getParent().requestDisallowInterceptTouchEvent(true);
             mTextView.cancelLongPress();
@@ -6084,6 +6137,8 @@ public class Editor {
                 logCursor("InsertionPointCursorController", "end cursor drag");
             }
             mIsDraggingCursor = false;
+            mIsTouchSnappedToHandleDuringDrag = false;
+            mPrevLineDuringDrag = UNSET_LINE;
             // Hide the magnifier and set the handle to be hidden after a delay.
             getHandle().dismissMagnifier();
             getHandle().hideAfterDelay();
