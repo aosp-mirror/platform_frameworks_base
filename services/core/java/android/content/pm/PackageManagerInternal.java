@@ -69,6 +69,25 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_COMPANION = 14;
     public static final int PACKAGE_RETAIL_DEMO = 15;
 
+    @IntDef(flag = true, prefix = "RESOLVE_", value = {
+            RESOLVE_NON_BROWSER_ONLY,
+            RESOLVE_NON_RESOLVER_ONLY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PrivateResolveFlags {}
+
+    /**
+     * Internal {@link #resolveIntent(Intent, String, int, int, int, boolean, int)} flag:
+     * only match components that contain a generic web intent filter.
+     */
+    public static final int RESOLVE_NON_BROWSER_ONLY = 0x00000001;
+
+    /**
+     * Internal {@link #resolveIntent(Intent, String, int, int, int, boolean, int)} flag: do not
+     * match to the resolver.
+     */
+    public static final int RESOLVE_NON_RESOLVER_ONLY = 0x00000002;
+
     @IntDef(value = {
             INTEGRITY_VERIFICATION_ALLOW,
             INTEGRITY_VERIFICATION_REJECT,
@@ -507,7 +526,8 @@ public abstract class PackageManagerInternal {
      * Resolves an activity intent, allowing instant apps to be resolved.
      */
     public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
-            int flags, int userId, boolean resolveForStart, int filterCallingUid);
+            int flags, @PrivateResolveFlags int privateResolveFlags, int userId,
+            boolean resolveForStart, int filterCallingUid);
 
     /**
     * Resolves a service intent, allowing instant apps to be resolved.

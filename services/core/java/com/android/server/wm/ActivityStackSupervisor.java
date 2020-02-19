@@ -108,6 +108,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -755,6 +756,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
                 modifiedFlags |= PackageManager.MATCH_INSTANT;
             }
+            int privateResolveFlags  = 0;
+            if (intent.isWebIntent()
+                        && (intent.getFlags() & Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER) != 0) {
+                privateResolveFlags |= PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY;
+            }
+            if ((intent.getFlags() & Intent.FLAG_ACTIVITY_REQUIRE_DEFAULT) != 0) {
+                privateResolveFlags |= PackageManagerInternal.RESOLVE_NON_RESOLVER_ONLY;
+            }
 
             // In order to allow cross-profile lookup, we clear the calling identity here.
             // Note the binder identity won't affect the result, but filterCallingUid will.
@@ -764,7 +773,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             final long token = Binder.clearCallingIdentity();
             try {
                 return mService.getPackageManagerInternalLocked().resolveIntent(
-                        intent, resolvedType, modifiedFlags, userId, true, filterCallingUid);
+                        intent, resolvedType, modifiedFlags, privateResolveFlags, userId, true,
+                        filterCallingUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
