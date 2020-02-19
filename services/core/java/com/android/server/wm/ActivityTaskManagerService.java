@@ -5920,8 +5920,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Return the intent set with {@link Intent#CATEGORY_SECONDARY_HOME} to resolve secondary home
      * activities.
      *
-     * @param preferredPackage Specify a preferred package name, otherwise use secondary home
-     *                        component defined in config_secondaryHomeComponent.
+     * @param preferredPackage Specify a preferred package name, otherwise use the package name
+     *                         defined in config_secondaryHomePackage.
      * @return the intent set with {@link Intent#CATEGORY_SECONDARY_HOME}
      */
     Intent getSecondaryHomeIntent(String preferredPackage) {
@@ -5929,10 +5929,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean useSystemProvidedLauncher = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useSystemProvidedLauncherForSecondary);
         if (preferredPackage == null || useSystemProvidedLauncher) {
-            // Using the component stored in config if no package name or forced.
-            final String secondaryHomeComponent = mContext.getResources().getString(
-                    com.android.internal.R.string.config_secondaryHomeComponent);
-            intent.setComponent(ComponentName.unflattenFromString(secondaryHomeComponent));
+            // Using the package name stored in config if no preferred package name or forced.
+            final String secondaryHomePackage = mContext.getResources().getString(
+                    com.android.internal.R.string.config_secondaryHomePackage);
+            intent.setPackage(secondaryHomePackage);
         } else {
             intent.setPackage(preferredPackage);
         }

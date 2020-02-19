@@ -52,7 +52,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
 
 import android.app.ActivityOptions;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -517,7 +516,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
      */
     @Test
     public void testStartHomeOnAllDisplays() {
-        mockResolveHomeActivity();
+        mockResolveHomeActivity(true /* primaryHome */, false /* forceSystemProvided */);
         mockResolveSecondaryHomeActivity();
 
         // Create secondary displays.
@@ -644,30 +643,26 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     }
 
     /**
-     * Tests that secondary home should be selected if default home not set.
+     * Tests that secondary home should be selected if primary home not set.
      */
     @Test
-    public void testResolveSecondaryHomeActivityWhenDefaultHomeNotSet() {
-        final Intent defaultHomeIntent = mService.getHomeIntent();
-        final ActivityInfo aInfoDefault = new ActivityInfo();
-        aInfoDefault.name = ResolverActivity.class.getName();
-        doReturn(aInfoDefault).when(mRootWindowContainer).resolveHomeActivity(anyInt(),
-                refEq(defaultHomeIntent));
+    public void testResolveSecondaryHomeActivityWhenPrimaryHomeNotSet() {
+        // Setup: primary home not set.
+        final Intent primaryHomeIntent = mService.getHomeIntent();
+        final ActivityInfo aInfoPrimary = new ActivityInfo();
+        aInfoPrimary.name = ResolverActivity.class.getName();
+        doReturn(aInfoPrimary).when(mRootWindowContainer).resolveHomeActivity(anyInt(),
+                refEq(primaryHomeIntent));
+        // Setup: set secondary home.
+        mockResolveHomeActivity(false /* primaryHome */, false /* forceSystemProvided */);
 
-        final String secondaryHomeComponent = mService.mContext.getResources().getString(
-                com.android.internal.R.string.config_secondaryHomeComponent);
-        final ComponentName comp = ComponentName.unflattenFromString(secondaryHomeComponent);
-        final Intent secondaryHomeIntent = mService.getSecondaryHomeIntent(null);
-        final ActivityInfo aInfoSecondary = new ActivityInfo();
-        aInfoSecondary.name = comp.getClassName();
-        doReturn(aInfoSecondary).when(mRootWindowContainer).resolveHomeActivity(anyInt(),
-                refEq(secondaryHomeIntent));
-
-        // Should fallback to secondary home if default home not set.
+        // Run the test.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
                 .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
-
-        assertEquals(comp.getClassName(), resolvedInfo.first.name);
+        final ActivityInfo aInfoSecondary = getFakeHomeActivityInfo(false /* primaryHome*/);
+        assertEquals(aInfoSecondary.name, resolvedInfo.first.name);
+        assertEquals(aInfoSecondary.applicationInfo.packageName,
+                resolvedInfo.first.applicationInfo.packageName);
     }
 
     /**
@@ -675,103 +670,60 @@ public class RootActivityContainerTests extends ActivityTestsBase {
      * config_useSystemProvidedLauncherForSecondary.
      */
     @Test
-    public void testResolveSecondaryHomeActivityForced() throws Exception {
-        Resources resources = mContext.getResources();
-        spyOn(resources);
-        try {
-            // setUp: set secondary launcher and force it.
-            final String defaultSecondaryHome =
-                    "com.android.test/com.android.test.TestDefaultSecondaryHome";
-            final ComponentName secondaryComp = ComponentName.unflattenFromString(
-                    defaultSecondaryHome);
-            doReturn(defaultSecondaryHome).when(resources).getString(
-                    com.android.internal.R.string.config_secondaryHomeComponent);
-            doReturn(true).when(resources).getBoolean(
-                    com.android.internal.R.bool.config_useSystemProvidedLauncherForSecondary);
-            final Intent secondaryHomeIntent = mService.getSecondaryHomeIntent(null);
-            assertEquals(secondaryComp, secondaryHomeIntent.getComponent());
-            final ActivityInfo aInfoSecondary = new ActivityInfo();
-            aInfoSecondary.name = secondaryComp.getClassName();
-            aInfoSecondary.applicationInfo = new ApplicationInfo();
-            aInfoSecondary.applicationInfo.packageName = secondaryComp.getPackageName();
-            doReturn(aInfoSecondary).when(mRootWindowContainer).resolveHomeActivity(anyInt(),
-                    refEq(secondaryHomeIntent));
-            final Intent homeIntent = mService.getHomeIntent();
-            final ActivityInfo aInfoDefault = new ActivityInfo();
-            aInfoDefault.name = "fakeHomeActivity";
-            aInfoDefault.applicationInfo = new ApplicationInfo();
-            aInfoDefault.applicationInfo.packageName = "fakeHomePackage";
-            doReturn(aInfoDefault).when(mRootWindowContainer).resolveHomeActivity(anyInt(),
-                    refEq(homeIntent));
-            // Let resolveActivities call to validate both main launcher and second launcher so that
-            // resolveActivities call does not work as enabler for secondary.
-            final List<ResolveInfo> resolutions1 = new ArrayList<>();
-            final ResolveInfo resolveInfo1 = new ResolveInfo();
-            resolveInfo1.activityInfo = new ActivityInfo();
-            resolveInfo1.activityInfo.name = aInfoDefault.name;
-            resolveInfo1.activityInfo.applicationInfo = aInfoDefault.applicationInfo;
-            resolutions1.add(resolveInfo1);
-            doReturn(resolutions1).when(mRootWindowContainer).resolveActivities(anyInt(),
-                    refEq(homeIntent));
-            final List<ResolveInfo> resolutions2 = new ArrayList<>();
-            final ResolveInfo resolveInfo2 = new ResolveInfo();
-            resolveInfo2.activityInfo = new ActivityInfo();
-            resolveInfo2.activityInfo.name = aInfoSecondary.name;
-            resolveInfo2.activityInfo.applicationInfo = aInfoSecondary.applicationInfo;
-            resolutions2.add(resolveInfo2);
-            doReturn(resolutions2).when(mRootWindowContainer).resolveActivities(anyInt(),
-                    refEq(secondaryHomeIntent));
-            doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplay(
-                    any(), anyInt(), anyBoolean());
-
-            // Run the test
-            final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
-                    .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
-            assertEquals(secondaryComp.getClassName(), resolvedInfo.first.name);
-            assertEquals(secondaryComp.getPackageName(),
-                    resolvedInfo.first.applicationInfo.packageName);
-            assertEquals(aInfoSecondary.name, resolvedInfo.first.name);
-        } finally {
-            // tearDown
-            reset(resources);
-        }
-    }
-
-    /**
-     * Tests that secondary home should be selected if default home not support secondary displays
-     * or there is no matched activity in the same package as selected default home.
-     */
-    @Test
-    public void testResolveSecondaryHomeActivityWhenDefaultHomeNotSupportMultiDisplay() {
-        mockResolveHomeActivity();
-
+    public void testResolveSecondaryHomeActivityForced() {
+        // SetUp: set primary home.
+        mockResolveHomeActivity(true /* primaryHome */, false /* forceSystemProvided */);
+        // SetUp: set secondary home and force it.
+        mockResolveHomeActivity(false /* primaryHome */, true /* forceSystemProvided */);
+        final Intent secondaryHomeIntent =
+                mService.getSecondaryHomeIntent(null /* preferredPackage */);
         final List<ResolveInfo> resolutions = new ArrayList<>();
-        doReturn(resolutions).when(mRootWindowContainer).resolveActivities(anyInt(), any());
-
-        final String secondaryHomeComponent = mService.mContext.getResources().getString(
-                com.android.internal.R.string.config_secondaryHomeComponent);
-        final ComponentName comp = ComponentName.unflattenFromString(secondaryHomeComponent);
-        final Intent secondaryHomeIntent = mService.getSecondaryHomeIntent(null);
-        final ActivityInfo aInfoSecondary = new ActivityInfo();
-        aInfoSecondary.name = comp.getClassName();
-        doReturn(aInfoSecondary).when(mRootWindowContainer).resolveHomeActivity(anyInt(),
+        final ResolveInfo resolveInfo = new ResolveInfo();
+        final ActivityInfo aInfoSecondary = getFakeHomeActivityInfo(false /* primaryHome*/);
+        resolveInfo.activityInfo = aInfoSecondary;
+        resolutions.add(resolveInfo);
+        doReturn(resolutions).when(mRootWindowContainer).resolveActivities(anyInt(),
                 refEq(secondaryHomeIntent));
+        doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplay(
+                any(), anyInt(), anyBoolean());
 
-        // Should fallback to secondary home if selected default home not support secondary displays
-        // or there is no matched activity in the same package as selected default home.
+        // Run the test.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
                 .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
-
-        assertEquals(comp.getClassName(), resolvedInfo.first.name);
+        assertEquals(aInfoSecondary.name, resolvedInfo.first.name);
+        assertEquals(aInfoSecondary.applicationInfo.packageName,
+                resolvedInfo.first.applicationInfo.packageName);
     }
 
     /**
-     * Tests that default home activity should be selected if it already support secondary displays.
+     * Tests that secondary home should be selected if primary home not support secondary displays
+     * or there is no matched activity in the same package as selected primary home.
      */
     @Test
-    public void testResolveSecondaryHomeActivityWhenDefaultHomeSupportMultiDisplay() {
-        final ActivityInfo aInfoDefault = mockResolveHomeActivity();
+    public void testResolveSecondaryHomeActivityWhenPrimaryHomeNotSupportMultiDisplay() {
+        // Setup: there is no matched activity in the same package as selected primary home.
+        mockResolveHomeActivity(true /* primaryHome */, false /* forceSystemProvided */);
+        final List<ResolveInfo> resolutions = new ArrayList<>();
+        doReturn(resolutions).when(mRootWindowContainer).resolveActivities(anyInt(), any());
+        // Setup: set secondary home.
+        mockResolveHomeActivity(false /* primaryHome */, false /* forceSystemProvided */);
 
+        // Run the test.
+        final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
+                .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
+        final ActivityInfo aInfoSecondary = getFakeHomeActivityInfo(false /* primaryHome*/);
+        assertEquals(aInfoSecondary.name, resolvedInfo.first.name);
+        assertEquals(aInfoSecondary.applicationInfo.packageName,
+                resolvedInfo.first.applicationInfo.packageName);
+    }
+    /**
+     * Tests that primary home activity should be selected if it already support secondary displays.
+     */
+    @Test
+    public void testResolveSecondaryHomeActivityWhenPrimaryHomeSupportMultiDisplay() {
+        // SetUp: set primary home.
+        mockResolveHomeActivity(true /* primaryHome */, false /* forceSystemProvided */);
+        // SetUp: put primary home info on 2nd item
         final List<ResolveInfo> resolutions = new ArrayList<>();
         final ResolveInfo infoFake1 = new ResolveInfo();
         infoFake1.activityInfo = new ActivityInfo();
@@ -779,7 +731,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         infoFake1.activityInfo.applicationInfo = new ApplicationInfo();
         infoFake1.activityInfo.applicationInfo.packageName = "fakePackage1";
         final ResolveInfo infoFake2 = new ResolveInfo();
-        infoFake2.activityInfo = aInfoDefault;
+        final ActivityInfo aInfoPrimary = getFakeHomeActivityInfo(true /* primaryHome */);
+        infoFake2.activityInfo = aInfoPrimary;
         resolutions.add(infoFake1);
         resolutions.add(infoFake2);
         doReturn(resolutions).when(mRootWindowContainer).resolveActivities(anyInt(), any());
@@ -787,13 +740,12 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplay(
                 any(), anyInt(), anyBoolean());
 
-        // Use default home activity if it support secondary displays.
+        // Run the test.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
                 .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
-
-        assertEquals(aInfoDefault.applicationInfo.packageName,
+        assertEquals(aInfoPrimary.name, resolvedInfo.first.name);
+        assertEquals(aInfoPrimary.applicationInfo.packageName,
                 resolvedInfo.first.applicationInfo.packageName);
-        assertEquals(aInfoDefault.name, resolvedInfo.first.name);
     }
 
     /**
@@ -801,8 +753,9 @@ public class RootActivityContainerTests extends ActivityTestsBase {
      */
     @Test
     public void testResolveSecondaryHomeActivityWhenOtherActivitySupportMultiDisplay() {
-        mockResolveHomeActivity();
-
+        // SetUp: set primary home.
+        mockResolveHomeActivity(true /* primaryHome */, false /* forceSystemProvided */);
+        // Setup: prepare two eligible activity info.
         final List<ResolveInfo> resolutions = new ArrayList<>();
         final ResolveInfo infoFake1 = new ResolveInfo();
         infoFake1.activityInfo = new ActivityInfo();
@@ -821,7 +774,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplay(
                 any(), anyInt(), anyBoolean());
 
-        // Use the first one of matched activities in the same package as selected default home.
+        // Use the first one of matched activities in the same package as selected primary home.
         final Pair<ActivityInfo, Intent> resolvedInfo = mRootWindowContainer
                 .resolveSecondaryHomeActivity(0 /* userId */, 1 /* displayId */);
 
@@ -884,32 +837,48 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
     /**
      * Mock {@link RootWindowContainer#resolveHomeActivity} for returning consistent activity
-     * info for test cases (the original implementation will resolve from the real package manager).
+     * info for test cases.
+     *
+     * @param primaryHome Indicate to use primary home intent as parameter, otherwise, use
+     *                    secondary home intent.
+     * @param forceSystemProvided Indicate to force using system provided home activity.
      */
-    private ActivityInfo mockResolveHomeActivity() {
-        final Intent homeIntent = mService.getHomeIntent();
-        final ActivityInfo aInfoDefault = new ActivityInfo();
-        aInfoDefault.name = "fakeHomeActivity";
-        aInfoDefault.applicationInfo = new ApplicationInfo();
-        aInfoDefault.applicationInfo.packageName = "fakeHomePackage";
-        doReturn(aInfoDefault).when(mRootWindowContainer).resolveHomeActivity(anyInt(),
-                refEq(homeIntent));
-        return aInfoDefault;
+    private void mockResolveHomeActivity(boolean primaryHome, boolean forceSystemProvided) {
+        ActivityInfo targetActivityInfo = getFakeHomeActivityInfo(primaryHome);
+        Intent targetIntent;
+        if (primaryHome) {
+            targetIntent = mService.getHomeIntent();
+        } else {
+            Resources resources = mContext.getResources();
+            spyOn(resources);
+            doReturn(targetActivityInfo.applicationInfo.packageName).when(resources).getString(
+                    com.android.internal.R.string.config_secondaryHomePackage);
+            doReturn(forceSystemProvided).when(resources).getBoolean(
+                    com.android.internal.R.bool.config_useSystemProvidedLauncherForSecondary);
+            targetIntent = mService.getSecondaryHomeIntent(null /* preferredPackage */);
+        }
+        doReturn(targetActivityInfo).when(mRootWindowContainer).resolveHomeActivity(anyInt(),
+                refEq(targetIntent));
     }
 
     /**
      * Mock {@link RootWindowContainer#resolveSecondaryHomeActivity} for returning consistent
-     * activity info for test cases (the original implementation will resolve from the real package
-     * manager).
+     * activity info for test cases.
      */
     private void mockResolveSecondaryHomeActivity() {
         final Intent secondaryHomeIntent = mService
                 .getSecondaryHomeIntent(null /* preferredPackage */);
-        final ActivityInfo aInfoSecondary = new ActivityInfo();
-        aInfoSecondary.name = "fakeSecondaryHomeActivity";
-        aInfoSecondary.applicationInfo = new ApplicationInfo();
-        aInfoSecondary.applicationInfo.packageName = "fakeSecondaryHomePackage";
+        final ActivityInfo aInfoSecondary = getFakeHomeActivityInfo(false);
         doReturn(Pair.create(aInfoSecondary, secondaryHomeIntent)).when(mRootWindowContainer)
                 .resolveSecondaryHomeActivity(anyInt(), anyInt());
+    }
+
+    private ActivityInfo getFakeHomeActivityInfo(boolean primaryHome) {
+        final ActivityInfo aInfo = new ActivityInfo();
+        aInfo.name = primaryHome ? "fakeHomeActivity" : "fakeSecondaryHomeActivity";
+        aInfo.applicationInfo = new ApplicationInfo();
+        aInfo.applicationInfo.packageName =
+                primaryHome ? "fakeHomePackage" : "fakeSecondaryHomePackage";
+        return  aInfo;
     }
 }

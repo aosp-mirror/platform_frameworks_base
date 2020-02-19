@@ -3957,14 +3957,14 @@
     <!-- Component name for the default module metadata provider on this device -->
     <string name="config_defaultModuleMetadataProvider" translatable="false">com.android.modulemetadata</string>
 
-    <!-- This is the default launcher component to use on secondary displays that support system
-         decorations.
-         This launcher activity must support multiple instances and have corresponding launch mode
-         set in AndroidManifest.
+    <!-- This is the default launcher package with an activity to use on secondary displays that
+         support system decorations.
+         This launcher package must have an activity that supports multiple instances and has
+         corresponding launch mode set in AndroidManifest.
          {@see android.view.Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS} -->
-    <string name="config_secondaryHomeComponent" translatable="false">com.android.launcher3/com.android.launcher3.SecondaryDisplayLauncher</string>
+    <string name="config_secondaryHomePackage" translatable="false">com.android.launcher3</string>
 
-    <!-- Force secondary home launcher specified in config_secondaryHomeComponent always. If this is
+    <!-- Force secondary home launcher specified in config_secondaryHomePackage always. If this is
          not set, secondary home launcher can be replaced by user. -->
     <bool name ="config_useSystemProvidedLauncherForSecondary">false</bool>
 
