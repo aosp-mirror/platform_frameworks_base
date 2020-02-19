@@ -74,6 +74,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -147,6 +148,7 @@ public class AbstractAccessibilityServiceConnectionTest {
 
     @Mock private Context mMockContext;
     @Mock private IPowerManager mMockIPowerManager;
+    @Mock private IThermalService mMockIThermalService;
     @Mock private PackageManager mMockPackageManager;
     @Spy  private AccessibilityServiceInfo mSpyServiceInfo = new AccessibilityServiceInfo();
     @Mock private AccessibilitySecurityPolicy mMockSecurityPolicy;
@@ -174,7 +176,7 @@ public class AbstractAccessibilityServiceConnectionTest {
                 .thenReturn(mMockMagnificationController);
 
         PowerManager powerManager =
-                new PowerManager(mMockContext, mMockIPowerManager, mHandler);
+                new PowerManager(mMockContext, mMockIPowerManager, mMockIThermalService, mHandler);
         when(mMockContext.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.hasSystemFeature(FEATURE_FINGERPRINT)).thenReturn(true);

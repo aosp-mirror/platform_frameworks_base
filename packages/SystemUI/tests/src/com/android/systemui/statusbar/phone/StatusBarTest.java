@@ -50,6 +50,7 @@ import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -256,7 +257,8 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationFilter.class, mNotificationFilter);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
-        mPowerManager = new PowerManager(mContext, powerManagerService,
+        IThermalService thermalService = mock(IThermalService.class);
+        mPowerManager = new PowerManager(mContext, powerManagerService, thermalService,
                 Handler.createAsync(Looper.myLooper()));
 
         mNotificationInterruptionStateProvider =

@@ -103,4 +103,11 @@ interface IThermalService {
       * {@hide}
       */
     List<CoolingDevice> getCurrentCoolingDevicesWithType(in int type);
+
+    /**
+     * @param forecastSeconds how many seconds ahead to forecast the provided headroom
+     * @return forecasted thermal headroom, normalized such that 1.0 indicates that throttling will
+     *     occur; returns NaN if the headroom or forecast is unavailable
+     */
+    float getThermalHeadroom(int forecastSeconds);
 }

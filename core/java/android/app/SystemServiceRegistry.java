@@ -148,6 +148,7 @@ import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
 import android.os.ISystemUpdateManager;
+import android.os.IThermalService;
 import android.os.IUserManager;
 import android.os.IncidentManager;
 import android.os.PowerManager;
@@ -576,10 +577,12 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<PowerManager>() {
             @Override
             public PowerManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.POWER_SERVICE);
-                IPowerManager service = IPowerManager.Stub.asInterface(b);
-                return new PowerManager(ctx.getOuterContext(),
-                        service, ctx.mMainThread.getHandler());
+                IBinder powerBinder = ServiceManager.getServiceOrThrow(Context.POWER_SERVICE);
+                IPowerManager powerService = IPowerManager.Stub.asInterface(powerBinder);
+                IBinder thermalBinder = ServiceManager.getServiceOrThrow(Context.THERMAL_SERVICE);
+                IThermalService thermalService = IThermalService.Stub.asInterface(thermalBinder);
+                return new PowerManager(ctx.getOuterContext(), powerService, thermalService,
+                        ctx.mMainThread.getHandler());
             }});
 
         registerService(Context.RECOVERY_SERVICE, RecoverySystem.class,
