@@ -87,6 +87,13 @@ public class LocationFudger {
         mRandom = random;
         mAccuracyM = Math.max(accuracyM, MIN_ACCURACY_M);
 
+        resetOffsets();
+    }
+
+    /**
+     * Resets the random offsets completely.
+     */
+    public void resetOffsets() {
         mLatitudeOffsetM = nextRandomOffset();
         mLongitudeOffsetM = nextRandomOffset();
         mNextUpdateRealtimeMs = mClock.millis() + OFFSET_UPDATE_INTERVAL_MS;
