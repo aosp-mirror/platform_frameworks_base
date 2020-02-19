@@ -3532,6 +3532,8 @@
      mode -->
     <string-array translatable="false" name="config_priorityOnlyDndExemptPackages">
         <item>com.android.dialer</item>
+        <item>com.android.systemui</item>
+        <item>android</item>
     </string-array>
 
     <!-- The default value for transition animation scale found in developer settings.

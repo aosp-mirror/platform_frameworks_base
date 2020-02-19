@@ -16,6 +16,19 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_ANYONE;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CALLS;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CONVERSATIONS;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_EVENTS;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_MEDIA;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_MESSAGES;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_REMINDERS;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_REPEAT_CALLERS;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM;
+import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
+import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_CONTACTS;
+import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_STARRED;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
@@ -219,7 +232,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testZenOff_NoMuteApplied() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_OFF;
         mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
-                Policy.PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
+                PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
 
         doNothing().when(mZenModeHelperSpy).applyRestrictions(eq(false), anyBoolean(), anyInt());
@@ -230,10 +243,73 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testZenOn_NotificationApplied() {
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        // The most permissive policy
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
+                PRIORITY_CATEGORY_MEDIA | PRIORITY_CATEGORY_MESSAGES
+                | PRIORITY_CATEGORY_CONVERSATIONS | PRIORITY_CATEGORY_CALLS
+                | PRIORITY_CATEGORY_ALARMS | PRIORITY_CATEGORY_EVENTS | PRIORITY_CATEGORY_REMINDERS
+                | PRIORITY_CATEGORY_REPEAT_CALLERS | PRIORITY_CATEGORY_SYSTEM, PRIORITY_SENDERS_ANY,
+                PRIORITY_SENDERS_ANY, 0, CONVERSATION_SENDERS_ANYONE);
+        mZenModeHelperSpy.applyRestrictions();
+
+        doNothing().when(mZenModeHelperSpy).applyRestrictions(anyBoolean(), anyBoolean(), anyInt());
+        verify(mZenModeHelperSpy).applyRestrictions(true, true,
+                AudioAttributes.USAGE_NOTIFICATION);
+        verify(mZenModeHelperSpy).applyRestrictions(true, true,
+                AudioAttributes.USAGE_NOTIFICATION_EVENT);
+        verify(mZenModeHelperSpy).applyRestrictions(true, true,
+                AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_DELAYED);
+        verify(mZenModeHelperSpy).applyRestrictions(true, true,
+                AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT);
+    }
+
+    @Test
+    public void testZenOn_StarredCallers_CallTypesBlocked() {
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        // The most permissive policy
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
+                PRIORITY_CATEGORY_MEDIA | PRIORITY_CATEGORY_MESSAGES
+                | PRIORITY_CATEGORY_CONVERSATIONS | PRIORITY_CATEGORY_CALLS
+                | PRIORITY_CATEGORY_ALARMS | PRIORITY_CATEGORY_EVENTS | PRIORITY_CATEGORY_REMINDERS
+                | PRIORITY_CATEGORY_SYSTEM,
+                PRIORITY_SENDERS_STARRED,
+                PRIORITY_SENDERS_ANY, 0, CONVERSATION_SENDERS_ANYONE);
+        mZenModeHelperSpy.applyRestrictions();
+
+        doNothing().when(mZenModeHelperSpy).applyRestrictions(anyBoolean(), anyBoolean(), anyInt());
+        verify(mZenModeHelperSpy).applyRestrictions(true, true,
+                AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
+        verify(mZenModeHelperSpy).applyRestrictions(true, true,
+                AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST);
+    }
+
+    @Test
+    public void testZenOn_AllCallers_CallTypesAllowed() {
+        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        // The most permissive policy
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
+                PRIORITY_CATEGORY_MEDIA | PRIORITY_CATEGORY_MESSAGES
+                | PRIORITY_CATEGORY_CONVERSATIONS | PRIORITY_CATEGORY_CALLS
+                | PRIORITY_CATEGORY_ALARMS | PRIORITY_CATEGORY_EVENTS | PRIORITY_CATEGORY_REMINDERS
+                | PRIORITY_CATEGORY_REPEAT_CALLERS | PRIORITY_CATEGORY_SYSTEM,
+                PRIORITY_SENDERS_ANY,
+                PRIORITY_SENDERS_ANY, 0, CONVERSATION_SENDERS_ANYONE);
+        mZenModeHelperSpy.applyRestrictions();
+
+        doNothing().when(mZenModeHelperSpy).applyRestrictions(anyBoolean(), anyBoolean(), anyInt());
+        verify(mZenModeHelperSpy).applyRestrictions(true, false,
+                AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
+        verify(mZenModeHelperSpy).applyRestrictions(true, false,
+                AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST);
+    }
+
+    @Test
     public void testZenOn_AllowAlarmsMedia_NoAlarmMediaMuteApplied() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
-                Policy.PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
+                PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
 
         mZenModeHelperSpy.applyRestrictions();
         verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, false,
@@ -261,7 +337,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testTotalSilence() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
         mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
-                Policy.PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
+                PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
 
         // Total silence will silence alarms, media and system noises (but not vibrations)
