@@ -2094,8 +2094,12 @@ public final class SmsManager {
 
     /**
      * Gets the total capacity of SMS storage on RUIM and SIM cards
+     * <p>
+     * This is the number of 176 byte EF-SMS records which can be stored on the RUIM or SIM card.
+     * <p>
+     * See 3GPP TS 31.102 - 4.2.25 - EF-SMS for more information
      *
-     * @return the total capacity count of SMS on RUIM and SIM cards
+     * @return the total number of SMS records which can be stored on the RUIM or SIM cards.
      * @hide
      */
     @SystemApi
