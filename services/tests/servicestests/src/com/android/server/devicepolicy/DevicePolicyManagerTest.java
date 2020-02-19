@@ -26,6 +26,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.PasswordMetrics.computeForPassword;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
@@ -6046,6 +6047,86 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().settings.settingsGlobalGetInt(Settings.Global.COMMON_CRITERIA_MODE, 0))
                 .thenReturn(1);
         assertTrue(dpm.isCommonCriteriaModeEnabled(admin1));
+    }
+
+    public void testCanProfileOwnerResetPasswordWhenLocked_nonDirectBootAwarePo()
+            throws Exception {
+        setDeviceEncryptionPerUser();
+        setupProfileOwner();
+        setupPasswordResetToken();
+
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        assertFalse("po is not direct boot aware",
+                dpm.canProfileOwnerResetPasswordWhenLocked(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    public void testCanProfileOwnerResetPasswordWhenLocked_noActiveToken() throws Exception {
+        setDeviceEncryptionPerUser();
+        setupProfileOwner();
+        makeAdmin1DirectBootAware();
+
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        assertFalse("po doesn't have an active password reset token",
+                dpm.canProfileOwnerResetPasswordWhenLocked(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    public void testCanProfileOwnerResetPasswordWhenLocked_nonFbeDevice() throws Exception {
+        setupProfileOwner();
+        makeAdmin1DirectBootAware();
+        setupPasswordResetToken();
+
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        assertFalse("device is not FBE",
+                dpm.canProfileOwnerResetPasswordWhenLocked(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    public void testCanProfileOwnerResetPasswordWhenLocked() throws Exception {
+        setDeviceEncryptionPerUser();
+        setupProfileOwner();
+        makeAdmin1DirectBootAware();
+        setupPasswordResetToken();
+
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        assertTrue("direct boot aware po with active password reset token",
+                dpm.canProfileOwnerResetPasswordWhenLocked(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    private void setupPasswordResetToken() {
+        final byte[] token = new byte[32];
+        final long handle = 123456;
+
+        when(getServices().lockPatternUtils
+                .addEscrowToken(eq(token), eq(DpmMockContext.CALLER_USER_HANDLE),
+                        nullable(EscrowTokenStateChangeCallback.class)))
+                .thenReturn(handle);
+
+        dpm.setResetPasswordToken(admin1, token);
+
+        when(getServices().lockPatternUtils
+                .isEscrowTokenActive(eq(handle), eq(DpmMockContext.CALLER_USER_HANDLE)))
+                .thenReturn(true);
+
+        assertTrue("failed to activate token", dpm.isResetPasswordTokenActive(admin1));
+    }
+
+    private void makeAdmin1DirectBootAware()
+            throws PackageManager.NameNotFoundException, android.os.RemoteException {
+        Mockito.reset(getServices().ipackageManager);
+
+        final ApplicationInfo ai = DpmTestUtils.cloneParcelable(
+                mRealTestContext.getPackageManager().getApplicationInfo(
+                        admin1.getPackageName(),
+                        PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS));
+        ai.privateFlags = PRIVATE_FLAG_DIRECT_BOOT_AWARE;
+
+        doReturn(ai).when(getServices().ipackageManager).getApplicationInfo(
+                eq(admin1.getPackageName()),
+                anyInt(),
+                eq(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    private void setDeviceEncryptionPerUser() {
+        when(getServices().storageManager.isFileBasedEncryptionEnabled()).thenReturn(true);
     }
 
     private void setCrossProfileAppsList(String... packages) {

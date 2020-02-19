@@ -437,7 +437,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Start an {@link IntentSender} when user is unlocked after disabling quiet mode.
      *
-     * @see {@link #requestQuietModeEnabled(String, boolean, int, IntentSender)}
+     * @see #requestQuietModeEnabled(String, boolean, int, IntentSender, int)
      */
     private class DisableQuietModeUserUnlockedCallback extends IProgressListener.Stub {
         private final IntentSender mTarget;
@@ -967,7 +967,16 @@ public class UserManagerService extends IUserManager.Stub {
                     "target should only be specified when we are disabling quiet mode.");
         }
 
-        ensureCanModifyQuietMode(callingPackage, Binder.getCallingUid(), userId, target != null);
+        final boolean dontAskCredential =
+                (flags & UserManager.QUIET_MODE_DISABLE_DONT_ASK_CREDENTIAL) != 0;
+        final boolean onlyIfCredentialNotRequired =
+                (flags & UserManager.QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED) != 0;
+        if (dontAskCredential && onlyIfCredentialNotRequired) {
+            throw new IllegalArgumentException("invalid flags: " + flags);
+        }
+
+        ensureCanModifyQuietMode(
+                callingPackage, Binder.getCallingUid(), userId, target != null, dontAskCredential);
         final long identity = Binder.clearCallingIdentity();
         try {
             if (enableQuietMode) {
@@ -976,11 +985,11 @@ public class UserManagerService extends IUserManager.Stub {
                 return true;
             }
             mLockPatternUtils.tryUnlockWithCachedUnifiedChallenge(userId);
-            boolean needToShowConfirmCredential =
-                    mLockPatternUtils.isSecure(userId)
-                            && !StorageManager.isUserKeyUnlocked(userId);
+            final boolean needToShowConfirmCredential = !dontAskCredential
+                    && mLockPatternUtils.isSecure(userId)
+                    && !StorageManager.isUserKeyUnlocked(userId);
             if (needToShowConfirmCredential) {
-                if ((flags & UserManager.QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED) != 0) {
+                if (onlyIfCredentialNotRequired) {
                     return false;
                 }
                 showConfirmCredentialToDisableQuietMode(userId, target);
@@ -1007,13 +1016,17 @@ public class UserManagerService extends IUserManager.Stub {
      * {@link Manifest.permission#MANAGE_USERS}.
      */
     private void ensureCanModifyQuietMode(String callingPackage, int callingUid,
-            @UserIdInt int targetUserId, boolean startIntent) {
+            @UserIdInt int targetUserId, boolean startIntent, boolean dontAskCredential) {
         if (hasManageUsersPermission()) {
             return;
         }
         if (startIntent) {
             throw new SecurityException("MANAGE_USERS permission is required to start intent "
                     + "after disabling quiet mode.");
+        }
+        if (dontAskCredential) {
+            throw new SecurityException("MANAGE_USERS permission is required to disable quiet "
+                    + "mode without credentials.");
         }
         if (!isSameProfileGroupNoChecks(UserHandle.getUserId(callingUid), targetUserId)) {
             throw new SecurityException("MANAGE_USERS permission is required to modify quiet mode "

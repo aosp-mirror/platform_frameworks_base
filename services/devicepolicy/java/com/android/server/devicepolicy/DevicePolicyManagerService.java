@@ -48,6 +48,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_KEEP_UNINSTALLED_
 import static android.app.admin.DevicePolicyManager.DELEGATION_NETWORK_LOGGING;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
+import static android.app.admin.DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_INDIVIDUAL_ATTESTATION;
@@ -10040,35 +10041,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean checkCallerIsCurrentUserOrProfile() {
-        final int callingUserId = UserHandle.getCallingUserId();
-        final long token = mInjector.binderClearCallingIdentity();
-        try {
-            UserInfo currentUser;
-            UserInfo callingUser = getUserInfo(callingUserId);
-            try {
-                currentUser = mInjector.getIActivityManager().getCurrentUser();
-            } catch (RemoteException e) {
-                Slog.e(LOG_TAG, "Failed to talk to activity managed.", e);
-                return false;
-            }
-
-            if (callingUser.isManagedProfile() && callingUser.profileGroupId != currentUser.id) {
-                Slog.e(LOG_TAG, "Cannot set permitted input methods for managed profile "
-                        + "of a user that isn't the foreground user.");
-                return false;
-            }
-            if (!callingUser.isManagedProfile() && callingUserId != currentUser.id ) {
-                Slog.e(LOG_TAG, "Cannot set permitted input methods "
-                        + "of a user that isn't the foreground user.");
-                return false;
-            }
-        } finally {
-            mInjector.binderRestoreCallingIdentity(token);
-        }
-        return true;
-    }
-
     @Override
     public boolean setPermittedInputMethods(ComponentName who, List packageList) {
         if (!mHasFeature) {
@@ -14517,12 +14489,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final int userHandle = mInjector.userHandleGetCallingUserId();
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            DevicePolicyData policy = getUserData(userHandle);
-            if (policy.mPasswordTokenHandle != 0) {
-                return mInjector.binderWithCleanCallingIdentity(
-                        () -> mLockPatternUtils.isEscrowTokenActive(policy.mPasswordTokenHandle,
-                                userHandle));
-            }
+            return isResetPasswordTokenActiveForUserLocked(userHandle);
+        }
+    }
+
+    private boolean isResetPasswordTokenActiveForUserLocked(int userHandle) {
+        DevicePolicyData policy = getUserData(userHandle);
+        if (policy.mPasswordTokenHandle != 0) {
+            return mInjector.binderWithCleanCallingIdentity(() ->
+                    mLockPatternUtils.isEscrowTokenActive(policy.mPasswordTokenHandle, userHandle));
         }
         return false;
     }
@@ -15804,6 +15779,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // DO shouldn't be able to use this method.
             enforceProfileOwnerOfOrganizationOwnedDevice(admin);
             return admin.mProfileMaximumTimeOff;
+        }
+    }
+
+    @Override
+    public boolean canProfileOwnerResetPasswordWhenLocked(int userId) {
+        enforceSystemCaller("call canProfileOwnerResetPasswordWhenLocked");
+        synchronized (getLockObject()) {
+            final ActiveAdmin poAdmin = getProfileOwnerAdminLocked(userId);
+            if (poAdmin == null
+                    || getEncryptionStatus() != ENCRYPTION_STATUS_ACTIVE_PER_USER
+                    || !isResetPasswordTokenActiveForUserLocked(userId)) {
+                return false;
+            }
+            final ApplicationInfo poAppInfo;
+            try {
+                poAppInfo = mIPackageManager.getApplicationInfo(
+                        poAdmin.info.getPackageName(), 0 /* flags */, userId);
+            } catch (RemoteException e) {
+                Slog.e(LOG_TAG, "Failed to query PO app info", e);
+                return false;
+            }
+            if (poAppInfo == null) {
+                Slog.wtf(LOG_TAG, "Cannot find AppInfo for profile owner");
+                return false;
+            }
+            if (!poAppInfo.isEncryptionAware()) {
+                return false;
+            }
+            Slog.d(LOG_TAG, "PO should be able to reset password from direct boot");
+            return true;
         }
     }
 }
