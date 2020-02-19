@@ -19,6 +19,7 @@ package android.net.ip;
 import static android.net.InetAddresses.parseNumericAddress;
 import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
+import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 import static android.net.util.NetworkConstants.FF;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
 import static android.net.util.NetworkConstants.asByte;
@@ -29,11 +30,15 @@ import android.net.INetworkStackStatusCallback;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.MacAddress;
 import android.net.RouteInfo;
+import android.net.TetheredClient;
 import android.net.TetheringManager;
+import android.net.dhcp.DhcpLeaseParcelable;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.DhcpServingParamsParcelExt;
+import android.net.dhcp.IDhcpLeaseCallbacks;
 import android.net.dhcp.IDhcpServer;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
 import android.net.shared.NetdUtils;
@@ -48,6 +53,8 @@ import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -57,7 +64,10 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -130,6 +140,11 @@ public class IpServer extends StateMachine {
          * @param newLp the new LinkProperties to report
          */
         public void updateLinkProperties(IpServer who, LinkProperties newLp) { }
+
+        /**
+         * Notify that the DHCP leases changed in one of the IpServers.
+         */
+        public void dhcpLeasesChanged() { }
     }
 
     /** Capture IpServer dependencies, for injection. */
@@ -205,6 +220,8 @@ public class IpServer extends StateMachine {
     private IDhcpServer mDhcpServer;
     private RaParams mLastRaParams;
     private LinkAddress mIpv4Address;
+    @NonNull
+    private List<TetheredClient> mDhcpLeases = Collections.emptyList();
 
     public IpServer(
             String ifaceName, Looper looper, int interfaceType, SharedLog log,
@@ -260,6 +277,14 @@ public class IpServer extends StateMachine {
     /** The properties of the network link which IpServer is serving. */
     public LinkProperties linkProperties() {
         return new LinkProperties(mLinkProperties);
+    }
+
+    /**
+     * Get the latest list of DHCP leases that was reported. Must be called on the IpServer looper
+     * thread.
+     */
+    public List<TetheredClient> getAllLeases() {
+        return Collections.unmodifiableList(mDhcpLeases);
     }
 
     /** Stop this IpServer. After this is called this IpServer should not be used any more. */
@@ -334,7 +359,7 @@ public class IpServer extends StateMachine {
 
                 mDhcpServer = server;
                 try {
-                    mDhcpServer.start(new OnHandlerStatusCallback() {
+                    mDhcpServer.startWithCallbacks(new OnHandlerStatusCallback() {
                         @Override
                         public void callback(int startStatusCode) {
                             if (startStatusCode != STATUS_SUCCESS) {
@@ -342,7 +367,7 @@ public class IpServer extends StateMachine {
                                 handleError();
                             }
                         }
-                    });
+                    }, new DhcpLeaseCallback());
                 } catch (RemoteException e) {
                     throw new IllegalStateException(e);
                 }
@@ -352,6 +377,48 @@ public class IpServer extends StateMachine {
         private void handleError() {
             mLastError = TetheringManager.TETHER_ERROR_DHCPSERVER_ERROR;
             transitionTo(mInitialState);
+        }
+    }
+
+    private class DhcpLeaseCallback extends IDhcpLeaseCallbacks.Stub {
+        @Override
+        public void onLeasesChanged(List<DhcpLeaseParcelable> leaseParcelables) {
+            final ArrayList<TetheredClient> leases = new ArrayList<>();
+            for (DhcpLeaseParcelable lease : leaseParcelables) {
+                final LinkAddress address = new LinkAddress(
+                        intToInet4AddressHTH(lease.netAddr), lease.prefixLength);
+
+                final MacAddress macAddress;
+                try {
+                    macAddress = MacAddress.fromBytes(lease.hwAddr);
+                } catch (IllegalArgumentException e) {
+                    Log.wtf(TAG, "Invalid address received from DhcpServer: "
+                            + Arrays.toString(lease.hwAddr));
+                    return;
+                }
+
+                final TetheredClient.AddressInfo addressInfo = new TetheredClient.AddressInfo(
+                        address, lease.hostname, lease.expTime);
+                leases.add(new TetheredClient(
+                        macAddress,
+                        Collections.singletonList(addressInfo),
+                        mInterfaceType));
+            }
+
+            getHandler().post(() -> {
+                mDhcpLeases = leases;
+                mCallback.dhcpLeasesChanged();
+            });
+        }
+
+        @Override
+        public int getInterfaceVersion() {
+            return this.VERSION;
+        }
+
+        @Override
+        public String getInterfaceHash() throws RemoteException {
+            return this.HASH;
         }
     }
 
@@ -388,6 +455,8 @@ public class IpServer extends StateMachine {
                             mLastError = TetheringManager.TETHER_ERROR_DHCPSERVER_ERROR;
                             // Not much more we can do here
                         }
+                        mDhcpLeases.clear();
+                        getHandler().post(mCallback::dhcpLeasesChanged);
                     }
                 });
                 mDhcpServer = null;
