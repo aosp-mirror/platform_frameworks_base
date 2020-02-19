@@ -426,17 +426,11 @@ public class PasspointConfigurationTest {
      *
      * @throws Exception
      */
-    @Test
+    @Test (expected = IllegalStateException.class)
     public void validateUniqueIdExceptionWithEmptyHomeSp() throws Exception {
         PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setHomeSp(null);
-        boolean exceptionCaught = false;
-        try {
-            String uniqueId = config.getUniqueId();
-        } catch (IllegalStateException e) {
-            exceptionCaught = true;
-        }
-        assertTrue(exceptionCaught);
+        String uniqueId = config.getUniqueId();
     }
 
     /**
@@ -445,16 +439,10 @@ public class PasspointConfigurationTest {
      *
      * @throws Exception
      */
-    @Test
+    @Test (expected = IllegalStateException.class)
     public void validateUniqueIdExceptionWithEmptyCredential() throws Exception {
         PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setCredential(null);
-        boolean exceptionCaught = false;
-        try {
-            String uniqueId = config.getUniqueId();
-        } catch (IllegalStateException e) {
-            exceptionCaught = true;
-        }
-        assertTrue(exceptionCaught);
+        String uniqueId = config.getUniqueId();
     }
 }
