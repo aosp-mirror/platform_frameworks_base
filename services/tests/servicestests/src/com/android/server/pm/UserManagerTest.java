@@ -812,7 +812,7 @@ public final class UserManagerTest {
                 "android", 0, mUserManager.getPrimaryUser().getUserHandle())
                 .getSystemService(Context.USER_SERVICE);
 
-        List<UserHandle> profiles = um.getUserProfiles(false);
+        List<UserHandle> profiles = um.getAllProfiles();
         assertThat(profiles.size()).isEqualTo(2);
         assertThat(profiles.get(0).equals(userProfile.getUserHandle())
                 || profiles.get(1).equals(userProfile.getUserHandle())).isTrue();

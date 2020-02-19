@@ -9049,7 +9049,9 @@ package android.os {
 
   public class UserManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void clearSeedAccountData();
-    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.os.UserHandle createProfile(@NonNull String, @NonNull String, @Nullable String[]) throws android.os.UserManager.UserOperationException;
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.os.UserHandle createProfile(@NonNull String, @NonNull String, @NonNull java.util.Set<java.lang.String>) throws android.os.UserManager.UserOperationException;
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public java.util.List<android.os.UserHandle> getAllProfiles();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public java.util.List<android.os.UserHandle> getEnabledProfiles();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getProfileParent(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getSeedAccountName();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.PersistableBundle getSeedAccountOptions();
@@ -9057,7 +9059,6 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public long[] getSerialNumbersOfUsers(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<android.os.UserHandle> getUserHandles(boolean);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public android.graphics.Bitmap getUserIcon();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public java.util.List<android.os.UserHandle> getUserProfiles(boolean);
     method @Deprecated @android.os.UserManager.UserRestrictionSource @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public int getUserRestrictionSource(String, android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<android.os.UserManager.EnforcingUser> getUserRestrictionSources(String, android.os.UserHandle);
     method @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public int getUserSwitchability();
