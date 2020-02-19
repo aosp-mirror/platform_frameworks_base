@@ -1,20 +1,4 @@
 // Baseline format: 1.0
-InternalClasses: com.android.permission.persistence.RuntimePermissionsPersistence:
-    Internal classes must not be exposed
-InternalClasses: com.android.permission.persistence.RuntimePermissionsState:
-    Internal classes must not be exposed
-InternalClasses: com.android.permission.persistence.RuntimePermissionsState.PermissionState:
-    Internal classes must not be exposed
-InternalClasses: com.android.role.persistence.RolesPersistence:
-    Internal classes must not be exposed
-InternalClasses: com.android.role.persistence.RolesState:
-    Internal classes must not be exposed
-InternalClasses: com.android.server.SystemService:
-    Internal classes must not be exposed
-InternalClasses: com.android.server.SystemService.TargetUser:
-    Internal classes must not be exposed
-
-
 ProtectedMember: com.android.server.SystemService#publishBinderService(String, android.os.IBinder):
     Protected methods not allowed; must be public: method com.android.server.SystemService.publishBinderService(String,android.os.IBinder)}
 ProtectedMember: com.android.server.SystemService#publishBinderService(String, android.os.IBinder, boolean):
