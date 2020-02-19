@@ -3440,6 +3440,27 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public ParceledListSlice<ConversationChannelWrapper> getConversations(
+                boolean onlyImportant) {
+            enforceSystemOrSystemUI("getConversations");
+            ArrayList<ConversationChannelWrapper> conversations =
+                    mPreferencesHelper.getConversations(onlyImportant);
+            for (ConversationChannelWrapper conversation : conversations) {
+                LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery()
+                        .setPackage(conversation.getPkg())
+                        .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED)
+                        .setShortcutIds(Arrays.asList(
+                                conversation.getNotificationChannel().getConversationId()));
+                List<ShortcutInfo> shortcuts = mLauncherAppsService.getShortcuts(
+                        query, UserHandle.of(UserHandle.getUserId(conversation.getUid())));
+                if (shortcuts != null && !shortcuts.isEmpty()) {
+                    conversation.setShortcutInfo(shortcuts.get(0));
+                }
+            }
+            return new ParceledListSlice<>(conversations);
+        }
+
+        @Override
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroupsForPackage(
                 String pkg, int uid, boolean includeDeleted) {
             enforceSystemOrSystemUI("getNotificationChannelGroupsForPackage");
