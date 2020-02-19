@@ -344,7 +344,7 @@ public class CutoutSpecificationTest {
                         .parse("@bottom"
                                 + "M 0,0\n"
                                 + "v -10\n"
-                                + "h 10\n"
+                                + "h -10\n"
                                 + "v 10\n"
                                 + "z\n"
                                 + "@right\n"
