@@ -37,6 +37,8 @@ import android.telephony.ims.ImsReasonInfo;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Provides access to telephony configuration values that are carrier-specific.
  */
@@ -3989,7 +3991,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
-        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, 0);
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
