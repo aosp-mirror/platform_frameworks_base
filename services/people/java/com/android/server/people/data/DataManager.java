@@ -51,7 +51,6 @@ import android.provider.Telephony.MmsSms;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -275,40 +274,35 @@ public class DataManager {
                 mContext.getPackageName(), intentFilter, callingUserId);
     }
 
-    /** Reports the {@link AppTargetEvent} from App Prediction Manager. */
-    public void reportAppTargetEvent(@NonNull AppTargetEvent event,
+    /** Reports the sharing related {@link AppTargetEvent} from App Prediction Manager. */
+    public void reportShareTargetEvent(@NonNull AppTargetEvent event,
             @Nullable IntentFilter intentFilter) {
         AppTarget appTarget = event.getTarget();
-        ShortcutInfo shortcutInfo = appTarget != null ? appTarget.getShortcutInfo() : null;
-        if (shortcutInfo == null || event.getAction() != AppTargetEvent.ACTION_LAUNCH) {
+        if (appTarget == null || event.getAction() != AppTargetEvent.ACTION_LAUNCH) {
             return;
         }
-        PackageData packageData = getPackage(appTarget.getPackageName(),
-                appTarget.getUser().getIdentifier());
-        if (packageData == null) {
-            return;
-        }
+        UserData userData = getUnlockedUserData(appTarget.getUser().getIdentifier());
+        PackageData packageData = userData.getOrCreatePackageData(appTarget.getPackageName());
+        String mimeType = intentFilter != null ? intentFilter.getDataType(0) : null;
+        @Event.EventType int eventType = mimeTypeToShareEventType(mimeType);
+        EventHistoryImpl eventHistory;
         if (ChooserActivity.LAUNCH_LOCATON_DIRECT_SHARE.equals(event.getLaunchLocation())) {
-            String mimeType = intentFilter != null ? intentFilter.getDataType(0) : null;
-            String shortcutId = shortcutInfo.getId();
-            if (packageData.getConversationStore().getConversation(shortcutId) == null
-                    || TextUtils.isEmpty(mimeType)) {
+            // Direct share event
+            if (appTarget.getShortcutInfo() == null) {
                 return;
             }
-            EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
-                    EventStore.CATEGORY_SHORTCUT_BASED, shortcutInfo.getId());
-            @Event.EventType int eventType;
-            if (mimeType.startsWith("text/")) {
-                eventType = Event.TYPE_SHARE_TEXT;
-            } else if (mimeType.startsWith("image/")) {
-                eventType = Event.TYPE_SHARE_IMAGE;
-            } else if (mimeType.startsWith("video/")) {
-                eventType = Event.TYPE_SHARE_VIDEO;
-            } else {
-                eventType = Event.TYPE_SHARE_OTHER;
+            String shortcutId = appTarget.getShortcutInfo().getId();
+            if (packageData.getConversationStore().getConversation(shortcutId) == null) {
+                addOrUpdateConversationInfo(appTarget.getShortcutInfo());
             }
-            eventHistory.addEvent(new Event(System.currentTimeMillis(), eventType));
+            eventHistory = packageData.getEventStore().getOrCreateEventHistory(
+                    EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);
+        } else {
+            // App share event
+            eventHistory = packageData.getEventStore().getOrCreateEventHistory(
+                    EventStore.CATEGORY_CLASS_BASED, appTarget.getClassName());
         }
+        eventHistory.addEvent(new Event(System.currentTimeMillis(), eventType));
     }
 
     /** Prunes the data for the specified user. */
@@ -333,6 +327,17 @@ public class DataManager {
             }
             packageData.pruneOrphanEvents();
         });
+    }
+
+    private int mimeTypeToShareEventType(String mimeType) {
+        if (mimeType.startsWith("text/")) {
+            return Event.TYPE_SHARE_TEXT;
+        } else if (mimeType.startsWith("image/")) {
+            return Event.TYPE_SHARE_IMAGE;
+        } else if (mimeType.startsWith("video/")) {
+            return Event.TYPE_SHARE_VIDEO;
+        }
+        return Event.TYPE_SHARE_OTHER;
     }
 
     private void pruneUninstalledPackageData(@NonNull UserData userData) {
@@ -410,12 +415,13 @@ public class DataManager {
                 EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);
     }
 
+    private boolean isPersonShortcut(@NonNull ShortcutInfo shortcutInfo) {
+        return shortcutInfo.getPersons() != null && shortcutInfo.getPersons().length != 0;
+    }
+
     @VisibleForTesting
     @WorkerThread
-    void onShortcutAddedOrUpdated(@NonNull ShortcutInfo shortcutInfo) {
-        if (shortcutInfo.getPersons() == null || shortcutInfo.getPersons().length == 0) {
-            return;
-        }
+    void addOrUpdateConversationInfo(@NonNull ShortcutInfo shortcutInfo) {
         UserData userData = getUnlockedUserData(shortcutInfo.getUserId());
         if (userData == null) {
             return;
@@ -431,24 +437,24 @@ public class DataManager {
         builder.setShortcutId(shortcutInfo.getId());
         builder.setLocusId(shortcutInfo.getLocusId());
         builder.setShortcutFlags(shortcutInfo.getFlags());
+        builder.setContactUri(null);
+        builder.setContactPhoneNumber(null);
+        builder.setContactStarred(false);
 
-        Person person = shortcutInfo.getPersons()[0];
-        builder.setPersonImportant(person.isImportant());
-        builder.setPersonBot(person.isBot());
-        String contactUri = person.getUri();
-        if (contactUri != null) {
-            ContactsQueryHelper helper = mInjector.createContactsQueryHelper(mContext);
-            if (helper.query(contactUri)) {
-                builder.setContactUri(helper.getContactUri());
-                builder.setContactStarred(helper.isStarred());
-                builder.setContactPhoneNumber(helper.getPhoneNumber());
+        if (shortcutInfo.getPersons() != null && shortcutInfo.getPersons().length != 0) {
+            Person person = shortcutInfo.getPersons()[0];
+            builder.setPersonImportant(person.isImportant());
+            builder.setPersonBot(person.isBot());
+            String contactUri = person.getUri();
+            if (contactUri != null) {
+                ContactsQueryHelper helper = mInjector.createContactsQueryHelper(mContext);
+                if (helper.query(contactUri)) {
+                    builder.setContactUri(helper.getContactUri());
+                    builder.setContactStarred(helper.isStarred());
+                    builder.setContactPhoneNumber(helper.getPhoneNumber());
+                }
             }
-        } else {
-            builder.setContactUri(null);
-            builder.setContactPhoneNumber(null);
-            builder.setContactStarred(false);
         }
-
         conversationStore.addOrUpdate(builder.build());
     }
 
@@ -626,7 +632,9 @@ public class DataManager {
                 List<ShortcutInfo> shortcuts = getShortcuts(packageName, userId,
                         /*shortcutIds=*/ null);
                 for (ShortcutInfo shortcut : shortcuts) {
-                    onShortcutAddedOrUpdated(shortcut);
+                    if (isPersonShortcut(shortcut)) {
+                        addOrUpdateConversationInfo(shortcut);
+                    }
                 }
             });
         }
