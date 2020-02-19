@@ -34,7 +34,7 @@ aidl_interface {
             enabled: false, // the platform uses statsd_java_aidl
         },
         cpp: {
-            enabled: true,
+            enabled: false,
         },
         ndk: {
             enabled: true,
