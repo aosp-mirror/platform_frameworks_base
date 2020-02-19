@@ -95,6 +95,7 @@ import android.net.TetheringRequestParcel;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServer;
+import android.net.ip.IpNeighborMonitor;
 import android.net.ip.IpServer;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.util.InterfaceParams;
@@ -173,6 +174,7 @@ public class TetheringTest {
     @Mock private UpstreamNetworkMonitor mUpstreamNetworkMonitor;
     @Mock private IPv6TetheringCoordinator mIPv6TetheringCoordinator;
     @Mock private RouterAdvertisementDaemon mRouterAdvertisementDaemon;
+    @Mock private IpNeighborMonitor mIpNeighborMonitor;
     @Mock private IDhcpServer mDhcpServer;
     @Mock private INetd mNetd;
     @Mock private UserManager mUserManager;
@@ -277,6 +279,11 @@ public class TetheringTest {
                     fail(e.getMessage());
                 }
             }).run();
+        }
+
+        public IpNeighborMonitor getIpNeighborMonitor(Handler h, SharedLog l,
+                IpNeighborMonitor.NeighborEventConsumer c) {
+            return mIpNeighborMonitor;
         }
     }
 
