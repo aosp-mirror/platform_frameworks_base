@@ -5403,7 +5403,7 @@ public final class Settings {
                         packagePermissions, sharedUserPermissions);
             }
 
-            mPersistence.write(runtimePermissions, UserHandle.of(userId));
+            mPersistence.writeAsUser(runtimePermissions, UserHandle.of(userId));
         }
 
         @NonNull
@@ -5457,12 +5457,13 @@ public final class Settings {
         }
 
         public void deleteUserRuntimePermissionsFile(int userId) {
-            mPersistence.delete(UserHandle.of(userId));
+            mPersistence.deleteAsUser(UserHandle.of(userId));
         }
 
         @GuardedBy("Settings.this.mLock")
         public void readStateForUserSyncLPr(int userId) {
-            RuntimePermissionsState runtimePermissions = mPersistence.read(UserHandle.of(userId));
+            RuntimePermissionsState runtimePermissions = mPersistence.readAsUser(UserHandle.of(
+                    userId));
             if (runtimePermissions == null) {
                 readLegacyStateForUserSyncLPr(userId);
                 writePermissionsForUserAsyncLPr(userId);
