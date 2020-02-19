@@ -986,13 +986,6 @@ python_binary_host {
 }
 
 filegroup {
-    name: "framework-annotation-nonnull-srcs",
-    srcs: [
-        "core/java/android/annotation/NonNull.java",
-    ],
-}
-
-filegroup {
     name: "framework-media-annotation-srcs",
     srcs: [
         "core/java/android/annotation/CallbackExecutor.java",
