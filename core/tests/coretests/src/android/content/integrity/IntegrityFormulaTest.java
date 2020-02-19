@@ -109,8 +109,8 @@ public class IntegrityFormulaTest {
     @Test
     public void createGreaterThanOrEqualsToFormula_versionCode() {
         int versionCode = 12;
-        IntegrityFormula formula = IntegrityFormula.Application.versionCodeGreaterThanOrEqualTo(
-                versionCode);
+        IntegrityFormula formula =
+                IntegrityFormula.Application.versionCodeGreaterThanOrEqualTo(versionCode);
 
         AtomicFormula.LongAtomicFormula stringAtomicFormula =
                 (AtomicFormula.LongAtomicFormula) formula;
@@ -124,11 +124,11 @@ public class IntegrityFormulaTest {
     public void createIsTrueFormula_preInstalled() {
         IntegrityFormula formula = IntegrityFormula.Application.isPreInstalled();
 
-        AtomicFormula.BooleanAtomicFormula stringAtomicFormula =
+        AtomicFormula.BooleanAtomicFormula booleanAtomicFormula =
                 (AtomicFormula.BooleanAtomicFormula) formula;
 
-        assertThat(stringAtomicFormula.getKey()).isEqualTo(AtomicFormula.PRE_INSTALLED);
-        assertThat(stringAtomicFormula.getValue()).isTrue();
+        assertThat(booleanAtomicFormula.getKey()).isEqualTo(AtomicFormula.PRE_INSTALLED);
+        assertThat(booleanAtomicFormula.getValue()).isTrue();
     }
 
     @Test
@@ -136,8 +136,8 @@ public class IntegrityFormulaTest {
         String packageName = "com.test.package";
         String certificateName = "certificate";
         IntegrityFormula formula1 = IntegrityFormula.Application.packageNameEquals(packageName);
-        IntegrityFormula formula2 = IntegrityFormula.Application.certificatesContain(
-                certificateName);
+        IntegrityFormula formula2 =
+                IntegrityFormula.Application.certificatesContain(certificateName);
 
         IntegrityFormula compoundFormula = IntegrityFormula.all(formula1, formula2);
 
@@ -149,8 +149,8 @@ public class IntegrityFormulaTest {
         String packageName = "com.test.package";
         String certificateName = "certificate";
         IntegrityFormula formula1 = IntegrityFormula.Application.packageNameEquals(packageName);
-        IntegrityFormula formula2 = IntegrityFormula.Application.certificatesContain(
-                certificateName);
+        IntegrityFormula formula2 =
+                IntegrityFormula.Application.certificatesContain(certificateName);
 
         IntegrityFormula compoundFormula = IntegrityFormula.any(formula1, formula2);
 
@@ -165,5 +165,30 @@ public class IntegrityFormulaTest {
                 IntegrityFormula.not(IntegrityFormula.Application.packageNameEquals(packageName));
 
         assertThat(compoundFormula.getTag()).isEqualTo(COMPOUND_FORMULA_TAG);
+    }
+
+    @Test
+    public void createIsTrueFormula_stampNotTrusted() {
+        IntegrityFormula formula = IntegrityFormula.SourceStamp.notTrusted();
+
+        AtomicFormula.BooleanAtomicFormula booleanAtomicFormula =
+                (AtomicFormula.BooleanAtomicFormula) formula;
+
+        assertThat(booleanAtomicFormula.getKey()).isEqualTo(AtomicFormula.STAMP_TRUSTED);
+        assertThat(booleanAtomicFormula.getValue()).isFalse();
+    }
+
+    @Test
+    public void createEqualsFormula_stampCertificateHash() {
+        String stampCertificateHash = "test-cert";
+        IntegrityFormula formula =
+                IntegrityFormula.SourceStamp.stampCertificateHashEquals(stampCertificateHash);
+
+        AtomicFormula.StringAtomicFormula stringAtomicFormula =
+                (AtomicFormula.StringAtomicFormula) formula;
+
+        assertThat(stringAtomicFormula.getKey()).isEqualTo(AtomicFormula.STAMP_CERTIFICATE_HASH);
+        assertThat(stringAtomicFormula.getValue()).matches(stampCertificateHash);
+        assertThat(stringAtomicFormula.getIsHashedValue()).isTrue();
     }
 }

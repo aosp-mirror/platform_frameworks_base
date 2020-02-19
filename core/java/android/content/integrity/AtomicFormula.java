@@ -47,12 +47,14 @@ public abstract class AtomicFormula extends IntegrityFormula {
     /** @hide */
     @IntDef(
             value = {
-                    PACKAGE_NAME,
-                    APP_CERTIFICATE,
-                    INSTALLER_NAME,
-                    INSTALLER_CERTIFICATE,
-                    VERSION_CODE,
-                    PRE_INSTALLED,
+                PACKAGE_NAME,
+                APP_CERTIFICATE,
+                INSTALLER_NAME,
+                INSTALLER_CERTIFICATE,
+                VERSION_CODE,
+                PRE_INSTALLED,
+                STAMP_TRUSTED,
+                STAMP_CERTIFICATE_HASH,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Key {}
@@ -104,6 +106,20 @@ public abstract class AtomicFormula extends IntegrityFormula {
      * <p>Can only be used in {@link BooleanAtomicFormula}.
      */
     public static final int PRE_INSTALLED = 5;
+
+    /**
+     * If the APK has an embedded trusted stamp.
+     *
+     * <p>Can only be used in {@link BooleanAtomicFormula}.
+     */
+    public static final int STAMP_TRUSTED = 6;
+
+    /**
+     * SHA-256 of the certificate used to sign the stamp embedded in the APK.
+     *
+     * <p>Can only be used in {@link StringAtomicFormula}.
+     */
+    public static final int STAMP_CERTIFICATE_HASH = 7;
 
     public static final int EQ = 0;
     public static final int GT = 1;
@@ -266,9 +282,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
         }
 
         private static boolean isValidOperator(int operator) {
-            return operator == EQ
-                    || operator == GT
-                    || operator == GTE;
+            return operator == EQ || operator == GT || operator == GTE;
         }
 
         private static long getLongMetadataValue(AppInstallMetadata appInstallMetadata, int key) {
@@ -300,7 +314,8 @@ public abstract class AtomicFormula extends IntegrityFormula {
                     key == PACKAGE_NAME
                             || key == APP_CERTIFICATE
                             || key == INSTALLER_CERTIFICATE
-                            || key == INSTALLER_NAME,
+                            || key == INSTALLER_NAME
+                            || key == STAMP_CERTIFICATE_HASH,
                     String.format(
                             "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
             mValue = null;
@@ -321,7 +336,8 @@ public abstract class AtomicFormula extends IntegrityFormula {
                     key == PACKAGE_NAME
                             || key == APP_CERTIFICATE
                             || key == INSTALLER_CERTIFICATE
-                            || key == INSTALLER_NAME,
+                            || key == INSTALLER_NAME
+                            || key == STAMP_CERTIFICATE_HASH,
                     String.format(
                             "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
             mValue = value;
@@ -329,15 +345,14 @@ public abstract class AtomicFormula extends IntegrityFormula {
         }
 
         /**
-         * Constructs a new {@link StringAtomicFormula} together with handling the necessary
-         * hashing for the given key.
+         * Constructs a new {@link StringAtomicFormula} together with handling the necessary hashing
+         * for the given key.
          *
-         * <p> The value will be automatically hashed with SHA256 and the hex digest will be
-         * computed when the key is PACKAGE_NAME or INSTALLER_NAME and the value is more than 32
-         * characters.
+         * <p>The value will be automatically hashed with SHA256 and the hex digest will be computed
+         * when the key is PACKAGE_NAME or INSTALLER_NAME and the value is more than 32 characters.
          *
-         * <p> The APP_CERTIFICATES and INSTALLER_CERTIFICATES are always delivered in hashed
-         * form. So the isHashedValue is set to true by default.
+         * <p>The APP_CERTIFICATES, INSTALLER_CERTIFICATES, and STAMP_CERTIFICATE_HASH are always
+         * delivered in hashed form. So the isHashedValue is set to true by default.
          *
          * @throws IllegalArgumentException if {@code key} cannot be used with string value.
          */
@@ -347,13 +362,15 @@ public abstract class AtomicFormula extends IntegrityFormula {
                     key == PACKAGE_NAME
                             || key == APP_CERTIFICATE
                             || key == INSTALLER_CERTIFICATE
-                            || key == INSTALLER_NAME,
+                            || key == INSTALLER_NAME
+                            || key == STAMP_CERTIFICATE_HASH,
                     String.format(
                             "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
             mValue = hashValue(key, value);
             mIsHashedValue =
                     key == APP_CERTIFICATE
-                            || key == INSTALLER_CERTIFICATE
+                                    || key == INSTALLER_CERTIFICATE
+                                    || key == STAMP_CERTIFICATE_HASH
                             ? true
                             : !mValue.equals(value);
         }
@@ -460,6 +477,8 @@ public abstract class AtomicFormula extends IntegrityFormula {
                     return appInstallMetadata.getInstallerCertificates();
                 case AtomicFormula.INSTALLER_NAME:
                     return Collections.singletonList(appInstallMetadata.getInstallerName());
+                case AtomicFormula.STAMP_CERTIFICATE_HASH:
+                    return Collections.singletonList(appInstallMetadata.getStampCertificateHash());
                 default:
                     throw new IllegalStateException(
                             "Unexpected key in StringAtomicFormula: " + key);
@@ -502,7 +521,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
         public BooleanAtomicFormula(@Key int key) {
             super(key);
             checkArgument(
-                    key == PRE_INSTALLED,
+                    key == PRE_INSTALLED || key == STAMP_TRUSTED,
                     String.format(
                             "Key %s cannot be used with BooleanAtomicFormula", keyToString(key)));
             mValue = null;
@@ -519,7 +538,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
         public BooleanAtomicFormula(@Key int key, boolean value) {
             super(key);
             checkArgument(
-                    key == PRE_INSTALLED,
+                    key == PRE_INSTALLED || key == STAMP_TRUSTED,
                     String.format(
                             "Key %s cannot be used with BooleanAtomicFormula", keyToString(key)));
             mValue = value;
@@ -615,6 +634,8 @@ public abstract class AtomicFormula extends IntegrityFormula {
             switch (key) {
                 case AtomicFormula.PRE_INSTALLED:
                     return appInstallMetadata.isPreInstalled();
+                case AtomicFormula.STAMP_TRUSTED:
+                    return appInstallMetadata.isStampTrusted();
                 default:
                     throw new IllegalStateException(
                             "Unexpected key in BooleanAtomicFormula: " + key);
@@ -640,6 +661,10 @@ public abstract class AtomicFormula extends IntegrityFormula {
                 return "INSTALLER_CERTIFICATE";
             case PRE_INSTALLED:
                 return "PRE_INSTALLED";
+            case STAMP_TRUSTED:
+                return "STAMP_TRUSTED";
+            case STAMP_CERTIFICATE_HASH:
+                return "STAMP_CERTIFICATE_HASH";
             default:
                 throw new IllegalArgumentException("Unknown key " + key);
         }
@@ -664,6 +689,8 @@ public abstract class AtomicFormula extends IntegrityFormula {
                 || key == VERSION_CODE
                 || key == INSTALLER_NAME
                 || key == INSTALLER_CERTIFICATE
-                || key == PRE_INSTALLED;
+                || key == PRE_INSTALLED
+                || key == STAMP_TRUSTED
+                || key == STAMP_CERTIFICATE_HASH;
     }
 }
