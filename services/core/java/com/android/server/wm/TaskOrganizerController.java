@@ -553,6 +553,12 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
             WindowContainerTransaction.Change c) {
         int effects = sanitizeAndApplyChange(wc, c);
 
+        final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
+        if (t != null) {
+            Task tr = (Task) wc;
+            tr.setMainWindowSizeChangeTransaction(t);
+        }
+
         Rect enterPipBounds = c.getEnterPipBounds();
         if (enterPipBounds != null) {
             Task tr = (Task) wc;
