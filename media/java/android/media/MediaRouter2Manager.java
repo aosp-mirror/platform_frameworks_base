@@ -453,6 +453,10 @@ public class MediaRouter2Manager {
             record.mExecutor.execute(() -> record.mCallback
                     .onControlCategoriesChanged(packageName, preferredFeatures));
         }
+        for (CallbackRecord record : mCallbackRecords) {
+            record.mExecutor.execute(() -> record.mCallback
+                    .onPreferredFeaturesChanged(packageName, preferredFeatures));
+        }
     }
 
     /**
@@ -760,6 +764,7 @@ public class MediaRouter2Manager {
          */
         public void onSessionsUpdated() {}
 
+        //TODO: remove this
         /**
          * Called when the preferred route features of an app is changed.
          *
@@ -768,6 +773,16 @@ public class MediaRouter2Manager {
          */
         public void onControlCategoriesChanged(@NonNull String packageName,
                 @NonNull List<String> preferredFeatures) {}
+
+        /**
+         * Called when the preferred route features of an app is changed.
+         *
+         * @param packageName the package name of the application
+         * @param preferredFeatures the list of preferred route features set by an application.
+         */
+        public void onPreferredFeaturesChanged(@NonNull String packageName,
+                @NonNull List<String> preferredFeatures) {}
+
     }
 
     final class CallbackRecord {

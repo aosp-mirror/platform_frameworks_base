@@ -411,11 +411,10 @@ public final class MediaRoute2Info implements Parcelable {
 
     /**
      * Returns true if the route info has all of the required field.
-     * A route info only obtained from {@link com.android.server.media.MediaRouterService}
-     * is valid.
+     * A route is valid if and only if it is obtained from
+     * {@link com.android.server.media.MediaRouterService}.
      * @hide
      */
-    //TODO: Reconsider the validity of a route info when fields are added.
     public boolean isValid() {
         if (TextUtils.isEmpty(getId()) || TextUtils.isEmpty(getName())
                 || TextUtils.isEmpty(getProviderId())) {
