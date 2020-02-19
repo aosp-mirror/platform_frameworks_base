@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
@@ -116,6 +117,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
+import android.view.InputDevice.InputSourceClass;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl.Transaction;
@@ -499,6 +501,10 @@ public final class ViewRootImpl implements ViewParent,
     int mPendingInputEventCount;
     boolean mProcessInputEventsScheduled;
     boolean mUnbufferedInputDispatch;
+    boolean mUnbufferedInputDispatchBySource;
+    @InputSourceClass
+    int mUnbufferedInputSource = SOURCE_CLASS_NONE;
+
     String mPendingInputEventQueueLengthCounterName = "pq";
 
     InputStage mFirstInputStage;
@@ -1849,7 +1855,7 @@ public final class ViewRootImpl implements ViewParent,
             mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier();
             mChoreographer.postCallback(
                     Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
-            if (!mUnbufferedInputDispatch) {
+            if (!mUnbufferedInputDispatch && !mUnbufferedInputDispatchBySource) {
                 scheduleConsumeBatchedInput();
             }
             notifyRendererOfFramePending();
@@ -7505,6 +7511,9 @@ public final class ViewRootImpl implements ViewParent,
                 writer.print(mTraversalScheduled);
         writer.print(innerPrefix); writer.print("mIsAmbientMode=");
                 writer.print(mIsAmbientMode);
+        writer.print(innerPrefix); writer.print("mUnbufferedInputSource=");
+        writer.print(Integer.toHexString(mUnbufferedInputSource));
+
         if (mTraversalScheduled) {
             writer.print(" (barrier="); writer.print(mTraversalBarrier); writer.println(")");
         } else {
@@ -8109,6 +8118,7 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void onInputEvent(InputEvent event) {
             Trace.traceBegin(Trace.TRACE_TAG_VIEW, "processInputEventForCompatibility");
+            processUnbufferedRequest(event);
             List<InputEvent> processedEvents;
             try {
                 processedEvents =
@@ -8134,7 +8144,7 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void onBatchedInputEventPending() {
-            if (mUnbufferedInputDispatch) {
+            if (mUnbufferedInputDispatch || mUnbufferedInputDispatchBySource) {
                 super.onBatchedInputEventPending();
             } else {
                 scheduleConsumeBatchedInput();
@@ -8150,6 +8160,17 @@ public final class ViewRootImpl implements ViewParent,
         public void dispose() {
             unscheduleConsumeBatchedInput();
             super.dispose();
+        }
+
+        private void processUnbufferedRequest(InputEvent event) {
+            if (!(event instanceof MotionEvent)) {
+                return;
+            }
+            mUnbufferedInputDispatchBySource =
+                    (event.getSource() & mUnbufferedInputSource) != SOURCE_CLASS_NONE;
+            if (mUnbufferedInputDispatchBySource && mConsumeBatchedInputScheduled) {
+                scheduleConsumeBatchedInputImmediately();
+            }
         }
     }
     WindowInputEventReceiver mInputEventReceiver;
@@ -9600,5 +9621,10 @@ public final class ViewRootImpl implements ViewParent,
         } else {
             return mSurfaceControl;
         }
+    }
+
+    @Override
+    public void onDescendantUnbufferedRequested() {
+        mUnbufferedInputSource = mView.mUnbufferedInputSource;
     }
 }

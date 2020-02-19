@@ -110,6 +110,7 @@ import android.view.AccessibilityIterators.ParagraphTextSegmentIterator;
 import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.AccessibilityIterators.WordTextSegmentIterator;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.InputDevice.InputSourceClass;
 import android.view.Window.OnContentApplyWindowInsetsListener;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsetsAnimation.Bounds;
@@ -5205,6 +5206,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private int mExplicitStyle;
 
     /**
+     * Specifies which input source classes should provide unbuffered input events to this view
+     *
+     * @see View#requestUnbufferedDispatch(int)
+     */
+    @InputSourceClass
+    int mUnbufferedInputSource = InputDevice.SOURCE_CLASS_NONE;
+
+    /**
      * Simple constructor to use when creating a view from code.
      *
      * @param context The Context the view is running in, through which it can
@@ -8011,6 +8020,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (mAttachInfo != null) {
             mAttachInfo.mKeyDispatchState.reset(this);
+        }
+
+        if (mParent != null) {
+            mParent.onDescendantUnbufferedRequested();
         }
 
         notifyEnterOrExitForAutoFillIfNeeded(gainFocus);
@@ -15820,12 +15833,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * system not batch {@link MotionEvent}s but instead deliver them as soon as they're
      * available. This method should only be called for touch events.
      *
-     * <p class="note">This api is not intended for most applications. Buffered dispatch
+     * <p class="note">This API is not intended for most applications. Buffered dispatch
      * provides many of benefits, and just requesting unbuffered dispatch on most MotionEvent
      * streams will not improve your input latency. Side effects include: increased latency,
      * jittery scrolls and inability to take advantage of system resampling. Talk to your input
      * professional to see if {@link #requestUnbufferedDispatch(MotionEvent)} is right for
      * you.</p>
+     *
+     * To receive unbuffered events for arbitrary input device source classes, use
+     * {@link #requestUnbufferedDispatch(int)},
+     *
+     * @see View#requestUnbufferedDispatch(int)
      */
     public final void requestUnbufferedDispatch(MotionEvent event) {
         final int action = event.getAction();
@@ -15835,6 +15853,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
         mAttachInfo.mUnbufferedDispatchRequested = true;
+    }
+
+    /**
+     * Request unbuffered dispatch of the given event source class to this view.
+     * This is similar to {@link View#requestUnbufferedDispatch(MotionEvent)}, but does not
+     * automatically terminate, and allows the specification of arbitrary input source classes.
+     *
+     * @param source The combined input source class to request unbuffered dispatch for. All
+     *               events coming from these source classes will not be buffered. Set to
+     *               {@link InputDevice#SOURCE_CLASS_NONE} in order to return to default behaviour.
+     *
+     * @see View#requestUnbufferedDispatch(MotionEvent)
+     */
+    public final void requestUnbufferedDispatch(@InputSourceClass int source) {
+        if (mUnbufferedInputSource == source) {
+            return;
+        }
+        mUnbufferedInputSource = source;
+        if (mParent != null) {
+            mParent.onDescendantUnbufferedRequested();
+        }
     }
 
     private boolean hasSize() {
