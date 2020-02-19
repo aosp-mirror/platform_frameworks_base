@@ -435,23 +435,22 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        // Handle padding of SystemIconsView
         DisplayCutout cutout = insets.getDisplayCutout();
-
-        // Handle padding of QuickStatusBarHeader
         Pair<Integer, Integer> cornerCutoutPadding = StatusBarWindowView.cornerCutoutMargins(
                 cutout, getDisplay());
         Pair<Integer, Integer> padding =
                 StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
                         cutout, cornerCutoutPadding, mRoundedCornerPadding);
-        setPadding(padding.first, 0, padding.second, getPaddingBottom());
-
-        // Handle padding of SystemIconsView
         final int waterfallTopInset = cutout == null ? 0 : cutout.getWaterfallInsets().top;
-        mSystemIconsView.setPaddingRelative(
-                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start),
-                waterfallTopInset,
-                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end),
-                0);
+        int statusBarPaddingLeft = isLayoutRtl()
+                ? getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end)
+                : getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start);
+        int statusBarPaddingRight = isLayoutRtl()
+                ? getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start)
+                : getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end);
+        mSystemIconsView.setPadding(padding.first + statusBarPaddingLeft, waterfallTopInset,
+                padding.second + statusBarPaddingRight, 0);
 
         return super.onApplyWindowInsets(insets);
     }
