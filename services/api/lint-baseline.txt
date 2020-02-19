@@ -1,0 +1,35 @@
+// Baseline format: 1.0
+InternalClasses: com.android.permission.persistence.RuntimePermissionsPersistence:
+    Internal classes must not be exposed
+InternalClasses: com.android.permission.persistence.RuntimePermissionsState:
+    Internal classes must not be exposed
+InternalClasses: com.android.permission.persistence.RuntimePermissionsState.PermissionState:
+    Internal classes must not be exposed
+InternalClasses: com.android.role.persistence.RolesPersistence:
+    Internal classes must not be exposed
+InternalClasses: com.android.role.persistence.RolesState:
+    Internal classes must not be exposed
+InternalClasses: com.android.server.SystemService:
+    Internal classes must not be exposed
+InternalClasses: com.android.server.SystemService.TargetUser:
+    Internal classes must not be exposed
+
+
+ProtectedMember: com.android.server.SystemService#publishBinderService(String, android.os.IBinder):
+    Protected methods not allowed; must be public: method com.android.server.SystemService.publishBinderService(String,android.os.IBinder)}
+ProtectedMember: com.android.server.SystemService#publishBinderService(String, android.os.IBinder, boolean):
+    Protected methods not allowed; must be public: method com.android.server.SystemService.publishBinderService(String,android.os.IBinder,boolean)}
+
+
+UserHandleName: com.android.permission.persistence.RuntimePermissionsPersistence#delete(android.os.UserHandle):
+    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `delete`
+UserHandleName: com.android.permission.persistence.RuntimePermissionsPersistence#read(android.os.UserHandle):
+    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `read`
+UserHandleName: com.android.permission.persistence.RuntimePermissionsPersistence#write(com.android.permission.persistence.RuntimePermissionsState, android.os.UserHandle):
+    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `write`
+UserHandleName: com.android.role.persistence.RolesPersistence#delete(android.os.UserHandle):
+    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `delete`
+UserHandleName: com.android.role.persistence.RolesPersistence#read(android.os.UserHandle):
+    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `read`
+UserHandleName: com.android.role.persistence.RolesPersistence#write(com.android.role.persistence.RolesState, android.os.UserHandle):
+    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `write`
