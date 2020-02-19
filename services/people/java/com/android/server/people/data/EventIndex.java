@@ -61,7 +61,7 @@ import java.util.function.Function;
  */
 public class EventIndex {
 
-    private static final int LONG_SIZE_BITS = 64;
+    private static final int RETENTION_DAYS = 63;
 
     private static final int TIME_SLOT_ONE_DAY = 0;
 
@@ -202,7 +202,7 @@ public class EventIndex {
             updateEventBitmaps(currentTime);
             for (int slotType = 0; slotType < TIME_SLOT_TYPES_COUNT; slotType++) {
                 int offset = diffTimeSlots(slotType, eventTime, currentTime);
-                if (offset < LONG_SIZE_BITS) {
+                if (offset < Long.SIZE) {
                     mEventBitmaps[slotType] |= (1L << offset);
                 }
             }
@@ -236,12 +236,16 @@ public class EventIndex {
     private void updateEventBitmaps(long currentTimeMillis) {
         for (int slotType = 0; slotType < TIME_SLOT_TYPES_COUNT; slotType++) {
             int offset = diffTimeSlots(slotType, mLastUpdatedTime, currentTimeMillis);
-            if (offset < LONG_SIZE_BITS) {
+            if (offset < Long.SIZE) {
                 mEventBitmaps[slotType] <<= offset;
             } else {
                 mEventBitmaps[slotType] = 0L;
             }
         }
+
+        int bitsToClear = Long.SIZE - RETENTION_DAYS;
+        mEventBitmaps[TIME_SLOT_ONE_DAY] <<= bitsToClear;
+        mEventBitmaps[TIME_SLOT_ONE_DAY] >>>= bitsToClear;
         mLastUpdatedTime = currentTimeMillis;
     }
 
