@@ -434,6 +434,11 @@ public final class IncrementalStorage {
             signature = V4Signature.readFrom(input);
         }
 
+        if (!signature.isVersionSupported()) {
+            throw new IOException("v4 signature version " + signature.version
+                    + " is not supported");
+        }
+
         final byte[] rootHash = signature.verityRootHash;
         final byte[] additionalData = signature.v3Digest;
         final byte[] pkcs7Signature = signature.pkcs7SignatureBlock;
