@@ -536,9 +536,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 // The FGS has the location capability, but due to FGS BG start
                                 // restriction it lost the capability, use temp location capability
                                 // to mark this case.
-                                // TODO change to MODE_IGNORED when enforcing the feature.
                                 maybeShowWhileInUseDebugToast(op, mode);
-                                return AppOpsManager.MODE_ALLOWED;
+                                return AppOpsManager.MODE_IGNORED;
                             } else {
                                 return AppOpsManager.MODE_IGNORED;
                             }
@@ -546,17 +545,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                             if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
                                 return AppOpsManager.MODE_ALLOWED;
                             } else {
-                                //TODO change to MODE_IGNORED when enforcing the feature.
                                 maybeShowWhileInUseDebugToast(op, mode);
-                                return AppOpsManager.MODE_ALLOWED;
+                                return AppOpsManager.MODE_IGNORED;
                             }
                         case OP_RECORD_AUDIO:
                             if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
                                 return AppOpsManager.MODE_ALLOWED;
                             } else {
-                                //TODO change to MODE_IGNORED when enforcing the feature.
                                 maybeShowWhileInUseDebugToast(op, mode);
-                                return AppOpsManager.MODE_ALLOWED;
+                                return AppOpsManager.MODE_IGNORED;
                             }
                         default:
                             return AppOpsManager.MODE_ALLOWED;
@@ -571,17 +568,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                         if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
                             return AppOpsManager.MODE_ALLOWED;
                         } else {
-                            //TODO change to MODE_IGNORED when enforcing the feature.
                             maybeShowWhileInUseDebugToast(op, mode);
-                            return AppOpsManager.MODE_ALLOWED;
+                            return AppOpsManager.MODE_IGNORED;
                         }
                     case OP_RECORD_AUDIO:
                         if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
                             return AppOpsManager.MODE_ALLOWED;
                         } else {
-                            //TODO change to MODE_IGNORED when enforcing the feature.
                             maybeShowWhileInUseDebugToast(op, mode);
-                            return AppOpsManager.MODE_ALLOWED;
+                            return AppOpsManager.MODE_IGNORED;
                         }
                     default:
                         return MODE_ALLOWED;
