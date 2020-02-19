@@ -348,6 +348,7 @@ public final class AppExitInfoTracker {
         } else {
             // always override the existing info since we are now more informational.
             info.setReason(raw.getReason());
+            info.setSubReason(raw.getSubReason());
             info.setStatus(0);
             info.setTimestamp(System.currentTimeMillis());
             info.setDescription(raw.getDescription());

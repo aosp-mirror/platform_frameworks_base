@@ -395,7 +395,7 @@ class AppErrors {
                     () -> {
                         synchronized (mService) {
                             killAppImmediateLocked(p, ApplicationExitInfo.REASON_OTHER,
-                                    ApplicationExitInfo.SUBREASON_UNKNOWN,
+                                    ApplicationExitInfo.SUBREASON_INVALID_STATE,
                                     "forced", "killed for invalid state");
                         }
                     },
@@ -510,8 +510,8 @@ class AppErrors {
                 stopReportingCrashesLocked(r);
             }
             if (res == AppErrorDialog.RESTART) {
-                mService.mProcessList.removeProcessLocked(r, false, true, "crash",
-                        ApplicationExitInfo.REASON_CRASH);
+                mService.mProcessList.removeProcessLocked(r, false, true,
+                        ApplicationExitInfo.REASON_CRASH, "crash");
                 if (taskId != INVALID_TASK_ID) {
                     try {
                         mService.startActivityFromRecents(taskId,
@@ -529,8 +529,8 @@ class AppErrors {
                     // Kill it with fire!
                     mService.mAtmInternal.onHandleAppCrash(r.getWindowProcessController());
                     if (!r.isPersistent()) {
-                        mService.mProcessList.removeProcessLocked(r, false, false, "crash",
-                                ApplicationExitInfo.REASON_CRASH);
+                        mService.mProcessList.removeProcessLocked(r, false, false,
+                                ApplicationExitInfo.REASON_CRASH, "crash");
                         mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                     }
                 } finally {
@@ -747,8 +747,8 @@ class AppErrors {
                 // Don't let services in this process be restarted and potentially
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
-                mService.mProcessList.removeProcessLocked(app, false, tryAgain, "crash",
-                        ApplicationExitInfo.REASON_CRASH);
+                mService.mProcessList.removeProcessLocked(app, false, tryAgain,
+                        ApplicationExitInfo.REASON_CRASH, "crash");
                 mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                 if (!showBackground) {
                     return false;
