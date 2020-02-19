@@ -149,7 +149,7 @@ public class BlobStoreManagerServiceTest {
         final BlobMetadata blobMetadata2 = createBlobMetadataMock(blobId2, blobFile2, false);
         mUserBlobs.put(blobHandle2, blobMetadata2);
 
-        mService.addKnownIdsForTest(sessionId1, sessionId2, sessionId3, sessionId4,
+        mService.addActiveIdsForTest(sessionId1, sessionId2, sessionId3, sessionId4,
                 blobId1, blobId2);
 
         // Invoke test method
@@ -180,8 +180,10 @@ public class BlobStoreManagerServiceTest {
         assertThat(mUserBlobs.get(blobHandle1)).isNotNull();
         assertThat(mUserBlobs.get(blobHandle2)).isNull();
 
-        assertThat(mService.getKnownIdsForTest()).containsExactly(
+        assertThat(mService.getActiveIdsForTest()).containsExactly(
                 sessionId2, sessionId3, blobId1);
+        assertThat(mService.getKnownIdsForTest()).containsExactly(
+                sessionId1, sessionId2, sessionId3, sessionId4, blobId1, blobId2);
     }
 
     @Test
@@ -198,12 +200,12 @@ public class BlobStoreManagerServiceTest {
         doReturn(String.valueOf(testId3)).when(file3).getName();
 
         doReturn(new File[] {file1, file2, file3}).when(mBlobsDir).listFiles();
-        mService.addKnownIdsForTest(testId1, testId3);
+        mService.addActiveIdsForTest(testId1, testId3);
 
         // Invoke test method
         mService.handleIdleMaintenanceLocked();
 
-        // Verify unknown blobs are delete
+        // Verify unknown blobs are deleted
         verify(file1, never()).delete();
         verify(file2).delete();
         verify(file3, never()).delete();
@@ -242,7 +244,7 @@ public class BlobStoreManagerServiceTest {
                 sessionId3, sessionFile3, blobHandle3);
         mUserSessions.append(sessionId3, session3);
 
-        mService.addKnownIdsForTest(sessionId1, sessionId2, sessionId3);
+        mService.addActiveIdsForTest(sessionId1, sessionId2, sessionId3);
 
         // Invoke test method
         mService.handleIdleMaintenanceLocked();
@@ -255,7 +257,9 @@ public class BlobStoreManagerServiceTest {
         assertThat(mUserSessions.size()).isEqualTo(1);
         assertThat(mUserSessions.get(sessionId2)).isNotNull();
 
-        assertThat(mService.getKnownIdsForTest()).containsExactly(sessionId2);
+        assertThat(mService.getActiveIdsForTest()).containsExactly(sessionId2);
+        assertThat(mService.getKnownIdsForTest()).containsExactly(
+                sessionId1, sessionId2, sessionId3);
     }
 
     @Test
@@ -282,7 +286,7 @@ public class BlobStoreManagerServiceTest {
         final BlobMetadata blobMetadata3 = createBlobMetadataMock(blobId3, blobFile3, false);
         mUserBlobs.put(blobHandle3, blobMetadata3);
 
-        mService.addKnownIdsForTest(blobId1, blobId2, blobId3);
+        mService.addActiveIdsForTest(blobId1, blobId2, blobId3);
 
         // Invoke test method
         mService.handleIdleMaintenanceLocked();
@@ -295,7 +299,8 @@ public class BlobStoreManagerServiceTest {
         assertThat(mUserBlobs.size()).isEqualTo(1);
         assertThat(mUserBlobs.get(blobHandle2)).isNotNull();
 
-        assertThat(mService.getKnownIdsForTest()).containsExactly(blobId2);
+        assertThat(mService.getActiveIdsForTest()).containsExactly(blobId2);
+        assertThat(mService.getKnownIdsForTest()).containsExactly(blobId1, blobId2, blobId3);
     }
 
     private BlobStoreSession createBlobStoreSessionMock(String ownerPackageName, int ownerUid,
