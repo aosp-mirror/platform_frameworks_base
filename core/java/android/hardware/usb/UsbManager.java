@@ -18,6 +18,7 @@
 package android.hardware.usb;
 
 import android.Manifest;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -337,12 +338,14 @@ public class UsbManager {
      * Code for the mtp usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
      * {@hide}
      */
+    @SystemApi
     public static final long FUNCTION_MTP = GadgetFunction.MTP;
 
     /**
      * Code for the ptp usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
      * {@hide}
      */
+    @SystemApi
     public static final long FUNCTION_PTP = GadgetFunction.PTP;
 
     /**
@@ -356,24 +359,28 @@ public class UsbManager {
      * Code for the midi usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
      * {@hide}
      */
+    @SystemApi
     public static final long FUNCTION_MIDI = GadgetFunction.MIDI;
 
     /**
      * Code for the accessory usb function.
      * {@hide}
      */
+    @SystemApi
     public static final long FUNCTION_ACCESSORY = GadgetFunction.ACCESSORY;
 
     /**
      * Code for the audio source usb function.
      * {@hide}
      */
+    @SystemApi
     public static final long FUNCTION_AUDIO_SOURCE = GadgetFunction.AUDIO_SOURCE;
 
     /**
      * Code for the adb usb function.
      * {@hide}
      */
+    @SystemApi
     public static final long FUNCTION_ADB = GadgetFunction.ADB;
 
     /**
@@ -398,6 +405,20 @@ public class UsbManager {
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_ADB, FUNCTION_ADB);
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_NCM, FUNCTION_NCM);
     }
+
+    /** @hide */
+    @LongDef(flag = true, prefix = { "FUNCTION_" }, value = {
+            FUNCTION_NONE,
+            FUNCTION_MTP,
+            FUNCTION_PTP,
+            FUNCTION_RNDIS,
+            FUNCTION_MIDI,
+            FUNCTION_ACCESSORY,
+            FUNCTION_AUDIO_SOURCE,
+            FUNCTION_ADB,
+            FUNCTION_NCM,
+    })
+    public @interface UsbFunctionMode {}
 
     private final Context mContext;
     private final IUsbManager mService;
@@ -721,7 +742,7 @@ public class UsbManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_USB)
-    public void setCurrentFunctions(long functions) {
+    public void setCurrentFunctions(@UsbFunctionMode long functions) {
         try {
             mService.setCurrentFunctions(functions);
         } catch (RemoteException e) {
