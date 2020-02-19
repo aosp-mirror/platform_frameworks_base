@@ -1229,11 +1229,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    @Override
-    protected void onRequestSetAllowed(boolean allowed) {
-        // do nothing - the gnss provider is always allowed
-    }
-
     private void deleteAidingData(Bundle extras) {
         int flags;
 

@@ -118,16 +118,6 @@ public class MockableLocationProviderTest {
     }
 
     @Test
-    public void testRequestSetAllowed() {
-        mProvider.requestSetAllowed(true);
-        verify(mRealProvider, times(1)).onRequestSetAllowed(true);
-
-        mProvider.setMockProvider(mMockProvider);
-        mProvider.requestSetAllowed(true);
-        verify(mMockProvider, times(1)).onRequestSetAllowed(true);
-    }
-
-    @Test
     public void testSendExtraCommand() {
         mProvider.sendExtraCommand(0, 0, "command", null);
         verify(mRealProvider, times(1)).onExtraCommand(0, 0, "command", null);

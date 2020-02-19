@@ -224,15 +224,6 @@ public class MockableLocationProvider extends AbstractLocationProvider {
         }
     }
 
-    @Override
-    protected void onRequestSetAllowed(boolean allowed) {
-        synchronized (mOwnerLock) {
-            if (mProvider != null) {
-                mProvider.onRequestSetAllowed(allowed);
-            }
-        }
-    }
-
     /**
      * Dumps the current provider implementation.
      */

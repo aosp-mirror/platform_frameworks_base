@@ -862,10 +862,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
 
-        public void requestSetAllowed(boolean allowed) {
-            mProvider.requestSetAllowed(allowed);
-        }
-
         public void onUserStarted(int userId) {
             synchronized (mLock) {
                 // clear the user's enabled state in order to force a reevalution of whether the
@@ -2929,18 +2925,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     private class LocalService extends LocationManagerInternal {
-
-        @Override
-        public void requestSetProviderAllowed(String provider, boolean allowed) {
-            Preconditions.checkArgument(provider != null, "invalid null provider");
-
-            synchronized (mLock) {
-                LocationProviderManager manager = getLocationProviderManager(provider);
-                if (manager != null) {
-                    manager.requestSetAllowed(allowed);
-                }
-            }
-        }
 
         @Override
         public boolean isProviderEnabledForUser(@NonNull String provider, int userId) {
