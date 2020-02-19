@@ -16,15 +16,18 @@
 #ifndef ANDROID_GRAPHICS_JNI_RUNTIME_H
 #define ANDROID_GRAPHICS_JNI_RUNTIME_H
 
+#include <cutils/compiler.h>
 #include <jni.h>
 
 __BEGIN_DECLS
 
-void init_android_graphics();
+ANDROID_API void init_android_graphics();
 
-int register_android_graphics_classes(JNIEnv* env);
+ANDROID_API int register_android_graphics_classes(JNIEnv* env);
 
-void zygote_preload_graphics();
+ANDROID_API int register_android_graphics_GraphicsStatsService(JNIEnv* env);
+
+ANDROID_API void zygote_preload_graphics();
 
 __END_DECLS
 

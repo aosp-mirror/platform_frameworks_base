@@ -16,6 +16,7 @@
 #ifndef ANDROID_GRAPHICS_REGION_H
 #define ANDROID_GRAPHICS_REGION_H
 
+#include <cutils/compiler.h>
 #include <android/rect.h>
 #include <sys/cdefs.h>
 #include <jni.h>
@@ -35,19 +36,19 @@ typedef struct ARegionIterator ARegionIterator;
  * @return ARegionIterator that must be closed and must not live longer than the life
  *         of the jobject.  It returns nullptr if the region is not a valid object.
  */
-ARegionIterator* ARegionIterator_acquireIterator(JNIEnv* env, jobject region);
+ANDROID_API ARegionIterator* ARegionIterator_acquireIterator(JNIEnv* env, jobject region);
 
-void ARegionIterator_releaseIterator(ARegionIterator* iterator);
+ANDROID_API void ARegionIterator_releaseIterator(ARegionIterator* iterator);
 
-bool ARegionIterator_isComplex(ARegionIterator* iterator);
+ANDROID_API bool ARegionIterator_isComplex(ARegionIterator* iterator);
 
-bool ARegionIterator_isDone(ARegionIterator* iterator);
+ANDROID_API bool ARegionIterator_isDone(ARegionIterator* iterator);
 
-void ARegionIterator_next(ARegionIterator* iterator);
+ANDROID_API void ARegionIterator_next(ARegionIterator* iterator);
 
-ARect ARegionIterator_getRect(ARegionIterator* iterator);
+ANDROID_API ARect ARegionIterator_getRect(ARegionIterator* iterator);
 
-ARect ARegionIterator_getTotalBounds(ARegionIterator* iterator);
+ANDROID_API ARect ARegionIterator_getTotalBounds(ARegionIterator* iterator);
 
 __END_DECLS
 

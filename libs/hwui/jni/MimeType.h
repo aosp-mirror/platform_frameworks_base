@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cutils/compiler.h>
 #include "SkEncodedImageFormat.h"
 
-const char* getMimeType(SkEncodedImageFormat);
+ANDROID_API const char* getMimeType(SkEncodedImageFormat);

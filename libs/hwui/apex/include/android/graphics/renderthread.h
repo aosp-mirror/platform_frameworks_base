@@ -16,6 +16,7 @@
 #ifndef ANDROID_GRAPHICS_RENDERTHREAD_H
 #define ANDROID_GRAPHICS_RENDERTHREAD_H
 
+#include <cutils/compiler.h>
 #include <sys/cdefs.h>
 
 __BEGIN_DECLS
@@ -26,7 +27,7 @@ __BEGIN_DECLS
  *           function requires a valid fd, but does not persist or assume ownership of the fd
  *           outside the scope of this function.
  */
-void ARenderThread_dumpGraphicsMemory(int fd);
+ANDROID_API void ARenderThread_dumpGraphicsMemory(int fd);
 
 __END_DECLS
 

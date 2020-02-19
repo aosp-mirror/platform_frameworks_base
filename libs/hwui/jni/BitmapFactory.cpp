@@ -4,6 +4,7 @@
 #include "BitmapFactory.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "GraphicsJNI.h"
+#include "MimeType.h"
 #include "NinePatchPeeker.h"
 #include "SkAndroidCodec.h"
 #include "SkBRDAllocator.h"

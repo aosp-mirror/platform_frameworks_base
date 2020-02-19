@@ -16,6 +16,7 @@
 #ifndef ANDROID_GRAPHICS_PAINT_H
 #define ANDROID_GRAPHICS_PAINT_H
 
+#include <cutils/compiler.h>
 #include <sys/cdefs.h>
 
 __BEGIN_DECLS
@@ -35,11 +36,11 @@ enum ABlendMode {
     ABLEND_MODE_SRC      = 2,
 };
 
-APaint* APaint_createPaint();
+ANDROID_API APaint* APaint_createPaint();
 
-void APaint_destroyPaint(APaint* paint);
+ANDROID_API void APaint_destroyPaint(APaint* paint);
 
-void APaint_setBlendMode(APaint* paint, ABlendMode blendMode);
+ANDROID_API void APaint_setBlendMode(APaint* paint, ABlendMode blendMode);
 
 __END_DECLS
 

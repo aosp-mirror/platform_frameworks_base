@@ -18,6 +18,7 @@
 #define ANDROID_GRAPHICS_MATRIX_H
 
 #include <jni.h>
+#include <cutils/compiler.h>
 #include <sys/cdefs.h>
 
 __BEGIN_DECLS
@@ -31,7 +32,7 @@ __BEGIN_DECLS
  * @return true if the values param was populated and false otherwise.
 
  */
-bool AMatrix_getContents(JNIEnv* env, jobject matrixObj, float values[9]);
+ANDROID_API bool AMatrix_getContents(JNIEnv* env, jobject matrixObj, float values[9]);
 
 __END_DECLS
 

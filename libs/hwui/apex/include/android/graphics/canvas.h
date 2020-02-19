@@ -20,6 +20,7 @@
 #include <android/graphics/paint.h>
 #include <android/native_window.h>
 #include <android/rect.h>
+#include <cutils/compiler.h>
 #include <jni.h>
 
 __BEGIN_DECLS
@@ -30,24 +31,24 @@ __BEGIN_DECLS
 typedef struct ACanvas ACanvas;
 
 //  One of AHardwareBuffer_Format.
-bool ACanvas_isSupportedPixelFormat(int32_t bufferFormat);
+ANDROID_API bool ACanvas_isSupportedPixelFormat(int32_t bufferFormat);
 
 /**
  * Returns a native handle to a Java android.graphics.Canvas
  *
  * @return ACanvas* that is only valid for the life of the jobject.
  */
-ACanvas* ACanvas_getNativeHandleFromJava(JNIEnv* env, jobject canvas);
+ANDROID_API ACanvas* ACanvas_getNativeHandleFromJava(JNIEnv* env, jobject canvas);
 
 /**
  * Creates a canvas that wraps the buffer
  *
  * @param buffer is a required param.  If no buffer is provided a nullptr will be returned.
  */
-ACanvas* ACanvas_createCanvas(const ANativeWindow_Buffer* buffer,
+ANDROID_API ACanvas* ACanvas_createCanvas(const ANativeWindow_Buffer* buffer,
                               int32_t /*android_dataspace_t*/ dataspace);
 
-void ACanvas_destroyCanvas(ACanvas* canvas);
+ANDROID_API void ACanvas_destroyCanvas(ACanvas* canvas);
 
 /**
  * Updates the canvas to render into the pixels in the provided buffer
@@ -60,7 +61,7 @@ void ACanvas_destroyCanvas(ACanvas* canvas);
  *         method will behave as if nullptr were passed as the input buffer and the previous buffer
  *         will still be released.
  */
-bool ACanvas_setBuffer(ACanvas* canvas, const ANativeWindow_Buffer* buffer,
+ANDROID_API bool ACanvas_setBuffer(ACanvas* canvas, const ANativeWindow_Buffer* buffer,
                        int32_t /*android_dataspace_t*/ dataspace);
 
 /**
@@ -68,21 +69,21 @@ bool ACanvas_setBuffer(ACanvas* canvas, const ANativeWindow_Buffer* buffer,
  *
  * @param clipRect required
  */
-void ACanvas_clipRect(ACanvas* canvas, const ARect* clipRect, bool doAntiAlias = false);
+ANDROID_API void ACanvas_clipRect(ACanvas* canvas, const ARect* clipRect, bool doAntiAlias = false);
 
 /**
  * Clips operations on the canvas to the difference of the current clip and the provided clipRect.
  *
  * @param clipRect required
  */
-void ACanvas_clipOutRect(ACanvas* canvas, const ARect* clipRect, bool doAntiAlias = false);
+ANDROID_API void ACanvas_clipOutRect(ACanvas* canvas, const ARect* clipRect, bool doAntiAlias = false);
 
 /**
  *
  * @param rect required
  * @param paint required
  */
-void ACanvas_drawRect(ACanvas* canvas, const ARect* rect, const APaint* paint);
+ANDROID_API void ACanvas_drawRect(ACanvas* canvas, const ARect* rect, const APaint* paint);
 
 /**
  *
@@ -91,7 +92,7 @@ void ACanvas_drawRect(ACanvas* canvas, const ARect* rect, const APaint* paint);
  * @param top
  * @param paint
  */
-void ACanvas_drawBitmap(ACanvas* canvas, const ABitmap* bitmap, float left, float top,
+ANDROID_API void ACanvas_drawBitmap(ACanvas* canvas, const ABitmap* bitmap, float left, float top,
                         const APaint* paint);
 
 __END_DECLS

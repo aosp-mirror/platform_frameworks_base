@@ -18,6 +18,7 @@
 
 #include <android/bitmap.h>
 #include <android/data_space.h>
+#include <cutils/compiler.h>
 #include <jni.h>
 #include <sys/cdefs.h>
 
@@ -37,31 +38,31 @@ typedef struct ABitmap ABitmap;
  * NOTE: This API does not need to remain as an APEX API if/when we pull libjnigraphics into the
  *       UI module.
  */
-AndroidBitmapInfo ABitmap_getInfoFromJava(JNIEnv* env, jobject bitmapObj);
+ANDROID_API AndroidBitmapInfo ABitmap_getInfoFromJava(JNIEnv* env, jobject bitmapObj);
 
 /**
  *
  * @return ptr to an opaque handle to the native bitmap or null if the java bitmap has been recycled
  *         or does not exist.
  */
-ABitmap* ABitmap_acquireBitmapFromJava(JNIEnv* env, jobject bitmapObj);
+ANDROID_API ABitmap* ABitmap_acquireBitmapFromJava(JNIEnv* env, jobject bitmapObj);
 
-ABitmap* ABitmap_copy(ABitmap* srcBitmap, AndroidBitmapFormat dstFormat);
+ANDROID_API ABitmap* ABitmap_copy(ABitmap* srcBitmap, AndroidBitmapFormat dstFormat);
 
-void ABitmap_acquireRef(ABitmap* bitmap);
-void ABitmap_releaseRef(ABitmap* bitmap);
+ANDROID_API void ABitmap_acquireRef(ABitmap* bitmap);
+ANDROID_API void ABitmap_releaseRef(ABitmap* bitmap);
 
-AndroidBitmapInfo ABitmap_getInfo(ABitmap* bitmap);
-ADataSpace ABitmap_getDataSpace(ABitmap* bitmap);
+ANDROID_API AndroidBitmapInfo ABitmap_getInfo(ABitmap* bitmap);
+ANDROID_API ADataSpace ABitmap_getDataSpace(ABitmap* bitmap);
 
-void* ABitmap_getPixels(ABitmap* bitmap);
-void ABitmap_notifyPixelsChanged(ABitmap* bitmap);
+ANDROID_API void* ABitmap_getPixels(ABitmap* bitmap);
+ANDROID_API void ABitmap_notifyPixelsChanged(ABitmap* bitmap);
 
-AndroidBitmapFormat ABitmapConfig_getFormatFromConfig(JNIEnv* env, jobject bitmapConfigObj);
-jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat format);
+ANDROID_API AndroidBitmapFormat ABitmapConfig_getFormatFromConfig(JNIEnv* env, jobject bitmapConfigObj);
+ANDROID_API jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat format);
 
 // NDK access
-int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const void* pixels,
+ANDROID_API int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const void* pixels,
                      AndroidBitmapCompressFormat format, int32_t quality, void* userContext,
                      AndroidBitmap_CompressWriteFunc);
 /**
@@ -75,7 +76,7 @@ int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const 
  *         a reference on the buffer, and the client must call
  *         AHardwareBuffer_release when finished with it.
  */
-AHardwareBuffer* ABitmap_getHardwareBuffer(ABitmap* bitmap);
+ANDROID_API AHardwareBuffer* ABitmap_getHardwareBuffer(ABitmap* bitmap);
 
 __END_DECLS
 

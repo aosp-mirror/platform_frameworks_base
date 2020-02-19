@@ -1,6 +1,8 @@
 #ifndef _ANDROID_GRAPHICS_GRAPHICS_JNI_H_
 #define _ANDROID_GRAPHICS_GRAPHICS_JNI_H_
 
+#include <cutils/compiler.h>
+
 #include "Bitmap.h"
 #include "SkBitmap.h"
 #include "SkBRDAllocator.h"
@@ -75,7 +77,7 @@ public:
     static SkPoint* jpointf_to_point(JNIEnv*, jobject jpointf, SkPoint* point);
     static void point_to_jpointf(const SkPoint& point, JNIEnv*, jobject jpointf);
 
-    static android::Canvas* getNativeCanvas(JNIEnv*, jobject canvas);
+    ANDROID_API static android::Canvas* getNativeCanvas(JNIEnv*, jobject canvas);
     static android::Bitmap* getNativeBitmap(JNIEnv*, jobject bitmap);
     static SkImageInfo getBitmapInfo(JNIEnv*, jobject bitmap, uint32_t* outRowBytes,
                                      bool* isHardware);

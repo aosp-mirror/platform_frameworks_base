@@ -25,6 +25,8 @@
 #include <stats_event.h>
 #include <stats_pull_atom_callback.h>
 #include <statslog.h>
+
+#include "android/graphics/jni_runtime.h"
 #include "GraphicsJNI.h"
 
 namespace android {
@@ -171,6 +173,9 @@ static void nativeDestructor(JNIEnv* env, jobject javaObject) {
     gGraphicsStatsServiceObject = nullptr;
 }
 
+} // namespace android
+using namespace android;
+
 static const JNINativeMethod sMethods[] =
         {{"nGetAshmemSize", "()I", (void*)getAshmemSize},
          {"nCreateDump", "(IZ)J", (void*)createDump},
@@ -190,5 +195,3 @@ int register_android_graphics_GraphicsStatsService(JNIEnv* env) {
     return jniRegisterNativeMethods(env, "android/graphics/GraphicsStatsService", sMethods,
                                     NELEM(sMethods));
 }
-
-} // namespace android
