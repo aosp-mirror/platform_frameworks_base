@@ -78,7 +78,6 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.testing.DexmakerShareClassLoaderRule;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -91,7 +90,6 @@ import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -146,10 +144,6 @@ public class AbstractAccessibilityServiceConnectionTest {
     private Callable<Boolean> mPerformA11yAction;
     private ArrayList<Integer> mDisplayList = new ArrayList<>(Arrays.asList(
             Display.DEFAULT_DISPLAY, SECONDARY_DISPLAY_ID));
-
-    // To mock package-private class.
-    @Rule public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
-            new DexmakerShareClassLoaderRule();
 
     @Mock private Context mMockContext;
     @Mock private IPowerManager mMockIPowerManager;
