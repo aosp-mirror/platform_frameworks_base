@@ -34,6 +34,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
@@ -423,6 +424,11 @@ public class RecentsAnimationController implements DeathRecipient {
 
         mService.mWindowPlacerLocked.performSurfacePlacement();
 
+        // If the target activity has a fixed orientation which is different from the current top
+        // activity, it will be rotated before being shown so we avoid a screen rotation
+        // animation when showing the Recents view.
+        mDisplayContent.rotateInDifferentOrientationIfNeeded(mTargetActivityRecord);
+
         // Notify that the animation has started
         if (mStatusBar != null) {
             mStatusBar.onRecentsAnimationStateChanged(true /* running */);
@@ -695,6 +701,9 @@ public class RecentsAnimationController implements DeathRecipient {
                 mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(
                         mTargetActivityRecord.token);
             }
+            if (mTargetActivityRecord.hasFixedRotationTransform()) {
+                mTargetActivityRecord.clearFixedRotationTransform();
+            }
         }
 
         // Notify that the animation has ended
@@ -826,6 +835,19 @@ public class RecentsAnimationController implements DeathRecipient {
     boolean shouldIgnoreForAccessibility(WindowState windowState) {
         final Task task = windowState.getTask();
         return task != null && isAnimatingTask(task) && !isTargetApp(windowState.mActivityRecord);
+    }
+
+    /**
+     * If the animation target ActivityRecord has a fixed rotation ({@link
+     * WindowToken#hasFixedRotationTransform()}, the provided wallpaper will be rotated accordingly.
+     *
+     * This avoids any screen rotation animation when animating to the Recents view.
+     */
+    void applyFixedRotationTransformIfNeeded(@NonNull WindowToken wallpaper) {
+        if (mTargetActivityRecord == null) {
+            return;
+        }
+        wallpaper.applyFixedRotationTransform(mTargetActivityRecord);
     }
 
     @VisibleForTesting
