@@ -163,6 +163,15 @@ public class WindowlessWindowManager implements IWindowSession {
         return !PixelFormat.formatHasAlpha(attrs.format);
     }
 
+    /** @hide */
+    protected SurfaceControl getSurfaceControl(View rootView) {
+        final State s = mStateForWindow.get(rootView.getViewRootImpl().mWindow.asBinder());
+        if (s == null) {
+            return null;
+        }
+        return s.mSurfaceControl;
+    }
+
     @Override
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,

@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
-import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
@@ -415,12 +414,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         // Save the minimized home height
-        final ActivityStack dockedStack =
-                mDisplayContent.getRootSplitScreenPrimaryTask();
-        mDisplayContent.getDockedDividerController().getHomeStackBoundsInDockedMode(
-                mDisplayContent.getConfiguration(),
-                dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide(),
-                mMinimizedHomeBounds);
+        mMinimizedHomeBounds = mDisplayContent.getRootHomeTask().getBounds();
 
         mService.mWindowPlacerLocked.performSurfacePlacement();
 
@@ -866,8 +860,8 @@ public class RecentsAnimationController implements DeathRecipient {
             mTask = task;
             mIsRecentTaskInvisible = isRecentTaskInvisible;
             final WindowContainer container = mTask.getParent();
-            container.getRelativeDisplayedPosition(mPosition);
             mBounds.set(container.getDisplayedBounds());
+            mPosition.set(mBounds.left, mBounds.top);
         }
 
         RemoteAnimationTarget createRemoteAnimationTarget() {
