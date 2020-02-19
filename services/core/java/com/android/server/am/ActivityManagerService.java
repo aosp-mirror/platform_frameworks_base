@@ -1045,6 +1045,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        protected IntentFilter getIntentFilter(@NonNull BroadcastFilter input) {
+            return input;
+        }
+
+        @Override
         protected BroadcastFilter[] newArray(int size) {
             return new BroadcastFilter[size];
         }

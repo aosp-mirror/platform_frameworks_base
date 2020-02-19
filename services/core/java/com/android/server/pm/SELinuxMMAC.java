@@ -18,15 +18,14 @@ package com.android.server.pm;
 
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.Signature;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Environment;
 import android.util.Slog;
 import android.util.Xml;
 
 import com.android.server.compat.PlatformCompat;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import libcore.io.IoUtils;
 

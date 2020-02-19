@@ -32,7 +32,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -47,6 +46,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import com.google.android.collect.Lists;

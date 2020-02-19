@@ -16,18 +16,19 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ParsedPackage;
 import android.service.pm.PackageProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionsState;
+import com.android.server.pm.pkg.PackageStateUnserialized;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,8 +40,7 @@ import java.util.Set;
 /**
  * Settings data for a particular package we know about.
  */
-public final class PackageSetting extends PackageSettingBase implements
-        ParsedPackage.PackageSettingCallback {
+public class PackageSetting extends PackageSettingBase {
     int appId;
 
     public AndroidPackage pkg;
@@ -64,6 +64,9 @@ public final class PackageSetting extends PackageSettingBase implements
      */
     @Nullable
     Map<String, ArraySet<String>> mimeGroups;
+
+    @NonNull
+    private PackageStateUnserialized pkgState = new PackageStateUnserialized();
 
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
@@ -223,10 +226,6 @@ public final class PackageSetting extends PackageSettingBase implements
         return (pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
-    public boolean isUpdatedSystem() {
-        return (pkgFlags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
-    }
-
     @Override
     public boolean isSharedUser() {
         return sharedUser != null;
@@ -324,9 +323,8 @@ public final class PackageSetting extends PackageSettingBase implements
         updateMimeGroups(mimeGroupNames);
     }
 
-    // TODO(b/135203078): Move to constructor
-    @Override
-    public void setAndroidPackage(AndroidPackage pkg) {
-        this.pkg = pkg;
+    @NonNull
+    public PackageStateUnserialized getPkgState() {
+        return pkgState;
     }
 }

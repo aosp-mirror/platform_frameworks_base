@@ -39,7 +39,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
@@ -65,6 +64,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 
@@ -163,7 +163,7 @@ public final class PermissionPolicyService extends SystemService {
                 if (perm.isSoftRestricted()) {
                     SoftRestrictedPermissionPolicy policy =
                             SoftRestrictedPermissionPolicy.forPermission(null, null, null,
-                                    perm.name);
+                                    null, perm.name);
                     int extraAppOp = policy.getExtraAppOpCode();
                     if (extraAppOp != OP_NONE) {
                         appOpsService.startWatchingMode(extraAppOp, null, mAppOpsCallback);
@@ -506,17 +506,18 @@ public final class PermissionPolicyService extends SystemService {
         /**
          * Note: Called with the package lock held. Do <u>not</u> call into app-op manager.
          */
-        private void addAppOps(@NonNull PackageInfo packageInfo, @NonNull String permissionName) {
+        private void addAppOps(@NonNull PackageInfo packageInfo, @NonNull AndroidPackage pkg,
+                @NonNull String permissionName) {
             PermissionInfo permissionInfo = mRuntimePermissionInfos.get(permissionName);
             if (permissionInfo == null) {
                 return;
             }
-            addPermissionAppOp(packageInfo, permissionInfo);
-            addExtraAppOp(packageInfo, permissionInfo);
+            addPermissionAppOp(packageInfo, pkg, permissionInfo);
+            addExtraAppOp(packageInfo, pkg, permissionInfo);
         }
 
         private void addPermissionAppOp(@NonNull PackageInfo packageInfo,
-                @NonNull PermissionInfo permissionInfo) {
+                @NonNull AndroidPackage pkg, @NonNull PermissionInfo permissionInfo) {
             if (!permissionInfo.isRuntime()) {
                 return;
             }
@@ -539,13 +540,13 @@ public final class PermissionPolicyService extends SystemService {
             }
 
             int appOpMode;
-            boolean shouldGrantAppOp = shouldGrantAppOp(packageInfo, permissionInfo);
+            boolean shouldGrantAppOp = shouldGrantAppOp(packageInfo, pkg, permissionInfo);
             if (shouldGrantAppOp) {
                 if (permissionInfo.backgroundPermission != null) {
                     PermissionInfo backgroundPermissionInfo = mRuntimePermissionInfos.get(
                             permissionInfo.backgroundPermission);
                     boolean shouldGrantBackgroundAppOp = backgroundPermissionInfo != null
-                            && shouldGrantAppOp(packageInfo, backgroundPermissionInfo);
+                            && shouldGrantAppOp(packageInfo, pkg, backgroundPermissionInfo);
                     appOpMode = shouldGrantBackgroundAppOp ? MODE_ALLOWED : MODE_FOREGROUND;
                 } else {
                     appOpMode = MODE_ALLOWED;
@@ -570,7 +571,7 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         private boolean shouldGrantAppOp(@NonNull PackageInfo packageInfo,
-                @NonNull PermissionInfo permissionInfo) {
+                @NonNull AndroidPackage pkg, @NonNull PermissionInfo permissionInfo) {
             String permissionName = permissionInfo.name;
             String packageName = packageInfo.packageName;
             boolean isGranted = mPackageManager.checkPermission(permissionName, packageName)
@@ -595,14 +596,15 @@ public final class PermissionPolicyService extends SystemService {
             } else if (permissionInfo.isSoftRestricted()) {
                 SoftRestrictedPermissionPolicy policy =
                         SoftRestrictedPermissionPolicy.forPermission(mContext,
-                                packageInfo.applicationInfo, mContext.getUser(), permissionName);
+                                packageInfo.applicationInfo, pkg, mContext.getUser(),
+                                permissionName);
                 return policy.mayGrantPermission();
             } else {
                 return true;
             }
         }
 
-        private void addExtraAppOp(@NonNull PackageInfo packageInfo,
+        private void addExtraAppOp(@NonNull PackageInfo packageInfo, @NonNull AndroidPackage pkg,
                 @NonNull PermissionInfo permissionInfo) {
             if (!permissionInfo.isSoftRestricted()) {
                 return;
@@ -611,7 +613,7 @@ public final class PermissionPolicyService extends SystemService {
             String permissionName = permissionInfo.name;
             SoftRestrictedPermissionPolicy policy =
                     SoftRestrictedPermissionPolicy.forPermission(mContext,
-                            packageInfo.applicationInfo, mContext.getUser(), permissionName);
+                            packageInfo.applicationInfo, pkg, mContext.getUser(), permissionName);
             int extraOpCode = policy.getExtraAppOpCode();
             if (extraOpCode == OP_NONE) {
                 return;
@@ -639,19 +641,23 @@ public final class PermissionPolicyService extends SystemService {
          * @param pkgName The package to add for later processing.
          */
         void addPackage(@NonNull String pkgName) {
-            final PackageInfo pkg;
+            PackageManagerInternal pmInternal =
+                    LocalServices.getService(PackageManagerInternal.class);
+            final PackageInfo pkgInfo;
+            final AndroidPackage pkg;
             try {
-                pkg = mPackageManager.getPackageInfo(pkgName, GET_PERMISSIONS);
+                pkgInfo = mPackageManager.getPackageInfo(pkgName, GET_PERMISSIONS);
+                pkg = pmInternal.getPackage(pkgName);
             } catch (NameNotFoundException e) {
                 return;
             }
 
-            if (pkg.requestedPermissions == null) {
+            if (pkgInfo == null || pkg == null || pkgInfo.requestedPermissions == null) {
                 return;
             }
 
-            for (String permission : pkg.requestedPermissions) {
-                addAppOps(pkg, permission);
+            for (String permission : pkgInfo.requestedPermissions) {
+                addAppOps(pkgInfo, pkg, permission);
             }
         }
 

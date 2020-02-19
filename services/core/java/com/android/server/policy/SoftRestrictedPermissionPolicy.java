@@ -35,7 +35,6 @@ import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -46,6 +45,7 @@ import android.util.Log;
 
 import com.android.internal.compat.IPlatformCompat;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 /**
  * The behavior of soft restricted permissions is different for each permission. This class collects
@@ -100,8 +100,8 @@ public abstract class SoftRestrictedPermissionPolicy {
      * @return The policy for this permission
      */
     public static @NonNull SoftRestrictedPermissionPolicy forPermission(@NonNull Context context,
-            @Nullable ApplicationInfo appInfo, @Nullable UserHandle user,
-            @NonNull String permission) {
+            @Nullable ApplicationInfo appInfo, @Nullable AndroidPackage pkg,
+            @Nullable UserHandle user, @NonNull String permission) {
         switch (permission) {
             // Storage uses a special app op to decide the mount state and supports soft restriction
             // where the restricted state allows the permission but only for accessing the medial
@@ -116,8 +116,6 @@ public abstract class SoftRestrictedPermissionPolicy {
 
                 if (appInfo != null) {
                     PackageManager pm = context.getPackageManager();
-                    PackageManagerInternal pmInternal =
-                            LocalServices.getService(PackageManagerInternal.class);
                     StorageManagerInternal smInternal =
                             LocalServices.getService(StorageManagerInternal.class);
                     int flags = pm.getPermissionFlags(permission, appInfo.packageName, user);
@@ -131,8 +129,7 @@ public abstract class SoftRestrictedPermissionPolicy {
                     isScopedStorageEnabled =
                             isChangeEnabledForUid(context, appInfo, user, ENABLE_SCOPED_STORAGE)
                             || isScopedStorageRequired;
-                    shouldPreserveLegacyExternalStorage = pmInternal.getPackage(
-                            appInfo.packageName).hasPreserveLegacyExternalStorage()
+                    shouldPreserveLegacyExternalStorage = pkg.hasPreserveLegacyExternalStorage()
                             && smInternal.hasLegacyExternalStorage(appInfo.uid);
                     shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0
                             || (isScopedStorageRequired && !shouldPreserveLegacyExternalStorage);

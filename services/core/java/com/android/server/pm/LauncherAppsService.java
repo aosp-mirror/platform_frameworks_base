@@ -50,7 +50,6 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
@@ -75,6 +74,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;

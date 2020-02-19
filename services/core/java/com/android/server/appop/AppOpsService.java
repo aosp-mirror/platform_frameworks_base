@@ -98,8 +98,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils.ParsedFeature;
+import android.content.pm.parsing.component.ParsedFeature;
 import android.database.ContentObserver;
 import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
@@ -156,6 +155,7 @@ import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.pm.PackageList;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import libcore.util.EmptyArray;
 

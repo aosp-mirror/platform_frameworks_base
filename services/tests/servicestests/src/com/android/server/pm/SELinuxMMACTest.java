@@ -22,12 +22,13 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.PackageImpl;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.server.compat.PlatformCompat;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,9 +80,9 @@ public class SELinuxMMACTest {
     }
 
     private AndroidPackage makePackage(int targetSdkVersion) {
-        return PackageImpl.forParsing(PACKAGE_NAME)
+        return ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
                 .setTargetSdkVersion(targetSdkVersion)
-                .hideAsParsed()
+                .hideAsParsed())
                 .hideAsFinal();
     }
 }

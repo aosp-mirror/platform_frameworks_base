@@ -29,8 +29,7 @@ import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.ComponentInfoFlags;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils;
+import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
@@ -38,6 +37,8 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.server.pm.PackageList;
+import com.android.server.pm.PackageSetting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -586,9 +587,7 @@ public abstract class PackageManagerInternal {
      */
     public abstract @Nullable AndroidPackage getPackage(@NonNull String packageName);
 
-    // TODO(b/135203078): PackageSetting can't be referenced directly. Should move to a server side
-    //  internal PM which is aware of PS.
-    public abstract @Nullable Object getPackageSetting(String packageName);
+    public abstract @Nullable PackageSetting getPackageSetting(String packageName);
 
     /**
      * Returns a package for the given UID. If the UID is part of a shared user ID, one
@@ -625,18 +624,17 @@ public abstract class PackageManagerInternal {
      */
     public abstract void removePackageListObserver(@NonNull PackageListObserver observer);
 
-    // TODO(b/135203078): PackageSetting can't be referenced directly
     /**
      * Returns a package object for the disabled system package name.
      */
-    public abstract @Nullable Object getDisabledSystemPackage(@NonNull String packageName);
+    public abstract @Nullable PackageSetting getDisabledSystemPackage(@NonNull String packageName);
 
     /**
      * Returns the package name for the disabled system package.
      *
      * This is equivalent to
      * {@link #getDisabledSystemPackage(String)}
-     *     .{@link com.android.server.pm.PackageSetting#pkg}
+     *     .{@link PackageSetting#pkg}
      *     .{@link AndroidPackage#getPackageName()}
      */
     public abstract @Nullable String getDisabledSystemPackageName(@NonNull String packageName);
@@ -677,7 +675,7 @@ public abstract class PackageManagerInternal {
     /**
      * Returns whether or not access to the application should be filtered.
      *
-     * @see #filterAppAccess(android.content.pm.PackageParser.Package, int, int)
+     * @see #filterAppAccess(AndroidPackage, int, int)
      */
     public abstract boolean filterAppAccess(
             @NonNull String packageName, int callingUid, int userId);
@@ -763,19 +761,27 @@ public abstract class PackageManagerInternal {
             throws IOException;
 
     /** Returns {@code true} if the specified component is enabled and matches the given flags. */
-    public abstract boolean isEnabledAndMatches(
-            @NonNull ComponentParseUtils.ParsedComponent component, int flags, int userId);
+    public abstract boolean isEnabledAndMatches(@NonNull ParsedMainComponent component, int flags,
+            int userId);
 
     /** Returns {@code true} if the given user requires extra badging for icons. */
     public abstract boolean userNeedsBadging(int userId);
 
     /**
      * Perform the given action for each package.
-     * Note that packages lock will be held while performin the actions.
+     * Note that packages lock will be held while performing the actions.
      *
      * @param actionLocked action to be performed
      */
     public abstract void forEachPackage(Consumer<AndroidPackage> actionLocked);
+
+    /**
+     * Perform the given action for each {@link PackageSetting}.
+     * Note that packages lock will be held while performing the actions.
+     *
+     * @param actionLocked action to be performed
+     */
+    public abstract void forEachPackageSetting(Consumer<PackageSetting> actionLocked);
 
     /**
      * Perform the given action for each installed package for a user.

@@ -22,12 +22,12 @@ import static android.content.pm.PackageManagerInternal.PACKAGE_SETUP_WIZARD;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.PackageManager;
@@ -37,15 +37,12 @@ import android.content.pm.PackageUserState;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProviderIntentInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedService;
-import android.content.pm.parsing.ComponentParseUtils.ParsedServiceIntentInfo;
-import android.content.pm.parsing.PackageInfoUtils;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedMainComponent;
+import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedService;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -58,6 +55,8 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.IntentResolver;
+import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -191,8 +190,11 @@ public class ComponentResolver {
      * of these during boot as we need to inspect at all of the intent filters on the
      * /system partition in order to know which component is the setup wizard. This can
      * only ever be non-empty if {@link #mDeferProtectedFilters} is {@code true}.
+     *
+     * This is a pair of component package name to actual filter, because we don't store the
+     * name inside the filter. It's technically independent of the component it's contained in.
      */
-    private List<ParsedActivityIntentInfo> mProtectedFilters;
+    private List<Pair<ParsedMainComponent, ParsedIntentInfo>> mProtectedFilters;
 
     ComponentResolver(UserManagerService userManager,
             PackageManagerInternal packageManagerInternal,
@@ -299,7 +301,7 @@ public class ComponentResolver {
                     continue;
                 }
                 final ProviderInfo info = PackageInfoUtils.generateProviderInfo(
-                        pkg, p, flags, ps.readUserState(userId), userId);
+                        pkg, p, flags, ps.readUserState(userId), userId, ps);
                 if (info == null) {
                     continue;
                 }
@@ -329,7 +331,7 @@ public class ComponentResolver {
                 return null;
             }
             return PackageInfoUtils.generateProviderInfo(pkg, p, flags,
-                    ps.readUserState(userId), userId);
+                    ps.readUserState(userId), userId, ps);
         }
     }
 
@@ -354,12 +356,12 @@ public class ComponentResolver {
                     continue;
                 }
 
-                if (safeMode && (pkg.getFlags() & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                if (safeMode && !pkg.isSystem()) {
                     continue;
                 }
                 final ProviderInfo info =
                         PackageInfoUtils.generateProviderInfo(pkg, p, 0,
-                                ps.readUserState(userId), userId);
+                                ps.readUserState(userId), userId, ps);
                 if (info == null) {
                     continue;
                 }
@@ -415,7 +417,7 @@ public class ComponentResolver {
 
     /** Add all components defined in the given package to the internal structures. */
     void addAllComponents(AndroidPackage pkg, boolean chatty) {
-        final ArrayList<ParsedActivityIntentInfo> newIntents = new ArrayList<>();
+        final ArrayList<Pair<ParsedActivity, ParsedIntentInfo>> newIntents = new ArrayList<>();
         synchronized (mLock) {
             addActivitiesLocked(pkg, newIntents, chatty);
             addReceiversLocked(pkg, chatty);
@@ -428,14 +430,14 @@ public class ComponentResolver {
                         PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM));
 
         for (int i = newIntents.size() - 1; i >= 0; --i) {
-            final ParsedActivityIntentInfo intentInfo = newIntents.get(i);
+            final Pair<ParsedActivity, ParsedIntentInfo> pair = newIntents.get(i);
             final PackageSetting disabledPkgSetting = (PackageSetting) sPackageManagerInternal
-                    .getDisabledSystemPackage(intentInfo.getPackageName());
+                    .getDisabledSystemPackage(pair.first.getPackageName());
             final AndroidPackage disabledPkg =
                     disabledPkgSetting == null ? null : disabledPkgSetting.pkg;
             final List<ParsedActivity> systemActivities =
                     disabledPkg != null ? disabledPkg.getActivities() : null;
-            adjustPriority(systemActivities, intentInfo, setupWizardPackage);
+            adjustPriority(systemActivities, pair.first, pair.second, setupWizardPackage);
         }
     }
 
@@ -459,7 +461,8 @@ public class ComponentResolver {
         if (mProtectedFilters == null || mProtectedFilters.size() == 0) {
             return;
         }
-        final List<ParsedActivityIntentInfo> protectedFilters = mProtectedFilters;
+        final List<Pair<ParsedMainComponent, ParsedIntentInfo>> protectedFilters =
+                mProtectedFilters;
         mProtectedFilters = null;
 
         // expect single setupwizard package
@@ -472,13 +475,17 @@ public class ComponentResolver {
                     + " All protected intents capped to priority 0");
         }
         for (int i = protectedFilters.size() - 1; i >= 0; --i) {
-            final ParsedActivityIntentInfo filter = protectedFilters.get(i);
-            if (filter.getPackageName().equals(setupWizardPackage)) {
+            final Pair<ParsedMainComponent, ParsedIntentInfo> pair = protectedFilters.get(i);
+            ParsedMainComponent component = pair.first;
+            ParsedIntentInfo filter = pair.second;
+            String packageName = component.getPackageName();
+            String className = component.getClassName();
+            if (packageName.equals(setupWizardPackage)) {
                 if (DEBUG_FILTERS) {
                     Slog.i(TAG, "Found setup wizard;"
                             + " allow priority " + filter.getPriority() + ";"
-                            + " package: " + filter.getPackageName()
-                            + " activity: " + filter.getClassName()
+                            + " package: " + packageName
+                            + " activity: " + className
                             + " priority: " + filter.getPriority());
                 }
                 // skip setup wizard; allow it to keep the high priority filter
@@ -486,8 +493,8 @@ public class ComponentResolver {
             }
             if (DEBUG_FILTERS) {
                 Slog.i(TAG, "Protected action; cap priority to 0;"
-                        + " package: " + filter.getPackageName()
-                        + " activity: " + filter.getClassName()
+                        + " package: " + packageName
+                        + " activity: " + className
                         + " origPrio: " + filter.getPriority());
             }
             filter.setPriority(0);
@@ -540,7 +547,7 @@ public class ComponentResolver {
                 printedSomething = true;
             }
             pw.print("  ");
-            ComponentName.printShortString(pw, p.getPackageName(), p.className);
+            ComponentName.printShortString(pw, p.getPackageName(), p.getName());
             pw.println(":");
             pw.print("    ");
             pw.println(p.toString());
@@ -575,24 +582,11 @@ public class ComponentResolver {
         if (dumpState.onTitlePrinted()) pw.println();
         pw.println("Service permissions:");
 
-        final Iterator<ParsedServiceIntentInfo> filterIterator = mServices.filterIterator();
+        final Iterator<Pair<ParsedService, ParsedIntentInfo>> filterIterator =
+                mServices.filterIterator();
         while (filterIterator.hasNext()) {
-            final ParsedServiceIntentInfo info = filterIterator.next();
-
-            ParsedService service = null;
-
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(info.getPackageName());
-            if (pkg != null && pkg.getServices() != null) {
-                for (ParsedService parsedService : pkg.getServices()) {
-                    if (Objects.equals(parsedService.className, info.getClassName())) {
-                        service = parsedService;
-                    }
-                }
-            }
-
-            if (service == null) {
-                continue;
-            }
+            final Pair<ParsedService, ParsedIntentInfo> pair = filterIterator.next();
+            ParsedService service = pair.first;
 
             final String permission = service.getPermission();
             if (permission != null) {
@@ -606,7 +600,7 @@ public class ComponentResolver {
 
     @GuardedBy("mLock")
     private void addActivitiesLocked(AndroidPackage pkg,
-            List<ParsedActivityIntentInfo> newIntents, boolean chatty) {
+            List<Pair<ParsedActivity, ParsedIntentInfo>> newIntents, boolean chatty) {
         final int activitiesSize = ArrayUtils.size(pkg.getActivities());
         StringBuilder r = null;
         for (int i = 0; i < activitiesSize; i++) {
@@ -671,7 +665,7 @@ public class ComponentResolver {
                         final String packageName =
                                 component != null ? component.getPackageName() : "?";
                         Slog.w(TAG, "Skipping provider name " + names[j]
-                                + " (in package " + pkg.getAppInfoPackageName() + ")"
+                                + " (in package " + pkg.getPackageName() + ")"
                                 + ": name already used by " + packageName);
                     }
                 }
@@ -736,8 +730,8 @@ public class ComponentResolver {
      * <em>WARNING</em> for performance reasons, the passed in intentList WILL BE
      * MODIFIED. Do not pass in a list that should not be changed.
      */
-    private static <T> void getIntentListSubset(List<ParsedActivityIntentInfo> intentList,
-            Function<ParsedActivityIntentInfo, Iterator<T>> generator, Iterator<T> searchIterator) {
+    private static <T> void getIntentListSubset(List<ParsedIntentInfo> intentList,
+            Function<ParsedIntentInfo, Iterator<T>> generator, Iterator<T> searchIterator) {
         // loop through the set of actions; every one must be found in the intent filter
         while (searchIterator.hasNext()) {
             // we must have at least one filter in the list to consider a match
@@ -748,9 +742,9 @@ public class ComponentResolver {
             final T searchAction = searchIterator.next();
 
             // loop through the set of intent filters
-            final Iterator<ParsedActivityIntentInfo> intentIter = intentList.iterator();
+            final Iterator<ParsedIntentInfo> intentIter = intentList.iterator();
             while (intentIter.hasNext()) {
-                final ParsedActivityIntentInfo intentInfo = intentIter.next();
+                final ParsedIntentInfo intentInfo = intentIter.next();
                 boolean selectionFound = false;
 
                 // loop through the intent filter's selection criteria; at least one
@@ -773,7 +767,7 @@ public class ComponentResolver {
         }
     }
 
-    private static boolean isProtectedAction(ParsedActivityIntentInfo filter) {
+    private static boolean isProtectedAction(ParsedIntentInfo filter) {
         final Iterator<String> actionsIter = filter.actionsIterator();
         while (actionsIter != null && actionsIter.hasNext()) {
             final String filterAction = actionsIter.next();
@@ -793,14 +787,14 @@ public class ComponentResolver {
             if (sysActivity.getName().equals(activityInfo.getName())) {
                 return sysActivity;
             }
-            if (sysActivity.getName().equals(activityInfo.targetActivity)) {
+            if (sysActivity.getName().equals(activityInfo.getTargetActivity())) {
                 return sysActivity;
             }
-            if (sysActivity.targetActivity != null) {
-                if (sysActivity.targetActivity.equals(activityInfo.getName())) {
+            if (sysActivity.getTargetActivity() != null) {
+                if (sysActivity.getTargetActivity().equals(activityInfo.getName())) {
                     return sysActivity;
                 }
-                if (sysActivity.targetActivity.equals(activityInfo.targetActivity)) {
+                if (sysActivity.getTargetActivity().equals(activityInfo.getTargetActivity())) {
                     return sysActivity;
                 }
             }
@@ -821,23 +815,24 @@ public class ComponentResolver {
      * <em>NOTE:</em> There is one exception. For security reasons, the setup wizard is
      * allowed to obtain any priority on any action.
      */
-    private void adjustPriority(List<ParsedActivity> systemActivities,
-            ParsedActivityIntentInfo intent, String setupWizardPackage) {
+    private void adjustPriority(List<ParsedActivity> systemActivities, ParsedActivity activity,
+            ParsedIntentInfo intent, String setupWizardPackage) {
         // nothing to do; priority is fine as-is
         if (intent.getPriority() <= 0) {
             return;
         }
 
-        AndroidPackage pkg = sPackageManagerInternal.getPackage(intent.getPackageName());
+        String packageName = activity.getPackageName();
+        AndroidPackage pkg = sPackageManagerInternal.getPackage(packageName);
 
-        final boolean privilegedApp =
-                ((pkg.getPrivateFlags() & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0);
+        final boolean privilegedApp = pkg.isPrivileged();
+        String className = activity.getClassName();
         if (!privilegedApp) {
             // non-privileged applications can never define a priority >0
             if (DEBUG_FILTERS) {
                 Slog.i(TAG, "Non-privileged app; cap priority to 0;"
-                        + " package: " + pkg.getPackageName()
-                        + " activity: " + intent.getClassName()
+                        + " package: " + packageName
+                        + " activity: " + className
                         + " origPrio: " + intent.getPriority());
             }
             intent.setPriority(0);
@@ -858,11 +853,11 @@ public class ComponentResolver {
                     if (mProtectedFilters == null) {
                         mProtectedFilters = new ArrayList<>();
                     }
-                    mProtectedFilters.add(intent);
+                    mProtectedFilters.add(Pair.create(activity, intent));
                     if (DEBUG_FILTERS) {
                         Slog.i(TAG, "Protected action; save for later;"
-                                + " package: " + pkg.getPackageName()
-                                + " activity: " + intent.getClassName()
+                                + " package: " + packageName
+                                + " activity: " + className
                                 + " origPrio: " + intent.getPriority());
                     }
                     return;
@@ -871,12 +866,12 @@ public class ComponentResolver {
                         Slog.i(TAG, "No setup wizard;"
                                 + " All protected intents capped to priority 0");
                     }
-                    if (intent.getPackageName().equals(setupWizardPackage)) {
+                    if (packageName.equals(setupWizardPackage)) {
                         if (DEBUG_FILTERS) {
                             Slog.i(TAG, "Found setup wizard;"
                                     + " allow priority " + intent.getPriority() + ";"
-                                    + " package: " + intent.getPackageName()
-                                    + " activity: " + intent.getClassName()
+                                    + " package: " + packageName
+                                    + " activity: " + className
                                     + " priority: " + intent.getPriority());
                         }
                         // setup wizard gets whatever it wants
@@ -884,8 +879,8 @@ public class ComponentResolver {
                     }
                     if (DEBUG_FILTERS) {
                         Slog.i(TAG, "Protected action; cap priority to 0;"
-                                + " package: " + intent.getPackageName()
-                                + " activity: " + intent.getClassName()
+                                + " package: " + packageName
+                                + " activity: " + className
                                 + " origPrio: " + intent.getPriority());
                     }
                     intent.setPriority(0);
@@ -898,27 +893,13 @@ public class ComponentResolver {
 
         // privileged app unbundled update ... try to find the same activity
 
-        ParsedActivity foundActivity = null;
-        ParsedActivity activity = null;
-
-        if (pkg.getActivities() != null) {
-            for (ParsedActivity parsedProvider : pkg.getActivities()) {
-                if (Objects.equals(parsedProvider.className, intent.getClassName())) {
-                    activity = parsedProvider;
-                }
-            }
-        }
-
-        if (activity != null) {
-            foundActivity = findMatchingActivity(systemActivities, activity);
-        }
-
+        ParsedActivity foundActivity = findMatchingActivity(systemActivities, activity);
         if (foundActivity == null) {
             // this is a new activity; it cannot obtain >0 priority
             if (DEBUG_FILTERS) {
                 Slog.i(TAG, "New activity; cap priority to 0;"
-                        + " package: " + pkg.getPackageName()
-                        + " activity: " + intent.getClassName()
+                        + " package: " + packageName
+                        + " activity: " + className
                         + " origPrio: " + intent.getPriority());
             }
             intent.setPriority(0);
@@ -928,8 +909,8 @@ public class ComponentResolver {
         // found activity, now check for filter equivalence
 
         // a shallow copy is enough; we modify the list, not its contents
-        final List<ParsedActivityIntentInfo> intentListCopy =
-                new ArrayList<>(foundActivity.intents);
+        final List<ParsedIntentInfo> intentListCopy =
+                new ArrayList<>(foundActivity.getIntents());
 
         // find matching action subsets
         final Iterator<String> actionsIterator = intent.actionsIterator();
@@ -939,8 +920,8 @@ public class ComponentResolver {
                 // no more intents to match; we're not equivalent
                 if (DEBUG_FILTERS) {
                     Slog.i(TAG, "Mismatched action; cap priority to 0;"
-                            + " package: " + pkg.getPackageName()
-                            + " activity: " + intent.getClassName()
+                            + " package: " + packageName
+                            + " activity: " + className
                             + " origPrio: " + intent.getPriority());
                 }
                 intent.setPriority(0);
@@ -957,8 +938,8 @@ public class ComponentResolver {
                 // no more intents to match; we're not equivalent
                 if (DEBUG_FILTERS) {
                     Slog.i(TAG, "Mismatched category; cap priority to 0;"
-                            + " package: " + pkg.getPackageName()
-                            + " activity: " + intent.getClassName()
+                            + " package: " + packageName
+                            + " activity: " + className
                             + " origPrio: " + intent.getPriority());
                 }
                 intent.setPriority(0);
@@ -974,8 +955,8 @@ public class ComponentResolver {
                 // no more intents to match; we're not equivalent
                 if (DEBUG_FILTERS) {
                     Slog.i(TAG, "Mismatched scheme; cap priority to 0;"
-                            + " package: " + pkg.getPackageName()
-                            + " activity: " + intent.getClassName()
+                            + " package: " + packageName
+                            + " activity: " + className
                             + " origPrio: " + intent.getPriority());
                 }
                 intent.setPriority(0);
@@ -993,8 +974,8 @@ public class ComponentResolver {
                 // no more intents to match; we're not equivalent
                 if (DEBUG_FILTERS) {
                     Slog.i(TAG, "Mismatched authority; cap priority to 0;"
-                            + " package: " + pkg.getPackageName()
-                            + " activity: " + intent.getClassName()
+                            + " package: " + packageName
+                            + " activity: " + className
                             + " origPrio: " + intent.getPriority());
                 }
                 intent.setPriority(0);
@@ -1011,8 +992,8 @@ public class ComponentResolver {
             if (DEBUG_FILTERS) {
                 Slog.i(TAG, "Found matching filter(s);"
                         + " cap priority to " + cappedPriority + ";"
-                        + " package: " + pkg.getPackageName()
-                        + " activity: " + intent.getClassName()
+                        + " package: " + packageName
+                        + " activity: " + className
                         + " origPrio: " + intent.getPriority());
             }
             intent.setPriority(cappedPriority);
@@ -1146,31 +1127,34 @@ public class ComponentResolver {
         }
     }
 
-    private abstract static class MimeGroupsAwareIntentResolver<F extends ParsedIntentInfo, R>
+    private abstract static class MimeGroupsAwareIntentResolver<F extends Pair<?
+            extends ParsedComponent, ParsedIntentInfo>, R>
             extends IntentResolver<F, R> {
         private ArrayMap<String, F[]> mMimeGroupToFilter = new ArrayMap<>();
         private boolean mIsUpdatingMimeGroup = false;
 
         @Override
         public void addFilter(F f) {
+            IntentFilter intentFilter = getIntentFilter(f);
             applyMimeGroups(f);
             super.addFilter(f);
 
             if (!mIsUpdatingMimeGroup) {
-                register_intent_filter(f, f.mimeGroupsIterator(), mMimeGroupToFilter,
+                register_intent_filter(f, intentFilter.mimeGroupsIterator(), mMimeGroupToFilter,
                         "      MimeGroup: ");
             }
         }
 
         @Override
         protected void removeFilterInternal(F f) {
+            IntentFilter intentFilter = getIntentFilter(f);
             if (!mIsUpdatingMimeGroup) {
-                unregister_intent_filter(f, f.mimeGroupsIterator(), mMimeGroupToFilter,
+                unregister_intent_filter(f, intentFilter.mimeGroupsIterator(), mMimeGroupToFilter,
                         "      MimeGroup: ");
             }
 
             super.removeFilterInternal(f);
-            f.clearDynamicDataTypes();
+            intentFilter.clearDynamicDataTypes();
         }
 
         /**
@@ -1197,10 +1181,11 @@ public class ComponentResolver {
             return hasChanges;
         }
 
-        private boolean updateFilter(F filter) {
+        private boolean updateFilter(F f) {
+            IntentFilter filter = getIntentFilter(f);
             List<String> oldTypes = filter.dataTypes();
-            removeFilter(filter);
-            addFilter(filter);
+            removeFilter(f);
+            addFilter(f);
             List<String> newTypes = filter.dataTypes();
             return !equalLists(oldTypes, newTypes);
         }
@@ -1221,12 +1206,12 @@ public class ComponentResolver {
             return first.equals(second);
         }
 
-        private void applyMimeGroups(F filter) {
-            String packageName = filter.getPackageName();
+        private void applyMimeGroups(F f) {
+            IntentFilter filter = getIntentFilter(f);
 
             for (int i = filter.countMimeGroups() - 1; i >= 0; i--) {
-                List<String> mimeTypes = sPackageManagerInternal.getMimeGroup(packageName,
-                        filter.getMimeGroup(i));
+                List<String> mimeTypes = sPackageManagerInternal.getMimeGroup(
+                        f.first.getPackageName(), filter.getMimeGroup(i));
 
                 for (int typeIndex = mimeTypes.size() - 1; typeIndex >= 0; typeIndex--) {
                     String mimeType = mimeTypes.get(typeIndex);
@@ -1244,7 +1229,7 @@ public class ComponentResolver {
     }
 
     private static class ActivityIntentResolver
-            extends MimeGroupsAwareIntentResolver<ParsedActivityIntentInfo, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<Pair<ParsedActivity, ParsedIntentInfo>, ResolveInfo> {
 
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
@@ -1277,15 +1262,18 @@ public class ComponentResolver {
             mFlags = flags;
             final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
             final int activitiesSize = packageActivities.size();
-            ArrayList<ParsedActivityIntentInfo[]> listCut = new ArrayList<>(activitiesSize);
+            ArrayList<Pair<ParsedActivity, ParsedIntentInfo>[]> listCut =
+                    new ArrayList<>(activitiesSize);
 
-            List<ParsedActivityIntentInfo> intentFilters;
+            List<ParsedIntentInfo> intentFilters;
             for (int i = 0; i < activitiesSize; ++i) {
-                intentFilters = packageActivities.get(i).intents;
-                if (intentFilters != null && intentFilters.size() > 0) {
-                    ParsedActivityIntentInfo[] array =
-                            new ParsedActivityIntentInfo[intentFilters.size()];
-                    intentFilters.toArray(array);
+                ParsedActivity activity = packageActivities.get(i);
+                intentFilters = activity.getIntents();
+                if (!intentFilters.isEmpty()) {
+                    Pair<ParsedActivity, ParsedIntentInfo>[] array = newArray(intentFilters.size());
+                    for (int arrayIndex = 0; arrayIndex < intentFilters.size(); arrayIndex++) {
+                        array[arrayIndex] = Pair.create(activity, intentFilters.get(arrayIndex));
+                    }
                     listCut.add(array);
                 }
             }
@@ -1293,22 +1281,17 @@ public class ComponentResolver {
         }
 
         private void addActivity(ParsedActivity a, String type,
-                List<ParsedActivityIntentInfo> newIntents) {
+                List<Pair<ParsedActivity, ParsedIntentInfo>> newIntents) {
             mActivities.put(a.getComponentName(), a);
             if (DEBUG_SHOW_INFO) {
-                final CharSequence label = a.nonLocalizedLabel != null
-                        ? a.nonLocalizedLabel
-                        : a.getName();
-                Log.v(TAG, "  " + type + " " + label + ":");
-            }
-            if (DEBUG_SHOW_INFO) {
+                Log.v(TAG, "  " + type + ":");
                 Log.v(TAG, "    Class=" + a.getName());
             }
-            final int intentsSize = a.intents.size();
+            final int intentsSize = a.getIntents().size();
             for (int j = 0; j < intentsSize; j++) {
-                ParsedActivityIntentInfo intent = a.intents.get(j);
+                ParsedIntentInfo intent = a.getIntents().get(j);
                 if (newIntents != null && "activity".equals(type)) {
-                    newIntents.add(intent);
+                    newIntents.add(Pair.create(a, intent));
                 }
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
@@ -1317,36 +1300,34 @@ public class ComponentResolver {
                 if (!intent.debugCheck()) {
                     Log.w(TAG, "==> For Activity " + a.getName());
                 }
-                addFilter(intent);
+                addFilter(Pair.create(a, intent));
             }
         }
 
         private void removeActivity(ParsedActivity a, String type) {
             mActivities.remove(a.getComponentName());
             if (DEBUG_SHOW_INFO) {
-                Log.v(TAG, "  " + type + " "
-                        + (a.nonLocalizedLabel != null ? a.nonLocalizedLabel
-                                : a.getName()) + ":");
+                Log.v(TAG, "  " + type + ":");
                 Log.v(TAG, "    Class=" + a.getName());
             }
-            final int intentsSize = a.intents.size();
+            final int intentsSize = a.getIntents().size();
             for (int j = 0; j < intentsSize; j++) {
-                ParsedActivityIntentInfo intent = a.intents.get(j);
+                ParsedIntentInfo intent = a.getIntents().get(j);
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
                     intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
-                removeFilter(intent);
+                removeFilter(Pair.create(a, intent));
             }
         }
 
         @Override
-        protected boolean allowFilterResult(
-                ParsedActivityIntentInfo filter, List<ResolveInfo> dest) {
+        protected boolean allowFilterResult(Pair<ParsedActivity, ParsedIntentInfo> filter,
+                List<ResolveInfo> dest) {
             for (int i = dest.size() - 1; i >= 0; --i) {
                 ActivityInfo destAi = dest.get(i).activityInfo;
-                if (Objects.equals(destAi.name, filter.getClassName())
-                        && Objects.equals(destAi.packageName, filter.getPackageName())) {
+                if (Objects.equals(destAi.name, filter.first.getName())
+                        && Objects.equals(destAi.packageName, filter.first.getPackageName())) {
                     return false;
                 }
             }
@@ -1354,39 +1335,23 @@ public class ComponentResolver {
         }
 
         @Override
-        protected ParsedActivityIntentInfo[] newArray(int size) {
-            return new ParsedActivityIntentInfo[size];
+        protected Pair<ParsedActivity, ParsedIntentInfo>[] newArray(int size) {
+            //noinspection unchecked
+            return (Pair<ParsedActivity, ParsedIntentInfo>[]) new Pair<?, ?>[size];
         }
 
         @Override
-        protected boolean isFilterStopped(ParsedActivityIntentInfo filter, int userId) {
-            if (!sUserManager.exists(userId)) return true;
-
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(filter.getPackageName());
-            if (pkg == null) {
-                return false;
-            }
-
-            PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                    filter.getPackageName());
-            if (ps == null) {
-                return false;
-            }
-
-            // System apps are never considered stopped for purposes of
-            // filtering, because there may be no way for the user to
-            // actually re-launch them.
-            return (ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0
-                    && ps.getStopped(userId);
+        protected boolean isFilterStopped(Pair<ParsedActivity, ParsedIntentInfo> filter, int userId) {
+            return ComponentResolver.isFilterStopped(filter, userId);
         }
 
         @Override
         protected boolean isPackageForFilter(String packageName,
-                ParsedActivityIntentInfo info) {
-            return packageName.equals(info.getPackageName());
+                Pair<ParsedActivity, ParsedIntentInfo> info) {
+            return packageName.equals(info.first.getPackageName());
         }
 
-        private void log(String reason, ParsedActivityIntentInfo info, int match,
+        private void log(String reason, ParsedIntentInfo info, int match,
                 int userId) {
             Slog.w(TAG, reason
                     + "; match: "
@@ -1396,8 +1361,11 @@ public class ComponentResolver {
         }
 
         @Override
-        protected ResolveInfo newResult(ParsedActivityIntentInfo info,
+        protected ResolveInfo newResult(Pair<ParsedActivity, ParsedIntentInfo> pair,
                 int match, int userId) {
+            ParsedActivity activity = pair.first;
+            ParsedIntentInfo info = pair.second;
+
             if (!sUserManager.exists(userId)) {
                 if (DEBUG) {
                     log("User doesn't exist", info, match, userId);
@@ -1405,24 +1373,8 @@ public class ComponentResolver {
                 return null;
             }
 
-            ParsedActivity activity = null;
-
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(info.getPackageName());
+            AndroidPackage pkg = sPackageManagerInternal.getPackage(activity.getPackageName());
             if (pkg == null) {
-                return null;
-            }
-
-            // TODO(b/135203078): Consider more efficient ways of doing this.
-            List<ParsedActivity> activities = getResolveList(pkg);
-            if (activities != null) {
-                for (ParsedActivity parsedActivity : activities) {
-                    if (Objects.equals(parsedActivity.className, info.getClassName())) {
-                        activity = parsedActivity;
-                    }
-                }
-            }
-
-            if (activity == null) {
                 return null;
             }
 
@@ -1435,7 +1387,7 @@ public class ComponentResolver {
                 return null;
             }
             PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                    info.getPackageName());
+                    activity.getPackageName());
             if (ps == null) {
                 if (DEBUG) {
                     log("info.activity.owner.mExtras == null", info, match, userId);
@@ -1443,8 +1395,8 @@ public class ComponentResolver {
                 return null;
             }
             final PackageUserState userState = ps.readUserState(userId);
-            ActivityInfo ai =
-                    PackageInfoUtils.generateActivityInfo(pkg, activity, mFlags, userState, userId);
+            ActivityInfo ai = PackageInfoUtils.generateActivityInfo(pkg, activity, mFlags,
+                    userState, userId, ps);
             if (ai == null) {
                 if (DEBUG) {
                     log("Failed to create ActivityInfo based on " + activity, info, match,
@@ -1502,19 +1454,20 @@ public class ComponentResolver {
             }
             res.handleAllWebDataURI = info.handleAllWebDataURI();
             res.priority = info.getPriority();
-            res.preferredOrder = pkg.getPreferredOrder();
+            // TODO(b/135203078): This field was unwritten and does nothing
+//            res.preferredOrder = pkg.getPreferredOrder();
             //System.out.println("Result: " + res.activityInfo.className +
             //                   " = " + res.priority);
             res.match = match;
-            res.isDefault = info.hasDefault;
-            res.labelRes = info.labelRes;
-            res.nonLocalizedLabel = info.nonLocalizedLabel;
+            res.isDefault = info.isHasDefault();
+            res.labelRes = info.getLabelRes();
+            res.nonLocalizedLabel = info.getNonLocalizedLabel();
             if (sPackageManagerInternal.userNeedsBadging(userId)) {
                 res.noResourceId = true;
             } else {
-                res.icon = info.icon;
+                res.icon = info.getIcon();
             }
-            res.iconResourceId = info.icon;
+            res.iconResourceId = info.getIcon();
             res.system = res.activityInfo.applicationInfo.isSystemApp();
             res.isInstantAppAvailable = userState.instantApp;
             return res;
@@ -1527,41 +1480,42 @@ public class ComponentResolver {
 
         @Override
         protected void dumpFilter(PrintWriter out, String prefix,
-                ParsedActivityIntentInfo filter) {
-            ParsedActivity activity = null;
-
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(filter.getPackageName());
-            if (pkg != null && pkg.getActivities() != null) {
-                for (ParsedActivity parsedActivity : pkg.getActivities()) {
-                    if (Objects.equals(parsedActivity.className, filter.getClassName())) {
-                        activity = parsedActivity;
-                    }
-                }
-            }
+                Pair<ParsedActivity, ParsedIntentInfo> pair) {
+            ParsedActivity activity = pair.first;
+            ParsedIntentInfo filter = pair.second;
 
             out.print(prefix);
             out.print(Integer.toHexString(System.identityHashCode(activity)));
             out.print(' ');
-            ComponentName.printShortString(out, filter.getPackageName(), filter.getClassName());
+            ComponentName.printShortString(out, activity.getPackageName(),
+                    activity.getClassName());
             out.print(" filter ");
             out.println(Integer.toHexString(System.identityHashCode(filter)));
         }
 
         @Override
-        protected Object filterToLabel(ParsedActivityIntentInfo filter) {
+        protected Object filterToLabel(Pair<ParsedActivity, ParsedIntentInfo> filter) {
             return filter;
         }
 
         protected void dumpFilterLabel(PrintWriter out, String prefix, Object label, int count) {
-            ParsedActivityIntentInfo activity = (ParsedActivityIntentInfo) label;
+            @SuppressWarnings("unchecked") Pair<ParsedActivity, ParsedIntentInfo> pair =
+                    (Pair<ParsedActivity, ParsedIntentInfo>) label;
             out.print(prefix);
-            out.print(Integer.toHexString(System.identityHashCode(activity)));
+            out.print(Integer.toHexString(System.identityHashCode(pair.first)));
             out.print(' ');
-            ComponentName.printShortString(out, activity.getPackageName(), activity.getClassName());
+            ComponentName.printShortString(out, pair.first.getPackageName(),
+                    pair.first.getClassName());
             if (count > 1) {
                 out.print(" ("); out.print(count); out.print(" filters)");
             }
             out.println();
+        }
+
+        @Override
+        protected IntentFilter getIntentFilter(
+                @NonNull Pair<ParsedActivity, ParsedIntentInfo> input) {
+            return input.second;
         }
 
         protected List<ParsedActivity> getResolveList(AndroidPackage pkg) {
@@ -1585,7 +1539,7 @@ public class ComponentResolver {
     }
 
     private static final class ProviderIntentResolver
-            extends MimeGroupsAwareIntentResolver<ParsedProviderIntentInfo, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<Pair<ParsedProvider, ParsedIntentInfo>, ResolveInfo> {
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
                 boolean defaultOnly, int userId) {
@@ -1617,15 +1571,18 @@ public class ComponentResolver {
             mFlags = flags;
             final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
             final int providersSize = packageProviders.size();
-            ArrayList<ParsedProviderIntentInfo[]> listCut = new ArrayList<>(providersSize);
+            ArrayList<Pair<ParsedProvider, ParsedIntentInfo>[]> listCut =
+                    new ArrayList<>(providersSize);
 
-            List<ParsedProviderIntentInfo> intentFilters;
+            List<ParsedIntentInfo> intentFilters;
             for (int i = 0; i < providersSize; ++i) {
-                intentFilters = packageProviders.get(i).getIntents();
-                if (intentFilters != null && intentFilters.size() > 0) {
-                    ParsedProviderIntentInfo[] array =
-                            new ParsedProviderIntentInfo[intentFilters.size()];
-                    intentFilters.toArray(array);
+                ParsedProvider provider = packageProviders.get(i);
+                intentFilters = provider.getIntents();
+                if (!intentFilters.isEmpty()) {
+                    Pair<ParsedProvider, ParsedIntentInfo>[] array = newArray(intentFilters.size());
+                    for (int arrayIndex = 0; arrayIndex < intentFilters.size(); arrayIndex++) {
+                        array[arrayIndex] = Pair.create(provider, intentFilters.get(arrayIndex));
+                    }
                     listCut.add(array);
                 }
             }
@@ -1640,17 +1597,13 @@ public class ComponentResolver {
 
             mProviders.put(p.getComponentName(), p);
             if (DEBUG_SHOW_INFO) {
-                Log.v(TAG, "  "
-                        + (p.nonLocalizedLabel != null
-                                ? p.nonLocalizedLabel
-                                : p.getName())
-                        + ":");
+                Log.v(TAG, "  provider:");
                 Log.v(TAG, "    Class=" + p.getName());
             }
             final int intentsSize = p.getIntents().size();
             int j;
             for (j = 0; j < intentsSize; j++) {
-                ParsedProviderIntentInfo intent = p.getIntents().get(j);
+                ParsedIntentInfo intent = p.getIntents().get(j);
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
                     intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
@@ -1658,37 +1611,35 @@ public class ComponentResolver {
                 if (!intent.debugCheck()) {
                     Log.w(TAG, "==> For Provider " + p.getName());
                 }
-                addFilter(intent);
+                addFilter(Pair.create(p, intent));
             }
         }
 
         void removeProvider(ParsedProvider p) {
             mProviders.remove(p.getComponentName());
             if (DEBUG_SHOW_INFO) {
-                Log.v(TAG, "  " + (p.nonLocalizedLabel != null
-                        ? p.nonLocalizedLabel
-                        : p.getName()) + ":");
+                Log.v(TAG, "  provider:");
                 Log.v(TAG, "    Class=" + p.getName());
             }
             final int intentsSize = p.getIntents().size();
             int j;
             for (j = 0; j < intentsSize; j++) {
-                ParsedProviderIntentInfo intent = p.getIntents().get(j);
+                ParsedIntentInfo intent = p.getIntents().get(j);
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
                     intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
-                removeFilter(intent);
+                removeFilter(Pair.create(p, intent));
             }
         }
 
         @Override
-        protected boolean allowFilterResult(
-                ParsedProviderIntentInfo filter, List<ResolveInfo> dest) {
+        protected boolean allowFilterResult(Pair<ParsedProvider, ParsedIntentInfo> filter,
+                List<ResolveInfo> dest) {
             for (int i = dest.size() - 1; i >= 0; i--) {
                 ProviderInfo destPi = dest.get(i).providerInfo;
-                if (Objects.equals(destPi.name, filter.getClassName())
-                        && Objects.equals(destPi.packageName, filter.getPackageName())) {
+                if (Objects.equals(destPi.name, filter.first.getClassName())
+                        && Objects.equals(destPi.packageName, filter.first.getPackageName())) {
                     return false;
                 }
             }
@@ -1696,59 +1647,35 @@ public class ComponentResolver {
         }
 
         @Override
-        protected ParsedProviderIntentInfo[] newArray(int size) {
-            return new ParsedProviderIntentInfo[size];
+        protected Pair<ParsedProvider, ParsedIntentInfo>[] newArray(int size) {
+            //noinspection unchecked
+            return (Pair<ParsedProvider, ParsedIntentInfo>[]) new Pair<?, ?>[size];
         }
 
         @Override
-        protected boolean isFilterStopped(ParsedProviderIntentInfo filter, int userId) {
-            if (!sUserManager.exists(userId)) {
-                return true;
-            }
-
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(filter.getPackageName());
-            if (pkg == null) {
-                return false;
-            }
-
-            PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                    filter.getPackageName());
-            if (ps == null) {
-                return false;
-            }
-
-            // System apps are never considered stopped for purposes of
-            // filtering, because there may be no way for the user to
-            // actually re-launch them.
-            return (ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0
-                    && ps.getStopped(userId);
+        protected boolean isFilterStopped(Pair<ParsedProvider, ParsedIntentInfo> filter,
+                int userId) {
+            return ComponentResolver.isFilterStopped(filter, userId);
         }
 
         @Override
         protected boolean isPackageForFilter(String packageName,
-                ParsedProviderIntentInfo info) {
-            return packageName.equals(info.getPackageName());
+                Pair<ParsedProvider, ParsedIntentInfo> info) {
+            return packageName.equals(info.first.getPackageName());
         }
 
         @Override
-        protected ResolveInfo newResult(ParsedProviderIntentInfo filter,
+        protected ResolveInfo newResult(Pair<ParsedProvider, ParsedIntentInfo> pair,
                 int match, int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
             }
 
-            ParsedProvider provider = null;
+            ParsedProvider provider = pair.first;
+            ParsedIntentInfo filter = pair.second;
 
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(filter.getPackageName());
-            if (pkg != null && pkg.getProviders() != null) {
-                for (ParsedProvider parsedProvider : pkg.getProviders()) {
-                    if (Objects.equals(parsedProvider.className, filter.getClassName())) {
-                        provider = parsedProvider;
-                    }
-                }
-            }
-
-            if (provider == null) {
+            AndroidPackage pkg = sPackageManagerInternal.getPackage(provider.getPackageName());
+            if (pkg == null) {
                 return null;
             }
 
@@ -1757,7 +1684,7 @@ public class ComponentResolver {
             }
 
             PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                    filter.getPackageName());
+                    provider.getPackageName());
             if (ps == null) {
                 return null;
             }
@@ -1779,8 +1706,8 @@ public class ComponentResolver {
             if (userState.instantApp && ps.isUpdateAvailable()) {
                 return null;
             }
-            ProviderInfo pi = PackageInfoUtils.generateProviderInfo(pkg, provider,
-                    mFlags, userState, userId);
+            ProviderInfo pi = PackageInfoUtils.generateProviderInfo(pkg, provider, mFlags,
+                    userState, userId, ps);
             if (pi == null) {
                 return null;
             }
@@ -1790,12 +1717,13 @@ public class ComponentResolver {
                 res.filter = filter;
             }
             res.priority = filter.getPriority();
-            res.preferredOrder = pkg.getPreferredOrder();
+            // TODO(b/135203078): This field was unwritten and does nothing
+//            res.preferredOrder = pkg.getPreferredOrder();
             res.match = match;
-            res.isDefault = filter.hasDefault;
-            res.labelRes = filter.labelRes;
-            res.nonLocalizedLabel = filter.nonLocalizedLabel;
-            res.icon = filter.icon;
+            res.isDefault = filter.isHasDefault();
+            res.labelRes = filter.getLabelRes();
+            res.nonLocalizedLabel = filter.getNonLocalizedLabel();
+            res.icon = filter.getIcon();
             res.system = res.providerInfo.applicationInfo.isSystemApp();
             return res;
         }
@@ -1807,37 +1735,31 @@ public class ComponentResolver {
 
         @Override
         protected void dumpFilter(PrintWriter out, String prefix,
-                ParsedProviderIntentInfo filter) {
-            ParsedProvider provider = null;
-
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(filter.getPackageName());
-            if (pkg != null && pkg.getProviders() != null) {
-                for (ParsedProvider parsedProvider : pkg.getProviders()) {
-                    if (Objects.equals(parsedProvider.className, filter.getClassName())) {
-                        provider = parsedProvider;
-                    }
-                }
-            }
+                Pair<ParsedProvider, ParsedIntentInfo> pair) {
+            ParsedProvider provider = pair.first;
+            ParsedIntentInfo filter = pair.second;
 
             out.print(prefix);
             out.print(Integer.toHexString(System.identityHashCode(provider)));
             out.print(' ');
-            ComponentName.printShortString(out, filter.getPackageName(), filter.getClassName());
+            ComponentName.printShortString(out, provider.getPackageName(), provider.getClassName());
             out.print(" filter ");
             out.println(Integer.toHexString(System.identityHashCode(filter)));
         }
 
         @Override
-        protected Object filterToLabel(ParsedProviderIntentInfo filter) {
+        protected Object filterToLabel(Pair<ParsedProvider, ParsedIntentInfo> filter) {
             return filter;
         }
 
         protected void dumpFilterLabel(PrintWriter out, String prefix, Object label, int count) {
-            final ParsedProviderIntentInfo provider = (ParsedProviderIntentInfo) label;
+            @SuppressWarnings("unchecked") final Pair<ParsedProvider, ParsedIntentInfo> pair =
+                    (Pair<ParsedProvider, ParsedIntentInfo>) label;
             out.print(prefix);
-            out.print(Integer.toHexString(System.identityHashCode(provider)));
+            out.print(Integer.toHexString(System.identityHashCode(pair.first)));
             out.print(' ');
-            ComponentName.printShortString(out, provider.getPackageName(), provider.getClassName());
+            ComponentName.printShortString(out, pair.first.getPackageName(),
+                    pair.first.getClassName());
             if (count > 1) {
                 out.print(" (");
                 out.print(count);
@@ -1846,12 +1768,18 @@ public class ComponentResolver {
             out.println();
         }
 
+        @Override
+        protected IntentFilter getIntentFilter(
+                @NonNull Pair<ParsedProvider, ParsedIntentInfo> input) {
+            return input.second;
+        }
+
         private final ArrayMap<ComponentName, ParsedProvider> mProviders = new ArrayMap<>();
         private int mFlags;
     }
 
     private static final class ServiceIntentResolver
-            extends MimeGroupsAwareIntentResolver<ParsedServiceIntentInfo, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<Pair<ParsedService, ParsedIntentInfo>, ResolveInfo> {
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
                 boolean defaultOnly, int userId) {
@@ -1877,15 +1805,18 @@ public class ComponentResolver {
             mFlags = flags;
             final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
             final int servicesSize = packageServices.size();
-            ArrayList<ParsedServiceIntentInfo[]> listCut = new ArrayList<>(servicesSize);
+            ArrayList<Pair<ParsedService, ParsedIntentInfo>[]> listCut =
+                    new ArrayList<>(servicesSize);
 
-            List<ParsedServiceIntentInfo> intentFilters;
+            List<ParsedIntentInfo> intentFilters;
             for (int i = 0; i < servicesSize; ++i) {
-                intentFilters = packageServices.get(i).intents;
-                if (intentFilters != null && intentFilters.size() > 0) {
-                    ParsedServiceIntentInfo[] array =
-                            new ParsedServiceIntentInfo[intentFilters.size()];
-                    intentFilters.toArray(array);
+                ParsedService service = packageServices.get(i);
+                intentFilters = service.getIntents();
+                if (intentFilters.size() > 0) {
+                    Pair<ParsedService, ParsedIntentInfo>[] array = newArray(intentFilters.size());
+                    for (int arrayIndex = 0; arrayIndex < intentFilters.size(); arrayIndex++) {
+                        array[arrayIndex] = Pair.create(service, intentFilters.get(arrayIndex));
+                    }
                     listCut.add(array);
                 }
             }
@@ -1895,15 +1826,13 @@ public class ComponentResolver {
         void addService(ParsedService s) {
             mServices.put(s.getComponentName(), s);
             if (DEBUG_SHOW_INFO) {
-                Log.v(TAG, "  "
-                        + (s.nonLocalizedLabel != null
-                        ? s.nonLocalizedLabel : s.getName()) + ":");
+                Log.v(TAG, "  service:");
                 Log.v(TAG, "    Class=" + s.getName());
             }
-            final int intentsSize = s.intents.size();
+            final int intentsSize = s.getIntents().size();
             int j;
             for (j = 0; j < intentsSize; j++) {
-                ParsedServiceIntentInfo intent = s.intents.get(j);
+                ParsedIntentInfo intent = s.getIntents().get(j);
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
                     intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
@@ -1911,36 +1840,35 @@ public class ComponentResolver {
                 if (!intent.debugCheck()) {
                     Log.w(TAG, "==> For Service " + s.getName());
                 }
-                addFilter(intent);
+                addFilter(Pair.create(s, intent));
             }
         }
 
         void removeService(ParsedService s) {
             mServices.remove(s.getComponentName());
             if (DEBUG_SHOW_INFO) {
-                Log.v(TAG, "  " + (s.nonLocalizedLabel != null
-                        ? s.nonLocalizedLabel : s.getName()) + ":");
+                Log.v(TAG, "  service:");
                 Log.v(TAG, "    Class=" + s.getName());
             }
-            final int intentsSize = s.intents.size();
+            final int intentsSize = s.getIntents().size();
             int j;
             for (j = 0; j < intentsSize; j++) {
-                ParsedServiceIntentInfo intent = s.intents.get(j);
+                ParsedIntentInfo intent = s.getIntents().get(j);
                 if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
                     intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
-                removeFilter(intent);
+                removeFilter(Pair.create(s, intent));
             }
         }
 
         @Override
-        protected boolean allowFilterResult(
-                ParsedServiceIntentInfo filter, List<ResolveInfo> dest) {
+        protected boolean allowFilterResult(Pair<ParsedService, ParsedIntentInfo> filter,
+                List<ResolveInfo> dest) {
             for (int i = dest.size() - 1; i >= 0; --i) {
                 ServiceInfo destAi = dest.get(i).serviceInfo;
-                if (Objects.equals(destAi.name, filter.getClassName())
-                        && Objects.equals(destAi.packageName, filter.getPackageName())) {
+                if (Objects.equals(destAi.name, filter.first.getClassName())
+                        && Objects.equals(destAi.packageName, filter.first.getPackageName())) {
                     return false;
                 }
             }
@@ -1948,55 +1876,32 @@ public class ComponentResolver {
         }
 
         @Override
-        protected ParsedServiceIntentInfo[] newArray(int size) {
-            return new ParsedServiceIntentInfo[size];
+        protected Pair<ParsedService, ParsedIntentInfo>[] newArray(int size) {
+            //noinspection unchecked
+            return (Pair<ParsedService, ParsedIntentInfo>[]) new Pair<?, ?>[size];
         }
 
         @Override
-        protected boolean isFilterStopped(ParsedServiceIntentInfo filter, int userId) {
-            if (!sUserManager.exists(userId)) return true;
-
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(filter.getPackageName());
-            if (pkg == null) {
-                return false;
-            }
-
-            PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                    filter.getPackageName());
-            if (ps == null) {
-                return false;
-            }
-
-            // System apps are never considered stopped for purposes of
-            // filtering, because there may be no way for the user to
-            // actually re-launch them.
-            return (ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0
-                    && ps.getStopped(userId);
+        protected boolean isFilterStopped(Pair<ParsedService, ParsedIntentInfo> filter, int userId) {
+            return ComponentResolver.isFilterStopped(filter, userId);
         }
 
         @Override
         protected boolean isPackageForFilter(String packageName,
-                ParsedServiceIntentInfo info) {
-            return packageName.equals(info.getPackageName());
+                Pair<ParsedService, ParsedIntentInfo> info) {
+            return packageName.equals(info.first.getPackageName());
         }
 
         @Override
-        protected ResolveInfo newResult(ParsedServiceIntentInfo filter,
-                int match, int userId) {
+        protected ResolveInfo newResult(Pair<ParsedService, ParsedIntentInfo> pair, int match,
+                int userId) {
             if (!sUserManager.exists(userId)) return null;
 
-            ParsedService service = null;
+            ParsedService service = pair.first;
+            ParsedIntentInfo filter = pair.second;
 
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(filter.getPackageName());
-            if (pkg != null && pkg.getServices() != null) {
-                for (ParsedService parsedService : pkg.getServices()) {
-                    if (Objects.equals(parsedService.className, filter.getClassName())) {
-                        service = parsedService;
-                    }
-                }
-            }
-
-            if (service == null) {
+            AndroidPackage pkg = sPackageManagerInternal.getPackage(service.getPackageName());
+            if (pkg == null) {
                 return null;
             }
 
@@ -2005,13 +1910,13 @@ public class ComponentResolver {
             }
 
             PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
-                    filter.getPackageName());
+                    service.getPackageName());
             if (ps == null) {
                 return null;
             }
             final PackageUserState userState = ps.readUserState(userId);
             ServiceInfo si = PackageInfoUtils.generateServiceInfo(pkg, service, mFlags,
-                    userState, userId);
+                    userState, userId, ps);
             if (si == null) {
                 return null;
             }
@@ -2038,12 +1943,13 @@ public class ComponentResolver {
                 res.filter = filter;
             }
             res.priority = filter.getPriority();
-            res.preferredOrder = pkg.getPreferredOrder();
+            // TODO(b/135203078): This field was unwritten and does nothing
+//            res.preferredOrder = pkg.getPreferredOrder();
             res.match = match;
-            res.isDefault = filter.hasDefault;
-            res.labelRes = filter.labelRes;
-            res.nonLocalizedLabel = filter.nonLocalizedLabel;
-            res.icon = filter.icon;
+            res.isDefault = filter.isHasDefault();
+            res.labelRes = filter.getLabelRes();
+            res.nonLocalizedLabel = filter.getNonLocalizedLabel();
+            res.icon = filter.getIcon();
             res.system = res.serviceInfo.applicationInfo.isSystemApp();
             return res;
         }
@@ -2055,25 +1961,17 @@ public class ComponentResolver {
 
         @Override
         protected void dumpFilter(PrintWriter out, String prefix,
-                ParsedServiceIntentInfo filter) {
-            ParsedService service = null;
-
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(filter.getPackageName());
-            if (pkg != null && pkg.getServices() != null) {
-                for (ParsedService parsedService : pkg.getServices()) {
-                    if (Objects.equals(parsedService.className, filter.getClassName())) {
-                        service = parsedService;
-                    }
-                }
-            }
+                Pair<ParsedService, ParsedIntentInfo> pair) {
+            ParsedService service = pair.first;
+            ParsedIntentInfo filter = pair.second;
 
             out.print(prefix);
             out.print(Integer.toHexString(System.identityHashCode(service)));
             out.print(' ');
-            ComponentName.printShortString(out, filter.getPackageName(), filter.getClassName());
+            ComponentName.printShortString(out, service.getPackageName(), service.getClassName());
             out.print(" filter ");
             out.print(Integer.toHexString(System.identityHashCode(filter)));
-            if (service != null && service.getPermission() != null) {
+            if (service.getPermission() != null) {
                 out.print(" permission "); out.println(service.getPermission());
             } else {
                 out.println();
@@ -2081,20 +1979,28 @@ public class ComponentResolver {
         }
 
         @Override
-        protected Object filterToLabel(ParsedServiceIntentInfo filter) {
+        protected Object filterToLabel(Pair<ParsedService, ParsedIntentInfo> filter) {
             return filter;
         }
 
         protected void dumpFilterLabel(PrintWriter out, String prefix, Object label, int count) {
-            final ParsedServiceIntentInfo service = (ParsedServiceIntentInfo) label;
+            @SuppressWarnings("unchecked") final Pair<ParsedService, ParsedIntentInfo> pair =
+                    (Pair<ParsedService, ParsedIntentInfo>) label;
             out.print(prefix);
-            out.print(Integer.toHexString(System.identityHashCode(service)));
+            out.print(Integer.toHexString(System.identityHashCode(pair.first)));
             out.print(' ');
-            ComponentName.printShortString(out, service.getPackageName(), service.getClassName());
+            ComponentName.printShortString(out, pair.first.getPackageName(),
+                    pair.first.getClassName());
             if (count > 1) {
                 out.print(" ("); out.print(count); out.print(" filters)");
             }
             out.println();
+        }
+
+        @Override
+        protected IntentFilter getIntentFilter(
+                @NonNull Pair<ParsedService, ParsedIntentInfo> input) {
+            return input.second;
         }
 
         // Keys are String (activity class name), values are Activity.
@@ -2183,11 +2089,40 @@ public class ComponentResolver {
                 i--;
             }
         }
+
+        @Override
+        protected IntentFilter getIntentFilter(
+                @NonNull AuxiliaryResolveInfo.AuxiliaryFilter input) {
+            return input;
+        }
+    }
+
+    private static boolean isFilterStopped(Pair<? extends ParsedComponent, ParsedIntentInfo> pair,
+            int userId) {
+        if (!sUserManager.exists(userId)) {
+            return true;
+        }
+
+        AndroidPackage pkg = sPackageManagerInternal.getPackage(pair.first.getPackageName());
+        if (pkg == null) {
+            return false;
+        }
+
+        PackageSetting ps = (PackageSetting) sPackageManagerInternal.getPackageSetting(
+                pair.first.getPackageName());
+        if (ps == null) {
+            return false;
+        }
+
+        // System apps are never considered stopped for purposes of
+        // filtering, because there may be no way for the user to
+        // actually re-launch them.
+        return !ps.isSystem() && ps.getStopped(userId);
     }
 
     /** Generic to create an {@link Iterator} for a data type */
     static class IterGenerator<E> {
-        public Iterator<E> generate(ParsedActivityIntentInfo info) {
+        public Iterator<E> generate(ParsedIntentInfo info) {
             return null;
         }
     }
@@ -2195,7 +2130,7 @@ public class ComponentResolver {
     /** Create an {@link Iterator} for intent actions */
     static class ActionIterGenerator extends IterGenerator<String> {
         @Override
-        public Iterator<String> generate(ParsedActivityIntentInfo info) {
+        public Iterator<String> generate(ParsedIntentInfo info) {
             return info.actionsIterator();
         }
     }
@@ -2203,7 +2138,7 @@ public class ComponentResolver {
     /** Create an {@link Iterator} for intent categories */
     static class CategoriesIterGenerator extends IterGenerator<String> {
         @Override
-        public Iterator<String> generate(ParsedActivityIntentInfo info) {
+        public Iterator<String> generate(ParsedIntentInfo info) {
             return info.categoriesIterator();
         }
     }
@@ -2211,7 +2146,7 @@ public class ComponentResolver {
     /** Create an {@link Iterator} for intent schemes */
     static class SchemesIterGenerator extends IterGenerator<String> {
         @Override
-        public Iterator<String> generate(ParsedActivityIntentInfo info) {
+        public Iterator<String> generate(ParsedIntentInfo info) {
             return info.schemesIterator();
         }
     }
@@ -2219,7 +2154,7 @@ public class ComponentResolver {
     /** Create an {@link Iterator} for intent authorities */
     static class AuthoritiesIterGenerator extends IterGenerator<IntentFilter.AuthorityEntry> {
         @Override
-        public Iterator<IntentFilter.AuthorityEntry> generate(ParsedActivityIntentInfo info) {
+        public Iterator<IntentFilter.AuthorityEntry> generate(ParsedIntentInfo info) {
             return info.authoritiesIterator();
         }
     }

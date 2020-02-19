@@ -17,11 +17,12 @@
 package com.android.server.pm;
 
 import android.annotation.Nullable;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ParsedPackage;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.File;
 import java.util.Set;
@@ -33,7 +34,8 @@ public interface PackageAbiHelper {
      * Derive and get the location of native libraries for the given package,
      * which varies depending on where and how the package was installed.
      */
-    NativeLibraryPaths getNativeLibraryPaths(AndroidPackage pkg, File appLib32InstallDir);
+    NativeLibraryPaths getNativeLibraryPaths(AndroidPackage pkg, PackageSetting pkgSetting,
+            File appLib32InstallDir);
 
     /**
      * Calculate the abis for a bundled app. These can uniquely be determined from the contents of
@@ -48,9 +50,8 @@ public interface PackageAbiHelper {
      *
      * If {@code extractLibs} is true, native libraries are extracted from the app if required.
      */
-    Pair<Abis, NativeLibraryPaths> derivePackageAbi(
-            AndroidPackage pkg, String cpuAbiOverride, boolean extractLibs)
-            throws PackageManagerException;
+    Pair<Abis, NativeLibraryPaths> derivePackageAbi(AndroidPackage pkg, boolean isUpdatedSystemApp,
+            String cpuAbiOverride, boolean extractLibs) throws PackageManagerException;
 
     /**
      * Calculates adjusted ABIs for a set of packages belonging to a shared user so that they all
@@ -113,8 +114,9 @@ public interface PackageAbiHelper {
             this.secondary = secondary;
         }
 
-        Abis(AndroidPackage pkg) {
-            this(pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi());
+        Abis(AndroidPackage pkg, PackageSetting pkgSetting)  {
+            this(AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
+                    AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting));
         }
 
         public void applyTo(ParsedPackage pkg) {
