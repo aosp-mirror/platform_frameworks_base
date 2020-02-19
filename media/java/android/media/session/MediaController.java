@@ -1056,8 +1056,15 @@ public final class MediaController {
         /**
          * Gets the volume control ID for this session. It can be used to identify which
          * volume provider is used by the session.
+         * <p>
+         * When the session starts to use {@link #PLAYBACK_TYPE_REMOTE remote volume handling},
+         * a volume provider should be set and it may set the volume control ID of the provider
+         * if the session wants to inform which volume provider is used.
+         * It can be {@code null} if the session didn't set the volume control ID or it uses
+         * {@link #PLAYBACK_TYPE_LOCAL local playback}.
+         * </p>
          *
-         * @return the volume control ID for this session or {@code null} if it's local playback
+         * @return the volume control ID for this session or {@code null} if it uses local playback
          * or not set.
          * @see VolumeProvider#getVolumeControlId()
          */

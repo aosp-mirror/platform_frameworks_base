@@ -219,8 +219,12 @@ public class BatterySaverPolicy extends ContentObserver {
     static final int POLICY_LEVEL_ADAPTIVE = 1;
     static final int POLICY_LEVEL_FULL = 2;
 
+    /**
+     * Do not access directly; always use {@link #setPolicyLevel}
+     * and {@link #getPolicyLevelLocked}
+     */
     @GuardedBy("mLock")
-    private int mPolicyLevel = POLICY_LEVEL_OFF;
+    private int mPolicyLevelRaw = POLICY_LEVEL_OFF;
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -288,6 +292,11 @@ public class BatterySaverPolicy extends ContentObserver {
     @VisibleForTesting
     int getDeviceSpecificConfigResId() {
         return R.string.config_batterySaverDeviceSpecificConfig;
+    }
+
+    @VisibleForTesting
+    void invalidatePowerSaveModeCaches() {
+        PowerManager.invalidatePowerSaveModeCaches();
     }
 
     @Override
@@ -373,14 +382,14 @@ public class BatterySaverPolicy extends ContentObserver {
         boolean changed = false;
         Policy newFullPolicy = Policy.fromSettings(setting, deviceSpecificSetting,
                 DEFAULT_FULL_POLICY);
-        if (mPolicyLevel == POLICY_LEVEL_FULL && !mFullPolicy.equals(newFullPolicy)) {
+        if (getPolicyLevelLocked() == POLICY_LEVEL_FULL && !mFullPolicy.equals(newFullPolicy)) {
             changed = true;
         }
         mFullPolicy = newFullPolicy;
 
         mDefaultAdaptivePolicy = Policy.fromSettings(adaptiveSetting, adaptiveDeviceSpecificSetting,
                 DEFAULT_ADAPTIVE_POLICY);
-        if (mPolicyLevel == POLICY_LEVEL_ADAPTIVE
+        if (getPolicyLevelLocked() == POLICY_LEVEL_ADAPTIVE
                 && !mAdaptivePolicy.equals(mDefaultAdaptivePolicy)) {
             changed = true;
         }
@@ -882,14 +891,14 @@ public class BatterySaverPolicy extends ContentObserver {
      */
     boolean setPolicyLevel(@PolicyLevel int level) {
         synchronized (mLock) {
-            if (mPolicyLevel == level) {
+            if (getPolicyLevelLocked() == level) {
                 return false;
             }
             switch (level) {
                 case POLICY_LEVEL_FULL:
                 case POLICY_LEVEL_ADAPTIVE:
                 case POLICY_LEVEL_OFF:
-                    mPolicyLevel = level;
+                    setPolicyLevelLocked(level);
                     break;
                 default:
                     Slog.wtf(TAG, "setPolicyLevel invalid level given: " + level);
@@ -911,7 +920,7 @@ public class BatterySaverPolicy extends ContentObserver {
         }
 
         mAdaptivePolicy = p;
-        if (mPolicyLevel == POLICY_LEVEL_ADAPTIVE) {
+        if (getPolicyLevelLocked() == POLICY_LEVEL_ADAPTIVE) {
             updatePolicyDependenciesLocked();
             return true;
         }
@@ -924,7 +933,7 @@ public class BatterySaverPolicy extends ContentObserver {
     }
 
     private Policy getCurrentPolicyLocked() {
-        switch (mPolicyLevel) {
+        switch (getPolicyLevelLocked()) {
             case POLICY_LEVEL_FULL:
                 return mFullPolicy;
             case POLICY_LEVEL_ADAPTIVE:
@@ -985,7 +994,7 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.println("    value: " + mAdaptiveDeviceSpecificSettings);
 
             pw.println("  mAccessibilityEnabled=" + mAccessibilityEnabled);
-            pw.println("  mPolicyLevel=" + mPolicyLevel);
+            pw.println("  mPolicyLevel=" + getPolicyLevelLocked());
 
             dumpPolicyLocked(pw, "  ", "full", mFullPolicy);
             dumpPolicyLocked(pw, "  ", "default adaptive", mDefaultAdaptivePolicy);
@@ -1066,5 +1075,21 @@ public class BatterySaverPolicy extends ContentObserver {
             mAccessibilityEnabled = enabled;
             updatePolicyDependenciesLocked();
         }
+    }
+
+    /** Non-blocking getter exists as a reminder not to modify cached fields directly */
+    @GuardedBy("mLock")
+    private int getPolicyLevelLocked() {
+        return mPolicyLevelRaw;
+    }
+
+    @GuardedBy("mLock")
+    private void setPolicyLevelLocked(int level) {
+        if (mPolicyLevelRaw == level) {
+            return;
+        }
+        // Under lock, invalidate before set ensures caches won't return stale values.
+        invalidatePowerSaveModeCaches();
+        mPolicyLevelRaw = level;
     }
 }

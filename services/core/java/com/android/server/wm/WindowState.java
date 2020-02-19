@@ -696,6 +696,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
+        if (mToken.hasFixedRotationTransform()) {
+            // The transform of its surface is handled by fixed rotation.
+            return;
+        }
+
         if (mPendingSeamlessRotate != null) {
             oldRotation = mPendingSeamlessRotate.getOldRotation();
         }
@@ -1000,6 +1005,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean isFullscreenAndFillsDisplay = !inMultiWindowMode() && matchesDisplayBounds();
         final boolean windowsAreFloating = task != null && task.isFloating();
         final DisplayContent dc = getDisplayContent();
+        final DisplayInfo displayInfo = getDisplayInfo();
         final WindowFrames windowFrames = getLayoutingWindowFrames();
 
         mInsetFrame.set(getBounds());
@@ -1086,7 +1092,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutXDiff = mInsetFrame.left - windowFrames.mContainingFrame.left;
             layoutYDiff = mInsetFrame.top - windowFrames.mContainingFrame.top;
             layoutContainingFrame = mInsetFrame;
-            mTmpRect.set(0, 0, dc.getDisplayInfo().logicalWidth, dc.getDisplayInfo().logicalHeight);
+            mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
             subtractInsets(windowFrames.mDisplayFrame, layoutContainingFrame, layoutDisplayFrame,
                     mTmpRect);
             if (!layoutInParentFrame()) {
@@ -1161,9 +1167,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     windowFrames.mDisplayFrame);
             windowFrames.calculateDockedDividerInsets(c.getDisplayCutout().getSafeInsets());
         } else {
-            getDisplayContent().getBounds(mTmpRect);
-            windowFrames.calculateInsets(
-                    windowsAreFloating, isFullscreenAndFillsDisplay, mTmpRect);
+            windowFrames.calculateInsets(windowsAreFloating, isFullscreenAndFillsDisplay,
+                    getDisplayFrames(dc.mDisplayFrames).mUnrestricted);
         }
 
         windowFrames.setDisplayCutout(
@@ -1186,12 +1191,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mIsWallpaper && (fw != windowFrames.mFrame.width()
                 || fh != windowFrames.mFrame.height())) {
-            final DisplayContent displayContent = getDisplayContent();
-            if (displayContent != null) {
-                final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-                getDisplayContent().mWallpaperController.updateWallpaperOffset(this,
-                        displayInfo.logicalWidth, displayInfo.logicalHeight, false);
-            }
+            dc.mWallpaperController.updateWallpaperOffset(this,
+                    displayInfo.logicalWidth, displayInfo.logicalHeight, false /* sync */);
         }
 
         // Calculate relative frame
@@ -1467,9 +1468,28 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    DisplayFrames getDisplayFrames(DisplayFrames originalFrames) {
+        final DisplayFrames diplayFrames = mToken.getFixedRotationTransformDisplayFrames();
+        if (diplayFrames != null) {
+            return diplayFrames;
+        }
+        return originalFrames;
+    }
+
     DisplayInfo getDisplayInfo() {
-        final DisplayContent displayContent = getDisplayContent();
-        return displayContent != null ? displayContent.getDisplayInfo() : null;
+        final DisplayInfo displayInfo = mToken.getFixedRotationTransformDisplayInfo();
+        if (displayInfo != null) {
+            return displayInfo;
+        }
+        return getDisplayContent().getDisplayInfo();
+    }
+
+    InsetsState getInsetsState() {
+        final InsetsState insetsState = mToken.getFixedRotationTransformInsetsState();
+        if (insetsState != null) {
+            return insetsState;
+        }
+        return getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this);
     }
 
     @Override
@@ -1990,6 +2010,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private boolean matchesDisplayBounds() {
+        final Rect displayBounds = mToken.getFixedRotationTransformDisplayBounds();
+        if (displayBounds != null) {
+            // If the rotated display bounds are available, the window bounds are also rotated.
+            return displayBounds.equals(getBounds());
+        }
         return getDisplayContent().getBounds().equals(getBounds());
     }
 
@@ -4786,7 +4811,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!displayContent.isDefaultDisplay && !displayContent.supportsSystemDecorations()) {
             // On a different display there is no system decor. Crop the window
             // by the screen boundaries.
-            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+            final DisplayInfo displayInfo = getDisplayInfo();
             policyCrop.set(0, 0, mWindowFrames.mCompatFrame.width(),
                     mWindowFrames.mCompatFrame.height());
             policyCrop.intersect(-mWindowFrames.mCompatFrame.left, -mWindowFrames.mCompatFrame.top,
@@ -5012,7 +5037,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final DisplayInfo displayInfo = getDisplayContent().getDisplayInfo();
+        final DisplayInfo displayInfo = getDisplayInfo();
         anim.initialize(mWindowFrames.mFrame.width(), mWindowFrames.mFrame.height(),
                 displayInfo.appWidth, displayInfo.appHeight);
         anim.restrictDuration(MAX_ANIMATION_DURATION);
@@ -5550,7 +5575,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * If the transient frame is set, the computed result won't be used in real layout. So this
+     * If the simulated frame is set, the computed result won't be used in real layout. So this
      * frames must be cleared when the simulated computation is done.
      */
     void setSimulatedWindowFrames(WindowFrames windowFrames) {

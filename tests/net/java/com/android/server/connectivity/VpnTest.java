@@ -656,8 +656,12 @@ public class VpnTest {
     }
 
     private Vpn createVpnAndSetupUidChecks(int... grantedOps) throws Exception {
-        final Vpn vpn = createVpn(primaryUser.id);
-        setMockedUsers(primaryUser);
+        return createVpnAndSetupUidChecks(primaryUser, grantedOps);
+    }
+
+    private Vpn createVpnAndSetupUidChecks(UserInfo user, int... grantedOps) throws Exception {
+        final Vpn vpn = createVpn(user.id);
+        setMockedUsers(user);
 
         when(mPackageManager.getPackageUidAsUser(eq(TEST_VPN_PKG), anyInt()))
                 .thenReturn(Process.myUid());
@@ -726,6 +730,19 @@ public class VpnTest {
     }
 
     @Test
+    public void testProvisionVpnProfileRestrictedUser() throws Exception {
+        final Vpn vpn =
+                createVpnAndSetupUidChecks(
+                        restrictedProfileA, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        try {
+            vpn.provisionVpnProfile(TEST_VPN_PKG, mVpnProfile, mKeyStore);
+            fail("Expected SecurityException due to restricted user");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
     public void testDeleteVpnProfile() throws Exception {
         final Vpn vpn = createVpnAndSetupUidChecks();
 
@@ -733,6 +750,19 @@ public class VpnTest {
 
         verify(mKeyStore)
                 .delete(eq(vpn.getProfileNameForPackage(TEST_VPN_PKG)), eq(Process.SYSTEM_UID));
+    }
+
+    @Test
+    public void testDeleteVpnProfileRestrictedUser() throws Exception {
+        final Vpn vpn =
+                createVpnAndSetupUidChecks(
+                        restrictedProfileA, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        try {
+            vpn.deleteVpnProfile(TEST_VPN_PKG, mKeyStore);
+            fail("Expected SecurityException due to restricted user");
+        } catch (SecurityException expected) {
+        }
     }
 
     @Test
@@ -817,6 +847,32 @@ public class VpnTest {
                         eq(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN),
                         eq(Process.myUid()),
                         eq(TEST_VPN_PKG));
+    }
+
+    @Test
+    public void testStartVpnProfileRestrictedUser() throws Exception {
+        final Vpn vpn =
+                createVpnAndSetupUidChecks(
+                        restrictedProfileA, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        try {
+            vpn.startVpnProfile(TEST_VPN_PKG, mKeyStore);
+            fail("Expected SecurityException due to restricted user");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    public void testStopVpnProfileRestrictedUser() throws Exception {
+        final Vpn vpn =
+                createVpnAndSetupUidChecks(
+                        restrictedProfileA, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        try {
+            vpn.stopVpnProfile(TEST_VPN_PKG);
+            fail("Expected SecurityException due to restricted user");
+        } catch (SecurityException expected) {
+        }
     }
 
     @Test

@@ -293,7 +293,7 @@ public class MediaRouter2Manager {
         if (client != null) {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.requestCreateClientSession(
+                mMediaRouterService.requestCreateSessionWithManager(
                         client, packageName, route, requestId);
                 //TODO: release the previous session?
             } catch (RemoteException ex) {
@@ -337,7 +337,7 @@ public class MediaRouter2Manager {
         }
         if (client != null) {
             try {
-                mMediaRouterService.setRouteVolume2Manager(client, route, volume);
+                mMediaRouterService.setRouteVolumeWithManager(client, route, volume);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
             }
@@ -368,7 +368,7 @@ public class MediaRouter2Manager {
         }
         if (client != null) {
             try {
-                mMediaRouterService.setSessionVolume2Manager(
+                mMediaRouterService.setSessionVolumeWithManager(
                         client, sessionInfo.getId(), volume);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
@@ -589,7 +589,7 @@ public class MediaRouter2Manager {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.selectClientRoute(mClient, getSessionId(), route);
+                    mMediaRouterService.selectRouteWithManager(mClient, getSessionId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to select route for session.", ex);
                 }
@@ -631,7 +631,7 @@ public class MediaRouter2Manager {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.deselectClientRoute(mClient, getSessionId(), route);
+                    mMediaRouterService.deselectRouteWithManager(mClient, getSessionId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to remove route from session.", ex);
                 }
@@ -674,7 +674,7 @@ public class MediaRouter2Manager {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.transferToClientRoute(mClient, getSessionId(), route);
+                    mMediaRouterService.transferToRouteWithManager(mClient, getSessionId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to transfer to route for session.", ex);
                 }
@@ -692,7 +692,7 @@ public class MediaRouter2Manager {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.releaseClientSession(mClient, getSessionId());
+                    mMediaRouterService.releaseSessionWithManager(mClient, getSessionId());
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to notify of controller release", ex);
                 }

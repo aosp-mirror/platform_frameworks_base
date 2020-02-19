@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
@@ -66,7 +65,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         mRoundnessManager = new NotificationRoundnessManager(
                 mBypassController,
                 new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext));
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         NotificationTestHelper testHelper = new NotificationTestHelper(getContext(), mDependency);
         mFirst = testHelper.createRow();
         mFirst.setHeadsUpAnimatingAwayListener(animatingAway

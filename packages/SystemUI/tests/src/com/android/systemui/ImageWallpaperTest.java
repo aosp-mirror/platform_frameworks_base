@@ -77,7 +77,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
         mEventCountdown = new CountDownLatch(1);
 

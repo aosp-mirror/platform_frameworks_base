@@ -286,6 +286,52 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         verify(af, never()).startWrite();
     }
 
+    @Test
+    public void testRemoveConversationRunnable() throws Exception {
+        NotificationHistory nh = mock(NotificationHistory.class);
+        NotificationHistoryDatabase.RemoveConversationRunnable rcr =
+                mDataBase.new RemoveConversationRunnable("pkg", "convo");
+        rcr.setNotificationHistory(nh);
+
+        AtomicFile af = mock(AtomicFile.class);
+        when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
+        mDataBase.mHistoryFiles.addLast(af);
+
+        when(nh.removeConversationFromWrite("pkg", "convo")).thenReturn(true);
+
+        mDataBase.mBuffer = mock(NotificationHistory.class);
+
+        rcr.run();
+
+        verify(mDataBase.mBuffer).removeConversationFromWrite("pkg", "convo");
+        verify(af).openRead();
+        verify(nh).removeConversationFromWrite("pkg", "convo");
+        verify(af).startWrite();
+    }
+
+    @Test
+    public void testRemoveConversationRunnable_noChanges() throws Exception {
+        NotificationHistory nh = mock(NotificationHistory.class);
+        NotificationHistoryDatabase.RemoveConversationRunnable rcr =
+                mDataBase.new RemoveConversationRunnable("pkg", "convo");
+        rcr.setNotificationHistory(nh);
+
+        AtomicFile af = mock(AtomicFile.class);
+        when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
+        mDataBase.mHistoryFiles.addLast(af);
+
+        when(nh.removeConversationFromWrite("pkg", "convo")).thenReturn(false);
+
+        mDataBase.mBuffer = mock(NotificationHistory.class);
+
+        rcr.run();
+
+        verify(mDataBase.mBuffer).removeConversationFromWrite("pkg", "convo");
+        verify(af).openRead();
+        verify(nh).removeConversationFromWrite("pkg", "convo");
+        verify(af, never()).startWrite();
+    }
+
     private class TestFileAttrProvider implements NotificationHistoryDatabase.FileAttrProvider {
         public Map<File, Long> creationDates = new HashMap<>();
 

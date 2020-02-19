@@ -17,6 +17,7 @@
 syntax = "proto2";
 option java_multiple_files = true;
 
+import "frameworks/base/core/proto/android/nfc/nfc_service.proto";
 import "frameworks/base/core/proto/android/os/backtrace.proto";
 import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
@@ -497,6 +498,11 @@ message IncidentProto {
     optional com.android.server.location.ContextHubServiceProto context_hub = 3051 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "contexthub --proto"
+    ];
+
+    optional com.android.nfc.NfcServiceDumpProto nfc_service  = 3052 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "nfc --proto"
     ];
 
     optional android.service.SensorServiceProto sensor_service = 3053 [

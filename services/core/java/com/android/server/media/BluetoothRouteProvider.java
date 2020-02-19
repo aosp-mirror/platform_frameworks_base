@@ -166,6 +166,20 @@ class BluetoothRouteProvider {
         }
     }
 
+    @Nullable
+    MediaRoute2Info getSelectedRoute() {
+        return (mSelectedRoute == null) ? null : mSelectedRoute.route;
+    }
+
+    @NonNull
+    List<MediaRoute2Info> getTransferableRoutes() {
+        List<MediaRoute2Info> routes = getAllBluetoothRoutes();
+        if (mSelectedRoute != null) {
+            routes.remove(mSelectedRoute.route);
+        }
+        return routes;
+    }
+
     @NonNull
     List<MediaRoute2Info> getAllBluetoothRoutes() {
         ArrayList<MediaRoute2Info> routes = new ArrayList<>();
@@ -175,9 +189,12 @@ class BluetoothRouteProvider {
         return routes;
     }
 
-    @Nullable
-    String getSelectedRouteId() {
-        return mSelectedRoute == null ? null : mSelectedRoute.route.getId();
+    boolean setSelectedRouteVolume(int volume) {
+        if (mSelectedRoute == null) return false;
+        mSelectedRoute.route = new MediaRoute2Info.Builder(mSelectedRoute.route)
+                .setVolume(volume)
+                .build();
+        return true;
     }
 
     private void notifyBluetoothRoutesUpdated() {

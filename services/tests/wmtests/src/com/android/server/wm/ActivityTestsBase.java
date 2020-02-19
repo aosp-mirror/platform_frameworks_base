@@ -238,6 +238,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             aInfo.applicationInfo.uid = mUid;
             aInfo.processName = mProcessName;
             aInfo.packageName = mComponent.getPackageName();
+            aInfo.name = mComponent.getClassName();
             if (mTargetActivity != null) {
                 aInfo.targetActivity = mTargetActivity;
             }

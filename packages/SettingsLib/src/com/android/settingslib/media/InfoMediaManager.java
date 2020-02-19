@@ -193,6 +193,34 @@ public class InfoMediaManager extends MediaManager {
     }
 
     /**
+     * Get the MediaDevice list that has been selected to current media.
+     *
+     * @return list of MediaDevice
+     */
+    List<MediaDevice> getSelectedMediaDevice() {
+        final List<MediaDevice> deviceList = new ArrayList<>();
+        if (TextUtils.isEmpty(mPackageName)) {
+            Log.w(TAG, "getSelectedMediaDevice() package name is null or empty!");
+            return deviceList;
+        }
+
+        final RoutingSessionInfo info = getRoutingSessionInfo();
+        if (info != null) {
+            for (MediaRoute2Info route : mRouterManager.getControllerForSession(info)
+                    .getSelectedRoutes()) {
+                deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
+                        route, mPackageName));
+            }
+            return deviceList;
+        }
+
+        Log.w(TAG, "getSelectedMediaDevice() cannot found selectable MediaDevice from : "
+                + mPackageName);
+
+        return deviceList;
+    }
+
+    /**
      * Adjust the volume of {@link android.media.RoutingSessionInfo}.
      *
      * @param volume the value of volume

@@ -47,6 +47,7 @@ import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.util.FloatingContentCoordinator;
 
 import java.io.PrintWriter;
 
@@ -127,6 +128,7 @@ public class PipTouchHandler {
     // Touch state
     private final PipTouchState mTouchState;
     private final FlingAnimationUtils mFlingAnimationUtils;
+    private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final PipMotionHelper mMotionHelper;
     private PipTouchGesture mGesture;
 
@@ -152,7 +154,7 @@ public class PipTouchHandler {
         @Override
         public void onPipMinimize() {
             setMinimizedStateInternal(true);
-            mMotionHelper.animateToClosestMinimizedState(mMovementBounds, null /* updateAction */);
+            mMotionHelper.animateToClosestMinimizedState(null /* updateAction */);
         }
 
         @Override
@@ -172,7 +174,8 @@ public class PipTouchHandler {
     public PipTouchHandler(Context context, IActivityManager activityManager,
             IActivityTaskManager activityTaskManager, PipMenuActivityController menuController,
             InputConsumerController inputConsumerController,
-            PipBoundsHandler pipBoundsHandler) {
+            PipBoundsHandler pipBoundsHandler,
+            FloatingContentCoordinator floatingContentCoordinator) {
 
         // Initialize the Pip input consumer
         mContext = context;
@@ -188,7 +191,7 @@ public class PipTouchHandler {
                 2.5f);
         mGesture = new DefaultPipTouchGesture();
         mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mActivityTaskManager,
-                mMenuController, mSnapAlgorithm, mFlingAnimationUtils);
+                mMenuController, mSnapAlgorithm, mFlingAnimationUtils, floatingContentCoordinator);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, this, mMotionHelper);
         mTouchState = new PipTouchState(mViewConfig, mHandler,
@@ -207,6 +210,7 @@ public class PipTouchHandler {
         inputConsumerController.setRegistrationListener(this::onRegistrationChanged);
 
         mPipBoundsHandler = pipBoundsHandler;
+        mFloatingContentCoordinator = floatingContentCoordinator;
         mConnection = new PipAccessibilityInteractionConnection(mMotionHelper,
                 this::onAccessibilityShowMenu, mHandler);
     }
@@ -228,15 +232,18 @@ public class PipTouchHandler {
     }
 
     public void onActivityPinned() {
-        cleanUp();
+        cleanUpDismissTarget();
         mShowPipMenuOnAnimationEnd = true;
         mPipResizeGestureHandler.onActivityPinned();
+        mFloatingContentCoordinator.onContentAdded(mMotionHelper);
     }
 
     public void onActivityUnpinned(ComponentName topPipActivity) {
         if (topPipActivity == null) {
             // Clean up state after the last PiP activity is removed
-            cleanUp();
+            cleanUpDismissTarget();
+
+            mFloatingContentCoordinator.onContentRemoved(mMotionHelper);
         }
         mPipResizeGestureHandler.onActivityUnpinned();
     }
@@ -501,8 +508,7 @@ public class PipTouchHandler {
         if (fromController) {
             if (isMinimized) {
                 // Move the PiP to the new bounds immediately if minimized
-                mMotionHelper.movePip(mMotionHelper.getClosestMinimizedBounds(mNormalBounds,
-                        mMovementBounds));
+                mMotionHelper.movePip(mMotionHelper.getClosestMinimizedBounds(mNormalBounds));
             }
         } else if (mPinnedStackController != null) {
             try {
@@ -654,7 +660,7 @@ public class PipTouchHandler {
 
                 mTmpBounds.set(mMotionHelper.getBounds());
                 mTmpBounds.offsetTo((int) left, (int) top);
-                mMotionHelper.movePip(mTmpBounds);
+                mMotionHelper.movePip(mTmpBounds, true /* isDragging */);
 
                 if (mEnableDimissDragToEdge) {
                     updateDismissFraction();
@@ -724,7 +730,6 @@ public class PipTouchHandler {
                         mMenuController.hideMenu();
                     } else {
                         mMotionHelper.animateToClosestMinimizedState(
-                                mMovementBounds,
                                 PipTouchHandler.this::updateDismissFraction /* updateAction */);
                     }
                     return true;
@@ -748,16 +753,15 @@ public class PipTouchHandler {
                 }
 
                 if (isFling) {
-                    mMotionHelper.flingToSnapTarget(
-                            vel.x, vel.y, mMovementBounds,
+                    mMotionHelper.flingToSnapTarget(vel.x, vel.y,
                             PipTouchHandler.this::updateDismissFraction /* updateAction */,
                             endAction /* endAction */);
                 } else {
-                    mMotionHelper.animateToClosestSnapTarget(mMovementBounds);
+                    mMotionHelper.animateToClosestSnapTarget();
                 }
             } else if (mIsMinimized) {
                 // This was a tap, so no longer minimized
-                mMotionHelper.animateToClosestSnapTarget(mMovementBounds);
+                mMotionHelper.animateToClosestSnapTarget();
                 setMinimizedStateInternal(false);
             } else if (mTouchState.isDoubleTap()) {
                 // Expand to fullscreen if this is a double tap
@@ -789,6 +793,7 @@ public class PipTouchHandler {
                 : mNormalMovementBounds;
         mPipBoundsHandler.setMinEdgeSize(
                 isMenuExpanded ? mExpandedShortestEdgeSize : 0);
+        mMotionHelper.setCurrentMovementBounds(mMovementBounds);
     }
 
     /**
@@ -797,16 +802,6 @@ public class PipTouchHandler {
     private void cleanUpDismissTarget() {
         mHandler.removeCallbacks(mShowDismissAffordance);
         mDismissViewController.destroyDismissTarget();
-    }
-
-    /**
-     * Resets some states related to the touch handling.
-     */
-    private void cleanUp() {
-        if (mIsMinimized) {
-            setMinimizedStateInternal(false);
-        }
-        cleanUpDismissTarget();
     }
 
     /**

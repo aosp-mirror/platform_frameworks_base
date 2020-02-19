@@ -39,7 +39,6 @@ import static org.mockito.Mockito.when;
 import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
@@ -79,7 +78,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         mNotificationTestHelper = new NotificationTestHelper(mContext, mDependency);
         mGroupRow = mNotificationTestHelper.createGroup();
         mGroupRow.setHeadsUpAnimatingAwayListener(

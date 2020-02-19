@@ -2050,6 +2050,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
 
+        if (mMagnificationController != null) {
+            mMagnificationController.setUserId(userState.mUserId);
+        }
+
         if (mUiAutomationManager.suppressingAccessibilityServicesLocked()
                 && mMagnificationController != null) {
             mMagnificationController.unregisterAll();

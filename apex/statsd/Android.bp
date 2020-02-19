@@ -71,7 +71,5 @@ cc_library_shared {
     apex_available: [
         "com.android.os.statsd",
         "test_com.android.os.statsd",
-        //TODO (b/148620413): remove platform.
-         "//apex_available:platform",
     ],
 }

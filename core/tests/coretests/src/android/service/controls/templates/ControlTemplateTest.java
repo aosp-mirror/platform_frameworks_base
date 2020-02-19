@@ -113,54 +113,6 @@ public class ControlTemplateTest {
     }
 
     @Test
-    public void testUnparcelingCorrectClass_discreteToggle() {
-        ControlTemplate toParcel =
-                new DiscreteToggleTemplate(TEST_ID, mControlButton, mControlButton);
-
-        ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
-
-        assertEquals(ControlTemplate.TYPE_DISCRETE_TOGGLE, fromParcel.getTemplateType());
-        assertTrue(fromParcel instanceof DiscreteToggleTemplate);
-    }
-
-    @Test
-    public void testUnparcelingCorrectClass_coordRange() {
-        ControlTemplate toParcel =
-                new CoordinatedRangeTemplate(TEST_ID, 0.1f,  0, 1, 0.5f, 1, 2, 1.5f, 0.1f, "%f");
-        ControlTemplate fromParcel = parcelAndUnparcel(toParcel);
-        assertEquals(ControlTemplate.TYPE_COORD_RANGE, fromParcel.getTemplateType());
-        assertTrue(fromParcel instanceof CoordinatedRangeTemplate);
-    }
-
-    @Test
-    public void testCoordRangeParameters_negativeMinGap() {
-        CoordinatedRangeTemplate template =
-                new CoordinatedRangeTemplate(TEST_ID, -0.1f,  0, 1, 0.5f, 1, 2, 1.5f, 0.1f, "%f");
-        assertEquals(0, template.getMinGap(), 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testCoordRangeParameters_differentStep() {
-        RangeTemplate rangeLow = new RangeTemplate(TEST_ID, 0, 1, 0.5f, 0.1f, "%f");
-        RangeTemplate rangeHigh = new RangeTemplate(TEST_ID, 0, 1, 0.75f, 0.2f, "%f");
-        new CoordinatedRangeTemplate(TEST_ID, 0.1f, rangeLow, rangeHigh);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testCoordRangeParameters_differentFormat() {
-        RangeTemplate rangeLow = new RangeTemplate(TEST_ID, 0, 1, 0.5f, 0.1f, "%f");
-        RangeTemplate rangeHigh = new RangeTemplate(TEST_ID, 0, 1, 0.75f, 0.1f, "%.1f");
-        new CoordinatedRangeTemplate(TEST_ID, 0.1f, rangeLow, rangeHigh);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testCoordRangeParameters_LargeMinGap() {
-        RangeTemplate rangeLow = new RangeTemplate(TEST_ID, 0, 1, 0.5f, 0.1f, "%f");
-        RangeTemplate rangeHigh = new RangeTemplate(TEST_ID, 0, 1, 0.75f, 0.1f, "%f");
-        new CoordinatedRangeTemplate(TEST_ID, 0.5f, rangeLow, rangeHigh);
-    }
-
-    @Test
     public void testUnparcelingCorrectClass_toggleRange() {
         ControlTemplate toParcel = new ToggleRangeTemplate(TEST_ID, mControlButton,
                 new RangeTemplate(TEST_ID, 0, 2, 1, 1, "%f"));

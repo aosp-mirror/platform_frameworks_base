@@ -2617,4 +2617,20 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     ADB_WIRELESS_DEVICE_QR_PAIRING_DIALOG = 1833;
+
+    // OPEN: Settings > apps & notifications > notifications > conversations
+    // CATEGORY: SETTINGS
+    // OS: R
+    NOTIFICATION_CONVERSATION_LIST_SETTINGS = 1834;
+
+    // Panel for Media Output Group operation
+    // CATEGORY: SETTINGS
+    // OS: R
+    PANEL_MEDIA_OUTPUT_GROUP = 1835;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Click on paired device
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_DETAILS = 1836;
 }

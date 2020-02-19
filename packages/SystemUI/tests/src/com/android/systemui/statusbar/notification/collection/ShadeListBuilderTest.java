@@ -51,7 +51,6 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
-import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -101,7 +100,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
 
         mListBuilder = new ShadeListBuilder(mSystemClock, mLogger, mock(DumpController.class));
         mListBuilder.setOnRenderListListener(mOnRenderListListener);

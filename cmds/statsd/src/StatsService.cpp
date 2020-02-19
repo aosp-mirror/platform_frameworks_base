@@ -280,7 +280,7 @@ void StatsService::dumpIncidentSection(int out) {
 status_t StatsService::handleShellCommand(int in, int out, int err, const char** argv,
                                           uint32_t argc) {
     uid_t uid = AIBinder_getCallingUid();
-    if (uid != AID_ROOT || uid != AID_SHELL) {
+    if (uid != AID_ROOT && uid != AID_SHELL) {
         return PERMISSION_DENIED;
     }
 

@@ -36,15 +36,20 @@ import static com.android.server.wm.WindowTokenProto.WINDOWS;
 import static com.android.server.wm.WindowTokenProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
+import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayInfo;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Comparator;
 
 /**
@@ -83,6 +88,57 @@ class WindowToken extends WindowContainer<WindowState> {
 
     /** The owner has {@link android.Manifest.permission#MANAGE_APP_TOKENS} */
     final boolean mOwnerCanManageAppTokens;
+
+    private FixedRotationTransformState mFixedRotationTransformState;
+
+    /**
+     * Used to fix the transform of the token to be rotated to a rotation different than it's
+     * display. The window frames and surfaces corresponding to this token will be layouted and
+     * rotated by the given rotated display info, frames and insets.
+     */
+    private static class FixedRotationTransformState {
+        final DisplayInfo mDisplayInfo;
+        final DisplayFrames mDisplayFrames;
+        final InsetsState mInsetsState;
+        final Configuration mRotatedOverrideConfiguration;
+        final SeamlessRotator mRotator;
+        final ArrayList<WindowContainer<?>> mRotatedContainers = new ArrayList<>();
+        boolean mIsTransforming = true;
+
+        FixedRotationTransformState(DisplayInfo rotatedDisplayInfo,
+                DisplayFrames rotatedDisplayFrames, InsetsState rotatedInsetsState,
+                Configuration rotatedConfig, int currentRotation) {
+            mDisplayInfo = rotatedDisplayInfo;
+            mDisplayFrames = rotatedDisplayFrames;
+            mInsetsState = rotatedInsetsState;
+            mRotatedOverrideConfiguration = rotatedConfig;
+            // This will use unrotate as rotate, so the new and old rotation are inverted.
+            mRotator = new SeamlessRotator(rotatedDisplayInfo.rotation, currentRotation,
+                    rotatedDisplayInfo);
+        }
+
+        /**
+         * Transforms the window container from the next rotation to the current rotation for
+         * showing the window in a display with different rotation.
+         */
+        void transform(WindowContainer<?> container) {
+            mRotator.unrotate(container.getPendingTransaction(), container);
+            if (!mRotatedContainers.contains(container)) {
+                mRotatedContainers.add(container);
+            }
+        }
+
+        /**
+         * Resets the transformation of the window containers which have been rotated. This should
+         * be called when the window has the same rotation as display.
+         */
+        void resetTransform() {
+            for (int i = mRotatedContainers.size() - 1; i >= 0; i--) {
+                final WindowContainer<?> c = mRotatedContainers.get(i);
+                mRotator.finish(c.getPendingTransaction(), c);
+            }
+        }
+    }
 
     /**
      * Compares two child window of this token and returns -1 if the first is lesser than the
@@ -272,6 +328,107 @@ class WindowToken extends WindowContainer<WindowState> {
             builder.setParent(null);
         }
         return builder;
+    }
+
+    boolean hasFixedRotationTransform() {
+        return mFixedRotationTransformState != null;
+    }
+
+    boolean isFinishingFixedRotationTransform() {
+        return mFixedRotationTransformState != null
+                && !mFixedRotationTransformState.mIsTransforming;
+    }
+
+    boolean isFixedRotationTransforming() {
+        return mFixedRotationTransformState != null
+                && mFixedRotationTransformState.mIsTransforming;
+    }
+
+    DisplayInfo getFixedRotationTransformDisplayInfo() {
+        return isFixedRotationTransforming() ? mFixedRotationTransformState.mDisplayInfo : null;
+    }
+
+    DisplayFrames getFixedRotationTransformDisplayFrames() {
+        return isFixedRotationTransforming() ? mFixedRotationTransformState.mDisplayFrames : null;
+    }
+
+    Rect getFixedRotationTransformDisplayBounds() {
+        return isFixedRotationTransforming()
+                ? mFixedRotationTransformState.mRotatedOverrideConfiguration.windowConfiguration
+                        .getBounds()
+                : null;
+    }
+
+    InsetsState getFixedRotationTransformInsetsState() {
+        return isFixedRotationTransforming() ? mFixedRotationTransformState.mInsetsState : null;
+    }
+
+    /** Applies the rotated layout environment to this token in the simulated rotated display. */
+    void applyFixedRotationTransform(DisplayInfo info, DisplayFrames displayFrames,
+            Configuration config) {
+        if (mFixedRotationTransformState != null) {
+            return;
+        }
+        final InsetsState insetsState = new InsetsState();
+        mDisplayContent.getDisplayPolicy().simulateLayoutDisplay(displayFrames, insetsState,
+                mDisplayContent.getConfiguration().uiMode);
+        mFixedRotationTransformState = new FixedRotationTransformState(info, displayFrames,
+                insetsState, new Configuration(config), mDisplayContent.getRotation());
+        onConfigurationChanged(getParent().getConfiguration());
+    }
+
+    /** Clears the transformation and continue updating the orientation change of display. */
+    void clearFixedRotationTransform() {
+        if (mFixedRotationTransformState == null) {
+            return;
+        }
+        mFixedRotationTransformState.resetTransform();
+        // Clear the flag so if the display will be updated to the same orientation, the transform
+        // won't take effect. The state is cleared at the end, because it is used to indicate that
+        // other windows can use seamless rotation when applying rotation to display.
+        mFixedRotationTransformState.mIsTransforming = false;
+        final boolean changed =
+                mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp(this);
+        // If it is not the launching app or the display is not rotated, make sure the merged
+        // override configuration is restored from parent.
+        if (!changed) {
+            onMergedOverrideConfigurationChanged();
+        }
+        mFixedRotationTransformState = null;
+    }
+
+    @Override
+    void resolveOverrideConfiguration(Configuration newParentConfig) {
+        super.resolveOverrideConfiguration(newParentConfig);
+        if (isFixedRotationTransforming()) {
+            // Apply the rotated configuration to current resolved configuration, so the merged
+            // override configuration can update to the same state.
+            getResolvedOverrideConfiguration().updateFrom(
+                    mFixedRotationTransformState.mRotatedOverrideConfiguration);
+        }
+    }
+
+    @Override
+    void updateSurfacePosition() {
+        super.updateSurfacePosition();
+        if (isFixedRotationTransforming()) {
+            // The window is layouted in a simulated rotated display but the real display hasn't
+            // rotated, so here transforms its surface to fit in the real display.
+            mFixedRotationTransformState.transform(this);
+        }
+    }
+
+    /**
+     * Converts the rotated animation frames and insets back to display space for local animation.
+     * It should only be called when {@link #hasFixedRotationTransform} is true.
+     */
+    void unrotateAnimationFrames(Rect outFrame, Rect outInsets, Rect outStableInsets,
+            Rect outSurfaceInsets) {
+        final SeamlessRotator rotator = mFixedRotationTransformState.mRotator;
+        rotator.unrotateFrame(outFrame);
+        rotator.unrotateInsets(outInsets);
+        rotator.unrotateInsets(outStableInsets);
+        rotator.unrotateInsets(outSurfaceInsets);
     }
 
     @CallSuper

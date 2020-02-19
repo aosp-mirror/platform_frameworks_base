@@ -180,8 +180,8 @@ package android.app {
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void resetHistoryParameters();
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void setHistoryParameters(int, long, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(int, int, String, int);
-    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(String, int, String, int);
-    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(String, int, int);
+    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(@NonNull String, int, @Nullable String, int);
+    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(@NonNull String, int, int);
     method public static int strOpToOp(@NonNull String);
     field public static final int HISTORICAL_MODE_DISABLED = 0; // 0x0
     field public static final int HISTORICAL_MODE_ENABLED_ACTIVE = 1; // 0x1

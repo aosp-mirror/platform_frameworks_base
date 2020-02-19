@@ -46,18 +46,21 @@ import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.wm.DisplayChangeController;
 import com.android.systemui.wm.DisplayController;
 
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
+@Singleton
 public class PipManager implements BasePipManager {
     private static final String TAG = "PipManager";
-
-    private static PipManager sPipController;
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -225,13 +228,10 @@ public class PipManager implements BasePipManager {
         }
     }
 
-    private PipManager() {}
-
-    /**
-     * Initializes {@link PipManager}.
-     */
-    public void initialize(Context context, BroadcastDispatcher broadcastDispatcher,
-            DisplayController displayController) {
+    @Inject
+    public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
+            DisplayController displayController,
+            FloatingContentCoordinator floatingContentCoordinator) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
@@ -249,7 +249,8 @@ public class PipManager implements BasePipManager {
         mMenuController = new PipMenuActivityController(context, mActivityManager, mMediaController,
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager, mActivityTaskManager,
-                mMenuController, mInputConsumerController, mPipBoundsHandler);
+                mMenuController, mInputConsumerController, mPipBoundsHandler,
+                floatingContentCoordinator);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);
@@ -327,16 +328,6 @@ public class PipManager implements BasePipManager {
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 animatingBounds, fromImeAdjustment, fromShelfAdjustment,
                 mTmpDisplayInfo.rotation);
-    }
-
-    /**
-     * Gets an instance of {@link PipManager}.
-     */
-    public static PipManager getInstance() {
-        if (sPipController == null) {
-            sPipController = new PipManager();
-        }
-        return sPipController;
     }
 
     public void dump(PrintWriter pw) {

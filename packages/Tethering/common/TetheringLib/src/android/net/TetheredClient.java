@@ -191,6 +191,15 @@ public final class TetheredClient implements Parcelable {
                 return new AddressInfo[size];
             }
         };
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "AddressInfo {"
+                    + mAddress
+                    + (mHostname != null ? ", hostname " + mHostname : "")
+                    + "}";
+        }
     }
 
     @Override
@@ -212,4 +221,13 @@ public final class TetheredClient implements Parcelable {
             return new TetheredClient[size];
         }
     };
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "TetheredClient {hwAddr " + mMacAddress
+                + ", addresses " + mAddresses
+                + ", tetheringType " + mTetheringType
+                + "}";
+    }
 }

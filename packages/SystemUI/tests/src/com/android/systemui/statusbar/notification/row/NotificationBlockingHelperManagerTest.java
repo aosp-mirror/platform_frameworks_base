@@ -49,7 +49,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +74,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(BubbleController.class);
         when(mGutsManager.openGuts(

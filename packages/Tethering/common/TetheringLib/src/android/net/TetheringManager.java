@@ -212,7 +212,7 @@ public class TetheringManager {
         new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(CONNECTOR_POLL_INTERVAL_MILLIS);
                 } catch (InterruptedException e) {
                     // Not much to do here, the system needs to wait for the connector
                 }
@@ -374,6 +374,9 @@ public class TetheringManager {
         public void onTetherStatesChanged(TetherStatesParcel states) {
             mTetherStatesParcel = states;
         }
+
+        @Override
+        public void onTetherClientsChanged(List<TetheredClient> clients) { }
 
         public void waitForStarted() {
             mWaitForCallback.block(DEFAULT_TIMEOUT_MS);
@@ -921,6 +924,7 @@ public class TetheringManager {
                         sendRegexpsChanged(parcel.config);
                         maybeSendTetherableIfacesChangedCallback(parcel.states);
                         maybeSendTetheredIfacesChangedCallback(parcel.states);
+                        callback.onClientsChanged(parcel.tetheredClients);
                     });
                 }
 
@@ -950,6 +954,11 @@ public class TetheringManager {
                         maybeSendTetherableIfacesChangedCallback(states);
                         maybeSendTetheredIfacesChangedCallback(states);
                     });
+                }
+
+                @Override
+                public void onTetherClientsChanged(final List<TetheredClient> clients) {
+                    executor.execute(() -> callback.onClientsChanged(clients));
                 }
             };
             getConnector(c -> c.registerTetheringEventCallback(remoteCallback, callerPkg));

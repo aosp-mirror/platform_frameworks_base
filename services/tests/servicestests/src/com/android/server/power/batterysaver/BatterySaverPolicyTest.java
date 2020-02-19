@@ -78,6 +78,11 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
             return mDeviceSpecificConfigResId;
         }
 
+        @Override
+        void invalidatePowerSaveModeCaches() {
+            // Avoids an SELinux denial.
+        }
+
         @VisibleForTesting
         void onChange() {
             onChange(true, null);

@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.FloatingContentCoordinator;
 
 /**
  * Testable BubbleController subclass that immediately synchronizes surfaces.
@@ -50,12 +51,13 @@ public class TestableBubbleController extends BubbleController {
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
-            DumpController dumpController) {
+            DumpController dumpController,
+            FloatingContentCoordinator floatingContentCoordinator) {
         super(context,
                 notificationShadeWindowController, statusBarStateController, shadeController,
                 data, Runnable::run, configurationController, interruptionStateProvider,
                 zenModeController, lockscreenUserManager, groupManager, entryManager,
-                notifPipeline, featureFlags, dumpController);
+                notifPipeline, featureFlags, dumpController, floatingContentCoordinator);
         setInflateSynchronously(true);
     }
 }

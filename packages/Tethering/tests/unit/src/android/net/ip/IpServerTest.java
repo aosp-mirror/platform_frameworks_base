@@ -469,7 +469,8 @@ public class IpServerTest {
 
     private void assertDhcpStarted(IpPrefix expectedPrefix) throws Exception {
         verify(mDependencies, times(1)).makeDhcpServer(eq(IFACE_NAME), any(), any());
-        verify(mDhcpServer, timeout(MAKE_DHCPSERVER_TIMEOUT_MS).times(1)).start(any());
+        verify(mDhcpServer, timeout(MAKE_DHCPSERVER_TIMEOUT_MS).times(1)).startWithCallbacks(
+                any(), any());
         final DhcpServingParamsParcel params = mDhcpParamsCaptor.getValue();
         // Last address byte is random
         assertTrue(expectedPrefix.contains(intToInet4AddressHTH(params.serverAddr)));

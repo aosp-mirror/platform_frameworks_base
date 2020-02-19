@@ -248,6 +248,9 @@ void StatsLogProcessor::onBinaryPushStateChangedEventLocked(LogEvent* event) {
 #endif
     event->updateValue(8 /*user id field id*/, userId, INT);
 
+    // If this event is a rollback event, then the following bits in the event
+    // are invalid and we will need to update them with the values we pulled
+    // from disk.
     if (is_rollback) {
         int bit = trainInfo.requiresStaging ? 1 : 0;
         event->updateValue(3 /*requires staging field id*/, bit, INT);
@@ -294,19 +297,28 @@ void StatsLogProcessor::getAndUpdateTrainInfoOnDisk(bool is_rollback,
 
     if (!trainInfo->experimentIds.empty()) {
         int64_t firstId = trainInfo->experimentIds.at(0);
+        auto& ids = trainInfo->experimentIds;
         switch (trainInfo->status) {
             case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALL_SUCCESS:
-                trainInfo->experimentIds.push_back(firstId + 1);
+                if (find(ids.begin(), ids.end(), firstId + 1) == ids.end()) {
+                    ids.push_back(firstId + 1);
+                }
                 break;
             case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_INITIATED:
-                trainInfo->experimentIds.push_back(firstId + 2);
+                if (find(ids.begin(), ids.end(), firstId + 2) == ids.end()) {
+                    ids.push_back(firstId + 2);
+                }
                 break;
             case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_SUCCESS:
-                trainInfo->experimentIds.push_back(firstId + 3);
+                if (find(ids.begin(), ids.end(), firstId + 3) == ids.end()) {
+                    ids.push_back(firstId + 3);
+                }
                 break;
         }
     }
 
+    // If this event is a rollback event, the following fields are invalid and
+    // need to be replaced by the fields stored to disk.
     if (is_rollback) {
         trainInfo->requiresStaging = trainInfoOnDisk.requiresStaging;
         trainInfo->rollbackEnabled = trainInfoOnDisk.rollbackEnabled;
@@ -356,6 +368,7 @@ vector<int64_t> StatsLogProcessor::processWatchdogRollbackOccurred(const int32_t
     }
     bool readTrainInfoSuccess = false;
     InstallTrainInfo trainInfoOnDisk;
+    // We use the package name of the event as the train name.
     readTrainInfoSuccess = StorageManager::readTrainInfo(packageNameIn, trainInfoOnDisk);
 
     if (!readTrainInfoSuccess) {
@@ -365,13 +378,20 @@ vector<int64_t> StatsLogProcessor::processWatchdogRollbackOccurred(const int32_t
     if (trainInfoOnDisk.experimentIds.empty()) {
         return vector<int64_t>();
     }
+
+    int64_t firstId = trainInfoOnDisk.experimentIds[0];
+    auto& ids = trainInfoOnDisk.experimentIds;
     switch (rollbackTypeIn) {
         case android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
-            trainInfoOnDisk.experimentIds.push_back(trainInfoOnDisk.experimentIds[0] + 4);
+            if (find(ids.begin(), ids.end(), firstId + 4) == ids.end()) {
+                ids.push_back(firstId + 4);
+            }
             StorageManager::writeTrainInfo(trainInfoOnDisk);
             break;
         case android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
-            trainInfoOnDisk.experimentIds.push_back(trainInfoOnDisk.experimentIds[0] + 5);
+            if (find(ids.begin(), ids.end(), firstId + 5) == ids.end()) {
+                ids.push_back(firstId + 5);
+            }
             StorageManager::writeTrainInfo(trainInfoOnDisk);
             break;
     }

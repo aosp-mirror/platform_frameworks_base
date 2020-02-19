@@ -371,8 +371,8 @@ package android.app {
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getPackagesForOps(@Nullable String[]);
     method public static int opToDefaultMode(@NonNull String);
     method @Nullable public static String opToPermission(@NonNull String);
-    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(String, int, String, int);
-    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(String, int, int);
+    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(@NonNull String, int, @Nullable String, int);
+    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(@NonNull String, int, int);
     field public static final String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
     field public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
     field public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
@@ -8163,6 +8163,174 @@ package android.net.wifi.hotspot2 {
 
 }
 
+package android.net.wifi.nl80211 {
+
+  public final class DeviceWiphyCapabilities implements android.os.Parcelable {
+    ctor public DeviceWiphyCapabilities();
+    method public int describeContents();
+    method public int getMaxNumberRxSpatialStreams();
+    method public int getMaxNumberTxSpatialStreams();
+    method public boolean isChannelWidthSupported(int);
+    method public boolean isWifiStandardSupported(int);
+    method public void setChannelWidthSupported(int, boolean);
+    method public void setMaxNumberRxSpatialStreams(int);
+    method public void setMaxNumberTxSpatialStreams(int);
+    method public void setWifiStandardSupport(int, boolean);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.DeviceWiphyCapabilities> CREATOR;
+  }
+
+  public final class NativeScanResult implements android.os.Parcelable {
+    ctor public NativeScanResult();
+    method public int describeContents();
+    method @Nullable public android.net.MacAddress getBssid();
+    method public int getCapabilities();
+    method public int getFrequencyMhz();
+    method @NonNull public byte[] getInformationElements();
+    method @NonNull public java.util.List<android.net.wifi.nl80211.RadioChainInfo> getRadioChainInfos();
+    method public int getSignalMbm();
+    method @NonNull public byte[] getSsid();
+    method public long getTsf();
+    method public boolean isAssociated();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int BSS_CAPABILITY_APSD = 2048; // 0x800
+    field public static final int BSS_CAPABILITY_CF_POLLABLE = 4; // 0x4
+    field public static final int BSS_CAPABILITY_CF_POLL_REQUEST = 8; // 0x8
+    field public static final int BSS_CAPABILITY_CHANNEL_AGILITY = 128; // 0x80
+    field public static final int BSS_CAPABILITY_DELAYED_BLOCK_ACK = 16384; // 0x4000
+    field public static final int BSS_CAPABILITY_DSSS_OFDM = 8192; // 0x2000
+    field public static final int BSS_CAPABILITY_ESS = 1; // 0x1
+    field public static final int BSS_CAPABILITY_IBSS = 2; // 0x2
+    field public static final int BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK = 32768; // 0x8000
+    field public static final int BSS_CAPABILITY_PBCC = 64; // 0x40
+    field public static final int BSS_CAPABILITY_PRIVACY = 16; // 0x10
+    field public static final int BSS_CAPABILITY_QOS = 512; // 0x200
+    field public static final int BSS_CAPABILITY_RADIO_MANAGEMENT = 4096; // 0x1000
+    field public static final int BSS_CAPABILITY_SHORT_PREAMBLE = 32; // 0x20
+    field public static final int BSS_CAPABILITY_SHORT_SLOT_TIME = 1024; // 0x400
+    field public static final int BSS_CAPABILITY_SPECTRUM_MANAGEMENT = 256; // 0x100
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.NativeScanResult> CREATOR;
+  }
+
+  public final class NativeWifiClient implements android.os.Parcelable {
+    ctor public NativeWifiClient(@Nullable android.net.MacAddress);
+    method public int describeContents();
+    method @Nullable public android.net.MacAddress getMacAddress();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.NativeWifiClient> CREATOR;
+  }
+
+  public final class PnoNetwork implements android.os.Parcelable {
+    ctor public PnoNetwork();
+    method public int describeContents();
+    method @NonNull public int[] getFrequenciesMhz();
+    method @NonNull public byte[] getSsid();
+    method public boolean isHidden();
+    method public void setFrequenciesMhz(@NonNull int[]);
+    method public void setHidden(boolean);
+    method public void setSsid(@NonNull byte[]);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.PnoNetwork> CREATOR;
+  }
+
+  public final class PnoSettings implements android.os.Parcelable {
+    ctor public PnoSettings();
+    method public int describeContents();
+    method public long getIntervalMillis();
+    method public int getMin2gRssiDbm();
+    method public int getMin5gRssiDbm();
+    method public int getMin6gRssiDbm();
+    method @NonNull public java.util.List<android.net.wifi.nl80211.PnoNetwork> getPnoNetworks();
+    method public void setIntervalMillis(long);
+    method public void setMin2gRssiDbm(int);
+    method public void setMin5gRssiDbm(int);
+    method public void setMin6gRssiDbm(int);
+    method public void setPnoNetworks(@NonNull java.util.List<android.net.wifi.nl80211.PnoNetwork>);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.PnoSettings> CREATOR;
+  }
+
+  public final class RadioChainInfo implements android.os.Parcelable {
+    ctor public RadioChainInfo(int, int);
+    method public int describeContents();
+    method public int getChainId();
+    method public int getLevelDbm();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.RadioChainInfo> CREATOR;
+  }
+
+  public class WifiNl80211Manager {
+    method public void abortScan(@NonNull String);
+    method public void enableVerboseLogging(boolean);
+    method @NonNull public int[] getChannelsMhzForBand(int);
+    method @Nullable public android.net.wifi.nl80211.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
+    method @NonNull public java.util.List<android.net.wifi.nl80211.NativeScanResult> getScanResults(@NonNull String, int);
+    method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.TxPacketCounters getTxPacketCounters(@NonNull String);
+    method @Nullable public static android.net.wifi.nl80211.WifiNl80211Manager.OemSecurityType parseOemSecurityTypeElement(int, int, @NonNull byte[]);
+    method public boolean registerApCallback(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SoftApCallback);
+    method public void sendMgmtFrame(@NonNull String, @NonNull byte[], int, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SendMgmtFrameCallback);
+    method public void setOnServiceDeadCallback(@NonNull Runnable);
+    method public boolean setupInterfaceForClientMode(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback);
+    method public boolean setupInterfaceForSoftApMode(@NonNull String);
+    method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.SignalPollResult signalPoll(@NonNull String);
+    method public boolean startPnoScan(@NonNull String, @NonNull android.net.wifi.nl80211.PnoSettings, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.PnoScanRequestCallback);
+    method public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>);
+    method public boolean stopPnoScan(@NonNull String);
+    method public boolean tearDownClientInterface(@NonNull String);
+    method public boolean tearDownInterfaces();
+    method public boolean tearDownSoftApInterface(@NonNull String);
+    field public static final int SCAN_TYPE_PNO_SCAN = 1; // 0x1
+    field public static final int SCAN_TYPE_SINGLE_SCAN = 0; // 0x0
+    field public static final int SEND_MGMT_FRAME_ERROR_ALREADY_STARTED = 5; // 0x5
+    field public static final int SEND_MGMT_FRAME_ERROR_MCS_UNSUPPORTED = 2; // 0x2
+    field public static final int SEND_MGMT_FRAME_ERROR_NO_ACK = 3; // 0x3
+    field public static final int SEND_MGMT_FRAME_ERROR_TIMEOUT = 4; // 0x4
+    field public static final int SEND_MGMT_FRAME_ERROR_UNKNOWN = 1; // 0x1
+  }
+
+  public static class WifiNl80211Manager.OemSecurityType {
+    ctor public WifiNl80211Manager.OemSecurityType(int, @NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<java.lang.Integer>, int);
+    field public final int groupCipher;
+    field @NonNull public final java.util.List<java.lang.Integer> keyManagement;
+    field @NonNull public final java.util.List<java.lang.Integer> pairwiseCipher;
+    field public final int protocol;
+  }
+
+  public static interface WifiNl80211Manager.PnoScanRequestCallback {
+    method public void onPnoRequestFailed();
+    method public void onPnoRequestSucceeded();
+  }
+
+  public static interface WifiNl80211Manager.ScanEventCallback {
+    method public void onScanFailed();
+    method public void onScanResultReady();
+  }
+
+  public static interface WifiNl80211Manager.SendMgmtFrameCallback {
+    method public void onAck(int);
+    method public void onFailure(int);
+  }
+
+  public static class WifiNl80211Manager.SignalPollResult {
+    field public final int associationFrequencyMHz;
+    field public final int currentRssiDbm;
+    field public final int rxBitrateMbps;
+    field public final int txBitrateMbps;
+  }
+
+  public static interface WifiNl80211Manager.SoftApCallback {
+    method public void onConnectedClientsChanged(@NonNull android.net.wifi.nl80211.NativeWifiClient, boolean);
+    method public void onFailure();
+    method public void onSoftApChannelSwitched(int, int);
+  }
+
+  public static class WifiNl80211Manager.TxPacketCounters {
+    field public final int txPacketFailed;
+    field public final int txPacketSucceeded;
+  }
+
+}
+
 package android.net.wifi.p2p {
 
   public final class WifiP2pGroupList implements android.os.Parcelable {
@@ -8246,174 +8414,6 @@ package android.net.wifi.rtt {
   public class WifiRttManager {
     method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE}) public void cancelRanging(@Nullable android.os.WorkSource);
     method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.CHANGE_WIFI_STATE, android.Manifest.permission.ACCESS_WIFI_STATE}) public void startRanging(@Nullable android.os.WorkSource, @NonNull android.net.wifi.rtt.RangingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.rtt.RangingResultCallback);
-  }
-
-}
-
-package android.net.wifi.wificond {
-
-  public final class DeviceWiphyCapabilities implements android.os.Parcelable {
-    ctor public DeviceWiphyCapabilities();
-    method public int describeContents();
-    method public int getMaxNumberRxSpatialStreams();
-    method public int getMaxNumberTxSpatialStreams();
-    method public boolean isChannelWidthSupported(int);
-    method public boolean isWifiStandardSupported(int);
-    method public void setChannelWidthSupported(int, boolean);
-    method public void setMaxNumberRxSpatialStreams(int);
-    method public void setMaxNumberTxSpatialStreams(int);
-    method public void setWifiStandardSupport(int, boolean);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.DeviceWiphyCapabilities> CREATOR;
-  }
-
-  public final class NativeScanResult implements android.os.Parcelable {
-    ctor public NativeScanResult();
-    method public int describeContents();
-    method @Nullable public android.net.MacAddress getBssid();
-    method public int getCapabilities();
-    method public int getFrequencyMhz();
-    method @NonNull public byte[] getInformationElements();
-    method @NonNull public java.util.List<android.net.wifi.wificond.RadioChainInfo> getRadioChainInfos();
-    method public int getSignalMbm();
-    method @NonNull public byte[] getSsid();
-    method public long getTsf();
-    method public boolean isAssociated();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int BSS_CAPABILITY_APSD = 2048; // 0x800
-    field public static final int BSS_CAPABILITY_CF_POLLABLE = 4; // 0x4
-    field public static final int BSS_CAPABILITY_CF_POLL_REQUEST = 8; // 0x8
-    field public static final int BSS_CAPABILITY_CHANNEL_AGILITY = 128; // 0x80
-    field public static final int BSS_CAPABILITY_DELAYED_BLOCK_ACK = 16384; // 0x4000
-    field public static final int BSS_CAPABILITY_DSSS_OFDM = 8192; // 0x2000
-    field public static final int BSS_CAPABILITY_ESS = 1; // 0x1
-    field public static final int BSS_CAPABILITY_IBSS = 2; // 0x2
-    field public static final int BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK = 32768; // 0x8000
-    field public static final int BSS_CAPABILITY_PBCC = 64; // 0x40
-    field public static final int BSS_CAPABILITY_PRIVACY = 16; // 0x10
-    field public static final int BSS_CAPABILITY_QOS = 512; // 0x200
-    field public static final int BSS_CAPABILITY_RADIO_MANAGEMENT = 4096; // 0x1000
-    field public static final int BSS_CAPABILITY_SHORT_PREAMBLE = 32; // 0x20
-    field public static final int BSS_CAPABILITY_SHORT_SLOT_TIME = 1024; // 0x400
-    field public static final int BSS_CAPABILITY_SPECTRUM_MANAGEMENT = 256; // 0x100
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeScanResult> CREATOR;
-  }
-
-  public final class NativeWifiClient implements android.os.Parcelable {
-    ctor public NativeWifiClient(@Nullable android.net.MacAddress);
-    method public int describeContents();
-    method @Nullable public android.net.MacAddress getMacAddress();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeWifiClient> CREATOR;
-  }
-
-  public final class PnoNetwork implements android.os.Parcelable {
-    ctor public PnoNetwork();
-    method public int describeContents();
-    method @NonNull public int[] getFrequenciesMhz();
-    method @NonNull public byte[] getSsid();
-    method public boolean isHidden();
-    method public void setFrequenciesMhz(@NonNull int[]);
-    method public void setHidden(boolean);
-    method public void setSsid(@NonNull byte[]);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.PnoNetwork> CREATOR;
-  }
-
-  public final class PnoSettings implements android.os.Parcelable {
-    ctor public PnoSettings();
-    method public int describeContents();
-    method public long getIntervalMillis();
-    method public int getMin2gRssiDbm();
-    method public int getMin5gRssiDbm();
-    method public int getMin6gRssiDbm();
-    method @NonNull public java.util.List<android.net.wifi.wificond.PnoNetwork> getPnoNetworks();
-    method public void setIntervalMillis(long);
-    method public void setMin2gRssiDbm(int);
-    method public void setMin5gRssiDbm(int);
-    method public void setMin6gRssiDbm(int);
-    method public void setPnoNetworks(@NonNull java.util.List<android.net.wifi.wificond.PnoNetwork>);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.PnoSettings> CREATOR;
-  }
-
-  public final class RadioChainInfo implements android.os.Parcelable {
-    ctor public RadioChainInfo(int, int);
-    method public int describeContents();
-    method public int getChainId();
-    method public int getLevelDbm();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.RadioChainInfo> CREATOR;
-  }
-
-  public class WifiNl80211Manager {
-    method public void abortScan(@NonNull String);
-    method public void enableVerboseLogging(boolean);
-    method @NonNull public int[] getChannelsMhzForBand(int);
-    method @Nullable public android.net.wifi.wificond.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
-    method @NonNull public java.util.List<android.net.wifi.wificond.NativeScanResult> getScanResults(@NonNull String, int);
-    method @Nullable public android.net.wifi.wificond.WifiNl80211Manager.TxPacketCounters getTxPacketCounters(@NonNull String);
-    method @Nullable public static android.net.wifi.wificond.WifiNl80211Manager.OemSecurityType parseOemSecurityTypeElement(int, int, @NonNull byte[]);
-    method public boolean registerApCallback(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiNl80211Manager.SoftApCallback);
-    method public void sendMgmtFrame(@NonNull String, @NonNull byte[], int, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiNl80211Manager.SendMgmtFrameCallback);
-    method public void setOnServiceDeadCallback(@NonNull Runnable);
-    method public boolean setupInterfaceForClientMode(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiNl80211Manager.ScanEventCallback, @NonNull android.net.wifi.wificond.WifiNl80211Manager.ScanEventCallback);
-    method public boolean setupInterfaceForSoftApMode(@NonNull String);
-    method @Nullable public android.net.wifi.wificond.WifiNl80211Manager.SignalPollResult signalPoll(@NonNull String);
-    method public boolean startPnoScan(@NonNull String, @NonNull android.net.wifi.wificond.PnoSettings, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiNl80211Manager.PnoScanRequestCallback);
-    method public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>);
-    method public boolean stopPnoScan(@NonNull String);
-    method public boolean tearDownClientInterface(@NonNull String);
-    method public boolean tearDownInterfaces();
-    method public boolean tearDownSoftApInterface(@NonNull String);
-    field public static final int SCAN_TYPE_PNO_SCAN = 1; // 0x1
-    field public static final int SCAN_TYPE_SINGLE_SCAN = 0; // 0x0
-    field public static final int SEND_MGMT_FRAME_ERROR_ALREADY_STARTED = 5; // 0x5
-    field public static final int SEND_MGMT_FRAME_ERROR_MCS_UNSUPPORTED = 2; // 0x2
-    field public static final int SEND_MGMT_FRAME_ERROR_NO_ACK = 3; // 0x3
-    field public static final int SEND_MGMT_FRAME_ERROR_TIMEOUT = 4; // 0x4
-    field public static final int SEND_MGMT_FRAME_ERROR_UNKNOWN = 1; // 0x1
-  }
-
-  public static class WifiNl80211Manager.OemSecurityType {
-    ctor public WifiNl80211Manager.OemSecurityType(int, @NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<java.lang.Integer>, int);
-    field public final int groupCipher;
-    field @NonNull public final java.util.List<java.lang.Integer> keyManagement;
-    field @NonNull public final java.util.List<java.lang.Integer> pairwiseCipher;
-    field public final int protocol;
-  }
-
-  public static interface WifiNl80211Manager.PnoScanRequestCallback {
-    method public void onPnoRequestFailed();
-    method public void onPnoRequestSucceeded();
-  }
-
-  public static interface WifiNl80211Manager.ScanEventCallback {
-    method public void onScanFailed();
-    method public void onScanResultReady();
-  }
-
-  public static interface WifiNl80211Manager.SendMgmtFrameCallback {
-    method public void onAck(int);
-    method public void onFailure(int);
-  }
-
-  public static class WifiNl80211Manager.SignalPollResult {
-    field public final int associationFrequencyMHz;
-    field public final int currentRssiDbm;
-    field public final int rxBitrateMbps;
-    field public final int txBitrateMbps;
-  }
-
-  public static interface WifiNl80211Manager.SoftApCallback {
-    method public void onConnectedClientsChanged(@NonNull android.net.wifi.wificond.NativeWifiClient, boolean);
-    method public void onFailure();
-    method public void onSoftApChannelSwitched(int, int);
-  }
-
-  public static class WifiNl80211Manager.TxPacketCounters {
-    field public final int txPacketFailed;
-    field public final int txPacketSucceeded;
   }
 
 }
@@ -14077,14 +14077,6 @@ package android.view.contentcapture {
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {
     method @Nullable public android.view.autofill.AutofillId getParentAutofillId();
-  }
-
-}
-
-package android.view.inline {
-
-  public final class InlinePresentationSpec implements android.os.Parcelable {
-    method @Nullable public String getStyle();
   }
 
 }

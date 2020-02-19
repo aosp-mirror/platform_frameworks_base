@@ -3009,7 +3009,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         NotificationChannel channel2 =
                 new NotificationChannel("B person", "B fabulous person", IMPORTANCE_DEFAULT);
-        channel2.setConversationId(calls.getId(), channel.getName().toString());
+        channel2.setConversationId(calls.getId(), channel2.getName().toString());
         mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
 
         Map<String, NotificationChannel> expected = new HashMap<>();
@@ -3035,5 +3035,47 @@ public class PreferencesHelperTest extends UiServiceTestCase {
             assertThat(convo.getGroupLabel())
                     .isEqualTo(expectedGroup.get(convo.getNotificationChannel().getId()));
         }
+    }
+
+    @Test
+    public void testDeleteConversation() {
+        String convoId = "convo";
+        NotificationChannel messages =
+                new NotificationChannel("messages", "Messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, messages, true, false);
+        NotificationChannel calls =
+                new NotificationChannel("calls", "Calls", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, calls, true, false);
+
+        NotificationChannel channel =
+                new NotificationChannel("A person msgs", "messages from A", IMPORTANCE_DEFAULT);
+        channel.setConversationId(messages.getId(), convoId);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
+
+        NotificationChannel noMatch =
+                new NotificationChannel("B person msgs", "messages from B", IMPORTANCE_DEFAULT);
+        noMatch.setConversationId(messages.getId(), "different convo");
+        mHelper.createNotificationChannel(PKG_O, UID_O, noMatch, true, false);
+
+        NotificationChannel channel2 =
+                new NotificationChannel("A person calls", "calls from A", IMPORTANCE_DEFAULT);
+        channel2.setConversationId(calls.getId(), convoId);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
+
+        assertEquals(channel, mHelper.getNotificationChannel(PKG_O, UID_O, channel.getId(), false));
+        assertEquals(channel2,
+                mHelper.getNotificationChannel(PKG_O, UID_O, channel2.getId(), false));
+        assertEquals(2, mHelper.deleteConversation(PKG_O, UID_O, convoId).size());
+
+        assertEquals(messages,
+                mHelper.getNotificationChannel(PKG_O, UID_O, messages.getId(), false));
+        assertEquals(noMatch,
+                mHelper.getNotificationChannel(PKG_O, UID_O, noMatch.getId(), false));
+
+        assertNull(mHelper.getNotificationChannel(PKG_O, UID_O, channel.getId(), false));
+        assertNull(mHelper.getNotificationChannel(PKG_O, UID_O, channel2.getId(), false));
+        assertEquals(channel, mHelper.getNotificationChannel(PKG_O, UID_O, channel.getId(), true));
+        assertEquals(channel2,
+                mHelper.getNotificationChannel(PKG_O, UID_O, channel2.getId(), true));
     }
 }
