@@ -80,7 +80,8 @@ import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.Dependency;
+import com.android.systemui.DumpController;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
@@ -144,7 +145,7 @@ import dagger.Lazy;
  * directly to the keyguard UI is posted to a {@link android.os.Handler} to ensure it is taken on the UI
  * thread of the keyguard.
  */
-public class KeyguardViewMediator extends SystemUI {
+public class KeyguardViewMediator extends SystemUI implements Dumpable {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
 
@@ -222,10 +223,10 @@ public class KeyguardViewMediator extends SystemUI {
     private final FalsingManager mFalsingManager;
 
     /** High level access to the power manager for WakeLocks */
-    private PowerManager mPM;
+    private final PowerManager mPM;
 
     /** TrustManager for letting it know when we change visibility */
-    private TrustManager mTrustManager;
+    private final TrustManager mTrustManager;
 
     /**
      * Used to keep the device awake while to ensure the keyguard finishes opening before
@@ -283,7 +284,7 @@ public class KeyguardViewMediator extends SystemUI {
 
     // the properties of the keyguard
 
-    private KeyguardUpdateMonitor mUpdateMonitor;
+    private final KeyguardUpdateMonitor mUpdateMonitor;
 
     /**
      * Last SIM state reported by the telephony system.
@@ -610,6 +611,7 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public void keyguardGone() {
             Trace.beginSection("KeyguardViewMediator.mViewMediatorCallback#keyguardGone");
+            mNotificationShadeWindowController.setKeyguardGoingAway(false);
             mKeyguardDisplayManager.hide();
             Trace.endSection();
         }
@@ -696,7 +698,9 @@ public class KeyguardViewMediator extends SystemUI {
             NotificationShadeWindowController notificationShadeWindowController,
             Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManagerLazy,
             DismissCallbackRegistry dismissCallbackRegistry,
-            @UiBackground Executor uiBgExecutor) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor, DumpController dumpController,
+            @UiBackground Executor uiBgExecutor, PowerManager powerManager,
+            TrustManager trustManager) {
         super(context);
         mFalsingManager = falsingManager;
         mLockPatternUtils = lockPatternUtils;
@@ -705,6 +709,10 @@ public class KeyguardViewMediator extends SystemUI {
         mStatusBarKeyguardViewManagerLazy = statusBarKeyguardViewManagerLazy;
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mUiBgExecutor = uiBgExecutor;
+        mUpdateMonitor = keyguardUpdateMonitor;
+        mPM = powerManager;
+        mTrustManager = trustManager;
+        dumpController.registerDumpable(this);
         mShowHomeOverLockscreen = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN,
@@ -731,9 +739,6 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void setupLocked() {
-        mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mTrustManager = mContext.getSystemService(TrustManager.class);
-
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
 
@@ -753,8 +758,6 @@ public class KeyguardViewMediator extends SystemUI {
                 injectionInflationController);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-
-        mUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
 
         KeyguardUpdateMonitor.setCurrentUser(ActivityManager.getCurrentUser());
 
