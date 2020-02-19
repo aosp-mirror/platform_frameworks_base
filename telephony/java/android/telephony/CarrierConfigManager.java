@@ -1988,6 +1988,13 @@ public class CarrierConfigManager {
             "carrier_allow_deflect_ims_call_bool";
 
     /**
+     * Flag indicating whether the carrier supports explicit call transfer for an IMS call.
+     * @hide
+     */
+    public static final String KEY_CARRIER_ALLOW_TRANSFER_IMS_CALL_BOOL =
+            "carrier_allow_transfer_ims_call_bool";
+
+    /**
      * Flag indicating whether the carrier always wants to play an "on-hold" tone when a call has
      * been remotely held.
      * <p>
@@ -3511,6 +3518,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_CONFIG_VERSION_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_DEFLECT_IMS_CALL_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_ALLOW_TRANSFER_IMS_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_PLAY_REMOTE_HOLD_TONE_BOOL, false);
         sDefaults.putBoolean(KEY_AUTO_RETRY_FAILED_WIFI_EMERGENCY_CALL, false);
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);

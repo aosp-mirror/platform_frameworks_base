@@ -387,8 +387,25 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     public static final int CAPABILITY_ADD_PARTICIPANT = 0x04000000;
+
+    /**
+     * Indicates that this {@code Connection} can be transferred to another
+     * number.
+     * Connection supports the blind and assured call transfer feature.
+     * @hide
+     */
+    public static final int CAPABILITY_TRANSFER = 0x08000000;
+
+    /**
+     * Indicates that this {@code Connection} can be transferred to another
+     * ongoing {@code Connection}.
+     * Connection supports the consultative call transfer feature.
+     * @hide
+     */
+    public static final int CAPABILITY_TRANSFER_CONSULTATIVE = 0x10000000;
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x08000000
+    // Next CAPABILITY value: 0x20000000
     //**********************************************************************************************
 
     /**
@@ -966,6 +983,13 @@ public abstract class Connection extends Conferenceable {
         }
         if ((capabilities & CAPABILITY_ADD_PARTICIPANT) == CAPABILITY_ADD_PARTICIPANT) {
             builder.append(isLong ? " CAPABILITY_ADD_PARTICIPANT" : " add_participant");
+        }
+        if ((capabilities & CAPABILITY_TRANSFER) == CAPABILITY_TRANSFER) {
+            builder.append(isLong ? " CAPABILITY_TRANSFER" : " sup_trans");
+        }
+        if ((capabilities & CAPABILITY_TRANSFER_CONSULTATIVE)
+                == CAPABILITY_TRANSFER_CONSULTATIVE) {
+            builder.append(isLong ? " CAPABILITY_TRANSFER_CONSULTATIVE" : " sup_cTrans");
         }
         builder.append("]");
         return builder.toString();
@@ -3090,6 +3114,26 @@ public abstract class Connection extends Conferenceable {
      * a request to reject with a message.
      */
     public void onReject(String replyMessage) {}
+
+    /**
+     * Notifies this Connection, a request to transfer to a target number.
+     * @param number the number to transfer this {@link Connection} to.
+     * @param isConfirmationRequired when {@code true}, the {@link ConnectionService}
+     * should wait until the transfer has successfully completed before disconnecting
+     * the current {@link Connection}.
+     * When {@code false}, the {@link ConnectionService} should signal the network to
+     * perform the transfer, but should immediately disconnect the call regardless of
+     * the outcome of the transfer.
+     * @hide
+     */
+    public void onTransfer(@NonNull Uri number, boolean isConfirmationRequired) {}
+
+    /**
+     * Notifies this Connection, a request to transfer to another Connection.
+     * @param otherConnection the {@link Connection} to transfer this call to.
+     * @hide
+     */
+    public void onTransfer(@NonNull Connection otherConnection) {}
 
     /**
      * Notifies this Connection of a request to silence the ringer.
