@@ -2291,6 +2291,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     context, requestCode, intent, flags, options, user);
         }
 
+        PendingIntent pendingIntentGetBroadcast(
+                Context context, int requestCode, Intent intent, int flags) {
+            return PendingIntent.getBroadcast(context, requestCode, intent, flags);
+        }
+
         void registerContentObserver(Uri uri, boolean notifyForDescendents,
                 ContentObserver observer, int userHandle) {
             mContext.getContentResolver().registerContentObserver(uri, notifyForDescendents,
@@ -15645,8 +15650,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void updateProfileOffAlarm(long profileOffDeadline) {
         final AlarmManager am = mInjector.getAlarmManager();
-        final PendingIntent pi = PendingIntent.getBroadcast(mContext, REQUEST_PROFILE_OFF_DEADLINE,
-                new Intent(ACTION_PROFILE_OFF_DEADLINE),
+        final PendingIntent pi = mInjector.pendingIntentGetBroadcast(
+                mContext, REQUEST_PROFILE_OFF_DEADLINE, new Intent(ACTION_PROFILE_OFF_DEADLINE),
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
         am.cancel(pi);
         if (profileOffDeadline != 0) {
