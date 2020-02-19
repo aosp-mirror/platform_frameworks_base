@@ -18,6 +18,7 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.view.Gravity;
@@ -28,6 +29,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
+import com.android.internal.util.ArrayUtils;
 
 /**
  * Class responsible for toast presentation inside app's process and in system UI.
@@ -39,17 +41,19 @@ public class ToastPresenter {
     private static final long LONG_DURATION_TIMEOUT = 7000;
 
     private final Context mContext;
+    private final Resources mResources;
     private final AccessibilityManager mAccessibilityManager;
 
     public ToastPresenter(Context context, AccessibilityManager accessibilityManager) {
         mContext = context;
+        mResources = context.getResources();
         mAccessibilityManager = accessibilityManager;
     }
 
     /**
      * Initializes {@code params} with default values for toasts.
      */
-    public void startLayoutParams(WindowManager.LayoutParams params) {
+    public void startLayoutParams(WindowManager.LayoutParams params, String packageName) {
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
         params.width = WindowManager.LayoutParams.WRAP_CONTENT;
         params.format = PixelFormat.TRANSLUCENT;
@@ -60,6 +64,7 @@ public class ToastPresenter {
         params.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        setShowForAllUsersIfApplicable(params, packageName);
     }
 
     /**
@@ -69,7 +74,7 @@ public class ToastPresenter {
     public void adjustLayoutParams(WindowManager.LayoutParams params, IBinder windowToken,
             int duration, int gravity, int xOffset, int yOffset, float horizontalMargin,
             float verticalMargin) {
-        Configuration config = mContext.getResources().getConfiguration();
+        Configuration config = mResources.getConfiguration();
         int absGravity = Gravity.getAbsoluteGravity(gravity, config.getLayoutDirection());
         params.gravity = absGravity;
         if ((absGravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) {
@@ -86,6 +91,32 @@ public class ToastPresenter {
         params.hideTimeoutMilliseconds =
                 (duration == Toast.LENGTH_LONG) ? LONG_DURATION_TIMEOUT : SHORT_DURATION_TIMEOUT;
         params.token = windowToken;
+    }
+
+    /**
+     * Sets {@link WindowManager.LayoutParams#SYSTEM_FLAG_SHOW_FOR_ALL_USERS} flag if {@code
+     * packageName} is a cross-user package.
+     *
+     * Implementation note:
+     *     This code is safe to be executed in SystemUI and the app's process:
+     *         <li>SystemUI: It's running on a trusted domain so apps can't tamper with it. SystemUI
+     *             has the permission INTERNAL_SYSTEM_WINDOW needed by the flag, so SystemUI can add
+     *             the flag on behalf of those packages, which all contain INTERNAL_SYSTEM_WINDOW
+     *             permission.
+     *         <li>App: The flag being added is protected behind INTERNAL_SYSTEM_WINDOW permission
+     *             and any app can already add that flag via getWindowParams() if it has that
+     *             permission, so we are just doing this automatically for cross-user packages.
+     */
+    private void setShowForAllUsersIfApplicable(WindowManager.LayoutParams params,
+            String packageName) {
+        if (isCrossUserPackage(packageName)) {
+            params.privateFlags = WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+        }
+    }
+
+    private boolean isCrossUserPackage(String packageName) {
+        String[] packages = mResources.getStringArray(R.array.config_toastCrossUserPackages);
+        return ArrayUtils.contains(packages, packageName);
     }
 
     /**
