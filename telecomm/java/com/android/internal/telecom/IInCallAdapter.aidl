@@ -36,6 +36,10 @@ oneway interface IInCallAdapter {
 
     void rejectCallWithReason(String callId, int rejectReason);
 
+    void transferCall(String callId, in Uri targetNumber, boolean isConfirmationRequired);
+
+    void consultativeTransfer(String callId, String otherCallId);
+
     void disconnectCall(String callId);
 
     void holdCall(String callId);

@@ -465,8 +465,27 @@ public final class Call {
          * @hide
          */
         public static final int CAPABILITY_ADD_PARTICIPANT = 0x02000000;
+
+        /**
+         * When set for a call, indicates that this {@code Call} can be transferred to another
+         * number.
+         * Call supports the blind and assured call transfer feature.
+         *
+         * @hide
+         */
+        public static final int CAPABILITY_TRANSFER = 0x04000000;
+
+        /**
+         * When set for a call, indicates that this {@code Call} can be transferred to another
+         * ongoing call.
+         * Call supports the consultative call transfer feature.
+         *
+         * @hide
+         */
+        public static final int CAPABILITY_TRANSFER_CONSULTATIVE = 0x08000000;
+
         //******************************************************************************************
-        // Next CAPABILITY value: 0x04000000
+        // Next CAPABILITY value: 0x10000000
         //******************************************************************************************
 
         /**
@@ -698,6 +717,12 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_ADD_PARTICIPANT)) {
                 builder.append(" CAPABILITY_ADD_PARTICIPANT");
+            }
+            if (can(capabilities, CAPABILITY_TRANSFER)) {
+                builder.append(" CAPABILITY_TRANSFER");
+            }
+            if (can(capabilities, CAPABILITY_TRANSFER_CONSULTATIVE)) {
+                builder.append(" CAPABILITY_TRANSFER_CONSULTATIVE");
             }
             builder.append("]");
             return builder.toString();
@@ -1561,6 +1586,30 @@ public final class Call {
      */
     public void reject(@RejectReason int rejectReason) {
         mInCallAdapter.rejectCall(mTelecomCallId, rejectReason);
+    }
+
+    /**
+     * Instructs this {@code Call} to be transferred to another number.
+     *
+     * @param targetNumber The address to which the call will be transferred.
+     * @param isConfirmationRequired if {@code true} it will initiate ASSURED transfer,
+     * if {@code false}, it will initiate BLIND transfer.
+     *
+     * @hide
+     */
+    public void transfer(@NonNull Uri targetNumber, boolean isConfirmationRequired) {
+        mInCallAdapter.transferCall(mTelecomCallId, targetNumber, isConfirmationRequired);
+    }
+
+    /**
+     * Instructs this {@code Call} to be transferred to another ongoing call.
+     * This will initiate CONSULTATIVE transfer.
+     * @param toCall The other ongoing {@code Call} to which this call will be transferred.
+     *
+     * @hide
+     */
+    public void transfer(@NonNull android.telecom.Call toCall) {
+        mInCallAdapter.transferCall(mTelecomCallId, toCall.mTelecomCallId);
     }
 
     /**
