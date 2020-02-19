@@ -448,7 +448,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      *  System property whose value is either "true" or "false", indicating whether
      *  device owner is present.
      */
-    private static final String PROPERTY_DEVICE_OWNER_PRESENT = "ro.device_owner";
+    private static final String PROPERTY_DEVICE_OWNER_PRESENT = "ro.organization_owned";
 
     private static final int STATUS_BAR_DISABLE_MASK =
             StatusBarManager.DISABLE_EXPAND |
@@ -2754,11 +2754,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         if (!mInjector.systemPropertiesGet(PROPERTY_DEVICE_OWNER_PRESENT, "").isEmpty()) {
-            Slog.w(LOG_TAG, "Trying to set ro.device_owner, but it has already been set?");
+            Slog.w(LOG_TAG, "Trying to set ro.organization_owned, but it has already been set?");
         } else {
             final String value = Boolean.toString(hasDeviceOwner);
             mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, value);
-            Slog.i(LOG_TAG, "Set ro.device_owner property to " + value);
+            Slog.i(LOG_TAG, "Set ro.organization_owned property to " + value);
         }
     }
 
