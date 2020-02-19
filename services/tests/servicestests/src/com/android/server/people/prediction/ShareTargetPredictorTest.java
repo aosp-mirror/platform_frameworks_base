@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -73,7 +74,7 @@ public final class ShareTargetPredictorTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mDataManager.getShareShortcuts(any())).thenReturn(mShareShortcuts);
+        when(mDataManager.getShareShortcuts(any(), anyInt())).thenReturn(mShareShortcuts);
         when(mDataManager.getPackage(PACKAGE_1, USER_ID)).thenReturn(mPackageData1);
         when(mDataManager.getPackage(PACKAGE_2, USER_ID)).thenReturn(mPackageData2);
 
@@ -82,7 +83,8 @@ public final class ShareTargetPredictorTest {
                 .setPredictedTargetCount(NUM_PREDICTED_TARGETS)
                 .setExtras(new Bundle())
                 .build();
-        mPredictor = new ShareTargetPredictor(predictionContext, targets -> { }, mDataManager);
+        mPredictor = new ShareTargetPredictor(
+                predictionContext, targets -> { }, mDataManager, USER_ID);
     }
 
     @Test

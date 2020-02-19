@@ -2773,6 +2773,13 @@ public class ShortcutService extends IShortcutService.Stub {
                     userId, /* doCache= */ false);
         }
 
+        @Override
+        public List<ShortcutManager.ShareShortcutInfo> getShareTargets(
+                @NonNull String callingPackage, @NonNull IntentFilter intentFilter, int userId) {
+            return ShortcutService.this.getShareTargets(
+                    callingPackage, intentFilter, userId).getList();
+        }
+
         private void updateCachedShortcutsInternal(int launcherUserId,
                 @NonNull String callingPackage, @NonNull String packageName,
                 @NonNull List<String> shortcutIds, int userId, boolean doCache) {
