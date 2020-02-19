@@ -43,6 +43,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.accessibility.AccessibilitySecurityPolicy.AccessibilityUserManager;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -781,7 +782,9 @@ public class AccessibilityWindowManager {
     /**
      * Wrapper of accessibility interaction connection for window.
      */
-    final class RemoteAccessibilityConnection implements IBinder.DeathRecipient {
+    // In order to avoid using DexmakerShareClassLoaderRule, make this class visible for testing.
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public final class RemoteAccessibilityConnection implements IBinder.DeathRecipient {
         private final int mUid;
         private final String mPackageName;
         private final int mWindowId;
