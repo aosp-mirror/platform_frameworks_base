@@ -19,6 +19,7 @@ package com.android.server.notification;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DISABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
+import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
 
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
@@ -1011,21 +1012,23 @@ public class ZenModeHelper {
 
     @VisibleForTesting
     protected void applyRestrictions() {
+        final boolean zenOn = mZenMode != Global.ZEN_MODE_OFF;
         final boolean zenPriorityOnly = mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         final boolean zenSilence = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
         final boolean zenAlarmsOnly = mZenMode == Global.ZEN_MODE_ALARMS;
-        final boolean allowCalls = mConsolidatedPolicy.allowCalls();
+        final boolean allowCalls = mConsolidatedPolicy.allowCalls()
+                && mConsolidatedPolicy.allowCallsFrom() == PRIORITY_SENDERS_ANY;
         final boolean allowRepeatCallers = mConsolidatedPolicy.allowRepeatCallers();
         final boolean allowSystem = mConsolidatedPolicy.allowSystem();
         final boolean allowMedia = mConsolidatedPolicy.allowMedia();
         final boolean allowAlarms = mConsolidatedPolicy.allowAlarms();
 
         // notification restrictions
-        final boolean muteNotifications =
-                (mSuppressedEffects & SUPPRESSED_EFFECT_NOTIFICATIONS) != 0;
+        final boolean muteNotifications = zenOn
+                || (mSuppressedEffects & SUPPRESSED_EFFECT_NOTIFICATIONS) != 0;
         // call restrictions
         final boolean muteCalls = zenAlarmsOnly
-                || (zenPriorityOnly && !allowCalls && !allowRepeatCallers)
+                || (zenPriorityOnly && !(allowCalls || allowRepeatCallers))
                 || (mSuppressedEffects & SUPPRESSED_EFFECT_CALLS) != 0;
         // alarm restrictions
         final boolean muteAlarms = zenPriorityOnly && !allowAlarms;
