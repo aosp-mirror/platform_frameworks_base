@@ -1994,12 +1994,11 @@ public final class OomAdjuster {
         if (app.hasForegroundServices()) {
             capability |= capabilityFromFGS;
         } else if (!ActivityManager.isProcStateBackground(procState)) {
-            // procState higher than PROCESS_STATE_TRANSIENT_BACKGROUND implicitly has
+            // procState higher than PROCESS_STATE_BOUND_FOREGROUND_SERVICE implicitly has
             // camera/microphone capability
             if (procState == PROCESS_STATE_FOREGROUND_SERVICE && procStateFromFGSClient) {
                 // if the FGS state is passed down from client, do not grant implicit capabilities.
             } else {
-                //TODO: remove this line when enforcing the feature.
                 capability |= PROCESS_CAPABILITY_ALL_IMPLICIT;
             }
         }
