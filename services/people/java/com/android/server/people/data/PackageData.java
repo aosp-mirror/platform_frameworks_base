@@ -253,6 +253,6 @@ public class PackageData {
 
     void onDestroy() {
         mEventStore.onDestroy();
-        // TODO: STOPSHIP: Destroy conversation info for the case of package being uninstalled.
+        mConversationStore.onDestroy();
     }
 }

@@ -62,6 +62,7 @@ abstract class AbstractProtoDiskReadWriter<T> {
     @GuardedBy("this")
     private ScheduledFuture<?> mScheduledFuture;
 
+    // File name -> data class
     @GuardedBy("this")
     private Map<String, T> mScheduledFileDataMap = new ArrayMap<>();
 
@@ -84,7 +85,8 @@ abstract class AbstractProtoDiskReadWriter<T> {
     }
 
     @WorkerThread
-    void delete(@NonNull String fileName) {
+    synchronized void delete(@NonNull String fileName) {
+        mScheduledFileDataMap.remove(fileName);
         final File file = getFile(fileName);
         if (!file.exists()) {
             return;

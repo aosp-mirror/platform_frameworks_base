@@ -191,6 +191,15 @@ class ConversationStore {
         return getConversation(mNotifChannelIdToShortcutIdMap.get(notifChannelId));
     }
 
+    synchronized void onDestroy() {
+        mConversationInfoMap.clear();
+        mContactUriToShortcutIdMap.clear();
+        mLocusIdToShortcutIdMap.clear();
+        mNotifChannelIdToShortcutIdMap.clear();
+        mPhoneNumberToShortcutIdMap.clear();
+        mConversationInfosProtoDiskReadWriter.deleteConversationsFile();
+    }
+
     @MainThread
     private synchronized void updateConversationsInMemory(
             @NonNull ConversationInfo conversationInfo) {
@@ -323,6 +332,11 @@ class ConversationStore {
         @MainThread
         void saveConversationsImmediately(@NonNull List<ConversationInfo> conversationInfos) {
             saveImmediately(mConversationInfoFileName, conversationInfos);
+        }
+
+        @WorkerThread
+        void deleteConversationsFile() {
+            delete(mConversationInfoFileName);
         }
     }
 }
