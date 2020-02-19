@@ -190,7 +190,7 @@
     <item msgid="5664310435707146591">"더 빠르게"</item>
     <item msgid="5491266922147715962">"매우 빠르게"</item>
     <item msgid="7659240015901486196">"상당히 빠르게"</item>
-    <item msgid="7147051179282410945">"매우 빠르게"</item>
+    <item msgid="7147051179282410945">"굉장히 빠르게"</item>
     <item msgid="581904787661470707">"가장 빠르게"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"프로필 선택"</string>
@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB 디버깅"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB가 연결된 경우 디버그 모드 사용"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB 디버깅 권한 승인 취소"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"무선 디버깅"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi가 연결되었을 때 디버그 모드 사용"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"오류"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"무선 디버깅"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"사용 가능한 기기를 보고 사용하려면 무선 디버깅을 사용 설정하세요."</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR 코드로 기기 페어링"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR 코드 스캐너를 사용하여 새 기기 페어링"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"페어링 코드로 기기 페어링"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"6자리 코드를 사용하여 새 기기 페어링"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"페어링된 기기"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"현재 연결된 기기"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"기기 세부정보"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"저장 안함"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"기기 지문: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"연결할 수 없음"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>이(가) 올바른 네트워크에 연결되어 있는지 확인하세요."</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"기기 페어링"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi 페어링 코드"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"페어링 실패"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"기기가 동일한 네트워크에 연결되어 있는지 확인하세요"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR 코드를 스캔하여 Wi‑Fi를 통해 기기 페어링"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"기기 페어링 중…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"기기를 페어링할 수 없습니다. QR 코드가 잘못되었거나 기기가 동일한 네트워크에 연결되어 있지 않습니다."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP 주소 및 포트"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR 코드 스캔"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR 코드를 스캔하여 Wi‑Fi를 통해 기기 페어링"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, 디버그, 개발자"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"버그 신고 바로가기"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"전원 메뉴에 버그 신고 버튼 표시"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"화면 켜짐 상태 유지"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"가능한 경우 테더링 하드웨어 가속 사용"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB 디버깅을 허용하시겠습니까?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB 디버깅은 개발용으로만 설계되었습니다. 이 기능을 사용하면 컴퓨터와 기기 간에 데이터를 복사하고 알림 없이 기기에 앱을 설치하며 로그 데이터를 읽을 수 있습니다."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"무선 디버깅을 허용하시겠습니까?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"무선 디버깅은 개발용으로만 설계되었습니다. 이 기능을 사용하면 컴퓨터와 기기 간에 데이터를 복사하고 알림 없이 기기에 앱을 설치하며 로그 데이터를 읽을 수 있습니다."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"이전에 승인한 모든 컴퓨터에서 USB 디버깅에 대한 액세스 권한을 취소하시겠습니까?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"개발자 설정을 허용하시겠습니까?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"이 설정은 개발자용으로만 설계되었습니다. 이 설정을 사용하면 기기 및 애플리케이션에 예기치 않은 중단이나 오류가 발생할 수 있습니다."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"적색약(적녹)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"청색약(청황)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"색보정"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"색상 보정을 사용하면 색맹인 사용자가 색상을 정확하게 구분하는 데 도움이 됩니다."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>, <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"남은 시간 약 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> 미만 남음(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> 이상 남음(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> 이상 남음"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"휴대전화가 곧 종료될 수 있음"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"태블릿이 곧 종료될 수 있음"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"기기가 곧 종료될 수 있음"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"휴대전화가 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"태블릿이 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"기기가 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"휴대전화가 곧 종료될 수 있음"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"태블릿이 곧 종료될 수 있음"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"기기가 곧 종료될 수 있음"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"휴대전화가 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"태블릿이 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"기기가 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"충전 완료까지 <xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전 완료까지 <xliff:g id="TIME">%2$s</xliff:g> 남음"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"충전 중"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"고속 충전 중"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"저속 충전 중"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"충전 안함"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"전원이 연결되었지만 현재 충전할 수 없음"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"충전 완료"</string>

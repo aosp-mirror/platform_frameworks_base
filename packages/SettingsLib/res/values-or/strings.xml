@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB ଡିବଗ୍‌ ହେଉଛି"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB ସଂଯୁକ୍ତ ହେବାବେଳେ ଡିବଗ୍‌ ମୋଡ୍‌"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ଡିବଗିଙ୍ଗ ଅଧିକାରକୁ କାଢ଼ିଦିଅନ୍ତୁ"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"ୱେୟାରଲେସ୍ ଡିବଗିଂ"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ୱାଇ-ଫାଇ ସଂଯୁକ୍ତ ଥିବା ବେଳେ ଡିବଗ୍ ମୋଡ୍"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"ତ୍ରୁଟି"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"ୱେୟାରଲେସ୍ ଡିବଗିଂ"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ଉପଲବ୍ଧ ଡିଭାଇସଗୁଡ଼ିକୁ ଦେଖିବାକୁ ଏବଂ ବ୍ୟବହାର କରିବାକୁ ୱେୟାରଲେସ୍ ଡିବଗିଂ ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR କୋଡରେ ଡିଭାଇସକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR କୋଡ୍ ସ୍କାନର୍ ବ୍ୟବହାର କରି ନୂଆ ଡିଭାଇସଗୁଡ଼ିକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ପେୟାରିଂ କୋଡରେ ଡିଭାଇସକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ଛଅ ଡିଜିଟ୍ କୋଡ୍ ବ୍ୟବହାର କରି ନୂଆ ଡିଭାଇସଗୁଡ଼ିକୁ ପେୟାର୍ କରନ୍ତୁ"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"ପେୟାର୍ ହୋଇଥିବା ଡିଭାଇସଗୁଡ଼ିକ"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"ବର୍ତ୍ତମାନ ସଂଯୁକ୍ତ ଅଛି"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"ଡିଭାଇସ୍ ବିବରଣୀ"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"ଭୁଲିଗଲେ"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"ଡିଭାଇସ୍ ଫିଙ୍ଗରପ୍ରିଣ୍ଟ: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"ସଂଯୋଗ ବିଫଳ ହେଲା"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ଫୋନ୍ ନେଟୱାର୍କ ସହ ସଂଯୁକ୍ତ ଥିବା ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"ଡିଭାଇସରୁ ପେୟାର୍ କରନ୍ତୁ"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"ୱାଇ-ଫାଇ ପେୟାରିଂ କୋଡ୍"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"ପେୟାରିଂ ବିଫଳ ହେଲା"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"ଡିଭାଇସଟି ସମାନ ନେଟୱାର୍କରେ ସଂଯୋଗ ହୋଇଥିବା ସୁନିଶ୍ଚିତ କରନ୍ତୁ।"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"ଏକ QR କୋଡ୍ ସ୍କାନ୍ କରି ୱାଇ-ଫାଇରେ ଡିଭାଇସ୍ ପେୟାର୍ କରନ୍ତୁ"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"ଡିଭାଇସ୍ ପେୟାର୍ କରାଯାଉଛି…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ଡିଭାଇସରୁ ପେୟାର୍ ହେବାରେ ବିଫଳ ହୋଇଛି। QR କୋଡ୍ ସଠିକ୍ ନଥିଲା ବା ଡିଭାଇସ୍ ସମାନ ନେଟୱାର୍କରେ ସଂଯୋଗ ହୋଇନାହିଁ।"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ଠିକଣା ଓ ପୋର୍ଟ"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR କୋଡ୍ ସ୍କାନ୍ କରନ୍ତୁ"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"ଏକ QR କୋଡ୍ ସ୍କାନ୍ କରି ୱାଇ-ଫାଇରେ ଡିଭାଇସ୍ ପେୟାର୍ କରନ୍ତୁ"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ଡିବଗ୍, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ବଗ୍ ରିପୋର୍ଟ ସର୍ଟକଟ୍‌"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"ବଗ୍ ରିପୋର୍ଟ ଦେବାପାଇଁ ପାୱାର୍‌ ମେନୁରେ ଏକ ବଟନ୍‌ ଦେଖନ୍ତୁ"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"ଜାଗ୍ରତ ରଖନ୍ତୁ"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"ଯଦି ଉପଲବ୍ଧ ଥାଏ, ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର୍‌ ଆକ୍ସିଲିରେସନ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ଡିବଗିଙ୍ଗ କରିବେ?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB ଡିବଗିଂ କେବଳ ଡେଭଲପମେଣ୍ଟ ଉଦ୍ଦେଶ୍ୟ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ ଅଟେ। ଆପଣଙ୍କ କମ୍ପ୍ୟୁଟର ଏବଂ ଡିଭାଇସ୍‌ ମଧ୍ୟରେ ଡାଟା କପି କରିବାକୁ, ବିନା ବିଜ୍ଞପ୍ତିରେ ଆପଣଙ୍କ ଡିଭାଇସରେ ଆପସ୍‌ ସଂସ୍ଥାପନ କରିବାକୁ, ଏବଂ ଲଗ୍‌ ଡାଟା ପଢିବାକୁ ଏହା ବ୍ୟବହାର କରନ୍ତୁ।"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"ୱେୟାରଲେସ୍ ଡିବଗିଂ ପାଇଁ ଅନୁମତି ଦେବେ?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ୱେୟାରଲେସ୍ ଡିବଗିଂ କେବଳ ଉନ୍ନତି ଉଦ୍ଦେଶ୍ୟ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ ଅଟେ। ଆପଣଙ୍କ କମ୍ପ୍ୟୁଟର ଏବଂ ଡିଭାଇସ୍ ମଧ୍ୟରେ ଡାଟା କପି କରିବାକୁ, ବିନା ବିଜ୍ଞପ୍ତିରେ ଆପଣଙ୍କ ଡିଭାଇସରେ ଆପ୍ସ ଇନଷ୍ଟଲ୍ କରିବାକୁ ଏବଂ ଲଗ୍ ଡାଟା ପଢ଼ିବା ପାଇଁ ଏହାକୁ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"ଅଧିକୃତ ସମସ୍ତ କମ୍ପ୍ୟୁଟରରୁ USB ଡିବଗ୍‌ କରିବା ଆକ୍ସେସ୍‌ ପ୍ରତ୍ୟାହାର କରିବେ କି?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"ଡେଭଲପମେଣ୍ଟ ସେଟିଙ୍ଗ ଅନୁମତି ଦେବେ?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ଏହି ସେଟିଙ୍ଗଗୁଡ଼ିକ କେବଳ ବିକାଶ ବ୍ୟବହାର ପାଇଁ ଉଦ୍ଦିଷ୍ଟ। ସେଗୁଡ଼ିକ କାରଣରୁ ଆପଣଙ୍କ ଡିଭାଇସ୍‌ ଓ ଆପ୍ଲିକେଶନ୍‍‍ଗୁଡ଼ିକ ଠିକ୍‌ ଭାବେ କାମ ନକରିପାରେ।"</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ପ୍ରୋଟାନୋମାଲି (ଲାଲ୍‌-ସବୁଜ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (ନୀଳ-ହଳଦିଆ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ରଙ୍ଗ ସଠିକତା"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"ରଙ୍ଗ ଚିହ୍ନିବାରେ ସମସ୍ୟା ଥିବା ଲୋକମାନଙ୍କୁ କଲର୍ କରେକ୍ସନ୍ ସଠିକ୍ ରଙ୍ଗ ଦେଖିବାରେ ସାହାଯ୍ୟ କରିଥାଏ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ଦ୍ୱାରା ଓଭର୍‌ରାଇଡ୍‌ କରାଯାଇଛି"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"ପାଖାପାଖି <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ବଳକା ଅଛି"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ରୁ କମ୍ ସମୟ ବଳକା ଅଛି (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>ରୁ ଅଧିକ ସମୟ ବଳକା ଅଛି(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>ରୁ ଅଧିକ ବଳକା ଅଛି"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"ଖୁବ୍ ଶୀଘ୍ର ଫୋନ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"ଖୁବ୍ ଶୀଘ୍ର ଟାବଲେଟ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"ଡିଭାଇସ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"ଖୁବ୍ ଶୀଘ୍ର ଫୋନ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"ଖୁବ୍ ଶୀଘ୍ର ଟାବଲେଟ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"ଖୁବ୍ ଶୀଘ୍ର ଡିଭାଇସ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ଫୋନ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ଟାବଲେଟ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ଡିଭାଇସ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"ଫୋନ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ଟାବଲେଟ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ଡିଭାଇସ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"ଚାର୍ଜ ହେବା ପାଇଁ <xliff:g id="TIME">%1$s</xliff:g> ବାକି ଅଛି"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ଚାର୍ଜ ହେବା ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ଅଜ୍ଞାତ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ଚାର୍ଜ ହେଉଛି"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ଶୀଘ୍ର ଚାର୍ଜ ହେଉଛି"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ଚାର୍ଜ ହେଉନାହିଁ"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ପ୍ଲଗ୍‌ରେ ଲାଗିଛି, ହେଲେ ଏବେ ଚାର୍ଜ କରିପାରିବ ନାହିଁ"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"ଚାର୍ଜ ସମ୍ପୂର୍ଣ୍ଣ"</string>

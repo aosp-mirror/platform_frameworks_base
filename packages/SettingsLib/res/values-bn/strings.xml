@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB ডিবাগিং"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB কানেক্ট থাকাকালীন ডিবাগ মোড"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ডিবাগিং অনুমতিগুলি প্রত্যাহার করুন"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"ওয়্যারলেস ডিবাগিং"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ওয়াই-ফাই কানেক্ট থাকাকালীন ডিবাগ মোড"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"সমস্যা"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"ওয়্যারলেস ডিবাগিং"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"কোন কোন ডিভাইস উপলভ্য আছে তা দেখে নিয়ে ব্যবহার করার জন্য, ওয়্যারলেস ডিবাগিং চালু করুন"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR কোড ব্যবহার করে ডিভাইস যোগ করুন"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR কোড স্ক্যানার ব্যবহার করে নতুন ডিভাইস যোগ করুন"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"যোগ করার কোড ব্যবহার করে ডিভাইস যোগ করুন"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ছয় সংখ্যার কোড ব্যবহার করে নতুন ডিভাইস যোগ করুন"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"যোগ করা ডিভাইস"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"এখন কানেক্ট রয়েছে"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"ডিভাইসের বিবরণ"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"ভুলে যান"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"ডিভাইসে আঙ্গুলের ছাপ: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"কানেক্ট করা যায়নি"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>টি সঠিক নেটওয়ার্কে কানেক্ট আছে কিনা দেখে নিন"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"ডিভাইসের সাথে যোগ করুন"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"ওয়াই-ফাই যোগ করার কোড"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"যোগ করা যায়নি"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"ডিভাইসটি একই নেটওয়ার্কে কানেক্ট আছে কিনা দেখে নিন।"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR কোড স্ক্যান করে ওয়াই-ফাই ব্যবহার করে ডিভাইস যোগ করুন"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"ডিভাইস যোগ করা হচ্ছে…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ডিভাইস যোগ করা যায়নি। এটি দুটি কারণে হয়ে থাকে - QR কোডটি সঠিক নয় বা ডিভাইসটি একই নেটওয়ার্কে কানেক্ট করা নেই।"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP অ্যাড্রেস ও পোর্ট"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR কোড স্ক্যান করুন"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR কোড স্ক্যান করে ওয়াই-ফাই ব্যবহার করে ডিভাইস যোগ করুন"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ত্রুটি প্রতিবেদনের শর্টকাট"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"সমস্যার তথ্য ক্যাপচার করতে পাওয়ার মেনুতে একটি বোতাম দেখান"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"জাগিয়ে রাখুন"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন উপলভ্য থাকলে ব্যবহার করুন"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ডিবাগিং মঞ্জুর করবেন?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB ডিবাগিং কেবলমাত্র বিকাশ করার উদ্দেশ্যে। আপনার কম্পিউটার এবং আপনার ডিভাইসের মধ্যে ডেটা অনুলিপি করতে এটি ব্যবহার করুন, বিজ্ঞপ্তি ছাড়া আপনার ডিভাইসে অ্যাপ্লিকেশানগুলি ইনস্টল করুন এবং ডেটা লগ পড়ুন।"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"ওয়্যারলেস ডিবাগিং-এর অনুমতি দেবেন?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ওয়্যারলেস ডিবাগিং কেবলমাত্র বিকাশ করার উদ্দেশ্যে। আপনার কম্পিউটার এবং আপনার ডিভাইসের মধ্যে ডেটা কপি করতে এটি ব্যবহার করুন, বিজ্ঞপ্তি ছাড়া আপনার ডিভাইসে অ্যাপ ইনস্টল করুন এবং ডেটা লগ পড়ুন।"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"আপনি আগে যে সব কম্পিউটার USB ডিবাগিং এর অ্যাক্সেসের অনুমতি দিয়েছিলেন তা প্রত্যাহার করবেন?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"উন্নতি সেটিংসের অনুমতি দেবেন?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"এইসব সেটিংস কেবলমাত্র উন্নত করার উদ্দেশ্য। সেগুলি কারণে আপনার ডিভাইস ভেঙ্গে এবং অ্যাপ্লিকেশানগুলি ভালো ভাবে কাজ করা নাও কারতে পারে।"</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"প্রোটানোম্যালি (লাল-সবুজ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ট্রিট্যানোম্যালি (নীল-হলুদ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"রঙ সংশোধন"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"রঙ অ্যাডজাস্ট করার সেটিংস, বর্ণান্ধতা আছে এমন ব্যক্তিদের আরও সঠিকভাবে রঙ দেখতে সাহায্য করে"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> এর দ্বারা ওভাররাইড করা হয়েছে"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"আর আনুমানিক <xliff:g id="TIME_REMAINING">%1$s</xliff:g> চলবে"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"আর <xliff:g id="THRESHOLD">%1$s</xliff:g>-এর কম চার্জ বাকি আছে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"আরও <xliff:g id="TIME_REMAINING">%1$s</xliff:g>-এর বেশি চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"আরও <xliff:g id="TIME_REMAINING">%1$s</xliff:g>-এর বেশি চলবে"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"ফোনটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"ট্যাবলেটটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"ডিভাইসটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"ফোনটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"ট্যাবলেটটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"ডিভাইসটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ফোন শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ট্যাবলেটটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ডিভাইসটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"ফোনটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ট্যাবলেটটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ডিভাইসটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"সম্পূর্ণ চার্জ হতে <xliff:g id="TIME">%1$s</xliff:g> বাকি আছে"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>-এ সম্পূর্ণ চার্জ হয়ে যাবে"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"অজানা"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"চার্জ হচ্ছে"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"দ্রুত চার্জ হচ্ছে"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ধীরে চার্জ হচ্ছে"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"চার্জ হচ্ছে না"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"প্লাগ-ইন করা হয়েছে কিন্তু এখনই চার্জ করা যাবে না"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"পূর্ণ"</string>

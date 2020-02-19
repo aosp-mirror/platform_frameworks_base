@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"Otklanjanje pogrešaka putem USB-a"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Otklanjanje pogrešaka putem USB-a"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Opoziv autorizacija za otklanjanje pogrešaka putem USB-a"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Bežično otklanjanje pogrešaka"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Način otklanjanja pogrešaka kad je Wi-Fi povezan"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Pogreška"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Bežično otklanjanje pogrešaka"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Da biste vidjeli dostupne uređaje i mogli se njima koristiti, uključite bežično otklanjanje pogrešaka"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Uparivanje uređaja pomoću QR koda"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Uparivanje novih uređaja pomoću čitača QR koda"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Uparivanje uređaja pomoću koda za uparivanje"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Uparivanje novih uređaja pomoću šesteroznamenkastog koda"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Upareni uređaji"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Trenutačno povezano"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Pojedinosti o uređaju"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Zaboravi"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Otisak prsta na uređaju: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Neuspješno povezivanje"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Provjerite je li uređaj <xliff:g id="DEVICE_NAME">%1$s</xliff:g> povezan na ispravnu mrežu"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Uparivanje s uređajem"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Kôd za uparivanje putem Wi-Fija"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Uparivanje nije uspjelo"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Provjerite je li uređaj povezan na istu mrežu."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Uparivanje uređaja putem Wi-Fija skeniranjem QR koda"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Uparivanje uređaja…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Uparivanje uređaja nije uspjelo. QR kôd je neispravan ili uređaj nije povezan na istu mrežu."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP adresa i priključak"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skeniraj QR kôd"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Uparivanje uređaja putem Wi-Fija skeniranjem QR koda"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, otklanjanje pogrešaka, razvoj"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Prečac izvješća o pogreškama"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikaži gumb u izborniku napajanja za izradu izvješća o programskim pogreškama"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ne pokreći mirovanje"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Upotreba hardverskog ubrzanja za modemsko povezivanje ako je dostupno"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Omogućiti otklanjanje pogrešaka putem USB-a?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Otklanjanje pogrešaka putem USB-a namijenjeno je samo u razvojne svrhe. Može se upotrijebiti za kopiranje podataka s računala na uređaj i obrnuto, instalaciju aplikacija na uređaju bez obavijesti i za čitanje dnevničkih zapisa."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Želite li omogućiti bežično otklanjanje pogrešaka?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Bežično otklanjanje pogrešaka namijenjeno je samo u razvojne svrhe. Može se upotrijebiti za kopiranje podataka s računala na uređaj i obrnuto, instalaciju aplikacija na uređaj bez obavijesti i za čitanje dnevničkih zapisa."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Želite li opozvati pristup uklanjanju pogrešaka putem USB-a sa svih računala koja ste prethodno autorizirali?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Dopustiti postavke razvojnih programera?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Ove su postavke namijenjene samo razvojnim programerima. One mogu uzrokovati kvar ili neželjeno ponašanje vašeg uređaja i aplikacija na njemu."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalija (crveno – zeleno)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalija (plavo – žuto)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Korekcija boje"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Korekcija boje pomaže slijepima za boje da vide preciznije boje"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Premošćeno postavkom <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Još otprilike <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Preostalo je manje od <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Preostalo je više od <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Preostalo je više od <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Telefon bi se uskoro mogao isključiti"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Tablet bi se uskoro mogao isključiti"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Uređaj bi se uskoro mogao isključiti"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Telefon bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Tablet bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Uređaj bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon bi se uskoro mogao isključiti"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet bi se uskoro mogao isključiti"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Uređaj bi se uskoro mogao isključiti"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Telefon bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Uređaj bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Napunit će se za <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – napunit će se za <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nepoznato"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Punjenje"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Brzo punjenje"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Sporo punjenje"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ne puni se"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Uključen, trenutačno se ne može puniti"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Puna"</string>

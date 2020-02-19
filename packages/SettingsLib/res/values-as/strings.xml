@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"ইউএছবি ডিবাগিং"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"ইউএছবি সংযোগ হৈ থকাৰ অৱস্থাত ডিবাগ ম\'ড"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"ইউএছবি ডিবাগিং অনুমতিসমূহ প্ৰত্যাহাৰ কৰক"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"ৱায়াৰলেছ ডিবাগিং"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ৱাই-ফাই সংযোজিত হৈ থকা সময়ত ডিবাগ ম’ড"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"আসোঁৱাহ"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"ৱায়াৰলেছ ডিবাগিং"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"উপলব্ধ ডিভাইচসমূহ চাবলৈ আৰু ব্যৱহাৰ কৰিবলৈ, ৱায়াৰলেছ ডিবাগিং অন কৰক"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"কিউআৰ ক’ডৰ জৰিয়তে ডিভাইচ পেয়াৰ কৰক"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"কিউআৰ ক’ড স্কেনাৰ ব্যৱহাৰ কৰি নতুন ডিভাইচসমূহ পেয়াৰ কৰক"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"পেয়াৰ কৰা ক’ডৰ জৰিয়তে ডিভাইচ পেয়াৰ কৰক"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ছটা অংকৰ ক’ড ব্যৱহাৰ কৰি নতুন ডিভাইচসমূহ পেয়াৰ কৰক"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"পেয়াৰ কৰি থোৱা ডিভাইচসমূহ"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"সম্প্ৰতি সংযোজিত হৈ আছে"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"ডিভাইচটোৰ সবিশেষ"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"পাহৰক"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"ডিভাইচৰ ফিংগাৰপ্ৰিণ্ট: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"সংযোগ কৰিব পৰা নগ’ল"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>টো শুদ্ধ নেটৱৰ্কৰ সৈতে সংযোগ কৰাটো নিশ্চিত কৰক"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"ডিভাইচৰ সৈতে পেয়াৰ কৰক"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"ৱাই-ফাইৰ পেয়াৰ কৰা ক’ড"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"পেয়াৰ কৰিব পৰা নগ’ল"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"ডিভাইচটো একেটা নেটৱৰ্কৰ সৈতে সংযোগ কৰাটো নিশ্চিত কৰক।"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"এটা কিউআৰ ক’ড স্কেন কৰি ৱাই-ফাইৰে ডিভাইচ পেয়াৰ কৰক"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"ডিভাইচ পেয়াৰ কৰি থকা হৈছে…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ডিভাইচটো পেয়াৰ কৰিব পৰা নগ’ল। কিউআৰ ক’ডটো ভুল অথবা ডিভাইচটো একেটা নেটৱৰ্কৰ সৈতে সংযোগ কৰা হোৱা নাই।"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"আইপি ঠিকনা &amp; প’ৰ্ট"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"কিউআৰ ক’ড স্কেন কৰক"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"এটা কিউআৰ ক’ড স্কেন কৰি ৱাই-ফাইৰে ডিভাইচ পেয়াৰ কৰক"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ডিবাগ, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"বাগ ৰিপৰ্টৰ শ্ৱৰ্টকাট"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"পাৱাৰ মেনুত বাগ প্ৰতিবেদন গ্ৰহণ কৰিবলৈ এটা বুটাম দেখুৱাওক"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"জাগ্ৰত কৰি ৰাখক"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"যদিহে উপলব্ধ হয় তেন্তে টেডাৰিং হাৰ্ডৱেৰ ত্বৰণ ব্যৱহাৰ কৰক"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"ইউএছবি ডিবাগিঙৰ অনুমতি দিয়েনে?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"ইউএছবি ডিবাগ কৰা কাৰ্য কেৱল বিকাশৰ উদ্দেশ্যৰেহে কৰা হৈছে৷ আপোনাৰ কম্পিউটাৰ আৰু আপোনাৰ ডিভাইচৰ মাজত ডেটা প্ৰতিলিপি কৰিবলৈ এইটো ব্যৱহাৰ কৰক, কোনো জাননী নিদিয়াকৈয়ে আপোনাৰ ডিভাইচত এপ্‌সমূহ ইনষ্টল কৰক আৰু লগ ডেটা পঢ়ক৷"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"ৱায়াৰলেছ ডিবাগিঙৰ অনুমতি দিবনে?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ৱায়াৰলেছ ডিবাগিং কেৱল বিকাশৰ উদ্দেশ্যেৰে কৰা হয়। আপোনাৰ কম্পিউটাৰ আৰু আপোনাৰ ডিভাইচৰ মাজত ডেটা প্ৰতিলিপি কৰিবলৈ, কোনো জাননী নিদিয়াকৈয়ে আপোনাৰ ডিভাইচত এপ্‌সমূহ ইনষ্টল কৰিবলৈ আৰু লগ ডেটা পঢ়িবলৈ এইটো ব্যৱহাৰ কৰক।"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"আপুনি আগতে ইউএছবি ডিবাগিঙৰ বাবে প্ৰৱেশৰ অনুমতি দিয়া সকলো কম্পিউটাৰৰ পৰা সেই অনুমতি প্ৰত্যাহাৰ কৰেনে?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"বিকাশৰ কামৰ বাবে থকা ছেটিংবিলাকক অনুমতি দিবনে?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"এই ছেটিংসমূহ বিকাশৰ কামত ব্যৱহাৰ কৰিবলৈ তৈয়াৰ কৰা হৈছে। সেইবিলাকে আপোনাৰ ডিভাইচ আৰু তাত থকা এপ্লিকেশ্বনসমূহক অকামিলা কৰি পেলাব পাৰে আৰু সেইবিলাকৰ কাৰণে এপ্লিকেশ্বনসমূহে অদ্ভুত আচৰণ কৰিব পাৰে।"</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"প্ৰ’টানোমালি (ৰঙা-সেউজীয়া)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ট্ৰাইটান\'মেলী (নীলা-হালধীয়া)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ৰং শুধৰণী"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"ৰং শুধৰণি কৰা কার্যই বর্ণান্ধ লোকসকলক ৰংবোৰ অধিক সঠিককৈ দেখাত সহায় কৰে"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g>ৰ দ্বাৰা অগ্ৰাহ্য কৰা হৈছে"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"প্রায় <xliff:g id="TIME_REMAINING">%1$s</xliff:g> বাকী আছে"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g>তকৈও কম সময় বাকী আছে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>তকৈও বেছি সময় বাকী আছে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>তকৈও বেছি সময় বাকী আছে"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"ফ\'নটো সোনকালেই বন্ধ হ\'ব পাৰে"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"টেবলেটটো সোনকালেই বন্ধ হ\'ব পাৰে"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"ডিভাইচটো সোনকালেই বন্ধ হ\'ব পাৰে"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"ফ\'নটো সোনকালেই বন্ধ হ\'ব পাৰে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"টেবলেটটো সোনকালেই বন্ধ হ\'ব পাৰে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"ডিভাইচটো সোনকালেই বন্ধ হ\'ব পাৰে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ফ’নটো সোনকালে বন্ধ হৈ যাব পাৰে"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"টেবলেটটো সোনকালে বন্ধ হৈ যাব পাৰে"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ডিভাইচটো সোনকালে বন্ধ হৈ যাব পাৰে"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"ফ’নটো সোনকালে বন্ধ হৈ যাব পাৰে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"টেবলেটটো সোনকালে বন্ধ হৈ যাব পাৰে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ডিভাইচটো সোনকালে বন্ধ হৈ যাব পাৰে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"চাৰ্জ হ’বলৈ <xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> চাৰ্জ হ\'বলৈ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"অজ্ঞাত"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"চাৰ্জ কৰি থকা হৈছে"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"দ্ৰুততাৰে চাৰ্জ হৈছে"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"লাহে লাহে চাৰ্জ হৈছে"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"চ্চাৰ্জ কৰা নাই"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"প্লাগ কৰি থোৱা হৈছে, এই মুহূৰ্তত চ্চাৰ্জ কৰিব নোৱাৰি"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"পূৰ্ণ"</string>

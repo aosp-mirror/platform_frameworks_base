@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB дебаг"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB холбодсон үеийн согог засах горим"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB дебагын зөвшөөрлийг хураах"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Утасгүй алдаа засах"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi холбогдсон үед дебаг хийх горим"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Алдаа"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Утасгүй алдаа засах"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Боломжтой төхөөрөмжүүдийг харах болох ашиглахын тулд утасгүй алдаа засахыг асаана уу"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Хурдан хариу үйлдлийн кодоор төхөөрөмжийг хослуул"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Хурдан хариу үйлдлийн кодын сканнерыг ашиглан шинэ төхөөрөмжүүдийг хослуулна уу"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Хослуулах кодоор төхөөрөмжийг хослуулна уу"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Зургаан оронтой кодыг ашиглан шинэ төхөөрөмжүүдийг хослуулна уу"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Хослуулсан төхөөрөмжүүд"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Одоогоор холбогдсон байна"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Төхөөрөмжийн дэлгэрэнгүй"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Мартах"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Төхөөрөмжийн хурууны хээ: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Холболт амжилтгүй боллоо"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>-г зөв сүлжээнд холбосон эсэхийг шалгана уу"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Төхөөрөмжтэй хослуулах"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi хослуулах код"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Хослуулалт амжилтгүй боллоо"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Төхөөрөмжийг ижил сүлжээнд холбосон эсэхийг шалгана уу."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Хурдан хариу үйлдлийн кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Төхөөрөмжийг хослуулж байна…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Төхөөрөмжийг хослуулж чадсангүй. Хурдан хариу үйлдлийн код буруу эсвэл төхөөрөмжийг ижил сүлжээнд холбоогүй байна."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP хаяг ба порт"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Хурдан хариу үйлдлийн кодыг скан хийх"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Хурдан хариу үйлдлийн кодыг скан хийж Wi-Fi-р төхөөрөмжийг хослуулна уу"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, дебаг хийх, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Алдаа мэдээлэх товчлол"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Цэсэнд алдааны мэдэгдэл авахад зориулсан товчийг харуулах"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Идэвхтэй байлгах"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Модем болгох техник хангамжийн хурдасгуурыг боломжтой тохиолдолд ашиглах"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB дебаг хийхийг зөвшөөрөх үү?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB дебаг нь зөвхөн хөгжүүлэлтийн зорилготой. Үүнийг өөрийн компьютер болон төхөөрөмжийн хооронд өгөгдөл хуулах, өөрийн төхөөрөмж дээр мэдэгдэлгүйгээр аппликейшн суулгах, лог датаг унших зэрэгт ашиглаж болно."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Утасгүй алдаа засахыг зөвшөөрөх үү?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Утасгүй алдаа засах нь зөвхөн хөгжүүлэлтийн зориулалттай. Үүнийг компьютер болон төхөөрөмж хооронд өгөгдөл хуулах, төхөөрөмждөө мэдэгдэлгүйгээр аппууд суулгах болон лог өгөгдлийг унших зэрэгт ашиглана уу."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Таны өмнө нь зөвшөөрөл өгсөн бүх компьютерээс USB дебаг хандалтыг нь хураах уу?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Хөгжлийн тохиргоог зөвшөөрөх үү?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Эдгээр тохиргоо нь зөвхөн хөгжүүлэлтэд ашиглах зорилготой. Эдгээр нь таны төхөөрөмж буюу түүн дээрх аппликейшнүүдийг эвдрэх, буруу ажиллах шалтгаан нь болж болно."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномаль (улаан-ногоон)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомаль (цэнхэр-шар)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Өнгө тохируулах"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Өнгөний залруулга нь өнгө ялгадаггүй хүмүүст өнгийг илүү оновчтой харахад тусалдаг"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Давхарласан <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ойролцоогоор <xliff:g id="TIME_REMAINING">%1$s</xliff:g> үлдсэн"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага хугацаа үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их хугацаа үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их хугацаа үлдсэн"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Утас удахгүй унтарна"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Таблет удахгүй унтарна"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Төхөөрөмж удахгүй унтарна"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Утас удахгүй унтарна (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Таблет удахгүй унтарна (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Төхөөрөмж удахгүй унтарна (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Утас удахгүй унтарч болзошгүй"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Таблет удахгүй унтарч болзошгүй"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Төхөөрөмж удахгүй унтарч болзошгүй"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Утас удахгүй унтарч болзошгүй (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Таблет удахгүй унтарч болзошгүй (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Төхөөрөмж удахгүй унтарч болзошгүй (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Цэнэглэх хүртэл үлдсэн <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - цэнэглэх хүртэл <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Тодорхойгүй"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Цэнэглэж байна"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Хурдан цэнэглэж байна"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Удаан цэнэглэж байна"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Цэнэглэхгүй байна"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Залгаастай тул одоо цэнэглэх боломжгүй"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Дүүрэн"</string>
