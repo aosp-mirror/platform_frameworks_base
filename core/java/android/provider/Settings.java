@@ -8760,6 +8760,13 @@ public final class Settings {
                 "location_permissions_upgrade_to_q_mode";
 
         /**
+         * Whether or not the system Auto Revoke feature is disabled.
+         * @hide
+         */
+        @SystemApi
+        public static final String AUTO_REVOKE_DISABLED = "auto_revoke_disabled";
+
+        /**
          * Map of android.theme.customization.* categories to the enabled overlay package for that
          * category, formatted as a serialized {@link org.json.JSONObject}. If there is no
          * corresponding package included for a category, then all overlay packages in that
