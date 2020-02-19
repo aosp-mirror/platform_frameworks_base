@@ -24,9 +24,9 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 
 /**
- * This is a schedule data item. It contains the schedule title text, the summary text which
- * displays on the summary of the Settings preference and an {@link Intent}. Intent is able to
- * launch the editing page of the schedule data when user clicks this item (preference).
+ * Schedule data item containing the schedule title text, the summary text which is displayed on the
+ * summary of the Settings preference and an {@link Intent} which Settings will launch when the
+ * user clicks on the preference.
  */
 public class ScheduleInfo implements Parcelable {
     private static final String TAG = "ScheduleInfo";
@@ -40,7 +40,7 @@ public class ScheduleInfo implements Parcelable {
         mIntent = builder.mIntent;
     }
 
-    protected ScheduleInfo(Parcel in) {
+    private ScheduleInfo(Parcel in) {
         mTitle = in.readString();
         mSummary = in.readString();
         mIntent = in.readParcelable(Intent.class.getClassLoader());
@@ -48,8 +48,6 @@ public class ScheduleInfo implements Parcelable {
 
     /**
      * Returns the title text.
-     *
-     * @return The title.
      */
     public String getTitle() {
         return mTitle;
@@ -57,15 +55,14 @@ public class ScheduleInfo implements Parcelable {
 
     /**
      * Returns the summary text.
-     *
-     * @return The summary.
      */
     public String getSummary() {
         return mSummary;
     }
 
     /**
-     * Returns an {@link Intent}.
+     * Returns an {@link Intent} which Settings will launch when the user clicks on a schedule
+     * preference.
      */
     public Intent getIntent() {
         return mIntent;
@@ -107,19 +104,15 @@ public class ScheduleInfo implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        return "title : " + mTitle + " summary : " + mSummary + (mIntent == null
-                ? " and intent is null." : ".");
+        return "title: " + mTitle + ", summary: " + mSummary + ", intent: " + mIntent;
     }
 
     /**
      * A simple builder for {@link ScheduleInfo}.
      */
     public static class Builder {
-        @NonNull
         private String mTitle;
-        @NonNull
         private String mSummary;
-        @NonNull
         private Intent mIntent;
 
         /**
