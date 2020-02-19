@@ -27,4 +27,6 @@ public interface NotificationManagerInternal {
             String tag, int id, int userId);
 
     void removeForegroundServiceFlagFromNotification(String pkg, int notificationId, int userId);
+
+    void onConversationRemoved(String pkg, int uid, String conversationId);
 }

@@ -52,6 +52,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.LauncherApps.ShortcutChangeCallback;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
@@ -72,6 +74,7 @@ import android.util.Range;
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.content.PackageMonitor;
 import com.android.server.LocalServices;
+import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.junit.After;
@@ -79,6 +82,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -87,6 +92,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -102,6 +108,7 @@ public final class DataManagerTest {
     private static final String TEST_PKG_NAME = "pkg";
     private static final String TEST_CLASS_NAME = "class";
     private static final String TEST_SHORTCUT_ID = "sc";
+    private static final int TEST_PKG_UID = 35;
     private static final String CONTACT_URI = "content://com.android.contacts/contacts/lookup/123";
     private static final String PHONE_NUMBER = "+1234567890";
     private static final String NOTIFICATION_CHANNEL_ID = "test : sc";
@@ -111,7 +118,9 @@ public final class DataManagerTest {
     @Mock private ShortcutServiceInternal mShortcutServiceInternal;
     @Mock private UsageStatsManagerInternal mUsageStatsManagerInternal;
     @Mock private PackageManagerInternal mPackageManagerInternal;
+    @Mock private NotificationManagerInternal mNotificationManagerInternal;
     @Mock private UserManager mUserManager;
+    @Mock private PackageManager mPackageManager;
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private TelecomManager mTelecomManager;
     @Mock private ContentResolver mContentResolver;
@@ -121,13 +130,16 @@ public final class DataManagerTest {
     @Mock private StatusBarNotification mStatusBarNotification;
     @Mock private Notification mNotification;
 
+    @Captor private ArgumentCaptor<ShortcutChangeCallback> mShortcutChangeCallbackCaptor;
+
     private NotificationChannel mNotificationChannel;
     private DataManager mDataManager;
     private CancellationSignal mCancellationSignal;
+    private ShortcutChangeCallback mShortcutChangeCallback;
     private TestInjector mInjector;
 
     @Before
-    public void setUp() {
+    public void setUp() throws PackageManager.NameNotFoundException {
         MockitoAnnotations.initMocks(this);
 
         addLocalServiceMock(ShortcutServiceInternal.class, mShortcutServiceInternal);
@@ -143,8 +155,12 @@ public final class DataManagerTest {
             return null;
         }).when(mPackageManagerInternal).forEachInstalledPackage(any(Consumer.class), anyInt());
 
+        addLocalServiceMock(NotificationManagerInternal.class, mNotificationManagerInternal);
+
+        when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
         when(mContext.getPackageName()).thenReturn("android");
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
 
         Context originalContext = getInstrumentation().getTargetContext();
         when(mContext.getApplicationInfo()).thenReturn(originalContext.getApplicationInfo());
@@ -175,7 +191,8 @@ public final class DataManagerTest {
         when(mUserManager.getEnabledProfiles(USER_ID_SECONDARY))
                 .thenReturn(Collections.singletonList(buildUserInfo(USER_ID_SECONDARY)));
 
-        when(mContext.getContentResolver()).thenReturn(mContentResolver);
+        when(mPackageManager.getPackageUidAsUser(TEST_PKG_NAME, USER_ID_PRIMARY))
+                .thenReturn(TEST_PKG_UID);
 
         when(mStatusBarNotification.getNotification()).thenReturn(mNotification);
         when(mStatusBarNotification.getPackageName()).thenReturn(TEST_PKG_NAME);
@@ -192,6 +209,10 @@ public final class DataManagerTest {
         mInjector = new TestInjector();
         mDataManager = new DataManager(mContext, mInjector);
         mDataManager.initialize();
+
+        verify(mShortcutServiceInternal).addShortcutChangeCallback(
+                mShortcutChangeCallbackCaptor.capture());
+        mShortcutChangeCallback = mShortcutChangeCallbackCaptor.getValue();
     }
 
     @After
@@ -471,6 +492,43 @@ public final class DataManagerTest {
         assertFalse(conversationInfo.isImportant());
         assertFalse(conversationInfo.isNotificationSilenced());
         assertFalse(conversationInfo.isDemoted());
+    }
+
+    @Test
+    public void testShortcutAddedOrUpdated() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mShortcutChangeCallback.onShortcutsAddedOrUpdated(TEST_PKG_NAME,
+                Collections.singletonList(shortcut), UserHandle.of(USER_ID_PRIMARY));
+
+        List<ConversationInfo> conversations = getConversationsInPrimary();
+
+        assertEquals(1, conversations.size());
+        assertEquals(TEST_SHORTCUT_ID, conversations.get(0).getShortcutId());
+    }
+
+    @Test
+    public void testShortcutDeleted() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut1 = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, "sc1",
+                buildPerson());
+        ShortcutInfo shortcut2 = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, "sc2",
+                buildPerson());
+        mShortcutChangeCallback.onShortcutsAddedOrUpdated(TEST_PKG_NAME,
+                Arrays.asList(shortcut1, shortcut2), UserHandle.of(USER_ID_PRIMARY));
+        mShortcutChangeCallback.onShortcutsRemoved(TEST_PKG_NAME,
+                Collections.singletonList(shortcut1), UserHandle.of(USER_ID_PRIMARY));
+
+        List<ConversationInfo> conversations = getConversationsInPrimary();
+
+        assertEquals(1, conversations.size());
+        assertEquals("sc2", conversations.get(0).getShortcutId());
+
+        verify(mNotificationManagerInternal)
+                .onConversationRemoved(TEST_PKG_NAME, TEST_PKG_UID, "sc1");
     }
 
     @Test
@@ -762,6 +820,11 @@ public final class DataManagerTest {
         @Override
         ScheduledExecutorService createScheduledExecutor() {
             return mExecutorService;
+        }
+
+        @Override
+        Executor getBackgroundExecutor() {
+            return Runnable::run;
         }
 
         @Override
