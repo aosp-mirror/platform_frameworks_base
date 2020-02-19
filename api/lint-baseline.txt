@@ -537,6 +537,9 @@ MissingNullability: android.icu.util.VersionInfo#UNICODE_12_1:
     
 MissingNullability: android.icu.util.VersionInfo#UNICODE_13_0:
     Missing nullability on field `UNICODE_13_0` in class `class android.icu.util.VersionInfo`
+    
+MissingNullability: java.time.chrono.JapaneseEra#REIWA:
+    Missing nullability on field `REIWA` in class `class java.time.chrono.JapaneseEra`
 
 
 RequiresPermission: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
