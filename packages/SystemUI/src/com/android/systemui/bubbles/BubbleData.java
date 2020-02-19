@@ -26,7 +26,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.service.notification.NotificationListenerService;
-import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.Log;
 import android.util.Pair;
 
@@ -285,31 +284,6 @@ public class BubbleData {
             Log.d(TAG, "notificationEntryRemoved: entry=" + entry + " reason=" + reason);
         }
         doRemove(entry.getKey(), reason);
-        dispatchPendingChanges();
-    }
-
-    /**
-     * Called when NotificationListener has received adjusted notification rank and reapplied
-     * filtering and sorting. This is used to dismiss any bubbles which should no longer be shown
-     * due to changes in permissions on the notification channel or the global setting.
-     *
-     * @param rankingMap the updated ranking map from NotificationListenerService
-     */
-    public void notificationRankingUpdated(RankingMap rankingMap) {
-        if (mTmpRanking == null) {
-            mTmpRanking = new NotificationListenerService.Ranking();
-        }
-
-        String[] orderedKeys = rankingMap.getOrderedKeys();
-        for (int i = 0; i < orderedKeys.length; i++) {
-            String key = orderedKeys[i];
-            if (hasBubbleWithKey(key)) {
-                rankingMap.getRanking(key, mTmpRanking);
-                if (!mTmpRanking.canBubble()) {
-                    doRemove(key, BubbleController.DISMISS_BLOCKED);
-                }
-            }
-        }
         dispatchPendingChanges();
     }
 
