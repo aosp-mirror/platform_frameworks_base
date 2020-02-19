@@ -42,7 +42,7 @@ class DetailDialog(
     val intent: PendingIntent
 ) : Dialog(parentContext) {
 
-    lateinit var activityView: ActivityView
+    var activityView: ActivityView
 
     val stateCallback: ActivityView.StateCallback = object : ActivityView.StateCallback() {
         override fun onActivityViewReady(view: ActivityView) {
@@ -61,24 +61,28 @@ class DetailDialog(
         override fun onTaskRemovalStarted(taskId: Int) {}
     }
 
-    init {
-        val window = getWindow()
-        window.requestFeature(Window.FEATURE_NO_TITLE)
+    @Suppress("DEPRECATION")
+    private fun Window.setWindowParams() {
+        requestFeature(Window.FEATURE_NO_TITLE)
 
         // Inflate the decor view, so the attributes below are not overwritten by the theme.
-        window.getDecorView()
-        window.getAttributes().systemUiVisibility =
-            (window.getAttributes().systemUiVisibility
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
+        decorView
+        attributes.systemUiVisibility =
+                (attributes.systemUiVisibility
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
 
-        window.setLayout(MATCH_PARENT, MATCH_PARENT)
-        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-            or WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
-            or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
-        window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
-        window.getAttributes().setFitInsetsTypes(0 /* types */)
+        setLayout(MATCH_PARENT, MATCH_PARENT)
+        clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                or WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+                or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+        setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+        getAttributes().setFitInsetsTypes(0 /* types */)
+    }
+
+    init {
+        getWindow()?.setWindowParams()
 
         setContentView(R.layout.controls_detail_dialog)
 
@@ -89,9 +93,9 @@ class DetailDialog(
     }
 
     override fun show() {
-        val attrs = getWindow().getAttributes()
-        attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-        getWindow().setAttributes(attrs)
+        val attrs = getWindow()?.attributes
+        attrs?.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        getWindow()?.attributes = attrs
 
         activityView.setCallback(stateCallback)
 

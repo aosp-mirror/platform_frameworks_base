@@ -135,7 +135,7 @@ class ControlsFavoritePersistenceWrapper(
     }
 
     private fun parseXml(parser: XmlPullParser): List<ControlInfo> {
-        var type = 0
+        var type: Int
         val infos = mutableListOf<ControlInfo>()
         while (parser.next().also { type = it } != XmlPullParser.END_DOCUMENT) {
             if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {

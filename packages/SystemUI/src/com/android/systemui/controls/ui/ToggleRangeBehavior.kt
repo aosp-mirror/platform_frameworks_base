@@ -60,7 +60,7 @@ class ToggleRangeBehavior : Behavior {
 
         val gestureListener = ToggleRangeGestureListener(cvh.layout)
         val gestureDetector = GestureDetector(context, gestureListener)
-        cvh.layout.setOnTouchListener({ v: View, e: MotionEvent ->
+        cvh.layout.setOnTouchListener { _: View, e: MotionEvent ->
             if (gestureDetector.onTouchEvent(e)) {
                 return@setOnTouchListener true
             }
@@ -72,7 +72,7 @@ class ToggleRangeBehavior : Behavior {
             }
 
             return@setOnTouchListener false
-        })
+        }
     }
 
     override fun bind(cws: ControlWithState) {
