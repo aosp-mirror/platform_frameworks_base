@@ -613,7 +613,9 @@ filegroup {
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SystemApi.java",
+        "core/java/android/annotation/TestApi.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
     ],
@@ -676,17 +678,6 @@ filegroup {
     ],
 }
 
-filegroup {
-    name: "framework-tethering-annotations",
-    srcs: [
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/RequiresPermission.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/com/android/internal/annotations/GuardedBy.java",
-    ],
-}
 // Build ext.jar
 // ============================================================
 java_library {
