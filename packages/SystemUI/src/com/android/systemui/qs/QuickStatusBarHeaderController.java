@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.carrier.QSCarrierGroupController;
 
 import javax.inject.Inject;
 

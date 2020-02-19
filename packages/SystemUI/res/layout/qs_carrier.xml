@@ -14,7 +14,7 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.qs.QSCarrier
+<com.android.systemui.qs.carrier.QSCarrier
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linear_carrier"
     android:layout_width="wrap_content"
@@ -46,4 +46,4 @@
         android:singleLine="true"
         android:maxEms="7"/>
 
-</com.android.systemui.qs.QSCarrier>
+</com.android.systemui.qs.carrier.QSCarrier>
