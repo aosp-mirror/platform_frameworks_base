@@ -123,5 +123,12 @@ cc_library {
         "libcutils",
     ],
     static_libs: ["libstatssocket"],
+
+    apex_available: [
+        "//apex_available:platform",
+        //TODO(b/149781190): Remove this once statsd no longer depends on libstatslog
+        "com.android.os.statsd",
+        "test_com.android.os.statsd",
+    ],
 }
 
