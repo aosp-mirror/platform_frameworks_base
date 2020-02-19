@@ -18,6 +18,8 @@
     <string name="notification_install_inprogress">Install in progress</string>
     <!-- Displayed on notification: Dynamic System installation failed [CHAR LIMIT=128] -->
     <string name="notification_install_failed">Install failed</string>
+    <!-- Displayed on notification: Image validation failed [CHAR LIMIT=128] -->
+    <string name="notification_image_validation_failed">Image validation failed. Abort installation.</string>
     <!-- Displayed on notification: We are running in Dynamic System [CHAR LIMIT=128] -->
     <string name="notification_dynsystem_in_use">Currently running a dynamic system. Restart to use the original Android version.</string>
 
