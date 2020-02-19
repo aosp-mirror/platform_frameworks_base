@@ -1278,20 +1278,21 @@
     <integer name="config_screenBrightnessSettingDefault">102</integer>
 
     <!-- Minimum screen brightness setting allowed by power manager.
-        The user is forbidden from setting the brightness below this level.
-        Equivalent to 10/255. -->
-    <item name="config_screenBrightnessSettingMinimumFloat" format="float" type="dimen">0.035433073</item>
+         -2 is invalid so setting will resort to int value specified above.
+         Set this to 0.0 to allow screen to go to minimal brightness.
+         The user is forbidden from setting the brightness below this level. -->
+    <item name="config_screenBrightnessSettingMinimumFloat" format="float" type="dimen">-2</item>
 
     <!-- Maximum screen brightness allowed by the power manager.
-         The user is forbidden from setting the brightness above this level.
-         This value is a fraction between 3.5% and 100%. -->
-    <item name="config_screenBrightnessSettingMaximumFloat" format="float" type="dimen">1.0</item>
+         -2 is invalid so setting will resort to int value specified above.
+         Set this to 1.0 for maximum brightness range.
+         The user is forbidden from setting the brightness above this level. -->
+    <item name="config_screenBrightnessSettingMaximumFloat" format="float" type="dimen">-2</item>
 
-    <!-- Default screen brightness setting.
-         Must be in the range specified by minimum and maximum.
-         This value is a fraction between 3.5% and 100%.
-         Equivalent to 102/255 (default for this device)    -->
-    <item name="config_screenBrightnessSettingDefaultFloat" format="float" type="dimen">0.397637795276</item>
+    <!-- Default screen brightness setting set.
+         -2 is invalid so setting will resort to int value specified above.
+         Must be in the range specified by minimum and maximum. -->
+    <item name="config_screenBrightnessSettingDefaultFloat" format="float" type="dimen">-2</item>
 
     <!-- Note: This setting is deprecated, please use
     config_screenBrightnessSettingForVrDefaultFloat instead -->
