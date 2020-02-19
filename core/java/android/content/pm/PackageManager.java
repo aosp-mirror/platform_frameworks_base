@@ -4332,6 +4332,36 @@ public abstract class PackageManager {
             @NonNull String permName, @NonNull UserHandle user);
 
     /**
+     * Revoke a runtime permission that was previously granted by {@link
+     * #grantRuntimePermission(String, String, android.os.UserHandle)}. The
+     * permission must have been requested by and granted to the application.
+     * If the application is not allowed to hold the permission, a {@link
+     * java.lang.SecurityException} is thrown. If the package or permission is
+     * invalid, a {@link java.lang.IllegalArgumentException} is thrown.
+     * <p>
+     * <strong>Note: </strong>Using this API requires holding
+     * android.permission.REVOKE_RUNTIME_PERMISSIONS and if the user id is
+     * not the current user android.permission.INTERACT_ACROSS_USERS_FULL.
+     * </p>
+     *
+     * @param packageName The package from which to revoke the permission.
+     * @param permName The permission name to revoke.
+     * @param user The user for which to revoke the permission.
+     * @param reason The reason for the revoke.
+     *
+     * @see #grantRuntimePermission(String, String, android.os.UserHandle)
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
+    public void revokeRuntimePermission(@NonNull String packageName,
+            @NonNull String permName, @NonNull UserHandle user, @NonNull String reason) {
+        revokeRuntimePermission(packageName, permName, user);
+    }
+
+    /**
      * Gets the state flags associated with a permission.
      *
      * @param permName The permission for which to get the flags.
