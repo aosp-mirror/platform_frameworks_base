@@ -20,7 +20,6 @@ import android.content.Context;
 import android.location.GnssAntennaInfo;
 import android.location.IGnssAntennaInfoListener;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -100,41 +99,10 @@ public abstract class GnssAntennaInfoProvider
 
     @Override
     protected ListenerOperation<IGnssAntennaInfoListener> getHandlerOperation(int result) {
-        int status;
-        switch (result) {
-            case RESULT_SUCCESS:
-                status = GnssAntennaInfo.Callback.STATUS_READY;
-                break;
-            case RESULT_NOT_AVAILABLE:
-            case RESULT_NOT_SUPPORTED:
-            case RESULT_INTERNAL_ERROR:
-                status = GnssAntennaInfo.Callback.STATUS_NOT_SUPPORTED;
-                break;
-            case RESULT_GPS_LOCATION_DISABLED:
-                status = GnssAntennaInfo.Callback.STATUS_LOCATION_DISABLED;
-                break;
-            case RESULT_UNKNOWN:
-                return null;
-            default:
-                Log.v(TAG, "Unhandled addListener result: " + result);
-                return null;
-        }
-        return new StatusChangedOperation(status);
-    }
-
-    private static class StatusChangedOperation
-            implements ListenerOperation<IGnssAntennaInfoListener> {
-        private final int mStatus;
-
-        StatusChangedOperation(int status) {
-            mStatus = status;
-        }
-
-        @Override
-        public void execute(IGnssAntennaInfoListener listener,
-                CallerIdentity callerIdentity) throws RemoteException {
-            listener.onStatusChanged(mStatus);
-        }
+        return (IGnssAntennaInfoListener listener,
+                CallerIdentity callerIdentity) -> {
+                // Do nothing, as GnssAntennaInfo.Callback does not have an onStatusChanged method.
+        };
     }
 
     /** Handle Gnss Antenna Info report. */
