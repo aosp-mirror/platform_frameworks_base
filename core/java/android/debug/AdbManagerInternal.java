@@ -42,7 +42,7 @@ public abstract class AdbManagerInternal {
     /**
      * Returns {@code true} if ADB debugging is enabled.
      */
-    public abstract boolean isAdbEnabled();
+    public abstract boolean isAdbEnabled(byte transportType);
 
     /**
      * Returns the file that contains all of the ADB keys used by the device.
