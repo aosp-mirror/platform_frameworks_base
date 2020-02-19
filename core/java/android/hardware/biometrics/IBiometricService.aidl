@@ -61,4 +61,9 @@ interface IBiometricService {
 
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
     void resetLockout(in byte [] token);
+
+    // Get a list of AuthenticatorIDs for authenticators which have enrolled templates and meet
+    // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore
+    // land as SIDs, and are used during key generation.
+    long[] getAuthenticatorIds();
 }
