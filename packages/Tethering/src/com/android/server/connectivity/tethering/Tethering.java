@@ -314,9 +314,13 @@ public class Tethering {
 
         startStateMachineUpdaters(mHandler);
         startTrackDefaultNetwork();
-        getWifiManager().registerSoftApCallback(
-                mHandler::post /* executor */,
-                new TetheringSoftApCallback());
+
+        final WifiManager wifiManager = getWifiManager();
+        if (wifiManager != null) {
+            wifiManager.registerSoftApCallback(
+                  mHandler::post /* executor */,
+                  new TetheringSoftApCallback());
+        }
     }
 
     private void startStateMachineUpdaters(Handler handler) {
