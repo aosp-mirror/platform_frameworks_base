@@ -413,10 +413,15 @@ static jint nativeSetAutoRefreshEnabled(JNIEnv* env, jclass clazz, jlong nativeO
     return anw->perform(surface, NATIVE_WINDOW_SET_AUTO_REFRESH, int(enabled));
 }
 
-static jint nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong nativeObject, jfloat frameRate) {
+static jint nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong nativeObject, jfloat frameRate,
+                               jint compatibility) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
     ANativeWindow* anw = static_cast<ANativeWindow*>(surface);
-    return anw->perform(surface, NATIVE_WINDOW_SET_FRAME_RATE, float(frameRate));
+    // Our compatibility is a Surface.FRAME_RATE_COMPATIBILITY_* value, and
+    // NATIVE_WINDOW_SET_FRAME_RATE takes an
+    // ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_* value. The values are identical
+    // though, so no need to explicitly convert.
+    return anw->perform(surface, NATIVE_WINDOW_SET_FRAME_RATE, float(frameRate), compatibility);
 }
 
 // ----------------------------------------------------------------------------
@@ -453,7 +458,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeAttachAndQueueBufferWithColorSpace},
     {"nativeSetSharedBufferModeEnabled", "(JZ)I", (void*)nativeSetSharedBufferModeEnabled},
     {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
-    {"nativeSetFrameRate", "(JF)I", (void*)nativeSetFrameRate},
+    {"nativeSetFrameRate", "(JFI)I", (void*)nativeSetFrameRate},
 };
 
 int register_android_view_Surface(JNIEnv* env)
