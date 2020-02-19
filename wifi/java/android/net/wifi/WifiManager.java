@@ -2755,6 +2755,26 @@ public class WifiManager {
     }
 
     /**
+     * Set if scanning is always available.
+     *
+     * If set to {@code true}, apps can issue {@link #startScan} and fetch scan results
+     * even when Wi-Fi is turned off.
+     *
+     * @param isAvailable true to enable, false to disable.
+     * @hide
+     * @see #isScanAlwaysAvailable()
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void setScanAlwaysAvailable(boolean isAvailable) {
+        try {
+            mService.setScanAlwaysAvailable(isAvailable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Check if scanning is always available.
      *
      * If this return {@code true}, apps can issue {@link #startScan} and fetch scan results

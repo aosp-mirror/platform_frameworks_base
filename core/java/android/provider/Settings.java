@@ -9093,26 +9093,34 @@ public final class Settings {
          * Set to one of {@link #WIFI_SLEEP_POLICY_DEFAULT},
          * {@link #WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED}, or
          * {@link #WIFI_SLEEP_POLICY_NEVER}.
+         * @deprecated This is no longer used or set by the platform.
          */
+        @Deprecated
         public static final String WIFI_SLEEP_POLICY = "wifi_sleep_policy";
 
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to use the default Wi-Fi sleep
          * policy, which is to sleep shortly after the turning off
          * according to the {@link #STAY_ON_WHILE_PLUGGED_IN} setting.
+         * @deprecated This is no longer used by the platform.
          */
+        @Deprecated
         public static final int WIFI_SLEEP_POLICY_DEFAULT = 0;
 
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to use the default policy when
          * the device is on battery, and never go to sleep when the device is
          * plugged in.
+         * @deprecated This is no longer used by the platform.
          */
+        @Deprecated
         public static final int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1;
 
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to never go to sleep.
+         * @deprecated This is no longer used by the platform.
          */
+        @Deprecated
         public static final int WIFI_SLEEP_POLICY_NEVER = 2;
 
         /**
@@ -10206,7 +10214,9 @@ public final class Settings {
        /**
         * Delay (in seconds) before repeating the Wi-Fi networks available notification.
         * Connecting to a network will reset the timer.
+        * @deprecated This is no longer used or set by the platform.
         */
+       @Deprecated
        public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
                "wifi_networks_available_repeat_delay";
 
@@ -10236,7 +10246,9 @@ public final class Settings {
        /**
         * When the number of open networks exceeds this number, the
         * least-recently-used excess networks will be removed.
+        * @deprecated This is no longer used or set by the platform.
         */
+       @Deprecated
        public static final String WIFI_NUM_OPEN_NETWORKS_KEPT = "wifi_num_open_networks_kept";
 
        /**
@@ -10247,8 +10259,8 @@ public final class Settings {
        /**
         * Setting to allow scans to be enabled even wifi is turned off for connectivity.
         * @hide
+        * @deprecated To be removed.
         */
-       @SystemApi
        public static final String WIFI_SCAN_ALWAYS_AVAILABLE =
                 "wifi_scan_always_enabled";
 
@@ -10257,8 +10269,8 @@ public final class Settings {
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated To be removed.
          */
-        @SystemApi
         public static final String WIFI_P2P_PENDING_FACTORY_RESET =
                 "wifi_p2p_pending_factory_reset";
 
@@ -10267,8 +10279,8 @@ public final class Settings {
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated To be removed.
          */
-        @SystemApi
         public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
 
         /**
@@ -10313,6 +10325,7 @@ public final class Settings {
          * Most readers of this setting should simply check if value == 1 to determined the
          * enabled state.
          * @hide
+         * @deprecated To be removed.
          */
         public static final String NETWORK_RECOMMENDATIONS_ENABLED =
                 "network_recommendations_enabled";
@@ -10352,13 +10365,11 @@ public final class Settings {
 
         /**
          * Whether wifi scan throttle is enabled or not.
-         * This is intended to be used via adb commands or a menu in developer option to turn off
-         * the default wifi scan throttling mechanism for apps.
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated To be removed.
          */
-        @SystemApi
         public static final String WIFI_SCAN_THROTTLE_ENABLED = "wifi_scan_throttle_enabled";
 
         /**
@@ -10460,8 +10471,8 @@ public final class Settings {
         * Setting to enable verbose logging in Wi-Fi; disabled by default, and setting to 1
         * will enable it. In the future, additional values may be supported.
         * @hide
+        * @deprecated To be removed.
         */
-       @SystemApi
        public static final String WIFI_VERBOSE_LOGGING_ENABLED =
                "wifi_verbose_logging_enabled";
 
@@ -10486,8 +10497,8 @@ public final class Settings {
          * Default values are provided by code or device configurations.
          * Errors in the parameters will cause the entire setting to be ignored.
          * @hide
+         * @deprecated This is no longer used or set by the platform.
          */
-        @SystemApi
         public static final String WIFI_SCORE_PARAMS =
                 "wifi_score_params";
 
@@ -10529,8 +10540,8 @@ public final class Settings {
        /**
         * The Wi-Fi peer-to-peer device name
         * @hide
+        * @deprecated To be removed.
         */
-       @SystemApi
        public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
 
        /**
