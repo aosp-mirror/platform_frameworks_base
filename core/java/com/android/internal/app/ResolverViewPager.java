@@ -18,13 +18,12 @@ package com.android.internal.app;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.internal.widget.ViewPager;
 
 /**
- * A {@link ViewPager} which wraps around its first child's height.
+ * A {@link ViewPager} which wraps around its tallest child's height.
  * <p>Normally {@link ViewPager} instances expand their height to cover all remaining space in
  * the layout.
  * <p>This class is used for the intent resolver's tabbed view.
@@ -56,16 +55,17 @@ public class ResolverViewPager extends ViewPager {
         }
         widthMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY);
         int height = getMeasuredHeight();
-        if (getChildCount() > 0) {
-            View child = getChildAt(0);
+        int maxHeight = 0;
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
             child.measure(widthMeasureSpec,
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
-            if (height > child.getMeasuredHeight()) {
-                height = child.getMeasuredHeight();
+            if (maxHeight < child.getMeasuredHeight()) {
+                maxHeight = child.getMeasuredHeight();
             }
         }
-        if (height < getMinimumHeight()) {
-            height = getMinimumHeight();
+        if (maxHeight > 0) {
+            height = maxHeight;
         }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);

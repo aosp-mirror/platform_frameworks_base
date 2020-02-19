@@ -108,8 +108,7 @@
                 <com.android.internal.app.ResolverViewPager
                     android:id="@+id/profile_pager"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="@dimen/resolver_empty_state_height" />
+                    android:layout_height="wrap_content" />
             </FrameLayout>
         </LinearLayout>
     </TabHost>

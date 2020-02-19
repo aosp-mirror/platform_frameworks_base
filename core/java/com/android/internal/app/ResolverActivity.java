@@ -396,13 +396,6 @@ public class ResolverActivity extends Activity implements
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             rdl.setOnApplyWindowInsetsListener(this::onApplyWindowInsets);
 
-            if (shouldShowTabs()) {
-                rdl.setMaxCollapsedHeight(getResources().getDimensionPixelSize(
-                        R.dimen.resolver_empty_state_height_with_tabs));
-                findViewById(R.id.profile_pager).setMinimumHeight(
-                        getResources().getDimensionPixelSize(R.dimen.resolver_empty_state_height));
-            }
-
             mResolverDrawerLayout = rdl;
         }
 
