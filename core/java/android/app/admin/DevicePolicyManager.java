@@ -1416,6 +1416,7 @@ public class DevicePolicyManager {
      * @see #setFactoryResetProtectionPolicy
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_FACTORY_RESET_PROTECTION)
     @SystemApi
     public static final String ACTION_RESET_PROTECTION_POLICY_CHANGED =
             "android.app.action.RESET_PROTECTION_POLICY_CHANGED";

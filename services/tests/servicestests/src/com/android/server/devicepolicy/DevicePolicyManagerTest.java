@@ -2097,7 +2097,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED),
-                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE));
+                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE),
+                eq(android.Manifest.permission.MANAGE_FACTORY_RESET_PROTECTION));
     }
 
     public void testSetFactoryResetProtectionPolicyFailWithPO() throws Exception {
@@ -2144,7 +2145,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED),
-                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE));
+                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE),
+                eq(android.Manifest.permission.MANAGE_FACTORY_RESET_PROTECTION));
     }
 
     public void testGetFactoryResetProtectionPolicyWithFrpManagementAgent()
@@ -2171,7 +2173,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED),
-                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE));
+                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE),
+                eq(android.Manifest.permission.MANAGE_FACTORY_RESET_PROTECTION));
     }
 
     private void assertPoliciesAreEqual(FactoryResetProtectionPolicy expectedPolicy,
