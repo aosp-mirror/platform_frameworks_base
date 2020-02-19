@@ -80,6 +80,7 @@ public class DynamicSystemInstallationService extends Service
     static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
     static final String KEY_DSU_SLOT = "KEY_DSU_SLOT";
     static final String DEFAULT_DSU_SLOT = "dsu";
+    static final String KEY_PUBKEY = "KEY_PUBKEY";
 
     /*
      * Intent actions
@@ -267,6 +268,7 @@ public class DynamicSystemInstallationService extends Service
         long userdataSize = intent.getLongExtra(DynamicSystemClient.KEY_USERDATA_SIZE, 0);
         mEnableWhenCompleted = intent.getBooleanExtra(KEY_ENABLE_WHEN_COMPLETED, false);
         String dsuSlot = intent.getStringExtra(KEY_DSU_SLOT);
+        String publicKey = intent.getStringExtra(KEY_PUBKEY);
 
         if (TextUtils.isEmpty(dsuSlot)) {
             dsuSlot = DEFAULT_DSU_SLOT;
@@ -274,7 +276,7 @@ public class DynamicSystemInstallationService extends Service
         // TODO: better constructor or builder
         mInstallTask =
                 new InstallationAsyncTask(
-                        url, dsuSlot, systemSize, userdataSize, this, mDynSystem, this);
+                        url, dsuSlot, publicKey, systemSize, userdataSize, this, mDynSystem, this);
 
         mInstallTask.execute();
 
@@ -408,6 +410,10 @@ public class DynamicSystemInstallationService extends Service
     }
 
     private Notification buildNotification(int status, int cause) {
+        return buildNotification(status, cause, null);
+    }
+
+    private Notification buildNotification(int status, int cause, Throwable detail) {
         Notification.Builder builder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_system_update_googblue_24dp)
                 .setProgress(0, 0, false);
@@ -463,7 +469,12 @@ public class DynamicSystemInstallationService extends Service
 
             case STATUS_NOT_STARTED:
                 if (cause != CAUSE_NOT_SPECIFIED && cause != CAUSE_INSTALL_CANCELLED) {
-                    builder.setContentText(getString(R.string.notification_install_failed));
+                    if (detail instanceof InstallationAsyncTask.ImageValidationException) {
+                        builder.setContentText(
+                                getString(R.string.notification_image_validation_failed));
+                    } else {
+                        builder.setContentText(getString(R.string.notification_install_failed));
+                    }
                 } else {
                     // no need to notify the user if the task is not started, or cancelled.
                 }
@@ -525,7 +536,7 @@ public class DynamicSystemInstallationService extends Service
                 break;
         }
 
-        Log.d(TAG, "status=" + statusString + ", cause=" + causeString);
+        Log.d(TAG, "status=" + statusString + ", cause=" + causeString + ", detail=" + detail);
 
         boolean notifyOnNotificationBar = true;
 
@@ -538,7 +549,7 @@ public class DynamicSystemInstallationService extends Service
         }
 
         if (notifyOnNotificationBar) {
-            mNM.notify(NOTIFICATION_ID, buildNotification(status, cause));
+            mNM.notify(NOTIFICATION_ID, buildNotification(status, cause, detail));
         }
 
         for (int i = mClients.size() - 1; i >= 0; i--) {
