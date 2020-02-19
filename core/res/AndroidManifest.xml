@@ -395,6 +395,9 @@
     <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
     <protected-broadcast android:name="android.intent.action.ADVANCED_SETTINGS" />
     <protected-broadcast android:name="android.intent.action.APPLICATION_RESTRICTIONS_CHANGED" />
+    <protected-broadcast android:name="com.android.server.adb.WIRELESS_DEBUG_PAIRED_DEVICES" />
+    <protected-broadcast android:name="com.android.server.adb.WIRELESS_DEBUG_PAIRING_RESULT" />
+    <protected-broadcast android:name="com.android.server.adb.WIRELESS_DEBUG_STATUS" />
 
     <!-- Legacy -->
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_START" />
