@@ -399,11 +399,14 @@ public class Editor {
                 com.android.internal.R.bool.config_enableHapticTextHandle);
 
         mFlagCursorDragFromAnywhereEnabled = AppGlobals.getIntCoreSetting(
-                WidgetFlags.KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE , 1) != 0;
+                WidgetFlags.KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE,
+                WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT ? 1 : 0) != 0;
         mFlagInsertionHandleGesturesEnabled = AppGlobals.getIntCoreSetting(
-                WidgetFlags.KEY_ENABLE_INSERTION_HANDLE_GESTURES , 0) != 0;
+                WidgetFlags.KEY_ENABLE_INSERTION_HANDLE_GESTURES,
+                WidgetFlags.ENABLE_INSERTION_HANDLE_GESTURES_DEFAULT ? 1 : 0) != 0;
         mNewMagnifierEnabled = AppGlobals.getIntCoreSetting(
-                WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER, 0) != 0;
+                WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER,
+                WidgetFlags.ENABLE_NEW_MAGNIFIER_DEFAULT ? 1 : 0) != 0;
         if (TextView.DEBUG_CURSOR) {
             logCursor("Editor", "Cursor drag from anywhere is %s.",
                     mFlagCursorDragFromAnywhereEnabled ? "enabled" : "disabled");
@@ -453,9 +456,11 @@ public class Editor {
         // TODO: supports changing the height/width dynamically because the text height can be
         // dynamically changed.
         float zoom = AppGlobals.getFloatCoreSetting(
-                WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR, 1.5f);
+                WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR,
+                WidgetFlags.MAGNIFIER_ZOOM_FACTOR_DEFAULT);
         float aspectRatio = AppGlobals.getFloatCoreSetting(
-                WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO, 5.5f);
+                WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO,
+                WidgetFlags.MAGNIFIER_ASPECT_RATIO_DEFAULT);
         // Avoid invalid/unsupported values.
         if (zoom < 1.2f || zoom > 1.8f) {
             zoom = 1.5f;
@@ -5271,9 +5276,11 @@ public class Editor {
             int opacity = 255;
             if (mFlagInsertionHandleGesturesEnabled) {
                 deltaHeight = AppGlobals.getIntCoreSetting(
-                        WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT, 25);
+                        WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT,
+                        WidgetFlags.INSERTION_HANDLE_DELTA_HEIGHT_DEFAULT);
                 opacity = AppGlobals.getIntCoreSetting(
-                        WidgetFlags.KEY_INSERTION_HANDLE_OPACITY, 50);
+                        WidgetFlags.KEY_INSERTION_HANDLE_OPACITY,
+                        WidgetFlags.INSERTION_HANDLE_OPACITY_DEFAULT);
                 // Avoid invalid/unsupported values.
                 if (deltaHeight < -25 || deltaHeight > 50) {
                     deltaHeight = 25;
