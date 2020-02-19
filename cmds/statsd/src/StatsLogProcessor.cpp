@@ -208,12 +208,8 @@ void StatsLogProcessor::onBinaryPushStateChangedEventLocked(LogEvent* event) {
     trainInfo.requiresLowLatencyMonitor =
             event->GetBool(5 /*requires low latency monitor field id*/, &err);
     trainInfo.status = int32_t(event->GetLong(6 /*state field id*/, &err));
-#ifdef NEW_ENCODING_SCHEME
     std::vector<uint8_t> trainExperimentIdBytes =
             event->GetStorage(7 /*experiment ids field id*/, &err);
-#else
-    string trainExperimentIdString = event->GetString(7 /*experiment ids field id*/, &err);
-#endif
     bool is_rollback = event->GetBool(10 /*is rollback field id*/, &err);
 
     if (err != NO_ERROR) {
@@ -221,12 +217,8 @@ void StatsLogProcessor::onBinaryPushStateChangedEventLocked(LogEvent* event) {
         return;
     }
     ExperimentIds trainExperimentIds;
-#ifdef NEW_ENCODING_SCHEME
     if (!trainExperimentIds.ParseFromArray(trainExperimentIdBytes.data(),
                                            trainExperimentIdBytes.size())) {
-#else
-    if (!trainExperimentIds.ParseFromString(trainExperimentIdString)) {
-#endif
         ALOGE("Failed to parse experimentids in binary push state changed.");
         return;
     }
@@ -241,11 +233,7 @@ void StatsLogProcessor::onBinaryPushStateChangedEventLocked(LogEvent* event) {
     int32_t userId = multiuser_get_user_id(uid);
 
     event->updateValue(2 /*train version field id*/, trainInfo.trainVersionCode, LONG);
-#ifdef NEW_ENCODING_SCHEME
     event->updateValue(7 /*experiment ids field id*/, trainExperimentIdProto, STORAGE);
-#else
-    event->updateValue(7 /*experiment ids field id*/, trainExperimentIdProto, STRING);
-#endif
     event->updateValue(8 /*user id field id*/, userId, INT);
 
     // If this event is a rollback event, then the following bits in the event
@@ -352,11 +340,7 @@ void StatsLogProcessor::onWatchdogRollbackOccurredLocked(LogEvent* event) {
     vector<uint8_t> experimentIdProto;
     writeExperimentIdsToProto(experimentIds, &experimentIdProto);
 
-#ifdef NEW_ENCODING_SCHEME
     event->updateValue(6 /*experiment ids field id*/, experimentIdProto, STORAGE);
-#else
-    event->updateValue(6 /*experiment ids field id*/, experimentIdProto, STRING);
-#endif
 }
 
 vector<int64_t> StatsLogProcessor::processWatchdogRollbackOccurred(const int32_t rollbackTypeIn,
