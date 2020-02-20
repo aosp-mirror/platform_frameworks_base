@@ -21,6 +21,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -721,8 +722,7 @@ public class MediaRouter2 {
             RoutingController newController) {
         for (TransferCallbackRecord record: mTransferCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mTransferCallback.onTransferred(oldController,
-                            newController));
+                    () -> record.mTransferCallback.onTransferred(oldController, newController));
         }
     }
 
@@ -862,6 +862,20 @@ public class MediaRouter2 {
         public String getId() {
             synchronized (mControllerLock) {
                 return mSessionInfo.getId();
+            }
+        }
+
+        /**
+         * Gets the original session id set by
+         * {@link RoutingSessionInfo.Builder#Builder(String, String)}.
+         *
+         * @hide
+         */
+        @NonNull
+        @TestApi
+        public String getOriginalId() {
+            synchronized (mControllerLock) {
+                return mSessionInfo.getOriginalId();
             }
         }
 
