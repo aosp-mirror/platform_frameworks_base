@@ -104,6 +104,9 @@ import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.internal.util.ArrayUtils.emptyIfNull;
 import static com.android.internal.util.ArrayUtils.filter;
+import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME;
+import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME;
+import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME;
 import static com.android.server.pm.ComponentResolver.RESOLVE_PRIORITY_SORTER;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
@@ -3000,8 +3003,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     + (systemPackagesCount == 0 ? 0 : systemScanTime / systemPackagesCount)
                     + " , cached: " + cachedSystemApps);
             if (mIsUpgrade && systemPackagesCount > 0) {
-                MetricsLogger.histogram(null, "ota_package_manager_system_app_avg_scan_time",
-                        ((int) systemScanTime) / systemPackagesCount);
+                //CHECKSTYLE:OFF IndentationCheck
+                FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
+                    BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME,
+                    systemScanTime / systemPackagesCount);
+                //CHECKSTYLE:ON IndentationCheck
             }
             if (!mOnlyCore) {
                 EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
@@ -3128,8 +3134,12 @@ public class PackageManagerService extends IPackageManager.Stub
                         + (dataPackagesCount == 0 ? 0 : dataScanTime / dataPackagesCount)
                         + " , cached: " + cachedNonSystemApps);
                 if (mIsUpgrade && dataPackagesCount > 0) {
-                    MetricsLogger.histogram(null, "ota_package_manager_data_app_avg_scan_time",
-                            ((int) dataScanTime) / dataPackagesCount);
+                    //CHECKSTYLE:OFF IndentationCheck
+                    FrameworkStatsLog.write(
+                        FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
+                        BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME,
+                        dataScanTime / dataPackagesCount);
+                    //CHECKSTYLE:OFF IndentationCheck
                 }
             }
             mExpectingBetter.clear();
@@ -3390,8 +3400,10 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             mDexManager.load(userPackages);
             if (mIsUpgrade) {
-                MetricsLogger.histogram(null, "ota_package_manager_init_time",
-                        (int) (SystemClock.uptimeMillis() - startTime));
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
+                        BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME,
+                        SystemClock.uptimeMillis() - startTime);
             }
         } // synchronized (mLock)
         } // synchronized (mInstallLock)
