@@ -1478,6 +1478,10 @@ package android.media {
     method @NonNull public String getOriginalId();
   }
 
+  public class MediaRouter2.RoutingController {
+    method @NonNull public String getOriginalId();
+  }
+
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
