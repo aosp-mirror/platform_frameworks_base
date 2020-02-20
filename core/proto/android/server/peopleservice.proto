@@ -50,6 +50,9 @@ message ConversationInfoProto {
 
   // Integer representation of conversation bit flags.
   optional int32 conversation_flags = 6;
+
+  // The phone number of the contact.
+  optional string contact_phone_number = 7;
 }
 
 // On disk data of events.
