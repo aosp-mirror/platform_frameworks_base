@@ -65,6 +65,9 @@ public abstract class ShortcutServiceInternal {
 
     public abstract void addListener(@NonNull ShortcutChangeListener listener);
 
+    public abstract void addShortcutChangeCallback(
+            @NonNull LauncherApps.ShortcutChangeCallback callback);
+
     public abstract int getShortcutIconResId(int launcherUserId, @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId);
 

@@ -36,6 +36,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.ShortcutService.DumpFilter;
@@ -365,9 +366,12 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     /**
      * Remove all shortcuts that aren't pinned, cached nor dynamic.
+     *
+     * @return List of removed shortcuts.
      */
-    private void removeOrphans() {
+    private List<ShortcutInfo> removeOrphans() {
         ArrayList<String> removeList = null; // Lazily initialize.
+        List<ShortcutInfo> removedShortcuts = null;
 
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
@@ -376,20 +380,26 @@ class ShortcutPackage extends ShortcutPackageItem {
 
             if (removeList == null) {
                 removeList = new ArrayList<>();
+                removedShortcuts = new ArrayList<>();
             }
             removeList.add(si.getId());
+            removedShortcuts.add(si);
         }
         if (removeList != null) {
             for (int i = removeList.size() - 1; i >= 0; i--) {
                 forceDeleteShortcutInner(removeList.get(i));
             }
         }
+
+        return removedShortcuts;
     }
 
     /**
      * Remove all dynamic shortcuts.
+     *
+     * @return List of shortcuts that actually got removed.
      */
-    public void deleteAllDynamicShortcuts(boolean ignoreInvisible) {
+    public List<ShortcutInfo> deleteAllDynamicShortcuts(boolean ignoreInvisible) {
         final long now = mShortcutUser.mService.injectCurrentTimeMillis();
 
         boolean changed = false;
@@ -404,8 +414,9 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
         }
         if (changed) {
-            removeOrphans();
+            return removeOrphans();
         }
+        return null;
     }
 
     /**
@@ -1028,7 +1039,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         s.verifyStates();
 
         // This will send a notification to the launcher, and also save .
-        s.packageShortcutsChanged(getPackageName(), getPackageUserId());
+        // TODO: List changed and removed manifest shortcuts and pass to packageShortcutsChanged()
+        s.packageShortcutsChanged(getPackageName(), getPackageUserId(), null, null);
         return true; // true means changed.
     }
 
@@ -1299,15 +1311,14 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public void resolveResourceStrings() {
         final ShortcutService s = mShortcutUser.mService;
-        boolean changed = false;
+
+        List<ShortcutInfo> changedShortcuts = null;
 
         Resources publisherRes = null;
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
 
             if (si.hasStringResources()) {
-                changed = true;
-
                 if (publisherRes == null) {
                     publisherRes = getPackageResources();
                     if (publisherRes == null) {
@@ -1317,10 +1328,15 @@ class ShortcutPackage extends ShortcutPackageItem {
 
                 si.resolveResourceStrings(publisherRes);
                 si.setTimestamp(s.injectCurrentTimeMillis());
+
+                if (changedShortcuts == null) {
+                    changedShortcuts = new ArrayList<>(1);
+                }
+                changedShortcuts.add(si);
             }
         }
-        if (changed) {
-            s.packageShortcutsChanged(getPackageName(), getPackageUserId());
+        if (!CollectionUtils.isEmpty(changedShortcuts)) {
+            s.packageShortcutsChanged(getPackageName(), getPackageUserId(), changedShortcuts, null);
         }
     }
 

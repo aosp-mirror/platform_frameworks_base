@@ -72,6 +72,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -134,6 +135,8 @@ public class LauncherAppsService extends SystemService {
 
         private final MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
 
+        private final ShortcutChangeHandler mShortcutChangeHandler;
+
         private final Handler mCallbackHandler;
 
         private PackageInstallerService mPackageInstallerService;
@@ -153,6 +156,8 @@ public class LauncherAppsService extends SystemService {
             mShortcutServiceInternal = Objects.requireNonNull(
                     LocalServices.getService(ShortcutServiceInternal.class));
             mShortcutServiceInternal.addListener(mPackageMonitor);
+            mShortcutChangeHandler = new ShortcutChangeHandler(mUserManagerInternal);
+            mShortcutServiceInternal.addShortcutChangeCallback(mShortcutChangeHandler);
             mCallbackHandler = BackgroundThread.getHandler();
             mDpm = (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         }
@@ -720,12 +725,37 @@ public class LauncherAppsService extends SystemService {
         @Override
         public void registerShortcutChangeCallback(String callingPackage, long changedSince,
                 String packageName, List shortcutIds, List<LocusId> locusIds,
-                ComponentName componentName, int flags, IShortcutChangeCallback callback,
-                int callbackId) {
+                ComponentName componentName, int flags, IShortcutChangeCallback callback) {
+            ensureShortcutPermission(callingPackage);
+
+            if (shortcutIds != null && packageName == null) {
+                throw new IllegalArgumentException(
+                        "To query by shortcut ID, package name must also be set");
+            }
+            if (locusIds != null && packageName == null) {
+                throw new IllegalArgumentException(
+                        "To query by locus ID, package name must also be set");
+            }
+
+            UserHandle user = UserHandle.of(injectCallingUserId());
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                    == PackageManager.PERMISSION_GRANTED) {
+                user = null;
+            }
+
+            // TODO: When ShortcutQueryWrapper (ag/10323729) is available, pass that directly.
+            ShortcutChangeHandler.QueryInfo query = new ShortcutChangeHandler.QueryInfo(
+                    changedSince, packageName, shortcutIds, locusIds, componentName, flags, user);
+            mShortcutChangeHandler.addShortcutChangeCallback(callback, query);
         }
 
         @Override
-        public void unregisterShortcutChangeCallback(String callingPackage, int callbackId) {
+        public void unregisterShortcutChangeCallback(String callingPackage,
+                IShortcutChangeCallback callback) {
+            ensureShortcutPermission(callingPackage);
+
+            mShortcutChangeHandler.removeShortcutChangeCallback(callback);
         }
 
         @Override
@@ -1003,6 +1033,153 @@ public class LauncherAppsService extends SystemService {
         @VisibleForTesting
         void postToPackageMonitorHandler(Runnable r) {
             mCallbackHandler.post(r);
+        }
+
+        public static class ShortcutChangeHandler implements LauncherApps.ShortcutChangeCallback {
+
+            static class QueryInfo {
+                final long mChangedSince;
+                final String mPackage;
+                final List<String> mShortcutIds;
+                final List<LocusId> mLocusIds;
+                final ComponentName mActivity;
+                final int mQueryFlags;
+                final UserHandle mCallbackUser;
+
+                QueryInfo(long changedSince, String packageName, List<String> shortcutIds,
+                        List<LocusId> locusIds, ComponentName activity, int flags,
+                        UserHandle callbackUser) {
+                    mChangedSince = changedSince;
+                    mPackage = packageName;
+                    mShortcutIds = shortcutIds;
+                    mLocusIds = locusIds;
+                    mActivity = activity;
+                    mQueryFlags = flags;
+                    mCallbackUser = callbackUser;
+                }
+            }
+
+            private final UserManagerInternal mUserManagerInternal;
+
+            ShortcutChangeHandler(UserManagerInternal userManager) {
+                mUserManagerInternal = userManager;
+            }
+
+            private final RemoteCallbackList<IShortcutChangeCallback> mCallbacks =
+                    new RemoteCallbackList<>();
+
+            public synchronized void addShortcutChangeCallback(IShortcutChangeCallback callback,
+                    QueryInfo query) {
+                mCallbacks.unregister(callback);
+                mCallbacks.register(callback, query);
+            }
+
+            public synchronized void removeShortcutChangeCallback(
+                    IShortcutChangeCallback callback) {
+                mCallbacks.unregister(callback);
+            }
+
+            @Override
+            public void onShortcutsAddedOrUpdated(String packageName, List<ShortcutInfo> shortcuts,
+                    UserHandle user) {
+                onShortcutEvent(packageName, shortcuts, user, false);
+            }
+
+            @Override
+            public void onShortcutsRemoved(String packageName, List<ShortcutInfo> shortcuts,
+                    UserHandle user) {
+                onShortcutEvent(packageName, shortcuts, user, true);
+            }
+
+            private void onShortcutEvent(String packageName,
+                    List<ShortcutInfo> shortcuts, UserHandle user, boolean shortcutsRemoved) {
+                int count = mCallbacks.beginBroadcast();
+
+                for (int i = 0; i < count; i++) {
+                    final IShortcutChangeCallback callback = mCallbacks.getBroadcastItem(i);
+                    final QueryInfo query = (QueryInfo) mCallbacks.getBroadcastCookie(i);
+
+                    if (query.mCallbackUser != null && !hasUserAccess(query.mCallbackUser, user)) {
+                        // Callback owner does not have access to the shortcuts' user.
+                        continue;
+                    }
+
+                    // Filter the list by query, if any matches exists, send via callback.
+                    List<ShortcutInfo> matchedList =
+                            filterShortcutsByQuery(packageName, shortcuts, query);
+                    if (!CollectionUtils.isEmpty(matchedList)) {
+                        try {
+                            if (shortcutsRemoved) {
+                                callback.onShortcutsRemoved(packageName, matchedList, user);
+                            } else {
+                                callback.onShortcutsAddedOrUpdated(packageName, matchedList, user);
+                            }
+                        } catch (RemoteException e) {
+                            // The RemoteCallbackList will take care of removing the dead object.
+                        }
+                    }
+                }
+
+                mCallbacks.finishBroadcast();
+            }
+
+            public static List<ShortcutInfo> filterShortcutsByQuery(String packageName,
+                    List<ShortcutInfo> shortcuts, QueryInfo query) {
+                if (query.mPackage != null && query.mPackage != packageName) {
+                    return null;
+                }
+
+                List<ShortcutInfo> matches = new ArrayList<>();
+
+                final boolean matchDynamic =
+                        (query.mQueryFlags & ShortcutQuery.FLAG_MATCH_DYNAMIC) != 0;
+                final boolean matchPinned =
+                        (query.mQueryFlags & ShortcutQuery.FLAG_MATCH_PINNED) != 0;
+                final boolean matchManifest =
+                        (query.mQueryFlags & ShortcutQuery.FLAG_MATCH_MANIFEST) != 0;
+                final boolean matchCached =
+                        (query.mQueryFlags & ShortcutQuery.FLAG_MATCH_CACHED) != 0;
+                final int shortcutFlags = (matchDynamic ? ShortcutInfo.FLAG_DYNAMIC : 0)
+                        | (matchPinned ? ShortcutInfo.FLAG_PINNED : 0)
+                        | (matchManifest ? ShortcutInfo.FLAG_MANIFEST : 0)
+                        | (matchCached ? ShortcutInfo.FLAG_CACHED : 0);
+
+                for (int i = 0; i < shortcuts.size(); i++) {
+                    final ShortcutInfo si = shortcuts.get(i);
+
+                    if (query.mActivity != null && !query.mActivity.equals(si.getActivity())) {
+                        continue;
+                    }
+
+                    if (query.mChangedSince != 0
+                            && query.mChangedSince > si.getLastChangedTimestamp()) {
+                        continue;
+                    }
+
+                    if (query.mShortcutIds != null && !query.mShortcutIds.contains(si.getId())) {
+                        continue;
+                    }
+
+                    if (query.mLocusIds != null && !query.mLocusIds.contains(si.getLocusId())) {
+                        continue;
+                    }
+
+                    if ((shortcutFlags & si.getFlags()) != 0) {
+                        matches.add(si);
+                    }
+                }
+
+                return matches;
+            }
+
+            private boolean hasUserAccess(UserHandle callbackUser, UserHandle shortcutUser) {
+                final int callbackUserId = callbackUser.getIdentifier();
+                final int shortcutUserId = shortcutUser.getIdentifier();
+
+                if (shortcutUser == callbackUser) return true;
+                return mUserManagerInternal.isProfileAccessible(callbackUserId, shortcutUserId,
+                        null, false);
+            }
         }
 
         private class MyPackageMonitor extends PackageMonitor implements ShortcutChangeListener {
