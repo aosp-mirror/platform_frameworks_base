@@ -437,7 +437,7 @@ public final class WifiOemMigrationHook {
                                 Settings.Global.WIFI_SCAN_THROTTLE_ENABLED, 1) == 1)
                 .setVerboseLoggingEnabled(
                         Settings.Global.getInt(context.getContentResolver(),
-                                Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED, 1) == 1)
+                                Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED, 0) == 1)
                 .build();
     }
 }
