@@ -138,6 +138,7 @@ import android.util.TimeUtils;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.Immutable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsAsyncNotedCallback;
@@ -155,11 +156,14 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
+import com.android.server.SystemServiceManager;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import libcore.util.EmptyArray;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -169,6 +173,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -184,12 +189,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 public class AppOpsService extends IAppOpsService.Stub {
     static final String TAG = "AppOps";
     static final boolean DEBUG = false;
+
+    /**
+     * Used for data access validation collection, we wish to only log a specific access once
+     */
+    private final ArraySet<NoteOpTrace> mNoteOpCallerStacktraces = new ArraySet<>();
 
     private static final int NO_VERSION = -1;
     /** Increment by one every time and add the corresponding upgrade logic in
@@ -241,6 +252,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     final Context mContext;
     final AtomicFile mFile;
+    private final @Nullable File mNoteOpCallerStacktracesFile;
     final Handler mHandler;
 
     /** Pool for {@link OpEventProxyInfoPool} to avoid to constantly reallocate new objects */
@@ -277,6 +289,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     @GuardedBy("this")
     private final ArrayMap<Pair<String, Integer>, ArrayList<AsyncNotedAppOp>>
             mUnforwardedAsyncNotedOps = new ArrayMap<>();
+
+    boolean mWriteNoteOpsScheduled;
 
     boolean mWriteScheduled;
     boolean mFastWriteScheduled;
@@ -1397,11 +1411,42 @@ public class AppOpsService extends IAppOpsService.Stub {
         featureOp.onClientDeath(clientId);
     }
 
+
+    /**
+     * Loads the OpsValidation file results into a hashmap {@link #mNoteOpCallerStacktraces}
+     * so that we do not log the same operation twice between instances
+     */
+    private void readNoteOpCallerStackTraces() {
+        try {
+            if (!mNoteOpCallerStacktracesFile.exists()) {
+                mNoteOpCallerStacktracesFile.createNewFile();
+                return;
+            }
+
+            try (Scanner read = new Scanner(mNoteOpCallerStacktracesFile)) {
+                read.useDelimiter("\\},");
+                while (read.hasNext()) {
+                    String jsonOps = read.next();
+                    mNoteOpCallerStacktraces.add(NoteOpTrace.fromJson(jsonOps));
+                }
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "Cannot parse traces noteOps", e);
+        }
+    }
+
     public AppOpsService(File storagePath, Handler handler, Context context) {
         mContext = context;
 
         LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
         mFile = new AtomicFile(storagePath, "appops");
+        if (AppOpsManager.NOTE_OP_COLLECTION_ENABLED) {
+            mNoteOpCallerStacktracesFile = new File(SystemServiceManager.ensureSystemDir(),
+                    "noteOpStackTraces.json");
+            readNoteOpCallerStackTraces();
+        } else {
+            mNoteOpCallerStacktracesFile = null;
+        }
         mHandler = handler;
         mConstants = new Constants(mHandler);
         readState();
@@ -1801,6 +1846,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         if (doWrite) {
             writeState();
+        }
+        if (AppOpsManager.NOTE_OP_COLLECTION_ENABLED && mWriteNoteOpsScheduled) {
+            writeNoteOps();
         }
     }
 
@@ -6049,6 +6097,144 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void setModeFromPermissionPolicy(int code, int uid, @NonNull String packageName,
                 int mode, @Nullable IAppOpsCallback callback) {
             setMode(code, uid, packageName, mode, callback);
+        }
+    }
+
+
+    /**
+     * Async task for writing note op stack trace, op code, package name and version to file
+     * More specifically, writes all the collected ops from {@link #mNoteOpCallerStacktraces}
+     */
+    private void writeNoteOps() {
+        synchronized (this) {
+            mWriteNoteOpsScheduled = false;
+        }
+        synchronized (mNoteOpCallerStacktracesFile) {
+            try (FileWriter writer = new FileWriter(mNoteOpCallerStacktracesFile)) {
+                int numTraces = mNoteOpCallerStacktraces.size();
+                for (int i = 0; i < numTraces; i++) {
+                    // Writing json formatted string into file
+                    writer.write(mNoteOpCallerStacktraces.valueAt(i).asJson());
+                    // Comma separation, so we can wrap the entire log as a JSON object
+                    // when all results are collected
+                    writer.write(",");
+                }
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to load opsValidation file for FileWriter", e);
+            }
+        }
+    }
+
+    /**
+     * This class represents a NoteOp Trace object amd contains the necessary fields that will
+     * be written to file to use for permissions data validation in JSON format
+     */
+    @Immutable
+    static class NoteOpTrace {
+        static final String STACKTRACE = "stackTrace";
+        static final String OP = "op";
+        static final String PACKAGENAME = "packageName";
+        static final String VERSION = "version";
+
+        private final @NonNull String mStackTrace;
+        private final int mOp;
+        private final @Nullable String mPackageName;
+        private final long mVersion;
+
+        /**
+         * Initialize a NoteOp object using a JSON object containing the necessary fields
+         *
+         * @param jsonTrace JSON object represented as a string
+         *
+         * @return NoteOpTrace object initialized with JSON fields
+         */
+        static NoteOpTrace fromJson(String jsonTrace) {
+            try {
+                // Re-add closing bracket which acted as a delimiter by the reader
+                JSONObject obj = new JSONObject(jsonTrace.concat("}"));
+                return new NoteOpTrace(obj.getString(STACKTRACE), obj.getInt(OP),
+                        obj.getString(PACKAGENAME), obj.getLong(VERSION));
+            } catch (JSONException e) {
+                // Swallow error, only meant for logging ops, should not affect flow of the code
+                Slog.e(TAG, "Error constructing NoteOpTrace object "
+                        + "JSON trace format incorrect", e);
+                return null;
+            }
+        }
+
+        NoteOpTrace(String stackTrace, int op, String packageName, long version) {
+            mStackTrace = stackTrace;
+            mOp = op;
+            mPackageName = packageName;
+            mVersion = version;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NoteOpTrace that = (NoteOpTrace) o;
+            return mOp == that.mOp
+                    && mVersion == that.mVersion
+                    && mStackTrace.equals(that.mStackTrace)
+                    && Objects.equals(mPackageName, that.mPackageName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mStackTrace, mOp, mPackageName, mVersion);
+        }
+
+        /**
+         * The object is formatted as a JSON object and returned as a String
+         *
+         * @return JSON formatted string
+         */
+        public String asJson() {
+            return  "{"
+                    + "\"" + STACKTRACE + "\":\"" + mStackTrace.replace("\n", "\\n")
+                    + '\"' + ",\"" + OP + "\":" + mOp
+                    + ",\"" + PACKAGENAME + "\":\"" + mPackageName + '\"'
+                    + ",\"" + VERSION + "\":" + mVersion
+                    + '}';
+        }
+    }
+
+    /**
+     * Collects noteOps, noteProxyOps and startOps from AppOpsManager and writes it into a file
+     * which will be used for permissions data validation, the given parameters to this method
+     * will be logged in json format
+     *
+     * @param stackTrace stacktrace from the most recent call in AppOpsManager
+     * @param op op code
+     * @param packageName package making call
+     * @param version android version for this call
+     */
+    @Override
+    public void collectNoteOpCallsForValidation(String stackTrace, int op, String packageName,
+            long version) {
+        if (!AppOpsManager.NOTE_OP_COLLECTION_ENABLED) {
+            return;
+        }
+
+        Objects.requireNonNull(stackTrace);
+        Preconditions.checkArgument(op >= 0);
+        Preconditions.checkArgument(op < AppOpsManager._NUM_OP);
+        Objects.requireNonNull(version);
+
+        NoteOpTrace noteOpTrace = new NoteOpTrace(stackTrace, op, packageName, version);
+
+        boolean noteOpSetWasChanged;
+        synchronized (this) {
+            noteOpSetWasChanged = mNoteOpCallerStacktraces.add(noteOpTrace);
+            if (noteOpSetWasChanged && !mWriteNoteOpsScheduled) {
+                mWriteNoteOpsScheduled = true;
+                mHandler.postDelayed(PooledLambda.obtainRunnable((that) -> {
+                    AsyncTask.execute(() -> {
+                        that.writeNoteOps();
+                    });
+                }, this), 2500);
+            }
         }
     }
 }

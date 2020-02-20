@@ -385,6 +385,15 @@ public class AppOpsManager {
      */
     public static final int WATCH_FOREGROUND_CHANGES = 1 << 0;
 
+
+    /**
+     * Flag to determine whether we should log noteOp/startOp calls to make sure they
+     * are correctly used
+     *
+     * @hide
+     */
+    public static final boolean NOTE_OP_COLLECTION_ENABLED = false;
+
     /**
      * @hide
      */
@@ -7103,6 +7112,7 @@ public class AppOpsManager {
     public int noteOpNoThrow(int op, int uid, @Nullable String packageName,
             @Nullable String featureId, @Nullable String message) {
         try {
+            collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
             if (collectionMode == COLLECT_ASYNC) {
                 if (message == null) {
@@ -7263,6 +7273,7 @@ public class AppOpsManager {
         int myUid = Process.myUid();
 
         try {
+            collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(proxiedUid, proxiedPackageName, op);
             if (collectionMode == COLLECT_ASYNC) {
                 if (message == null) {
@@ -7583,6 +7594,7 @@ public class AppOpsManager {
     public int startOpNoThrow(int op, int uid, @NonNull String packageName,
             boolean startIfModeDefault, @Nullable String featureId, @Nullable String message) {
         try {
+            collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
             if (collectionMode == COLLECT_ASYNC) {
                 if (message == null) {
@@ -8491,5 +8503,25 @@ public class AppOpsManager {
      */
     public static int leftCircularDistance(int from, int to, int size) {
         return (to + size - from) % size;
+    }
+
+    /**
+     * Helper method for noteOp, startOp and noteProxyOp to call AppOpsService to collect/log
+     * stack traces
+     *
+     * <p> For each call, the stacktrace op code, package name and long version code will be
+     * passed along where it will be logged/collected
+     *
+     * @param op The operation to note
+     */
+    private void collectNoteOpCallsForValidation(int op) {
+        if (NOTE_OP_COLLECTION_ENABLED) {
+            try {
+                mService.collectNoteOpCallsForValidation(getFormattedStackTrace(),
+                        op, mContext.getOpPackageName(), mContext.getApplicationInfo().longVersionCode);
+            } catch (RemoteException e) {
+                // Swallow error, only meant for logging ops, should not affect flow of the code
+            }
+        }
     }
 }

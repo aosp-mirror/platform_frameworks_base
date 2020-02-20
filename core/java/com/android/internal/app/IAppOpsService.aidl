@@ -103,4 +103,6 @@ interface IAppOpsService {
     int checkOperationRaw(int code, int uid, String packageName);
 
     void reloadNonHistoricalState();
+
+    void collectNoteOpCallsForValidation(String stackTrace, int op, String packageName, long version);
 }
