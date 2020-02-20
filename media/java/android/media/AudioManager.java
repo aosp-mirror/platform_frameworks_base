@@ -1654,6 +1654,12 @@ public class AudioManager {
      * @hide
      * Interface to be notified of changes in the preferred audio device set for a given audio
      * strategy.
+     * <p>Note that this listener will only be invoked whenever
+     * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAttributes)} or
+     * {@link #removePreferredDeviceForStrategy(AudioProductStrategy)} causes a change in
+     * preferred device. It will not be invoked directly after registration with
+     * {@link #addOnPreferredDeviceForStrategyChangedListener(Executor, OnPreferredDeviceForStrategyChangedListener)}
+     * to indicate which strategies had preferred devices at the time of registration.</p>
      * @see #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAttributes)
      * @see #removePreferredDeviceForStrategy(AudioProductStrategy)
      * @see #getPreferredDeviceForStrategy(AudioProductStrategy)
