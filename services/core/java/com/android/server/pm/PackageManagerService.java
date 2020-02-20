@@ -6826,12 +6826,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 final boolean isTargetHiddenFromInstantApp =
                         !isTargetVisibleToInstantApp
                         || (matchExplicitlyVisibleOnly && !isTargetExplicitlyVisibleToInstantApp);
-                final boolean blockResolution =
+                final boolean blockInstantResolution =
                         !isTargetSameInstantApp
                         && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                         && isTargetHiddenFromInstantApp));
-                if (!blockResolution) {
+                final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
+                        && !resolveForStart && shouldFilterApplicationLocked(
+                                getPackageSettingInternal(ai.applicationInfo.packageName,
+                                        Process.SYSTEM_UID), filterCallingUid, userId);
+                if (!blockInstantResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
                     ri.activityInfo = ai;
                     list.add(ri);
@@ -7215,9 +7219,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 resolveInfos.set(i, installerInfo);
                 continue;
             }
-            // caller is a full app, don't need to apply any other filtering
+            // caller is a full app
             if (ephemeralPkgName == null) {
-                continue;
+                SettingBase callingSetting =
+                        mSettings.getSettingLPr(UserHandle.getAppId(filterCallingUid));
+                PackageSetting resolvedSetting =
+                        getPackageSettingInternal(info.activityInfo.packageName, 0);
+                if (resolveForStart
+                        || !mAppsFilter.shouldFilterApplication(
+                                filterCallingUid, callingSetting, resolvedSetting, userId)) {
+                    continue;
+                }
             } else if (ephemeralPkgName.equals(info.activityInfo.packageName)) {
                 // caller is same app; don't need to apply any other filtering
                 continue;
@@ -7907,12 +7919,17 @@ public class PackageManagerService extends IPackageManager.Stub
                                 & ApplicationInfo.PRIVATE_FLAG_INSTANT) != 0;
                 final boolean isTargetHiddenFromInstantApp =
                         (si.flags & ServiceInfo.FLAG_VISIBLE_TO_INSTANT_APP) == 0;
-                final boolean blockResolution =
+                final boolean blockInstantResolution =
                         !isTargetSameInstantApp
                         && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                         && isTargetHiddenFromInstantApp));
-                if (!blockResolution) {
+
+                final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
+                        && shouldFilterApplicationLocked(
+                        getPackageSettingInternal(si.applicationInfo.packageName,
+                                Process.SYSTEM_UID), callingUid, userId);
+                if (!blockInstantResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
                     ri.serviceInfo = si;
                     list.add(ri);
@@ -7931,8 +7948,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return Collections.emptyList();
                 }
                 return applyPostServiceResolutionFilter(
-                        resolveInfos,
-                        instantAppPkgName);
+                        resolveInfos, instantAppPkgName, userId, callingUid);
             }
             final AndroidPackage pkg = mPackages.get(pkgName);
             if (pkg != null) {
@@ -7943,20 +7959,26 @@ public class PackageManagerService extends IPackageManager.Stub
                     return Collections.emptyList();
                 }
                 return applyPostServiceResolutionFilter(
-                        resolveInfos,
-                        instantAppPkgName);
+                        resolveInfos, instantAppPkgName, userId, callingUid);
             }
             return Collections.emptyList();
         }
     }
 
     private List<ResolveInfo> applyPostServiceResolutionFilter(List<ResolveInfo> resolveInfos,
-            String instantAppPkgName) {
-        if (instantAppPkgName == null) {
-            return resolveInfos;
-        }
+            String instantAppPkgName, @UserIdInt int userId, int filterCallingUid) {
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
+            if (instantAppPkgName == null) {
+                SettingBase callingSetting =
+                        mSettings.getSettingLPr(UserHandle.getAppId(filterCallingUid));
+                PackageSetting resolvedSetting =
+                        getPackageSettingInternal(info.serviceInfo.packageName, 0);
+                if (!mAppsFilter.shouldFilterApplication(
+                        filterCallingUid, callingSetting, resolvedSetting, userId)) {
+                    continue;
+                }
+            }
             final boolean isEphemeralApp = info.serviceInfo.applicationInfo.isInstantApp();
             // allow services that are defined in the provided package
             if (isEphemeralApp && instantAppPkgName.equals(info.serviceInfo.packageName)) {
@@ -8039,7 +8061,11 @@ public class PackageManagerService extends IPackageManager.Stub
                         && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                         && isTargetHiddenFromInstantApp));
-                if (!blockResolution) {
+                final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
+                        && shouldFilterApplicationLocked(
+                        getPackageSettingInternal(pi.applicationInfo.packageName,
+                                Process.SYSTEM_UID), callingUid, userId);
+                if (!blockResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
                     ri.providerInfo = pi;
                     list.add(ri);
@@ -8058,8 +8084,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return Collections.emptyList();
                 }
                 return applyPostContentProviderResolutionFilter(
-                        resolveInfos,
-                        instantAppPkgName);
+                        resolveInfos, instantAppPkgName, userId, callingUid);
             }
             final AndroidPackage pkg = mPackages.get(pkgName);
             if (pkg != null) {
@@ -8070,20 +8095,29 @@ public class PackageManagerService extends IPackageManager.Stub
                     return Collections.emptyList();
                 }
                 return applyPostContentProviderResolutionFilter(
-                        resolveInfos,
-                        instantAppPkgName);
+                        resolveInfos, instantAppPkgName, userId, callingUid);
             }
             return Collections.emptyList();
         }
     }
 
     private List<ResolveInfo> applyPostContentProviderResolutionFilter(
-            List<ResolveInfo> resolveInfos, String instantAppPkgName) {
-        if (instantAppPkgName == null) {
-            return resolveInfos;
-        }
+            List<ResolveInfo> resolveInfos, String instantAppPkgName,
+            @UserIdInt int userId, int callingUid) {
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
+
+            if (instantAppPkgName == null) {
+                SettingBase callingSetting =
+                        mSettings.getSettingLPr(UserHandle.getAppId(callingUid));
+                PackageSetting resolvedSetting =
+                        getPackageSettingInternal(info.providerInfo.packageName, 0);
+                if (!mAppsFilter.shouldFilterApplication(
+                        callingUid, callingSetting, resolvedSetting, userId)) {
+                    continue;
+                }
+            }
+
             final boolean isEphemeralApp = info.providerInfo.applicationInfo.isInstantApp();
             // allow providers that are defined in the provided package
             if (isEphemeralApp && instantAppPkgName.equals(info.providerInfo.packageName)) {
