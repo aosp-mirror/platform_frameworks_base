@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
@@ -84,9 +83,6 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
-import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
-import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
-import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -105,12 +101,15 @@ import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
 import static com.android.server.wm.DisplayContentProto.DOCKED_STACK_DIVIDER_CONTROLLER;
 import static com.android.server.wm.DisplayContentProto.DPI;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
+import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
 import static com.android.server.wm.DisplayContentProto.ID;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.OVERLAY_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
+import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.wm.DisplayContentProto.TASKS;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
@@ -2708,6 +2707,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mRemovingDisplay = false;
         }
 
+        // Apply the pending transaction here since we may not be able to reach the DisplayContent
+        // on the next traversal if it's removed from RootWindowContainer child list.
+        getPendingTransaction().apply();
         mWmService.mWindowPlacerLocked.requestTraversal();
     }
 
