@@ -76,3 +76,27 @@ enum ServiceOperationState {
     SERVICE_OPERATION_STATE_BOUND = 4;
     SERVICE_OPERATION_STATE_EXECUTING = 5;
 }
+
+// this enum list is from frameworks/base/core/java/com/android/internal/app/procstats/ProcessStats.java
+// and not frameworks/base/core/java/android/app/ActivityManager.java
+enum AggregatedProcessState {
+    AGGREGATED_PROCESS_STATE_UNKNOWN = 0;
+    // Persistent system process; PERSISTENT or PERSISTENT_UI in ActivityManager
+    AGGREGATED_PROCESS_STATE_PERSISTENT = 1;
+    // Top activity; actually any visible activity; TOP or TOP_SLEEPING in ActivityManager
+    AGGREGATED_PROCESS_STATE_TOP = 2;
+    // Bound top foreground process; BOUND_TOP or BOUND_FOREGROUND_SERVICE in ActivityManager
+    AGGREGATED_PROCESS_STATE_BOUND_TOP_OR_FGS = 3;
+    // Important foreground process; FOREGROUND_SERVICE in ActivityManager
+    AGGREGATED_PROCESS_STATE_FGS = 4;
+    // Important foreground process ; IMPORTANT_FOREGROUND in ActivityManager
+    AGGREGATED_PROCESS_STATE_IMPORTANT_FOREGROUND = 5;
+    // Various background processes; IMPORTANT_BACKGROUND, TRANSIENT_BACKGROUND, BACKUP, SERVICE,
+    // HEAVY_WEIGHT in ActivityManager
+    AGGREGATED_PROCESS_STATE_BACKGROUND = 6;
+    // Process running a receiver; RECEIVER in ActivityManager
+    AGGREGATED_PROCESS_STATE_RECEIVER = 7;
+    // Various cached processes; HOME, LAST_ACTIVITY, CACHED_ACTIVITY, CACHED_RECENT,
+    // CACHED_ACTIVITY_CLIENT, CACHED_EMPTY in ActivityManager
+    AGGREGATED_PROCESS_STATE_CACHED = 8;
+}
