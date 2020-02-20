@@ -24,8 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.PackageInfoUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -52,6 +50,8 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import libcore.io.IoUtils;
 import libcore.util.HexEncoding;
@@ -694,12 +694,13 @@ class InstantAppRegistry {
             final int packageCount = mService.mPackages.size();
             for (int i = 0; i < packageCount; i++) {
                 final AndroidPackage pkg = mService.mPackages.valueAt(i);
-                if (now - pkg.getLatestPackageUseTimeInMills() < maxInstalledCacheDuration) {
+                final PackageSetting ps = mService.getPackageSetting(pkg.getPackageName());
+                if (ps == null) {
                     continue;
                 }
 
-                final PackageSetting ps = mService.getPackageSetting(pkg.getPackageName());
-                if (ps == null) {
+                if (now - ps.getPkgState().getLatestPackageUseTimeInMills()
+                        < maxInstalledCacheDuration) {
                     continue;
                 }
 
@@ -733,30 +734,28 @@ class InstantAppRegistry {
                     } else if (rhsPkg == null) {
                         return 1;
                     } else {
-                        if (lhsPkg.getLatestPackageUseTimeInMills() >
-                                rhsPkg.getLatestPackageUseTimeInMills()) {
+                        final PackageSetting lhsPs = mService.getPackageSetting(
+                                lhsPkg.getPackageName());
+                        if (lhsPs == null) {
+                            return 0;
+                        }
+
+                        final PackageSetting rhsPs = mService.getPackageSetting(
+                                rhsPkg.getPackageName());
+                        if (rhsPs == null) {
+                            return 0;
+                        }
+
+                        if (lhsPs.getPkgState().getLatestPackageUseTimeInMills() >
+                                rhsPs.getPkgState().getLatestPackageUseTimeInMills()) {
                             return 1;
-                        } else if (lhsPkg.getLatestPackageUseTimeInMills() <
-                                rhsPkg.getLatestPackageUseTimeInMills()) {
+                        } else if (lhsPs.getPkgState().getLatestPackageUseTimeInMills() <
+                                rhsPs.getPkgState().getLatestPackageUseTimeInMills()) {
                             return -1;
+                        } else if (lhsPs.firstInstallTime > rhsPs.firstInstallTime) {
+                            return 1;
                         } else {
-                            final PackageSetting lhsPs = mService.getPackageSetting(
-                                    lhsPkg.getPackageName());
-                            if (lhsPs == null) {
-                                return 0;
-                            }
-
-                            final PackageSetting rhsPs = mService.getPackageSetting(
-                                    rhsPkg.getPackageName());
-                            if (rhsPs == null) {
-                                return 0;
-                            }
-
-                            if (lhsPs.firstInstallTime > rhsPs.firstInstallTime) {
-                                return 1;
-                            } else {
-                                return -1;
-                            }
+                            return -1;
                         }
                     }
                 });
@@ -869,10 +868,9 @@ class InstantAppRegistry {
         // TODO(b/135203078): This may be broken due to inner mutability problems that were broken
         //  as part of moving to PackageInfoUtils. Flags couldn't be determined.
         ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(ps.pkg, 0,
-                ps.readUserState(userId), userId);
+                ps.readUserState(userId), userId, ps);
         if (addApplicationInfo) {
-            return new InstantAppInfo(appInfo,
-                    requestedPermissions, grantedPermissions);
+            return new InstantAppInfo(appInfo, requestedPermissions, grantedPermissions);
         } else {
             return new InstantAppInfo(appInfo.packageName,
                     appInfo.loadLabel(mService.mContext.getPackageManager()),

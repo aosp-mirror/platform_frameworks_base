@@ -2054,14 +2054,15 @@ public class ConnectivityServiceTest {
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
 
-        // Bring up wifi with a score of 70.
+        // Bring up validated wifi.
         // Cell is lingered because it would not satisfy any request, even if it validated.
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
-        mWiFiNetworkAgent.adjustScore(50);
-        mWiFiNetworkAgent.connect(false);   // Score: 70
+        mWiFiNetworkAgent.connect(true);   // Score: 60
         callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        // TODO: Investigate sending validated before losing.
         callback.expectCallback(CallbackEntry.LOSING, mCellNetworkAgent);
-        defaultCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
+        defaultCallback.expectAvailableThenValidatedCallbacks(mWiFiNetworkAgent);
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         assertEquals(defaultCallback.getLastAvailableNetwork(), mCm.getActiveNetwork());
 
@@ -5845,7 +5846,7 @@ public class ConnectivityServiceTest {
 
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(true);
-        trustedCallback.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
+        trustedCallback.expectAvailableThenValidatedCallbacks(mWiFiNetworkAgent);
         verify(mNetworkManagementService).setDefaultNetId(eq(mWiFiNetworkAgent.getNetwork().netId));
         reset(mNetworkManagementService);
 

@@ -37,6 +37,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.provider.DeviceConfig;
@@ -74,6 +75,8 @@ public class AttentionManagerServiceTest {
     @Mock
     private IPowerManager mMockIPowerManager;
     @Mock
+    private IThermalService mMockIThermalService;
+    @Mock
     Context mContext;
 
     @Before
@@ -84,7 +87,7 @@ public class AttentionManagerServiceTest {
         // setup power manager mock
         PowerManager mPowerManager;
         doReturn(true).when(mMockIPowerManager).isInteractive();
-        mPowerManager = new PowerManager(mContext, mMockIPowerManager, null);
+        mPowerManager = new PowerManager(mContext, mMockIPowerManager, mMockIThermalService, null);
 
         Object mLock = new Object();
         // setup a spy on attention manager

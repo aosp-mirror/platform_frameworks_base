@@ -70,7 +70,7 @@ class ControlsFavoritingActivity @Inject constructor(
             target: RecyclerView.ViewHolder
         ): Boolean {
             return currentModel?.onMoveItem(
-                    viewHolder.adapterPosition, target.adapterPosition) != null
+                    viewHolder.layoutPosition, target.layoutPosition) != null
         }
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}

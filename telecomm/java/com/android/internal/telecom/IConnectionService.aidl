@@ -81,6 +81,11 @@ oneway interface IConnectionService {
 
     void rejectWithMessage(String callId, String message, in Session.Info sessionInfo);
 
+    void transfer(String callId, in Uri number, boolean isConfirmationRequired,
+            in Session.Info sessionInfo);
+
+    void consultativeTransfer(String callId, String otherCallId, in Session.Info sessionInfo);
+
     void disconnect(String callId, in Session.Info sessionInfo);
 
     void silence(String callId, in Session.Info sessionInfo);

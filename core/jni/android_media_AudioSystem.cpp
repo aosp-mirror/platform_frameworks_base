@@ -34,7 +34,7 @@
 #include <system/audio.h>
 #include <system/audio_policy.h>
 #include "android_media_AudioAttributes.h"
-#include "android_media_AudioDevice.h"
+#include "android_media_AudioDeviceAttributes.h"
 #include "android_media_AudioEffectDescriptor.h"
 #include "android_media_AudioErrors.h"
 #include "android_media_AudioFormat.h"
@@ -2352,7 +2352,7 @@ android_media_AudioSystem_getPreferredDeviceForStrategy(JNIEnv *env, jobject thi
         jint strategy, jobjectArray jDeviceArray)
 {
     if (jDeviceArray == nullptr || env->GetArrayLength(jDeviceArray) != 1) {
-        ALOGE("%s invalid array to store AudioDevice", __FUNCTION__);
+        ALOGE("%s invalid array to store AudioDeviceAttributes", __FUNCTION__);
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
 
@@ -2362,10 +2362,10 @@ android_media_AudioSystem_getPreferredDeviceForStrategy(JNIEnv *env, jobject thi
     if (status != NO_ERROR) {
         return (jint) status;
     }
-    jobject jAudioDevice = NULL;
-    jint jStatus = createAudioDeviceFromNative(env, &jAudioDevice, &elDevice);
+    jobject jAudioDeviceAttributes = NULL;
+    jint jStatus = createAudioDeviceAttributesFromNative(env, &jAudioDeviceAttributes, &elDevice);
     if (jStatus == AUDIO_JAVA_SUCCESS) {
-        env->SetObjectArrayElement(jDeviceArray, 0, jAudioDevice);
+        env->SetObjectArrayElement(jDeviceArray, 0, jAudioDeviceAttributes);
     }
     return jStatus;
 }
@@ -2380,7 +2380,7 @@ android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
     // with reverse JNI to make the array grow as need as this would be less efficient, and some
     // components call this method often
     if (jDeviceArray == nullptr || maxResultSize == 0) {
-        ALOGE("%s invalid array to store AudioDevice", __FUNCTION__);
+        ALOGE("%s invalid array to store AudioDeviceAttributes", __FUNCTION__);
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
 
@@ -2401,13 +2401,13 @@ android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
         return AUDIO_JAVA_INVALID_OPERATION;
     }
     size_t index = 0;
-    jobject jAudioDevice = NULL;
+    jobject jAudioDeviceAttributes = NULL;
     for (const auto& device : devices) {
-        jStatus = createAudioDeviceFromNative(env, &jAudioDevice, &device);
+        jStatus = createAudioDeviceAttributesFromNative(env, &jAudioDeviceAttributes, &device);
         if (jStatus != AUDIO_JAVA_SUCCESS) {
             return jStatus;
         }
-        env->SetObjectArrayElement(jDeviceArray, index++, jAudioDevice);
+        env->SetObjectArrayElement(jDeviceArray, index++, jAudioDeviceAttributes);
     }
     return jStatus;
 }
@@ -2519,10 +2519,10 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_setPreferredDeviceForStrategy},
          {"removePreferredDeviceForStrategy", "(I)I",
           (void *)android_media_AudioSystem_removePreferredDeviceForStrategy},
-         {"getPreferredDeviceForStrategy", "(I[Landroid/media/AudioDevice;)I",
+         {"getPreferredDeviceForStrategy", "(I[Landroid/media/AudioDeviceAttributes;)I",
           (void *)android_media_AudioSystem_getPreferredDeviceForStrategy},
          {"getDevicesForAttributes",
-          "(Landroid/media/AudioAttributes;[Landroid/media/AudioDevice;)I",
+          "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAttributes;)I",
           (void *)android_media_AudioSystem_getDevicesForAttributes},
          {"setUserIdDeviceAffinities", "(I[I[Ljava/lang/String;)I",
           (void *)android_media_AudioSystem_setUserIdDeviceAffinities},

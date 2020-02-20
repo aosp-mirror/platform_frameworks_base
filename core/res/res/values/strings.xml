@@ -421,14 +421,6 @@
          [CHAR LIMIT=NONE] -->
     <string name="location_changed_notification_text">Tap to see your location settings.</string>
 
-    <!-- Feature Id for Country Detector. [CHAR LIMIT=NONE]-->
-    <string name="country_detector">Country Detector</string>
-    <!-- Feature Id for Location service. [CHAR LIMIT=NONE]-->
-    <string name="location_service">Location Service</string>
-    <!-- Feature Id for Sensor Notification service. [CHAR LIMIT=NONE]-->
-    <string name="sensor_notification_service">Sensor Notification Service</string>
-    <!-- Feature Id for Twilight service. [CHAR LIMIT=NONE]-->
-    <string name="twilight_service">Twilight Service</string>
 
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
@@ -5372,4 +5364,9 @@
     <string name="resolver_no_apps_available_explanation">We couldn\u2019t find any apps</string>
     <!-- Button which switches on the disabled work profile [CHAR LIMIT=NONE] -->
     <string name="resolver_switch_on_work">Switch on work</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permlab_accessCallAudio">Record or play audio in telephony calls</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_accessCallAudio">Allows this app, when assigned as default dialer application, to record or play audio in telephony calls.</string>
 </resources>

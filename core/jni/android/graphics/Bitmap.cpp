@@ -19,11 +19,10 @@
 #include <utils/Color.h>
 
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer, parcel or render thread
-#include <binder/Parcel.h>
-#include <renderthread/RenderProxy.h>
 #include <android_runtime/android_graphics_GraphicBuffer.h>
-#include <android_runtime/android_hardware_HardwareBuffer.h>
-#include <private/android/AHardwareBufferHelpers.h>
+#include <binder/Parcel.h>
+#include <dlfcn.h>
+#include <renderthread/RenderProxy.h>
 #endif
 
 #include "core_jni_helpers.h"
@@ -1027,11 +1026,18 @@ static jobject Bitmap_copyPreserveInternalConfig(JNIEnv* env, jobject, jlong bit
     return createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(false));
 }
 
+#ifdef __ANDROID__ // Layoutlib does not support graphic buffer
+typedef AHardwareBuffer* (*AHB_from_HB)(JNIEnv*, jobject);
+AHB_from_HB AHardwareBuffer_fromHardwareBuffer;
+
+typedef jobject (*AHB_to_HB)(JNIEnv*, AHardwareBuffer*);
+AHB_to_HB AHardwareBuffer_toHardwareBuffer;
+#endif
+
 static jobject Bitmap_wrapHardwareBufferBitmap(JNIEnv* env, jobject, jobject hardwareBuffer,
                                                jlong colorSpacePtr) {
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer
-    AHardwareBuffer* buffer = android_hardware_HardwareBuffer_getNativeHardwareBuffer(env,
-        hardwareBuffer);
+    AHardwareBuffer* buffer = AHardwareBuffer_fromHardwareBuffer(env, hardwareBuffer);
     sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer,
                                               GraphicsJNI::getNativeColorSpace(colorSpacePtr));
     if (!bitmap.get()) {
@@ -1052,6 +1058,19 @@ static jobject Bitmap_createGraphicBufferHandle(JNIEnv* env, jobject, jlong bitm
 
     Bitmap& bitmap = bitmapHandle->bitmap();
     return android_graphics_GraphicBuffer_createFromAHardwareBuffer(env, bitmap.hardwareBuffer());
+#else
+    return NULL;
+#endif
+}
+
+static jobject Bitmap_getHardwareBuffer(JNIEnv* env, jobject, jlong bitmapPtr) {
+#ifdef __ANDROID__ // Layoutlib does not support graphic buffer
+    LocalScopedBitmap bitmapHandle(bitmapPtr);
+    LOG_ALWAYS_FATAL_IF(!bitmapHandle->isHardware(),
+            "Hardware config is only supported config in Bitmap_getHardwareBuffer");
+
+    Bitmap& bitmap = bitmapHandle->bitmap();
+    return AHardwareBuffer_toHardwareBuffer(env, bitmap.hardwareBuffer());
 #else
     return NULL;
 #endif
@@ -1123,6 +1142,8 @@ static const JNINativeMethod gBitmapMethods[] = {
         (void*) Bitmap_wrapHardwareBufferBitmap },
     {   "nativeCreateGraphicBufferHandle", "(J)Landroid/graphics/GraphicBuffer;",
         (void*) Bitmap_createGraphicBufferHandle },
+    {   "nativeGetHardwareBuffer", "(J)Landroid/hardware/HardwareBuffer;",
+        (void*) Bitmap_getHardwareBuffer },
     {   "nativeComputeColorSpace",  "(J)Landroid/graphics/ColorSpace;", (void*)Bitmap_computeColorSpace },
     {   "nativeSetColorSpace",      "(JJ)V", (void*)Bitmap_setColorSpace },
     {   "nativeIsSRGB",             "(J)Z", (void*)Bitmap_isSRGB },
@@ -1140,6 +1161,18 @@ int register_android_graphics_Bitmap(JNIEnv* env)
     gBitmap_nativePtr = GetFieldIDOrDie(env, gBitmap_class, "mNativePtr", "J");
     gBitmap_constructorMethodID = GetMethodIDOrDie(env, gBitmap_class, "<init>", "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
     gBitmap_reinitMethodID = GetMethodIDOrDie(env, gBitmap_class, "reinit", "(IIZ)V");
+
+#ifdef __ANDROID__ // Layoutlib does not support graphic buffer
+    void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
+    AHardwareBuffer_fromHardwareBuffer =
+            (AHB_from_HB)dlsym(handle_, "AHardwareBuffer_fromHardwareBuffer");
+    LOG_ALWAYS_FATAL_IF(AHardwareBuffer_fromHardwareBuffer == nullptr,
+                        "Failed to find required symbol AHardwareBuffer_fromHardwareBuffer!");
+
+    AHardwareBuffer_toHardwareBuffer = (AHB_to_HB)dlsym(handle_, "AHardwareBuffer_toHardwareBuffer");
+    LOG_ALWAYS_FATAL_IF(AHardwareBuffer_toHardwareBuffer == nullptr,
+                        " Failed to find required symbol AHardwareBuffer_toHardwareBuffer!");
+#endif
     return android::RegisterMethodsOrDie(env, "android/graphics/Bitmap", gBitmapMethods,
                                          NELEM(gBitmapMethods));
 }

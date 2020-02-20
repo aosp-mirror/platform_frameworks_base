@@ -104,7 +104,6 @@ public abstract class MediaRoute2ProviderService extends Service {
     @Override
     @Nullable
     public IBinder onBind(@NonNull Intent intent) {
-        //TODO: Allow binding from media router service only?
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             if (mStub == null) {
                 mStub = new MediaRoute2ProviderServiceStub();

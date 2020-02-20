@@ -648,7 +648,7 @@ public class BubbleStackView extends FrameLayout {
         String appName = topBubble.getAppName();
         Notification notification = topBubble.getEntry().getSbn().getNotification();
         CharSequence titleCharSeq = notification.extras.getCharSequence(Notification.EXTRA_TITLE);
-        String titleStr = getResources().getString(R.string.stream_notification);
+        String titleStr = getResources().getString(R.string.notification_bubble_title);
         if (titleCharSeq != null) {
             titleStr = titleCharSeq.toString();
         }

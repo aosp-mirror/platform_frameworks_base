@@ -16,8 +16,8 @@
 
 package com.android.server.om
 
-import android.content.pm.parsing.AndroidPackage
 import android.net.Uri
+import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -196,11 +196,13 @@ class OverlayReferenceMapperTests {
         whenever(packageName) { "$TARGET_PACKAGE_NAME$increment" }
         whenever(overlayables) { mapOf("overlayableName$increment" to ACTOR_NAME) }
         whenever(toString()) { "Package{$packageName}" }
+        whenever(isOverlay) { false }
     }
 
     private fun mockOverlay(increment: Int = 0) = mockThrowOnUnmocked<AndroidPackage> {
         whenever(packageName) { "$OVERLAY_PACKAGE_NAME$increment" }
         whenever(overlayables) { emptyMap<String, String>() }
         whenever(toString()) { "Package{$packageName}" }
+        whenever(isOverlay) { true }
     }
 }

@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB නිදොස්කරණය"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB සම්බන්ධ විට නිදොස් ආකාරය"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB නිදොස් කිරීම් අනුමැති අහෝසි කරන්න"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"නොරැහැන් දෝෂාවේක්ෂණය"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi සම්බන්ධ විට දෝෂාවේක්ෂණ ප්‍රකාරය"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"දෝෂයකි"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"නොරැහැන් දෝෂාවේක්ෂණය"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ලබා ගත හැකි උපාංග බැලීමට, නොරැහැන් දෝෂාවේක්ෂණය ක්‍රියාත්මක කරන්න"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR කේතය සමගින් උපාංගය යුගල කරන්න"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR කේත ස්කෑනරය භාවිතයෙන් නව උපාංග යුගල කරන්න"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"යුගල කිරීමේ කේතය සමගින් උපාංගය යුගල කරන්න"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ඉලක්කම් හයක කේතය භාවිතයෙන් නව උපාංග යුගල කරන්න"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"යුගල කළ උපාංග"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"දැනට සම්බන්ධ වී ඇත"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"උපාංග විස්තර"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"අමතක කරන්න"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"උපාංග ඇඟිලි සලකුණ: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"සම්බන්ධය අසාර්ථකයි"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> නිවැරදි ජාලයට සම්බන්ධ කර ඇති බව සහතික කර ගන්න"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"උපංගය සමගින් යුගල කරන්න"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi යුගල කිරීමේ කේතය"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"යුගල කිරීම අසාර්ථකයි"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"උපාංගය එකම ජාලයට සම්බන්ධ කර ඇති බව සහතික කර ගන්න."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR කේතය ස්කෑන් කිරීමෙන් Wi‑Fi හරහා උපාංගය යුගල කරන්න"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"උපාංගය යුගල කරමින්…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"උපාංගය යුගල කිරීමට අසමත් විය. QR කේතය වැරදිය නැතහොත් එකම ජාලයට සම්බන්ධ කර නැත."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ලිපිනය &amp; තොට"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR කේතය ස්කෑන් කරන්න"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR කේතය ස්කෑන් කිරීමෙන් Wi‑Fi හරහා උපාංගය යුගල කරන්න"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, දෝෂාවෙක්ෂණ, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"දෝෂය වාර්තා කිරීමේ කෙටිමඟ"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"දෝෂ වාර්තාවක් ගැනීම සඳහා බල මෙනුව තුළ බොත්තම පෙන්වන"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"අවදියෙන් සිටින්න"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"ලබා ගත හැකි නම්, ටෙදරින් දෘඪාංග ත්වරණය භාවිත කරන්න"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB දෝශාවේක්ෂණයට ඉඩ දෙන්නද?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB දෝශාවේක්ෂණය සංවර්ධන කටයුතු සඳහා පමණක් යොදාගැනේ. එය ඔබගේ පරිගණකය සහ ඔබගේ උපාංගය අතර දත්ත පිටපත් කිරීමට පමණක් භාවිතා කරන්න, ඔබගේ උපාංගය මත දැනුම්දීම් රහිතව යෙදුම් ස්ථාපනය කරන්න, සහ ලොග් දත්ත කියවන්න."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"නොරැහැන් දෝෂාවේක්ෂණය ඉඩ දෙන්නද?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"නොරැහැන් දෝෂාවේක්ෂණය සංවර්ධන කටයුතු සඳහා පමණක් අදහස් කරයි. එය ඔබේ පරිගණකය සහ ඔබේ උපාංගය අතර දත්ත පිටපත් කිරීමට, දැනුම් දීමක් නොමැතිව ඔබේ උපාංගයේ යෙදුම් ස්ථාපනය කිරීමට සහ ලොග දත්ත කියවීමට පමණක් භාවිත කරන්න."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"ඔබ මින්පෙර අවසර ලබාදුන් සියළුම පරිගණක වෙතින් USB නිදොස්කරණට ප්‍රවේශය අහෝසි කරන්නද?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"සංවර්ධන සැකසීම් වවලට අවසර දෙන්නද?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"මෙම සැකසීම් වර්ධක භාවිතය සඳහා පමණි. ඔබගේ උපාංගයේ සහ යෙදුම්වල අක්‍රිය වීමට හෝ වැරදි ක්‍රියා කෙරුමකට ඒවා බලපෑ හැක."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"වර්ණ දුර්වලතාවය (රතු-කොළ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"වර්ණ අන්ධතාවය (නිල්-කහ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"වර්ණ නිවැරදි කිරීම"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"වර්ණ අන්ධතාවෙන් පෙළෙන පුද්ගලයන්ට වඩාත් නිරවද්‍ය වර්ණ බැලීමට වර්ණ නිවැරදි කිරීම සහාය වේ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> මගින් ඉක්මවන ලදී"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ක් පමණ ඉතිරියි"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g>ට වඩා අඩුවෙන් ඉතිරිය (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>ට වඩා වැඩියෙන් ඉතිරිය (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>කට වඩා වැඩියෙන් ඉතිරිය"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"දුරකථනය ඉක්මනින් වැසිය හැකිය"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"ටැබ්ලටය ඉක්මනින් වැසිය හැකිය"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"උපාංගය ඉක්මනින් වැසිය හැකිය"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"දුරකථනය ඉක්මනින් වැසිය හැකිය (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"ටැබ්ලටය ඉක්මනින් වැසිය හැකිය (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"උපාංගය ඉක්මනින් වැසිය හැකිය (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"දුරකථනය ඉක්මනින් වැසිය හැකිය"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ටැබ්ලට් පරිගණකය ඉක්මනින් වැසිය හැකිය"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"උපාංගය ඉක්මනින් වැසිය හැකිය"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"දුරකථනය ඉක්මනින් වැසිය හැකිය (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ටැබ්ලට් පරිගණකය ඉක්මනින් වැසිය හැකිය (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"උපාංගය ඉක්මනින් වැසිය හැකිය (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"ආරෝපණය වන තෙක් <xliff:g id="TIME">%1$s</xliff:g> ඇත"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - ආරෝපණය වන තෙක් <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"නොදනී"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ආරෝපණය වෙමින්"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ශීඝ්‍ර ආරෝපණය"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"සෙමින් ආරෝපණය"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ආරෝපණය නොවේ"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"පේනුගත කර ඇත, මේ අවස්ථාවේදී ආරෝපණය කළ නොහැකිය"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"පූර්ණ"</string>

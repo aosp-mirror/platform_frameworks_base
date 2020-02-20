@@ -76,6 +76,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private boolean mMutingEnabled;
     private boolean mArcSupport;
     private HdmiPortInfo[] mHdmiPortInfo;
+    private boolean mWokenUp;
 
     @Before
     public void setUp() {
@@ -138,7 +139,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 }
 
                 @Override
-                void wakeUp() {}
+                void wakeUp() {
+                    mWokenUp = true;
+                }
 
                 @Override
                 void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
@@ -697,5 +700,19 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem
             .getCecDeviceInfo(differentDevice.getLogicalAddress())).isEqualTo(differentDevice);
         assertThat(mInvokeDeviceEventState).isEqualTo(DEVICE_EVENT_ADD_DEVICE);
+    }
+
+    @Test
+    public void doNotWakeUpOnHotPlug_PlugIn() {
+        mWokenUp = false;
+        mHdmiCecLocalDeviceAudioSystem.onHotplug(0, true);
+        assertThat(mWokenUp).isFalse();
+    }
+
+    @Test
+    public void doNotWakeUpOnHotPlug_PlugOut() {
+        mWokenUp = false;
+        mHdmiCecLocalDeviceAudioSystem.onHotplug(0, false);
+        assertThat(mWokenUp).isFalse();
     }
 }

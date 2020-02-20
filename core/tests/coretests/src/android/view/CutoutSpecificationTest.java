@@ -69,6 +69,13 @@ public class CutoutSpecificationTest {
             + "z\n"
             + "@right\n"
             + "@bind_right_cutout\n"
+            + "@bottom\n"
+            + "M 0,0\n"
+            + "h -24\n"
+            + "v -48\n"
+            + "h 48\n"
+            + "v 48\n"
+            + "z\n"
             + "@dp";
     private static final String CORNER_CUTOUT_SPECIFICATION = "M 0,0\n"
             + "h 1\n"
@@ -141,13 +148,66 @@ public class CutoutSpecificationTest {
     }
 
     @Test
+    public void parse_withBindMarker_shouldHaveTopBound() {
+        CutoutSpecification cutoutSpecification = mParser.parse(WITH_BIND_CUTOUT_SPECIFICATION);
+        assertThat(cutoutSpecification.getTopBound()).isEqualTo(new Rect(0, 0, 168, 168));
+    }
+
+    @Test
     public void parse_withBindMarker_shouldHaveRightBound() {
         CutoutSpecification cutoutSpecification = mParser.parse(WITH_BIND_CUTOUT_SPECIFICATION);
         assertThat(cutoutSpecification.getRightBound()).isEqualTo(new Rect(912, 960, 1080, 1128));
     }
 
     @Test
-    public void parse_tallCutout_shouldBeDone() {
+    public void parse_withBindMarker_shouldHaveBottomBound() {
+        CutoutSpecification cutoutSpecification = mParser.parse(WITH_BIND_CUTOUT_SPECIFICATION);
+        assertThat(cutoutSpecification.getBottomBound()).isEqualTo(new Rect(456, 1752, 624, 1920));
+    }
+
+    @Test
+    public void parse_withBindMarker_shouldMatchExpectedSafeInset() {
+        CutoutSpecification cutoutSpecification = mParser.parse(WITH_BIND_CUTOUT_SPECIFICATION);
+        assertThat(cutoutSpecification.getSafeInset()).isEqualTo(new Rect(168, 168, 168, 168));
+    }
+
+    @Test
+    public void parse_withBindMarker_tabletLikeDevice_shouldHaveLeftBound() {
+        CutoutSpecification cutoutSpecification = new CutoutSpecification.Parser(3.5f, 1920, 1080)
+                .parse(WITH_BIND_CUTOUT_SPECIFICATION);
+        assertThat(cutoutSpecification.getLeftBound()).isEqualTo(new Rect(0, 540, 168, 708));
+    }
+
+    @Test
+    public void parse_withBindMarker_tabletLikeDevice_shouldHaveTopBound() {
+        CutoutSpecification cutoutSpecification = new CutoutSpecification.Parser(3.5f, 1920, 1080)
+                .parse(WITH_BIND_CUTOUT_SPECIFICATION);
+        assertThat(cutoutSpecification.getTopBound()).isEqualTo(new Rect(0, 0, 168, 168));
+    }
+
+    @Test
+    public void parse_withBindMarker_tabletLikeDevice_shouldHaveRightBound() {
+        CutoutSpecification cutoutSpecification = new CutoutSpecification.Parser(3.5f, 1920, 1080)
+                .parse(WITH_BIND_CUTOUT_SPECIFICATION);
+        assertThat(cutoutSpecification.getRightBound()).isEqualTo(new Rect(1752, 540, 1920, 708));
+    }
+
+    @Test
+    public void parse_withBindMarker_tabletLikeDevice_shouldHaveBottomBound() {
+        CutoutSpecification cutoutSpecification = new CutoutSpecification.Parser(3.5f, 1920, 1080)
+                .parse(WITH_BIND_CUTOUT_SPECIFICATION);
+        assertThat(cutoutSpecification.getBottomBound()).isEqualTo(new Rect(876, 912, 1044, 1080));
+    }
+
+    @Test
+    public void parse_withBindMarker_tabletLikeDevice_shouldMatchExpectedSafeInset() {
+        CutoutSpecification cutoutSpecification = new CutoutSpecification.Parser(3.5f, 1920, 1080)
+                .parse(WITH_BIND_CUTOUT_SPECIFICATION);
+        assertThat(cutoutSpecification.getSafeInset()).isEqualTo(new Rect(168, 0, 168, 168));
+    }
+
+    @Test
+    public void parse_tallCutout_topBoundShouldMatchExpectedHeight() {
         CutoutSpecification cutoutSpecification = mParser.parse("M 0,0\n"
                 + "L -48, 0\n"
                 + "L -44.3940446283, 36.0595537175\n"
@@ -162,7 +222,7 @@ public class CutoutSpecificationTest {
     }
 
     @Test
-    public void parse_wideCutout_shouldBeDone() {
+    public void parse_wideCutout_topBoundShouldMatchExpectedWidth() {
         CutoutSpecification cutoutSpecification = mParser.parse("M 0,0\n"
                 + "L -72, 0\n"
                 + "L -69.9940446283, 20.0595537175\n"
@@ -177,7 +237,7 @@ public class CutoutSpecificationTest {
     }
 
     @Test
-    public void parse_narrowCutout_shouldBeDone() {
+    public void parse_narrowCutout_topBoundShouldHaveExpectedWidth() {
         CutoutSpecification cutoutSpecification = mParser.parse("M 0,0\n"
                 + "L -24, 0\n"
                 + "L -21.9940446283, 20.0595537175\n"
@@ -192,7 +252,7 @@ public class CutoutSpecificationTest {
     }
 
     @Test
-    public void parse_doubleCutout_shouldBeDone() {
+    public void parse_doubleCutout_topBoundShouldHaveExpectedHeight() {
         CutoutSpecification cutoutSpecification = mParser.parse("M 0,0\n"
                 + "L -72, 0\n"
                 + "L -69.9940446283, 20.0595537175\n"
@@ -217,7 +277,7 @@ public class CutoutSpecificationTest {
     }
 
     @Test
-    public void parse_cornerCutout_shouldBeDone() {
+    public void parse_cornerCutout_topBoundShouldHaveExpectedHeight() {
         CutoutSpecification cutoutSpecification = mParser.parse("M 0,0\n"
                 + "L -48, 0\n"
                 + "C -48,48 -48,48 0,48\n"
@@ -229,7 +289,7 @@ public class CutoutSpecificationTest {
     }
 
     @Test
-    public void parse_holeCutout_shouldBeDone() {
+    public void parse_holeCutout_shouldMatchExpectedInset() {
         CutoutSpecification cutoutSpecification = mParser.parse("M 20.0,20.0\n"
                 + "h 136\n"
                 + "v 136\n"
@@ -258,5 +318,39 @@ public class CutoutSpecificationTest {
 
         assertThat(cutoutSpecification.getSafeInset())
                 .isEqualTo(new Rect(6, 0, 8, 0));
+    }
+
+    @Test
+    public void parse_bottomLeftSpec_withBindLeftMarker_shouldBeLeftBound() {
+        CutoutSpecification cutoutSpecification =
+                new CutoutSpecification.Parser(2f, 400, 200)
+                        .parse("@bottom"
+                                + "M 0,0\n"
+                                + "v -10\n"
+                                + "h 10\n"
+                                + "v 10\n"
+                                + "z\n"
+                                + "@left\n"
+                                + "@bind_left_cutout");
+
+        assertThat(cutoutSpecification.getLeftBound())
+                .isEqualTo(new Rect(0, 190, 10, 200));
+    }
+
+    @Test
+    public void parse_bottomRightSpec_withBindRightMarker_shouldBeRightBound() {
+        CutoutSpecification cutoutSpecification =
+                new CutoutSpecification.Parser(2f, 400, 200)
+                        .parse("@bottom"
+                                + "M 0,0\n"
+                                + "v -10\n"
+                                + "h 10\n"
+                                + "v 10\n"
+                                + "z\n"
+                                + "@right\n"
+                                + "@bind_right_cutout");
+
+        assertThat(cutoutSpecification.getRightBound())
+                .isEqualTo(new Rect(390, 190, 400, 200));
     }
 }

@@ -547,16 +547,11 @@ void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
 }
 
 void ASurfaceTransaction_setFrameRate(ASurfaceTransaction* aSurfaceTransaction,
-                                      ASurfaceControl* aSurfaceControl, float frameRate) {
+                                      ASurfaceControl* aSurfaceControl, float frameRate,
+                                      int8_t compatibility) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
-
-    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-    if (frameRate < 0) {
-        ALOGE("Failed to set frame ate - invalid frame rate");
-        return;
-    }
-
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
-    transaction->setFrameRate(surfaceControl, frameRate);
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    transaction->setFrameRate(surfaceControl, frameRate, compatibility);
 }

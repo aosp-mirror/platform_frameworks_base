@@ -260,4 +260,9 @@ public class StubTransaction extends SurfaceControl.Transaction {
     public SurfaceControl.Transaction unsetColor(SurfaceControl sc) {
         return this;
     }
+
+    @Override
+    public SurfaceControl.Transaction setShadowRadius(SurfaceControl sc, float shadowRadius) {
+        return this;
+    }
 }

@@ -2120,8 +2120,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void unmount(VolumeInfo vol) {
         try {
-            mVold.unmount(vol.id);
-            mStorageSessionController.onVolumeUnmount(vol);
             try {
                 if (vol.type == VolumeInfo.TYPE_PRIVATE) {
                     mInstaller.onPrivateVolumeRemoved(vol.getFsUuid());
@@ -2129,6 +2127,8 @@ class StorageManagerService extends IStorageManager.Stub
             } catch (Installer.InstallerException e) {
                 Slog.e(TAG, "Failed unmount mirror data", e);
             }
+            mVold.unmount(vol.id);
+            mStorageSessionController.onVolumeUnmount(vol);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -4346,6 +4346,42 @@ class StorageManagerService extends IStorageManager.Stub
             mPolicies.add(policy);
         }
 
+        /**
+         * Check if fuse is running in target user, if it's running then setup its obb directories.
+         * TODO: System server should store a list of active pids that obb is not mounted and use it.
+         */
+        @Override
+        public void prepareObbDirs(int userId, Set<String> packageList, String processName) {
+            String fuseRunningUsersList = SystemProperties.get("vold.fuse_running_users", "");
+            String[] fuseRunningUsers = fuseRunningUsersList.split(",");
+            boolean fuseReady = false;
+            String targetUserId = String.valueOf(userId);
+            for (String user : fuseRunningUsers) {
+                if (targetUserId.equals(user)) {
+                    fuseReady = true;
+                }
+            }
+            if (fuseReady) {
+                try {
+                    final IVold vold = IVold.Stub.asInterface(
+                            ServiceManager.getServiceOrThrow("vold"));
+                    for (String pkg : packageList) {
+                        final String obbDir =
+                                String.format("/storage/emulated/%d/Android/obb", userId);
+                        final String packageObbDir = String.format("%s/%s/", obbDir, pkg);
+
+                        // Create package obb dir if it doesn't exist.
+                        File file = new File(packageObbDir);
+                        if (!file.exists()) {
+                            vold.setupAppDir(packageObbDir, mPmInternal.getPackage(pkg).getUid());
+                        }
+                    }
+                } catch (ServiceManager.ServiceNotFoundException | RemoteException e) {
+                    Slog.e(TAG, "Unable to create obb directories for " + processName, e);
+                }
+            }
+        }
+
         @Override
         public void onExternalStoragePolicyChanged(int uid, String packageName) {
             final int mountMode = getExternalStorageMountMode(uid, packageName);
@@ -4406,6 +4442,25 @@ class StorageManagerService extends IStorageManager.Stub
         public boolean hasLegacyExternalStorage(int uid) {
             synchronized (mLock) {
                 return mUidsWithLegacyExternalStorage.contains(uid);
+            }
+        }
+
+        @Override
+        public void prepareAppDataAfterInstall(String packageName, int uid) {
+            int userId = UserHandle.getUserId(uid);
+            final Environment.UserEnvironment userEnv = new Environment.UserEnvironment(userId);
+
+            // The installer may have downloaded OBBs for this newly installed application;
+            // make sure the OBB dir for the application is setup correctly, if it exists.
+            File[] packageObbDirs = userEnv.buildExternalStorageAppObbDirs(packageName);
+            for (File packageObbDir : packageObbDirs) {
+                try {
+                    mVold.fixupAppDir(packageObbDir.getCanonicalPath() + "/", uid);
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to get canonical path for " + packageName);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to fixup app dir for " + packageName);
+                }
             }
         }
 

@@ -33,8 +33,8 @@ import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.admin.DevicePolicyManager;
 import android.app.PropertyInvalidatedCache;
+import android.app.admin.DevicePolicyManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -151,12 +151,23 @@ public class UserManager {
     public static final int QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED = 0x1;
 
     /**
+     * Flag passed to {@link #requestQuietModeEnabled} to request disabling quiet mode without
+     * asking for credentials. This is used when managed profile password is forgotten. It starts
+     * the user in locked state so that a direct boot aware DPC could reset the password.
+     * Should not be used together with
+     * {@link #QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED} or an exception will be thrown.
+     * @hide
+     */
+    public static final int QUIET_MODE_DISABLE_DONT_ASK_CREDENTIAL = 0x2;
+
+    /**
      * List of flags available for the {@link #requestQuietModeEnabled} method.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "QUIET_MODE_" }, value = {
-            QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED })
+            QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED,
+            QUIET_MODE_DISABLE_DONT_ASK_CREDENTIAL})
     public @interface QuietModeFlag {}
 
     /**
@@ -3521,12 +3532,13 @@ public class UserManager {
             boolean enableQuietMode, @NonNull UserHandle userHandle, IntentSender target) {
         return requestQuietModeEnabled(enableQuietMode, userHandle, target, 0);
     }
+
     /**
      * Similar to {@link #requestQuietModeEnabled(boolean, UserHandle)}, except you can specify
      * a target to start when user is unlocked. If {@code target} is specified, caller must have
      * the {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
-     * @see {@link #requestQuietModeEnabled(boolean, UserHandle)}
+     * @see #requestQuietModeEnabled(boolean, UserHandle)
      * @hide
      */
     public boolean requestQuietModeEnabled(

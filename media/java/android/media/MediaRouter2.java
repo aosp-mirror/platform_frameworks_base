@@ -363,7 +363,7 @@ public class MediaRouter2 {
     /**
      * Transfers the current media to the given route.
      * If it's necessary a new {@link RoutingController} is created or it is handled within
-     * the current controller.
+     * the current routing controller.
      *
      * @param route the route you want to transfer the current media to. Pass {@code null} to
      *              stop routing of the current media.
@@ -393,8 +393,11 @@ public class MediaRouter2 {
             return;
         }
 
-        // TODO: Check the given route exists
         // TODO: Check thread-safety
+        if (!mRoutes.containsKey(route.getId())) {
+            notifyTransferFailed(route);
+            return;
+        }
         if (controller.getRoutingSessionInfo().getTransferableRoutes().contains(route.getId())) {
             controller.transferToRoute(route);
             return;
@@ -877,9 +880,11 @@ public class MediaRouter2 {
          */
         @NonNull
         public List<MediaRoute2Info> getSelectedRoutes() {
+            List<String> selectedRouteIds;
             synchronized (mControllerLock) {
-                return getRoutesWithIdsLocked(mSessionInfo.getSelectedRoutes());
+                selectedRouteIds = mSessionInfo.getSelectedRoutes();
             }
+            return getRoutesWithIds(selectedRouteIds);
         }
 
         /**
@@ -887,9 +892,11 @@ public class MediaRouter2 {
          */
         @NonNull
         public List<MediaRoute2Info> getSelectableRoutes() {
+            List<String> selectableRouteIds;
             synchronized (mControllerLock) {
-                return getRoutesWithIdsLocked(mSessionInfo.getSelectableRoutes());
+                selectableRouteIds = mSessionInfo.getSelectableRoutes();
             }
+            return getRoutesWithIds(selectableRouteIds);
         }
 
         /**
@@ -897,9 +904,11 @@ public class MediaRouter2 {
          */
         @NonNull
         public List<MediaRoute2Info> getDeselectableRoutes() {
+            List<String> deselectableRouteIds;
             synchronized (mControllerLock) {
-                return getRoutesWithIdsLocked(mSessionInfo.getDeselectableRoutes());
+                deselectableRouteIds = mSessionInfo.getDeselectableRoutes();
             }
+            return getRoutesWithIds(deselectableRouteIds);
         }
 
         /**
@@ -1203,20 +1212,12 @@ public class MediaRouter2 {
             }
         }
 
-        // TODO: This method uses two locks (mLock outside, sLock inside).
-        //       Check if there is any possiblity of deadlock.
-        private List<MediaRoute2Info> getRoutesWithIdsLocked(List<String> routeIds) {
-            List<MediaRoute2Info> routes = new ArrayList<>();
+        private List<MediaRoute2Info> getRoutesWithIds(List<String> routeIds) {
             synchronized (sRouterLock) {
-                // TODO: Maybe able to change using Collection.stream()?
-                for (String routeId : routeIds) {
-                    MediaRoute2Info route = mRoutes.get(routeId);
-                    if (route != null) {
-                        routes.add(route);
-                    }
-                }
+                return routeIds.stream().map(mRoutes::get)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
             }
-            return Collections.unmodifiableList(routes);
         }
     }
 

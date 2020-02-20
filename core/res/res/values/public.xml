@@ -3014,6 +3014,7 @@
       <public name="minExtensionVersion" />
       <public name="allowNativeHeapPointerTagging" />
       <public name="preserveLegacyExternalStorage" />
+      <public name="mimeGroup" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">

@@ -13,6 +13,9 @@
       "name": "AppEnumerationTests"
     },
     {
+      "name": "CtsMatchFlagTestCases"
+    },
+    {
       "name": "FrameworksServicesTests",
       "options": [
         {

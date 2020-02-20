@@ -69,8 +69,7 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
                         uint8_t* buf = reinterpret_cast<uint8_t*>(
                                 const_cast<int8_t*>(parcel.buffer.data()));
                         shared_ptr<LogEvent> event = make_shared<LogEvent>(
-                                buf, parcel.buffer.size(), /*uid=*/-1, /*pid=*/-1,
-                                /*useNewSchema=*/true);
+                                buf, parcel.buffer.size(), /*uid=*/-1, /*pid=*/-1);
                         sharedData->push_back(event);
                     }
                     *pullSuccess = success;

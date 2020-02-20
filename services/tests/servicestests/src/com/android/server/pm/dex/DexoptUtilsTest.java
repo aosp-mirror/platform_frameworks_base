@@ -23,14 +23,15 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.pm.SharedLibraryInfo;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.PackageImpl;
-import android.content.pm.parsing.ParsedPackage;
 import android.content.pm.parsing.ParsingPackage;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import dalvik.system.DelegateLastClassLoader;
 import dalvik.system.DexClassLoader;
@@ -61,7 +62,8 @@ public class DexoptUtilsTest {
     private TestData createMockApplicationInfo(String baseClassLoader, boolean addSplits,
             boolean addSplitDependencies, boolean isolatedSplitLoading) {
         String codeDir = "/data/app/mock.android.com";
-        ParsingPackage parsingPackage = PackageImpl.forParsing("mock.android.com")
+        ParsingPackage parsingPackage = PackageImpl.forTesting("mock.android.com",
+                codeDir + "/base.dex")
                 .setClassLoaderName(baseClassLoader);
 
         parsingPackage.setIsolatedSplitLoading(isolatedSplitLoading);
@@ -122,8 +124,7 @@ public class DexoptUtilsTest {
                     .setSplitClassLoaderName(7, null);
         }
 
-        ParsedPackage parsedPackage = parsingPackage.hideAsParsed()
-                .setBaseCodePath(codeDir + "/base.dex");
+        ParsedPackage parsedPackage = (ParsedPackage) parsingPackage.hideAsParsed();
 
         TestData data = new TestData();
         data.pkg = parsedPackage.hideAsFinal();

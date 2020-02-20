@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB 调试"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"连接 USB 后启用调试模式"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"撤消 USB 调试授权"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"无线调试"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"连接到 WLAN 后启用调试模式"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"错误"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"无线调试"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"要查看和使用可用的设备，请开启无线调试"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"使用二维码配对设备"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"使用二维码扫描器配对新设备"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"使用配对码配对设备"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"使用六位数验证码配对新设备"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"已配对的设备"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"当前已连接"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"设备详细信息"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"取消保存"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"设备指纹：<xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"连接失败"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"确保<xliff:g id="DEVICE_NAME">%1$s</xliff:g>已连接到正确的网络"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"与设备配对"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"WLAN 配对码"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"配对失败"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"确保设备已连接到同一网络。"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"扫描二维码即可通过 WLAN 配对设备"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"正在配对设备…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"无法配对设备。可能是因为二维码不正确，或者设备未连接到同一网络。"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP 地址和端口"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"扫描二维码"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"扫描二维码即可通过 WLAN 配对设备"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, 调试, debug, 开发, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"错误报告快捷方式"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"在电源菜单中显示用于提交错误报告的按钮"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"不锁定屏幕"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"使用网络共享硬件加速功能（如果可用）"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"是否允许 USB 调试？"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB 调试仅用于开发目的。该功能可用于在您的计算机和设备之间复制数据、在您的设备上安装应用（事先不发通知）以及读取日志数据。"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"要允许无线调试吗？"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"无线调试仅用于开发目的。该功能可用于在您的计算机和设备之间复制数据、在您的设备上安装应用（事先不发通知）以及读取日志数据。"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"是否针对您之前授权的所有计算机撤消 USB 调试的访问权限？"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"允许开发设置？"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"这些设置仅适用于开发工作。一旦启用，会导致您的设备以及设备上的应用崩溃或出现异常。"</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"红色弱视（红绿不分）"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"蓝色弱视（蓝黄不分）"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"颜色校正功能有助于色盲用户看到更准确的颜色"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已被“<xliff:g id="TITLE">%1$s</xliff:g>”覆盖"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"大约还可使用 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"电量剩余使用时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"电量剩余使用时间超过 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"电量剩余使用时间超过 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"手机可能即将关机"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"平板电脑可能即将关机"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"设备可能即将关机"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"手机可能即将关机 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"平板电脑可能即将关机 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"设备可能即将关机 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"手机可能即将关机"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"平板电脑可能即将关机"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"设备可能即将关机"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"手机可能即将关机 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"平板电脑可能即将关机 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"设备可能即将关机 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"还剩 <xliff:g id="TIME">%1$s</xliff:g>充满电"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>后充满电"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"正在充电"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"正在快速充电"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"正在慢速充电"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"未在充电"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已插入电源，但是现在无法充电"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"电量充足"</string>

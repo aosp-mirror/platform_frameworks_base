@@ -33,6 +33,7 @@ import java.lang.ref.WeakReference;
  */
 final class AccessibilityEmbeddedConnection extends IAccessibilityEmbeddedConnection.Stub {
     private final WeakReference<ViewRootImpl> mViewRootImpl;
+    private final Matrix mTmpScreenMatrix = new Matrix();
 
     AccessibilityEmbeddedConnection(ViewRootImpl viewRootImpl) {
         mViewRootImpl = new WeakReference<>(viewRootImpl);
@@ -73,9 +74,11 @@ final class AccessibilityEmbeddedConnection extends IAccessibilityEmbeddedConnec
     public void setScreenMatrix(float[] matrixValues) {
         final ViewRootImpl viewRootImpl = mViewRootImpl.get();
         if (viewRootImpl != null) {
-            // TODO(b/148821260): Implement the rest of matrix values.
-            viewRootImpl.mAttachInfo.mLocationInParentDisplay.set(
-                    (int) matrixValues[Matrix.MTRANS_X], (int) matrixValues[Matrix.MTRANS_Y]);
+            mTmpScreenMatrix.setValues(matrixValues);
+            if (viewRootImpl.mAttachInfo.mScreenMatrixInEmbeddedHierarchy == null) {
+                viewRootImpl.mAttachInfo.mScreenMatrixInEmbeddedHierarchy = new Matrix();
+            }
+            viewRootImpl.mAttachInfo.mScreenMatrixInEmbeddedHierarchy.set(mTmpScreenMatrix);
         }
     }
 }

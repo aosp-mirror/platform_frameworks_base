@@ -216,9 +216,6 @@ public class GnssManagerService {
      * {@link android.location.GnssCapabilities}.
      */
     public long getGnssCapabilities(String packageName) {
-        mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
-
         if (!checkLocationAppOp(packageName)) {
             return GnssCapabilities.INVALID_CAPABILITIES;
         }

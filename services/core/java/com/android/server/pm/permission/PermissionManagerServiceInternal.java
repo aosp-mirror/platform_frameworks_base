@@ -22,8 +22,9 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.permission.PermissionManagerInternal;
+
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.ArrayList;
 import java.util.List;

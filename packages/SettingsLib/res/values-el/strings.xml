@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"Εντοπισμός σφαλμάτων USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Λειτουργία εντοπισμού σφαλμάτων όταν το USB είναι συνδεδεμένο"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Ανάκληση εξ/σεων εντ/σμού σφ/των USB"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Εντοπισμός σφαλμ. ασύρ. σύνδεσης"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Λειτουργία εντοπισμού σφαλμάτων όταν το Wi‑Fi είναι συνδεδεμένο"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Σφάλμα"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Εντοπισμός σφαλμ. ασύρ. σύνδεσης"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Για να δείτε και να χρησιμοποιήσετε τις διαθέσιμες συσκευές, ενεργοποιήστε τον εντοπισμό σφαλμάτων ασύρματης σύνδεσης"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Σύζευξη συσκευής με κωδικό QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Σύζευξη νέων συσκευών με τη χρήση σαρωτή κωδικών QR"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Σύζευξη συσκευής με κωδικό σύζευξης"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Σύζευξη νέων συσκευών με τη χρήση εξαψήφιου κωδικού"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Συσκευές σε σύζευξη"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Συνδεδεμένες αυτήν τη στιγμή"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Λεπτομέρειες συσκευής"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Διαγραφή"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Μοναδικό χαρακτηριστικό συσκευής: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Η σύνδεση δεν ήταν επιτυχής"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Βεβαιωθείτε ότι η συσκευή <xliff:g id="DEVICE_NAME">%1$s</xliff:g> είναι συνδεδεμένη στο σωστό δίκτυο"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Σύζευξη με συσκευή"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Κωδικός σύζευξης Wi‑Fi"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Η σύζευξη δεν ήταν επιτυχής"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Βεβαιωθείτε ότι η συσκευή είναι συνδεδεμένη στο ίδιο δίκτυο."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Σύζευξη συσκευής μέσω Wi‑Fi με τη σάρωση ενός κωδικού QR"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Σύζευξη συσκευής…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Η σύζευξη της συσκευής απέτυχε. Ο κωδικός QR ήταν λανθασμένος ή η συσκευή δεν είναι συνδεδεμένη στο ίδιο δίκτυο."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Διεύθυνση IP και θύρα"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Σάρωση κωδικού QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Σύζευξη συσκευής μέσω Wi‑Fi με τη σάρωση ενός κωδικού QR"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, εντοπισμός σφαλμάτων, προγραμματιστής"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Συντόμευση αναφοράς σφαλμάτων"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Εμφάνιση κουμπιού στο μενού ενεργοποίησης για τη λήψη αναφοράς σφαλμάτων"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Παραμονή σε λειτουργία"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Χρήση της σύνδεσης επιτάχυνσης υλικού εάν υπάρχει"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Να επιτρέπεται ο εντοπισμός σφαλμάτων USB;"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Ο εντοπισμός σφαλμάτων USB προορίζεται μόνο για σκοπούς προγραμματισμού. Χρησιμοποιήστε τον για αντιγραφή δεδομένων μεταξύ του υπολογιστή και της συσκευής σας, για την εγκατάσταση εφαρμογών στη συσκευή σας χωρίς προειδοποίηση και για την ανάγνωση δεδομένων καταγραφής."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Να επιτρέπεται ο εντοπισμός σφαλμάτων ασύρματης σύνδεσης;"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Ο εντοπισμός σφαλμάτων ασύρματης σύνδεσης προορίζεται μόνο για σκοπούς προγραμματισμού. Χρησιμοποιήστε τον για αντιγραφή δεδομένων μεταξύ του υπολογιστή και της συσκευής σας, για την εγκατάσταση εφαρμογών στη συσκευή σας χωρίς ειδοποίηση και για την ανάγνωση δεδομένων καταγραφής."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Ανάκληση πρόσβασης στον εντοπισμό σφαλμάτων USB από όλους τους υπολογιστές για τους οποίους είχατε εξουσιοδότηση στο παρελθόν;"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Να επιτρέπεται η χρήση των ρυθμίσεων ανάπτυξης;"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Αυτές οι ρυθμίσεις προορίζονται για χρήση κατά την ανάπτυξη. Μπορούν να προκαλέσουν προβλήματα στη λειτουργία της συσκευής και των εφαρμογών σας."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Πρωτανοπία (κόκκινο-πράσινο)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Τριτανοπία (μπλε-κίτρινο)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Διόρθωση χρωμάτων"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Η διόρθωση χρωμάτων βοηθάει τα άτομα με αχρωματοψία να βλέπουν τα χρώματα με μεγαλύτερη ακρίβεια"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Αντικαταστάθηκε από <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Απομένει/ουν περίπου <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Απομένει/ουν λιγότερo/α από <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Απομένουν περισσότερα/ες από <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Απομένουν περισσότερα/ες από <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Το τηλέφωνο μπορεί να απενεργοποιηθεί σύντομα"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Το tablet μπορεί να απενεργοποιηθεί σύντομα"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Η συσκευή μπορεί να απενεργοποιηθεί σύντομα"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Το τηλέφωνο μπορεί να απενεργοποιηθεί σύντομα (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Το tablet μπορεί να απενεργοποιηθεί σύντομα (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Η συσκευή μπορεί να απενεργοποιηθεί σύντομα (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Το τηλέφωνο μπορεί να απενεργοποιηθεί σύντομα"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Το tablet μπορεί να απενεργοποιηθεί σύντομα"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Η συσκευή μπορεί να απενεργοποιηθεί σύντομα"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Το τηλέφωνο μπορεί να απενεργοποιηθεί σύντομα (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Το tablet μπορεί να απενεργοποιηθεί σύντομα (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Η συσκευή μπορεί να απενεργοποιηθεί σύντομα (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Απομένουν <xliff:g id="TIME">%1$s</xliff:g> για ολοκλήρωση της φόρτισης"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για την ολοκλήρωση της φόρτισης"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Άγνωστο"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Φόρτιση"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ταχεία φόρτιση"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Αργή φόρτιση"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Δεν φορτίζει"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Συνδέθηκε, δεν είναι δυνατή η φόρτιση αυτήν τη στιγμή"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Πλήρης"</string>

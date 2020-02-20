@@ -1813,13 +1813,7 @@ public class LocationManager {
 
     /**
      * Returns the supported capabilities of the GNSS chipset.
-     *
-     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present.
-     *
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(ACCESS_FINE_LOCATION)
     public @NonNull GnssCapabilities getGnssCapabilities() {
         try {
             long gnssCapabilities = mService.getGnssCapabilities(mContext.getPackageName());
@@ -2264,35 +2258,36 @@ public class LocationManager {
     }
 
     /**
-     * Registers a Gnss Antenna Info callback.
+     * Registers a Gnss Antenna Info listener. Only expect results if
+     * {@link GnssCapabilities#hasGnssAntennaInfo()} shows that antenna info is supported.
      *
-     * @param executor the executor that the callback runs on.
-     * @param callback a {@link GnssAntennaInfo.Callback} object to register.
-     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     * @param executor the executor that the listener runs on.
+     * @param listener a {@link GnssAntennaInfo.Listener} object to register.
+     * @return {@code true} if the listener was added successfully, {@code false} otherwise.
      *
      * @throws IllegalArgumentException if executor is null
-     * @throws IllegalArgumentException if callback is null
+     * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
-    public boolean registerAntennaInfoCallback(
+    public boolean registerAntennaInfoListener(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull GnssAntennaInfo.Callback callback) {
+            @NonNull GnssAntennaInfo.Listener listener) {
         try {
-            return mGnssAntennaInfoListenerManager.addListener(callback, executor);
+            return mGnssAntennaInfoListenerManager.addListener(listener, executor);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Unregisters a GNSS Antenna Info callback.
+     * Unregisters a GNSS Antenna Info listener.
      *
-     * @param callback a {@link GnssAntennaInfo.Callback} object to remove.
+     * @param listener a {@link GnssAntennaInfo.Listener} object to remove.
      */
-    public void unregisterAntennaInfoCallback(@NonNull GnssAntennaInfo.Callback callback) {
+    public void unregisterAntennaInfoListener(@NonNull GnssAntennaInfo.Listener listener) {
         try {
-            mGnssAntennaInfoListenerManager.removeListener(callback);
+            mGnssAntennaInfoListenerManager.removeListener(listener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3043,7 +3038,7 @@ public class LocationManager {
     }
 
     private class GnssAntennaInfoListenerManager extends
-            AbstractListenerManager<Void, GnssAntennaInfo.Callback> {
+            AbstractListenerManager<Void, GnssAntennaInfo.Listener> {
 
         @Nullable
         private IGnssAntennaInfoListener mListenerTransport;
@@ -3074,11 +3069,6 @@ public class LocationManager {
             @Override
             public void onGnssAntennaInfoReceived(final List<GnssAntennaInfo> gnssAntennaInfos) {
                 execute((callback) -> callback.onGnssAntennaInfoReceived(gnssAntennaInfos));
-            }
-
-            @Override
-            public void onStatusChanged(int status) {
-                execute((listener) -> listener.onStatusChanged(status));
             }
         }
 

@@ -1253,7 +1253,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats uidSnapshot = getNetworkStatsUidDetail(INTERFACES_ALL);
         Trace.traceEnd(TRACE_TAG_NETWORK);
         Trace.traceBegin(TRACE_TAG_NETWORK, "snapshotXt");
-        final NetworkStats xtSnapshot = getNetworkStatsXt();
+        final NetworkStats xtSnapshot = readNetworkStatsSummaryXt();
         Trace.traceEnd(TRACE_TAG_NETWORK);
         Trace.traceBegin(TRACE_TAG_NETWORK, "snapshotDev");
         final NetworkStats devSnapshot = readNetworkStatsSummaryDev();
@@ -1742,18 +1742,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 mUseBpfTrafficStats);
         uidSnapshot.combineAllValues(tetherSnapshot);
 
-        final TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(
-                Context.TELEPHONY_SERVICE);
-
-        // fold video calling data usage stats into uid snapshot
-        final NetworkStats vtStats = telephonyManager.getVtDataUsage(STATS_PER_UID);
-        if (vtStats != null) {
-            vtStats.filter(UID_ALL, ifaces, TAG_ALL);
-            mStatsFactory.apply464xlatAdjustments(uidSnapshot, vtStats,
-                    mUseBpfTrafficStats);
-            uidSnapshot.combineAllValues(vtStats);
-        }
-
         // get a stale copy of uid stats snapshot provided by providers.
         final NetworkStats providerStats = getNetworkStatsFromProviders(STATS_PER_UID);
         providerStats.filter(UID_ALL, ifaces, TAG_ALL);
@@ -1763,24 +1751,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         uidSnapshot.combineAllValues(mUidOperations);
 
         return uidSnapshot;
-    }
-
-    /**
-     * Return snapshot of current XT statistics with video calling data usage statistics.
-     */
-    private NetworkStats getNetworkStatsXt() throws RemoteException {
-        final NetworkStats xtSnapshot = readNetworkStatsSummaryXt();
-
-        final TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(
-                Context.TELEPHONY_SERVICE);
-
-        // Merge video calling data usage into XT
-        final NetworkStats vtSnapshot = telephonyManager.getVtDataUsage(STATS_PER_IFACE);
-        if (vtSnapshot != null) {
-            xtSnapshot.combineAllValues(vtSnapshot);
-        }
-
-        return xtSnapshot;
     }
 
     /**

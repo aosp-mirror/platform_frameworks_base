@@ -45,9 +45,7 @@ import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
-import android.content.pm.parsing.ApkParseUtils;
-import android.content.pm.parsing.PackageInfoUtils;
-import android.content.pm.parsing.ParsedPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -64,6 +62,9 @@ import com.android.server.LocalServices;
 import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.integrity.model.RuleMetadata;
+import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -508,13 +509,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             throw new IllegalArgumentException("Installation path is null, package not found");
         }
 
-        PackageParser parser = new PackageParser();
+        PackageParser2 parser = new PackageParser2(null, false, null, null, null);
         try {
-            ParsedPackage pkg = parser.parseParsedPackage(installationPath, 0, false);
+            ParsedPackage pkg = parser.parsePackage(installationPath, 0, false);
             int flags = PackageManager.GET_SIGNING_CERTIFICATES | PackageManager.GET_META_DATA;
-            ApkParseUtils.collectCertificates(pkg, false);
+            pkg.setSigningDetails(ParsingPackageUtils.collectCertificates(pkg, false));
             return PackageInfoUtils.generate(pkg, null, flags, 0, 0, null, new PackageUserState(),
-                    UserHandle.getCallingUserId());
+                    UserHandle.getCallingUserId(), null);
         } catch (Exception e) {
             throw new IllegalArgumentException("Exception reading " + dataUri, e);
         }

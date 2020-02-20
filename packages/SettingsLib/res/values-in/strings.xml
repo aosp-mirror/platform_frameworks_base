@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"Debugging USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Mode debug ketika USB tersambung"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Cabut otorisasi debug USB"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Proses debug nirkabel"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Mode debug saat Wi-Fi tersambung"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Error"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Proses debug nirkabel"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Untuk melihat dan menggunakan perangkat yang tersedia, aktifkan proses debug nirkabel"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Sambungkan perangkat dengan kode QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Sambungkan perangkat baru menggunakan Pemindai kode QR"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Sambungkan perangkat dengan kode penghubung"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Sambungkan perangkat baru menggunakan kode enam digit"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Perangkat disambungkan"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Saat ini tersambung"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Detail perangkat"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Lupakan"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Sidik jari perangkat: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Sambungan gagal"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Pastikan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> tersambung ke jaringan yang tepat"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Sambungkan dengan perangkat"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Kode penyambungan Wi-Fi"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Penyambungan perangkat gagal"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Pastikan perangkat tersambung ke jaringan yang sama."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Menyambungkan perangkat melalui Wi‑Fi dengan memindai Kode QR"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Menyambungkan perangkat…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Gagal menyambungkan perangkat. Kode QR salah, atau perangkat tidak tersambung ke jaringan yang sama."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Alamat IP &amp; Port"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Memindai kode QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Menyambungkan perangkat melalui Wi‑Fi dengan memindai Kode QR"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Pintasan laporan bug"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Tampilkan tombol di menu daya untuk mengambil laporan bug"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Tetap terjaga"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Gunakan akselerasi hardware tethering jika tersedia"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Izinkan melakukan debug USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Debugging USB dimaksudkan untuk tujuan pengembangan saja. Gunakan untuk menyalin data antara komputer dan perangkat Anda, memasang apl pada perangkat tanpa notifikasi, dan membaca data log."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Izinkan proses debug nirkabel?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Proses debug nirkabel dimaksudkan untuk tujuan pengembangan saja. Gunakan untuk menyalin data antara komputer dan perangkat Anda, menginstal aplikasi pada perangkat tanpa notifikasi, dan membaca data log."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Cabut akses ke debug USB dari semua komputer yang telah Anda otorisasi sebelumnya?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Izinkan setelan pengembangan?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Setelan ini hanya dimaksudkan untuk penggunaan pengembangan. Setelan dapat menyebabkan perangkat dan aplikasi yang menerapkannya rusak atau tidak berfungsi semestinya."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (merah-hijau)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (biru-kuning)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koreksi warna"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Koreksi warna membantu orang penderita buta warna melihat warna yang lebih akurat"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Digantikan oleh <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Sekitar <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Tersisa kurang dari <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Tersisa lebih dari <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Tersisa lebih dari <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Ponsel mungkin segera dimatikan"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Tablet mungkin segera dimatikan"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Perangkat mungkin segera dimatikan"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Ponsel mungkin segera dimatikan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Tablet mungkin segera dimatikan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Perangkat mungkin segera dimatikan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Ponsel akan segera dimatikan"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet akan segera dimatikan"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Perangkat akan segera dimatikan"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Ponsel akan segera dimatikan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet akan segera dimatikan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Perangkat akan segera dimatikan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Sisa <xliff:g id="TIME">%1$s</xliff:g> hingga terisi penuh"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi terisi penuh"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Mengisi daya"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mengisi daya cepat"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mengisi daya lambat"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Tidak mengisi daya"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Tercolok, tidak dapat mengisi baterai sekarang"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Penuh"</string>

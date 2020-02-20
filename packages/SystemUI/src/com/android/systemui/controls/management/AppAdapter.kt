@@ -58,13 +58,13 @@ class AppAdapter(
     private var listOfServices = emptyList<CandidateInfo>()
 
     private val callback = object : ControlsListingController.ControlsListingCallback {
-        override fun onServicesUpdated(list: List<CandidateInfo>) {
+        override fun onServicesUpdated(candidates: List<CandidateInfo>) {
             backgroundExecutor.execute {
-                val collator = Collator.getInstance(resources.getConfiguration().locale)
+                val collator = Collator.getInstance(resources.configuration.locales[0])
                 val localeComparator = compareBy<CandidateInfo, CharSequence>(collator) {
                     it.loadLabel()
                 }
-                listOfServices = list.sortedWith(localeComparator)
+                listOfServices = candidates.sortedWith(localeComparator)
                 uiExecutor.execute(::notifyDataSetChanged)
             }
         }

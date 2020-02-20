@@ -1416,6 +1416,7 @@ public class DevicePolicyManager {
      * @see #setFactoryResetProtectionPolicy
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_FACTORY_RESET_PROTECTION)
     @SystemApi
     public static final String ACTION_RESET_PROTECTION_POLICY_CHANGED =
             "android.app.action.RESET_PROTECTION_POLICY_CHANGED";
@@ -11988,5 +11989,22 @@ public class DevicePolicyManager {
             }
         }
         return 0;
+    }
+
+    /**
+     * Returns {@code true} when {@code userId} has a profile owner that is capable of resetting
+     * password in RUNNING_LOCKED state. For that it should have at least one direct boot aware
+     * component and have an active password reset token. Can only be called by the system.
+     * @hide
+     */
+    public boolean canProfileOwnerResetPasswordWhenLocked(int userId) {
+        if (mService != null) {
+            try {
+                return mService.canProfileOwnerResetPasswordWhenLocked(userId);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 }

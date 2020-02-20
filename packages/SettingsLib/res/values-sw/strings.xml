@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"Utatuzi wa USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Muundo wa kurekebisha wakati USB imeunganishwa"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Batilisha idhini za kurekebisha USB"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Utatuzi usiotumia waya"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Hali ya utatuzi wakati Wi-Fi imeunganishwa"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Hitilafu"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Utatuzi usiotumia waya"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Ili kungalia na kutumia vifaa vinavyopatikana, washa utatuzi usiotumia waya"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Oanisha kifaa ukitumia msimbo wa QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Oanisha vifaa vipya ukitumia Kichanganuzi cha Msimbo wa QR"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Oanisha kifaa ukitumia msimbo wa kuoanisha"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Oanisha vifaa vipya ukitumia msimbo wa tarakimu sita"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Vifaa vilivyooanishwa"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Vilivyounganishwa kwa sasa"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Maelezo ya kifaa"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Sahau"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Alama bainifu ya kifaa: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Imeshindwa kuunganisha"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Hakikisha kuwa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> kimeunganishwa kwenye mtandao sahihi"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Oanisha na kifaa"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Msimbo wa kuoanisha wa Wi-Fi"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Imeshindwa kuunganisha"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Hakikisha kuwa kifaa kimeunganishwa kwenye mtandao mmoja."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Oanisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Inaoanisha kifaa…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Imeshindwa kuoanisha kifaa. Huenda msimbo wa QR haukuwa sahihi au kifaa hakijaunganishwa kwenye mtandao mmoja."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Anwani ya IP na Mlango"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Changanua msimbo wa QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Oanisha kifaa kupitia Wi-Fi kwa kuchanganua Msimbo wa QR"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, tatua, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Njia ya mkato ya kuripoti hitilafu"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Onyesha kitufe cha kuripoti hitilafu katika menyu ya kuzima/kuwasha kifaa"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Weka skrini ikiwa imewashwa"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Tumia huduma ya kuongeza kasi kwa kutumia maunzi ili kusambaza mtandao ikiwa inapatikana"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Ruhusu utatuaji USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Ueuaji wa USB umekusudiwa kwa malengo ya utengenezaji tu. Itumi kunakili data kati ya kompyuta yako na kifaa chako, kusanidi programu kwa kifaa chako bila arifa, na kusoma data ya rajisi."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Ungependa kuruhusu utatuzi usiotumia waya?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Utatuzi usiotumia waya umekusudiwa kwa malengo ya usanidi tu. Utumie kunakili data kati ya kompyuta yako na kifaa chako, kusakinisha programu kwenye kifaa chako bila arifa na kusoma data ya kumbukumbu."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Unataka kubatilisha ufikiaji wa urekebishaji wa USB kutoka kwenye kompyuta zote ulizotangulia kuidhinisha?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Ruhusu mipangilio ya usanidi?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Mipangilio hii imekusudiwa kwa matumizi ya usanidi tu. Inaweza kusababisha kifaa chako na programu zilizoko kuvunjika au kutofanya kazi vizuri."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (nyekundu-kijani)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (samawati-manjano)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Usahihishaji wa rangi"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Urekebishaji wa rangi huwasaidia watu wenye matatizo ya kutofautisha rangi ili waone rangi nyingi sahihi"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Imetanguliwa na <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Zimesalia takribani <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Zimesalia chini ya <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Zimesalia zaidi ya <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Zimesalia zaidi ya <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Simu inakaribia kuzimika"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Kompyuta kibao inakaribia kuzimika"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Kifaa kinakaribia kuzimika"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Simu inakaribia kuzimika (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Kompyuta kibao inakaribia kuzimika (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Kifaa kinakaribia kuzimika (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Huenda simu ikazima hivi karibuni"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Huenda kompyuta yako kibao ikazima hivi karibuni"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Huenda kifaa kikazima hivi karibuni"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Huenda simu ikazima hivi karibuni (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Huenda kompyuta kibao ikazima hivi karibuni (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Huenda kifaa kikazima hivi karibuni (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Zimesalia <xliff:g id="TIME">%1$s</xliff:g> hadi ijae chaji"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hadi ijae chaji"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Haijulikani"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Inachaji"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Inachaji kwa kasi"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Inachaji pole pole"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Haichaji"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Haiwezi kuchaji kwa sasa"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Imejaa"</string>

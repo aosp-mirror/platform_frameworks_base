@@ -90,8 +90,7 @@ public abstract class IntegrityFormula {
             return new BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true);
         }
 
-        private Application() {
-        }
+        private Application() {}
     }
 
     /** Factory class for creating integrity formulas based on installer. */
@@ -117,26 +116,45 @@ public abstract class IntegrityFormula {
          */
         @NonNull
         public static IntegrityFormula certificatesContain(@NonNull String installerCertificate) {
-            return new StringAtomicFormula(AtomicFormula.INSTALLER_CERTIFICATE,
-                    installerCertificate);
+            return new StringAtomicFormula(
+                    AtomicFormula.INSTALLER_CERTIFICATE, installerCertificate);
         }
 
-        private Installer() {
+        private Installer() {}
+    }
+
+    /** Factory class for creating integrity formulas based on source stamp. */
+    public static final class SourceStamp {
+        /** Returns an integrity formula that checks the equality to a stamp certificate hash. */
+        @NonNull
+        public static IntegrityFormula stampCertificateHashEquals(
+                @NonNull String stampCertificateHash) {
+            return new StringAtomicFormula(
+                    AtomicFormula.STAMP_CERTIFICATE_HASH, stampCertificateHash);
         }
+
+        /**
+         * Returns an integrity formula that is valid when stamp embedded in the APK is NOT trusted.
+         */
+        @NonNull
+        public static IntegrityFormula notTrusted() {
+            return new BooleanAtomicFormula(AtomicFormula.STAMP_TRUSTED, /* value= */ false);
+        }
+
+        private SourceStamp() {}
     }
 
     /** @hide */
     @IntDef(
             value = {
-                    COMPOUND_FORMULA_TAG,
-                    STRING_ATOMIC_FORMULA_TAG,
-                    LONG_ATOMIC_FORMULA_TAG,
-                    BOOLEAN_ATOMIC_FORMULA_TAG,
-                    INSTALLER_ALLOWED_BY_MANIFEST_FORMULA_TAG
+                COMPOUND_FORMULA_TAG,
+                STRING_ATOMIC_FORMULA_TAG,
+                LONG_ATOMIC_FORMULA_TAG,
+                BOOLEAN_ATOMIC_FORMULA_TAG,
+                INSTALLER_ALLOWED_BY_MANIFEST_FORMULA_TAG
             })
     @Retention(RetentionPolicy.SOURCE)
-    @interface Tag {
-    }
+    @interface Tag {}
 
     /** @hide */
     public static final int COMPOUND_FORMULA_TAG = 0;
@@ -171,8 +189,8 @@ public abstract class IntegrityFormula {
     public abstract boolean isAppCertificateFormula();
 
     /**
-     * Returns true when the formula (or one of its atomic formulas) has installer package name
-     * or installer certificate as key.
+     * Returns true when the formula (or one of its atomic formulas) has installer package name or
+     * installer certificate as key.
      *
      * @hide
      */
@@ -243,15 +261,12 @@ public abstract class IntegrityFormula {
         return new CompoundFormula(CompoundFormula.AND, Arrays.asList(formulae));
     }
 
-    /**
-     * Returns a formula that evaluates to true when {@code formula} evaluates to false.
-     */
+    /** Returns a formula that evaluates to true when {@code formula} evaluates to false. */
     @NonNull
     public static IntegrityFormula not(@NonNull IntegrityFormula formula) {
         return new CompoundFormula(CompoundFormula.NOT, Arrays.asList(formula));
     }
 
     // Constructor is package private so it cannot be inherited outside of this package.
-    IntegrityFormula() {
-    }
+    IntegrityFormula() {}
 }

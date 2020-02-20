@@ -109,7 +109,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
-import android.view.autofill.AutofillId;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputBinding;
@@ -150,6 +149,7 @@ import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.internal.view.InputBindResult;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -1812,16 +1812,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("mMethodMap")
     private void onCreateInlineSuggestionsRequestLocked(@UserIdInt int userId,
-            ComponentName componentName, AutofillId autofillId,
-            IInlineSuggestionsRequestCallback callback) {
+            InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback callback) {
         final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
         try {
             if (userId == mSettings.getCurrentUserId() && imi != null
                     && imi.isInlineSuggestionsEnabled() && mCurMethod != null) {
                 executeOrSendMessage(mCurMethod,
-                        mCaller.obtainMessageOOOO(MSG_INLINE_SUGGESTIONS_REQUEST, mCurMethod,
-                                componentName, autofillId,
-                                new InlineSuggestionsRequestCallbackDecorator(callback,
+                        mCaller.obtainMessageOOO(MSG_INLINE_SUGGESTIONS_REQUEST, mCurMethod,
+                                requestInfo, new InlineSuggestionsRequestCallbackDecorator(callback,
                                         imi.getPackageName())));
             } else {
                 callback.onInlineSuggestionsUnsupported();
@@ -3972,13 +3970,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // ---------------------------------------------------------------
             case MSG_INLINE_SUGGESTIONS_REQUEST:
                 args = (SomeArgs) msg.obj;
-                final ComponentName componentName = (ComponentName) args.arg2;
-                final AutofillId autofillId = (AutofillId) args.arg3;
+                final InlineSuggestionsRequestInfo requestInfo =
+                        (InlineSuggestionsRequestInfo) args.arg2;
                 final IInlineSuggestionsRequestCallback callback =
-                        (IInlineSuggestionsRequestCallback) args.arg4;
+                        (IInlineSuggestionsRequestCallback) args.arg3;
                 try {
-                    ((IInputMethod) args.arg1).onCreateInlineSuggestionsRequest(componentName,
-                            autofillId, callback);
+                    ((IInputMethod) args.arg1).onCreateInlineSuggestionsRequest(requestInfo,
+                            callback);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest(): " + e);
                 }
@@ -4549,10 +4547,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
-            ComponentName componentName, AutofillId autofillId,
+            InlineSuggestionsRequestInfo requestInfo,
             IInlineSuggestionsRequestCallback callback) {
         synchronized (mMethodMap) {
-            onCreateInlineSuggestionsRequestLocked(userId, componentName, autofillId, callback);
+            onCreateInlineSuggestionsRequestLocked(userId, requestInfo, callback);
         }
     }
 
@@ -4620,9 +4618,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void onCreateInlineSuggestionsRequest(int userId, ComponentName componentName,
-                AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
-            mService.onCreateInlineSuggestionsRequest(userId, componentName, autofillId, cb);
+        public void onCreateInlineSuggestionsRequest(int userId,
+                InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb) {
+            mService.onCreateInlineSuggestionsRequest(userId, requestInfo, cb);
         }
 
         @Override

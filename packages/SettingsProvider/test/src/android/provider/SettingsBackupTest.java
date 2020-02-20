@@ -579,7 +579,8 @@ public class SettingsBackupTest {
                     Settings.Global.MODEM_STACK_ENABLED_FOR_SLOT,
                     Settings.Global.POWER_BUTTON_LONG_PRESS,
                     Settings.Global.POWER_BUTTON_VERY_LONG_PRESS,
-                    Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER);
+                    Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
+                    Settings.Global.ADVANCED_BATTERY_USAGE_AMOUNT);
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(

@@ -101,6 +101,11 @@ public class DisplayController {
                                 return;
                             }
                             Display display = getDisplay(displayId);
+                            if (display == null) {
+                                Slog.w(TAG, "Skipping Display Configuration change on invalid"
+                                        + " display. It may have been removed.");
+                                return;
+                            }
                             Context perDisplayContext = mContext;
                             if (displayId != Display.DEFAULT_DISPLAY) {
                                 perDisplayContext = mContext.createDisplayContext(display);

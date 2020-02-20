@@ -148,6 +148,7 @@ import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
 import android.os.ISystemUpdateManager;
+import android.os.IThermalService;
 import android.os.IUserManager;
 import android.os.IncidentManager;
 import android.os.PowerManager;
@@ -185,6 +186,7 @@ import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyRegistryManager;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
@@ -220,6 +222,8 @@ import java.util.Objects;
 @SystemApi
 public final class SystemServiceRegistry {
     private static final String TAG = "SystemServiceRegistry";
+
+    private static final boolean ENABLE_SERVICE_NOT_FOUND_WTF = true;
 
     // Service registry information.
     // This information is never changed once static initialization has completed.
@@ -576,10 +580,12 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<PowerManager>() {
             @Override
             public PowerManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.POWER_SERVICE);
-                IPowerManager service = IPowerManager.Stub.asInterface(b);
-                return new PowerManager(ctx.getOuterContext(),
-                        service, ctx.mMainThread.getHandler());
+                IBinder powerBinder = ServiceManager.getServiceOrThrow(Context.POWER_SERVICE);
+                IPowerManager powerService = IPowerManager.Stub.asInterface(powerBinder);
+                IBinder thermalBinder = ServiceManager.getServiceOrThrow(Context.THERMAL_SERVICE);
+                IThermalService thermalService = IThermalService.Stub.asInterface(thermalBinder);
+                return new PowerManager(ctx.getOuterContext(), powerService, thermalService,
+                        ctx.mMainThread.getHandler());
             }});
 
         registerService(Context.RECOVERY_SERVICE, RecoverySystem.class,
@@ -1370,8 +1376,29 @@ public final class SystemServiceRegistry {
      * @hide
      */
     public static Object getSystemService(ContextImpl ctx, String name) {
-        ServiceFetcher<?> fetcher = SYSTEM_SERVICE_FETCHERS.get(name);
-        return fetcher != null ? fetcher.getService(ctx) : null;
+        if (name == null) {
+            return null;
+        }
+        final ServiceFetcher<?> fetcher = SYSTEM_SERVICE_FETCHERS.get(name);
+        if (ENABLE_SERVICE_NOT_FOUND_WTF && fetcher == null) {
+            // This should be a caller bug.
+            Slog.wtf(TAG, "Unknown manager requested: " + name);
+            return null;
+        }
+
+        final Object ret = fetcher.getService(ctx);
+        if (ENABLE_SERVICE_NOT_FOUND_WTF && ret == null) {
+            // Some services do return null in certain situations, so don't do WTF for them.
+            switch (name) {
+                case Context.CONTENT_CAPTURE_MANAGER_SERVICE:
+                case Context.APP_PREDICTION_SERVICE:
+                case Context.INCREMENTAL_SERVICE:
+                    return null;
+            }
+            Slog.wtf(TAG, "Manager wrapper not available: " + name);
+            return null;
+        }
+        return ret;
     }
 
     /**
@@ -1379,7 +1406,15 @@ public final class SystemServiceRegistry {
      * @hide
      */
     public static String getSystemServiceName(Class<?> serviceClass) {
-        return SYSTEM_SERVICE_NAMES.get(serviceClass);
+        if (serviceClass == null) {
+            return null;
+        }
+        final String serviceName = SYSTEM_SERVICE_NAMES.get(serviceClass);
+        if (ENABLE_SERVICE_NOT_FOUND_WTF && serviceName == null) {
+            // This should be a caller bug.
+            Slog.wtf(TAG, "Unknown manager requested: " + serviceClass.getCanonicalName());
+        }
+        return serviceName;
     }
 
     /**
@@ -1676,7 +1711,9 @@ public final class SystemServiceRegistry {
                         try {
                             cache.wait();
                         } catch (InterruptedException e) {
-                            Log.w(TAG, "getService() interrupted");
+                            // This shouldn't normally happen, but if someone interrupts the
+                            // thread, it will.
+                            Slog.wtf(TAG, "getService() interrupted");
                             Thread.currentThread().interrupt();
                             return null;
                         }

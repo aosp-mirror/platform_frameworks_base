@@ -42,6 +42,9 @@ public final class AppInstallMetadata {
     private final List<String> mInstallerCertificates;
     private final long mVersionCode;
     private final boolean mIsPreInstalled;
+    private final boolean mIsStampTrusted;
+    // Raw string encoding for the SHA-256 hash of the certificate of the stamp.
+    private final String mStampCertificateHash;
     private final Map<String, String> mAllowedInstallersAndCertificates;
 
     private AppInstallMetadata(Builder builder) {
@@ -51,6 +54,8 @@ public final class AppInstallMetadata {
         this.mInstallerCertificates = builder.mInstallerCertificates;
         this.mVersionCode = builder.mVersionCode;
         this.mIsPreInstalled = builder.mIsPreInstalled;
+        this.mIsStampTrusted = builder.mIsStampTrusted;
+        this.mStampCertificateHash = builder.mStampCertificateHash;
         this.mAllowedInstallersAndCertificates = builder.mAllowedInstallersAndCertificates;
     }
 
@@ -84,9 +89,17 @@ public final class AppInstallMetadata {
         return mIsPreInstalled;
     }
 
-    /**
-     * Get the allowed installers and their corresponding cert.
-     */
+    /** @see AppInstallMetadata.Builder#setIsStampTrusted(boolean) */
+    public boolean isStampTrusted() {
+        return mIsStampTrusted;
+    }
+
+    /** @see AppInstallMetadata.Builder#setStampCertificateHash(String) */
+    public String getStampCertificateHash() {
+        return mStampCertificateHash;
+    }
+
+    /** Get the allowed installers and their corresponding cert. */
     public Map<String, String> getAllowedInstallersAndCertificates() {
         return mAllowedInstallersAndCertificates;
     }
@@ -95,13 +108,16 @@ public final class AppInstallMetadata {
     public String toString() {
         return String.format(
                 "AppInstallMetadata { PackageName = %s, AppCerts = %s, InstallerName = %s,"
-                    + " InstallerCerts = %s, VersionCode = %d, PreInstalled = %b }",
+                        + " InstallerCerts = %s, VersionCode = %d, PreInstalled = %b, "
+                        + "StampTrusted = %b, StampCert = %s }",
                 mPackageName,
                 mAppCertificates,
                 mInstallerName == null ? "null" : mInstallerName,
                 mInstallerCertificates == null ? "null" : mInstallerCertificates,
                 mVersionCode,
-                mIsPreInstalled);
+                mIsPreInstalled,
+                mIsStampTrusted,
+                mStampCertificateHash == null ? "null" : mStampCertificateHash);
     }
 
     /** Builder class for constructing {@link AppInstallMetadata} objects. */
@@ -112,6 +128,8 @@ public final class AppInstallMetadata {
         private List<String> mInstallerCertificates;
         private long mVersionCode;
         private boolean mIsPreInstalled;
+        private boolean mIsStampTrusted;
+        private String mStampCertificateHash;
         private Map<String, String> mAllowedInstallersAndCertificates;
 
         public Builder() {
@@ -199,6 +217,31 @@ public final class AppInstallMetadata {
         @NonNull
         public Builder setIsPreInstalled(boolean isPreInstalled) {
             this.mIsPreInstalled = isPreInstalled;
+            return this;
+        }
+
+        /**
+         * Set certificate hash of the stamp embedded in the APK.
+         *
+         * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
+         * of the stamp.
+         *
+         * @see AppInstallMetadata#getStampCertificateHash()
+         */
+        @NonNull
+        public Builder setStampCertificateHash(@NonNull String stampCertificateHash) {
+            this.mStampCertificateHash = Objects.requireNonNull(stampCertificateHash);
+            return this;
+        }
+
+        /**
+         * Set whether the stamp embedded in the APK is trusted or not.
+         *
+         * @see AppInstallMetadata#isStampTrusted()
+         */
+        @NonNull
+        public Builder setIsStampTrusted(boolean isStampTrusted) {
+            this.mIsStampTrusted = isStampTrusted;
             return this;
         }
 

@@ -55,10 +55,9 @@ static jclass class_location;
 static jclass class_gnssNavigationMessage;
 static jclass class_gnssClock;
 static jclass class_gnssConfiguration_halInterfaceVersion;
-static jclass class_gnssAntennaInfo;
-static jclass class_phaseCenterOffsetCoordinates;
-static jclass class_phaseCenterVariationCorrections;
-static jclass class_signalGainCorrections;
+static jclass class_gnssAntennaInfoBuilder;
+static jclass class_phaseCenterOffset;
+static jclass class_sphericalCorrections;
 static jclass class_arrayList;
 static jclass class_doubleArray;
 
@@ -122,12 +121,16 @@ static jmethodID method_gnssNavigationMessageCtor;
 static jmethodID method_gnssClockCtor;
 static jmethodID method_gnssMeasurementCtor;
 static jmethodID method_halInterfaceVersionCtor;
-static jmethodID method_gnssAntennaInfoCtor;
-static jmethodID method_phaseCenterOffsetCoordinatesCtor;
-static jmethodID method_phaseCenterVariationCorrectionsCtor;
-static jmethodID method_signalGainCorrectionsCtor;
+static jmethodID method_gnssAntennaInfoBuilderCtor;
+static jmethodID method_phaseCenterOffsetCtor;
+static jmethodID method_sphericalCorrectionsCtor;
 static jmethodID method_arrayListCtor;
 static jmethodID method_arrayListAdd;
+static jmethodID method_gnssAntennaInfoBuilderSetCarrierFrequencyMHz;
+static jmethodID method_gnssAntennaInfoBuilderSetPhaseCenterOffset;
+static jmethodID method_gnssAntennaInfoBuilderSetPhaseCenterVariationCorrections;
+static jmethodID method_gnssAntennaInfoBuilderSetSignalGainCorrections;
+static jmethodID method_gnssAntennaInfoBuilderBuild;
 
 /*
  * Save a pointer to JavaVm to attach/detach threads executing
@@ -1088,7 +1091,7 @@ private:
             const hidl_vec<IGnssAntennaInfoCallback::GnssAntennaInfo>& gnssAntennaInfos);
     jobject translateSingleGnssAntennaInfo(
             JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo);
-    jobject translatePhaseCenterOffsetCoordinates(
+    jobject translatePhaseCenterOffset(
             JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo);
     jobject translatePhaseCenterVariationCorrections(
             JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo);
@@ -1150,11 +1153,10 @@ jobject GnssAntennaInfoCallback::translateAllGnssAntennaInfos(
     return arrayList;
 }
 
-jobject GnssAntennaInfoCallback::translatePhaseCenterOffsetCoordinates(
+jobject GnssAntennaInfoCallback::translatePhaseCenterOffset(
         JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo) {
-    jobject phaseCenterOffsetCoordinates =
-            env->NewObject(class_phaseCenterOffsetCoordinates,
-                           method_phaseCenterOffsetCoordinatesCtor,
+    jobject phaseCenterOffset =
+            env->NewObject(class_phaseCenterOffset, method_phaseCenterOffsetCtor,
                            gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.x,
                            gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.xUncertainty,
                            gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.y,
@@ -1162,7 +1164,7 @@ jobject GnssAntennaInfoCallback::translatePhaseCenterOffsetCoordinates(
                            gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.z,
                            gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.zUncertainty);
 
-    return phaseCenterOffsetCoordinates;
+    return phaseCenterOffset;
 }
 
 jobject GnssAntennaInfoCallback::translatePhaseCenterVariationCorrections(
@@ -1185,8 +1187,7 @@ jobject GnssAntennaInfoCallback::translatePhaseCenterVariationCorrections(
     }
 
     jobject phaseCenterVariationCorrections =
-            env->NewObject(class_phaseCenterVariationCorrections,
-                           method_phaseCenterVariationCorrectionsCtor,
+            env->NewObject(class_sphericalCorrections, method_sphericalCorrectionsCtor,
                            phaseCenterVariationCorrectionsArray,
                            phaseCenterVariationCorrectionsUncertaintiesArray);
 
@@ -1212,7 +1213,7 @@ jobject GnssAntennaInfoCallback::translateSignalGainCorrections(
     }
 
     jobject signalGainCorrections =
-            env->NewObject(class_signalGainCorrections, method_signalGainCorrectionsCtor,
+            env->NewObject(class_sphericalCorrections, method_sphericalCorrectionsCtor,
                            signalGainCorrectionsArray, signalGainCorrectionsUncertaintiesArray);
 
     env->DeleteLocalRef(signalGainCorrectionsArray);
@@ -1223,8 +1224,7 @@ jobject GnssAntennaInfoCallback::translateSignalGainCorrections(
 
 jobject GnssAntennaInfoCallback::translateSingleGnssAntennaInfo(
         JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo) {
-    jobject phaseCenterOffsetCoordinates =
-            translatePhaseCenterOffsetCoordinates(env, gnssAntennaInfo);
+    jobject phaseCenterOffset = translatePhaseCenterOffset(env, gnssAntennaInfo);
 
     // Nullable
     jobject phaseCenterVariationCorrections =
@@ -1233,13 +1233,29 @@ jobject GnssAntennaInfoCallback::translateSingleGnssAntennaInfo(
     // Nullable
     jobject signalGainCorrections = translateSignalGainCorrections(env, gnssAntennaInfo);
 
+    // Get builder
+    jobject gnssAntennaInfoBuilderObject =
+            env->NewObject(class_gnssAntennaInfoBuilder, method_gnssAntennaInfoBuilderCtor);
+
+    // Set fields
+    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
+                          method_gnssAntennaInfoBuilderSetCarrierFrequencyMHz,
+                          gnssAntennaInfo.carrierFrequencyMHz);
+    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
+                          method_gnssAntennaInfoBuilderSetPhaseCenterOffset, phaseCenterOffset);
+    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
+                          method_gnssAntennaInfoBuilderSetPhaseCenterVariationCorrections,
+                          phaseCenterVariationCorrections);
+    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
+                          method_gnssAntennaInfoBuilderSetSignalGainCorrections,
+                          signalGainCorrections);
+
+    // build
     jobject gnssAntennaInfoObject =
-            env->NewObject(class_gnssAntennaInfo, method_gnssAntennaInfoCtor,
-                           gnssAntennaInfo.carrierFrequencyMHz, phaseCenterOffsetCoordinates,
-                           phaseCenterVariationCorrections, signalGainCorrections);
+            env->CallObjectMethod(gnssAntennaInfoBuilderObject, method_gnssAntennaInfoBuilderBuild);
 
     // Delete Local Refs
-    env->DeleteLocalRef(phaseCenterOffsetCoordinates);
+    env->DeleteLocalRef(phaseCenterOffset);
     env->DeleteLocalRef(phaseCenterVariationCorrections);
     env->DeleteLocalRef(signalGainCorrections);
 
@@ -2004,35 +2020,38 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     class_gnssMeasurement = (jclass) env->NewGlobalRef(gnssMeasurementClass);
     method_gnssMeasurementCtor = env->GetMethodID(class_gnssMeasurement, "<init>", "()V");
 
-    jclass gnssAntennaInfoClass = env->FindClass("android/location/GnssAntennaInfo");
-    class_gnssAntennaInfo = (jclass)env->NewGlobalRef(gnssAntennaInfoClass);
-    method_gnssAntennaInfoCtor =
-            env->GetMethodID(class_gnssAntennaInfo, "<init>",
-                             "(D"
-                             "Landroid/location/GnssAntennaInfo$PhaseCenterOffsetCoordinates;"
-                             "Landroid/location/GnssAntennaInfo$PhaseCenterVariationCorrections;"
-                             "Landroid/location/GnssAntennaInfo$SignalGainCorrections;"
-                             ")V");
+    jclass gnssAntennaInfoBuilder = env->FindClass("android/location/GnssAntennaInfo$Builder");
+    class_gnssAntennaInfoBuilder = (jclass)env->NewGlobalRef(gnssAntennaInfoBuilder);
+    method_gnssAntennaInfoBuilderCtor =
+            env->GetMethodID(class_gnssAntennaInfoBuilder, "<init>", "()V");
+    method_gnssAntennaInfoBuilderSetCarrierFrequencyMHz =
+            env->GetMethodID(class_gnssAntennaInfoBuilder, "setCarrierFrequencyMHz",
+                             "(D)Landroid/location/GnssAntennaInfo$Builder;");
+    method_gnssAntennaInfoBuilderSetPhaseCenterOffset =
+            env->GetMethodID(class_gnssAntennaInfoBuilder, "setPhaseCenterOffset",
+                             "(Landroid/location/GnssAntennaInfo$PhaseCenterOffset;)"
+                             "Landroid/location/GnssAntennaInfo$Builder;");
+    method_gnssAntennaInfoBuilderSetPhaseCenterVariationCorrections =
+            env->GetMethodID(class_gnssAntennaInfoBuilder, "setPhaseCenterVariationCorrections",
+                             "(Landroid/location/GnssAntennaInfo$SphericalCorrections;)"
+                             "Landroid/location/GnssAntennaInfo$Builder;");
+    method_gnssAntennaInfoBuilderSetSignalGainCorrections =
+            env->GetMethodID(class_gnssAntennaInfoBuilder, "setSignalGainCorrections",
+                             "(Landroid/location/GnssAntennaInfo$SphericalCorrections;)"
+                             "Landroid/location/GnssAntennaInfo$Builder;");
+    method_gnssAntennaInfoBuilderBuild = env->GetMethodID(class_gnssAntennaInfoBuilder, "build",
+                                                          "()Landroid/location/GnssAntennaInfo;");
 
-    jclass phaseCenterOffsetCoordinatesClass =
-            env->FindClass("android/location/GnssAntennaInfo$PhaseCenterOffsetCoordinates");
-    class_phaseCenterOffsetCoordinates =
-            (jclass)env->NewGlobalRef(phaseCenterOffsetCoordinatesClass);
-    method_phaseCenterOffsetCoordinatesCtor =
-            env->GetMethodID(class_phaseCenterOffsetCoordinates, "<init>", "(DDDDDD)V");
+    jclass phaseCenterOffsetClass =
+            env->FindClass("android/location/GnssAntennaInfo$PhaseCenterOffset");
+    class_phaseCenterOffset = (jclass)env->NewGlobalRef(phaseCenterOffsetClass);
+    method_phaseCenterOffsetCtor = env->GetMethodID(class_phaseCenterOffset, "<init>", "(DDDDDD)V");
 
-    jclass phaseCenterVariationCorrectionsClass =
-            env->FindClass("android/location/GnssAntennaInfo$PhaseCenterVariationCorrections");
-    class_phaseCenterVariationCorrections =
-            (jclass)env->NewGlobalRef(phaseCenterVariationCorrectionsClass);
-    method_phaseCenterVariationCorrectionsCtor =
-            env->GetMethodID(class_phaseCenterVariationCorrections, "<init>", "([[D[[D)V");
-
-    jclass signalGainCorrectionsClass =
-            env->FindClass("android/location/GnssAntennaInfo$SignalGainCorrections");
-    class_signalGainCorrections = (jclass)env->NewGlobalRef(signalGainCorrectionsClass);
-    method_signalGainCorrectionsCtor =
-            env->GetMethodID(class_signalGainCorrections, "<init>", "([[D[[D)V");
+    jclass sphericalCorrectionsClass =
+            env->FindClass("android/location/GnssAntennaInfo$SphericalCorrections");
+    class_sphericalCorrections = (jclass)env->NewGlobalRef(sphericalCorrectionsClass);
+    method_sphericalCorrectionsCtor =
+            env->GetMethodID(class_sphericalCorrections, "<init>", "([[D[[D)V");
 
     jclass locationClass = env->FindClass("android/location/Location");
     class_location = (jclass) env->NewGlobalRef(locationClass);

@@ -40,6 +40,7 @@ import org.junit.runners.Suite;
         BatteryStatsUserLifecycleTests.class,
         KernelCpuProcStringReaderTest.class,
         KernelCpuUidActiveTimeReaderTest.class,
+        KernelCpuUidBpfMapReaderTest.class,
         KernelCpuUidClusterTimeReaderTest.class,
         KernelCpuUidFreqTimeReaderTest.class,
         KernelCpuUidUserSysTimeReaderTest.class,

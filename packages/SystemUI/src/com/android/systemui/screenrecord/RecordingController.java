@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.os.CountDownTimer;
 import android.util.Log;
 
-import com.android.systemui.qs.tiles.ScreenRecordTile;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.ArrayList;
@@ -62,7 +61,7 @@ public class RecordingController
     /**
      * Show dialog of screen recording options to user.
      */
-    public void launchRecordPrompt(ScreenRecordTile tileToUpdate) {
+    public void launchRecordPrompt() {
         final ComponentName launcherComponent = new ComponentName(SYSUI_PACKAGE,
                 SYSUI_SCREENRECORD_LAUNCHER);
         final Intent intent = new Intent();
@@ -73,15 +72,17 @@ public class RecordingController
 
     /**
      * Start counting down in preparation to start a recording
-     * @param ms Time in ms to count down
+     * @param ms Total time in ms to wait before starting
+     * @param interval Time in ms per countdown step
      * @param startIntent Intent to start a recording
      * @param stopIntent Intent to stop a recording
      */
-    public void startCountdown(long ms, PendingIntent startIntent, PendingIntent stopIntent) {
+    public void startCountdown(long ms, long interval, PendingIntent startIntent,
+            PendingIntent stopIntent) {
         mIsStarting = true;
         mStopIntent = stopIntent;
 
-        mCountDownTimer = new CountDownTimer(ms, 1000) {
+        mCountDownTimer = new CountDownTimer(ms, interval) {
             @Override
             public void onTick(long millisUntilFinished) {
                 for (RecordingStateChangeCallback cb : mListeners) {
@@ -94,7 +95,7 @@ public class RecordingController
                 mIsStarting = false;
                 mIsRecording = true;
                 for (RecordingStateChangeCallback cb : mListeners) {
-                    cb.onRecordingEnd();
+                    cb.onCountdownEnd();
                 }
                 try {
                     startIntent.send();
@@ -120,7 +121,7 @@ public class RecordingController
         mIsStarting = false;
 
         for (RecordingStateChangeCallback cb : mListeners) {
-            cb.onRecordingEnd();
+            cb.onCountdownEnd();
         }
     }
 
@@ -144,15 +145,11 @@ public class RecordingController
      * Stop the recording
      */
     public void stopRecording() {
-        updateState(false);
         try {
             mStopIntent.send();
+            updateState(false);
         } catch (PendingIntent.CanceledException e) {
             Log.e(TAG, "Error stopping: " + e.getMessage());
-        }
-
-        for (RecordingStateChangeCallback cb : mListeners) {
-            cb.onRecordingEnd();
         }
     }
 
@@ -191,6 +188,12 @@ public class RecordingController
          * @param millisUntilFinished Time in ms remaining in the countdown
          */
         default void onCountdown(long millisUntilFinished) {}
+
+        /**
+         * Called when a countdown to recording has ended. This is a separate method so that if
+         * needed, listeners can handle cases where recording fails to start
+         */
+        default void onCountdownEnd() {}
 
         /**
          * Called when a screen recording has started

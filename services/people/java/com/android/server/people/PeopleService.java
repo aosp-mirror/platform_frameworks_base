@@ -88,7 +88,7 @@ public class PeopleService extends SystemService {
         @Override
         public void onCreatePredictionSession(AppPredictionContext context,
                 AppPredictionSessionId sessionId) {
-            mSessions.put(sessionId, new SessionInfo(context, mDataManager));
+            mSessions.put(sessionId, new SessionInfo(context, mDataManager, sessionId.getUserId()));
         }
 
         @Override

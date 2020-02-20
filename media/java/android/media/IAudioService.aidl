@@ -18,7 +18,7 @@ package android.media;
 
 import android.bluetooth.BluetoothDevice;
 import android.media.AudioAttributes;
-import android.media.AudioDevice;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioFocusInfo;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
@@ -275,13 +275,13 @@ interface IAudioService {
 
     boolean isCallScreeningModeSupported();
 
-    int setPreferredDeviceForStrategy(in int strategy, in AudioDevice device);
+    int setPreferredDeviceForStrategy(in int strategy, in AudioDeviceAttributes device);
 
     int removePreferredDeviceForStrategy(in int strategy);
 
-    AudioDevice getPreferredDeviceForStrategy(in int strategy);
+    AudioDeviceAttributes getPreferredDeviceForStrategy(in int strategy);
 
-    List<AudioDevice> getDevicesForAttributes(in AudioAttributes attributes);
+    List<AudioDeviceAttributes> getDevicesForAttributes(in AudioAttributes attributes);
 
     int setAllowedCapturePolicy(in int capturePolicy);
 

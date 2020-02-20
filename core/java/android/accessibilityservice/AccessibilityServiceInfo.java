@@ -27,6 +27,7 @@ import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -34,6 +35,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Drawable;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Parcel;
@@ -786,9 +788,30 @@ public class AccessibilityServiceInfo implements Parcelable {
      *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
      * </p>
      * @return The animated image resource id.
+     * @hide
      */
     public int getAnimatedImageRes() {
         return mAnimatedImageRes;
+    }
+
+    /**
+     * The animated image drawable.
+     * <p>
+     *    <strong>Statically set from
+     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     * @return The animated image drawable.
+     */
+    @Nullable
+    public Drawable loadAnimatedImage(@NonNull PackageManager packageManager)  {
+        if (mAnimatedImageRes == /* invalid */ 0) {
+            return null;
+        }
+
+        final String packageName = mComponentName.getPackageName();
+        final ApplicationInfo applicationInfo = mResolveInfo.serviceInfo.applicationInfo;
+
+        return packageManager.getDrawable(packageName, mAnimatedImageRes, applicationInfo);
     }
 
     /**

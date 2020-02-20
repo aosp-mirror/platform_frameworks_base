@@ -230,6 +230,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         /* This is exactly PendingIntent.getActivity, separated out for testability */
         PendingIntent getPendingIntentActivity(Context context, int requestCode, Intent intent,
                 int flags);
+
+        void setGestureDetectionPassthroughRegion(int displayId, Region region);
+
+        void setTouchExplorationPassthroughRegion(int displayId, Region region);
     }
 
     public AbstractAccessibilityServiceConnection(Context context, ComponentName componentName,
@@ -1735,5 +1739,15 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     public boolean isMultiFingerGesturesEnabled() {
         return mRequestMultiFingerGestures;
+    }
+
+    @Override
+    public void setGestureDetectionPassthroughRegion(int displayId, Region region) {
+        mSystemSupport.setGestureDetectionPassthroughRegion(displayId, region);
+    }
+
+    @Override
+    public void setTouchExplorationPassthroughRegion(int displayId, Region region) {
+        mSystemSupport.setTouchExplorationPassthroughRegion(displayId, region);
     }
 }

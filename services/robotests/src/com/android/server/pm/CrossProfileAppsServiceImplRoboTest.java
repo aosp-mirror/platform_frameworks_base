@@ -46,8 +46,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.PackageImpl;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -58,6 +56,9 @@ import androidx.test.core.app.ApplicationProvider;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowUserManager;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -135,7 +136,8 @@ public class CrossProfileAppsServiceImplRoboTest {
                         eq(userId)))
                 .thenReturn(packageInfo);
         when(mPackageManagerInternal.getPackage(uid))
-                .thenReturn(PackageImpl.forParsing(CROSS_PROFILE_APP_PACKAGE_NAME));
+                .thenReturn(((ParsedPackage) PackageImpl.forTesting(CROSS_PROFILE_APP_PACKAGE_NAME)
+                        .hideAsParsed()).hideAsFinal());
     }
 
     private PackageInfo buildTestPackageInfo() {
@@ -497,7 +499,9 @@ public class CrossProfileAppsServiceImplRoboTest {
 
     private void declareCrossProfileAttributeOnCrossProfileApp(boolean value) {
         mockCrossProfileAndroidPackage(
-                PackageImpl.forParsing(CROSS_PROFILE_APP_PACKAGE_NAME).setCrossProfile(value));
+                ((ParsedPackage) PackageImpl.forTesting(CROSS_PROFILE_APP_PACKAGE_NAME)
+                        .setCrossProfile(value)
+                        .hideAsParsed()).hideAsFinal());
     }
 
     private class TestInjector implements CrossProfileAppsServiceImpl.Injector {

@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB डिबग गर्दै"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB जडित हुँदा डिबग मोड"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB डिबग गर्ने प्राधिकरणहरू उल्टाउनुहोस्"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"वायरलेस डिबग गर्ने प्रक्रिया"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi मा जोडिँदा डिबग मोड सक्षम पार्ने कि नपार्ने"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"त्रुटि"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"वायरलेस डिबग गर्ने प्रक्रिया"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"उपलब्ध यन्त्रहरू हेर्न र प्रयोग गर्न वायरलेस डिबग गर्ने प्रक्रिया सक्रिय गर्नुहोस्"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR कोडमार्फत यन्त्रको जोडा बनाउनुहोस्"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR कोड स्क्यानर प्रयोग गरी नयाँ यन्त्रहरूको जोडा बनाउनुहोस्"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"जोडा मिलाउने कोडमार्फत यन्त्रको जोडा बनाउनुहोस्"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"छ अङ्कको कोड प्रयोग गरी नयाँ यन्त्रहरूको जोडा बनाउनुहोस्"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"जोडा बनाइएका यन्त्रहरू"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"हाल जोडिएको छ"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"यन्त्रसम्बन्धी विवरणहरू"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"बिर्सनुहोस्"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"यन्त्रको फिंगरप्रिन्ट: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"वायरलेसमा जोड्न सकिएन"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> सही नेटवर्कमा जोडिएको कुरा सुनिश्चित गर्नुहोस्"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"यन्त्रसँग जोडा बनाउनुहोस्"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi सँग जोडा मिलाउने कोड"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"जोडा बनाउने प्रक्रिया सफल भएन"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"यन्त्र उही नेटवर्कमा जोडिएको कुरा सुनिश्चित गर्नुहोस्।"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR कोड स्क्यान गरेर Wi‑Fi प्रयोग गरी यन्त्रको जोडा बनाउनुहोस्"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"यन्त्रसँग जोडा मिलाउँदै…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"यन्त्रसँग जोडा बनाउन सकिएन। कि त QR कोड गलत छ कि यन्त्र उही नेटवर्कमा जोडिएको छैन।"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ठेगाना र पोर्ट"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR कोड स्क्यान गर्नुहोस्"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR कोड स्क्यान गरेर Wi‑Fi प्रयोग गरी यन्त्रको जोडा बनाउनुहोस्"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"बग प्रतिवेदन सर्टकट"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"बग रिपोर्ट लिनका लागि पावर मेनुमा बटन देखाउनुहोस्"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"जागा रहनुहोस्"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"उपलब्ध भएमा टेदरिङको लागि हार्डवेयरको प्रवेग प्रयोग गर्नुहोस्"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB डिबग गर्न लागि अनुमति दिने हो?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"युएसबी डिबगिङ विकास प्रयोजनका लागि मात्र निर्मित हुन्छ। यसलाई तपाईँको कम्प्युटर र तपाईँको उपकरणका बीच डेटा प्रतिलिपि गर्न, बिना सूचना तपाईँको उपकरणमा अनुप्रयोगहरू स्थापना गर्न र लग डेटा पढ्नका लागि प्रयोग गर्नुहोस्।"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"वायरलेस डिबग गर्ने प्रक्रिया सक्षम पार्ने हो?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"वायरलेस डिबग गर्ने प्रक्रिया विकास प्रयोजनका लागि मात्रै हो। यसलाई आफ्ना कम्प्युटर र उपकरणका बिच डेटा प्रतिलिपि गर्न, सूचना नदिई आफ्नो उपकरणमा अनुप्रयोगहरू स्थापना गर्न र लगसम्बन्धी डेटा रिड गर्नका लागि प्रयोग गर्नुहोस्।"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"तपाईं पहिले नै अधिकृत गर्नुभएका सबै कम्प्यूटरबाट USB डिबग गर्नको लागि पहुँच रद्द गर्ने हो?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"विकास सेटिङहरू अनुमति दिने हो?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"यी सेटिङहरू केवल विकास प्रयोगको लागि विचार गरिएको हो। तिनीहरूले तपाईंको उपकरण र अनुप्रयोगहरूलाई विच्छेदन गर्न वा दुर्व्यवहार गर्न सक्दछ।"</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"प्रोटानेमली (रातो, हरियो)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ट्रिटानोमेली (निलो-पंहेलो)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रङ्ग सुधार"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"रङ सुधार गर्नुले रङ छुट्याउन नसक्ने मान्छेलाई थप सटीक रूपमा रङहरू छुट्याउन मद्दत गर्दछ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारा अधिरोहित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"फोन चाँडै बन्द हुन सक्छ"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"ट्याब्लेट चाँडै बन्द हुन सक्छ"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"यन्त्र चाँडै बन्द हुन सक्छ"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"फोन चाँडै बन्द हुन सक्छ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"ट्याब्लेट चाँडै बन्द हुन सक्छ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"यन्त्र चाँडै बन्द हुन सक्छ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"फोन चाँडै बन्द हुन सक्छ"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ट्याब्लेट चाँडै बन्द हुन सक्छ"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"यन्त्र चाँडै बन्द हुन सक्छ"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"फोन चाँडै बन्द हुन सक्छ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ट्याब्लेट चाँडै बन्द हुन सक्छ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"यन्त्र चाँडै बन्द हुन सक्छ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"पूर्ण चार्ज हुन <xliff:g id="TIME">%1$s</xliff:g> बाँकी"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"पूर्ण चार्ज हुन <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> लाग्छ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हुँदै"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"द्रुत गतिमा चार्ज गरिँदै"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"बिस्तारै चार्ज गरिँदै"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज भइरहेको छैन"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लगइन गरिएको छ, अहिले नै चार्ज गर्न सकिँदैन"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"पूर्ण चार्ज भएको स्थिति"</string>

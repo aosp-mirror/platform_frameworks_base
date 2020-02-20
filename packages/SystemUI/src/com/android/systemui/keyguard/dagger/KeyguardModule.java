@@ -16,9 +16,13 @@
 
 package com.android.systemui.keyguard.dagger;
 
+import android.app.trust.TrustManager;
 import android.content.Context;
+import android.os.PowerManager;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.DumpController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -54,6 +58,10 @@ public class KeyguardModule {
             NotificationShadeWindowController notificationShadeWindowController,
             Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManagerLazy,
             DismissCallbackRegistry dismissCallbackRegistry,
+            KeyguardUpdateMonitor updateMonitor,
+            DumpController dumpController,
+            PowerManager powerManager,
+            TrustManager trustManager,
             @UiBackground Executor uiBgExecutor) {
         return new KeyguardViewMediator(
                 context,
@@ -63,6 +71,10 @@ public class KeyguardModule {
                 notificationShadeWindowController,
                 statusBarKeyguardViewManagerLazy,
                 dismissCallbackRegistry,
-                uiBgExecutor);
+                updateMonitor,
+                dumpController,
+                uiBgExecutor,
+                powerManager,
+                trustManager);
     }
 }

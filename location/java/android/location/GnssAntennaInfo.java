@@ -16,72 +16,37 @@
 
 package android.location;
 
-import android.annotation.IntDef;
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.annotations.VisibleForTesting;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A class that contains information about a GNSS antenna. GNSS antenna characteristics can change
  * with device configuration, such as when a device is folded open or closed. Antenna information is
- * delivered to registered instances of {@link Callback}.
+ * delivered to registered instances of {@link Listener}.
  */
 public final class GnssAntennaInfo implements Parcelable {
     private final double mCarrierFrequencyMHz;
-    private final PhaseCenterOffsetCoordinates mPhaseCenterOffsetCoordinates;
-    private final PhaseCenterVariationCorrections mPhaseCenterVariationCorrections;
-    private final SignalGainCorrections mSignalGainCorrections;
+    private final PhaseCenterOffset mPhaseCenterOffset;
+    private final SphericalCorrections mPhaseCenterVariationCorrections;
+    private final SphericalCorrections mSignalGainCorrections;
 
     /**
      * Used for receiving GNSS antenna info from the GNSS engine. You can implement this interface
-     * and call {@link LocationManager#registerAntennaInfoCallback};
+     * and call {@link LocationManager#registerAntennaInfoListener};
      */
-    public abstract static class Callback {
+    public interface Listener {
         /**
-         * The status of GNSS antenna info.
-         *
-         * @hide
-         */
-        @Retention(RetentionPolicy.SOURCE)
-        @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_LOCATION_DISABLED})
-        public @interface GnssAntennaInfoStatus {
-        }
-
-        /**
-         * The system does not support GNSS antenna info.
-         *
-         * This status will not change in the future.
-         */
-        public static final int STATUS_NOT_SUPPORTED = 0;
-
-        /**
-         * GNSS antenna info updates are being successfully tracked.
-         */
-        public static final int STATUS_READY = 1;
-
-        /**
-         * GNSS provider or Location is disabled, updated will not be received until they are
-         * enabled.
-         */
-        public static final int STATUS_LOCATION_DISABLED = 2;
-
-        /**
-         * Returns the latest GNSS antenna info. This event is triggered when a callback is
+         * Returns the latest GNSS antenna info. This event is triggered when a listener is
          * registered, and whenever the antenna info changes (due to a device configuration change).
          */
-        public void onGnssAntennaInfoReceived(@NonNull List<GnssAntennaInfo> gnssAntennaInfos) {}
-
-        /**
-         * Returns the latest status of the GNSS antenna info sub-system.
-         */
-        public void onStatusChanged(@GnssAntennaInfoStatus int status) {}
+        void onGnssAntennaInfoReceived(@NonNull List<GnssAntennaInfo> gnssAntennaInfos);
     }
 
     /**
@@ -90,37 +55,31 @@ public final class GnssAntennaInfo implements Parcelable {
      * for mobiles - see sensor or form factor documents for details. Uncertainties are reported
      *  to 1-sigma.
      */
-    public static final class PhaseCenterOffsetCoordinates implements Parcelable {
-        private final double mPhaseCenterOffsetCoordinateXMillimeters;
-        private final double mPhaseCenterOffsetCoordinateXUncertaintyMillimeters;
-        private final double mPhaseCenterOffsetCoordinateYMillimeters;
-        private final double mPhaseCenterOffsetCoordinateYUncertaintyMillimeters;
-        private final double mPhaseCenterOffsetCoordinateZMillimeters;
-        private final double mPhaseCenterOffsetCoordinateZUncertaintyMillimeters;
+    public static final class PhaseCenterOffset implements Parcelable {
+        private final double mOffsetXMm;
+        private final double mOffsetXUncertaintyMm;
+        private final double mOffsetYMm;
+        private final double mOffsetYUncertaintyMm;
+        private final double mOffsetZMm;
+        private final double mOffsetZUncertaintyMm;
 
-        @VisibleForTesting
-        public PhaseCenterOffsetCoordinates(double phaseCenterOffsetCoordinateXMillimeters,
-                double phaseCenterOffsetCoordinateXUncertaintyMillimeters,
-                double phaseCenterOffsetCoordinateYMillimeters,
-                double phaseCenterOffsetCoordinateYUncertaintyMillimeters,
-                double phaseCenterOffsetCoordinateZMillimeters,
-                double phaseCenterOffsetCoordinateZUncertaintyMillimeters) {
-            mPhaseCenterOffsetCoordinateXMillimeters = phaseCenterOffsetCoordinateXMillimeters;
-            mPhaseCenterOffsetCoordinateYMillimeters = phaseCenterOffsetCoordinateYMillimeters;
-            mPhaseCenterOffsetCoordinateZMillimeters = phaseCenterOffsetCoordinateZMillimeters;
-            mPhaseCenterOffsetCoordinateXUncertaintyMillimeters =
-                    phaseCenterOffsetCoordinateXUncertaintyMillimeters;
-            mPhaseCenterOffsetCoordinateYUncertaintyMillimeters =
-                    phaseCenterOffsetCoordinateYUncertaintyMillimeters;
-            mPhaseCenterOffsetCoordinateZUncertaintyMillimeters =
-                    phaseCenterOffsetCoordinateZUncertaintyMillimeters;
+        public PhaseCenterOffset(
+                double offsetXMm, double offsetXUncertaintyMm,
+                double offsetYMm, double offsetYUncertaintyMm,
+                double offsetZMm, double offsetZUncertaintyMm) {
+            mOffsetXMm = offsetXMm;
+            mOffsetYMm = offsetYMm;
+            mOffsetZMm = offsetZMm;
+            mOffsetXUncertaintyMm = offsetXUncertaintyMm;
+            mOffsetYUncertaintyMm = offsetYUncertaintyMm;
+            mOffsetZUncertaintyMm = offsetZUncertaintyMm;
         }
 
-        public static final @NonNull Creator<PhaseCenterOffsetCoordinates> CREATOR =
-                new Creator<PhaseCenterOffsetCoordinates>() {
+        public static final @NonNull Creator<PhaseCenterOffset> CREATOR =
+                new Creator<PhaseCenterOffset>() {
                     @Override
-                    public PhaseCenterOffsetCoordinates createFromParcel(Parcel in) {
-                        return new PhaseCenterOffsetCoordinates(
+                    public PhaseCenterOffset createFromParcel(Parcel in) {
+                        return new PhaseCenterOffset(
                                 in.readDouble(),
                                 in.readDouble(),
                                 in.readDouble(),
@@ -131,33 +90,39 @@ public final class GnssAntennaInfo implements Parcelable {
                     }
 
                     @Override
-                    public PhaseCenterOffsetCoordinates[] newArray(int size) {
-                        return new PhaseCenterOffsetCoordinates[size];
+                    public PhaseCenterOffset[] newArray(int size) {
+                        return new PhaseCenterOffset[size];
                     }
                 };
 
-        public double getXCoordMillimeters() {
-            return mPhaseCenterOffsetCoordinateXMillimeters;
+        @FloatRange()
+        public double getXOffsetMm() {
+            return mOffsetXMm;
         }
 
-        public double getXCoordUncertaintyMillimeters() {
-            return mPhaseCenterOffsetCoordinateXUncertaintyMillimeters;
+        @FloatRange()
+        public double getXOffsetUncertaintyMm() {
+            return mOffsetXUncertaintyMm;
         }
 
-        public double getYCoordMillimeters() {
-            return mPhaseCenterOffsetCoordinateYMillimeters;
+        @FloatRange()
+        public double getYOffsetMm() {
+            return mOffsetYMm;
         }
 
-        public double getYCoordUncertaintyMillimeters() {
-            return mPhaseCenterOffsetCoordinateYUncertaintyMillimeters;
+        @FloatRange()
+        public double getYOffsetUncertaintyMm() {
+            return mOffsetYUncertaintyMm;
         }
 
-        public double getZCoordMillimeters() {
-            return mPhaseCenterOffsetCoordinateZMillimeters;
+        @FloatRange()
+        public double getZOffsetMm() {
+            return mOffsetZMm;
         }
 
-        public double getZCoordUncertaintyMillimeters() {
-            return mPhaseCenterOffsetCoordinateZUncertaintyMillimeters;
+        @FloatRange()
+        public double getZOffsetUncertaintyMm() {
+            return mOffsetZUncertaintyMm;
         }
 
         @Override
@@ -167,30 +132,27 @@ public final class GnssAntennaInfo implements Parcelable {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeDouble(mPhaseCenterOffsetCoordinateXMillimeters);
-            dest.writeDouble(mPhaseCenterOffsetCoordinateXUncertaintyMillimeters);
-            dest.writeDouble(mPhaseCenterOffsetCoordinateYMillimeters);
-            dest.writeDouble(mPhaseCenterOffsetCoordinateYUncertaintyMillimeters);
-            dest.writeDouble(mPhaseCenterOffsetCoordinateZMillimeters);
-            dest.writeDouble(mPhaseCenterOffsetCoordinateZUncertaintyMillimeters);
+            dest.writeDouble(mOffsetXMm);
+            dest.writeDouble(mOffsetXUncertaintyMm);
+            dest.writeDouble(mOffsetYMm);
+            dest.writeDouble(mOffsetYUncertaintyMm);
+            dest.writeDouble(mOffsetZMm);
+            dest.writeDouble(mOffsetZUncertaintyMm);
         }
 
         @Override
         public String toString() {
-            StringBuilder builder = new StringBuilder("PhaseCenteroffset:\n");
-            builder.append("X: " + mPhaseCenterOffsetCoordinateXMillimeters + " +/- "
-                    + mPhaseCenterOffsetCoordinateXUncertaintyMillimeters + "\n");
-            builder.append("Y: " + mPhaseCenterOffsetCoordinateYMillimeters + " +/- "
-                    + mPhaseCenterOffsetCoordinateYUncertaintyMillimeters + "\n");
-            builder.append("Z: " + mPhaseCenterOffsetCoordinateZMillimeters + " +/- "
-                    + mPhaseCenterOffsetCoordinateZUncertaintyMillimeters + "\n");
-            return builder.toString();
+            return "PhaseCenterOffset{"
+                    + "OffsetXMm=" + mOffsetXMm + " +/-" + mOffsetXUncertaintyMm
+                    + ", OffsetYMm=" + mOffsetYMm + " +/-" + mOffsetYUncertaintyMm
+                    + ", OffsetZMm=" + mOffsetZMm + " +/-" + mOffsetZUncertaintyMm
+                    + '}';
         }
     }
 
     /**
-     * Class containing information about the phase center variation (PCV) corrections. The PCV
-     * correction is added to the phase measurement to obtain the corrected value.
+     * Represents corrections on a spherical mapping. Corrections are added to measurements to
+     * obtain the corrected values.
      *
      * The corrections and associated (1-sigma) uncertainties are represented by respect 2D arrays.
      *
@@ -203,229 +165,7 @@ public final class GnssAntennaInfo implements Parcelable {
      * at 180 degrees. They are separated by deltaPhi, the regular spacing between zenith angles,
      * i.e., deltaPhi = 180 / (number of columns - 1).
      */
-    public static final class PhaseCenterVariationCorrections extends SphericalCorrections {
-
-        @VisibleForTesting
-        public PhaseCenterVariationCorrections(
-                @NonNull double[][] phaseCenterVariationCorrectionsMillimeters,
-                @NonNull double[][] phaseCenterVariationCorrectionUncertaintiesMillimeters) {
-            super(phaseCenterVariationCorrectionsMillimeters,
-                    phaseCenterVariationCorrectionUncertaintiesMillimeters);
-        }
-
-        private PhaseCenterVariationCorrections(@NonNull Parcel in) {
-            super(in);
-        }
-
-        /**
-         * Get the phase center variation correction in millimeters at the specified row and column
-         * in the underlying 2D array.
-         * @param row zero-based major index in the array
-         * @param column zero-based minor index in the array
-         * @return phase center correction in millimeters
-         */
-        public double getPhaseCenterVariationCorrectionMillimetersAt(int row, int column) {
-            return super.getCorrectionAt(row, column);
-        }
-
-        /**
-         * Get the phase center variation correction uncertainty in millimeters at the specified row
-         * and column in the underlying 2D array.
-         * @param row zero-based major index in the array
-         * @param column zero-based minor index in the array
-         * @return 1-sigma phase center correction uncertainty in millimeters
-         */
-        public double getPhaseCenterVariationCorrectionUncertaintyMillimetersAt(
-                int row, int column) {
-            return super.getCorrectionUncertaintyAt(row, column);
-        }
-
-        public @NonNull double[][] getRawCorrectionsArray() {
-            return super.getRawCorrectionsArray().clone();
-        }
-
-        public @NonNull double[][] getRawCorrectionUncertaintiesArray() {
-            return super.getRawCorrectionUncertaintiesArray().clone();
-        }
-
-        public int getNumRows() {
-            return super.getNumRows();
-        }
-
-        public int getNumColumns() {
-            return super.getNumColumns();
-        }
-
-        /**
-         * The fixed theta angle separation between successive rows.
-         */
-        public double getDeltaTheta() {
-            return super.getDeltaTheta();
-        }
-
-        /**
-         * The fixed phi angle separation between successive columns.
-         */
-        public double getDeltaPhi() {
-            return super.getDeltaPhi();
-        }
-
-        public static final @NonNull Creator<PhaseCenterVariationCorrections> CREATOR =
-                new Creator<PhaseCenterVariationCorrections>() {
-                    @Override
-                    public PhaseCenterVariationCorrections createFromParcel(Parcel in) {
-                        return new PhaseCenterVariationCorrections(in);
-                    }
-
-                    @Override
-                    public PhaseCenterVariationCorrections[] newArray(int size) {
-                        return new PhaseCenterVariationCorrections[size];
-                    }
-                };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(@NonNull Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder("PhaseCenterVariationCorrections:\n");
-            builder.append(super.toString());
-            return builder.toString();
-        }
-    }
-
-    /**
-     * Class containing information about the signal gain (SG) corrections. The SG
-     * correction is added to the signal gain to obtain the corrected value.
-     *
-     * The corrections and associated (1-sigma) uncertainties are represented by respect 2D arrays.
-     *
-     * Each row (major indices) represents a fixed theta. The first row corresponds to a
-     * theta angle of 0 degrees. The last row corresponds to a theta angle of (360 - deltaTheta)
-     * degrees, where deltaTheta is the regular spacing between azimuthal angles, i.e., deltaTheta
-     * = 360 / (number of rows).
-     *
-     * The columns (minor indices) represent fixed zenith angles, beginning at 0 degrees and ending
-     * at 180 degrees. They are separated by deltaPhi, the regular spacing between zenith angles,
-     * i.e., deltaPhi = 180 / (number of columns - 1).
-     */
-    public static final class SignalGainCorrections extends SphericalCorrections {
-
-        @VisibleForTesting
-        public SignalGainCorrections(
-                @NonNull double[][] signalGainCorrectionsDbi,
-                @NonNull double[][] signalGainCorrectionUncertaintiesDbi) {
-            super(signalGainCorrectionsDbi,
-                    signalGainCorrectionUncertaintiesDbi);
-        }
-
-        private SignalGainCorrections(@NonNull Parcel in) {
-            super(in);
-        }
-
-        /**
-         * Get the signal gain correction in dbi at the specified row and column
-         * in the underlying 2D array.
-         * @param row zero-based major index in the array
-         * @param column zero-based minor index in the array
-         * @return signal gain correction in dbi
-         */
-        public double getSignalGainCorrectionDbiAt(int row, int column) {
-            return super.getCorrectionAt(row, column);
-        }
-
-        /**
-         * Get the signal gain correction correction uncertainty in dbi at the specified row
-         * and column in the underlying 2D array.
-         * @param row zero-based major index in the array
-         * @param column zero-based minor index in the array
-         * @return 1-sigma signal gain correction uncertainty in dbi
-         */
-        public double getSignalGainCorrectionUncertaintyDbiAt(int row, int column) {
-            return super.getCorrectionUncertaintyAt(row, column);
-        }
-
-        public @NonNull double[][] getRawCorrectionsArray() {
-            return super.getRawCorrectionsArray().clone();
-        }
-
-        public @NonNull double[][] getRawCorrectionUncertaintiesArray() {
-            return super.getRawCorrectionUncertaintiesArray().clone();
-        }
-
-        public int getNumRows() {
-            return super.getNumRows();
-        }
-
-        public int getNumColumns() {
-            return super.getNumColumns();
-        }
-
-        /**
-         * The fixed theta angle separation between successive rows.
-         */
-        public double getDeltaTheta() {
-            return super.getDeltaTheta();
-        }
-
-        /**
-         * The fixed phi angle separation between successive columns.
-         */
-        public double getDeltaPhi() {
-            return super.getDeltaPhi();
-        }
-
-        public static final @NonNull Creator<SignalGainCorrections> CREATOR =
-                new Creator<SignalGainCorrections>() {
-                    @Override
-                    public SignalGainCorrections createFromParcel(Parcel in) {
-                        return new SignalGainCorrections(in);
-                    }
-
-                    @Override
-                    public SignalGainCorrections[] newArray(int size) {
-                        return new SignalGainCorrections[size];
-                    }
-                };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(@NonNull Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder("SignalGainCorrections:\n");
-            builder.append(super.toString());
-            return builder.toString();
-        }
-    }
-
-    /**
-     * Represents corrections on a spherical mapping.
-     *
-     * Each row (major indices) represents a fixed theta. The first row corresponds to a
-     * theta angle of 0 degrees. The last row corresponds to a theta angle of (360 - deltaTheta)
-     * degrees, where deltaTheta is the regular spacing between azimuthal angles, i.e., deltaTheta
-     * = 360 / (number of rows).
-     *
-     * The columns (minor indices) represent fixed zenith angles, beginning at 0 degrees and ending
-     * at 180 degrees. They are separated by deltaPhi, the regular spacing between zenith angles,
-     * i.e., deltaPhi = 180 / (number of columns - 1).
-     */
-    private abstract static class SphericalCorrections implements Parcelable {
+    public static final class SphericalCorrections implements Parcelable{
         private final double[][] mCorrections;
         private final double[][] mCorrectionUncertainties;
         private final double mDeltaTheta;
@@ -433,7 +173,7 @@ public final class GnssAntennaInfo implements Parcelable {
         private final int mNumRows;
         private final int mNumColumns;
 
-        SphericalCorrections(@NonNull double[][] corrections,
+        public SphericalCorrections(@NonNull double[][] corrections,
                 @NonNull double[][] correctionUncertainties) {
             if (corrections.length != correctionUncertainties.length
                     || corrections[0].length != correctionUncertainties[0].length) {
@@ -474,52 +214,82 @@ public final class GnssAntennaInfo implements Parcelable {
                 in.readDoubleArray(correctionUncertainties[row]);
             }
 
-            mNumRows = corrections.length;
-            mNumColumns = corrections[0].length;
+            mNumRows = numRows;
+            mNumColumns = numColumns;
             mCorrections = corrections;
             mCorrectionUncertainties = correctionUncertainties;
             mDeltaTheta = 360.0d / mNumRows;
             mDeltaPhi = 180.0d / (mNumColumns - 1);
         }
 
-        private double getCorrectionAt(int row, int column) {
-            return mCorrections[row][column];
-        }
-
-        private double getCorrectionUncertaintyAt(int row, int column) {
-            return mCorrectionUncertainties[row][column];
-        }
-
+        /**
+         * Array representing corrections on a spherical mapping. Corrections are added to
+         * measurements to obtain the corrected values.
+         *
+         * Each row (major indices) represents a fixed theta. The first row corresponds to a
+         * theta angle of 0 degrees. The last row corresponds to a theta angle of (360 - deltaTheta)
+         * degrees, where deltaTheta is the regular spacing between azimuthal angles, i.e.,
+         * deltaTheta = 360 / (number of rows).
+         *
+         * The columns (minor indices) represent fixed zenith angles, beginning at 0 degrees and
+         * ending at 180 degrees. They are separated by deltaPhi, the regular spacing between zenith
+         * angles, i.e., deltaPhi = 180 / (number of columns - 1).
+         */
         @NonNull
-        private double[][] getRawCorrectionsArray() {
+        public double[][] getCorrectionsArray() {
             return mCorrections;
         }
 
+        /**
+         * Array representing uncertainty on corrections on a spherical mapping.
+         *
+         * Each row (major indices) represents a fixed theta. The first row corresponds to a
+         * theta angle of 0 degrees. The last row corresponds to a theta angle of (360 - deltaTheta)
+         * degrees, where deltaTheta is the regular spacing between azimuthal angles, i.e.,
+         * deltaTheta = 360 / (number of rows).
+         *
+         * The columns (minor indices) represent fixed zenith angles, beginning at 0 degrees and
+         * ending at 180 degrees. They are separated by deltaPhi, the regular spacing between zenith
+         * angles, i.e., deltaPhi = 180 / (number of columns - 1).
+         */
         @NonNull
-        private double[][] getRawCorrectionUncertaintiesArray() {
+        public double[][] getCorrectionUncertaintiesArray() {
             return mCorrectionUncertainties;
-        }
-
-        private int getNumRows() {
-            return mNumRows;
-        }
-
-        private int getNumColumns() {
-            return mNumColumns;
         }
 
         /**
          * The fixed theta angle separation between successive rows.
          */
-        private double getDeltaTheta() {
+        @FloatRange(from = 0.0f, to = 360.0f)
+        public double getDeltaTheta() {
             return mDeltaTheta;
         }
 
         /**
          * The fixed phi angle separation between successive columns.
          */
-        private double getDeltaPhi() {
+        @FloatRange(from = 0.0f, to = 180.0f)
+        public double getDeltaPhi() {
             return mDeltaPhi;
+        }
+
+
+        public static final @NonNull Creator<SphericalCorrections> CREATOR =
+                new Creator<SphericalCorrections>() {
+                    @Override
+                    public SphericalCorrections createFromParcel(Parcel in) {
+                        return new SphericalCorrections(in);
+                    }
+
+                    @Override
+                    public SphericalCorrections[] newArray(int size) {
+                        return new SphericalCorrections[size];
+                    }
+                };
+
+        @Override
+        public int describeContents() {
+            return 0;
         }
 
         @Override
@@ -534,62 +304,114 @@ public final class GnssAntennaInfo implements Parcelable {
             }
         }
 
-        private String arrayToString(double[][] array) {
-            StringBuilder builder = new StringBuilder();
-            for (int row = 0; row < mNumRows; row++) {
-                builder.append("[ ");
-                for (int column = 0; column < mNumColumns - 1; column++) {
-                    builder.append(array[row][column] + ", ");
-                }
-                builder.append(array[row][mNumColumns - 1] + " ]\n");
-            }
-            return builder.toString();
-        }
-
         @Override
         public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("DeltaTheta: " + mDeltaTheta + "\n");
-            builder.append("DeltaPhi: " + mDeltaPhi + "\n");
-            builder.append("CorrectionsArray:\n");
-            builder.append(arrayToString(mCorrections));
-            builder.append("CorrectionUncertaintiesArray:\n");
-            builder.append(arrayToString(mCorrectionUncertainties));
-            return builder.toString();
+            return "SphericalCorrections{"
+                    + "Corrections=" + Arrays.toString(mCorrections)
+                    + ", CorrectionUncertainties=" + Arrays.toString(mCorrectionUncertainties)
+                    + ", DeltaTheta=" + mDeltaTheta
+                    + ", DeltaPhi=" + mDeltaPhi
+                    + '}';
         }
     }
 
-    @VisibleForTesting
-    public GnssAntennaInfo(
+    private GnssAntennaInfo(
             double carrierFrequencyMHz,
-            @NonNull PhaseCenterOffsetCoordinates phaseCenterOffsetCoordinates,
-            @Nullable PhaseCenterVariationCorrections phaseCenterVariationCorrections,
-            @Nullable SignalGainCorrections signalGainCorrectionDbi) {
-        if (phaseCenterOffsetCoordinates == null) {
+            @NonNull PhaseCenterOffset phaseCenterOffset,
+            @Nullable SphericalCorrections phaseCenterVariationCorrections,
+            @Nullable SphericalCorrections signalGainCorrectionDbi) {
+        if (phaseCenterOffset == null) {
             throw new IllegalArgumentException("Phase Center Offset Coordinates cannot be null.");
         }
         mCarrierFrequencyMHz = carrierFrequencyMHz;
-        mPhaseCenterOffsetCoordinates = phaseCenterOffsetCoordinates;
+        mPhaseCenterOffset = phaseCenterOffset;
         mPhaseCenterVariationCorrections = phaseCenterVariationCorrections;
         mSignalGainCorrections = signalGainCorrectionDbi;
     }
 
+    /**
+     * Builder class for GnssAntennaInfo.
+     */
+    public static class Builder {
+        private double mCarrierFrequencyMHz;
+        private PhaseCenterOffset mPhaseCenterOffset;
+        private SphericalCorrections mPhaseCenterVariationCorrections;
+        private SphericalCorrections mSignalGainCorrections;
+
+        /**
+         * Set antenna carrier frequency (MHz).
+         * @param carrierFrequencyMHz antenna carrier frequency (MHz)
+         * @return Builder builder object
+         */
+        @NonNull
+        public Builder setCarrierFrequencyMHz(@FloatRange(from = 0.0f) double carrierFrequencyMHz) {
+            mCarrierFrequencyMHz = carrierFrequencyMHz;
+            return this;
+        }
+
+        /**
+         * Set antenna phase center offset.
+         * @param phaseCenterOffset phase center offset object
+         * @return Builder builder object
+         */
+        @NonNull
+        public Builder setPhaseCenterOffset(@NonNull PhaseCenterOffset phaseCenterOffset) {
+            mPhaseCenterOffset = Objects.requireNonNull(phaseCenterOffset);
+            return this;
+        }
+
+        /**
+         * Set phase center variation corrections.
+         * @param phaseCenterVariationCorrections phase center variation corrections object
+         * @return Builder builder object
+         */
+        @NonNull
+        public Builder setPhaseCenterVariationCorrections(
+                @Nullable SphericalCorrections phaseCenterVariationCorrections) {
+            mPhaseCenterVariationCorrections = phaseCenterVariationCorrections;
+            return this;
+        }
+
+        /**
+         * Set signal gain corrections.
+         * @param signalGainCorrections signal gain corrections object
+         * @return Builder builder object
+         */
+        @NonNull
+        public Builder setSignalGainCorrections(
+                @Nullable SphericalCorrections signalGainCorrections) {
+            mSignalGainCorrections = signalGainCorrections;
+            return this;
+        }
+
+        /**
+         * Build GnssAntennaInfo object.
+         * @return instance of GnssAntennaInfo
+         */
+        @NonNull
+        public GnssAntennaInfo build() {
+            return new GnssAntennaInfo(mCarrierFrequencyMHz, mPhaseCenterOffset,
+                    mPhaseCenterVariationCorrections, mSignalGainCorrections);
+        }
+    }
+
+    @FloatRange(from = 0.0f)
     public double getCarrierFrequencyMHz() {
         return mCarrierFrequencyMHz;
     }
 
     @NonNull
-    public PhaseCenterOffsetCoordinates getPhaseCenterOffsetCoordinates() {
-        return mPhaseCenterOffsetCoordinates;
+    public PhaseCenterOffset getPhaseCenterOffset() {
+        return mPhaseCenterOffset;
     }
 
     @Nullable
-    public PhaseCenterVariationCorrections getPhaseCenterVariationCorrections() {
+    public SphericalCorrections getPhaseCenterVariationCorrections() {
         return mPhaseCenterVariationCorrections;
     }
 
     @Nullable
-    public SignalGainCorrections getSignalGainCorrections() {
+    public SphericalCorrections getSignalGainCorrections() {
         return mSignalGainCorrections;
     }
 
@@ -600,16 +422,18 @@ public final class GnssAntennaInfo implements Parcelable {
                                 double carrierFrequencyMHz = in.readDouble();
 
                                 ClassLoader classLoader = getClass().getClassLoader();
-                                PhaseCenterOffsetCoordinates phaseCenterOffsetCoordinates =
+                                PhaseCenterOffset phaseCenterOffset =
                                         in.readParcelable(classLoader);
-                                PhaseCenterVariationCorrections phaseCenterVariationCorrections =
+                                SphericalCorrections phaseCenterVariationCorrections =
                                         in.readParcelable(classLoader);
-                                SignalGainCorrections signalGainCorrections =
+                                SphericalCorrections signalGainCorrections =
                                         in.readParcelable(classLoader);
 
-                                return new GnssAntennaInfo(carrierFrequencyMHz,
-                                        phaseCenterOffsetCoordinates,
-                                        phaseCenterVariationCorrections, signalGainCorrections);
+                                return new GnssAntennaInfo(
+                                            carrierFrequencyMHz,
+                                            phaseCenterOffset,
+                                            phaseCenterVariationCorrections,
+                                            signalGainCorrections);
                             }
 
                             @Override
@@ -626,29 +450,18 @@ public final class GnssAntennaInfo implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeDouble(mCarrierFrequencyMHz);
-
-        // Write Phase Center Offset
-        parcel.writeParcelable(mPhaseCenterOffsetCoordinates, flags);
-
-        // Write Phase Center Variation Corrections
+        parcel.writeParcelable(mPhaseCenterOffset, flags);
         parcel.writeParcelable(mPhaseCenterVariationCorrections, flags);
-
-        // Write Signal Gain Corrections
         parcel.writeParcelable(mSignalGainCorrections, flags);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("[ GnssAntennaInfo:\n");
-        builder.append("CarrierFrequencyMHz: " + mCarrierFrequencyMHz + "\n");
-        builder.append(mPhaseCenterOffsetCoordinates.toString());
-        builder.append(mPhaseCenterVariationCorrections == null
-                ? "PhaseCenterVariationCorrections: null\n"
-                : mPhaseCenterVariationCorrections.toString());
-        builder.append(mSignalGainCorrections == null
-                ? "SignalGainCorrections: null\n"
-                : mSignalGainCorrections.toString());
-        builder.append("]");
-        return builder.toString();
+        return "GnssAntennaInfo{"
+                + "CarrierFrequencyMHz=" + mCarrierFrequencyMHz
+                + ", PhaseCenterOffset=" + mPhaseCenterOffset
+                + ", PhaseCenterVariationCorrections=" + mPhaseCenterVariationCorrections
+                + ", SignalGainCorrections=" + mSignalGainCorrections
+                + '}';
     }
 }

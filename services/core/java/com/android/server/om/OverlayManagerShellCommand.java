@@ -181,7 +181,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
     private void printListOverlay(PrintWriter out, OverlayInfo oi) {
         String status;
         switch (oi.state) {
-            case OverlayInfo.STATE_ENABLED_STATIC:
+            case OverlayInfo.STATE_ENABLED_IMMUTABLE:
             case OverlayInfo.STATE_ENABLED:
                 status = "[x]";
                 break;

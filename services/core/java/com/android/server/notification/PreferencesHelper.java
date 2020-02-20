@@ -1186,6 +1186,44 @@ public class PreferencesHelper implements RankingConfig {
         return groups;
     }
 
+    public ArrayList<ConversationChannelWrapper> getConversations(boolean onlyImportant) {
+        synchronized (mPackagePreferences) {
+            ArrayList<ConversationChannelWrapper> conversations = new ArrayList<>();
+
+            for (PackagePreferences p : mPackagePreferences.values()) {
+                int N = p.channels.size();
+                for (int i = 0; i < N; i++) {
+                    final NotificationChannel nc = p.channels.valueAt(i);
+                    if (!TextUtils.isEmpty(nc.getConversationId()) && !nc.isDeleted()
+                            && (nc.isImportantConversation() || !onlyImportant)) {
+                        ConversationChannelWrapper conversation = new ConversationChannelWrapper();
+                        conversation.setPkg(p.pkg);
+                        conversation.setUid(p.uid);
+                        conversation.setNotificationChannel(nc);
+                        conversation.setParentChannelLabel(
+                                p.channels.get(nc.getParentChannelId()).getName());
+                        boolean blockedByGroup = false;
+                        if (nc.getGroup() != null) {
+                            NotificationChannelGroup group = p.groups.get(nc.getGroup());
+                            if (group != null) {
+                                if (group.isBlocked()) {
+                                    blockedByGroup = true;
+                                } else {
+                                    conversation.setGroupLabel(group.getName());
+                                }
+                            }
+                        }
+                        if (!blockedByGroup) {
+                            conversations.add(conversation);
+                        }
+                    }
+                }
+            }
+
+            return conversations;
+        }
+    }
+
     public ArrayList<ConversationChannelWrapper> getConversations(String pkg, int uid) {
         Objects.requireNonNull(pkg);
         synchronized (mPackagePreferences) {
@@ -1199,6 +1237,8 @@ public class PreferencesHelper implements RankingConfig {
                 final NotificationChannel nc = r.channels.valueAt(i);
                 if (!TextUtils.isEmpty(nc.getConversationId()) && !nc.isDeleted()) {
                     ConversationChannelWrapper conversation = new ConversationChannelWrapper();
+                    conversation.setPkg(r.pkg);
+                    conversation.setUid(r.uid);
                     conversation.setNotificationChannel(nc);
                     conversation.setParentChannelLabel(
                             r.channels.get(nc.getParentChannelId()).getName());

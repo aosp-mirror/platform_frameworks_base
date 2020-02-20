@@ -49,6 +49,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.ServiceStartArgs;
+import android.app.admin.DevicePolicyEventLogger;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ComponentName;
 import android.content.ComponentName.WithComponentName;
@@ -79,6 +80,8 @@ import android.os.SystemProperties;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.stats.devicepolicy.DevicePolicyEnums;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -186,6 +189,9 @@ public final class ActiveServices {
     String mLastAnrDump;
 
     AppWidgetManagerInternal mAppWidgetManagerInternal;
+
+    // white listed packageName.
+    ArraySet<String> mWhiteListAllowWhileInUsePermissionInFgs = new ArraySet<>();
 
     final Runnable mLastAnrDumpClearer = new Runnable() {
         @Override public void run() {
@@ -389,6 +395,20 @@ public final class ActiveServices {
         AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
         ast.addListener(new ForcedStandbyListener());
         mAppWidgetManagerInternal = LocalServices.getService(AppWidgetManagerInternal.class);
+        setWhiteListAllowWhileInUsePermissionInFgs();
+    }
+
+    private void setWhiteListAllowWhileInUsePermissionInFgs() {
+        final String attentionServicePackageName =
+                mAm.mContext.getPackageManager().getAttentionServicePackageName();
+        if (!TextUtils.isEmpty(attentionServicePackageName)) {
+            mWhiteListAllowWhileInUsePermissionInFgs.add(attentionServicePackageName);
+        }
+        final String systemCaptionsServicePackageName =
+                mAm.mContext.getPackageManager().getSystemCaptionsServicePackageName();
+        if (!TextUtils.isEmpty(systemCaptionsServicePackageName)) {
+            mWhiteListAllowWhileInUsePermissionInFgs.add(systemCaptionsServicePackageName);
+        }
     }
 
     ServiceRecord getServiceByNameLocked(ComponentName name, int callingUser) {
@@ -1894,6 +1914,8 @@ public final class ActiveServices {
                 requestServiceBindingLocked(s, b.intent, callerFg, false);
             }
 
+            maybeLogBindCrossProfileService(userId, callingPackage, callerApp.info.uid);
+
             getServiceMapLocked(s.userId).ensureNotStartingBackgroundLocked(s);
 
         } finally {
@@ -1901,6 +1923,21 @@ public final class ActiveServices {
         }
 
         return 1;
+    }
+
+    private void maybeLogBindCrossProfileService(
+            int userId, String callingPackage, int callingUid) {
+        if (UserHandle.isCore(callingUid)) {
+            return;
+        }
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId == userId
+                || !mAm.mUserController.isSameProfileGroup(callingUserId, userId)) {
+            return;
+        }
+        DevicePolicyEventLogger.createEvent(DevicePolicyEnums.BIND_CROSS_PROFILE_SERVICE)
+                .setStrings(callingPackage)
+                .write();
     }
 
     void publishServiceLocked(ServiceRecord r, Intent intent, IBinder service) {
@@ -4631,6 +4668,12 @@ public final class ActiveServices {
         // Does the calling UID have any visible activity?
         final boolean isCallingUidVisible = mAm.mAtmInternal.isUidForeground(callingUid);
         if (isCallingUidVisible) {
+            return true;
+        }
+
+        final boolean isWhiteListedPackage =
+                mWhiteListAllowWhileInUsePermissionInFgs.contains(callingPackage);
+        if (isWhiteListedPackage) {
             return true;
         }
 

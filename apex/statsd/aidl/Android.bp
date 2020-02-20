@@ -34,10 +34,17 @@ aidl_interface {
             enabled: false, // the platform uses statsd_java_aidl
         },
         cpp: {
-            enabled: true,
+            enabled: false,
         },
         ndk: {
             enabled: true,
-        }
+            apex_available: [
+                // TODO(b/145923087): Remove this once statsd binary is in apex
+                "//apex_available:platform",
+
+                "com.android.os.statsd",
+                "test_com.android.os.statsd",
+            ],
+        },
     }
 }

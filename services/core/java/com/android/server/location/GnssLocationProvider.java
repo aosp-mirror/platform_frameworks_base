@@ -2244,6 +2244,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (hasCapability(GPS_CAPABILITY_MEASUREMENT_CORRECTIONS)) {
             s.append("MEASUREMENT_CORRECTIONS ");
         }
+        if (hasCapability(GPS_CAPABILITY_ANTENNA_INFO)) s.append("ANTENNA_INFO ");
         s.append(")\n");
         if (hasCapability(GPS_CAPABILITY_MEASUREMENT_CORRECTIONS)) {
             s.append("SubHal=MEASUREMENT_CORRECTIONS[");

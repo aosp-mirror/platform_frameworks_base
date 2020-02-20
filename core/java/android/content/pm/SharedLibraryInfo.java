@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,28 +36,6 @@ import java.util.List;
  * static - non backwards-compatible emulating static linking.
  */
 public final class SharedLibraryInfo implements Parcelable {
-
-    /** @hide */
-    public static SharedLibraryInfo createForStatic(AndroidPackage pkg) {
-        return new SharedLibraryInfo(null, pkg.getPackageName(),
-                pkg.makeListAllCodePaths(),
-                pkg.getStaticSharedLibName(),
-                pkg.getStaticSharedLibVersion(),
-                TYPE_STATIC,
-                new VersionedPackage(pkg.getManifestPackageName(),
-                        pkg.getLongVersionCode()),
-                null, null);
-    }
-
-    /** @hide */
-    public static SharedLibraryInfo createForDynamic(AndroidPackage pkg, String name) {
-        return new SharedLibraryInfo(null, pkg.getPackageName(),
-                pkg.makeListAllCodePaths(), name,
-                (long) VERSION_UNDEFINED,
-                TYPE_DYNAMIC, new VersionedPackage(pkg.getPackageName(),
-                pkg.getLongVersionCode()),
-                null, null);
-    }
 
     /** @hide */
     @IntDef(flag = true, prefix = { "TYPE_" }, value = {

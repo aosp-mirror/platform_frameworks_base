@@ -346,6 +346,7 @@ java_library {
         "android.hardware.cas-V1.1-java",
         "android.hardware.cas-V1.2-java",
         "android.hardware.contexthub-V1.0-java",
+        "android.hardware.contexthub-V1.1-java",
         "android.hardware.gnss-V1.0-java",
         "android.hardware.gnss-V2.1-java",
         "android.hardware.health-V1.0-java-constants",
@@ -392,7 +393,7 @@ java_defaults {
 
     exclude_srcs: [
         // See comment on framework-atb-backward-compatibility module below
-        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 
     sdk_version: "core_platform",
@@ -596,7 +597,7 @@ java_library {
     installable: true,
     libs: ["app-compat-annotations"],
     srcs: [
-        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 }
 
@@ -687,6 +688,7 @@ filegroup {
     srcs: [
         "core/java/android/annotation/CallbackExecutor.java",
         "core/java/android/annotation/CheckResult.java",
+        "core/java/android/annotation/CurrentTimeMillisLong.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
         "core/java/android/annotation/NonNull.java",
@@ -1126,7 +1128,6 @@ filegroup {
     srcs: [
         ":framework-annotations",
         "core/java/android/annotation/BytesLong.java",
-        "core/java/android/annotation/CurrentTimeMillisLong.java",
         "core/java/android/annotation/CurrentTimeSecondsLong.java",
         "core/java/android/annotation/DurationMillisLong.java",
     ],
@@ -1326,7 +1327,6 @@ java_library {
     libs: [
         "framework-minus-apex",
         "unsupportedappusage",
-        "ike-stubs",
     ],
     static_libs: [
         "libphonenumber-platform",

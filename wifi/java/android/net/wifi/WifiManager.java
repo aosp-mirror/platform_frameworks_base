@@ -46,6 +46,7 @@ import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.ProvisioningCallback;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -2755,6 +2756,26 @@ public class WifiManager {
     }
 
     /**
+     * Set if scanning is always available.
+     *
+     * If set to {@code true}, apps can issue {@link #startScan} and fetch scan results
+     * even when Wi-Fi is turned off.
+     *
+     * @param isAvailable true to enable, false to disable.
+     * @hide
+     * @see #isScanAlwaysAvailable()
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void setScanAlwaysAvailable(boolean isAvailable) {
+        try {
+            mService.setScanAlwaysAvailable(isAvailable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Check if scanning is always available.
      *
      * If this return {@code true}, apps can issue {@link #startScan} and fetch scan results
@@ -4900,7 +4921,10 @@ public class WifiManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(
+            maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@code #setVerboseLoggingEnabled(boolean)} instead."
+    )
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void enableVerboseLogging (int verbose) {
         try {
@@ -4928,7 +4952,10 @@ public class WifiManager {
 
     /** @hide */
     // TODO(b/145484145): remove once SUW stops calling this via reflection
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(
+            maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@code #isVerboseLoggingEnabled()} instead."
+    )
     public int getVerboseLoggingLevel() {
         try {
             return mService.getVerboseLoggingLevel();

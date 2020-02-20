@@ -406,9 +406,7 @@ public class CutoutSpecification {
                     }
                     currentIndex += RIGHT_MARKER.length();
                 } else if (specWithoutDp.startsWith(BOTTOM_MARKER, currentIndex)) {
-                    if (!mPositionFromCenterVertical) {
-                        parseSvgPathSpec(region, sb.toString());
-                    }
+                    parseSvgPathSpec(region, sb.toString());
                     currentIndex += BOTTOM_MARKER.length();
 
                     /* prepare to parse the rest path */
@@ -416,9 +414,7 @@ public class CutoutSpecification {
                     mBindBottomCutout = true;
                     mPositionFromBottom = true;
                 } else if (specWithoutDp.startsWith(CENTER_VERTICAL_MARKER, currentIndex)) {
-                    if (!mPositionFromBottom) {
-                        parseSvgPathSpec(region, sb.toString());
-                    }
+                    parseSvgPathSpec(region, sb.toString());
                     currentIndex += CENTER_VERTICAL_MARKER.length();
 
                     /* prepare to parse the rest path */
@@ -431,14 +427,16 @@ public class CutoutSpecification {
                     /* prepare to parse the rest path */
                     resetStatus(sb);
                 } else if (specWithoutDp.startsWith(BIND_LEFT_CUTOUT_MARKER, currentIndex)) {
-                    if (!mBindBottomCutout && !mBindRightCutout) {
-                        mBindLeftCutout = true;
-                    }
+                    mBindBottomCutout = false;
+                    mBindRightCutout = false;
+                    mBindLeftCutout = true;
+
                     currentIndex += BIND_LEFT_CUTOUT_MARKER.length();
                 } else if (specWithoutDp.startsWith(BIND_RIGHT_CUTOUT_MARKER, currentIndex)) {
-                    if (!mBindBottomCutout && !mBindLeftCutout) {
-                        mBindRightCutout = true;
-                    }
+                    mBindBottomCutout = false;
+                    mBindLeftCutout = false;
+                    mBindRightCutout = true;
+
                     currentIndex += BIND_RIGHT_CUTOUT_MARKER.length();
                 } else {
                     currentIndex += 1;

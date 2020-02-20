@@ -22,10 +22,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Xml;
 
@@ -193,9 +195,28 @@ public final class AccessibilityShortcutInfo {
      * The animated image resource id of the accessibility shortcut target.
      *
      * @return The animated image resource id.
+     *
+     * @hide
      */
     public int getAnimatedImageRes() {
         return mAnimatedImageRes;
+    }
+
+    /**
+     * The animated image drawable of the accessibility shortcut target.
+     *
+     * @return The animated image drawable.
+     */
+    @Nullable
+    public Drawable loadAnimatedImage(@NonNull PackageManager packageManager) {
+        if (mAnimatedImageRes == /* invalid */ 0) {
+            return null;
+        }
+
+        final String packageName = mComponentName.getPackageName();
+        final ApplicationInfo applicationInfo = mActivityInfo.applicationInfo;
+
+        return packageManager.getDrawable(packageName, mAnimatedImageRes, applicationInfo);
     }
 
     /**
