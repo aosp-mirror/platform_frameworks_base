@@ -1279,7 +1279,8 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     public NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId) {
         try {
-            return mService.getDefaultNetworkCapabilitiesForUser(userId);
+            return mService.getDefaultNetworkCapabilitiesForUser(
+                    userId, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1361,7 +1362,7 @@ public class ConnectivityManager {
     @Nullable
     public NetworkCapabilities getNetworkCapabilities(@Nullable Network network) {
         try {
-            return mService.getNetworkCapabilities(network);
+            return mService.getNetworkCapabilities(network, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4039,10 +4040,9 @@ public class ConnectivityManager {
             @NonNull PendingIntent operation) {
         printStackTrace();
         checkPendingIntentNotNull(operation);
-        final String callingPackageName = mContext.getOpPackageName();
         try {
             mService.pendingRequestForNetwork(
-                    request.networkCapabilities, operation, callingPackageName);
+                    request.networkCapabilities, operation, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -4154,10 +4154,9 @@ public class ConnectivityManager {
             @NonNull PendingIntent operation) {
         printStackTrace();
         checkPendingIntentNotNull(operation);
-        final String callingPackageName = mContext.getOpPackageName();
         try {
             mService.pendingListenForNetwork(
-                    request.networkCapabilities, operation, callingPackageName);
+                    request.networkCapabilities, operation, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
