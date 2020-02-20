@@ -21,9 +21,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.text.format.DateFormat;
 import android.util.Range;
+import android.util.Slog;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.people.PeopleEventIndexProto;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Instant;
@@ -34,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.function.Function;
 
@@ -60,6 +66,7 @@ import java.util.function.Function;
  *  </pre>
  */
 public class EventIndex {
+    private static final String TAG = EventIndex.class.getSimpleName();
 
     private static final int RETENTION_DAYS = 63;
 
@@ -118,22 +125,23 @@ public class EventIndex {
     private final Injector mInjector;
 
     EventIndex() {
-        mInjector = new Injector();
-        mEventBitmaps = new long[]{0L, 0L, 0L, 0L};
-        mLastUpdatedTime = mInjector.currentTimeMillis();
+        this(new Injector());
     }
 
-    EventIndex(EventIndex from) {
-        mInjector = new Injector();
-        mEventBitmaps = Arrays.copyOf(from.mEventBitmaps, TIME_SLOT_TYPES_COUNT);
-        mLastUpdatedTime = from.mLastUpdatedTime;
+    EventIndex(@NonNull EventIndex from) {
+        this(from.mInjector, Arrays.copyOf(from.mEventBitmaps, TIME_SLOT_TYPES_COUNT),
+                from.mLastUpdatedTime);
     }
 
     @VisibleForTesting
-    EventIndex(Injector injector) {
+    EventIndex(@NonNull Injector injector) {
+        this(injector, new long[]{0L, 0L, 0L, 0L}, injector.currentTimeMillis());
+    }
+
+    private EventIndex(@NonNull Injector injector, long[] eventBitmaps, long lastUpdatedTime) {
         mInjector = injector;
-        mEventBitmaps = new long[]{0L, 0L, 0L, 0L};
-        mLastUpdatedTime = mInjector.currentTimeMillis();
+        mEventBitmaps = eventBitmaps;
+        mLastUpdatedTime = lastUpdatedTime;
     }
 
     /**
@@ -232,6 +240,31 @@ public class EventIndex {
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof EventIndex)) {
+            return false;
+        }
+        EventIndex other = (EventIndex) obj;
+        return mLastUpdatedTime == other.mLastUpdatedTime
+                && Arrays.equals(mEventBitmaps, other.mEventBitmaps);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mLastUpdatedTime, mEventBitmaps);
+    }
+
+    synchronized void writeToProto(@NonNull ProtoOutputStream protoOutputStream) {
+        for (long bitmap : mEventBitmaps) {
+            protoOutputStream.write(PeopleEventIndexProto.EVENT_BITMAPS, bitmap);
+        }
+        protoOutputStream.write(PeopleEventIndexProto.LAST_UPDATED_TIME, mLastUpdatedTime);
+    }
+
     /** Shifts the event bitmaps to make them up-to-date. */
     private void updateEventBitmaps(long currentTimeMillis) {
         for (int slotType = 0; slotType < TIME_SLOT_TYPES_COUNT; slotType++) {
@@ -247,6 +280,28 @@ public class EventIndex {
         mEventBitmaps[TIME_SLOT_ONE_DAY] <<= bitsToClear;
         mEventBitmaps[TIME_SLOT_ONE_DAY] >>>= bitsToClear;
         mLastUpdatedTime = currentTimeMillis;
+    }
+
+    static EventIndex readFromProto(@NonNull ProtoInputStream protoInputStream) throws IOException {
+        int bitmapIndex = 0;
+        long[] eventBitmaps = new long[TIME_SLOT_TYPES_COUNT];
+        long lastUpdated = 0L;
+        while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (protoInputStream.getFieldNumber()) {
+                case (int) PeopleEventIndexProto.EVENT_BITMAPS:
+                    eventBitmaps[bitmapIndex++] = protoInputStream.readLong(
+                            PeopleEventIndexProto.EVENT_BITMAPS);
+                    break;
+                case (int) PeopleEventIndexProto.LAST_UPDATED_TIME:
+                    lastUpdated = protoInputStream.readLong(
+                            PeopleEventIndexProto.LAST_UPDATED_TIME);
+                    break;
+                default:
+                    Slog.e(TAG, "Could not read undefined field: "
+                            + protoInputStream.getFieldNumber());
+            }
+        }
+        return new EventIndex(new Injector(), eventBitmaps, lastUpdated);
     }
 
     private static LocalDateTime toLocalDateTime(long epochMilli) {

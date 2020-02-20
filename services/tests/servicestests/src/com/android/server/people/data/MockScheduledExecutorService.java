@@ -54,8 +54,8 @@ class MockScheduledExecutorService implements ScheduledExecutorService {
         long totalExecuted = 0;
         for (MockScheduledFuture<?> future : futuresCopy) {
             if (future.getDelay() < mTimeElapsedMillis) {
-                future.getCommand().run();
-                mExecutes.add(future.getCommand());
+                future.getRunnable().run();
+                mExecutes.add(future.getRunnable());
                 totalExecuted += 1;
             } else {
                 mFutures.add(future);
@@ -96,7 +96,8 @@ class MockScheduledExecutorService implements ScheduledExecutorService {
     @Override
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period,
             TimeUnit unit) {
-        throw new UnsupportedOperationException();
+        Preconditions.checkState(unit == TimeUnit.MILLISECONDS);
+        return new MockScheduledFuture<>(command, period, unit);
     }
 
     @Override
@@ -132,7 +133,13 @@ class MockScheduledExecutorService implements ScheduledExecutorService {
 
     @Override
     public <T> Future<T> submit(Callable<T> task) {
-        throw new UnsupportedOperationException();
+        MockScheduledFuture<T> future = new MockScheduledFuture<>(task, 0, TimeUnit.MILLISECONDS);
+        try {
+            future.getCallable().call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return future;
     }
 
     @Override
@@ -141,11 +148,11 @@ class MockScheduledExecutorService implements ScheduledExecutorService {
     }
 
     @Override
-    public Future<?> submit(Runnable command) {
-        mExecutes.add(command);
-        MockScheduledFuture<?> future = new MockScheduledFuture<>(command, 0,
+    public Future<?> submit(Runnable runnable) {
+        mExecutes.add(runnable);
+        MockScheduledFuture<?> future = new MockScheduledFuture<>(runnable, 0,
                 TimeUnit.MILLISECONDS);
-        future.getCommand().run();
+        future.getRunnable().run();
         return future;
     }
 
@@ -181,12 +188,22 @@ class MockScheduledExecutorService implements ScheduledExecutorService {
 
     class MockScheduledFuture<V> implements ScheduledFuture<V> {
 
-        private final Runnable mCommand;
+        private final Runnable mRunnable;
+        private final Callable<V> mCallable;
         private final long mDelay;
         private boolean mCancelled = false;
 
-        MockScheduledFuture(Runnable command, long delay, TimeUnit timeUnit) {
-            mCommand = command;
+        MockScheduledFuture(Runnable runnable, long delay, TimeUnit timeUnit) {
+            this(runnable, null, delay);
+        }
+
+        MockScheduledFuture(Callable<V> callable, long delay, TimeUnit timeUnit) {
+            this(null, callable, delay);
+        }
+
+        private MockScheduledFuture(Runnable runnable, Callable<V> callable, long delay) {
+            mCallable = callable;
+            mRunnable = runnable;
             mDelay = delay;
         }
 
@@ -194,8 +211,12 @@ class MockScheduledExecutorService implements ScheduledExecutorService {
             return mDelay;
         }
 
-        public Runnable getCommand() {
-            return mCommand;
+        public Runnable getRunnable() {
+            return mRunnable;
+        }
+
+        public Callable<V> getCallable() {
+            return mCallable;
         }
 
         @Override

@@ -73,9 +73,8 @@ class UserData {
         // Ensures per user root directory for people data is present, and attempt to load
         // data from disk.
         mPerUserPeopleDataDir.mkdirs();
-        for (PackageData packageData : mPackageDataMap.values()) {
-            packageData.loadFromDisk();
-        }
+        mPackageDataMap.putAll(PackageData.packagesDataFromDisk(mUserId, this::isDefaultDialer,
+                this::isDefaultSmsApp, mScheduledExecutorService, mPerUserPeopleDataDir, mHelper));
     }
 
     void setUserStopped() {
