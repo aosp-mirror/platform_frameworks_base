@@ -355,7 +355,7 @@ message Atom {
         BootTimeEventElapsedTime boot_time_event_elapsed_time_reported = 240;
         BootTimeEventUtcTime boot_time_event_utc_time_reported = 241;
         BootTimeEventErrorCode boot_time_event_error_code_reported = 242;
-        UserspaceRebootReported userspace_reboot_reported = 243;
+        UserspaceRebootReported userspace_reboot_reported = 243 [(log_from_module) = "framework"];
     }
 
     // Pulled events will start at field 10000.
