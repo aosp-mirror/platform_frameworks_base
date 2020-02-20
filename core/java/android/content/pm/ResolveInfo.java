@@ -39,6 +39,8 @@ import java.util.Comparator;
  */
 public class ResolveInfo implements Parcelable {
     private static final String TAG = "ResolveInfo";
+    private static final String INTENT_FORWARDER_ACTIVITY =
+            "com.android.internal.app.IntentForwarderActivity";
 
     /**
      * The activity or broadcast receiver that corresponds to this resolution
@@ -349,6 +351,16 @@ public class ResolveInfo implements Parcelable {
             pw.println(prefix + "ProviderInfo:");
             providerInfo.dump(pw, prefix + "  ", dumpFlags);
         }
+    }
+
+    /**
+     * Returns whether this resolution represents the intent forwarder activity.
+     *
+     * @return whether this resolution represents the intent forwarder activity
+     */
+    public boolean isCrossProfileIntentForwarderActivity() {
+        return activityInfo != null
+                && INTENT_FORWARDER_ACTIVITY.equals(activityInfo.targetActivity);
     }
 
     public ResolveInfo() {
