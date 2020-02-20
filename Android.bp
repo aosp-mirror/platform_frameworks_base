@@ -691,6 +691,7 @@ filegroup {
         "core/java/android/annotation/CurrentTimeMillisLong.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/LongDef.java",
         "core/java/android/annotation/NonNull.java",
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/RequiresPermission.java",
