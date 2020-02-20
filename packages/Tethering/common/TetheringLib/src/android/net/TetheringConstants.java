@@ -33,6 +33,9 @@ import android.os.ResultReceiver;
  */
 @SystemApi(client = MODULE_LIBRARIES)
 public class TetheringConstants {
+    /** An explicit private class to avoid exposing constructor.*/
+    private TetheringConstants() { }
+
     /**
      * Extra used for communicating with the TetherService. Includes the type of tethering to
      * enable if any.
