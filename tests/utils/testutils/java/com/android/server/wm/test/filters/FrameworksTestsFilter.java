@@ -38,6 +38,7 @@ public final class FrameworksTestsFilter extends SelectTest {
             "android.app.activity.ActivityThreadClientTest",
             // Test specifications for FrameworksCoreTests.
             "android.app.servertransaction.", // all tests under the package.
+            "android.view.CutoutSpecificationTest",
             "android.view.DisplayCutoutTest",
             "android.view.InsetsAnimationControlImplTest",
             "android.view.InsetsControllerTest",
