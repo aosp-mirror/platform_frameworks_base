@@ -3430,16 +3430,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // there is hope for it to become one if it validated, then it is needed.
             ensureRunningOnConnectivityServiceThread();
             if (nri.request.isRequest() && nai.satisfies(nri.request) &&
-                    (nai.isSatisfyingRequest(nri.request.requestId)
-                    // Note that canPossiblyBeat catches two important cases:
-                    // 1. Unvalidated slow networks will not be reaped when an unvalidated fast
-                    // network is currently satisfying the request. This is desirable for example
-                    // when cellular ends up validating but WiFi/Ethernet does not.
-                    // 2. Fast networks will not be reaped when a validated slow network is
-                    // currently satisfying the request. This is desirable for example when
-                    // Ethernet ends up validating and out scoring WiFi, or WiFi/Ethernet ends
-                    // up validating and out scoring cellular.
-                            || nai.canPossiblyBeat(nri.mSatisfier))) {
+                    (nai.isSatisfyingRequest(nri.request.requestId) ||
+                    // Note that this catches two important cases:
+                    // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
+                    //    is currently satisfying the request.  This is desirable when
+                    //    cellular ends up validating but WiFi does not.
+                    // 2. Unvalidated WiFi will not be reaped when validated cellular
+                    //    is currently satisfying the request.  This is desirable when
+                    //    WiFi ends up validating and out scoring cellular.
+                    nri.mSatisfier.getCurrentScore()
+                            < nai.getCurrentScoreAsValidated())) {
                 return false;
             }
         }
