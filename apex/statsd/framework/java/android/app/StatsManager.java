@@ -159,6 +159,9 @@ public final class StatsManager {
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Failed to addConfig in statsmanager");
+                throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
     }
@@ -194,6 +197,9 @@ public final class StatsManager {
                 Log.e(TAG, "Failed to connect to statsmanager when removing configuration");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Failed to removeConfig in statsmanager");
                 throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
@@ -391,6 +397,9 @@ public final class StatsManager {
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
                 throw new StatsUnavailableException(e.getMessage(), e);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Failed to getReports in statsmanager");
+                throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
     }
@@ -427,6 +436,9 @@ public final class StatsManager {
                 Log.e(TAG, "Failed to connect to statsmanager when getting metadata");
                 throw new StatsUnavailableException("could not connect", e);
             } catch (SecurityException e) {
+                throw new StatsUnavailableException(e.getMessage(), e);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Failed to getStatsMetadata in statsmanager");
                 throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
@@ -469,6 +481,9 @@ public final class StatsManager {
                                     + "registered experiment IDs");
                 }
                 throw new StatsUnavailableException("could not connect", e);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Failed to getRegisteredExperimentIds in statsmanager");
+                throw new StatsUnavailableException(e.getMessage(), e);
             }
         }
     }
