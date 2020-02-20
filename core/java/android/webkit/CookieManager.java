@@ -268,17 +268,28 @@ public abstract class CookieManager {
     protected abstract boolean allowFileSchemeCookiesImpl();
 
     /**
-     * Sets whether the application's {@link WebView} instances should send and
-     * accept cookies for file scheme URLs.
-     * Use of cookies with file scheme URLs is potentially insecure and turned
-     * off by default.
-     * Do not use this feature unless you can be sure that no unintentional
-     * sharing of cookie data can take place.
+     * Sets whether the application's {@link WebView} instances should send and accept cookies for
+     * file scheme URLs.
      * <p>
-     * Note that calls to this method will have no effect if made after a
-     * {@link WebView} or CookieManager instance has been created.
+     * Use of cookies with file scheme URLs is potentially insecure and turned off by default. All
+     * {@code file://} URLs share all their cookies, which may lead to leaking private app cookies
+     * (ex. any malicious file can access cookies previously set by other (trusted) files).
+     * <p class="note">
+     * Loading content via {@code file://} URLs is generally discouraged. See the note in
+     * {@link WebSettings#setAllowFileAccess}.
+     * Using <a href="{@docRoot}reference/androidx/webkit/WebViewAssetLoader.html">
+     * androidx.webkit.WebViewAssetLoader</a> to load files over {@code http(s)://} URLs allows
+     * the standard web security model to be used for setting and sharing cookies for local files.
+     * <p>
+     * Note that calls to this method will have no effect if made after calling other
+     * {@link CookieManager} APIs.
+     *
+     * @deprecated This setting is not secure, please use
+     *             <a href="{@docRoot}reference/androidx/webkit/WebViewAssetLoader.html">
+     *             androidx.webkit.WebViewAssetLoader</a> instead.
      */
     // Static for backward compatibility.
+    @Deprecated
     public static void setAcceptFileSchemeCookies(boolean accept) {
         getInstance().setAcceptFileSchemeCookiesImpl(accept);
     }
