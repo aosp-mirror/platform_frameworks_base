@@ -554,6 +554,14 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style
+        name="TextAppearance.NotificationSectionHeaderButton"
+        parent="@android:style/Widget.Material.Button.Borderless">
+        <item name="android:textColor">?attr/wallpaperTextColor</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <style name="TextAppearance.HeadsUpStatusBarText"
            parent="@*android:style/TextAppearance.DeviceDefault.Notification.Info">
     </style>
@@ -661,5 +669,5 @@
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/control_secondary_text</item>
     </style>
-
+    
 </resources>
