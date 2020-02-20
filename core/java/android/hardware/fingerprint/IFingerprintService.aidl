@@ -113,4 +113,7 @@ interface IFingerprintService {
 
     // Removes a callback set by addClientActiveCallback
     void removeClientActiveCallback(IFingerprintClientActiveCallback callback);
+
+    // Initialize the OEM configured biometric strength
+    void initConfiguredStrength(int strength);
 }

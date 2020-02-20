@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -124,7 +125,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
 
-        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
         when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
         when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);

@@ -21,6 +21,7 @@ import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC;
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 
@@ -462,6 +463,12 @@ public class FingerprintService extends BiometricServiceBase {
             checkPermission(MANAGE_FINGERPRINT);
             mClientActiveCallbacks.remove(callback);
         }
+
+        @Override // Binder call
+        public void initConfiguredStrength(int strength) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            initConfiguredStrengthInternal(strength);
+        }
     }
 
     /**
@@ -526,8 +533,8 @@ public class FingerprintService extends BiometricServiceBase {
                 throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
                 if (biometric == null || biometric instanceof Fingerprint) {
-                    mFingerprintServiceReceiver
-                            .onAuthenticationSucceeded(deviceId, (Fingerprint) biometric, userId);
+                    mFingerprintServiceReceiver.onAuthenticationSucceeded(deviceId,
+                            (Fingerprint) biometric, userId, isStrongBiometric());
                 } else {
                     Slog.e(TAG, "onAuthenticationSucceeded received non-fingerprint biometric");
                 }

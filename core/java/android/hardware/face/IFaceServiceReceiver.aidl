@@ -24,7 +24,8 @@ import android.hardware.face.Face;
 oneway interface IFaceServiceReceiver {
     void onEnrollResult(long deviceId, int faceId, int remaining);
     void onAcquired(long deviceId, int acquiredInfo, int vendorCode);
-    void onAuthenticationSucceeded(long deviceId, in Face face, int userId);
+    void onAuthenticationSucceeded(long deviceId, in Face face, int userId,
+            boolean isStrongBiometric);
     void onAuthenticationFailed(long deviceId);
     void onError(long deviceId, int error, int vendorCode);
     void onRemoved(long deviceId, int faceId, int remaining);

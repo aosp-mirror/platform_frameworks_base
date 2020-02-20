@@ -239,7 +239,8 @@ public class KeyguardUpdateMonitorCallback {
      * @param userId the user id for which the biometric sample was authenticated
      * @param biometricSourceType
      */
-    public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) { }
+    public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
+            boolean isStrongBiometric) { }
 
     /**
      * Called when biometric authentication provides help string (e.g. "Try again")
