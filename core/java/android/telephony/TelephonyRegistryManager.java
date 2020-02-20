@@ -18,7 +18,6 @@ package android.telephony;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
@@ -62,7 +61,6 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
-@SystemApi
 @TestApi
 public class TelephonyRegistryManager {
 
@@ -286,7 +284,6 @@ public class TelephonyRegistryManager {
      * @param incomingNumber incoming phone number.
      * @hide
      */
-    @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyCallStateChangedForAllSubscriptions(@CallState int state,
@@ -302,7 +299,6 @@ public class TelephonyRegistryManager {
      * Notify {@link SubscriptionInfo} change.
      * @hide
      */
-    @SystemApi
     public void notifySubscriptionInfoChanged() {
         try {
             sRegistry.notifySubscriptionInfoChanged();
@@ -315,7 +311,6 @@ public class TelephonyRegistryManager {
      * Notify opportunistic {@link SubscriptionInfo} change.
      * @hide
      */
-    @SystemApi
     public void notifyOpportunisticSubscriptionInfoChanged() {
         try {
             sRegistry.notifyOpportunisticSubscriptionInfoChanged();
