@@ -654,6 +654,13 @@ final public class MediaMuxer {
      * the right tracks. Also, it needs to make sure the samples for each track
      * are written in chronological order (e.g. in the order they are provided
      * by the encoder.)</p>
+     * <p> For MPEG4 media format, the duration of the last sample in a track can be set by passing
+     * an additional empty buffer(bufferInfo.size = 0) with MediaCodec.BUFFER_FLAG_END_OF_STREAM
+     * flag and a suitable presentation timestamp set in bufferInfo parameter as the last sample of
+     * that track.  This last sample's presentation timestamp shall be a sum of the presentation
+     * timestamp and the duration preferred for the original last sample.  If no explicit
+     * END_OF_STREAM sample was passed, then the duration of the last sample would be the same as
+     * that of the sample before that.</p>
      * @param byteBuf The encoded sample.
      * @param trackIndex The track index for this sample.
      * @param bufferInfo The buffer information related to this sample.
