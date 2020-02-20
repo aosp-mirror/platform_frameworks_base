@@ -393,6 +393,9 @@ public class PowerProfile {
     }
 
     public int getNumCoresInCpuCluster(int cluster) {
+        if (cluster < 0 || cluster >= mCpuClusters.length) {
+            return 0; // index out of bound
+        }
         return mCpuClusters[cluster].numCpus;
     }
 
