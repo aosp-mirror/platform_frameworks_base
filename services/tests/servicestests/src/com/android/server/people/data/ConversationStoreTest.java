@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
@@ -63,7 +62,6 @@ public final class ConversationStoreTest {
     private static final String PHONE_NUMBER_3 = "+9234567890";
 
     private MockScheduledExecutorService mMockScheduledExecutorService;
-    private TestContactQueryHelper mTestContactQueryHelper;
     private ConversationStore mConversationStore;
     private File mFile;
 
@@ -71,7 +69,6 @@ public final class ConversationStoreTest {
     public void setUp() {
         Context ctx = InstrumentationRegistry.getContext();
         mFile = new File(ctx.getCacheDir(), "testdir");
-        mTestContactQueryHelper = new TestContactQueryHelper(ctx);
         resetConversationStore();
     }
 
@@ -207,9 +204,6 @@ public final class ConversationStoreTest {
         mConversationStore.deleteConversation(SHORTCUT_ID_3);
         mMockScheduledExecutorService.fastForwardTime(3L * DateUtils.MINUTE_IN_MILLIS);
 
-        mTestContactQueryHelper.setQueryResult(true, true);
-        mTestContactQueryHelper.setPhoneNumberResult(PHONE_NUMBER, PHONE_NUMBER_2);
-
         resetConversationStore();
         ConversationInfo out1 = mConversationStore.getConversation(SHORTCUT_ID);
         ConversationInfo out2 = mConversationStore.getConversation(SHORTCUT_ID_2);
@@ -240,9 +234,6 @@ public final class ConversationStoreTest {
         mConversationStore.addOrUpdate(in2);
         mMockScheduledExecutorService.fastForwardTime(DateUtils.MINUTE_IN_MILLIS);
 
-        mTestContactQueryHelper.setQueryResult(true);
-        mTestContactQueryHelper.setPhoneNumberResult(PHONE_NUMBER);
-
         resetConversationStore();
         ConversationInfo out1 = mConversationStore.getConversation(SHORTCUT_ID);
         ConversationInfo out2 = mConversationStore.getConversation(SHORTCUT_ID_2);
@@ -255,10 +246,6 @@ public final class ConversationStoreTest {
 
         mConversationStore.addOrUpdate(in3);
         mMockScheduledExecutorService.fastForwardTime(3L * DateUtils.MINUTE_IN_MILLIS);
-
-        mTestContactQueryHelper.reset();
-        mTestContactQueryHelper.setQueryResult(true, true, true);
-        mTestContactQueryHelper.setPhoneNumberResult(PHONE_NUMBER, PHONE_NUMBER_2, PHONE_NUMBER_3);
 
         resetConversationStore();
         out1 = mConversationStore.getConversation(SHORTCUT_ID);
@@ -290,9 +277,6 @@ public final class ConversationStoreTest {
         // loadConversationFromDisk gets called each time we call #resetConversationStore().
         assertEquals(2, mMockScheduledExecutorService.getExecutes().size());
 
-        mTestContactQueryHelper.setQueryResult(true, true);
-        mTestContactQueryHelper.setPhoneNumberResult(PHONE_NUMBER, PHONE_NUMBER_2);
-
         resetConversationStore();
         ConversationInfo out1 = mConversationStore.getConversation(SHORTCUT_ID);
         ConversationInfo out2 = mConversationStore.getConversation(SHORTCUT_ID_2);
@@ -303,8 +287,7 @@ public final class ConversationStoreTest {
     private void resetConversationStore() {
         mFile.mkdir();
         mMockScheduledExecutorService = new MockScheduledExecutorService();
-        mConversationStore = new ConversationStore(mFile, mMockScheduledExecutorService,
-                mTestContactQueryHelper);
+        mConversationStore = new ConversationStore(mFile, mMockScheduledExecutorService);
         mConversationStore.loadConversationsFromDisk();
     }
 
@@ -325,55 +308,5 @@ public final class ConversationStoreTest {
                 .setImportant(true)
                 .setBubbled(true)
                 .build();
-    }
-
-    private static class TestContactQueryHelper extends ContactsQueryHelper {
-
-        private int mQueryCalls;
-        private boolean[] mQueryResult;
-
-        private int mPhoneNumberCalls;
-        private String[] mPhoneNumberResult;
-
-        TestContactQueryHelper(Context context) {
-            super(context);
-
-            mQueryCalls = 0;
-            mPhoneNumberCalls = 0;
-        }
-
-        private void setQueryResult(boolean... values) {
-            mQueryResult = values;
-        }
-
-        private void setPhoneNumberResult(String... values) {
-            mPhoneNumberResult = values;
-        }
-
-        private void reset() {
-            mQueryCalls = 0;
-            mQueryResult = null;
-            mPhoneNumberCalls = 0;
-            mPhoneNumberResult = null;
-        }
-
-        @Override
-        boolean query(String contactUri) {
-            if (mQueryResult != null && mQueryCalls < mQueryResult.length) {
-                return mQueryResult[mQueryCalls++];
-            }
-            mQueryCalls++;
-            return false;
-        }
-
-        @Override
-        @Nullable
-        String getPhoneNumber() {
-            if (mPhoneNumberResult != null && mPhoneNumberCalls < mPhoneNumberResult.length) {
-                return mPhoneNumberResult[mPhoneNumberCalls++];
-            }
-            mPhoneNumberCalls++;
-            return null;
-        }
     }
 }

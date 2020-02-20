@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.content.LocusId;
 import android.net.Uri;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
@@ -71,16 +70,13 @@ class ConversationStore {
 
     private final ScheduledExecutorService mScheduledExecutorService;
     private final File mPackageDir;
-    private final ContactsQueryHelper mHelper;
 
     private ConversationInfosProtoDiskReadWriter mConversationInfosProtoDiskReadWriter;
 
     ConversationStore(@NonNull File packageDir,
-            @NonNull ScheduledExecutorService scheduledExecutorService,
-            @NonNull ContactsQueryHelper helper) {
+            @NonNull ScheduledExecutorService scheduledExecutorService) {
         mScheduledExecutorService = scheduledExecutorService;
         mPackageDir = packageDir;
-        mHelper = helper;
     }
 
     /**
@@ -102,7 +98,6 @@ class ConversationStore {
                     return;
                 }
                 for (ConversationInfo conversationInfo : conversationsOnDisk) {
-                    conversationInfo = restoreConversationPhoneNumber(conversationInfo);
                     updateConversationsInMemory(conversationInfo);
                 }
             }
@@ -248,25 +243,6 @@ class ConversationStore {
                     mPackageDir, CONVERSATIONS_FILE_NAME, mScheduledExecutorService);
         }
         return mConversationInfosProtoDiskReadWriter;
-    }
-
-    /**
-     * Conversation's phone number is not saved on disk, so it has to be fetched.
-     */
-    @WorkerThread
-    private ConversationInfo restoreConversationPhoneNumber(
-            @NonNull ConversationInfo conversationInfo) {
-        if (conversationInfo.getContactUri() != null) {
-            if (mHelper.query(conversationInfo.getContactUri().toString())) {
-                String phoneNumber = mHelper.getPhoneNumber();
-                if (!TextUtils.isEmpty(phoneNumber)) {
-                    conversationInfo = new ConversationInfo.Builder(
-                            conversationInfo).setContactPhoneNumber(
-                            phoneNumber).build();
-                }
-            }
-        }
-        return conversationInfo;
     }
 
     /** Reads and writes {@link ConversationInfo}s on disk. */

@@ -274,6 +274,10 @@ public class ConversationInfo {
         }
         protoOutputStream.write(ConversationInfoProto.SHORTCUT_FLAGS, mShortcutFlags);
         protoOutputStream.write(ConversationInfoProto.CONVERSATION_FLAGS, mConversationFlags);
+        if (mContactPhoneNumber != null) {
+            protoOutputStream.write(ConversationInfoProto.CONTACT_PHONE_NUMBER,
+                    mContactPhoneNumber);
+        }
     }
 
     /** Reads from {@link ProtoInputStream} and constructs a {@link ConversationInfo}. */
@@ -314,6 +318,10 @@ public class ConversationInfo {
                 case (int) ConversationInfoProto.CONVERSATION_FLAGS:
                     builder.setConversationFlags(protoInputStream.readInt(
                             ConversationInfoProto.CONVERSATION_FLAGS));
+                    break;
+                case (int) ConversationInfoProto.CONTACT_PHONE_NUMBER:
+                    builder.setContactPhoneNumber(protoInputStream.readString(
+                            ConversationInfoProto.CONTACT_PHONE_NUMBER));
                     break;
                 default:
                     Slog.w(TAG, "Could not read undefined field: "
