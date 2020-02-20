@@ -16,6 +16,8 @@
 
 package android.os;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import android.annotation.NonNull;
@@ -33,6 +35,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.hardware.display.DisplayManager;
 import android.provider.Settings;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -614,7 +617,8 @@ public class RecoverySystem {
 
             // On TV, reboot quiescently if the screen is off
             if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                if (context.getDisplay().getState() != Display.STATE_ON) {
+                DisplayManager dm = context.getSystemService(DisplayManager.class);
+                if (dm.getDisplay(DEFAULT_DISPLAY).getState() != Display.STATE_ON) {
                     reason += ",quiescent";
                 }
             }

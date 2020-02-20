@@ -165,7 +165,7 @@ final class FillUi {
         // In full screen we only initialize size once assuming screen size never changes
         if (mFullScreen) {
             final Point outPoint = mTempPoint;
-            mContext.getDisplay().getSize(outPoint);
+            mContext.getDisplayNoVerify().getSize(outPoint);
             // full with of screen and half height of screen
             mContentWidth = LayoutParams.MATCH_PARENT;
             mContentHeight = outPoint.y / 2;
@@ -559,7 +559,7 @@ final class FillUi {
     }
 
     private static void resolveMaxWindowSize(Context context, Point outPoint) {
-        context.getDisplay().getSize(outPoint);
+        context.getDisplayNoVerify().getSize(outPoint);
         final TypedValue typedValue = sTempTypedValue;
         context.getTheme().resolveAttribute(R.attr.autofillDatasetPickerMaxWidth,
                 typedValue, true);

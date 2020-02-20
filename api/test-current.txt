@@ -2538,6 +2538,11 @@ package android.os {
     method public void log(android.os.StrictMode.ViolationInfo);
   }
 
+  public static final class StrictMode.VmPolicy.Builder {
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder detectIncorrectContextUse();
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder permitIncorrectContextUse();
+  }
+
   public class SystemConfigManager {
     method @NonNull @RequiresPermission("android.permission.READ_CARRIER_APP_INFO") public java.util.Set<java.lang.String> getDisabledUntilUsedPreinstalledCarrierApps();
     method @NonNull @RequiresPermission("android.permission.READ_CARRIER_APP_INFO") public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps();

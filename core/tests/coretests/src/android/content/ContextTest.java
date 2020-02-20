@@ -16,11 +16,13 @@
 
 package android.content;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static org.junit.Assert.assertEquals;
 
 import android.app.ActivityThread;
+import android.hardware.display.DisplayManager;
 import android.os.UserHandle;
-import android.view.WindowManager;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -45,17 +47,16 @@ public class ContextTest {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals(testContext.getDisplay().getDisplayId(), testContext.getDisplayId());
+        assertEquals(testContext.getDisplayNoVerify().getDisplayId(), testContext.getDisplayId());
     }
 
-    // TODO(b/128338354): Re-visit this test after introducing WindowContext
     @Test
     public void testDisplayIdForDefaultDisplayContext() {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
-        final WindowManager wm = testContext.getSystemService(WindowManager.class);
+        final DisplayManager dm = testContext.getSystemService(DisplayManager.class);
         final Context defaultDisplayContext =
-                testContext.createDisplayContext(wm.getDefaultDisplay());
+                testContext.createDisplayContext(dm.getDisplay(DEFAULT_DISPLAY));
 
         assertEquals(defaultDisplayContext.getDisplay().getDisplayId(),
                 defaultDisplayContext.getDisplayId());
