@@ -19,6 +19,7 @@ package com.android.server.people.prediction;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppTarget;
@@ -45,8 +46,8 @@ class ShareTargetPredictor extends AppTargetPredictor {
 
     ShareTargetPredictor(@NonNull AppPredictionContext predictionContext,
             @NonNull Consumer<List<AppTarget>> updatePredictionsMethod,
-            @NonNull DataManager dataManager) {
-        super(predictionContext, updatePredictionsMethod, dataManager);
+            @NonNull DataManager dataManager, @UserIdInt int callingUserId) {
+        super(predictionContext, updatePredictionsMethod, dataManager, callingUserId);
         mIntentFilter = predictionContext.getExtras().getParcelable(
                 ChooserActivity.APP_PREDICTION_INTENT_FILTER_KEY);
     }
@@ -84,7 +85,7 @@ class ShareTargetPredictor extends AppTargetPredictor {
     List<ShareTarget> getShareTargets() {
         List<ShareTarget> shareTargets = new ArrayList<>();
         List<ShareShortcutInfo> shareShortcuts =
-                getDataManager().getShareShortcuts(mIntentFilter);
+                getDataManager().getShareShortcuts(mIntentFilter, mCallingUserId);
 
         for (ShareShortcutInfo shareShortcut : shareShortcuts) {
             ShortcutInfo shortcutInfo = shareShortcut.getShortcutInfo();

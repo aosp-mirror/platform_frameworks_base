@@ -53,7 +53,7 @@ public interface ScanCallback {
     void onInputStreamIds(@NonNull int[] inputStreamIds);
 
     /** Locked signal standard for DVBS. */
-    void onDvbsStandard(@DvbsFrontendSettings.Standard int dvbsStandandard);
+    void onDvbsStandard(@DvbsFrontendSettings.Standard int dvbsStandard);
 
     /** Locked signal standard. for DVBT */
     void onDvbtStandard(@DvbtFrontendSettings.Standard int dvbtStandard);

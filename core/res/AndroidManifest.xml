@@ -645,6 +645,9 @@
 
     <protected-broadcast android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY" />
 
+    <!-- Added in R -->
+    <protected-broadcast android:name="android.app.action.RESET_PROTECTION_POLICY_CHANGED" />
+
     <!-- For tether entitlement recheck-->
     <protected-broadcast
         android:name="com.android.server.connectivity.tethering.PROVISIONING_RECHECK_ALARM" />
@@ -1196,6 +1199,15 @@
                 android.label="@string/permlab_acceptHandover"
                 android:description="@string/permdesc_acceptHandovers"
                 android:protectionLevel="dangerous" />
+
+    <!-- Allows an application assigned to the Dialer role to be granted access to the telephony
+         call audio streams, both TX and RX.
+         <p>Protection level: signature|appop
+    -->
+    <permission android:name="android.permission.ACCESS_CALL_AUDIO"
+                android.label="@string/permlab_accessCallAudio"
+                android:description="@string/permdesc_accessCallAudio"
+                android:protectionLevel="signature|appop" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device microphone                        -->
@@ -1950,6 +1962,18 @@
         android:label="@string/permlab_modifyAudioSettings"
         android:description="@string/permdesc_modifyAudioSettings"
         android:protectionLevel="normal" />
+
+    <!-- ======================================== -->
+    <!-- Permissions for factory reset protection -->
+    <!-- ======================================== -->
+    <eat-comment />
+
+    <!-- @SystemApi Allows an application to set a factory reset protection (FRP) policy.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.MANAGE_FACTORY_RESET_PROTECTION"
+        android:protectionLevel="signature|privileged"/>
 
     <!-- ================================== -->
     <!-- Permissions for accessing hardware -->
@@ -4952,16 +4976,6 @@
     <!-- @hide @SystemApi Allows an application to access locusId events in the usage stats. -->
     <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
                 android:protectionLevel="signature|appPredictor" />
-
-    <!-- Feature Id for Country Detector. -->
-    <feature android:featureId="CountryDetector" android:label="@string/country_detector"/>
-    <!-- Feature Id for Location service. -->
-    <feature android:featureId="LocationService" android:label="@string/location_service"/>
-    <!-- Feature Id for Sensor Notification service. -->
-    <feature android:featureId="SensorNotificationService"
-             android:label="@string/sensor_notification_service"/>
-    <!-- Feature Id for Twilight service. -->
-    <feature android:featureId="TwilightService" android:label="@string/twilight_service"/>
 
     <application android:process="system"
                  android:persistent="true"

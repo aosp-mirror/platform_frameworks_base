@@ -1794,6 +1794,9 @@ public final class AutofillManager {
             client.autofillClientResetableStateAvailable();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            // no-op, just log the error message.
+            Log.w(TAG, "Exception getting result from SyncResultReceiver: " + e);
         }
     }
 

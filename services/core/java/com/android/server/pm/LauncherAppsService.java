@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -307,8 +306,8 @@ public class LauncherAppsService extends SystemService {
             final int callingUserId = injectCallingUserId();
 
             if (targetUserId == callingUserId) return true;
-            if (mContext.checkCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS_FULL)
-                    == PackageManager.PERMISSION_GRANTED) {
+            if (injectHasInteractAcrossUsersFullPermission(injectBinderCallingPid(),
+                    injectBinderCallingUid())) {
                 return true;
             }
 
@@ -681,6 +680,15 @@ public class LauncherAppsService extends SystemService {
         @VisibleForTesting
         boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
             return mContext.checkPermission(android.Manifest.permission.ACCESS_SHORTCUTS,
+                    callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
+        }
+
+        /**
+         * Returns true if the caller has the "INTERACT_ACROSS_USERS_FULL" permission.
+         */
+        @VisibleForTesting
+        boolean injectHasInteractAcrossUsersFullPermission(int callingPid, int callingUid) {
+            return mContext.checkPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
         }
 

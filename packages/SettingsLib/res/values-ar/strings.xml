@@ -206,6 +206,60 @@
     <string name="enable_adb" msgid="8072776357237289039">"‏تصحيح أخطاء USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"‏وضع تصحيح الأخطاء عند توصيل USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"‏إلغاء عمليات تفويض تصحيح أخطاء USB"</string>
+    <!-- no translation found for enable_adb_wireless (6973226350963971018) -->
+    <skip />
+    <!-- no translation found for enable_adb_wireless_summary (7344391423657093011) -->
+    <skip />
+    <!-- no translation found for adb_wireless_error (721958772149779856) -->
+    <skip />
+    <!-- no translation found for adb_wireless_settings (2295017847215680229) -->
+    <skip />
+    <!-- no translation found for adb_wireless_list_empty_off (1713707973837255490) -->
+    <skip />
+    <!-- no translation found for adb_pair_method_qrcode_title (6982904096137468634) -->
+    <skip />
+    <!-- no translation found for adb_pair_method_qrcode_summary (3729901496856458634) -->
+    <skip />
+    <!-- no translation found for adb_pair_method_code_title (1122590300445142904) -->
+    <skip />
+    <!-- no translation found for adb_pair_method_code_summary (6370414511333685185) -->
+    <skip />
+    <!-- no translation found for adb_paired_devices_title (5268997341526217362) -->
+    <skip />
+    <!-- no translation found for adb_wireless_device_connected_summary (3039660790249148713) -->
+    <skip />
+    <!-- no translation found for adb_wireless_device_details_title (7129369670526565786) -->
+    <skip />
+    <!-- no translation found for adb_device_forget (193072400783068417) -->
+    <skip />
+    <!-- no translation found for adb_device_fingerprint_title_format (291504822917843701) -->
+    <skip />
+    <!-- no translation found for adb_wireless_connection_failed_title (664211177427438438) -->
+    <skip />
+    <!-- no translation found for adb_wireless_connection_failed_message (9213896700171602073) -->
+    <skip />
+    <!-- no translation found for adb_pairing_device_dialog_title (7141739231018530210) -->
+    <skip />
+    <!-- no translation found for adb_pairing_device_dialog_pairing_code_label (3639239786669722731) -->
+    <skip />
+    <!-- no translation found for adb_pairing_device_dialog_failed_title (3426758947882091735) -->
+    <skip />
+    <!-- no translation found for adb_pairing_device_dialog_failed_msg (6611097519661997148) -->
+    <skip />
+    <!-- no translation found for adb_wireless_qrcode_summary (8051414549011801917) -->
+    <skip />
+    <!-- no translation found for adb_wireless_verifying_qrcode_text (6123192424916029207) -->
+    <skip />
+    <!-- no translation found for adb_qrcode_pairing_device_failed_msg (6936292092592914132) -->
+    <skip />
+    <!-- no translation found for adb_wireless_ip_addr_preference_title (8335132107715311730) -->
+    <skip />
+    <!-- no translation found for adb_wireless_qrcode_pairing_title (1906409667944674707) -->
+    <skip />
+    <!-- no translation found for adb_wireless_qrcode_pairing_description (8578868049289910131) -->
+    <skip />
+    <!-- no translation found for keywords_adb_wireless (6507505581882171240) -->
+    <skip />
     <string name="bugreport_in_power" msgid="8664089072534638709">"اختصار تقرير الأخطاء"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"عرض زر في قائمة خيارات التشغيل لإعداد تقرير بالأخطاء"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"البقاء في الوضع النشط"</string>
@@ -271,6 +325,10 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"استخدام إعداد تسريع الأجهزة للتوصيل إن كان متاحًا"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"‏تم تصميم تصحيح أخطاء USB لأغراض التطوير فقط. يمكن استخدامه لنسخ البيانات بين الكمبيوتر والجهاز، وتثبيت التطبيقات على جهازك بدون تنبيه، وقراءة بيانات السجل."</string>
+    <!-- no translation found for adbwifi_warning_title (727104571653031865) -->
+    <skip />
+    <!-- no translation found for adbwifi_warning_message (8005936574322702388) -->
+    <skip />
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"‏هل تريد إلغاء إمكانية الدخول إلى تصحيح أخطاء USB من جميع أجهزة الكمبيوتر التي تم التصريح لها سابقًا؟"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"هل تريد السماح لإعدادات التطوير؟"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"هذه الإعدادات مخصصة لاستخدام التطوير فقط. قد يتسبب هذا في حدوث أعطال أو خلل في أداء الجهاز والتطبيقات المثبتة عليه."</string>
@@ -403,12 +461,18 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"يتبقى أقل من <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"يتبقى أكثر من <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"يتبقى أكثر من <xliff:g id="TIME_REMAINING">%1$s</xliff:g>."</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"قد يتم إغلاق الهاتف بعد قليل."</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"قد يتم إغلاق الجهاز اللوحي بعد قليل."</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"قد يتم إغلاق الجهاز بعد قليل."</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"قد يتم إغلاق الهاتف بعد قليل (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"قد يتم إغلاق الجهاز اللوحي بعد قليل (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"قد يتم إغلاق الجهاز بعد قليل (<xliff:g id="LEVEL">%1$s</xliff:g>)."</string>
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (137330009791560774) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (145489081521468132) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1070562682853942350) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (4429259621177089719) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7703677921000858479) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (4374784375644214578) -->
+    <skip />
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> إلى أن يتم شحن الجهاز بالكامل"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> إلى أن يتم شحن الجهاز بالكامل"</string>

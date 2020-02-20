@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.hotspot2.osu;
+package com.android.hotspot2.osulogin;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
 
@@ -41,8 +41,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import com.android.hotspot2.R;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -194,7 +192,7 @@ public class OsuLoginActivity extends Activity {
         // Check if the key event was the Back button.
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             // If there is a history to move back
-            if (mWebView.canGoBack()){
+            if (mWebView.canGoBack()) {
                 mWebView.goBack();
                 return true;
             }
@@ -278,6 +276,6 @@ public class OsuLoginActivity extends Activity {
                 mPageError = true;
                 Log.e(TAG, "onReceived Error for MainFrame: " + error.getErrorCode());
             }
-         }
+        }
     }
 }

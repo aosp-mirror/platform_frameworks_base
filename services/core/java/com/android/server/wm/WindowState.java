@@ -1513,8 +1513,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
         // associate them with some stack to enable dimming.
         final DisplayContent dc = getDisplayContent();
-        return mAttrs.type >= FIRST_SYSTEM_WINDOW && dc != null
-                ? dc.getOrCreateRootHomeTask() : null;
+        return mAttrs.type >= FIRST_SYSTEM_WINDOW && dc != null ? dc.getRootHomeTask() : null;
     }
 
     /**
@@ -2687,18 +2686,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             mWmService.mTaskSnapshotController.onAppDied(win.mActivityRecord);
                         }
                         win.removeIfPossible(shouldKeepVisibleDeadAppWindow());
-                        if (win.mAttrs.type == TYPE_DOCK_DIVIDER) {
-                            // The owner of the docked divider died :( We reset the docked stack,
-                            // just in case they have the divider at an unstable position. Better
-                            // also reset drag resizing state, because the owner can't do it
-                            // anymore.
-                            final ActivityStack stack =
-                                    dc.getRootSplitScreenPrimaryTask();
-                            if (stack != null) {
-                                stack.resetDockedStackToMiddle();
-                            }
-                            resetSplitScreenResizing = true;
-                        }
                     } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
                         WindowState.this.removeIfPossible();

@@ -3334,4 +3334,35 @@ public class ApplicationPackageManager extends PackageManager {
             throw e.rethrowAsRuntimeException();
         }
     }
+
+    public void setMimeGroup(String mimeGroup, Set<String> mimeTypes) {
+        try {
+            mPM.setMimeGroup(mContext.getPackageName(), mimeGroup,
+                    new ArrayList<String>(mimeTypes));
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public void clearMimeGroup(String mimeGroup) {
+        try {
+            mPM.clearMimeGroup(mContext.getPackageName(), mimeGroup);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public Set<String> getMimeGroup(String group) {
+        try {
+            List<String> mimeGroup = mPM.getMimeGroup(mContext.getPackageName(), group);
+            if (mimeGroup == null) {
+                return null;
+            }
+            return new ArraySet<>(mimeGroup);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
 }

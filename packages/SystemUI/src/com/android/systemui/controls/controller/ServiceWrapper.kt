@@ -18,7 +18,6 @@ package com.android.systemui.controls.controller
 
 import android.service.controls.actions.ControlAction
 import android.service.controls.IControlsActionCallback
-import android.service.controls.IControlsLoadCallback
 import android.service.controls.IControlsProvider
 import android.service.controls.IControlsSubscriber
 import android.service.controls.IControlsSubscription
@@ -45,9 +44,9 @@ class ServiceWrapper(val service: IControlsProvider) {
         }
     }
 
-    fun load(cb: IControlsLoadCallback): Boolean {
+    fun load(subscriber: IControlsSubscriber): Boolean {
         return callThroughService {
-            service.load(cb)
+            service.load(subscriber)
         }
     }
 

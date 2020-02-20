@@ -163,7 +163,6 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
-import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -356,6 +355,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardStateController mKeyguardStateController;
     private final HeadsUpManagerPhone mHeadsUpManager;
+    private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final BypassHeadsUpNotifier mBypassHeadsUpNotifier;
     private final FalsingManager mFalsingManager;
@@ -676,7 +676,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
-            DismissCallbackRegistry dismissCallbackRegistry) {
+            DismissCallbackRegistry dismissCallbackRegistry,
+            StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -688,6 +689,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardBypassController = keyguardBypassController;
         mKeyguardStateController = keyguardStateController;
         mHeadsUpManager = headsUpManagerPhone;
+        mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mDynamicPrivacyController = dynamicPrivacyController;
         mBypassHeadsUpNotifier = bypassHeadsUpNotifier;
         mFalsingManager = falsingManager;
@@ -1031,9 +1033,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                         CollapsedStatusBarFragment.TAG)
                 .commit();
 
-        mHeadsUpManager.setUp(mNotificationShadeWindowView, mGroupManager, this,
-                mVisualStabilityManager);
-        mConfigurationController.addCallback(mHeadsUpManager);
+        mHeadsUpManager.setup(mVisualStabilityManager);
+        mStatusBarTouchableRegionManager.setup(this, mNotificationShadeWindowView);
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanelViewController.getOnHeadsUpChangedListener());
         mHeadsUpManager.addListener(mVisualStabilityManager);
@@ -1410,8 +1411,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!mRecentsOptional.isPresent()) {
             return false;
         }
-        int dockSide = WindowManagerProxy.getInstance().getDockSide();
-        if (dockSide == WindowManager.DOCKED_INVALID) {
+        Divider divider = null;
+        if (mDividerOptional.isPresent()) {
+            divider = mDividerOptional.get();
+        }
+        if (divider == null || !divider.inSplitMode()) {
             final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(mDisplayId);
             if (navbarPos == NAV_BAR_POS_INVALID) {
                 return false;
@@ -1421,16 +1425,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                     : SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
             return mRecentsOptional.get().splitPrimaryTask(createMode, null, metricsDockAction);
         } else {
-            if (mDividerOptional.isPresent()) {
-                Divider divider = mDividerOptional.get();
-                if (divider.isMinimized() && !divider.isHomeStackResizable()) {
-                    // Undocking from the minimized state is not supported
-                    return false;
-                } else {
-                    divider.onUndockingTask();
-                    if (metricsUndockAction != -1) {
-                        mMetricsLogger.action(metricsUndockAction);
-                    }
+            if (divider.isMinimized() && !divider.isHomeStackResizable()) {
+                // Undocking from the minimized state is not supported
+                return false;
+            } else {
+                divider.onUndockingTask();
+                if (metricsUndockAction != -1) {
+                    mMetricsLogger.action(metricsUndockAction);
                 }
             }
         }
@@ -2466,6 +2467,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             mHeadsUpManager.dump(fd, pw, args);
         } else {
             pw.println("  mHeadsUpManager: null");
+        }
+
+        if (mStatusBarTouchableRegionManager != null) {
+            mStatusBarTouchableRegionManager.dump(fd, pw, args);
+        } else {
+            pw.println("  mStatusBarTouchableRegionManager: null");
         }
 
         if (mLightBarController != null) {

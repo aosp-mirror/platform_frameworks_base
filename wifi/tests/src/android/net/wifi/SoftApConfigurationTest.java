@@ -125,6 +125,7 @@ public class SoftApConfigurationTest {
                 .setChannel(149, SoftApConfiguration.BAND_5GHZ)
                 .setHiddenSsid(true)
                 .setMaxNumberOfClients(10)
+                .setAutoShutdownEnabled(true)
                 .setShutdownTimeoutMillis(500000)
                 .enableClientControlByUser(true)
                 .setClientList(testBlockedClientList, testAllowedClientList)
@@ -136,6 +137,7 @@ public class SoftApConfigurationTest {
         assertThat(original.getChannel()).isEqualTo(149);
         assertThat(original.isHiddenSsid()).isEqualTo(true);
         assertThat(original.getMaxNumberOfClients()).isEqualTo(10);
+        assertThat(original.isAutoShutdownEnabled()).isEqualTo(true);
         assertThat(original.getShutdownTimeoutMillis()).isEqualTo(500000);
         assertThat(original.isClientControlByUserEnabled()).isEqualTo(true);
         assertThat(original.getBlockedClientList()).isEqualTo(testBlockedClientList);

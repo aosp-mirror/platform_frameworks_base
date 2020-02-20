@@ -1183,6 +1183,11 @@ public class DisplayPolicy {
 
         if (transit == TRANSIT_PREVIEW_DONE) {
             if (win.hasAppShownWindows()) {
+                if (win.isActivityTypeHome()) {
+                    // Dismiss the starting window as soon as possible to avoid the crossfade out
+                    // with old content because home is easier to have different UI states.
+                    return ANIMATION_NONE;
+                }
                 if (DEBUG_ANIM) Slog.i(TAG, "**** STARTING EXIT");
                 return R.anim.app_starting_exit;
             }

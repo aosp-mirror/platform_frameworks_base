@@ -179,12 +179,15 @@ import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManager.ModuleInfoFlags;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
+import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.ParseFlags;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
+import android.content.pm.PackagePartitions;
+import android.content.pm.PackagePartitions.SystemPartition;
 import android.content.pm.PackageStats;
 import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
@@ -305,6 +308,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
@@ -792,22 +796,12 @@ public class PackageManagerService extends IPackageManager.Stub
      * specificity (the more generic, the earlier in the list a partition appears).
      */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    public static final List<SystemPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
-            Arrays.asList(
-                    new SystemPartition(Environment.getRootDirectory(), 0 /* scanFlag */,
-                            false /* hasOverlays */),
-                    new SystemPartition(Environment.getVendorDirectory(), SCAN_AS_VENDOR,
-                            true /* hasOverlays */),
-                    new SystemPartition(Environment.getOdmDirectory(), SCAN_AS_ODM,
-                            true /* hasOverlays */),
-                    new SystemPartition(Environment.getOemDirectory(), SCAN_AS_OEM,
-                            true /* hasOverlays */),
-                    new SystemPartition(Environment.getProductDirectory(), SCAN_AS_PRODUCT,
-                            true /* hasOverlays */),
-                    new SystemPartition(Environment.getSystemExtDirectory(), SCAN_AS_SYSTEM_EXT,
-                            true /* hasOverlays */)));
+    public static final List<ScanPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
+            PackagePartitions.getOrderedPartitions(ScanPartition::new));
 
-    private final List<SystemPartition> mDirsToScanAsSystem;
+    private final List<ScanPartition> mDirsToScanAsSystem;
+
+    private final OverlayConfig mOverlayConfig;
 
     /**
      * Unit tests will instantiate, extend and/or mock to mock dependencies / behaviors.
@@ -2588,66 +2582,44 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    public static class SystemPartition {
-        public final File folder;
+    @VisibleForTesting
+    public static class ScanPartition extends SystemPartition {
+        @ScanFlags
         public final int scanFlag;
-        public final File appFolder;
-        @Nullable
-        public final File privAppFolder;
-        @Nullable
-        public final File overlayFolder;
 
-
-        private static boolean shouldScanPrivApps(@ScanFlags int scanFlags) {
-            if ((scanFlags & SCAN_AS_OEM) != 0) {
-                return false;
-            }
-            if (scanFlags == 0) {  // /system partition
-                return true;
-            }
-            if ((scanFlags
-                    & (SCAN_AS_VENDOR | SCAN_AS_ODM | SCAN_AS_PRODUCT | SCAN_AS_SYSTEM_EXT)) != 0) {
-                return true;
-            }
-            if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
-                return true;
-            }
-            return false;
+        public ScanPartition(@NonNull SystemPartition partition) {
+            super(partition);
+            scanFlag = scanFlagForPartition(partition);
         }
 
-        private SystemPartition(File folder, int scanFlag, boolean hasOverlays) {
-            this.folder = folder;
-            this.scanFlag = scanFlag;
-            this.appFolder = toCanonical(new File(folder, "app"));
-            this.privAppFolder = shouldScanPrivApps(scanFlag)
-                    ? toCanonical(new File(folder, "priv-app"))
-                    : null;
-            this.overlayFolder = hasOverlays ? toCanonical(new File(folder, "overlay")) : null;
+        /**
+         * Creates a partition containing the same folders as the original partition but with a
+         * different root folder. The new partition will include the scan flags of the original
+         * partition along with any specified additional scan flags.
+         */
+        public ScanPartition(@NonNull File folder, @NonNull ScanPartition original,
+                @ScanFlags int additionalScanFlag) {
+            super(folder, original);
+            this.scanFlag = original.scanFlag | additionalScanFlag;
         }
 
-        public boolean containsPrivApp(File scanFile) {
-            return FileUtils.contains(privAppFolder, scanFile);
-        }
-
-        public boolean containsApp(File scanFile) {
-            return FileUtils.contains(appFolder, scanFile);
-        }
-
-        public boolean containsPath(String path) {
-            return path.startsWith(folder.getPath() + "/");
-        }
-
-        public boolean containsPrivPath(String path) {
-            return privAppFolder != null && path.startsWith(privAppFolder.getPath() + "/");
-        }
-
-        private static File toCanonical(File dir) {
-            try {
-                return dir.getCanonicalFile();
-            } catch (IOException e) {
-                // failed to look up canonical path, continue with original one
-                return dir;
+        private static int scanFlagForPartition(PackagePartitions.SystemPartition partition) {
+            switch (partition.type) {
+                case PackagePartitions.PARTITION_SYSTEM:
+                    return 0;
+                case PackagePartitions.PARTITION_VENDOR:
+                    return SCAN_AS_VENDOR;
+                case PackagePartitions.PARTITION_ODM:
+                    return SCAN_AS_ODM;
+                case PackagePartitions.PARTITION_OEM:
+                    return SCAN_AS_OEM;
+                case PackagePartitions.PARTITION_PRODUCT:
+                    return SCAN_AS_PRODUCT;
+                case PackagePartitions.PARTITION_SYSTEM_EXT:
+                    return SCAN_AS_SYSTEM_EXT;
+                default:
+                    throw new IllegalStateException("Unable to determine scan flag for "
+                            + partition.folder);
             }
         }
     }
@@ -2751,7 +2723,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mDirsToScanAsSystem = new ArrayList<>();
         mDirsToScanAsSystem.addAll(SYSTEM_PARTITIONS);
         mDirsToScanAsSystem.addAll(mApexManager.getActiveApexInfos().stream()
-                .map(ai -> resolveApexToSystemPartition(ai))
+                .map(PackageManagerService::resolveApexToScanPartition)
                 .filter(Objects::nonNull).collect(Collectors.toList()));
         Slog.d(TAG,
                 "Directories scanned as system partitions: [" + mDirsToScanAsSystem.stream().map(
@@ -2900,11 +2872,11 @@ public class PackageManagerService extends IPackageManager.Stub
             // For security and version matching reason, only consider overlay packages if they
             // reside in the right directory.
             for (int i = mDirsToScanAsSystem.size() - 1; i >= 0; i--) {
-                final SystemPartition partition = mDirsToScanAsSystem.get(i);
-                if (partition.overlayFolder == null) {
+                final ScanPartition partition = mDirsToScanAsSystem.get(i);
+                if (partition.getOverlayFolder() == null) {
                     continue;
                 }
-                scanDirTracedLI(partition.overlayFolder, systemParseFlags,
+                scanDirTracedLI(partition.getOverlayFolder(), systemParseFlags,
                         systemScanFlags | partition.scanFlag, 0,
                         packageParser, executorService);
             }
@@ -2917,17 +2889,20 @@ public class PackageManagerService extends IPackageManager.Stub
                         "Failed to load frameworks package; check log for warnings");
             }
             for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
-                final SystemPartition partition = mDirsToScanAsSystem.get(i);
-                if (partition.privAppFolder != null) {
-                    scanDirTracedLI(partition.privAppFolder, systemParseFlags,
+                final ScanPartition partition = mDirsToScanAsSystem.get(i);
+                if (partition.getPrivAppFolder() != null) {
+                    scanDirTracedLI(partition.getPrivAppFolder(), systemParseFlags,
                             systemScanFlags | SCAN_AS_PRIVILEGED | partition.scanFlag, 0,
                             packageParser, executorService);
                 }
-                scanDirTracedLI(partition.appFolder, systemParseFlags,
+                scanDirTracedLI(partition.getAppFolder(), systemParseFlags,
                         systemScanFlags | partition.scanFlag, 0,
                         packageParser, executorService);
             }
 
+            // Parse overlay configuration files to set default enable state, mutability, and
+            // priority of system overlays.
+            mOverlayConfig = OverlayConfig.initializeSystemInstance(mPmInternal::forEachPackage);
 
             // Prune any system packages that no longer exist.
             final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<>();
@@ -3105,7 +3080,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         @ParseFlags int reparseFlags = 0;
                         @ScanFlags int rescanFlags = 0;
                         for (int i1 = 0, size = mDirsToScanAsSystem.size(); i1 < size; i1++) {
-                            SystemPartition partition = mDirsToScanAsSystem.get(i1);
+                            final ScanPartition partition = mDirsToScanAsSystem.get(i1);
                             if (partition.containsPrivApp(scanFile)) {
                                 reparseFlags = systemParseFlags;
                                 rescanFlags = systemScanFlags | SCAN_AS_PRIVILEGED
@@ -6128,8 +6103,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
-        return resolveIntentInternal(intent, resolvedType, flags, userId, false,
-                Binder.getCallingUid());
+        return resolveIntentInternal(intent, resolvedType, flags, 0 /*privateResolveFlags*/,
+                userId, false, Binder.getCallingUid());
     }
 
     /**
@@ -6137,8 +6112,9 @@ public class PackageManagerService extends IPackageManager.Stub
      * However, if {@code resolveForStart} is {@code true}, all instant apps are visible
      * since we need to allow the system to start any installed application.
      */
-    private ResolveInfo resolveIntentInternal(Intent intent, String resolvedType,
-            int flags, int userId, boolean resolveForStart, int filterCallingUid) {
+    private ResolveInfo resolveIntentInternal(Intent intent, String resolvedType, int flags,
+            @PrivateResolveFlags int privateResolveFlags, int userId, boolean resolveForStart,
+            int filterCallingUid) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveIntent");
 
@@ -6150,11 +6126,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
             final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType,
-                    flags, filterCallingUid, userId, resolveForStart, true /*allowDynamicSplits*/);
+                    flags, privateResolveFlags, filterCallingUid, userId, resolveForStart,
+                    true /*allowDynamicSplits*/);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             final ResolveInfo bestChoice =
-                    chooseBestActivity(intent, resolvedType, flags, query, userId);
+                    chooseBestActivity(
+                            intent, resolvedType, flags, privateResolveFlags, query, userId);
             return bestChoice;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -6312,7 +6290,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
-            int flags, List<ResolveInfo> query, int userId) {
+            int flags, int privateResolveFlags, List<ResolveInfo> query, int userId) {
         if (query != null) {
             final int N = query.size();
             if (N == 1) {
@@ -6353,6 +6331,10 @@ public class PackageManagerService extends IPackageManager.Stub
                             return ri;
                         }
                     }
+                }
+                if ((privateResolveFlags
+                        & PackageManagerInternal.RESOLVE_NON_RESOLVER_ONLY) != 0) {
+                    return null;
                 }
                 ri = new ResolveInfo(mResolveInfo);
                 ri.activityInfo = new ActivityInfo(ri.activityInfo);
@@ -6767,13 +6749,13 @@ public class PackageManagerService extends IPackageManager.Stub
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
         return queryIntentActivitiesInternal(
-                intent, resolvedType, flags, Binder.getCallingUid(), userId,
-                false /*resolveForStart*/, true /*allowDynamicSplits*/);
+                intent, resolvedType, flags, 0 /*privateResolveFlags*/, Binder.getCallingUid(),
+                userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
     }
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, int flags, int filterCallingUid, int userId,
-            boolean resolveForStart, boolean allowDynamicSplits) {
+            String resolvedType, int flags, @PrivateResolveFlags int privateResolveFlags,
+            int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final String instantAppPkgName = getInstantAppPackageName(filterCallingUid);
         mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
@@ -6858,7 +6840,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // Check for results in the current profile.
                 result = filterIfNotSystemUser(mComponentResolver.queryActivities(
-                        intent, resolvedType, flags, userId), userId);
+                        intent, resolvedType, flags, privateResolveFlags, userId), userId);
                 addInstant = isInstantAppResolutionAllowed(intent, result, userId,
                         false /*skipPackageCheck*/);
                 // Check for cross profile results.
@@ -6957,7 +6939,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         | PackageManager.GET_RESOLVED_FILTER
                         | PackageManager.MATCH_INSTANT
                         | PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY,
-                    userId);
+                    0, userId);
             for (int i = instantApps.size() - 1; i >= 0; --i) {
                 final ResolveInfo info = instantApps.get(i);
                 final String packageName = info.activityInfo.packageName;
@@ -7061,7 +7043,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
-                resolvedType, flags, parentUserId);
+                resolvedType, flags, 0, parentUserId);
 
         if (resultTargetUser == null || resultTargetUser.isEmpty()) {
             return null;
@@ -7246,8 +7228,9 @@ public class PackageManagerService extends IPackageManager.Stub
         failureActivityIntent.setPackage(packageName);
         // IMPORTANT: disallow dynamic splits to avoid an infinite loop
         final List<ResolveInfo> result = queryIntentActivitiesInternal(
-                failureActivityIntent, null /*resolvedType*/, 0 /*flags*/, filterCallingUid, userId,
-                false /*resolveForStart*/, false /*allowDynamicSplits*/);
+                failureActivityIntent, null /*resolvedType*/, 0 /*flags*/,
+                0 /*privateResolveFlags*/, filterCallingUid, userId, false /*resolveForStart*/,
+                false /*allowDynamicSplits*/);
         final int NR = result.size();
         if (NR > 0) {
             for (int i = 0; i < NR; i++) {
@@ -7502,7 +7485,7 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int sourceUserId) {
         int targetUserId = filter.getTargetUserId();
         List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
-                resolvedType, flags, targetUserId);
+                resolvedType, flags, 0, targetUserId);
         if (resultTargetUser != null && isUserEnabled(targetUserId)) {
             // If all the matches in the target profile are suspended, return null.
             for (int i = resultTargetUser.size() - 1; i >= 0; i--) {
@@ -10911,7 +10894,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     parsedPackage.getVersionCode(), parsedPackage.getFlags(),
                     parsedPackage.getPrivateFlags(), user, true /*allowInstall*/, instantApp,
                     virtualPreload, UserManagerService.getInstance(), usesStaticLibraries,
-                    parsedPackage.getUsesStaticLibrariesVersions());
+                    parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups());
         } else {
             // make a deep copy to avoid modifying any existing system state.
             pkgSetting = new PackageSetting(pkgSetting);
@@ -10928,7 +10911,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     parsedPackage.getPrimaryCpuAbi(), parsedPackage.getSecondaryCpuAbi(),
                     parsedPackage.getFlags(), parsedPackage.getPrivateFlags(),
                     UserManagerService.getInstance(),
-                    usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions());
+                    usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
+                    parsedPackage.getMimeGroups());
         }
         if (createNewPackage && originalPkgSetting != null) {
             // This is the initial transition from the original package, so,
@@ -11570,50 +11554,17 @@ public class PackageManagerService extends IPackageManager.Stub
                     // We are scanning a system overlay. This can be the first scan of the
                     // system/vendor/oem partition, or an update to the system overlay.
                     if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                        // This must be an update to a system overlay.
-                        final PackageSetting previousPkg = assertNotNull(
-                                mSettings.getPackageLPr(pkg.getPackageName()),
-                                "previous package state not present");
-
-                        // previousPkg.pkg may be null: the package will be not be scanned if the
-                        // package manager knows there is a newer version on /data.
-                        // TODO[b/79435695]: Find a better way to keep track of the "static"
-                        // property for RROs instead of having to parse packages on /system
-                        AndroidPackage ppkg = previousPkg.pkg;
-                        if (ppkg == null) {
-                            try {
-                                final PackageParser pp = new PackageParser();
-                                // TODO(b/135203078): Do we really need to parse here? Maybe use
-                                //  a shortened path?
-                                ppkg = pp.parseParsedPackage(previousPkg.codePath,
-                                        parseFlags | PackageParser.PARSE_IS_SYSTEM_DIR,
-                                        false)
-                                        .hideAsFinal();
-                            } catch (PackageParserException e) {
-                                Slog.w(TAG, "failed to parse " + previousPkg.codePath, e);
-                            }
-                        }
-
-                        // Static overlays cannot be updated.
-                        if (ppkg != null && ppkg.isOverlayIsStatic()) {
+                        // This must be an update to a system overlay. Immutable overlays cannot be
+                        // upgraded.
+                        Objects.requireNonNull(mOverlayConfig,
+                                "Parsing non-system dir before overlay configs are initialized");
+                        if (!mOverlayConfig.isMutable(pkg.getPackageName())) {
                             throw new PackageManagerException("Overlay "
                                     + pkg.getPackageName()
                                     + " is static and cannot be upgraded.");
-                        // Non-static overlays cannot be converted to static overlays.
-                        } else if (pkg.isOverlayIsStatic()) {
-                            throw new PackageManagerException("Overlay "
-                                    + pkg.getPackageName()
-                                    + " cannot be upgraded into a static overlay.");
                         }
                     }
                 } else {
-                    // The overlay is a non-system overlay. Non-system overlays cannot be static.
-                    if (pkg.isOverlayIsStatic()) {
-                        throw new PackageManagerException("Overlay "
-                                + pkg.getPackageName()
-                                + " is static but not pre-installed.");
-                    }
-
                     // A non-preloaded overlay packages must have targetSdkVersion >= Q, or be
                     // signed with the platform certificate. Check this in increasing order of
                     // computational cost.
@@ -15207,10 +15158,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // We purposefully exclude FLAG_STORAGE_EXTERNAL here, since
                 // this task was only focused on moving data on internal storage.
+                // We don't want ART profiles cleared, because they don't move,
+                // so we would be deleting the only copy (b/149200535).
+                final int flags = FLAG_STORAGE_DE | FLAG_STORAGE_CE
+                        | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES;
                 for (int userId : userIds) {
                     try {
-                        mInstaller.destroyAppData(volumeUuid, move.packageName, userId,
-                                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE, 0);
+                        mInstaller.destroyAppData(volumeUuid, move.packageName, userId, flags, 0);
                     } catch (InstallerException e) {
                         Slog.w(TAG, String.valueOf(e));
                     }
@@ -17971,14 +17925,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private static @Nullable SystemPartition resolveApexToSystemPartition(
+    private static @Nullable ScanPartition resolveApexToScanPartition(
             ApexManager.ActiveApexInfo apexInfo) {
         for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
-            SystemPartition sp = SYSTEM_PARTITIONS.get(i);
+            ScanPartition sp = SYSTEM_PARTITIONS.get(i);
             if (apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
                     sp.folder.getAbsolutePath())) {
-                return new SystemPartition(apexInfo.apexDirectory,
-                        sp.scanFlag | SCAN_AS_APK_IN_APEX, false /* hasOverlays */);
+                return new ScanPartition(apexInfo.apexDirectory, sp, SCAN_AS_APK_IN_APEX);
             }
         }
         return null;
@@ -18079,7 +18032,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 | PackageParser.PARSE_IS_SYSTEM_DIR;
         @ScanFlags int scanFlags = SCAN_AS_SYSTEM;
         for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
-            SystemPartition partition = mDirsToScanAsSystem.get(i);
+            ScanPartition partition = mDirsToScanAsSystem.get(i);
             if (partition.containsPath(codePathString)) {
                 scanFlags |= partition.scanFlag;
                 if (partition.containsPrivPath(codePathString)) {
@@ -18429,15 +18382,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
             clearDefaultBrowserIfNeededForUser(ps.name, nextUserId);
             removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId, ps.appId);
-            final SparseBooleanArray changedUsers = new SparseBooleanArray();
-            clearPackagePreferredActivitiesLPw(ps.name, changedUsers, nextUserId);
-            if (changedUsers.size() > 0) {
-                updateDefaultHomeNotLocked(changedUsers);
-                postPreferredActivityChangedBroadcast(nextUserId);
-                synchronized (mLock) {
-                    scheduleWritePackageRestrictionsLocked(nextUserId);
-                }
-            }
+            clearPackagePreferredActivities(ps.name, nextUserId);
             mPermissionManager.resetRuntimePermissions(pkg, nextUserId);
         }
 
@@ -18926,13 +18871,19 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         int callingUserId = UserHandle.getCallingUserId();
+        clearPackagePreferredActivities(packageName, callingUserId);
+    }
+
+    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    private void clearPackagePreferredActivities(String packageName, int userId) {
         final SparseBooleanArray changedUsers = new SparseBooleanArray();
-        clearPackagePreferredActivitiesLPw(packageName, changedUsers, callingUserId);
+
+        clearPackagePreferredActivitiesLPw(packageName, changedUsers, userId);
         if (changedUsers.size() > 0) {
             updateDefaultHomeNotLocked(changedUsers);
-            postPreferredActivityChangedBroadcast(callingUserId);
+            postPreferredActivityChangedBroadcast(userId);
             synchronized (mLock) {
-                scheduleWritePackageRestrictionsLocked(callingUserId);
+                scheduleWritePackageRestrictionsLocked(userId);
             }
         }
     }
@@ -21785,6 +21736,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
+        StorageManagerInternal smInternal = mInjector.getStorageManagerInternal();
         for (UserInfo user : mUserManager.getUsers(false /*excludeDying*/)) {
             final int flags;
             if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
@@ -21798,6 +21750,13 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ps.getInstalled(user.id)) {
                 // TODO: when user data is locked, mark that we're still dirty
                 prepareAppDataLIF(pkg, user.id, flags);
+
+                if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+                    // Prepare app data on external storage; currently this is used to
+                    // setup any OBB dirs that were created by the installer correctly.
+                    int uid = UserHandle.getUid(user.id, UserHandle.getAppId(pkg.getUid()));
+                    smInternal.prepareAppDataAfterInstall(pkg.getPackageName(), uid);
+                }
             }
         }
     }
@@ -23324,7 +23283,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public List<ResolveInfo> queryIntentActivities(
                 Intent intent, String resolvedType, int flags, int filterCallingUid, int userId) {
             return PackageManagerService.this
-                    .queryIntentActivitiesInternal(intent, resolvedType, flags, filterCallingUid,
+                    .queryIntentActivitiesInternal(intent, resolvedType, flags, 0, filterCallingUid,
                             userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
         }
 
@@ -23610,9 +23569,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public ResolveInfo resolveIntent(Intent intent, String resolvedType,
-                int flags, int userId, boolean resolveForStart, int filterCallingUid) {
+                int flags, int privateResolveFlags, int userId, boolean resolveForStart,
+                int filterCallingUid) {
             return resolveIntentInternal(
-                    intent, resolvedType, flags, userId, resolveForStart, filterCallingUid);
+                    intent, resolvedType, flags, privateResolveFlags, userId, resolveForStart,
+                    filterCallingUid);
         }
 
         @Override
@@ -23931,6 +23892,11 @@ public class PackageManagerService extends IPackageManager.Stub
             msg.arg1 = verificationId;
             msg.obj = verificationResult;
             mHandler.sendMessage(msg);
+        }
+
+        @Override
+        public List<String> getMimeGroup(String packageName, String mimeGroup) {
+            return PackageManagerService.this.getMimeGroup(packageName, mimeGroup);
         }
     }
 
@@ -24365,6 +24331,38 @@ public class PackageManagerService extends IPackageManager.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private void applyMimeGroupChanges(String packageName, String mimeGroup) {
+        if (mComponentResolver.updateMimeGroup(packageName, mimeGroup)) {
+            clearPackagePreferredActivities(packageName, UserHandle.USER_ALL);
+        }
+
+        mPmInternal.writeSettings(false);
+    }
+
+    @Override
+    public void setMimeGroup(String packageName, String mimeGroup, List<String> mimeTypes) {
+        boolean changed = mSettings.mPackages.get(packageName)
+                .setMimeGroup(mimeGroup, mimeTypes);
+
+        if (changed) {
+            applyMimeGroupChanges(packageName, mimeGroup);
+        }
+    }
+
+    @Override
+    public void clearMimeGroup(String packageName, String mimeGroup) {
+        boolean changed = mSettings.mPackages.get(packageName).clearMimeGroup(mimeGroup);
+
+        if (changed) {
+            applyMimeGroupChanges(packageName, mimeGroup);
+        }
+    }
+
+    @Override
+    public List<String> getMimeGroup(String packageName, String mimeGroup) {
+        return mSettings.mPackages.get(packageName).getMimeGroup(mimeGroup);
     }
 
     static class ActiveInstallSession {

@@ -125,6 +125,8 @@ interface IWifiManager
 
     DhcpInfo getDhcpInfo();
 
+    void setScanAlwaysAvailable(boolean isAvailable);
+
     boolean isScanAlwaysAvailable();
 
     boolean acquireWifiLock(IBinder lock, int lockType, String tag, in WorkSource ws);

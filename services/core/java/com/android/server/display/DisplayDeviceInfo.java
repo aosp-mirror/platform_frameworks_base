@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayViewport;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -288,6 +289,13 @@ final class DisplayDeviceInfo {
     public DisplayAddress address;
 
     /**
+     * Product-specific information about the display or the directly connected device on the
+     * display chain. For example, if the display is transitively connected, this field may contain
+     * product information about the intermediate device.
+     */
+    public DeviceProductInfo deviceProductInfo;
+
+    /**
      * Display state.
      */
     public int state = Display.STATE_ON;
@@ -360,6 +368,7 @@ final class DisplayDeviceInfo {
                 || rotation != other.rotation
                 || type != other.type
                 || !Objects.equals(address, other.address)
+                || !Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 || ownerUid != other.ownerUid
                 || !Objects.equals(ownerPackageName, other.ownerPackageName)) {
             diff |= DIFF_OTHER;
@@ -396,6 +405,7 @@ final class DisplayDeviceInfo {
         rotation = other.rotation;
         type = other.type;
         address = other.address;
+        deviceProductInfo = other.deviceProductInfo;
         state = other.state;
         ownerUid = other.ownerUid;
         ownerPackageName = other.ownerPackageName;
@@ -429,6 +439,7 @@ final class DisplayDeviceInfo {
         if (address != null) {
             sb.append(", address ").append(address);
         }
+        sb.append(", deviceProductInfo ").append(deviceProductInfo);
         sb.append(", state ").append(Display.stateToString(state));
         if (ownerUid != 0 || ownerPackageName != null) {
             sb.append(", owner ").append(ownerPackageName);

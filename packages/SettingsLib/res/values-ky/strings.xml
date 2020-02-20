@@ -31,7 +31,7 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Аутентификация маселеси бар"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Туташпай жатат"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\"<xliff:g id="AP_NAME">%1$s</xliff:g>\" тармагына туташпай койду"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Сырсөздү текшерип, кайра аракет кылыңыз."</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Сырсөздү текшерип, кайталап көрүңүз."</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Тейлөө аймагында эмес"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Автоматтык түрдө туташпайт"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Интернетке туташпай турат"</string>
@@ -125,7 +125,7 @@
     <string name="bluetooth_talkback_phone" msgid="868393783858123880">"Телефон"</string>
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Сүрөт тартуучу түзмөк"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Кулакчын"</string>
-    <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Дайындарды киргизүүчү сырткы түзмөк"</string>
+    <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Дайындарды киргизүүчү тышкы түзмөк"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Угуу аппаратынын сол кулагы жупташтырылууда…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Угуу аппаратынын оң кулагы жупташтырылууда…"</string>
@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB аркылуу мүчүлүштүктөрдү оңдоо"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB компьютерге сайылганда мүчүлүштүктөрдү оңдоо режими иштейт"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB аркылуу мүчүлүштүктөрдү оңдоо уруксатын артка кайтаруу"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Мүчүлүштүктөрдү зымсыз оңдоо"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi\'га туташтырылганда мүчүлүштүктөрдү оңдоо режими"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Ката"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Мүчүлүштүктөрдү зымсыз оңдоо"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Жеткиликтүү түзмөктөрдү көрүү үчүн мүчүлүштүктөрдү зымсыз оңдоону күйгүзүңүз"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR кодун колдонуп, түзмөктү жупташтырыңыз"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR кодунун сканерин колдонуп, жаңы түзмөктөрдү жупташтырыңыз"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Жупташтыруучу код менен түзмөктү жупташтырыңыз"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Алты сандан турган кодду колдонуп, жаңы түзмөктөрдү жупташтырыңыз"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Жупташтырылган түзмөктөр"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Учурда туташып турган түзмөктөр"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Түзмөктүн чоо-жайы"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Унутулсун"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Түзмөктөгү манжа изи: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Туташкан жок"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> туура тармакка туташып турганын текшериңиз"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Түзмөктү жупташтыруу"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi жупташтыруучу коду"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Жупташтырылган жок"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Түзмөк бир тармакка туташканын текшериңиз."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR кодун скандап, түзмөктү Wi‑Fi аркылуу жупташтырыңыз"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Түзмөк жупташтырылууда…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Түзмөк жупташтырылган жок. QR коду туура эмес же түзмөк бир тармакка туташпай турат."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP дареги жана Оюкча"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR кодун скандоо"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR кодун скандап, түзмөктү Wi‑Fi аркылуу жупташтырыңыз"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, мүчүлүштүктөрдү оңдоо, иштеп чыгуу"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Ката жөнүндө кабарлоо"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Менюда ката жөнүндө кабарлоо баскычы көрүнүп турат"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ойгоо туруу"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Мүмкүнчүлүккө жараша, модем режиминде аппарат тезирээк иштей баштайт"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB аркылуу жөндөөгө уруксат бересизби?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-жөндөө - өндүрүү максатында гана  түзүлгөн. Аны компүтериңиз менен түзмөгүңүздүн ортосунда берилиштерди алмашуу, түзмөгүңүзгө колдонмолорду эскертүүсүз орнотуу жана лог берилиштерин окуу үчүн колдонсоңуз болот."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Мүчүлүштүктөрдү зымсыз оңдоого уруксат берилсинби?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Мүчүлүштүктөрдү зымсыз оңдоо – өндүрүү максатында гана түзүлгөн. Аны компьютериңиз менен түзмөгүңүздүн ортосунда маалыматты алмашуу, колдонмолорду түзмөгүңүзгө эскертүүсүз орнотуу жана маалыматтар таржымалын окуу үчүн колдонсоңуз болот."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Сиз мурун USB жөндөөлөрүнө уруксат берген бардык компүтерлердин жеткиси жокко чыгарылсынбы?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Жөндөөлөрдү өзгөртүү"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Бул орнотуулар өндүрүүчүлөр үчүн гана берилген. Булар түзмөгүңүздүн колдонмолорун бузулушуна же туура эмес иштешине алып келиши мүмкүн."</string>
@@ -368,7 +397,7 @@
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Учурда иштеп жаткан кызматтарды көрүп, көзөмөлдөп турасыз"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView кызматы"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView аткарылышын коюу"</string>
-    <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Тандалган нерсе жараксыз болуп калган. Кайра аракет кылыңыз."</string>
+    <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Тандалган нерсе жараксыз болуп калган. Кайталап көрүңүз."</string>
     <string name="convert_to_file_encryption" msgid="2828976934129751818">"Файлдарды шифрлөөгө өтүү"</string>
     <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Айландыруу…"</string>
     <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Файл мурунтан эле шифрленген"</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномалия (кызыл-жашыл)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомалия (көк-сары)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Түсүн тууралоо"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Түстү тууралоо жөндөөсү түстөрдү айырмалап көрбөгөн адамдарга түстөрдү тагыраак билүүгө жардам берет"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> менен алмаштырылган"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Болжол менен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> калды"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> жетпеген убакыт калды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ашыгыраак убакыт калды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ашыгыраак убакыт калды"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Телефон бир аздан кийин өчүп калышы мүмкүн"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Планшет бир аздан кийин өчүп калышы мүмкүн"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Түзмөк бир аздан кийин өчүп калышы мүмкүн"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Телефон бир аздан кийин өчүп калышы мүмкүн (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Планшет бир аздан кийин өчүп калышы мүмкүн (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Түзмөк бир аздан кийин өчүп калышы мүмкүн (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Телефон бир аздан кийин өчүп калышы мүмкүн"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Планшет бир аздан кийин өчүп калышы мүмкүн"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Түзмөк бир аздан кийин өчүп калышы мүмкүн"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Телефон бир аздан кийин өчүп калышы мүмкүн (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Планшет бир аздан кийин өчүп калышы мүмкүн (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Түзмөк бир аздан кийин өчүп калышы мүмкүн (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> кийин кубатталат"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> кийин кубатталат"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгисиз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Кубатталууда"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ыкчам кубатталууда"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Жай кубатталууда"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Кубат алган жок"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Сайылып турат, учурда кубаттоо мүмкүн эмес"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Толук"</string>

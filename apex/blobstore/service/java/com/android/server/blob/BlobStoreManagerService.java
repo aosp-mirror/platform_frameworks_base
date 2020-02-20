@@ -334,7 +334,8 @@ public class BlobStoreManagerService extends SystemService {
                 throw new SecurityException("Caller not allowed to access " + blobHandle
                         + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
             }
-            if (leaseExpiryTimeMillis != 0 && leaseExpiryTimeMillis > blobHandle.expiryTimeMillis) {
+            if (leaseExpiryTimeMillis != 0 && blobHandle.expiryTimeMillis != 0
+                    && leaseExpiryTimeMillis > blobHandle.expiryTimeMillis) {
                 throw new IllegalArgumentException(
                         "Lease expiry cannot be later than blobs expiry time");
             }

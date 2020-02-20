@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB デバッグ"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB接続時はデバッグモードにする"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USBデバッグの許可の取り消し"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"ワイヤレス デバッグ"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi 接続時にデバッグモード"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"エラー"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"ワイヤレス デバッグ"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"利用可能なデバイスを確認して使用するには、ワイヤレス デバッグをオンにしてください"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR コードによるデバイスのペア設定"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR コードスキャナを使って新しいデバイスをペア設定します"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ペア設定コードによるデバイスのペア設定"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"6 桁のコードを使って新しいデバイスをペア設定します"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"ペア設定済みのデバイス"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"現在接続"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"デバイスの詳細"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"削除"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"デバイスのフィンガープリント: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"接続エラー"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> が正しいネットワークに接続されていることを確認してください"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"デバイスとのペア設定"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi-Fi ペア設定コード"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"ペア設定エラー"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"デバイスが同じネットワークに接続されていることを確認してください。"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR コードをスキャンして Wi-Fi 経由でデバイスをペア設定します"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"デバイスをペア設定しています…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"デバイスをペア設定できませんでした。QR コードが間違っているか、デバイスが同じネットワークに接続されていません。"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP アドレスとポート"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR コードのスキャン"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR コードをスキャンして Wi-Fi 経由でデバイスをペア設定します"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, デバッグ, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"バグレポートのショートカット"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"電源メニューにバグレポートを取得するボタンを表示する"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"スリープモードにしない"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"テザリング時にハードウェア アクセラレーションを使用します（使用可能な場合）"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USBデバッグを許可しますか？"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USBデバッグは開発専用に設計されています。パソコンとデバイスの間でデータをコピーする場合や、アプリを通知なしでデバイスにインストールする場合、ログデータを読み取る場合に使用できます。"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"ワイヤレス デバッグを許可しますか？"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ワイヤレス デバッグは開発専用に設計されています。パソコンとデバイスの間でデータをコピーする場合や、アプリを通知なしでデバイスにインストールする場合、ログデータを読み取る場合に使用できます。"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"以前に許可したすべてのパソコンからのUSBデバッグへのアクセスを取り消しますか？"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"開発用の設定を許可しますか？"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"これらの設定は開発専用に設計されています。そのためデバイスやデバイス上のアプリが故障したり正常に動作しなくなったりするおそれがあります。"</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"第一色弱（赤緑）"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"第三色弱（青黄）"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色補正"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"色補正機能を利用すると、色覚障がいのある方がより正確に色を判別できるようになります"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g>によって上書き済み"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"残り時間: 約 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"残り時間: <xliff:g id="THRESHOLD">%1$s</xliff:g>未満（<xliff:g id="LEVEL">%2$s</xliff:g>）"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"残り時間: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>以上（<xliff:g id="LEVEL">%2$s</xliff:g>）"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"残り時間: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>以上"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"スマートフォンの電源がもうすぐ切れます"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"タブレットの電源がもうすぐ切れます"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"デバイスの電源がもうすぐ切れます"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"スマートフォンの電源がもうすぐ切れます（<xliff:g id="LEVEL">%1$s</xliff:g>）"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"タブレットの電源がもうすぐ切れます（<xliff:g id="LEVEL">%1$s</xliff:g>）"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"デバイスの電源がもうすぐ切れます（<xliff:g id="LEVEL">%1$s</xliff:g>）"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"スマートフォンの電源がもうすぐ切れます"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"タブレットの電源がもうすぐ切れます"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"デバイスの電源がもうすぐ切れます"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"スマートフォンの電源がもうすぐ切れます（<xliff:g id="LEVEL">%1$s</xliff:g>）"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"タブレットの電源がもうすぐ切れます（<xliff:g id="LEVEL">%1$s</xliff:g>）"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"デバイスの電源がもうすぐ切れます（<xliff:g id="LEVEL">%1$s</xliff:g>）"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"充電完了まであと <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電完了まで <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"急速充電中"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"低速充電中"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"充電していません"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"接続されていますが、現在、充電できません"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"フル"</string>

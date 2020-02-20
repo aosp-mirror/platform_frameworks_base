@@ -33,6 +33,7 @@ import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
 import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
+import android.app.admin.DevicePolicyEventLogger;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -60,6 +61,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -84,6 +86,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.Profile;
+import com.android.internal.app.chooser.ChooserTargetInfo;
 import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.content.PackageMonitor;
@@ -98,6 +101,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
 
 /**
  * This activity is displayed when the system attempts to start an Intent for
@@ -152,6 +156,8 @@ public class ResolverActivity extends Activity implements
     private static final String EXTRA_SHOW_FRAGMENT_ARGS = ":settings:show_fragment_args";
     private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
     private static final String OPEN_LINKS_COMPONENT_KEY = "app_link_state";
+    protected static final String METRICS_CATEGORY_RESOLVER = "intent_resolver";
+    protected static final String METRICS_CATEGORY_CHOOSER = "intent_chooser";
 
     /**
      * TODO(arangelov): Remove a couple of weeks after work/personal tabs are finalized.
@@ -362,7 +368,7 @@ public class ResolverActivity extends Activity implements
                 mMultiProfilePagerAdapter.getPersonalListAdapter());
         mPersonalPackageMonitor.register(
                 this, getMainLooper(), getPersonalProfileUserHandle(), false);
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             mWorkPackageMonitor = createPackageMonitor(
                     mMultiProfilePagerAdapter.getWorkListAdapter());
             mWorkPackageMonitor.register(this, getMainLooper(), getWorkProfileUserHandle(), false);
@@ -390,7 +396,7 @@ public class ResolverActivity extends Activity implements
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             rdl.setOnApplyWindowInsetsListener(this::onApplyWindowInsets);
 
-            if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+            if (shouldShowTabs()) {
                 rdl.setMaxCollapsedHeight(getResources().getDimensionPixelSize(
                         R.dimen.resolver_empty_state_height_with_tabs));
                 findViewById(R.id.profile_pager).setMinimumHeight(
@@ -419,7 +425,7 @@ public class ResolverActivity extends Activity implements
             List<ResolveInfo> rList,
             boolean filterLastUsed) {
         AbstractMultiProfilePagerAdapter resolverMultiProfilePagerAdapter = null;
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             resolverMultiProfilePagerAdapter =
                     createResolverMultiProfilePagerAdapterForTwoProfiles(
                             initialIntents, rList, filterLastUsed);
@@ -500,8 +506,12 @@ public class ResolverActivity extends Activity implements
         return null;
     }
 
-    protected boolean hasWorkProfile() {
+    private boolean hasWorkProfile() {
         return getWorkProfileUserHandle() != null;
+    }
+
+    protected boolean shouldShowTabs() {
+        return hasWorkProfile() && ENABLE_TABBED_VIEW;
     }
 
     protected void onProfileClick(View v) {
@@ -728,7 +738,7 @@ public class ResolverActivity extends Activity implements
         if (!mRegistered) {
             mPersonalPackageMonitor.register(this, getMainLooper(),
                     getPersonalProfileUserHandle(), false);
-            if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+            if (shouldShowTabs()) {
                 if (mWorkPackageMonitor == null) {
                     mWorkPackageMonitor = createPackageMonitor(
                             mMultiProfilePagerAdapter.getWorkListAdapter());
@@ -745,7 +755,7 @@ public class ResolverActivity extends Activity implements
     @Override
     protected void onStart() {
         super.onStart();
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             mWorkProfileStateReceiver = createWorkProfileStateReceiver();
             registerWorkProfileStateReceiver();
         }
@@ -1197,12 +1207,14 @@ public class ResolverActivity extends Activity implements
         if (!mSafeForwardingMode) {
             if (cti.startAsUser(this, null, currentUserHandle)) {
                 onActivityStarted(cti);
+                maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
             }
             return;
         }
         try {
             if (cti.startAsCaller(this, null, currentUserHandle.getIdentifier())) {
                 onActivityStarted(cti);
+                maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
             }
         } catch (RuntimeException e) {
             String launchedFromPackage;
@@ -1216,6 +1228,18 @@ public class ResolverActivity extends Activity implements
                     + " package " + launchedFromPackage + ", while running in "
                     + ActivityThread.currentProcessName(), e);
         }
+    }
+
+    private void maybeLogCrossProfileTargetLaunch(TargetInfo cti, UserHandle currentUserHandle) {
+        if (!hasWorkProfile() || currentUserHandle == getUser()) {
+            return;
+        }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.RESOLVER_CROSS_PROFILE_TARGET_OPENED)
+                .setBoolean(currentUserHandle == getPersonalProfileUserHandle())
+                .setStrings(getMetricsCategory(),
+                        cti instanceof ChooserTargetInfo ? "direct_share" : "other_target")
+                .write();
     }
 
 
@@ -1304,8 +1328,11 @@ public class ResolverActivity extends Activity implements
                     + "cannot be null.");
         }
         // We partially rebuild the inactive adapter to determine if we should auto launch
-        boolean rebuildActiveCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
-        boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false);
+        boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
+        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+            boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false);
+            rebuildCompleted = rebuildCompleted && rebuildInactiveCompleted;
+        }
 
         if (useLayoutWithDefault()) {
             mLayoutId = R.layout.resolver_list_with_default;
@@ -1314,7 +1341,7 @@ public class ResolverActivity extends Activity implements
         }
         setContentView(mLayoutId);
         mMultiProfilePagerAdapter.setupViewPager(findViewById(R.id.profile_pager));
-        return postRebuildList(rebuildActiveCompleted && rebuildInactiveCompleted);
+        return postRebuildList(rebuildCompleted);
     }
 
     /**
@@ -1343,7 +1370,7 @@ public class ResolverActivity extends Activity implements
 
         setupViewVisibilities();
 
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             setupProfileTabs();
         }
 
@@ -1375,6 +1402,10 @@ public class ResolverActivity extends Activity implements
     private boolean maybeAutolaunchIfSingleTarget() {
         int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
         if (count != 1) {
+            return false;
+        }
+
+        if (mMultiProfilePagerAdapter.getActiveListAdapter().getOtherProfile() != null) {
             return false;
         }
 
@@ -1414,7 +1445,8 @@ public class ResolverActivity extends Activity implements
      * - The target app has declared it supports cross-profile communication via manifest metadata
      */
     private boolean maybeAutolaunchIfCrossProfileSupported() {
-        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
+        ResolverListAdapter activeListAdapter = mMultiProfilePagerAdapter.getActiveListAdapter();
+        int count = activeListAdapter.getUnfilteredCount();
         if (count != 1) {
             return false;
         }
@@ -1423,7 +1455,7 @@ public class ResolverActivity extends Activity implements
         if (inactiveListAdapter.getUnfilteredCount() != 1) {
             return false;
         }
-        TargetInfo activeProfileTarget = mMultiProfilePagerAdapter.getActiveListAdapter()
+        TargetInfo activeProfileTarget = activeListAdapter
                 .targetInfoForPosition(0, false);
         TargetInfo inactiveProfileTarget = inactiveListAdapter.targetInfoForPosition(0, false);
         if (!Objects.equals(activeProfileTarget.getResolvedComponentName(),
@@ -1438,6 +1470,11 @@ public class ResolverActivity extends Activity implements
             return false;
         }
 
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.RESOLVER_AUTOLAUNCH_CROSS_PROFILE_TARGET)
+                .setBoolean(activeListAdapter.getUserHandle() == getPersonalProfileUserHandle())
+                .setStrings(getMetricsCategory())
+                .write();
         safelyStartActivity(activeProfileTarget);
         finish();
         return true;
@@ -1519,11 +1556,17 @@ public class ResolverActivity extends Activity implements
                 viewPager.setCurrentItem(1);
             }
             setupViewVisibilities();
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.RESOLVER_SWITCH_TABS)
+                    .setInt(viewPager.getCurrentItem())
+                    .setStrings(getMetricsCategory())
+                    .write();
         });
 
         viewPager.setVisibility(View.VISIBLE);
         tabHost.setCurrentTab(mMultiProfilePagerAdapter.getCurrentPage());
         mMultiProfilePagerAdapter.setOnProfileSelectedListener(tabHost::setCurrentTab);
+        findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
     }
 
     private void resetTabsHeaderStyle(TabWidget tabWidget) {
@@ -1562,7 +1605,7 @@ public class ResolverActivity extends Activity implements
             stub.setVisibility(View.VISIBLE);
             TextView textView = (TextView) LayoutInflater.from(this).inflate(
                     R.layout.resolver_different_item_header, null, false);
-            if (ENABLE_TABBED_VIEW) {
+            if (shouldShowTabs()) {
                 textView.setGravity(Gravity.CENTER);
             }
             stub.addView(textView);
@@ -1684,6 +1727,10 @@ public class ResolverActivity extends Activity implements
                 : lhs.activityInfo == null ? rhs.activityInfo == null
                 : Objects.equals(lhs.activityInfo.name, rhs.activityInfo.name)
                 && Objects.equals(lhs.activityInfo.packageName, rhs.activityInfo.packageName);
+    }
+
+    protected String getMetricsCategory() {
+        return METRICS_CATEGORY_RESOLVER;
     }
 
     @Override // ResolverListCommunicator

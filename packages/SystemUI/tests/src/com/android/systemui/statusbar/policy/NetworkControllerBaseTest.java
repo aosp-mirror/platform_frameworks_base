@@ -45,6 +45,7 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telephony.CdmaEriInformation;
 import android.telephony.CellSignalStrength;
+import android.telephony.DisplayInfo;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -96,6 +97,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected PhoneStateListener mPhoneStateListener;
     protected SignalStrength mSignalStrength;
     protected ServiceState mServiceState;
+    protected DisplayInfo mDisplayInfo;
     protected NetworkRegistrationInfo mFakeRegInfo;
     protected ConnectivityManager mMockCm;
     protected WifiManager mMockWm;
@@ -159,6 +161,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         mSignalStrength = mock(SignalStrength.class);
         mServiceState = mock(ServiceState.class);
+        mDisplayInfo = mock(DisplayInfo.class);
 
         mFakeRegInfo = new NetworkRegistrationInfo.Builder()
                 .setTransportType(TRANSPORT_TYPE_WWAN)
@@ -167,6 +170,9 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 .build();
         doReturn(mFakeRegInfo).when(mServiceState)
                 .getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN);
+        doReturn(TelephonyManager.NETWORK_TYPE_LTE).when(mDisplayInfo).getNetworkType();
+        doReturn(DisplayInfo.OVERRIDE_NETWORK_TYPE_NONE).when(mDisplayInfo)
+                .getOverrideNetworkType();
 
         mEriInformation = new CdmaEriInformation(CdmaEriInformation.ERI_OFF,
                 CdmaEriInformation.ERI_ICON_MODE_NORMAL);
@@ -260,33 +266,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
     }
 
-    public void setupDefaultNr5GIconConfiguration() {
-        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
-        NetworkControllerImpl.Config.add5GIconMapping("connected:5g", mConfig);
-    }
-
-    public void setupNr5GIconConfigurationForNotRestrictedRrcCon() {
-        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
-        NetworkControllerImpl.Config.add5GIconMapping("connected:5g_plus", mConfig);
-        NetworkControllerImpl.Config.add5GIconMapping("not_restricted_rrc_con:5g", mConfig);
-    }
-
-    public void setupNr5GIconConfigurationForNotRestrictedRrcIdle() {
-        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
-        NetworkControllerImpl.Config.add5GIconMapping("connected:5g_plus", mConfig);
-        NetworkControllerImpl.Config.add5GIconMapping("not_restricted_rrc_idle:5g", mConfig);
-    }
-
-    public void setupDefaultNr5GIconDisplayGracePeriodTime_enableThirtySeconds() {
-        final int enableDisplayGraceTimeSec = 30;
-        NetworkControllerImpl.Config.setDisplayGraceTime(enableDisplayGraceTimeSec, mConfig);
-    }
-
-    public void setupDefaultNr5GIconDisplayGracePeriodTime_disabled() {
-        final int disableDisplayGraceTimeSec = 0;
-        NetworkControllerImpl.Config.setDisplayGraceTime(disableDisplayGraceTimeSec, mConfig);
-    }
-
     public void setConnectivityViaBroadcast(
         int networkType, boolean validated, boolean isConnected) {
         setConnectivityCommon(networkType, validated, isConnected);
@@ -369,6 +348,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected void updateServiceState() {
         Log.d(TAG, "Sending Service State: " + mServiceState);
         mPhoneStateListener.onServiceStateChanged(mServiceState);
+        mPhoneStateListener.onDisplayInfoChanged(mDisplayInfo);
     }
 
     public void updateCallState(int state) {
@@ -384,6 +364,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 .build();
         when(mServiceState.getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN))
                 .thenReturn(fakeRegInfo);
+        when(mDisplayInfo.getNetworkType()).thenReturn(dataNetType);
         mPhoneStateListener.onDataConnectionStateChanged(dataState, dataNetType);
     }
 

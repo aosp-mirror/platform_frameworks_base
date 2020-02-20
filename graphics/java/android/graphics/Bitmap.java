@@ -2243,6 +2243,19 @@ public final class Bitmap implements Parcelable {
         return nativeCreateGraphicBufferHandle(mNativePtr);
     }
 
+    /**
+     * @return {@link HardwareBuffer} which is internally used by hardware bitmap
+     *
+     * Note: the HardwareBuffer does *not* have an associated {@link ColorSpace}.
+     * To render this object the same as its rendered with this Bitmap, you
+     * should also call {@link getColorSpace}.
+     *
+     * @hide
+     */
+    public HardwareBuffer getHardwareBuffer() {
+        return nativeGetHardwareBuffer(mNativePtr);
+    }
+
     //////////// native methods
 
     private static native Bitmap nativeCreate(int[] colors, int offset,
@@ -2308,6 +2321,7 @@ public final class Bitmap implements Parcelable {
     private static native Bitmap nativeWrapHardwareBufferBitmap(HardwareBuffer buffer,
                                                                 long nativeColorSpace);
     private static native GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap);
+    private static native HardwareBuffer nativeGetHardwareBuffer(long nativeBitmap);
     private static native ColorSpace nativeComputeColorSpace(long nativePtr);
     private static native void nativeSetColorSpace(long nativePtr, long nativeColorSpace);
     private static native boolean nativeIsSRGB(long nativePtr);

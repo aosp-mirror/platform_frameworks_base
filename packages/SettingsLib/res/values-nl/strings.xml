@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB-foutopsporing"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Foutopsporingsmodus bij USB-verbinding"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Autorisatie USB-foutopsporing intrekken"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Draadloze foutopsporing"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Foutopsporingsmodus als wifi is verbonden"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Fout"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Draadloze foutopsporing"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Schakel draadloze foutopsporing in om beschikbare apparaten te bekijken en te gebruiken"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Apparaat koppelen met QR-code"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Nieuwe apparaten koppelen via QR-codescanner"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Apparaat koppelen met koppelingscode"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Nieuwe apparaten koppelen via een zescijferige code"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Gekoppelde apparaten"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Momenteel verbonden"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Apparaatgegevens"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Vergeten"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Vingerafdruk van apparaat: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Verbinding mislukt"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Zorg dat <xliff:g id="DEVICE_NAME">%1$s</xliff:g> is verbonden met het juiste netwerk"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Koppelen aan apparaat"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wifi-koppelingscode"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Koppeling mislukt"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Zorg dat het apparaat is verbonden met hetzelfde netwerk."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Apparaat koppelen via wifi door een QR-code te scannen"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Apparaat koppelen…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Kan het apparaat niet koppelen. De QR-code was onjuist of het apparaat is niet verbonden met hetzelfde netwerk."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adres en poort"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR-code scannen"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Apparaat koppelen via wifi door een QR-code te scannen"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, foutopsporing, ontwikkeling"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Snelle link naar bugrapport"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Een knop in het voedingsmenu weergeven om een bugrapport te maken"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Stand-by"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Hardwareversnelling voor tethering gebruiken indien beschikbaar"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB-foutopsporing toestaan?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-foutopsporing is alleen bedoeld voor ontwikkeldoeleinden. Het kan worden gebruikt om gegevens te kopiëren tussen je computer en je apparaat, apps zonder melding op je apparaat te installeren en loggegevens te lezen."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Draadloze foutopsporing toestaan?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Draadloze foutopsporing is alleen bedoeld voor ontwikkeldoeleinden. Het kan worden gebruikt om gegevens te kopiëren tussen je computer en je apparaat, apps zonder melding op je apparaat te installeren en logboekgegevens te lezen."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Toegang tot USB-foutopsporing intrekken voor alle computers waarvoor je dit eerder hebt toegestaan?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Ontwikkelingsinstellingen toestaan?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Deze instellingen zijn uitsluitend bedoeld voor ontwikkelingsgebruik. Je apparaat en apps kunnen hierdoor vastlopen of anders reageren."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (rood-groen)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (blauw-geel)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Kleurcorrectie"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Met behulp van kleurcorrectie kunnen mensen die kleurenblind zijn, nauwkeurigere kleuren te zien krijgen"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overschreven door <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Nog ongeveer <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Nog minder dan <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Nog meer dan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Nog meer dan <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Telefoon wordt binnenkort mogelijk uitgeschakeld"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Tablet wordt binnenkort mogelijk uitgeschakeld"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Apparaat wordt binnenkort mogelijk uitgeschakeld"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Telefoon wordt binnenkort mogelijk uitgeschakeld (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Tablet wordt binnenkort mogelijk uitgeschakeld (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Apparaat wordt binnenkort mogelijk uitgeschakeld (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefoon wordt binnenkort mogelijk uitgeschakeld"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet wordt binnenkort mogelijk uitgeschakeld"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Apparaat wordt binnenkort mogelijk uitgeschakeld"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Telefoon wordt binnenkort mogelijk uitgeschakeld (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet wordt binnenkort mogelijk uitgeschakeld (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Apparaat wordt binnenkort mogelijk uitgeschakeld (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Nog <xliff:g id="TIME">%1$s</xliff:g> tot opgeladen"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> tot opgeladen"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Onbekend"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Opladen"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Snel opladen"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Langzaam opladen"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Wordt niet opgeladen"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Aangesloten, kan nu niet opladen"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Volledig"</string>

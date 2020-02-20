@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs;
+package com.android.systemui.qs.carrier;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -29,6 +29,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
+import com.android.systemui.qs.QuickStatusBarHeader;
 
 import java.util.Objects;
 
@@ -41,7 +42,7 @@ public class QSCarrier extends LinearLayout {
     private DualToneHandler mDualToneHandler;
     private ColorStateList mColorForegroundStateList;
     private float mColorForegroundIntensity;
-    private QSCarrierGroupController.CellSignalState mLastSignalState;
+    private CellSignalState mLastSignalState;
 
     public QSCarrier(Context context) {
         super(context);
@@ -76,8 +77,13 @@ public class QSCarrier extends LinearLayout {
         mColorForegroundIntensity = QuickStatusBarHeader.getColorIntensity(colorForeground);
     }
 
-    public void updateState(QSCarrierGroupController.CellSignalState state) {
-        if (Objects.equals(state, mLastSignalState)) return;
+    /**
+     * Update the state of this view
+     * @param state the current state of the signal for this view
+     * @return true if the state was actually changed
+     */
+    public boolean updateState(CellSignalState state) {
+        if (Objects.equals(state, mLastSignalState)) return false;
         mLastSignalState = state;
         mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
         if (state.visible) {
@@ -103,6 +109,7 @@ public class QSCarrier extends LinearLayout {
             }
             mMobileSignal.setContentDescription(contentDescription);
         }
+        return true;
     }
 
     private boolean hasValidTypeContentDescription(String typeContentDescription) {

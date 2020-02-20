@@ -912,7 +912,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void setShadowRenderer() {
         mRenderShadowsInCompositor = Settings.Global.getInt(mContext.getContentResolver(),
-                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 0) != 0;
+                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
     }
 
     PowerManager mPowerManager;
@@ -1169,9 +1169,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
 
-        mUseBLAST = DeviceConfig.getBoolean(
+        mUseBLAST = SystemProperties.getBoolean(
+                    String.join(".", "persist.device_config",
                     DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
-                    WM_USE_BLAST_ADAPTER_FLAG, false);
+                    WM_USE_BLAST_ADAPTER_FLAG), false);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);
@@ -7491,15 +7492,14 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc != null) {
-                    WindowState imeTarget = dc.getImeControlTarget();
-                    if (imeTarget == null) {
+                    InsetsControlTarget imeControlTarget = dc.mInputMethodControlTarget;
+                    if (imeControlTarget == null) {
                         return;
                     }
                     // If there was a pending IME show(), reset it as IME has been
                     // requested to be hidden.
-                    imeTarget.getDisplayContent().getInsetsStateController().getImeSourceProvider()
-                            .abortShowImePostLayout();
-                    imeTarget.hideInsets(WindowInsets.Type.ime(), true /* fromIme */);
+                    dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
+                    imeControlTarget.hideInsets(WindowInsets.Type.ime(), true /* fromIme */);
                 }
             }
         }

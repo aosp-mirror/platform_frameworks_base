@@ -3023,6 +3023,18 @@ public abstract class PackageManager {
     public static final String FEATURE_TUNER = "android.hardware.tv.tuner";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the necessary changes to support app enumeration.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_APP_ENUMERATION = "android.software.app_enumeration";
+
+    /** @hide */
+    public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
+
+    /**
      * Extra field name for the URI to a verification file. Passed to a package
      * verifier.
      *
@@ -7817,5 +7829,38 @@ public abstract class PackageManager {
                 ? ((AdaptiveIconDrawable) drawable).getSourceDrawableResId() : Resources.ID_NULL;
         return resId == com.android.internal.R.drawable.sym_def_app_icon
                 || resId == com.android.internal.R.drawable.sym_app_on_sd_unavailable_icon;
+    }
+
+    /**
+     * Sets MIME group's MIME types
+     *
+     * @param mimeGroup MIME group to modify
+     * @param mimeTypes new MIME types contained by MIME group
+     */
+    public void setMimeGroup(@NonNull String mimeGroup, @NonNull Set<String> mimeTypes) {
+        throw new UnsupportedOperationException(
+                "setMimeGroup not implemented in subclass");
+    }
+
+    /**
+     * Clears MIME group by removing all MIME types from it
+     *
+     * @param mimeGroup MIME group to clear
+     */
+    public void clearMimeGroup(@NonNull String mimeGroup) {
+        throw new UnsupportedOperationException(
+                "clearMimeGroup not implemented in subclass");
+    }
+
+    /**
+     * Gets all MIME types that MIME group contains
+     *
+     * @return MIME types contained by the MIME group,
+     *         or null if the MIME group was not declared in the manifest.
+     */
+    @Nullable
+    public Set<String> getMimeGroup(@NonNull String mimeGroup) {
+        throw new UnsupportedOperationException(
+                "getMimeGroup not implemented in subclass");
     }
 }

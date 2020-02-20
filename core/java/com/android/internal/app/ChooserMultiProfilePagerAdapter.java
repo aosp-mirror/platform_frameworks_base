@@ -165,6 +165,11 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
         return getListViewForIndex(1 - getCurrentPage());
     }
 
+    @Override
+    String getMetricsCategory() {
+        return ResolverActivity.METRICS_CATEGORY_CHOOSER;
+    }
+
     class ChooserProfileDescriptor extends ProfileDescriptor {
         private ChooserActivity.ChooserGridAdapter chooserGridAdapter;
         private RecyclerView recyclerView;

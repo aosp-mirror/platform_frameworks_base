@@ -124,8 +124,9 @@ public class SyncOperationTest extends AndroidTestCase {
         SyncOperation op2 = SyncOperation.maybeCreateFromJobExtras(pb);
 
         assertTrue("Account fields in extras not persisted.",
-                account1.equals(op2.extras.get("acc")));
-        assertTrue("Fields in extras not persisted", "String".equals(op2.extras.getString("str")));
+                account1.equals(op2.getClonedExtras().get("acc")));
+        assertTrue("Fields in extras not persisted", "String".equals(
+                op2.getClonedExtras().getString("str")));
     }
 
     @SmallTest

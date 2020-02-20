@@ -62,6 +62,7 @@ public class PlatformCompatTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        android.app.compat.ChangeIdStateCache.disable();
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getPackageUid(eq(PACKAGE_NAME), eq(0))).thenThrow(
                 new PackageManager.NameNotFoundException());

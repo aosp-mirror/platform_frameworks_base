@@ -185,7 +185,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(LeakDetector.class),
                 mock(ForegroundServiceDismissalFeatureController.class)
         );
-        mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, mHeadsUpManager);
+        mEntryManager.setUpForTest(mock(NotificationPresenter.class));
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
         NotificationShelf notificationShelf = mock(NotificationShelf.class);

@@ -32,6 +32,7 @@ import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
 import android.content.pm.PackageUserState;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
@@ -39,6 +40,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
+import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
 import android.content.pm.parsing.ComponentParseUtils.ParsedProviderIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedService;
@@ -229,9 +231,11 @@ public class ComponentResolver {
     }
 
     @Nullable
-    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, int flags, int userId) {
+    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, int flags,
+            @PrivateResolveFlags int privateResolveFlags, int userId) {
         synchronized (mLock) {
-            return mActivities.queryIntent(intent, resolvedType, flags, userId);
+            return mActivities.queryIntent(
+                    intent, resolvedType, flags, privateResolveFlags, userId);
         }
     }
 
@@ -368,7 +372,7 @@ public class ComponentResolver {
     @Nullable
     List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, int flags, int userId) {
         synchronized (mLock) {
-            return mReceivers.queryIntent(intent, resolvedType, flags, userId);
+            return mReceivers.queryIntent(intent, resolvedType, flags, 0, userId);
         }
     }
 
@@ -1142,8 +1146,105 @@ public class ComponentResolver {
         }
     }
 
+    private abstract static class MimeGroupsAwareIntentResolver<F extends ParsedIntentInfo, R>
+            extends IntentResolver<F, R> {
+        private ArrayMap<String, F[]> mMimeGroupToFilter = new ArrayMap<>();
+        private boolean mIsUpdatingMimeGroup = false;
+
+        @Override
+        public void addFilter(F f) {
+            applyMimeGroups(f);
+            super.addFilter(f);
+
+            if (!mIsUpdatingMimeGroup) {
+                register_intent_filter(f, f.mimeGroupsIterator(), mMimeGroupToFilter,
+                        "      MimeGroup: ");
+            }
+        }
+
+        @Override
+        protected void removeFilterInternal(F f) {
+            if (!mIsUpdatingMimeGroup) {
+                unregister_intent_filter(f, f.mimeGroupsIterator(), mMimeGroupToFilter,
+                        "      MimeGroup: ");
+            }
+
+            super.removeFilterInternal(f);
+            f.clearDynamicDataTypes();
+        }
+
+        /**
+         * Updates MIME group by applying changes to all IntentFilters
+         * that contain the group and repopulating m*ToFilter maps accordingly
+         *
+         * @param packageName package to which MIME group belongs
+         * @param mimeGroup MIME group to update
+         * @return true, if any intent filters were changed due to this update
+         */
+        public boolean updateMimeGroup(String packageName, String mimeGroup) {
+            F[] filters = mMimeGroupToFilter.get(mimeGroup);
+            int n = filters != null ? filters.length : 0;
+
+            mIsUpdatingMimeGroup = true;
+            boolean hasChanges = false;
+            F filter;
+            for (int i = 0; i < n && (filter = filters[i]) != null; i++) {
+                if (isPackageForFilter(packageName, filter)) {
+                    hasChanges |= updateFilter(filter);
+                }
+            }
+            mIsUpdatingMimeGroup = false;
+            return hasChanges;
+        }
+
+        private boolean updateFilter(F filter) {
+            List<String> oldTypes = filter.dataTypes();
+            removeFilter(filter);
+            addFilter(filter);
+            List<String> newTypes = filter.dataTypes();
+            return !equalLists(oldTypes, newTypes);
+        }
+
+        private boolean equalLists(List<String> first, List<String> second) {
+            if (first == null) {
+                return second == null;
+            } else if (second == null) {
+                return false;
+            }
+
+            if (first.size() != second.size()) {
+                return false;
+            }
+
+            Collections.sort(first);
+            Collections.sort(second);
+            return first.equals(second);
+        }
+
+        private void applyMimeGroups(F filter) {
+            String packageName = filter.getPackageName();
+
+            for (int i = filter.countMimeGroups() - 1; i >= 0; i--) {
+                List<String> mimeTypes = sPackageManagerInternal.getMimeGroup(packageName,
+                        filter.getMimeGroup(i));
+
+                for (int typeIndex = mimeTypes.size() - 1; typeIndex >= 0; typeIndex--) {
+                    String mimeType = mimeTypes.get(typeIndex);
+
+                    try {
+                        filter.addDynamicDataType(mimeType);
+                    } catch (IntentFilter.MalformedMimeTypeException e) {
+                        if (DEBUG) {
+                            Slog.w(TAG, "Malformed mime type: " + mimeType, e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private static class ActivityIntentResolver
-            extends IntentResolver<ParsedActivityIntentInfo, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<ParsedActivityIntentInfo, ResolveInfo> {
 
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
@@ -1154,11 +1255,12 @@ public class ComponentResolver {
         }
 
         List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
-                int userId) {
+                int privateResolveFlags, int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
             }
             mFlags = flags;
+            mPrivateResolveFlags = privateResolveFlags;
             return super.queryIntent(intent, resolvedType,
                     (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
                     userId);
@@ -1388,6 +1490,11 @@ public class ComponentResolver {
                 }
                 return null;
             }
+            final boolean matchNonBrowserOnly =
+                    (mPrivateResolveFlags & PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY) != 0;
+            if (matchNonBrowserOnly && info.handleAllWebDataURI()) {
+                return null;
+            }
             final ResolveInfo res = new ResolveInfo();
             res.activityInfo = ai;
             if ((mFlags & PackageManager.GET_RESOLVED_FILTER) != 0) {
@@ -1465,6 +1572,7 @@ public class ComponentResolver {
         private final ArrayMap<ComponentName, ParsedActivity> mActivities =
                 new ArrayMap<>();
         private int mFlags;
+        private int mPrivateResolveFlags;
     }
 
     // Both receivers and activities share a class, but point to different get methods
@@ -1477,7 +1585,7 @@ public class ComponentResolver {
     }
 
     private static final class ProviderIntentResolver
-            extends IntentResolver<ParsedProviderIntentInfo, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<ParsedProviderIntentInfo, ResolveInfo> {
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
                 boolean defaultOnly, int userId) {
@@ -1743,7 +1851,7 @@ public class ComponentResolver {
     }
 
     private static final class ServiceIntentResolver
-            extends IntentResolver<ParsedServiceIntentInfo, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<ParsedServiceIntentInfo, ResolveInfo> {
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
                 boolean defaultOnly, int userId) {
@@ -2114,5 +2222,18 @@ public class ComponentResolver {
         public Iterator<IntentFilter.AuthorityEntry> generate(ParsedActivityIntentInfo info) {
             return info.authoritiesIterator();
         }
+    }
+
+    /**
+     * Removes MIME type from the group, by delegating to IntentResolvers
+     * @return true if any intent filters were changed due to this update
+     */
+    boolean updateMimeGroup(String packageName, String group) {
+        boolean hasChanges = mActivities.updateMimeGroup(packageName, group);
+        hasChanges |= mProviders.updateMimeGroup(packageName, group);
+        hasChanges |= mReceivers.updateMimeGroup(packageName, group);
+        hasChanges |= mServices.updateMimeGroup(packageName, group);
+
+        return hasChanges;
     }
 }

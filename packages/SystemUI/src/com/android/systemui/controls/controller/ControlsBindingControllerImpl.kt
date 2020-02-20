@@ -22,7 +22,6 @@ import android.os.IBinder
 import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.IControlsActionCallback
-import android.service.controls.IControlsLoadCallback
 import android.service.controls.IControlsSubscriber
 import android.service.controls.IControlsSubscription
 import android.service.controls.actions.ControlAction
@@ -63,12 +62,6 @@ open class ControlsBindingControllerImpl @Inject constructor(
     private val componentMap: MutableMap<Key, ControlsProviderLifecycleManager> =
             ArrayMap<Key, ControlsProviderLifecycleManager>()
 
-    private val loadCallbackService = object : IControlsLoadCallback.Stub() {
-        override fun accept(token: IBinder, controls: MutableList<Control>) {
-            backgroundExecutor.execute(OnLoadRunnable(token, controls))
-        }
-    }
-
     private val actionCallbackService = object : IControlsActionCallback.Stub() {
         override fun accept(
             token: IBinder,
@@ -106,7 +99,6 @@ open class ControlsBindingControllerImpl @Inject constructor(
         return ControlsProviderLifecycleManager(
                 context,
                 backgroundExecutor,
-                loadCallbackService,
                 actionCallbackService,
                 subscriberService,
                 currentUser,
@@ -130,7 +122,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
         callback: ControlsBindingController.LoadCallback
     ) {
         val provider = retrieveLifecycleManager(component)
-        provider.maybeBindAndLoad(callback)
+        provider.maybeBindAndLoad(LoadSubscriber(callback))
     }
 
     override fun subscribe(controls: List<ControlInfo>) {
@@ -216,7 +208,8 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
     private inner class OnLoadRunnable(
         token: IBinder,
-        val list: List<Control>
+        val list: List<Control>,
+        val callback: ControlsBindingController.LoadCallback
     ) : CallbackRunnable(token) {
         override fun run() {
             if (provider == null) {
@@ -233,9 +226,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
                     return
                 }
             }
-            provider.lastLoadCallback?.accept(list) ?: run {
-                Log.w(TAG, "Null callback")
-            }
+            callback.accept(list)
             provider.unbindService()
         }
     }
@@ -277,7 +268,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     ) : CallbackRunnable(token) {
         override fun run() {
             provider?.let {
-                Log.i(TAG, "onComplete receive from '${provider.componentName}'")
+                Log.i(TAG, "onComplete receive from '${it.componentName}'")
             }
         }
     }
@@ -288,7 +279,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     ) : CallbackRunnable(token) {
         override fun run() {
             provider?.let {
-                Log.e(TAG, "onError receive from '${provider.componentName}': $error")
+                Log.e(TAG, "onError receive from '${it.componentName}': $error")
             }
         }
     }
@@ -305,6 +296,44 @@ open class ControlsBindingControllerImpl @Inject constructor(
             }
             provider?.let {
                 lazyController.get().onActionResponse(it.componentName, controlId, response)
+            }
+        }
+    }
+
+    private inner class OnLoadErrorRunnable(
+        token: IBinder,
+        val error: String,
+        val callback: ControlsBindingController.LoadCallback
+    ) : CallbackRunnable(token) {
+        override fun run() {
+            callback.error(error)
+            provider?.let {
+                Log.e(TAG, "onError receive from '${it.componentName}': $error")
+            }
+        }
+    }
+
+    private inner class LoadSubscriber(
+        val callback: ControlsBindingController.LoadCallback
+    ) : IControlsSubscriber.Stub() {
+        val loadedControls = ArrayList<Control>()
+        var hasError = false
+
+        override fun onSubscribe(token: IBinder, subs: IControlsSubscription) {
+            backgroundExecutor.execute(OnSubscribeRunnable(token, subs))
+        }
+
+        override fun onNext(token: IBinder, c: Control) {
+            backgroundExecutor.execute { loadedControls.add(c) }
+        }
+        override fun onError(token: IBinder, s: String) {
+            hasError = true
+            backgroundExecutor.execute(OnLoadErrorRunnable(token, s, callback))
+        }
+
+        override fun onComplete(token: IBinder) {
+            if (!hasError) {
+                backgroundExecutor.execute(OnLoadRunnable(token, loadedControls, callback))
             }
         }
     }

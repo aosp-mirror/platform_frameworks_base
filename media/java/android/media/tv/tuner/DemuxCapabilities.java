@@ -18,7 +18,7 @@ package android.media.tv.tuner;
 
 import android.annotation.BytesLong;
 import android.annotation.IntDef;
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.media.tv.tuner.filter.Filter;
@@ -159,7 +159,7 @@ public class DemuxCapabilities {
      * {@link FilterConfiguration}.
      * <p>The ith element represents the filter's capability as the source for the ith type.
      */
-    @Nullable
+    @NonNull
     @Size(5)
     public int[] getLinkCapabilities() {
         return mLinkCaps;

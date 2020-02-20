@@ -675,4 +675,18 @@ public interface ViewParent {
      */
     default void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
     }
+
+    /**
+     * Unbuffered dispatch has been requested by a child of this view parent.
+     * This method is called by the View hierarchy to signal ancestors that a View needs to
+     * request unbuffered dispatch.
+     *
+     * @see View#requestUnbufferedDispatch(int)
+     * @hide
+     */
+    default void onDescendantUnbufferedRequested() {
+        if (getParent() != null) {
+            getParent().onDescendantUnbufferedRequested();
+        }
+    }
 }

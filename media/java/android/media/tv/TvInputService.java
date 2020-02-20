@@ -111,37 +111,32 @@ public abstract class TvInputService extends Service {
     public @interface PriorityHintUseCaseType {}
 
     /**
-     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(int, String , int)}:
-     * Background.
-     * TODO Link: Tuner#Tuner(Context, string, int).
+     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(Context, int, String,
+     * int)}: Background. TODO Link: Tuner#Tuner(Context, string, int).
      */
     public static final int PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND = 100;
 
     /**
-     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(int, String , int)}:
-     * Scan.
-     * TODO Link: Tuner#Tuner(Context, string, int).
+     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(Context, int, String,
+     * int)}: Scan. TODO Link: Tuner#Tuner(Context, string, int).
      */
     public static final int PRIORITY_HINT_USE_CASE_TYPE_SCAN = 200;
 
     /**
-     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(int, String , int)}:
-     * Playback.
-     * TODO Link: Tuner#Tuner(Context, string, int).
+     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(Context, int, String,
+     * int)}: Playback. TODO Link: Tuner#Tuner(Context, string, int).
      */
     public static final int PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK = 300;
 
     /**
-     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(int, String , int)}:
-     * Live.
-     * TODO Link: Tuner#Tuner(Context, string, int).
+     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(Context, int, String,
+     * int)}: Live. TODO Link: Tuner#Tuner(Context, string, int).
      */
     public static final int PRIORITY_HINT_USE_CASE_TYPE_LIVE = 400;
 
     /**
-     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(int, String , int)}:
-     * Record.
-     * TODO Link: Tuner#Tuner(Context, string, int).
+     * Use case of priority hint for {@link android.media.MediaCas#MediaCas(Context, int, String,
+     * int)}: Record. TODO Link: Tuner#Tuner(Context, string, int).
      */
     public static final int PRIORITY_HINT_USE_CASE_TYPE_RECORD = 500;
 

@@ -20,7 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"Lagring af indstillinger"</string>
-    <string name="wifi_softap_config_change" msgid="5338670993556993667">"Ændringer af dine indstillinger for hotspot"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"Dit hotspotbånd er ændret."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"Denne enhed understøtter ikke din præference om kun 5 GHz. Denne enhed vil i stedet bruge 5 GHz-båndet, når det er muligt."</string>
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"Indstillingerne for hotspots har ændret sig"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"Tryk for at se flere oplysninger"</string>
 </resources>

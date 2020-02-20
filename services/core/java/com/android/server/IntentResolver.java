@@ -194,7 +194,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         mFilters.remove(f);
     }
 
-    void removeFilterInternal(F f) {
+    protected void removeFilterInternal(F f) {
         if (localLOGV) {
             Slog.v(TAG, "Removing filter: " + f);
             f.dump(new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM), "      ");
@@ -651,7 +651,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         return num;
     }
 
-    private final int register_intent_filter(F filter, Iterator<String> i,
+    protected final int register_intent_filter(F filter, Iterator<String> i,
             ArrayMap<String, F[]> dest, String prefix) {
         if (i == null) {
             return 0;
@@ -667,7 +667,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         return num;
     }
 
-    private final int unregister_intent_filter(F filter, Iterator<String> i,
+    protected final int unregister_intent_filter(F filter, Iterator<String> i,
             ArrayMap<String, F[]> dest, String prefix) {
         if (i == null) {
             return 0;
@@ -836,7 +836,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     /**
      * All filters that have been registered.
      */
-    private final ArraySet<F> mFilters = new ArraySet<F>();
+    protected final ArraySet<F> mFilters = new ArraySet<F>();
 
     /**
      * All of the MIME types that have been registered, such as "image/jpeg",

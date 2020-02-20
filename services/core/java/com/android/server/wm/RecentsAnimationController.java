@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
-import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
@@ -34,6 +33,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
@@ -414,14 +414,14 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         // Save the minimized home height
-        final ActivityStack dockedStack =
-                mDisplayContent.getRootSplitScreenPrimaryTask();
-        mDisplayContent.getDockedDividerController().getHomeStackBoundsInDockedMode(
-                mDisplayContent.getConfiguration(),
-                dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide(),
-                mMinimizedHomeBounds);
+        mMinimizedHomeBounds = mDisplayContent.getRootHomeTask().getBounds();
 
         mService.mWindowPlacerLocked.performSurfacePlacement();
+
+        // If the target activity has a fixed orientation which is different from the current top
+        // activity, it will be rotated before being shown so we avoid a screen rotation
+        // animation when showing the Recents view.
+        mDisplayContent.rotateInDifferentOrientationIfNeeded(mTargetActivityRecord);
 
         // Notify that the animation has started
         if (mStatusBar != null) {
@@ -695,6 +695,9 @@ public class RecentsAnimationController implements DeathRecipient {
                 mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(
                         mTargetActivityRecord.token);
             }
+            if (mTargetActivityRecord.hasFixedRotationTransform()) {
+                mTargetActivityRecord.clearFixedRotationTransform();
+            }
         }
 
         // Notify that the animation has ended
@@ -828,6 +831,19 @@ public class RecentsAnimationController implements DeathRecipient {
         return task != null && isAnimatingTask(task) && !isTargetApp(windowState.mActivityRecord);
     }
 
+    /**
+     * If the animation target ActivityRecord has a fixed rotation ({@link
+     * WindowToken#hasFixedRotationTransform()}, the provided wallpaper will be rotated accordingly.
+     *
+     * This avoids any screen rotation animation when animating to the Recents view.
+     */
+    void applyFixedRotationTransformIfNeeded(@NonNull WindowToken wallpaper) {
+        if (mTargetActivityRecord == null) {
+            return;
+        }
+        wallpaper.applyFixedRotationTransform(mTargetActivityRecord);
+    }
+
     @VisibleForTesting
     class TaskAnimationAdapter implements AnimationAdapter {
 
@@ -844,8 +860,8 @@ public class RecentsAnimationController implements DeathRecipient {
             mTask = task;
             mIsRecentTaskInvisible = isRecentTaskInvisible;
             final WindowContainer container = mTask.getParent();
-            container.getRelativeDisplayedPosition(mPosition);
             mBounds.set(container.getDisplayedBounds());
+            mPosition.set(mBounds.left, mBounds.top);
         }
 
         RemoteAnimationTarget createRemoteAnimationTarget() {

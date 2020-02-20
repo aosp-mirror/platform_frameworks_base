@@ -105,10 +105,12 @@ namespace {
 using namespace std::placeholders;
 
 using android::String8;
+using android::base::ReadFileToString;
 using android::base::StringAppendF;
 using android::base::StringPrintf;
 using android::base::WriteStringToFile;
 using android::base::GetBoolProperty;
+using android::base::GetProperty;
 
 #define CREATE_ERROR(...) StringPrintf("%s:%d: ", __FILE__, __LINE__). \
                               append(StringPrintf(__VA_ARGS__))
@@ -173,6 +175,12 @@ static constexpr int DEFAULT_DATA_DIR_PERMISSION = 0751;
  */
 static const std::string ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY =
     "persist.zygote.app_data_isolation";
+
+/**
+ * Property to enable app data isolation for sdcard obb or data in vold.
+ */
+static const std::string ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
+    "persist.sys.vold_app_data_isolation_enabled";
 
 static constexpr const uint64_t UPPER_HALF_WORD_MASK = 0xFFFF'FFFF'0000'0000;
 static constexpr const uint64_t LOWER_HALF_WORD_MASK = 0x0000'0000'FFFF'FFFF;
@@ -603,6 +611,15 @@ static void EnableDebugger() {
   }
 }
 
+static bool IsFilesystemSupported(const std::string& fsType) {
+    std::string supported;
+    if (!ReadFileToString("/proc/filesystems", &supported)) {
+        ALOGE("Failed to read supported filesystems");
+        return false;
+    }
+    return supported.find(fsType + "\n") != std::string::npos;
+}
+
 static void PreApplicationInit() {
   // The child process sets this to indicate it's not the zygote.
   android_mallopt(M_SET_ZYGOTE_CHILD, nullptr, 0);
@@ -780,6 +797,31 @@ static void MountAppDataTmpFs(const std::string& target_dir,
     fail_fn(CREATE_ERROR("Failed to mount tmpfs to %s: %s",
                          target_dir.c_str(), strerror(errno)));
   }
+}
+
+static void BindMountObbPackage(std::string_view package_name, int userId, fail_fn_t fail_fn) {
+
+  // TODO(148772775): Pass primary volume name from zygote argument to here
+  std::string source;
+  if (IsFilesystemSupported("sdcardfs")) {
+    source = StringPrintf("/mnt/runtime/default/emulated/%d/Android/obb/%s",
+        userId, package_name.data());
+  } else {
+    source = StringPrintf("/mnt/pass_through/%d/emulated/%d/Android/obb/%s",
+        userId, userId, package_name.data());
+  }
+  std::string target(
+      StringPrintf("/storage/emulated/%d/Android/obb/%s", userId, package_name.data()));
+
+  if (access(source.c_str(), F_OK) != 0) {
+    fail_fn(CREATE_ERROR("Cannot access source %s: %s", source.c_str(), strerror(errno)));
+  }
+
+  if (access(target.c_str(), F_OK) != 0) {
+    fail_fn(CREATE_ERROR("Cannot access target %s: %s", target.c_str(), strerror(errno)));
+  }
+
+  BindMount(source, target, fail_fn);
 }
 
 // Create a private mount namespace and bind mount appropriate emulated
@@ -1504,6 +1546,60 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
   }
 }
 
+// Bind mount all obb directories that are visible to this app.
+// If app data isolation is not enabled for this process, bind mount the whole obb
+// directory instead.
+static void BindMountAppObbDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
+    uid_t uid, const char* process_name, jstring managed_nice_name, fail_fn_t fail_fn) {
+
+  auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
+  const userid_t user_id = multiuser_get_user_id(uid);
+
+  // If FUSE is not ready for this user, skip it
+  // TODO(148772775): Pass primary volume name from zygote argument to here
+  std::string tmp = GetProperty("vold.fuse_running_users", "");
+  std::istringstream fuse_running_users(tmp);
+  bool user_found = false;
+  std::string s;
+  std::string user_id_str = std::to_string(user_id);
+  while (!user_found && std::getline(fuse_running_users, s, ',')) {
+    if (user_id_str == s) {
+      user_found = true;
+    }
+  }
+  if (!user_found) {
+    ALOGI("User %d is not running fuse yet, fuse_running_users=%s", user_id, tmp.c_str());
+    return;
+  }
+
+  // Fuse is ready, so we can start using fuse path.
+  int size = (pkg_data_info_list != nullptr) ? env->GetArrayLength(pkg_data_info_list) : 0;
+
+  if (size == 0) {
+    // App data isolation is not enabled for this process, so we bind mount to whole obb/ dir.
+    std::string source;
+    if (IsFilesystemSupported("sdcardfs")) {
+      source = StringPrintf("/mnt/runtime/default/emulated/%d/Android/obb", user_id);
+    } else {
+      source = StringPrintf("/mnt/pass_through/%d/emulated/%d/Android/obb", user_id, user_id);
+    }
+    std::string target(StringPrintf("/storage/emulated/%d/Android/obb", user_id));
+
+    if (access(source.c_str(), F_OK) != 0) {
+      fail_fn(CREATE_ERROR("Error accessing %s: %s", source.c_str(), strerror(errno)));
+    }
+    BindMount(source, target, fail_fn);
+    return;
+  }
+
+  // Bind mount each package obb directory
+  for (int i = 0; i < size; i += 3) {
+    jstring package_str = (jstring) (env->GetObjectArrayElement(pkg_data_info_list, i));
+    std::string packageName = extract_fn(package_str).value();
+    BindMountObbPackage(packageName, user_id, fail_fn);
+  }
+}
+
 // Utility routine to specialize a zygote child process.
 static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
                              jint runtime_flags, jobjectArray rlimits,
@@ -1550,6 +1646,12 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       && GetBoolProperty(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true)) {
     isolateAppData(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
     isolateJitProfile(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
+  }
+
+  if ((mount_external != MOUNT_EXTERNAL_INSTALLER) &&
+        GetBoolProperty(kPropFuse, false) &&
+        GetBoolProperty(ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false)) {
+    BindMountAppObbDirs(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
 
   // If this zygote isn't root, it won't be able to create a process group,

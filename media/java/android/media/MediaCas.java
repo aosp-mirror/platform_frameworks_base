@@ -19,14 +19,20 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.hardware.cas.V1_0.HidlCasPluginDescriptor;
 import android.hardware.cas.V1_0.ICas;
 import android.hardware.cas.V1_0.IMediaCasService;
 import android.hardware.cas.V1_2.ICasListener;
+import android.hardware.cas.V1_2.Status;
 import android.media.MediaCasException.*;
 import android.media.tv.TvInputService.PriorityHintUseCaseType;
+import android.media.tv.tunerresourcemanager.CasSessionRequest;
+import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IHwBinder;
 import android.os.Looper;
@@ -39,6 +45,9 @@ import android.util.Singleton;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * MediaCas can be used to obtain keys for descrambling protected media streams, in
@@ -110,6 +119,10 @@ public final class MediaCas implements AutoCloseable {
     private EventHandler mEventHandler;
     private @PriorityHintUseCaseType int mPriorityHint;
     private String mTvInputServiceSessionId;
+    private int mClientId;
+    private int mCasSystemId;
+    private TunerResourceManager mTunerResourceManager = null;
+    private final Map<Session, Integer> mSessionMap = new HashMap<>();
 
     /**
      * Scrambling modes used to open cas sessions.
@@ -329,6 +342,10 @@ public final class MediaCas implements AutoCloseable {
                         createFromSessionId(sessionId), msg.arg1, msg.arg2,
                         bundle.getByteArray(DATA_KEY));
             } else if (msg.what == MSG_CAS_STATUS_EVENT) {
+                if ((msg.arg1 == PLUGIN_STATUS_SESSION_NUMBER_CHANGED)
+                        && (mTunerResourceManager != null)) {
+                    mTunerResourceManager.updateCasInfo(mCasSystemId, msg.arg2);
+                }
                 mListener.onPluginStatusUpdate(MediaCas.this, msg.arg1, msg.arg2);
             } else if (msg.what == MSG_CAS_RESOURCE_LOST) {
                 mListener.onResourceLost(MediaCas.this);
@@ -364,6 +381,19 @@ public final class MediaCas implements AutoCloseable {
                     EventHandler.MSG_CAS_STATUS_EVENT, status, arg));
         }
     };
+
+    private final TunerResourceManager.ResourcesReclaimListener mResourceListener =
+            new TunerResourceManager.ResourcesReclaimListener() {
+            @Override
+            public void onReclaimResources() {
+                synchronized (mSessionMap) {
+                    mSessionMap.forEach((casSession, sessionResourceId) -> casSession.close());
+                }
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
+                        EventHandler.MSG_CAS_RESOURCE_LOST));
+            }
+        };
+
     /**
      * Describe a CAS plugin with its CA_system_ID and string name.
      *
@@ -429,9 +459,19 @@ public final class MediaCas implements AutoCloseable {
      */
     public final class Session implements AutoCloseable {
         final ArrayList<Byte> mSessionId;
+        boolean mIsClosed = false;
 
         Session(@NonNull ArrayList<Byte> sessionId) {
             mSessionId = new ArrayList<Byte>(sessionId);
+        }
+
+        private void validateSessionInternalStates() {
+            if (mICas == null) {
+                throw new IllegalStateException();
+            }
+            if (mIsClosed) {
+                MediaCasStateException.throwExceptionIfNeeded(Status.ERROR_CAS_SESSION_NOT_OPENED);
+            }
         }
 
         /**
@@ -459,7 +499,7 @@ public final class MediaCas implements AutoCloseable {
          */
         public void setPrivateData(@NonNull byte[] data)
                 throws MediaCasException {
-            validateInternalStates();
+            validateSessionInternalStates();
 
             try {
                 MediaCasException.throwExceptionIfNeeded(
@@ -483,7 +523,7 @@ public final class MediaCas implements AutoCloseable {
          */
         public void processEcm(@NonNull byte[] data, int offset, int length)
                 throws MediaCasException {
-            validateInternalStates();
+            validateSessionInternalStates();
 
             try {
                 MediaCasException.throwExceptionIfNeeded(
@@ -522,7 +562,7 @@ public final class MediaCas implements AutoCloseable {
          */
         public void sendSessionEvent(int event, int arg, @Nullable byte[] data)
                 throws MediaCasException {
-            validateInternalStates();
+            validateSessionInternalStates();
 
             if (mICasV11 == null) {
                 Log.d(TAG, "Send Session Event isn't supported by cas@1.0 interface");
@@ -546,7 +586,7 @@ public final class MediaCas implements AutoCloseable {
          */
         @NonNull
         public byte[] getSessionId() {
-            validateInternalStates();
+            validateSessionInternalStates();
             return toBytes(mSessionId);
         }
 
@@ -558,11 +598,12 @@ public final class MediaCas implements AutoCloseable {
          */
         @Override
         public void close() {
-            validateInternalStates();
-
+            validateSessionInternalStates();
             try {
                 MediaCasStateException.throwExceptionIfNeeded(
                         mICas.closeSession(mSessionId));
+                mIsClosed = true;
+                removeSessionFromResourceMap(this);
             } catch (RemoteException e) {
                 cleanupAndRethrowIllegalState();
             }
@@ -664,6 +705,7 @@ public final class MediaCas implements AutoCloseable {
     /**
      * Instantiate a CA system of the specified system id.
      *
+     * @param context the context of the caller.
      * @param casSystemId The system id of the CA system.
      * @param tvInputServiceSessionId The Id of the session opened in TV Input Service (TIS)
      *        {@link android.media.tv.TvInputService#onCreateSession(String, String)}
@@ -672,11 +714,23 @@ public final class MediaCas implements AutoCloseable {
      * @throws UnsupportedCasException if the device does not support the
      * specified CA system.
      */
-    public MediaCas(int casSystemId, @Nullable String tvInputServiceSessionId,
-            @PriorityHintUseCaseType int priorityHint)  throws UnsupportedCasException {
+    public MediaCas(@NonNull Context context, int casSystemId,
+            @Nullable String tvInputServiceSessionId,
+            @PriorityHintUseCaseType int priorityHint) throws UnsupportedCasException {
         this(casSystemId);
-        mPriorityHint = priorityHint;
-        mTvInputServiceSessionId = tvInputServiceSessionId;
+
+        Objects.requireNonNull(context, "context must not be null");
+        mCasSystemId = casSystemId;
+        mTunerResourceManager = (TunerResourceManager)
+                context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
+        if (mTunerResourceManager != null) {
+            int[] clientId = new int[1];
+            ResourceClientProfile profile =
+                    new ResourceClientProfile(tvInputServiceSessionId, priorityHint);
+            mTunerResourceManager.registerClientProfile(
+                    profile, new HandlerExecutor(mEventHandler), mResourceListener, clientId);
+            mClientId = clientId[0];
+        }
     }
 
     IHwBinder getBinder() {
@@ -813,6 +867,40 @@ public final class MediaCas implements AutoCloseable {
         }
     }
 
+    private int getSessionResourceId() throws MediaCasException {
+        validateInternalStates();
+
+        int[] sessionResourceId = new int[1];
+        sessionResourceId[0] = -1;
+        if (mTunerResourceManager != null) {
+            CasSessionRequest casSessionRequest = new CasSessionRequest(mClientId, mCasSystemId);
+            if (!mTunerResourceManager.requestCasSession(casSessionRequest, sessionResourceId)) {
+                throw new MediaCasException.ResourceBusyException(
+                    "insufficient resource to Open Session");
+            }
+        }
+        return  sessionResourceId[0];
+    }
+
+    private void addSessionToResourceMap(Session session, int sessionResourceId) {
+
+        if (sessionResourceId != -1) {
+            synchronized (mSessionMap) {
+                mSessionMap.put(session, sessionResourceId);
+            }
+        }
+    }
+
+    private void removeSessionFromResourceMap(Session session) {
+
+        synchronized (mSessionMap) {
+            if (mSessionMap.get(session) != null) {
+                mTunerResourceManager.releaseCasSession(mSessionMap.get(session));
+                mSessionMap.remove(session);
+            }
+        }
+    }
+
     /**
      * Open a session to descramble one or more streams scrambled by the
      * conditional access system.
@@ -824,12 +912,13 @@ public final class MediaCas implements AutoCloseable {
      * @throws MediaCasStateException for CAS-specific state exceptions.
      */
     public Session openSession() throws MediaCasException {
-        validateInternalStates();
+        int sessionResourceId = getSessionResourceId();
 
         try {
             OpenSessionCallback cb = new OpenSessionCallback();
             mICas.openSession(cb);
             MediaCasException.throwExceptionIfNeeded(cb.mStatus);
+            addSessionToResourceMap(cb.mSession, sessionResourceId);
             return cb.mSession;
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
@@ -853,7 +942,7 @@ public final class MediaCas implements AutoCloseable {
     @Nullable
     public Session openSession(@SessionUsage int sessionUsage, @ScramblingMode int scramblingMode)
             throws MediaCasException {
-        validateInternalStates();
+        int sessionResourceId = getSessionResourceId();
 
         if (mICasV12 == null) {
             Log.d(TAG, "Open Session with scrambling mode is only supported by cas@1.2+ interface");
@@ -864,6 +953,7 @@ public final class MediaCas implements AutoCloseable {
             OpenSession_1_2_Callback cb = new OpenSession_1_2_Callback();
             mICasV12.openSession_1_2(sessionUsage, scramblingMode, cb);
             MediaCasException.throwExceptionIfNeeded(cb.mStatus);
+            addSessionToResourceMap(cb.mSession, sessionResourceId);
             return cb.mSession;
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
@@ -986,6 +1076,16 @@ public final class MediaCas implements AutoCloseable {
             } finally {
                 mICas = null;
             }
+        }
+
+        if (mTunerResourceManager != null) {
+            mTunerResourceManager.unregisterClientProfile(mClientId);
+            mTunerResourceManager = null;
+        }
+
+        if (mHandlerThread != null) {
+            mHandlerThread.quit();
+            mHandlerThread = null;
         }
     }
 

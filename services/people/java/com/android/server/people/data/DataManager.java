@@ -34,13 +34,11 @@ import android.content.IntentFilter;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutInfo;
-import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutManager.ShareShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Process;
@@ -83,7 +81,6 @@ import java.util.function.Function;
  */
 public class DataManager {
 
-    private static final String PLATFORM_PACKAGE_NAME = "android";
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
     private static final long QUERY_EVENTS_MAX_AGE_MS = DateUtils.DAY_IN_MILLIS;
@@ -106,7 +103,6 @@ public class DataManager {
 
     private ShortcutServiceInternal mShortcutServiceInternal;
     private PackageManagerInternal mPackageManagerInternal;
-    private ShortcutManager mShortcutManager;
     private UserManager mUserManager;
 
     public DataManager(Context context) {
@@ -125,7 +121,6 @@ public class DataManager {
     public void initialize() {
         mShortcutServiceInternal = LocalServices.getService(ShortcutServiceInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mShortcutManager = mContext.getSystemService(ShortcutManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
 
         mShortcutServiceInternal.addListener(new ShortcutServiceListener());
@@ -171,8 +166,7 @@ public class DataManager {
         mNotificationListeners.put(userId, notificationListener);
         try {
             notificationListener.registerAsSystemService(mContext,
-                    new ComponentName(PLATFORM_PACKAGE_NAME, getClass().getCanonicalName()),
-                    userId);
+                    new ComponentName(mContext, getClass()), userId);
         } catch (RemoteException e) {
             // Should never occur for local calls.
         }
@@ -242,8 +236,8 @@ public class DataManager {
      * Iterates through all the {@link PackageData}s owned by the unlocked users who are in the
      * same profile group as the calling user.
      */
-    public void forAllPackages(Consumer<PackageData> consumer) {
-        List<UserInfo> users = mUserManager.getEnabledProfiles(mInjector.getCallingUserId());
+    void forPackagesInProfile(@UserIdInt int callingUserId, Consumer<PackageData> consumer) {
+        List<UserInfo> users = mUserManager.getEnabledProfiles(callingUserId);
         for (UserInfo userInfo : users) {
             UserData userData = getUnlockedUserData(userInfo.id);
             if (userData != null) {
@@ -275,8 +269,10 @@ public class DataManager {
      * Gets the {@link ShareShortcutInfo}s from all packages owned by the calling user that match
      * the specified {@link IntentFilter}.
      */
-    public List<ShareShortcutInfo> getShareShortcuts(@NonNull IntentFilter intentFilter) {
-        return mShortcutManager.getShareTargets(intentFilter);
+    public List<ShareShortcutInfo> getShareShortcuts(@NonNull IntentFilter intentFilter,
+            @UserIdInt int callingUserId) {
+        return mShortcutServiceInternal.getShareTargets(
+                mContext.getPackageName(), intentFilter, callingUserId);
     }
 
     /** Reports the {@link AppTargetEvent} from App Prediction Manager. */
@@ -361,7 +357,7 @@ public class DataManager {
         @ShortcutQuery.QueryFlags int queryFlags = ShortcutQuery.FLAG_MATCH_DYNAMIC
                 | ShortcutQuery.FLAG_MATCH_PINNED | ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER;
         return mShortcutServiceInternal.getShortcuts(
-                mInjector.getCallingUserId(), /*callingPackage=*/ PLATFORM_PACKAGE_NAME,
+                UserHandle.USER_SYSTEM, mContext.getPackageName(),
                 /*changedSince=*/ 0, packageName, shortcutIds, /*locusIds=*/ null,
                 /*componentName=*/ null, queryFlags, userId, MY_PID, MY_UID);
     }
@@ -775,7 +771,7 @@ public class DataManager {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            forAllPackages(PackageData::saveToDisk);
+            forAllUnlockedUsers(userData -> userData.forAllPackages(PackageData::saveToDisk));
         }
     }
 
@@ -808,10 +804,6 @@ public class DataManager {
         UsageStatsQueryHelper createUsageStatsQueryHelper(@UserIdInt int userId,
                 Function<String, PackageData> packageDataGetter) {
             return new UsageStatsQueryHelper(userId, packageDataGetter);
-        }
-
-        int getCallingUserId() {
-            return Binder.getCallingUserHandle().getIdentifier();
         }
     }
 }

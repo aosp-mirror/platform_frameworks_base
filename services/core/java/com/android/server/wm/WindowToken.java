@@ -377,6 +377,19 @@ class WindowToken extends WindowContainer<WindowState> {
         onConfigurationChanged(getParent().getConfiguration());
     }
 
+    /**
+     * Copies the {@link FixedRotationTransformState} (if any) from the other WindowToken to this
+     * one.
+     */
+    void applyFixedRotationTransform(WindowToken other) {
+        final FixedRotationTransformState fixedRotationState = other.mFixedRotationTransformState;
+        if (fixedRotationState != null) {
+            applyFixedRotationTransform(fixedRotationState.mDisplayInfo,
+                    fixedRotationState.mDisplayFrames,
+                    fixedRotationState.mRotatedOverrideConfiguration);
+        }
+    }
+
     /** Clears the transformation and continue updating the orientation change of display. */
     void clearFixedRotationTransform() {
         if (mFixedRotationTransformState == null) {

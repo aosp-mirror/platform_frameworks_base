@@ -206,6 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"Gỡ lỗi qua USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Bật chế độ gỡ lỗi khi kết nối USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Thu hồi ủy quyền gỡ lỗi USB"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Gỡ lỗi không dây"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Chế độ gỡ lỗi khi có kết nối Wi-Fi"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"Lỗi"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Gỡ lỗi không dây"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Để xem và sử dụng các thiết bị có sẵn, hãy bật tính năng gỡ lỗi không dây"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Ghép nối thiết bị bằng mã QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Ghép nối các thiết bị mới bằng Trình quét mã QR"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Ghép nối thiết bị bằng mã ghép nối"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Ghép nối các thiết bị mới bằng mã gồm 6 chữ số"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Thiết bị được ghép nối"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Hiện đang kết nối"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Thông tin chi tiết về thiết bị"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Xóa"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Vân tay trên thiết bị: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Kết nối không thành công"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Đảm bảo bạn kết nối <xliff:g id="DEVICE_NAME">%1$s</xliff:g> với đúng mạng"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Ghép nối với thiết bị"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Mã ghép nối Wi-Fi"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Ghép nối không thành công"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Đảm bảo bạn kết nối thiết bị với cùng một mạng."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Ghép nối thiết bị qua Wi-Fi bằng cách quét mã QR"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Đang ghép nối thiết bị…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Không ghép nối được thiết bị. Mã QR không chính xác hoặc bạn không kết nối thiết bị với cùng một mạng."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Địa chỉ IP và cổng"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Quét mã QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Ghép nối thiết bị qua Wi-Fi bằng cách quét mã QR"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, gỡ lỗi, nhà phát triển"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Phím tắt báo cáo lỗi"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Hiển thị một nút trong menu nguồn để báo cáo lỗi"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Không khóa màn hình"</string>
@@ -271,6 +298,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Sử dụng tính năng tăng tốc phần cứng khi chia sẻ kết nối nếu có"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Cho phép gỡ lỗi qua USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Gỡ lỗi USB chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị của bạn mà không thông báo và đọc dữ liệu nhật ký."</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Bật tính năng gỡ lỗi không dây?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Tính năng gỡ lỗi không dây chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị mà không thông báo và đọc dữ liệu nhật ký."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Thu hồi quyền truy cập gỡ lỗi USB từ tất cả máy tính mà bạn đã ủy quyền trước đó?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Cho phép cài đặt phát triển?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Những cài đặt này chỉ dành cho mục đích phát triển. Chúng có thể làm cho thiết bị và ứng dụng trên thiết bị của bạn bị lỗi và hoạt động sai."</string>
@@ -383,8 +412,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Mù màu đỏ không hoàn toàn (đỏ-xanh lục)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Mù màu (xanh lam-vàng)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Sửa màu"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Tính năng hiệu chỉnh màu sắc giúp những người bị mù màu thấy màu sắc chính xác hơn"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Bị ghi đè bởi <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -403,21 +431,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Còn lại không đến <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Còn lại hơn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Còn lại hơn <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Điện thoại có thể sắp tắt"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Máy tính bảng có thể sắp tắt"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Thiết bị có thể sắp tắt"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Điện thoại có thể sắp tắt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Máy tính bảng có thể sắp tắt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Thiết bị có thể sắp tắt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Điện thoại có thể sắp tắt"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Máy tính bảng có thể sắp tắt"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Thiết bị có thể sắp tắt"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Điện thoại có thể sắp tắt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Máy tính bảng có thể sắp tắt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Thiết bị có thể sắp tắt (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Còn <xliff:g id="TIME">%1$s</xliff:g> nữa là sạc xong"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> nữa là sạc xong"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Không xác định"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Đang sạc"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Đang sạc nhanh"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Đang sạc chậm"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Hiện không sạc"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Đã cắm nhưng không thể sạc ngay"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Đầy"</string>

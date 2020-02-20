@@ -48,17 +48,8 @@ filegroup {
 
 java_defaults {
     name: "framework-statsd-defaults",
-
-    // TODO(b/146757305): Use "module_current" once it's ready.
-    sdk_version: "core_current",
-
-    libs: [
-        "framework-annotations-lib",
-
-        // TODO(b/146757305): should be unnecessary once
-        // sdk_version="module_lib_current" or "module_current"
-        "android_module_lib_stubs_current",
-    ],
+    sdk_version: "module_current",
+    libs: [ "framework-annotations-lib" ],
 }
 
 java_library {
@@ -71,16 +62,6 @@ java_library {
     srcs: [
         ":framework-statsd-sources",
     ],
-
-    aidl: {
-        // TODO(b/146757305): should be unnecessary once
-        // sdk_version="module_lib_current" or "module_current"
-        include_dirs: [
-            // To refer:
-            // android.app.PendintIntent
-            "frameworks/base/core/java",
-        ],
-    },
 
     permitted_packages: [
         "android.app",

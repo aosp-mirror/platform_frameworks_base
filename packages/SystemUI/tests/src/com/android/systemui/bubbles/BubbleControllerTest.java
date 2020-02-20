@@ -203,7 +203,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         // Bubbles get added to status bar window view
         mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
-                mConfigurationController, mKeyguardBypassController, mColorExtractor);
+                mConfigurationController, mKeyguardBypassController, mColorExtractor,
+                mDumpController);
         mNotificationShadeWindowController.setNotificationShadeView(
                 mSuperStatusBarViewFactory.getNotificationShadeWindowView());
         mNotificationShadeWindowController.attach();

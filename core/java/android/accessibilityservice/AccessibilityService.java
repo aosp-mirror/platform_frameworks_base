@@ -960,7 +960,7 @@ public abstract class AccessibilityService extends Service {
             return false;
         }
         List<GestureDescription.GestureStep> steps =
-                MotionEventGenerator.getGestureStepsFromGestureDescription(gesture, 100);
+                MotionEventGenerator.getGestureStepsFromGestureDescription(gesture, 16);
         try {
             synchronized (mLock) {
                 mGestureStatusCallbackSequence++;
@@ -2413,5 +2413,56 @@ public abstract class AccessibilityService extends Service {
         public long getTimestamp() {
             return mTimestamp;
         };
+    }
+
+    /**
+     * When {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled, this
+     * function requests that touch interactions starting in the specified region of the screen
+     * bypass the gesture detector. There can only be one gesture detection passthrough region per
+     * display. Requesting a new gesture detection passthrough region clears the existing one. To
+     * disable this passthrough and return to the original behavior, pass in an empty region. When
+     * {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is disabled this
+     * function has no effect.
+     *
+     * @param displayId The display on which to set this region.
+     * @param region the region of the screen.
+     */
+    public void setGestureDetectionPassthroughRegion(int displayId, @NonNull Region region) {
+        Preconditions.checkNotNull(region, "region cannot be null");
+        final IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        if (connection != null) {
+            try {
+                connection.setGestureDetectionPassthroughRegion(displayId, region);
+            } catch (RemoteException re) {
+                throw new RuntimeException(re);
+            }
+        }
+    }
+
+    /**
+     * When {@link AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled, this
+     * function requests that touch interactions starting in the specified region of the screen
+     * bypass the touch explorer and go straight to the view hierarchy. There can only be one touch
+     * exploration passthrough region per display. Requesting a new touch explorationpassthrough
+     * region clears the existing one. To disable this passthrough and return to the original
+     * behavior, pass in an empty region. When {@link
+     * AccessibilityServiceInfo#FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is disabled this function has
+     * no effect.
+     *
+     * @param displayId The display on which to set this region.
+     * @param region the region of the screen .
+     */
+    public void setTouchExplorationPassthroughRegion(int displayId, @NonNull Region region) {
+        Preconditions.checkNotNull(region, "region cannot be null");
+        final IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        if (connection != null) {
+            try {
+                connection.setTouchExplorationPassthroughRegion(displayId, region);
+            } catch (RemoteException re) {
+                throw new RuntimeException(re);
+            }
+        }
     }
 }

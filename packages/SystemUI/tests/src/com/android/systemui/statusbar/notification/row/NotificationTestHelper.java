@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpansionLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -102,8 +103,8 @@ public class NotificationTestHelper {
         mStatusBarStateController = mock(StatusBarStateController.class);
         mGroupManager = new NotificationGroupManager(mStatusBarStateController);
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarStateController,
-                mock(KeyguardBypassController.class));
-        mHeadsUpManager.setUp(null, mGroupManager, null, null);
+                mock(KeyguardBypassController.class), mock(NotificationGroupManager.class),
+                mock(ConfigurationControllerImpl.class));
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
 
         NotificationContentInflater contentBinder = new NotificationContentInflater(

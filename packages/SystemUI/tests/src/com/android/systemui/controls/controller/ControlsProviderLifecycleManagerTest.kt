@@ -19,7 +19,6 @@ package com.android.systemui.controls.controller
 import android.content.ComponentName
 import android.os.UserHandle
 import android.service.controls.IControlsActionCallback
-import android.service.controls.IControlsLoadCallback
 import android.service.controls.IControlsProvider
 import android.service.controls.IControlsSubscriber
 import android.service.controls.actions.ControlAction
@@ -32,13 +31,13 @@ import com.android.systemui.util.time.FakeSystemClock
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
@@ -53,8 +52,6 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var actionCallbackService: IControlsActionCallback.Stub
-    @Mock
-    private lateinit var loadCallbackService: IControlsLoadCallback.Stub
     @Mock
     private lateinit var subscriberService: IControlsSubscriber.Stub
     @Mock
@@ -85,7 +82,6 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
         manager = ControlsProviderLifecycleManager(
                 context,
                 executor,
-                loadCallbackService,
                 actionCallbackService,
                 subscriberService,
                 UserHandle.of(0),
@@ -113,31 +109,29 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
 
     @Test
     fun testMaybeBindAndLoad() {
-        manager.maybeBindAndLoad(loadCallback)
+        manager.maybeBindAndLoad(subscriberService)
 
-        verify(service).load(loadCallbackService)
+        verify(service).load(subscriberService)
 
         assertTrue(mContext.isBound(componentName))
-        assertEquals(loadCallback, manager.lastLoadCallback)
     }
 
     @Test
     fun testMaybeUnbind_bindingAndCallback() {
-        manager.maybeBindAndLoad(loadCallback)
+        manager.maybeBindAndLoad(subscriberService)
 
         manager.unbindService()
         assertFalse(mContext.isBound(componentName))
-        assertNull(manager.lastLoadCallback)
     }
 
     @Test
     fun testMaybeBindAndLoad_timeout() {
-        manager.maybeBindAndLoad(loadCallback)
+        manager.maybeBindAndLoad(subscriberService)
 
         executor.advanceClockToLast()
         executor.runAllReady()
 
-        verify(loadCallback).error(anyString())
+        verify(subscriberService).onError(any(), anyString())
     }
 
     @Test

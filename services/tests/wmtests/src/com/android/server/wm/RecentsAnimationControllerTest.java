@@ -20,7 +20,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
@@ -53,6 +55,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager.TaskSnapshot;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -65,11 +69,15 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
+import com.google.common.truth.Truth;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
 
 /**
  * Build/Install/Run:
@@ -328,6 +336,107 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // IRecentsAnimationController#setCancelWithDeferredScreenshot called.
         assertFalse(mController.shouldDeferCancelWithScreenshot());
         assertTrue(activity.shouldAnimate(TRANSIT_ACTIVITY_CLOSE));
+    }
+
+    @Test
+    public void testRecentViewInFixedPortraitWhenTopAppInLandscape() {
+        mWm.mIsFixedRotationTransformEnabled = true;
+        mWm.setRecentsAnimationController(mController);
+
+        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+        final ActivityRecord homeAppWindow =
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                        .setStack(homeStack)
+                        .setCreateTask(true)
+                        .build();
+        final ActivityRecord appWindow = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState win0 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
+        appWindow.addWindow(win0);
+
+        final ActivityRecord landActivity = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        landActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, landActivity, "win1");
+        landActivity.addWindow(win1);
+
+        assertEquals(landActivity.getTask().getTopVisibleActivity(), landActivity);
+        assertEquals(landActivity.findMainWindow(), win1);
+
+        // Ensure that the display is in Landscape
+        landActivity.onDescendantOrientationChanged(landActivity.token, landActivity);
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE,
+                mDisplayContent.getConfiguration().orientation);
+
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeAppWindow);
+
+        // Check that the home app is in portrait
+        assertEquals(Configuration.ORIENTATION_PORTRAIT,
+                homeAppWindow.getConfiguration().orientation);
+    }
+
+    @Test
+    public void testWallpaperHasFixedRotationApplied() {
+        mWm.mIsFixedRotationTransformEnabled = true;
+        mWm.setRecentsAnimationController(mController);
+
+        // Create a portrait home stack, a wallpaper and a landscape application displayed on top.
+
+        // Home stack
+        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+        final ActivityRecord homeActivity =
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                        .setStack(homeStack)
+                        .setCreateTask(true)
+                        .build();
+        homeActivity.setOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        final WindowState homeWindow = createWindow(null, TYPE_BASE_APPLICATION, homeActivity,
+                "homeWindow");
+        homeActivity.addWindow(homeWindow);
+        homeWindow.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
+
+        // Landscape application
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState applicationWindow = createWindow(null, TYPE_BASE_APPLICATION, activity,
+                "applicationWindow");
+        activity.addWindow(applicationWindow);
+        activity.setOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Wallpaper
+        final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
+                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
+        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
+                "wallpaperWindow");
+
+        // Make sure the landscape activity is on top and the display is in landscape
+        activity.moveFocusableActivityToTop("test");
+        mDisplayContent.getConfiguration().windowConfiguration.setRotation(
+                mDisplayContent.getRotation());
+
+
+        spyOn(mDisplayContent.mWallpaperController);
+        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+
+        // Start the recents animation
+        mController
+                .initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
+
+        mDisplayContent.mWallpaperController.adjustWallpaperWindows();
+
+        // Check preconditions
+        ArrayList<WallpaperWindowToken> wallpapers = new ArrayList<>(1);
+        mDisplayContent.forAllWallpaperWindows(wallpapers::add);
+
+        Truth.assertThat(wallpapers).hasSize(1);
+        Truth.assertThat(wallpapers.get(0).getTopChild()).isEqualTo(wallpaperWindow);
+
+        // Actual check
+        assertEquals(Configuration.ORIENTATION_PORTRAIT,
+                wallpapers.get(0).getConfiguration().orientation);
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {

@@ -22,10 +22,8 @@ import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LE
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
-import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
@@ -94,29 +92,24 @@ public class ShortcutKeyDispatcher extends SystemUI
     }
 
     private void handleDockKey(long shortcutCode) {
-        try {
-            int dockSide = mWindowManagerService.getDockedStackSide();
-            if (dockSide == WindowManager.DOCKED_INVALID) {
-                // Split the screen
-                mRecents.splitPrimaryTask((shortcutCode == SC_DOCK_LEFT)
-                        ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
-                        : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, null, -1);
-            } else {
-                // If there is already a docked window, we respond by resizing the docking pane.
-                DividerView dividerView = mDivider.getView();
-                DividerSnapAlgorithm snapAlgorithm = dividerView.getSnapAlgorithm();
-                int dividerPosition = dividerView.getCurrentPosition();
-                DividerSnapAlgorithm.SnapTarget currentTarget =
-                        snapAlgorithm.calculateNonDismissingSnapTarget(dividerPosition);
-                DividerSnapAlgorithm.SnapTarget target = (shortcutCode == SC_DOCK_LEFT)
-                        ? snapAlgorithm.getPreviousTarget(currentTarget)
-                        : snapAlgorithm.getNextTarget(currentTarget);
-                dividerView.startDragging(true /* animate */, false /* touching */);
-                dividerView.stopDragging(target.position, 0f, false /* avoidDismissStart */,
-                        true /* logMetrics */);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "handleDockKey() failed.");
+        if (mDivider == null || !mDivider.inSplitMode()) {
+            // Split the screen
+            mRecents.splitPrimaryTask((shortcutCode == SC_DOCK_LEFT)
+                    ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
+                    : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, null, -1);
+        } else {
+            // If there is already a docked window, we respond by resizing the docking pane.
+            DividerView dividerView = mDivider.getView();
+            DividerSnapAlgorithm snapAlgorithm = dividerView.getSnapAlgorithm();
+            int dividerPosition = dividerView.getCurrentPosition();
+            DividerSnapAlgorithm.SnapTarget currentTarget =
+                    snapAlgorithm.calculateNonDismissingSnapTarget(dividerPosition);
+            DividerSnapAlgorithm.SnapTarget target = (shortcutCode == SC_DOCK_LEFT)
+                    ? snapAlgorithm.getPreviousTarget(currentTarget)
+                    : snapAlgorithm.getNextTarget(currentTarget);
+            dividerView.startDragging(true /* animate */, false /* touching */);
+            dividerView.stopDragging(target.position, 0f, false /* avoidDismissStart */,
+                    true /* logMetrics */);
         }
     }
 }

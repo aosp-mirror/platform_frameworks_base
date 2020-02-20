@@ -1035,10 +1035,12 @@ public class AppOpsManager {
     public static final int OP_ACTIVATE_PLATFORM_VPN = 94;
     /** @hide */
     public static final int OP_LOADER_USAGE_STATS = 95;
+    /** @hide Access telephony call audio */
+    public static final int OP_ACCESS_CALL_AUDIO = 96;
 
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 96;
+    public static final int _NUM_OP = 97;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1329,6 +1331,9 @@ public class AppOpsManager {
     @SystemApi
     public static final String OPSTR_MANAGE_EXTERNAL_STORAGE =
             "android:manage_external_storage";
+    /** @hide Access telephony call audio */
+    @SystemApi
+    public static final String OPSTR_ACCESS_CALL_AUDIO = "android:access_call_audio";
 
     /** @hide Communicate cross-profile within the same profile group. */
     @SystemApi
@@ -1418,6 +1423,7 @@ public class AppOpsManager {
             OP_MANAGE_EXTERNAL_STORAGE,
             OP_INTERACT_ACROSS_PROFILES,
             OP_LOADER_USAGE_STATS,
+            OP_ACCESS_CALL_AUDIO,
     };
 
     /**
@@ -1525,6 +1531,7 @@ public class AppOpsManager {
             OP_INTERACT_ACROSS_PROFILES,        //INTERACT_ACROSS_PROFILES
             OP_ACTIVATE_PLATFORM_VPN,           // ACTIVATE_PLATFORM_VPN
             OP_LOADER_USAGE_STATS,              // LOADER_USAGE_STATS
+            OP_ACCESS_CALL_AUDIO,               // ACCESS_CALL_AUDIO
     };
 
     /**
@@ -1627,6 +1634,7 @@ public class AppOpsManager {
             OPSTR_INTERACT_ACROSS_PROFILES,
             OPSTR_ACTIVATE_PLATFORM_VPN,
             OPSTR_LOADER_USAGE_STATS,
+            OPSTR_ACCESS_CALL_AUDIO,
     };
 
     /**
@@ -1730,6 +1738,7 @@ public class AppOpsManager {
             "INTERACT_ACROSS_PROFILES",
             "ACTIVATE_PLATFORM_VPN",
             "LOADER_USAGE_STATS",
+            "ACCESS_CALL_AUDIO",
     };
 
     /**
@@ -1834,6 +1843,7 @@ public class AppOpsManager {
             android.Manifest.permission.INTERACT_ACROSS_PROFILES,
             null, // no permission for OP_ACTIVATE_PLATFORM_VPN
             android.Manifest.permission.LOADER_USAGE_STATS,
+            Manifest.permission.ACCESS_CALL_AUDIO,
     };
 
     /**
@@ -1938,6 +1948,7 @@ public class AppOpsManager {
             null, // INTERACT_ACROSS_PROFILES
             null, // ACTIVATE_PLATFORM_VPN
             null, // LOADER_USAGE_STATS
+            null, // ACCESS_CALL_AUDIO
     };
 
     /**
@@ -2041,6 +2052,7 @@ public class AppOpsManager {
             false, // INTERACT_ACROSS_PROFILES
             false, // ACTIVATE_PLATFORM_VPN
             false, // LOADER_USAGE_STATS
+            false, // ACCESS_CALL_AUDIO
     };
 
     /**
@@ -2143,6 +2155,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // INTERACT_ACROSS_PROFILES
             AppOpsManager.MODE_IGNORED, // ACTIVATE_PLATFORM_VPN
             AppOpsManager.MODE_DEFAULT, // LOADER_USAGE_STATS
+            AppOpsManager.MODE_DEFAULT, // ACCESS_CALL_AUDIO
     };
 
     /**
@@ -2249,6 +2262,7 @@ public class AppOpsManager {
             false, // INTERACT_ACROSS_PROFILES
             false, // ACTIVATE_PLATFORM_VPN
             false, // LOADER_USAGE_STATS
+            false, // ACCESS_CALL_AUDIO
     };
 
     /**

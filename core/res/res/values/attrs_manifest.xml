@@ -2809,6 +2809,9 @@
              case-sensitive, unlike formal RFC MIME types.  As a result,
              MIME types here should always use lower case letters.</em></p> -->
         <attr name="mimeType" format="string" />
+        <!-- Specify a group of MIME types that are handled. MIME types can be added and
+             removed to a package's MIME group via the PackageManager. -->
+        <attr name="mimeGroup" format="string" />
         <!-- Specify a URI scheme that is handled, as per
              {@link android.content.IntentFilter#addDataScheme
              IntentFilter.addDataScheme()}.

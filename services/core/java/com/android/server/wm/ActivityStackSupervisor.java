@@ -108,6 +108,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -755,6 +756,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
                 modifiedFlags |= PackageManager.MATCH_INSTANT;
             }
+            int privateResolveFlags  = 0;
+            if (intent.isWebIntent()
+                        && (intent.getFlags() & Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER) != 0) {
+                privateResolveFlags |= PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY;
+            }
+            if ((intent.getFlags() & Intent.FLAG_ACTIVITY_REQUIRE_DEFAULT) != 0) {
+                privateResolveFlags |= PackageManagerInternal.RESOLVE_NON_RESOLVER_ONLY;
+            }
 
             // In order to allow cross-profile lookup, we clear the calling identity here.
             // Note the binder identity won't affect the result, but filterCallingUid will.
@@ -764,7 +773,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             final long token = Binder.clearCallingIdentity();
             try {
                 return mService.getPackageManagerInternalLocked().resolveIntent(
-                        intent, resolvedType, modifiedFlags, userId, true, filterCallingUid);
+                        intent, resolvedType, modifiedFlags, privateResolveFlags, userId, true,
+                        filterCallingUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2447,7 +2457,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // split-screen in split-screen.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                moveTasksToFullscreenStackLocked(dockedStack, actualStack == dockedStack);
+                dockedStack.getDisplay().onSplitScreenModeDismissed();
+                dockedStack.getDisplay().ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
+                        true /* notifyClients */);
             }
             return;
         }
@@ -2809,7 +2821,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 final DisplayContent display = task.getStack().getDisplay();
                 final ActivityStack topSecondaryStack =
                         display.getTopStackInWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-                if (topSecondaryStack.isActivityTypeHome()) {
+                if (topSecondaryStack != null && topSecondaryStack.isActivityTypeHome()) {
                     // If the home activity is the top split-screen secondary stack, then the
                     // primary split-screen stack is in the minimized mode which means it can't
                     // receive input keys, so we should move the focused app to the home app so that

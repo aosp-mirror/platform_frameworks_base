@@ -226,6 +226,8 @@ public final class Settings {
     @Deprecated
     private static final String TAG_SUSPENDED_LAUNCHER_EXTRAS = "suspended-launcher-extras";
     private static final String TAG_SUSPEND_PARAMS = "suspend-params";
+    private static final String TAG_MIME_GROUP = "mime-group";
+    private static final String TAG_MIME_TYPE = "mime-type";
 
     public static final String ATTR_NAME = "name";
     public static final String ATTR_PACKAGE = "package";
@@ -266,6 +268,7 @@ public final class Settings {
     private static final String ATTR_VOLUME_UUID = "volumeUuid";
     private static final String ATTR_SDK_VERSION = "sdkVersion";
     private static final String ATTR_DATABASE_VERSION = "databaseVersion";
+    private static final String ATTR_VALUE = "value";
 
     private final Object mLock;
 
@@ -511,8 +514,7 @@ public final class Settings {
                 p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
                 p.secondaryCpuAbiString, p.cpuAbiOverrideString,
                 p.appId, p.versionCode, p.pkgFlags, p.pkgPrivateFlags,
-                p.usesStaticLibraries,
-                p.usesStaticLibrariesVersions);
+                p.usesStaticLibraries, p.usesStaticLibrariesVersions, p.mimeGroups);
         mDisabledSysPackages.remove(name);
         return ret;
     }
@@ -529,7 +531,7 @@ public final class Settings {
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, long vc, int
             pkgFlags, int pkgPrivateFlags, String[] usesStaticLibraries,
-            long[] usesStaticLibraryNames) {
+            long[] usesStaticLibraryNames, Map<String, ArraySet<String>> mimeGroups) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -542,7 +544,8 @@ public final class Settings {
         p = new PackageSetting(name, realName, codePath, resourcePath,
                 legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
                 cpuAbiOverrideString, vc, pkgFlags, pkgPrivateFlags,
-                0 /*userId*/, usesStaticLibraries, usesStaticLibraryNames);
+                0 /*userId*/, usesStaticLibraries, usesStaticLibraryNames,
+                mimeGroups);
         p.appId = uid;
         if (registerExistingAppIdLPw(uid, p, name)) {
             mPackages.put(name, p);
@@ -605,7 +608,8 @@ public final class Settings {
             String secondaryCpuAbi, long versionCode, int pkgFlags, int pkgPrivateFlags,
             UserHandle installUser, boolean allowInstall, boolean instantApp,
             boolean virtualPreload, UserManagerService userManager,
-            String[] usesStaticLibraries, long[] usesStaticLibrariesVersions) {
+            String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
+            Set<String> mimeGroupNames) {
         final PackageSetting pkgSetting;
         if (originalPkg != null) {
             if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
@@ -631,7 +635,7 @@ public final class Settings {
                     legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
                     null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
                     0 /*sharedUserId*/, usesStaticLibraries,
-                    usesStaticLibrariesVersions);
+                    usesStaticLibrariesVersions, createMimeGroups(mimeGroupNames));
             pkgSetting.setTimeStamp(codePath.lastModified());
             pkgSetting.sharedUser = sharedUser;
             // If this is not a system app, it starts out stopped.
@@ -704,6 +708,14 @@ public final class Settings {
         return pkgSetting;
     }
 
+    private static Map<String, ArraySet<String>> createMimeGroups(Set<String> mimeGroupNames) {
+        if (mimeGroupNames == null) {
+            return null;
+        }
+
+        return new KeySetToValueMap<>(mimeGroupNames, new ArraySet<>());
+    }
+
     /**
      * Updates the given package setting using the provided information.
      * <p>
@@ -715,7 +727,8 @@ public final class Settings {
             @Nullable String legacyNativeLibraryPath, @Nullable String primaryCpuAbi,
             @Nullable String secondaryCpuAbi, int pkgFlags, int pkgPrivateFlags,
             @NonNull UserManagerService userManager,
-            @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions)
+            @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions,
+            @Nullable Set<String> mimeGroupNames)
                     throws PackageManagerException {
         final String pkgName = pkgSetting.name;
         if (pkgSetting.sharedUser != sharedUser) {
@@ -801,6 +814,7 @@ public final class Settings {
             pkgSetting.usesStaticLibraries = null;
             pkgSetting.usesStaticLibrariesVersions = null;
         }
+        pkgSetting.updateMimeGroups(mimeGroupNames);
     }
 
     /**
@@ -2855,6 +2869,7 @@ public final class Settings {
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
         writeKeySetAliasesLPr(serializer, pkg.keySetData);
         writeDomainVerificationsLPr(serializer, pkg.verificationInfo);
+        writeMimeGroupLPr(serializer, pkg.mimeGroups);
 
         serializer.endTag(null, "package");
     }
@@ -3506,7 +3521,7 @@ public final class Settings {
         PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
                 new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiStr,
                 secondaryCpuAbiStr, cpuAbiOverrideStr, versionCode, pkgFlags, pkgPrivateFlags,
-                0 /*sharedUserId*/, null, null);
+                0 /*sharedUserId*/, null, null, null);
         String timeStampStr = parser.getAttributeValue(null, "ft");
         if (timeStampStr != null) {
             try {
@@ -3745,8 +3760,8 @@ public final class Settings {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
                         new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiString,
                         secondaryCpuAbiString, cpuAbiOverrideString, userId, versionCode, pkgFlags,
-                        pkgPrivateFlags,
-                        null /*usesStaticLibraries*/, null /*usesStaticLibraryVersions*/);
+                        pkgPrivateFlags, null /*usesStaticLibraries*/,
+                        null /*usesStaticLibraryVersions*/, null /*mimeGroups*/);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
                             + userId + " pkg=" + packageSetting);
@@ -3764,9 +3779,10 @@ public final class Settings {
                     packageSetting = new PackageSetting(name.intern(), realName, new File(
                             codePathStr), new File(resourcePathStr), legacyNativeLibraryPathStr,
                             primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                            versionCode, pkgFlags, pkgPrivateFlags,
-                            sharedUserId,
-                            null /*usesStaticLibraries*/, null /*usesStaticLibraryVersions*/);
+                            versionCode, pkgFlags, pkgPrivateFlags, sharedUserId,
+                            null /*usesStaticLibraries*/,
+                            null /*usesStaticLibraryVersions*/,
+                            null /*mimeGroups*/);
                     packageSetting.setTimeStamp(timeStamp);
                     packageSetting.firstInstallTime = firstInstallTime;
                     packageSetting.lastUpdateTime = lastUpdateTime;
@@ -3880,6 +3896,8 @@ public final class Settings {
                             packageSetting.installSource.setInitiatingPackageSignatures(signatures);
                 } else if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
                     readDomainVerificationLPw(parser, packageSetting);
+                } else if (tagName.equals(TAG_MIME_GROUP)) {
+                    packageSetting.mimeGroups = readMimeGroupLPw(parser, packageSetting.mimeGroups);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <package>: " + parser.getName());
@@ -3900,6 +3918,67 @@ public final class Settings {
         }
         if (installSource.originatingPackageName != null) {
             mInstallerPackages.add(installSource.originatingPackageName);
+        }
+    }
+
+    private Map<String, ArraySet<String>> readMimeGroupLPw(XmlPullParser parser,
+            Map<String, ArraySet<String>> mimeGroups) throws XmlPullParserException, IOException {
+        String groupName = parser.getAttributeValue(null, ATTR_NAME);
+        if (groupName == null) {
+            XmlUtils.skipCurrentTag(parser);
+            return mimeGroups;
+        }
+
+        if (mimeGroups == null) {
+            mimeGroups = new ArrayMap<>();
+        }
+
+        ArraySet<String> mimeTypes = mimeGroups.get(groupName);
+        if (mimeTypes == null) {
+            mimeTypes = new ArraySet<>();
+            mimeGroups.put(groupName, mimeTypes);
+        }
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_MIME_TYPE)) {
+                String typeName = parser.getAttributeValue(null, ATTR_VALUE);
+                if (typeName != null) {
+                    mimeTypes.add(typeName);
+                }
+            } else {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Unknown element under <mime-group>: " + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+
+        return mimeGroups;
+    }
+
+    private void writeMimeGroupLPr(XmlSerializer serializer,
+            Map<String, ArraySet<String>> mimeGroups) throws IOException {
+        if (mimeGroups == null) {
+            return;
+        }
+
+        for (String mimeGroup: mimeGroups.keySet()) {
+            serializer.startTag(null, TAG_MIME_GROUP);
+            serializer.attribute(null, ATTR_NAME, mimeGroup);
+
+            for (String mimeType: mimeGroups.get(mimeGroup)) {
+                serializer.startTag(null, TAG_MIME_TYPE);
+                serializer.attribute(null, ATTR_VALUE, mimeType);
+                serializer.endTag(null, TAG_MIME_TYPE);
+            }
+
+            serializer.endTag(null, TAG_MIME_GROUP);
         }
     }
 
@@ -5113,6 +5192,77 @@ public final class Settings {
             mRuntimePermissionsPersistence.writePermissionsForUserSyncLPr(userId);
         } else {
             mRuntimePermissionsPersistence.writePermissionsForUserAsyncLPr(userId);
+        }
+    }
+
+    private static class KeySetToValueMap<K, V> implements Map<K, V> {
+        @NonNull
+        private final Set<K> mKeySet;
+        private final V mValue;
+
+        KeySetToValueMap(@NonNull Set<K> keySet, V value) {
+            mKeySet = keySet;
+            mValue = value;
+        }
+
+        @Override
+        public int size() {
+            return mKeySet.size();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return mKeySet.isEmpty();
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            return mKeySet.contains(key);
+        }
+
+        @Override
+        public boolean containsValue(Object value) {
+            return mValue == value;
+        }
+
+        @Override
+        public V get(Object key) {
+            return mValue;
+        }
+
+        @Override
+        public V put(K key, V value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public V remove(Object key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void putAll(Map<? extends K, ? extends V> m) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Set<K> keySet() {
+            return mKeySet;
+        }
+
+        @Override
+        public Collection<V> values() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Set<Entry<K, V>> entrySet() {
+            throw new UnsupportedOperationException();
         }
     }
 

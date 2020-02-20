@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2020, The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package android.service.controls;
+package com.android.frameworks.coretests;
 
-import android.service.controls.Control;
+import android.app.Activity;
 
-/**
- * @hide
- */
-oneway interface IControlsLoadCallback {
-    void accept(in IBinder token, in List<Control> controls);
+public class TestActivity extends Activity {
+
 }

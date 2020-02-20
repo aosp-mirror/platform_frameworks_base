@@ -214,6 +214,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
      * Updates the mSessionInfo. Returns true if the session info is changed.
      */
     boolean updateSessionInfosIfNeededLocked() {
+        // Prevent to execute this method before mBtRouteProvider is created.
+        if (mBtRouteProvider == null) return false;
         RoutingSessionInfo oldSessionInfo = mSessionInfos.isEmpty() ? null : mSessionInfos.get(0);
 
         RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(

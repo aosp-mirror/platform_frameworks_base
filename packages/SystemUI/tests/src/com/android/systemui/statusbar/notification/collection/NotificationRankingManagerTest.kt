@@ -145,6 +145,47 @@ class NotificationRankingManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testSort_importantPeople() {
+        val aN = Notification.Builder(mContext, "test")
+                .setStyle(Notification.MessagingStyle(""))
+                .build()
+        val aC = NotificationChannel("test", "", IMPORTANCE_DEFAULT)
+        aC.setConversationId("parent", "convo")
+        val a = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(aN)
+                .setChannel(aC)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build()
+
+        val bN = Notification.Builder(mContext, "test")
+                .setStyle(Notification.MessagingStyle(""))
+                .build()
+        val bC = NotificationChannel("test", "", IMPORTANCE_DEFAULT)
+        bC.setConversationId("parent", "convo")
+        bC.setImportantConversation(true)
+        val b = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .setPkg("pkg2")
+                .setOpPkg("pkg2")
+                .setTag("tag")
+                .setNotification(bN)
+                .setChannel(bC)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build()
+
+
+        assertEquals(
+                listOf(b, a),
+                rankingManager.updateRanking(null, listOf(a, b), "test"))
+    }
+
+    @Test
     fun testSort_properlySetsAlertingBucket() {
         val notif = Notification.Builder(mContext, "test") .build()
 

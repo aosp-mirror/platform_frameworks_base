@@ -33,6 +33,8 @@ public final class ConversationChannelWrapper implements Parcelable {
     private CharSequence mGroupLabel;
     private CharSequence mParentChannelLabel;
     private ShortcutInfo mShortcutInfo;
+    private String mPkg;
+    private int mUid;
 
     public ConversationChannelWrapper() {}
 
@@ -41,6 +43,8 @@ public final class ConversationChannelWrapper implements Parcelable {
         mGroupLabel = in.readCharSequence();
         mParentChannelLabel = in.readCharSequence();
         mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader());
+        mPkg = in.readStringNoHelper();
+        mUid = in.readInt();
     }
 
     @Override
@@ -49,6 +53,8 @@ public final class ConversationChannelWrapper implements Parcelable {
         dest.writeCharSequence(mGroupLabel);
         dest.writeCharSequence(mParentChannelLabel);
         dest.writeParcelable(mShortcutInfo, flags);
+        dest.writeStringNoHelper(mPkg);
+        dest.writeInt(mUid);
     }
 
     @Override
@@ -103,6 +109,22 @@ public final class ConversationChannelWrapper implements Parcelable {
         mShortcutInfo = shortcutInfo;
     }
 
+    public String getPkg() {
+        return mPkg;
+    }
+
+    public void setPkg(String pkg) {
+        mPkg = pkg;
+    }
+
+    public int getUid() {
+        return mUid;
+    }
+
+    public void setUid(int uid) {
+        mUid = uid;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -111,12 +133,14 @@ public final class ConversationChannelWrapper implements Parcelable {
         return Objects.equals(getNotificationChannel(), that.getNotificationChannel()) &&
                 Objects.equals(getGroupLabel(), that.getGroupLabel()) &&
                 Objects.equals(getParentChannelLabel(), that.getParentChannelLabel()) &&
-                Objects.equals(getShortcutInfo(), that.getShortcutInfo());
+                Objects.equals(getShortcutInfo(), that.getShortcutInfo()) &&
+                Objects.equals(getPkg(), that.getPkg()) &&
+                getUid() == that.getUid();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getNotificationChannel(), getGroupLabel(), getParentChannelLabel(),
-                getShortcutInfo());
+                getShortcutInfo(), getPkg(), getUid());
     }
 }
