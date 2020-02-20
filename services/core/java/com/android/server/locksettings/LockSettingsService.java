@@ -530,6 +530,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             return Settings.Global.getInt(contentResolver, keyName, defaultValue);
         }
 
+        public int settingsSecureGetInt(ContentResolver contentResolver, String keyName,
+                int defaultValue, int userId) {
+            return Settings.Secure.getIntForUser(contentResolver, keyName, defaultValue, userId);
+        }
+
         public @NonNull ManagedProfilePasswordCache getManagedProfilePasswordCache() {
             try {
                 java.security.KeyStore ks = java.security.KeyStore.getInstance("AndroidKeyStore");
@@ -1007,6 +1012,13 @@ public class LockSettingsService extends ILockSettings.Stub {
             case DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK:
             default:
                 return quality;
+        }
+    }
+
+    private void enforceFrpResolved() {
+        if (mInjector.settingsSecureGetInt(mContext.getContentResolver(),
+                Settings.Secure.SECURE_FRP_MODE, 0, UserHandle.USER_SYSTEM) == 1) {
+            throw new SecurityException("Cannot change credential while FRP is not resolved yet");
         }
     }
 
@@ -1572,6 +1584,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     "This operation requires secure lock screen feature");
         }
         checkWritePermission(userId);
+        enforceFrpResolved();
 
         // When changing credential for profiles with unified challenge, some callers
         // will pass in empty credential while others will pass in the credential of
