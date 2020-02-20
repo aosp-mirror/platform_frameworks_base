@@ -1876,24 +1876,6 @@ public class TelephonyManager {
     //
 
     /**
-     * Returns the {@link PhoneCapability} for the device or null if it is not available.
-     * <p>
-     * Requires Permission: READ_PHONE_STATE or that the calling app has
-     * carrier privileges (see {@link #hasCarrierPrivileges}).
-     */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @Nullable
-    public PhoneCapability getPhoneCapability() {
-        try {
-            ITelephony telephony = getITelephony();
-            return telephony == null ? null :
-                    telephony.getPhoneCapability(getSubId(), getOpPackageName(), getFeatureId());
-        } catch (RemoteException ex) {
-            return null;
-        }
-    }
-
-    /**
      * Returns the software version number for the device, for example,
      * the IMEI/SV for GSM phones. Return null if the software version is
      * not available.
