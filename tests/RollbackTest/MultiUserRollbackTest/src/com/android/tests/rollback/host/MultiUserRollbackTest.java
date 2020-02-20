@@ -51,8 +51,8 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
     public void setup() throws Exception {
         mOriginalUserId = getDevice().getCurrentUser();
         createAndStartSecondaryUser();
-        installPackageAsUser("RollbackTest.apk", true, mOriginalUserId);
-        installPackageAsUser("RollbackTest.apk", true, mSecondaryUserId);
+        // TODO(b/149733368): Remove the '-g' workaround when the bug is fixed.
+        installPackage("RollbackTest.apk", "-g --user all");
     }
 
     @Test
