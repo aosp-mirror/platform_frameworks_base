@@ -34,6 +34,9 @@
       "options": [
         {
           "include-filter": "android.content.pm.cts.PackageManagerShellCommandTest"
+        },
+        {
+          "include-filter": "android.content.pm.cts.PackageManagerShellCommandIncrementalTest"
         }
       ]
     },
