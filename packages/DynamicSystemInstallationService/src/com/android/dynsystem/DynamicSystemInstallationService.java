@@ -462,7 +462,7 @@ public class DynamicSystemInstallationService extends Service
                         .setStyle(new Notification.BigTextStyle().bigText(msgInUse));
 
                 builder.addAction(new Notification.Action.Builder(
-                        null, getString(R.string.notification_action_uninstall),
+                        null, getString(R.string.notification_action_reboot_to_origin),
                         createPendingIntent(ACTION_REBOOT_TO_NORMAL)).build());
 
                 break;
