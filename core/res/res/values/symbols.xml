@@ -688,7 +688,6 @@
   <java-symbol type="string" name="capability_title_canControlMagnification" />
   <java-symbol type="string" name="capability_desc_canPerformGestures" />
   <java-symbol type="string" name="capability_title_canPerformGestures" />
-  <java-symbol type="string" name="captive_portal_logged_in_detailed" />
   <java-symbol type="string" name="capital_off" />
   <java-symbol type="string" name="capital_on" />
   <java-symbol type="string" name="cfTemplateForwarded" />
