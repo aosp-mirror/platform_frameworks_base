@@ -67,7 +67,7 @@ class ResetTargetTaskHelper {
 
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 ResetTargetTaskHelper::processTask, this, PooledLambda.__(Task.class));
-        targetTask.mWmService.mRoot.forAllTasks(c, true /*traverseTopToBottom*/, mTargetStack);
+        targetTask.mWmService.mRoot.forAllLeafTasks(c, true /*traverseTopToBottom*/);
         c.recycle();
 
         processPendingReparentActivities();
@@ -245,9 +245,8 @@ class ResetTargetTaskHelper {
                 if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "
                         + r + " out to bottom task " + targetTask);
             } else {
-                targetTask = mTargetStack.createTask(
-                        atmService.mStackSupervisor.getNextTaskIdForUser(r.mUserId), r.info,
-                        null /* intent */, false /* toTop */);
+                targetTask = mTargetStack.reuseOrCreateTask(
+                        r.info, null /*intent*/, false /*toTop*/);
                 targetTask.affinityIntent = r.intent;
                 createdTasks.add(targetTask);
                 if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "
