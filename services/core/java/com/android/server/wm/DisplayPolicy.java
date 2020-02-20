@@ -131,7 +131,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.hardware.power.V1_0.PowerHint;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -303,6 +302,8 @@ public class DisplayPolicy {
     private int[] mNavigationBarFrameHeightForRotationDefault = new int[4];
 
     private boolean mIsFreeformWindowOverlappingWithNavBar;
+
+    private boolean mLastImmersiveMode;
 
     private final StatusBarController mStatusBarController;
 
@@ -3182,8 +3183,8 @@ public class DisplayPolicy {
                     if (nb) mNavigationBarController.showTransient();
                     updateSystemUiVisibilityLw();
                 }
-                mImmersiveModeConfirmation.confirmCurrentPrompt();
             }
+            mImmersiveModeConfirmation.confirmCurrentPrompt();
         }
     }
 
@@ -3210,7 +3211,7 @@ public class DisplayPolicy {
         updateSystemUiVisibilityLw();
     }
 
-    private int updateSystemUiVisibilityLw() {
+    int updateSystemUiVisibilityLw() {
         // If there is no window focused, there will be nobody to handle the events
         // anyway, so just hang on in whatever state we're in until things settle down.
         WindowState winCandidate = mFocusedWindow != null ? mFocusedWindow
@@ -3566,9 +3567,11 @@ public class DisplayPolicy {
         vis = mStatusBarController.updateVisibilityLw(transientStatusBarAllowed, oldVis, vis);
 
         // update navigation bar
-        boolean oldImmersiveMode = isImmersiveMode(oldVis);
-        boolean newImmersiveMode = isImmersiveMode(vis);
+        boolean newInsetsMode = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL;
+        boolean oldImmersiveMode = newInsetsMode ? mLastImmersiveMode : isImmersiveMode(oldVis);
+        boolean newImmersiveMode = newInsetsMode ? isImmersiveMode(win) : isImmersiveMode(vis);
         if (oldImmersiveMode != newImmersiveMode) {
+            mLastImmersiveMode = newImmersiveMode;
             final String pkg = win.getOwningPackage();
             mImmersiveModeConfirmation.immersiveModeChangedLw(pkg, newImmersiveMode,
                     mService.mPolicy.isUserSetupComplete(),
@@ -3673,12 +3676,23 @@ public class DisplayPolicy {
         }
     }
 
+    // TODO(b/118118435): Remove this after migration
     private boolean isImmersiveMode(int vis) {
         final int flags = View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         return mNavigationBar != null
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 && (vis & flags) != 0
                 && canHideNavigationBar();
+    }
+
+    private boolean isImmersiveMode(WindowState win) {
+        final int behavior = win.mAttrs.insetsFlags.behavior;
+        return mNavigationBar != null
+                && canHideNavigationBar()
+                && (behavior == BEHAVIOR_SHOW_BARS_BY_SWIPE
+                        || behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE)
+                && getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)
+                && win != getNotificationShade();
     }
 
     /**
