@@ -137,7 +137,8 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                         try {
                             mLastImeTarget = ActivityTaskManager.getTaskOrganizerController()
                                     .getImeTarget(displayId);
-                            mShouldAdjustForIme = !mSplitLayout.mDisplayLayout.isLandscape()
+                            mShouldAdjustForIme = mLastImeTarget != null
+                                    && !mSplitLayout.mDisplayLayout.isLandscape()
                                     && (mLastImeTarget.asBinder()
                                     == mSplits.mSecondary.token.asBinder());
                         } catch (RemoteException e) {
