@@ -1257,7 +1257,7 @@ public final class MediaFormat {
      * @throws ClassCastException if the stored value for the key is ByteBuffer or String
      */
     public final @Nullable Number getNumber(@NonNull String name) {
-        return ((Number)mMap.get(name));
+        return (Number) mMap.get(name);
     }
 
     /**
@@ -1280,7 +1280,7 @@ public final class MediaFormat {
      *         String
      */
     public final int getInteger(@NonNull String name) {
-        return ((Integer)mMap.get(name)).intValue();
+        return (int) mMap.get(name);
     }
 
     /**
@@ -1308,7 +1308,7 @@ public final class MediaFormat {
      *         String
      */
     public final long getLong(@NonNull String name) {
-        return ((Long)mMap.get(name)).longValue();
+        return (long) mMap.get(name);
     }
 
     /**
@@ -1336,7 +1336,7 @@ public final class MediaFormat {
      *         String
      */
     public final float getFloat(@NonNull String name) {
-        return ((Float)mMap.get(name)).floatValue();
+        return (float) mMap.get(name);
     }
 
     /**
@@ -1419,21 +1419,21 @@ public final class MediaFormat {
      * Sets the value of an integer key.
      */
     public final void setInteger(@NonNull String name, int value) {
-        mMap.put(name, Integer.valueOf(value));
+        mMap.put(name, value);
     }
 
     /**
      * Sets the value of a long key.
      */
     public final void setLong(@NonNull String name, long value) {
-        mMap.put(name, Long.valueOf(value));
+        mMap.put(name, value);
     }
 
     /**
      * Sets the value of a float key.
      */
     public final void setFloat(@NonNull String name, float value) {
-        mMap.put(name, new Float(value));
+        mMap.put(name, value);
     }
 
     /**
@@ -1558,7 +1558,7 @@ public final class MediaFormat {
 
         @Override
         public int size() {
-            return (int)mKeys.stream().filter(k -> keepKey(k)).count();
+            return (int) mKeys.stream().filter(this::keepKey).count();
         }
     }
 
