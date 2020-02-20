@@ -2718,6 +2718,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mRemovingDisplay = false;
         }
 
+        // Apply the pending transaction here since we may not be able to reach the DisplayContent
+        // on the next traversal if it's removed from RootWindowContainer child list.
+        getPendingTransaction().apply();
         mWmService.mWindowPlacerLocked.requestTraversal();
     }
 
