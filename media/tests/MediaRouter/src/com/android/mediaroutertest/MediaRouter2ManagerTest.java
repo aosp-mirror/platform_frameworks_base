@@ -55,7 +55,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -296,7 +295,7 @@ public class MediaRouter2ManagerTest {
         String selectedSystemRouteId =
                 MediaRouter2Utils.getOriginalId(
                 mManager.getActiveSessions().get(0).getSelectedRoutes().get(0));
-        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(Collections.emptyList());
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
         MediaRoute2Info volRoute = routes.get(selectedSystemRouteId);
         assertNotNull(volRoute);
 
@@ -429,10 +428,11 @@ public class MediaRouter2ManagerTest {
             }
 
             @Override
-            public void onControlCategoriesChanged(String packageName,
+            public void onPreferredFeaturesChanged(String packageName,
                     List<String> preferredFeatures) {
                 if (TextUtils.equals(mPackageName, packageName)
-                        && preferredFeatures.equals(routeFeatures)) {
+                        && preferredFeatures.size() == routeFeatures.size()
+                        && preferredFeatures.containsAll(routeFeatures)) {
                     featuresLatch.countDown();
                 }
             }
