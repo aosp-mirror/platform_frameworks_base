@@ -113,6 +113,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -5419,25 +5420,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setShelf(NotificationShelf shelf) {
+    public void setShelfController(NotificationShelfController notificationShelfController) {
         int index = -1;
         if (mShelf != null) {
             index = indexOfChild(mShelf);
             removeView(mShelf);
         }
-        mShelf = shelf;
+        mShelf = notificationShelfController.getView();
         addView(mShelf, index);
-        mAmbientState.setShelf(shelf);
-        mStateAnimator.setShelf(shelf);
-        shelf.bind(mAmbientState, this);
+        mAmbientState.setShelf(mShelf);
+        mStateAnimator.setShelf(mShelf);
+        notificationShelfController.bind(mAmbientState, this);
         if (ANCHOR_SCROLLING) {
             mScrollAnchorView = mShelf;
         }
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public NotificationShelf getNotificationShelf() {
-        return mShelf;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
