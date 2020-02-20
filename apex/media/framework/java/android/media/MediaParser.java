@@ -56,6 +56,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -404,9 +405,141 @@ public final class MediaParser {
         }
     }
 
+    // Public constants.
+
+    /**
+     * Sets whether constant bitrate seeking should be enabled for exo.AdtsParser. {@code boolean}
+     * expected. Default value is {@code false}.
+     */
+    public static final String PARAMETER_ADTS_ENABLE_CBR_SEEKING =
+            "exo.AdtsParser.enableCbrSeeking";
+    /**
+     * Sets whether constant bitrate seeking should be enabled for exo.AmrParser. {@code boolean}
+     * expected. Default value is {@code false}.
+     */
+    public static final String PARAMETER_AMR_ENABLE_CBR_SEEKING = "exo.AmrParser.enableCbrSeeking";
+    /**
+     * Sets whether the ID3 track should be disabled for exo.FlacParser. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_FLAC_DISABLE_ID3 = "exo.FlacParser.disableId3";
+    /**
+     * Sets whether exo.FragmentedMp4Parser should ignore edit lists. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_FMP4_IGNORE_EDIT_LISTS =
+            "exo.FragmentedMp4Parser.ignoreEditLists";
+    /**
+     * Sets whether exo.FragmentedMp4Parser should ignore the tfdt box. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_FMP4_IGNORE_TFDT_BOX =
+            "exo.FragmentedMp4Parser.ignoreTfdtBox";
+    /**
+     * Sets whether exo.FragmentedMp4Parser should treat all video frames as key frames. {@code
+     * boolean} expected. Default value is {@code false}.
+     */
+    public static final String PARAMETER_FMP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES =
+            "exo.FragmentedMp4Parser.treatVideoFramesAsKeyframes";
+    /**
+     * Sets whether exo.MatroskaParser should avoid seeking to the cues element. {@code boolean}
+     * expected. Default value is {@code false}.
+     *
+     * <p>If this flag is enabled and the cues element occurs after the first cluster, then the
+     * media is treated as unseekable.
+     */
+    public static final String PARAMETER_MATROSKA_DISABLE_CUES_SEEKING =
+            "exo.MatroskaParser.disableCuesSeeking";
+    /**
+     * Sets whether the ID3 track should be disabled for exo.Mp3Parser. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_MP3_DISABLE_ID3 = "exo.Mp3Parser.disableId3";
+    /**
+     * Sets whether constant bitrate seeking should be enabled for exo.Mp3Parser. {@code boolean}
+     * expected. Default value is {@code false}.
+     */
+    public static final String PARAMETER_MP3_ENABLE_CBR_SEEKING = "exo.Mp3Parser.enableCbrSeeking";
+    /**
+     * Sets whether exo.Mp3Parser should generate a time-to-byte mapping. {@code boolean} expected.
+     * Default value is {@code false}.
+     *
+     * <p>Enabling this flag may require to scan a significant portion of the file to compute a seek
+     * point. Therefore, it should only be used if:
+     *
+     * <ul>
+     *   <li>the file is small, or
+     *   <li>the bitrate is variable (or the type of bitrate is unknown) and the seeking metadata
+     *       provided in the file is not precise enough (or is not present).
+     * </ul>
+     */
+    public static final String PARAMETER_MP3_ENABLE_INDEX_SEEKING =
+            "exo.Mp3Parser.enableIndexSeeking";
+    /**
+     * Sets whether exo.Mp4Parser should ignore edit lists. {@code boolean} expected. Default value
+     * is {@code false}.
+     */
+    public static final String PARAMETER_MP4_IGNORE_EDIT_LISTS = "exo.Mp4Parser.ignoreEditLists";
+    /**
+     * Sets the operation mode for exo.TsParser. {@code String} expected. Valid values are {@code
+     * "single_pmt"}, {@code "multi_pmt"}, and {@code "hls"}. Default value is {@code "single_pmt"}.
+     *
+     * <p>The operation modes alter the way exo.TsParser behaves so that it can handle certain kinds
+     * of commonly-occurring malformed media.
+     *
+     * <ul>
+     *   <li>{@code "single_pmt"}: Only the first found PMT is parsed. Others are ignored, even if
+     *       more PMTs are declared in the PAT.
+     *   <li>{@code "multi_pmt"}: Behave as described in ISO/IEC 13818-1.
+     *   <li>{@code "hls"}: Enable {@code "single_pmt"} mode, and ignore continuity counters.
+     * </ul>
+     */
+    public static final String PARAMETER_TS_MODE = "exo.TsParser.mode";
+    /**
+     * Sets whether exo.TsParser should treat samples consisting of non-IDR I slices as
+     * synchronization samples (key-frames). {@code boolean} expected. Default value is {@code
+     * false}.
+     */
+    public static final String PARAMETER_TS_ALLOW_NON_IDR_AVC_KEYFRAMES =
+            "exo.TsParser.allowNonIdrAvcKeyframes";
+    /**
+     * Sets whether exo.TsParser should ignore AAC elementary streams. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_TS_IGNORE_AAC_STREAM = "exo.TsParser.ignoreAacStream";
+    /**
+     * Sets whether exo.TsParser should ignore AVC elementary streams. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_TS_IGNORE_AVC_STREAM = "exo.TsParser.ignoreAvcStream";
+    /**
+     * Sets whether exo.TsParser should ignore splice information streams. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM =
+            "exo.TsParser.ignoreSpliceInfoStream";
+    /**
+     * Sets whether exo.TsParser should split AVC stream into access units based on slice headers.
+     * {@code boolean} expected. Default value is {@code false}.
+     *
+     * <p>This flag should be left disabled if the stream contains access units delimiters in order
+     * to avoid unnecessary computational costs.
+     */
+    public static final String PARAMETER_TS_DETECT_ACCESS_UNITS =
+            "exo.TsParser.ignoreDetectAccessUnits";
+    /**
+     * Sets whether exo.TsParser should handle HDMV DTS audio streams. {@code boolean} expected.
+     * Default value is {@code false}.
+     *
+     * <p>Enabling this flag will disable the detection of SCTE subtitles.
+     */
+    public static final String PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS =
+            "exo.TsParser.enableHdmvDtsAudioStreams";
+
     // Private constants.
 
     private static final Map<String, ExtractorFactory> EXTRACTOR_FACTORIES_BY_NAME;
+    private static final Map<String, Class> EXPECTED_TYPE_BY_PARAMETER_NAME;
 
     // Instance creation methods.
 
@@ -462,6 +595,7 @@ public final class MediaParser {
 
     // Private fields.
 
+    private final Map<String, Object> mParserParameters;
     private final OutputConsumer mOutputConsumer;
     private final String[] mParserNamesPool;
     private final PositionHolder mPositionHolder;
@@ -475,6 +609,51 @@ public final class MediaParser {
     private long mPendingSeekTimeUs;
 
     // Public methods.
+
+    /**
+     * Sets parser-specific parameters which allow customizing behavior.
+     *
+     * <p>Must be called before the first call to {@link #advance}.
+     *
+     * @param parameterName The name of the parameter to set. See {@code PARAMETER_*} constants for
+     *     documentation on possible values.
+     * @param value The value to set for the given {@code parameterName}. See {@code PARAMETER_*}
+     *     constants for documentation on the expected types.
+     * @return This instance, for convenience.
+     * @throws IllegalStateException If called after calling {@link #advance} on the same instance.
+     */
+    @NonNull
+    public MediaParser setParameter(@NonNull String parameterName, @NonNull Object value) {
+        if (mExtractor != null) {
+            throw new IllegalStateException(
+                    "setParameters() must be called before the first advance() call.");
+        }
+        Class expectedType = EXPECTED_TYPE_BY_PARAMETER_NAME.get(parameterName);
+        // Ignore parameter names that are not contained in the map, in case the client is passing
+        // a parameter that is being added in a future version of this library.
+        if (expectedType != null && !expectedType.isInstance(value)) {
+            throw new IllegalArgumentException(
+                    parameterName
+                            + " expects a "
+                            + expectedType.getSimpleName()
+                            + " but a "
+                            + value.getClass().getSimpleName()
+                            + " was passed.");
+        }
+        mParserParameters.put(parameterName, value);
+        return this;
+    }
+
+    /**
+     * Returns whether the given {@code parameterName} is supported by this parser.
+     *
+     * @param parameterName The parameter name to check support for. One of the {@code PARAMETER_*}
+     *     constants.
+     * @return Whether the given {@code parameterName} is supported.
+     */
+    public boolean supportsParameter(@NonNull String parameterName) {
+        return EXPECTED_TYPE_BY_PARAMETER_NAME.containsKey(parameterName);
+    }
 
     /**
      * Returns the name of the backing parser implementation.
@@ -599,6 +778,7 @@ public final class MediaParser {
     // Private methods.
 
     private MediaParser(OutputConsumer outputConsumer, boolean sniff, String... parserNamesPool) {
+        mParserParameters = new HashMap<>();
         mOutputConsumer = outputConsumer;
         mParserNamesPool = parserNamesPool;
         if (!sniff) {
@@ -949,5 +1129,27 @@ public final class MediaParser {
         extractorFactoriesByName.put("exo.TsParser", TsExtractor::new);
         extractorFactoriesByName.put("exo.WavParser", WavExtractor::new);
         EXTRACTOR_FACTORIES_BY_NAME = Collections.unmodifiableMap(extractorFactoriesByName);
+
+        HashMap<String, Class> expectedTypeByParameterName = new HashMap<>();
+        expectedTypeByParameterName.put(PARAMETER_ADTS_ENABLE_CBR_SEEKING, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_AMR_ENABLE_CBR_SEEKING, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_FLAC_DISABLE_ID3, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_FMP4_IGNORE_EDIT_LISTS, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_FMP4_IGNORE_TFDT_BOX, Boolean.class);
+        expectedTypeByParameterName.put(
+                PARAMETER_FMP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MATROSKA_DISABLE_CUES_SEEKING, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MP3_DISABLE_ID3, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MP3_ENABLE_CBR_SEEKING, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MP3_ENABLE_INDEX_SEEKING, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MP4_IGNORE_EDIT_LISTS, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_MODE, String.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_ALLOW_NON_IDR_AVC_KEYFRAMES, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_IGNORE_AAC_STREAM, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_IGNORE_AVC_STREAM, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_DETECT_ACCESS_UNITS, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS, Boolean.class);
+        EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
     }
 }
