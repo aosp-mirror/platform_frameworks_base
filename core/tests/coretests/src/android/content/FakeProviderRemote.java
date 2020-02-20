@@ -54,4 +54,10 @@ public class FakeProviderRemote extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
     }
+
+    @Override
+    public Uri canonicalize(Uri uri) {
+        return new Uri.Builder().scheme(uri.getScheme()).authority(uri.getAuthority())
+                .appendPath("canonical").build();
+    }
 }

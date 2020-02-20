@@ -234,4 +234,12 @@ public class ContentResolverTest {
         assertThat(type).isNull();
         assertThat(end).isLessThan(start + 5000);
     }
+
+    @Test
+    public void testCanonicalize() {
+        Uri canonical = mResolver.canonicalize(
+                Uri.parse("content://android.content.FakeProviderRemote/something"));
+        assertThat(canonical).isEqualTo(
+                Uri.parse("content://android.content.FakeProviderRemote/canonical"));
+    }
 }
