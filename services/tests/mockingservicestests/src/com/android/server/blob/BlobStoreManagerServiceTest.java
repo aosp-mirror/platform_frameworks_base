@@ -303,6 +303,37 @@ public class BlobStoreManagerServiceTest {
         assertThat(mService.getKnownIdsForTest()).containsExactly(blobId1, blobId2, blobId3);
     }
 
+    @Test
+    public void testGetTotalUsageBytes() throws Exception {
+        // Setup blobs
+        final BlobMetadata blobMetadata1 = mock(BlobMetadata.class);
+        final long size1 = 4567;
+        doReturn(size1).when(blobMetadata1).getSize();
+        doReturn(true).when(blobMetadata1).isALeasee(TEST_PKG1, TEST_UID1);
+        doReturn(true).when(blobMetadata1).isALeasee(TEST_PKG2, TEST_UID2);
+        mUserBlobs.put(mock(BlobHandle.class), blobMetadata1);
+
+        final BlobMetadata blobMetadata2 = mock(BlobMetadata.class);
+        final long size2 = 89475;
+        doReturn(size2).when(blobMetadata2).getSize();
+        doReturn(false).when(blobMetadata2).isALeasee(TEST_PKG1, TEST_UID1);
+        doReturn(true).when(blobMetadata2).isALeasee(TEST_PKG2, TEST_UID2);
+        mUserBlobs.put(mock(BlobHandle.class), blobMetadata2);
+
+        final BlobMetadata blobMetadata3 = mock(BlobMetadata.class);
+        final long size3 = 328732;
+        doReturn(size3).when(blobMetadata3).getSize();
+        doReturn(true).when(blobMetadata3).isALeasee(TEST_PKG1, TEST_UID1);
+        doReturn(false).when(blobMetadata3).isALeasee(TEST_PKG2, TEST_UID2);
+        mUserBlobs.put(mock(BlobHandle.class), blobMetadata3);
+
+        // Verify usage is calculated correctly
+        assertThat(mService.getTotalUsageBytesLocked(TEST_UID1, TEST_PKG1))
+                .isEqualTo(size1 + size3);
+        assertThat(mService.getTotalUsageBytesLocked(TEST_UID2, TEST_PKG2))
+                .isEqualTo(size1 + size2);
+    }
+
     private BlobStoreSession createBlobStoreSessionMock(String ownerPackageName, int ownerUid,
             long sessionId, File sessionFile) {
         return createBlobStoreSessionMock(ownerPackageName, ownerUid, sessionId, sessionFile,
