@@ -27,7 +27,3 @@ PrivateSuperclass: android.location.GnssAntennaInfo.PhaseCenterVariationCorrecti
     Public class android.location.GnssAntennaInfo.PhaseCenterVariationCorrections extends private class android.location.GnssAntennaInfo.SphericalCorrections
 PrivateSuperclass: android.location.GnssAntennaInfo.SignalGainCorrections:
     Public class android.location.GnssAntennaInfo.SignalGainCorrections extends private class android.location.GnssAntennaInfo.SphericalCorrections
-
-
-StaticUtils: android.net.TetheringConstants:
-    Fully-static utility classes must not have constructor

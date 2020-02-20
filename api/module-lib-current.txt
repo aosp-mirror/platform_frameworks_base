@@ -30,7 +30,6 @@ package android.net {
   }
 
   public class TetheringConstants {
-    ctor public TetheringConstants();
     field public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
     field public static final String EXTRA_PROVISION_CALLBACK = "extraProvisionCallback";
     field public static final String EXTRA_REM_TETHER_TYPE = "extraRemTetherType";
