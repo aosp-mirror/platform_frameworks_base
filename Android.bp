@@ -1029,22 +1029,6 @@ aidl_interface {
     },
 }
 
-
-subdirs = [
-    "cmds/*",
-    "core/*",
-    "libs/*",
-    "media/*",
-    "proto",
-    "tools/*",
-    "native/android",
-    "native/graphics/jni",
-]
-
-optional_subdirs = [
-    "core/tests/utiltests/jni",
-]
-
 // TODO(b/77285514): remove this once the last few hidl interfaces have been
 // updated to use hwbinder.stubs.
 java_library {
