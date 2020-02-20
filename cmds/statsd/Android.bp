@@ -217,10 +217,7 @@ cc_binary {
 
     shared_libs: ["libgtest_prod"],
 
-    apex_available: [
-        "com.android.os.statsd",
-        "test_com.android.os.statsd",
-    ],
+    init_rc: ["statsd.rc"],
 }
 
 // ==============
