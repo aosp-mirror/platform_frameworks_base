@@ -86,7 +86,9 @@ filegroup {
 
 android_library {
     name: "SystemUI-tests",
-    manifest: "tests/AndroidManifest.xml",
+    manifest: "tests/AndroidManifest-base.xml",
+    additional_manifests: ["tests/AndroidManifest.xml"],
+
     resource_dirs: [
         "tests/res",
         "res-product",
