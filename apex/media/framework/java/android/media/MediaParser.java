@@ -375,13 +375,13 @@ public final class MediaParser {
     }
 
     /**
-     * Thrown if all extractors implementations provided to {@link #create} failed to sniff the
-     * input content.
+     * Thrown if all parser implementations provided to {@link #create} failed to sniff the input
+     * content.
      */
     public static final class UnrecognizedInputFormatException extends IOException {
 
         /**
-         * Creates a new instance which signals that the extractors with the given names failed to
+         * Creates a new instance which signals that the parsers with the given names failed to
          * parse the input.
          */
         @NonNull
@@ -389,7 +389,7 @@ public final class MediaParser {
         private static UnrecognizedInputFormatException createForExtractors(
                 @NonNull String... extractorNames) {
             StringBuilder builder = new StringBuilder();
-            builder.append("None of the available extractors ( ");
+            builder.append("None of the available parsers ( ");
             builder.append(extractorNames[0]);
             for (int i = 1; i < extractorNames.length; i++) {
                 builder.append(", ");
@@ -411,10 +411,10 @@ public final class MediaParser {
     // Instance creation methods.
 
     /**
-     * Creates an instance backed by the extractor with the given {@code name}. The returned
-     * instance will attempt extraction without sniffing the content.
+     * Creates an instance backed by the parser with the given {@code name}. The returned instance
+     * will attempt parsing without sniffing the content.
      *
-     * @param name The name of the extractor that will be associated with the created instance.
+     * @param name The name of the parser that will be associated with the created instance.
      * @param outputConsumer The {@link OutputConsumer} to which track data and samples are pushed.
      * @return A new instance.
      * @throws IllegalArgumentException If an invalid name is provided.
@@ -428,42 +428,42 @@ public final class MediaParser {
     }
 
     /**
-     * Creates an instance whose backing extractor will be selected by sniffing the content during
-     * the first {@link #advance} call. Extractor implementations will sniff the content in order of
-     * appearance in {@code extractorNames}.
+     * Creates an instance whose backing parser will be selected by sniffing the content during the
+     * first {@link #advance} call. Parser implementations will sniff the content in order of
+     * appearance in {@code parserNames}.
      *
      * @param outputConsumer The {@link OutputConsumer} to which extracted data is output.
-     * @param extractorNames The names of the extractors to sniff the content with. If empty, a
-     *     default array of names is used.
+     * @param parserNames The names of the parsers to sniff the content with. If empty, a default
+     *     array of names is used.
      * @return A new instance.
      */
     @NonNull
     public static MediaParser create(
-            @NonNull OutputConsumer outputConsumer, @NonNull String... extractorNames) {
-        assertValidNames(extractorNames);
-        if (extractorNames.length == 0) {
-            extractorNames = EXTRACTOR_FACTORIES_BY_NAME.keySet().toArray(new String[0]);
+            @NonNull OutputConsumer outputConsumer, @NonNull String... parserNames) {
+        assertValidNames(parserNames);
+        if (parserNames.length == 0) {
+            parserNames = EXTRACTOR_FACTORIES_BY_NAME.keySet().toArray(new String[0]);
         }
-        return new MediaParser(outputConsumer, /* sniff= */ true, extractorNames);
+        return new MediaParser(outputConsumer, /* sniff= */ true, parserNames);
     }
 
     // Misc static methods.
 
     /**
-     * Returns an immutable list with the names of the extractors that are suitable for container
+     * Returns an immutable list with the names of the parsers that are suitable for container
      * formats with the given {@link MediaFormat}.
      *
      * <p>TODO: List which properties are taken into account. E.g. MimeType.
      */
     @NonNull
-    public static List<String> getExtractorNames(@NonNull MediaFormat mediaFormat) {
+    public static List<String> getParserNames(@NonNull MediaFormat mediaFormat) {
         throw new UnsupportedOperationException();
     }
 
     // Private fields.
 
     private final OutputConsumer mOutputConsumer;
-    private final String[] mExtractorNamesPool;
+    private final String[] mParserNamesPool;
     private final PositionHolder mPositionHolder;
     private final InputReadingDataSource mDataSource;
     private final ExtractorInputAdapter mScratchExtractorInputAdapter;
@@ -477,18 +477,18 @@ public final class MediaParser {
     // Public methods.
 
     /**
-     * Returns the name of the backing extractor implementation.
+     * Returns the name of the backing parser implementation.
      *
      * <p>If this instance was creating using {@link #createByName}, the provided name is returned.
      * If this instance was created using {@link #create}, this method will return null until the
-     * first call to {@link #advance}, after which the name of the backing extractor implementation
-     * is returned.
+     * first call to {@link #advance}, after which the name of the backing parser implementation is
+     * returned.
      *
-     * @return The name of the backing extractor implementation, or null if the backing extractor
+     * @return The name of the backing parser implementation, or null if the backing parser
      *     implementation has not yet been selected.
      */
     @Nullable
-    public String getExtractorName() {
+    public String getParserName() {
         return mExtractorName;
     }
 
@@ -499,7 +499,7 @@ public final class MediaParser {
      * <p>This method will block until some progress has been made.
      *
      * <p>If this instance was created using {@link #create}. the first call to this method will
-     * sniff the content with the extractors with the provided names.
+     * sniff the content with the parsers with the provided names.
      *
      * @param seekableInputReader The {@link SeekableInputReader} from which to obtain the media
      *     container data.
@@ -520,13 +520,15 @@ public final class MediaParser {
         }
         mDataSource.mInputReader = seekableInputReader;
 
-        if (mExtractor == null) {
-            for (String extractorName : mExtractorNamesPool) {
-                Extractor extractor =
-                        EXTRACTOR_FACTORIES_BY_NAME.get(extractorName).createInstance();
+        // TODO: Apply parameters when creating extractor instances.
+        if (mExtractorName != null) {
+            mExtractor = EXTRACTOR_FACTORIES_BY_NAME.get(mExtractorName).createInstance();
+        } else if (mExtractor == null) {
+            for (String parserName : mParserNamesPool) {
+                Extractor extractor = EXTRACTOR_FACTORIES_BY_NAME.get(parserName).createInstance();
                 try {
                     if (extractor.sniff(mExtractorInput)) {
-                        mExtractorName = extractorName;
+                        mExtractorName = parserName;
                         mExtractor = extractor;
                         mExtractor.init(new ExtractorOutputAdapter());
                         break;
@@ -540,7 +542,7 @@ public final class MediaParser {
                 }
             }
             if (mExtractor == null) {
-                throw UnrecognizedInputFormatException.createForExtractors(mExtractorNamesPool);
+                throw UnrecognizedInputFormatException.createForExtractors(mParserNamesPool);
             }
             return true;
         }
@@ -586,22 +588,21 @@ public final class MediaParser {
      * Releases any acquired resources.
      *
      * <p>After calling this method, this instance becomes unusable and no other methods should be
-     * invoked. DESIGN NOTE: Should be removed. There shouldn't be any resource for releasing.
+     * invoked.
      */
     public void release() {
+        // TODO: Dump media metrics here.
         mExtractorInput = null;
         mExtractor = null;
     }
 
     // Private methods.
 
-    private MediaParser(
-            OutputConsumer outputConsumer, boolean sniff, String... extractorNamesPool) {
+    private MediaParser(OutputConsumer outputConsumer, boolean sniff, String... parserNamesPool) {
         mOutputConsumer = outputConsumer;
-        mExtractorNamesPool = extractorNamesPool;
+        mParserNamesPool = parserNamesPool;
         if (!sniff) {
-            mExtractorName = extractorNamesPool[0];
-            mExtractor = EXTRACTOR_FACTORIES_BY_NAME.get(mExtractorName).createInstance();
+            mExtractorName = parserNamesPool[0];
         }
         mPositionHolder = new PositionHolder();
         mDataSource = new InputReadingDataSource();
@@ -921,7 +922,7 @@ public final class MediaParser {
                 throw new IllegalArgumentException(
                         "Invalid extractor name: "
                                 + name
-                                + ". Supported extractors are: "
+                                + ". Supported parsers are: "
                                 + TextUtils.join(", ", EXTRACTOR_FACTORIES_BY_NAME.keySet())
                                 + ".");
             }
@@ -933,20 +934,20 @@ public final class MediaParser {
     static {
         // Using a LinkedHashMap to keep the insertion order when iterating over the keys.
         LinkedHashMap<String, ExtractorFactory> extractorFactoriesByName = new LinkedHashMap<>();
-        extractorFactoriesByName.put("exo.Ac3Extractor", Ac3Extractor::new);
-        extractorFactoriesByName.put("exo.Ac4Extractor", Ac4Extractor::new);
-        extractorFactoriesByName.put("exo.AdtsExtractor", AdtsExtractor::new);
-        extractorFactoriesByName.put("exo.AmrExtractor", AmrExtractor::new);
-        extractorFactoriesByName.put("exo.FlacExtractor", FlacExtractor::new);
-        extractorFactoriesByName.put("exo.FlvExtractor", FlvExtractor::new);
-        extractorFactoriesByName.put("exo.FragmentedMp4Extractor", FragmentedMp4Extractor::new);
-        extractorFactoriesByName.put("exo.MatroskaExtractor", MatroskaExtractor::new);
-        extractorFactoriesByName.put("exo.Mp3Extractor", Mp3Extractor::new);
-        extractorFactoriesByName.put("exo.Mp4Extractor", Mp4Extractor::new);
-        extractorFactoriesByName.put("exo.OggExtractor", OggExtractor::new);
-        extractorFactoriesByName.put("exo.PsExtractor", PsExtractor::new);
-        extractorFactoriesByName.put("exo.TsExtractor", TsExtractor::new);
-        extractorFactoriesByName.put("exo.WavExtractor", WavExtractor::new);
+        extractorFactoriesByName.put("exo.Ac3Parser", Ac3Extractor::new);
+        extractorFactoriesByName.put("exo.Ac4Parser", Ac4Extractor::new);
+        extractorFactoriesByName.put("exo.AdtsParser", AdtsExtractor::new);
+        extractorFactoriesByName.put("exo.AmrParser", AmrExtractor::new);
+        extractorFactoriesByName.put("exo.FlacParser", FlacExtractor::new);
+        extractorFactoriesByName.put("exo.FlvParser", FlvExtractor::new);
+        extractorFactoriesByName.put("exo.FragmentedMp4Parser", FragmentedMp4Extractor::new);
+        extractorFactoriesByName.put("exo.MatroskaParser", MatroskaExtractor::new);
+        extractorFactoriesByName.put("exo.Mp3Parser", Mp3Extractor::new);
+        extractorFactoriesByName.put("exo.Mp4Parser", Mp4Extractor::new);
+        extractorFactoriesByName.put("exo.OggParser", OggExtractor::new);
+        extractorFactoriesByName.put("exo.PsParser", PsExtractor::new);
+        extractorFactoriesByName.put("exo.TsParser", TsExtractor::new);
+        extractorFactoriesByName.put("exo.WavParser", WavExtractor::new);
         EXTRACTOR_FACTORIES_BY_NAME = Collections.unmodifiableMap(extractorFactoriesByName);
     }
 }
