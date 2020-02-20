@@ -24,13 +24,13 @@ apex_defaults {
         "libstatspull",
         "libstatssocket",
     ],
-    // binaries: ["vold"],
+    binaries: ["statsd"],
     java_libs: [
         "framework-statsd",
         "service-statsd",
     ],
     compile_multilib: "both",
-    // prebuilts: ["my_prebuilt"],
+    prebuilts: ["com.android.os.statsd.init.rc"],
     name: "com.android.os.statsd-defaults",
     key: "com.android.os.statsd.key",
     certificate: ":com.android.os.statsd.certificate",
@@ -49,6 +49,12 @@ android_app_certificate {
     certificate: "com.android.os.statsd",
 }
 
+prebuilt_etc {
+    name: "com.android.os.statsd.init.rc",
+    src: "statsd.rc",
+    filename: "init.rc",
+    installable: false,
+}
 
 // JNI library for StatsLog.write
 cc_library_shared {
