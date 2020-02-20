@@ -16,6 +16,8 @@
 
 package com.android.server.locksettings;
 
+import static android.os.UserHandle.USER_SYSTEM;
+
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
@@ -24,6 +26,7 @@ import android.hardware.rebootescrow.IRebootEscrow;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -38,6 +41,26 @@ import java.util.NoSuchElementException;
 
 class RebootEscrowManager {
     private static final String TAG = "RebootEscrowManager";
+
+    /**
+     * Used in the database storage to indicate the boot count at which the reboot escrow was
+     * previously armed.
+     */
+    @VisibleForTesting
+    public static final String REBOOT_ESCROW_ARMED_KEY = "reboot_escrow_armed_count";
+
+    /**
+     * Number of boots until we consider the escrow data to be stale for the purposes of metrics.
+     * <p>
+     * If the delta between the current boot number and the boot number stored when the mechanism
+     * was armed is under this number and the escrow mechanism fails, we report it as a failure of
+     * the mechanism.
+     * <p>
+     * If the delta over this number and escrow fails, we will not report the metric as failed
+     * since there most likely was some other issue if the device rebooted several times before
+     * getting to the escrow restore code.
+     */
+    private static final int BOOT_COUNT_TOLERANCE = 5;
 
     /**
      * Used to track when the reboot escrow is wanted. Should stay true once escrow is requested
@@ -74,6 +97,7 @@ class RebootEscrowManager {
 
     interface Callbacks {
         boolean isUserSecure(int userId);
+
         void onRebootEscrowRestored(byte spVersion, byte[] syntheticPassword, int userId);
     }
 
@@ -92,7 +116,8 @@ class RebootEscrowManager {
             return (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         }
 
-        public @Nullable IRebootEscrow getRebootEscrow() {
+        @Nullable
+        public IRebootEscrow getRebootEscrow() {
             try {
                 return IRebootEscrow.Stub.asInterface(ServiceManager.getService(
                         "android.hardware.rebootescrow.IRebootEscrow/default"));
@@ -100,6 +125,15 @@ class RebootEscrowManager {
                 Slog.i(TAG, "Device doesn't implement RebootEscrow HAL");
             }
             return null;
+        }
+
+        public int getBootCount() {
+            return Settings.Global.getInt(mContext.getContentResolver(), Settings.Global.BOOT_COUNT,
+                    0);
+        }
+
+        public void reportMetric(boolean success) {
+            FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, success);
         }
     }
 
@@ -135,7 +169,7 @@ class RebootEscrowManager {
             for (UserInfo user : users) {
                 mStorage.removeRebootEscrow(user.id);
             }
-            FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, false);
+            onEscrowRestoreComplete(false);
             return;
         }
 
@@ -143,8 +177,19 @@ class RebootEscrowManager {
         for (UserInfo user : rebootEscrowUsers) {
             allUsersUnlocked &= restoreRebootEscrowForUser(user.id, escrowKey);
         }
-        FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED,
-                allUsersUnlocked);
+        onEscrowRestoreComplete(allUsersUnlocked);
+    }
+
+    private void onEscrowRestoreComplete(boolean success) {
+        int previousBootCount = mStorage.getInt(REBOOT_ESCROW_ARMED_KEY, 0, USER_SYSTEM);
+        mStorage.removeKey(REBOOT_ESCROW_ARMED_KEY, USER_SYSTEM);
+
+        int bootCountDelta = mInjector.getBootCount() - previousBootCount;
+        if (bootCountDelta > BOOT_COUNT_TOLERANCE) {
+            return;
+        }
+
+        mInjector.reportMetric(success);
     }
 
     private RebootEscrowKey getAndClearRebootEscrowKey() {
@@ -267,6 +312,8 @@ class RebootEscrowManager {
             return;
         }
 
+        mStorage.removeKey(REBOOT_ESCROW_ARMED_KEY, USER_SYSTEM);
+
         try {
             rebootEscrow.storeKey(new byte[32]);
         } catch (RemoteException e) {
@@ -308,6 +355,11 @@ class RebootEscrowManager {
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed escrow secret to RebootEscrow HAL", e);
         }
+
+        if (armedRebootEscrow) {
+            mStorage.setInt(REBOOT_ESCROW_ARMED_KEY, mInjector.getBootCount(), USER_SYSTEM);
+        }
+
         return armedRebootEscrow;
     }
 
