@@ -422,6 +422,8 @@ class Task extends WindowContainer<WindowContainer> {
     /** When set, will force the task to report as invisible. */
     boolean mForceHidden = false;
 
+    SurfaceControl.Transaction mMainWindowSizeChangeTransaction;
+
     private final FindRootHelper mFindRootHelper = new FindRootHelper();
     private class FindRootHelper {
         private ActivityRecord mRoot;
@@ -3978,5 +3980,18 @@ class Task extends WindowContainer<WindowContainer> {
         mPictureInPictureParams.copyOnlySet(p);
         mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
                 this, true /* force */);
+    }
+
+    /**
+     * See {@link WindowContainerTransaction#setBoundsChangeTransaction}. In short this
+     * transaction will be consumed by the next BASE_APPLICATION window within our hierarchy
+     * to resize, and it will defer the transaction until that resize frame completes.
+     */
+    void setMainWindowSizeChangeTransaction(SurfaceControl.Transaction t) {
+        mMainWindowSizeChangeTransaction = t;
+    }
+
+    SurfaceControl.Transaction getMainWindowSizeChangeTransaction() {
+        return mMainWindowSizeChangeTransaction;
     }
 }
