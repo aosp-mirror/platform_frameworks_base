@@ -65,6 +65,7 @@ public class TunerResourceManagerService extends SystemService {
     private SparseArray<IResourcesReclaimListener> mListeners = new SparseArray<>();
 
     private TvInputManager mManager;
+    private UseCasePriorityHints mPriorityCongfig = new UseCasePriorityHints();
 
     // Used to synchronize the access to the service.
     private final Object mLock = new Object();
@@ -84,6 +85,7 @@ public class TunerResourceManagerService extends SystemService {
             publishBinderService(Context.TV_TUNER_RESOURCE_MGR_SERVICE, new BinderService());
         }
         mManager = (TvInputManager) getContext().getSystemService(Context.TV_INPUT_SERVICE);
+        mPriorityCongfig.parse();
     }
 
     private final class BinderService extends ITunerResourceManager.Stub {
@@ -409,14 +411,21 @@ public class TunerResourceManagerService extends SystemService {
 
     @VisibleForTesting
     protected int getClientPriority(int useCase, int callingPid) {
-        // TODO: how to get fg/bg information from pid
         if (DEBUG) {
             Slog.d(TAG, "getClientPriority useCase=" + useCase
                     + ", calling Pid=" + callingPid + ")");
         }
 
-        // TODO: get priority from the table built from the useCase config xml
-        return 0;
+        if (isForeground(callingPid)) {
+            return mPriorityCongfig.getForegroundPriority(useCase);
+        }
+        return mPriorityCongfig.getBackgroundPriority(useCase);
+    }
+
+    @VisibleForTesting
+    protected boolean isForeground(int callingPid) {
+        // TODO: how to get fg/bg information from pid
+        return true;
     }
 
     @VisibleForTesting
