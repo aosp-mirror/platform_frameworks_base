@@ -16,6 +16,8 @@
 
 package com.android.systemui.bubbles;
 
+import android.graphics.Bitmap;
+import android.graphics.Path;
 import android.view.View;
 
 /**
@@ -23,8 +25,20 @@ import android.view.View;
  */
 interface BubbleViewProvider {
     BubbleExpandedView getExpandedView();
+
     void setContentVisibility(boolean visible);
+
     View getIconView();
+
     void logUIEvent(int bubbleCount, int action, float normalX, float normalY, int index);
+
     String getKey();
+
+    Bitmap getBadgedImage();
+
+    int getDotColor();
+
+    Path getDotPath();
+
+    boolean showDot();
 }

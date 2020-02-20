@@ -147,7 +147,7 @@ public class StackAnimationController extends
     /** Horizontal offset of bubbles in the stack. */
     private float mStackOffset;
     /** Diameter of the bubble icon. */
-    private int mBubbleIconBitmapSize;
+    private int mBubbleBitmapSize;
     /** Width of the bubble (icon and padding). */
     private int mBubbleSize;
     /**
@@ -194,7 +194,7 @@ public class StackAnimationController extends
             return false;
         }
 
-        float stackCenter = mStackPosition.x + mBubbleIconBitmapSize / 2;
+        float stackCenter = mStackPosition.x + mBubbleBitmapSize / 2;
         float screenCenter = mLayout.getWidth() / 2;
         return stackCenter < screenCenter;
     }
@@ -227,7 +227,7 @@ public class StackAnimationController extends
      * @return The X value that the stack will end up at after the fling/spring.
      */
     public float flingStackThenSpringToEdge(float x, float velX, float velY) {
-        final boolean stackOnLeftSide = x - mBubbleIconBitmapSize / 2 < mLayout.getWidth() / 2;
+        final boolean stackOnLeftSide = x - mBubbleBitmapSize / 2 < mLayout.getWidth() / 2;
 
         final boolean stackShouldFlingLeft = stackOnLeftSide
                 ? velX < ESCAPE_VELOCITY
@@ -542,7 +542,7 @@ public class StackAnimationController extends
                 new SpringForce()
                         .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY)
                         .setStiffness(SpringForce.STIFFNESS_MEDIUM),
-                velX, mLayout.getWidth() / 2f - mBubbleIconBitmapSize / 2f);
+                velX, mLayout.getWidth() / 2f - mBubbleBitmapSize / 2f);
 
         springFirstBubbleWithStackFollowing(
                 DynamicAnimation.TRANSLATION_Y,
@@ -705,7 +705,7 @@ public class StackAnimationController extends
         Resources res = layout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mBubbleIconBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
+        mBubbleBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_bitmap_size);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreen = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
         mStackStartingVerticalOffset =
