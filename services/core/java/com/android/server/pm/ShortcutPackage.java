@@ -310,6 +310,60 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     /**
+     * Push a shortcut. If the max number of dynamic shortcuts is already reached, remove the
+     * shortcut with the lowest rank before adding the new shortcut.
+     */
+    public boolean pushDynamicShortcut(@NonNull ShortcutInfo newShortcut) {
+        Preconditions.checkArgument(newShortcut.isEnabled(),
+                "pushDynamicShortcuts() cannot publish disabled shortcuts");
+
+        newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
+
+        final ShortcutInfo oldShortcut = mShortcuts.get(newShortcut.getId());
+        boolean wasPinned = false;
+
+        if (oldShortcut == null) {
+            final ShortcutService service = mShortcutUser.mService;
+            final int maxShortcuts = service.getMaxActivityShortcuts();
+
+            final ArrayMap<ComponentName, ArrayList<ShortcutInfo>> all =
+                    sortShortcutsToActivities();
+            final ArrayList<ShortcutInfo> activityShortcuts = all.get(newShortcut.getActivity());
+
+            if (activityShortcuts != null && activityShortcuts.size() == maxShortcuts) {
+                // Max has reached. Delete the shortcut with lowest rank.
+
+                // Sort by isManifestShortcut() and getRank().
+                Collections.sort(activityShortcuts, mShortcutTypeAndRankComparator);
+
+                final ShortcutInfo shortcut = activityShortcuts.get(maxShortcuts - 1);
+                if (shortcut.isManifestShortcut()) {
+                    // All shortcuts are manifest shortcuts and cannot be removed.
+                    Slog.e(TAG, "Failed to remove manifest shortcut while pushing dynamic shortcut "
+                            + newShortcut.getId());
+                    return false;
+                }
+
+                deleteDynamicWithId(shortcut.getId(), /*ignoreInvisible=*/ true);
+            }
+        } else {
+            // It's an update case.
+            // Make sure the target is updatable. (i.e. should be mutable.)
+            oldShortcut.ensureUpdatableWith(newShortcut, /*isUpdating=*/ false);
+
+            wasPinned = oldShortcut.isPinned();
+        }
+
+        // If it was originally pinned, the new one should be pinned too.
+        if (wasPinned) {
+            newShortcut.addFlags(ShortcutInfo.FLAG_PINNED);
+        }
+
+        forceReplaceShortcutInner(newShortcut);
+        return true;
+    }
+
+    /**
      * Remove all shortcuts that aren't pinned, cached nor dynamic.
      */
     private void removeOrphans() {
