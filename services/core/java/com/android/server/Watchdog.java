@@ -100,7 +100,7 @@ public class Watchdog extends Thread {
         "media.codec", // vendor/bin/hw/android.hardware.media.omx@1.0-service
         "media.swcodec", // /apex/com.android.media.swcodec/bin/mediaswcodec
         "com.android.bluetooth",  // Bluetooth service
-        "/apex/com.android.os.statsd/bin/statsd",  // Stats daemon
+        "/system/bin/statsd",  // Stats daemon
     };
 
     public static final List<String> HAL_INTERFACES_OF_INTEREST = Arrays.asList(

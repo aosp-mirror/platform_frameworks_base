@@ -12,9 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-service statsd /apex/com.android.os.statsd/bin/statsd
+service statsd /system/bin/statsd
     class main
     socket statsdw dgram+passcred 0222 statsd statsd
     user statsd
     group statsd log
     writepid /dev/cpuset/system-background/tasks
+
+on property:ro.statsd.enable=false
+    stop statsd
+
+on post-fs-data
+    # Create directory for statsd
+    mkdir /data/misc/stats-data/ 0770 statsd system
+    mkdir /data/misc/stats-service/ 0770 statsd system
+    mkdir /data/misc/stats-active-metric/ 0770 statsd system
+    mkdir /data/misc/train-info/ 0770 statsd system
