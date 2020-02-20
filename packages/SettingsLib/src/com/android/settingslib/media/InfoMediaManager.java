@@ -165,6 +165,26 @@ public class InfoMediaManager extends MediaManager {
     }
 
     /**
+     * Release session to stop playing media on MediaDevice.
+     */
+    boolean releaseSession() {
+        if (TextUtils.isEmpty(mPackageName)) {
+            Log.w(TAG, "releaseSession() package name is null or empty!");
+            return false;
+        }
+
+        final RoutingSessionInfo info = getRoutingSessionInfo();
+        if (info != null) {
+            mRouterManager.getControllerForSession(info).release();
+            return true;
+        }
+
+        Log.w(TAG, "releaseSession() Ignoring release session : " + mPackageName);
+
+        return false;
+    }
+
+    /**
      * Get the MediaDevice list that can be added to current media.
      *
      * @return list of MediaDevice
@@ -298,7 +318,9 @@ public class InfoMediaManager extends MediaManager {
 
     private void buildAllRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAllRoutes()) {
-            addMediaDevice(route);
+            if (route.isSystemRoute()) {
+                addMediaDevice(route);
+            }
         }
     }
 

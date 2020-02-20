@@ -96,6 +96,7 @@ public class InfoMediaManagerTest {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         when(info.getId()).thenReturn(TEST_ID);
         when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(info.isSystemRoute()).thenReturn(true);
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
@@ -166,6 +167,7 @@ public class InfoMediaManagerTest {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         when(info.getId()).thenReturn(TEST_ID);
         when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(info.isSystemRoute()).thenReturn(true);
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
@@ -221,6 +223,7 @@ public class InfoMediaManagerTest {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         when(info.getId()).thenReturn(TEST_ID);
         when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(info.isSystemRoute()).thenReturn(true);
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
@@ -437,5 +440,24 @@ public class InfoMediaManagerTest {
         when(info.getClientPackageName()).thenReturn("com.fake.packagename");
 
         assertThat(mInfoMediaManager.getSessionVolume()).isEqualTo(-1);
+    }
+
+    @Test
+    public void releaseSession_packageNameIsNull_returnFalse() {
+        mInfoMediaManager.mPackageName = null;
+
+        assertThat(mInfoMediaManager.releaseSession()).isFalse();
+    }
+
+    @Test
+    public void releaseSession_removeSuccessfully_returnTrue() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        assertThat(mInfoMediaManager.releaseSession()).isTrue();
     }
 }
