@@ -1265,9 +1265,12 @@
     <!-- The notice header of Third-party licenses. not translatable -->
     <string name="notice_header" translatable="false"></string>
 
-    <!-- Name of the this device. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name">This device</string>
+    <!-- Name of the phone device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name">Phone speaker</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>
+
+    <!-- Name of the 3.5mm audio device. [CHAR LIMIT=40] -->
+    <string name="media_transfer_wired_device_name">Wired audio device</string>
 </resources>
