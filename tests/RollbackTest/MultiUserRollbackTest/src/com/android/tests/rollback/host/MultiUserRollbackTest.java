@@ -108,30 +108,4 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
         // Note we can't install apps on a locked user
         awaitUserUnlocked(mSecondaryUserId);
     }
-
-    private void createAndSwitchToSecondaryUserIfNecessary() throws Exception {
-        if (mSecondaryUserId == -1) {
-            mOriginalUserId = getDevice().getCurrentUser();
-            mSecondaryUserId = getDevice().createUser("MultiUserRollbackTest_User"
-                    + System.currentTimeMillis());
-            switchToUser(mSecondaryUserId);
-        }
-    }
-
-    private void switchToUser(int userId) throws Exception {
-        if (getDevice().getCurrentUser() == userId) {
-            return;
-        }
-
-        assertTrue(getDevice().switchUser(userId));
-        for (int i = 0; i < SWITCH_USER_COMPLETED_NUMBER_OF_POLLS; ++i) {
-            String userState = getDevice().executeShellCommand("am get-started-user-state "
-                    + userId);
-            if (userState.contains("RUNNING_UNLOCKED")) {
-                return;
-            }
-            Thread.sleep(SWITCH_USER_COMPLETED_POLL_INTERVAL_IN_MILLIS);
-        }
-        fail("User switch to user " + userId + " timed out");
-    }
 }
