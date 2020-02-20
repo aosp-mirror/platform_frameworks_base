@@ -51,7 +51,6 @@ public class NetworkNotificationManager {
         LOST_INTERNET(SystemMessage.NOTE_NETWORK_LOST_INTERNET),
         NETWORK_SWITCH(SystemMessage.NOTE_NETWORK_SWITCH),
         NO_INTERNET(SystemMessage.NOTE_NETWORK_NO_INTERNET),
-        LOGGED_IN(SystemMessage.NOTE_NETWORK_LOGGED_IN),
         PARTIAL_CONNECTIVITY(SystemMessage.NOTE_NETWORK_PARTIAL_CONNECTIVITY),
         SIGN_IN(SystemMessage.NOTE_NETWORK_SIGN_IN),
         PRIVATE_DNS_BROKEN(SystemMessage.NOTE_NETWORK_PRIVATE_DNS_BROKEN);
@@ -114,14 +113,10 @@ public class NetworkNotificationManager {
         }
     }
 
-    private static int getIcon(int transportType, NotificationType notifyType) {
-        if (transportType != TRANSPORT_WIFI) {
-            return R.drawable.stat_notify_rssi_in_range;
-        }
-
-        return notifyType == NotificationType.LOGGED_IN
-            ? R.drawable.ic_wifi_signal_4
-            : R.drawable.stat_notify_wifi_in_range;  // TODO: Distinguish ! from ?.
+    private static int getIcon(int transportType) {
+        return (transportType == TRANSPORT_WIFI)
+                ? R.drawable.stat_notify_wifi_in_range :  // TODO: Distinguish ! from ?.
+                R.drawable.stat_notify_rssi_in_range;
     }
 
     /**
@@ -185,7 +180,7 @@ public class NetworkNotificationManager {
         Resources r = mContext.getResources();
         final CharSequence title;
         final CharSequence details;
-        int icon = getIcon(transportType, notifyType);
+        int icon = getIcon(transportType);
         if (notifyType == NotificationType.NO_INTERNET && transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.wifi_no_internet,
                     WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
@@ -235,9 +230,6 @@ public class NetworkNotificationManager {
                     details = r.getString(R.string.network_available_sign_in_detailed, name);
                     break;
             }
-        } else if (notifyType == NotificationType.LOGGED_IN) {
-            title = WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID());
-            details = r.getString(R.string.captive_portal_logged_in_detailed);
         } else if (notifyType == NotificationType.NETWORK_SWITCH) {
             String fromTransport = getTransportName(transportType);
             String toTransport = getTransportName(approximateTransportType(switchToNai));
@@ -379,7 +371,6 @@ public class NetworkNotificationManager {
             case NETWORK_SWITCH:
                 return 2;
             case LOST_INTERNET:
-            case LOGGED_IN:
                 return 1;
             default:
                 return 0;

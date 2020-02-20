@@ -2725,9 +2725,6 @@ public class ConnectivityServiceTest {
 
         // Expect NET_CAPABILITY_VALIDATED onAvailable callback.
         validatedCallback.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
-        // Expect no notification to be shown when captive portal disappears by itself
-        verify(mNotificationManager, never()).notifyAsUser(
-                anyString(), eq(NotificationType.LOGGED_IN.eventId), any(), any());
 
         // Break network connectivity.
         // Expect NET_CAPABILITY_VALIDATED onLost callback.
@@ -2789,8 +2786,6 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
         validatedCallback.expectAvailableCallbacksValidated(mWiFiNetworkAgent);
         captivePortalCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
-        verify(mNotificationManager, times(1)).notifyAsUser(anyString(),
-                eq(NotificationType.LOGGED_IN.eventId), any(), eq(UserHandle.ALL));
 
         mCm.unregisterNetworkCallback(validatedCallback);
         mCm.unregisterNetworkCallback(captivePortalCallback);
