@@ -16,7 +16,6 @@
 
 package com.android.server.connectivity
 
-import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
@@ -36,7 +35,6 @@ class NetworkRankerTest {
     private fun makeNai(satisfy: Boolean, score: Int) = mock(NetworkAgentInfo::class.java).also {
         doReturn(satisfy).`when`(it).satisfies(any())
         doReturn(score).`when`(it).currentScore
-        it.networkCapabilities = NetworkCapabilities()
     }
 
     @Test
