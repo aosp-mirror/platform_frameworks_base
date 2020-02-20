@@ -131,7 +131,7 @@ public class Utils {
      */
     public static boolean isAtLeastStrength(int sensorStrength, int requestedStrength) {
         // Clear out any bits that are not reserved for biometric
-        sensorStrength = sensorStrength & Authenticators.BIOMETRIC_MIN_STRENGTH;
+        sensorStrength &= Authenticators.BIOMETRIC_MIN_STRENGTH;
 
         // If the authenticator contains bits outside of the requested strength, it is too weak.
         if ((sensorStrength & ~requestedStrength) != 0) {
@@ -139,7 +139,7 @@ public class Utils {
         }
 
         for (int i = Authenticators.BIOMETRIC_MAX_STRENGTH;
-                i <= requestedStrength; i = i << 1 | 1) {
+                i <= requestedStrength; i = (i << 1) | 1) {
             if (i == sensorStrength) {
                 return true;
             }

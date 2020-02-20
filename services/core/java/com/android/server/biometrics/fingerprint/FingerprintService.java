@@ -413,7 +413,7 @@ public class FingerprintService extends BiometricServiceBase {
         @Override // Binder call
         public long getAuthenticatorId() {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            return FingerprintService.super.getAuthenticatorId();
+            return FingerprintService.this.getAuthenticatorId();
         }
 
         @Override // Binder call
