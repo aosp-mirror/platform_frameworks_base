@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "StorageManager"
+#include <android-base/file.h>
 #include <android-base/logging.h>
 #include <android-base/unique_fd.h>
 #include <fcntl.h>
@@ -25,10 +26,29 @@
 
 namespace android {
 
+static const char* kProcFilesystems = "/proc/filesystems";
+
+// Checks whether the passed in filesystem is listed in /proc/filesystems
+static bool IsFilesystemSupported(const std::string& fsType) {
+    std::string supported;
+    if (!android::base::ReadFileToString(kProcFilesystems, &supported)) {
+        PLOG(ERROR) << "Failed to read supported filesystems";
+        return false;
+    }
+    return supported.find(fsType + "\n") != std::string::npos;
+}
+
 jboolean android_os_storage_StorageManager_setQuotaProjectId(JNIEnv* env, jobject self,
                                                              jstring path, jlong projectId) {
     struct fsxattr fsx;
     ScopedUtfChars utf_chars_path(env, path);
+
+    static bool sdcardFsSupported = IsFilesystemSupported("sdcardfs");
+    if (sdcardFsSupported) {
+        // sdcardfs doesn't support project ID quota tracking and takes care of quota
+        // in a different way.
+        return JNI_TRUE;
+    }
 
     if (projectId > UINT32_MAX) {
         LOG(ERROR) << "Invalid project id: " << projectId;
