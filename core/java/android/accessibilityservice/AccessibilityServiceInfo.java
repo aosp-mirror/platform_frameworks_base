@@ -803,11 +803,12 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @return The animated image drawable.
      */
     @Nullable
-    public Drawable loadAnimatedImage(@NonNull PackageManager packageManager)  {
+    public Drawable loadAnimatedImage(@NonNull Context context)  {
         if (mAnimatedImageRes == /* invalid */ 0) {
             return null;
         }
 
+        final PackageManager packageManager = context.getPackageManager();
         final String packageName = mComponentName.getPackageName();
         final ApplicationInfo applicationInfo = mResolveInfo.serviceInfo.applicationInfo;
 
