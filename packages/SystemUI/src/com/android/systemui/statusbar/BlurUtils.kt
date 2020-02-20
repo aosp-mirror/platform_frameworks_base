@@ -90,7 +90,7 @@ open class BlurUtils @Inject constructor(
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
-        IndentingPrintWriter(pw, "  ").use {
+        IndentingPrintWriter(pw, "  ").let {
             it.println("BlurUtils:")
             it.increaseIndent()
             it.println("minBlurRadius: $minBlurRadius")
