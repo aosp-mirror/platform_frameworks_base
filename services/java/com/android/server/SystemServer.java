@@ -41,7 +41,6 @@ import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityModuleConnector;
-import android.net.ITetheringConnector;
 import android.net.NetworkStackClient;
 import android.os.BaseBundle;
 import android.os.Binder;
@@ -285,6 +284,8 @@ public final class SystemServer {
             "com.android.server.appprediction.AppPredictionManagerService";
     private static final String CONTENT_SUGGESTIONS_SERVICE_CLASS =
             "com.android.server.contentsuggestions.ContentSuggestionsManagerService";
+
+    private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -2228,7 +2229,7 @@ public final class SystemServer {
             try {
                 // TODO: hide implementation details, b/146312721.
                 ConnectivityModuleConnector.getInstance().startModuleService(
-                        ITetheringConnector.class.getName(),
+                        TETHERING_CONNECTOR_CLASS,
                         PERMISSION_MAINLINE_NETWORK_STACK, service -> {
                             ServiceManager.addService(Context.TETHERING_SERVICE, service,
                                     false /* allowIsolated */,
