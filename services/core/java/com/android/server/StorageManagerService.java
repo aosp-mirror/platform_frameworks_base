@@ -4366,18 +4366,24 @@ class StorageManagerService extends IStorageManager.Stub
                     final IVold vold = IVold.Stub.asInterface(
                             ServiceManager.getServiceOrThrow("vold"));
                     for (String pkg : packageList) {
-                        final String obbDir =
-                                String.format("/storage/emulated/%d/Android/obb", userId);
-                        final String packageObbDir = String.format("%s/%s/", obbDir, pkg);
+                        final String packageObbDir =
+                                String.format("/storage/emulated/%d/Android/obb/%s/", userId, pkg);
+                        final String packageDataDir =
+                                String.format("/storage/emulated/%d/Android/data/%s/",
+                                        userId, pkg);
 
-                        // Create package obb dir if it doesn't exist.
+                        // Create package obb and data dir if it doesn't exist.
                         File file = new File(packageObbDir);
                         if (!file.exists()) {
                             vold.setupAppDir(packageObbDir, mPmInternal.getPackage(pkg).getUid());
                         }
+                        file = new File(packageDataDir);
+                        if (!file.exists()) {
+                            vold.setupAppDir(packageDataDir, mPmInternal.getPackage(pkg).getUid());
+                        }
                     }
                 } catch (ServiceManager.ServiceNotFoundException | RemoteException e) {
-                    Slog.e(TAG, "Unable to create obb directories for " + processName, e);
+                    Slog.e(TAG, "Unable to create obb and data directories for " + processName, e);
                 }
             }
         }
