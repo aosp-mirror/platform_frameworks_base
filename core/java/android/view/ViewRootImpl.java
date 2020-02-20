@@ -30,6 +30,7 @@ import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
@@ -38,10 +39,12 @@ import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
@@ -2061,9 +2064,12 @@ public final class ViewRootImpl implements ViewParent,
         }
         final int sysUiVis = params.systemUiVisibility | params.subtreeSystemUiVisibility;
         final int flags = params.flags;
+        final boolean matchParent = params.width == MATCH_PARENT && params.height == MATCH_PARENT;
+        final boolean nonAttachedAppWindow = params.type >= FIRST_APPLICATION_WINDOW
+                && params.type <= LAST_APPLICATION_WINDOW;
         final boolean statusWasHiddenByFlags = (mTypesHiddenByFlags & Type.statusBars()) != 0;
         final boolean statusIsHiddenByFlags = (sysUiVis & SYSTEM_UI_FLAG_FULLSCREEN) != 0
-                || (flags & FLAG_FULLSCREEN) != 0;
+                || ((flags & FLAG_FULLSCREEN) != 0 && matchParent && nonAttachedAppWindow);
         final boolean navWasHiddenByFlags = (mTypesHiddenByFlags & Type.navigationBars()) != 0;
         final boolean navIsHiddenByFlags = (sysUiVis & SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
 
@@ -2428,8 +2434,6 @@ public final class ViewRootImpl implements ViewParent,
             params = lp;
         }
         if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-            adjustLayoutParamsForCompatibility(lp);
-            controlInsetsForCompatibility(lp);
             handleDispatchSystemUiVisibilityChanged(mCompatibleVisibilityInfo);
         }
 
@@ -2524,6 +2528,8 @@ public final class ViewRootImpl implements ViewParent,
                     && !PixelFormat.formatHasAlpha(params.format)) {
                 params.format = PixelFormat.TRANSLUCENT;
             }
+            adjustLayoutParamsForCompatibility(params);
+            controlInsetsForCompatibility(params);
         }
 
         if (mFirst || windowShouldResize || insetsChanged ||
