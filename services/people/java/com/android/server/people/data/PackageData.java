@@ -59,16 +59,14 @@ public class PackageData {
             @NonNull Predicate<String> isDefaultDialerPredicate,
             @NonNull Predicate<String> isDefaultSmsAppPredicate,
             @NonNull ScheduledExecutorService scheduledExecutorService,
-            @NonNull File perUserPeopleDataDir,
-            @NonNull ContactsQueryHelper helper) {
+            @NonNull File perUserPeopleDataDir) {
         mPackageName = packageName;
         mUserId = userId;
 
         mPackageDataDir = new File(perUserPeopleDataDir, mPackageName);
         mPackageDataDir.mkdirs();
 
-        mConversationStore = new ConversationStore(mPackageDataDir, scheduledExecutorService,
-                helper);
+        mConversationStore = new ConversationStore(mPackageDataDir, scheduledExecutorService);
         mEventStore = new EventStore(mPackageDataDir, scheduledExecutorService);
         mIsDefaultDialerPredicate = isDefaultDialerPredicate;
         mIsDefaultSmsAppPredicate = isDefaultSmsAppPredicate;
@@ -83,8 +81,7 @@ public class PackageData {
             @NonNull Predicate<String> isDefaultDialerPredicate,
             @NonNull Predicate<String> isDefaultSmsAppPredicate,
             @NonNull ScheduledExecutorService scheduledExecutorService,
-            @NonNull File perUserPeopleDataDir,
-            @NonNull ContactsQueryHelper helper) {
+            @NonNull File perUserPeopleDataDir) {
         Map<String, PackageData> results = new ArrayMap<>();
         File[] packageDirs = perUserPeopleDataDir.listFiles(File::isDirectory);
         if (packageDirs == null) {
@@ -93,7 +90,7 @@ public class PackageData {
         for (File packageDir : packageDirs) {
             PackageData packageData = new PackageData(packageDir.getName(), userId,
                     isDefaultDialerPredicate, isDefaultSmsAppPredicate, scheduledExecutorService,
-                    perUserPeopleDataDir, helper);
+                    perUserPeopleDataDir);
             packageData.loadFromDisk();
             results.put(packageDir.getName(), packageData);
         }

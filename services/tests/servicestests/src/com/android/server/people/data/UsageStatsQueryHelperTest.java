@@ -79,10 +79,9 @@ public final class UsageStatsQueryHelperTest {
         Context ctx = InstrumentationRegistry.getContext();
         File testDir = new File(ctx.getCacheDir(), "testdir");
         ScheduledExecutorService scheduledExecutorService = new MockScheduledExecutorService();
-        ContactsQueryHelper helper = new ContactsQueryHelper(ctx);
 
         mPackageData = new TestPackageData(PKG_NAME, USER_ID_PRIMARY, pkg -> false, pkg -> false,
-                scheduledExecutorService, testDir, helper);
+                scheduledExecutorService, testDir);
         mPackageData.mConversationStore.mConversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
                 .setLocusId(LOCUS_ID_1)
@@ -221,9 +220,8 @@ public final class UsageStatsQueryHelperTest {
         private ConversationInfo mConversationInfo;
 
         TestConversationStore(File packageDir,
-                ScheduledExecutorService scheduledExecutorService,
-                ContactsQueryHelper helper) {
-            super(packageDir, scheduledExecutorService, helper);
+                ScheduledExecutorService scheduledExecutorService) {
+            super(packageDir, scheduledExecutorService);
         }
 
         @Override
@@ -241,12 +239,10 @@ public final class UsageStatsQueryHelperTest {
         TestPackageData(@NonNull String packageName, @UserIdInt int userId,
                 @NonNull Predicate<String> isDefaultDialerPredicate,
                 @NonNull Predicate<String> isDefaultSmsAppPredicate,
-                @NonNull ScheduledExecutorService scheduledExecutorService, @NonNull File rootDir,
-                @NonNull ContactsQueryHelper helper) {
+                @NonNull ScheduledExecutorService scheduledExecutorService, @NonNull File rootDir) {
             super(packageName, userId, isDefaultDialerPredicate, isDefaultSmsAppPredicate,
-                    scheduledExecutorService, rootDir, helper);
-            mConversationStore = new TestConversationStore(rootDir, scheduledExecutorService,
-                    helper);
+                    scheduledExecutorService, rootDir);
+            mConversationStore = new TestConversationStore(rootDir, scheduledExecutorService);
             mEventStore = new TestEventStore(rootDir, scheduledExecutorService);
         }
 

@@ -134,8 +134,7 @@ public class DataManager {
     public void onUserUnlocked(int userId) {
         UserData userData = mUserDataArray.get(userId);
         if (userData == null) {
-            userData = new UserData(userId, mDiskReadWriterExecutor,
-                    mInjector.createContactsQueryHelper(mContext));
+            userData = new UserData(userId, mDiskReadWriterExecutor);
             mUserDataArray.put(userId, userData);
         }
         userData.setUserUnlocked();

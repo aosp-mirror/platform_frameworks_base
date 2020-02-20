@@ -61,7 +61,7 @@ public final class PackageDataTest {
         testDir.mkdir();
         mPackageData = new PackageData(
                 PACKAGE_NAME, USER_ID, pkg -> mIsDefaultDialer, pkg -> mIsDefaultSmsApp,
-                new MockScheduledExecutorService(), testDir, new ContactsQueryHelper(ctx));
+                new MockScheduledExecutorService(), testDir);
         ConversationInfo conversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
                 .setLocusId(LOCUS_ID)

@@ -37,8 +37,6 @@ class UserData {
 
     private final ScheduledExecutorService mScheduledExecutorService;
 
-    private final ContactsQueryHelper mHelper;
-
     private boolean mIsUnlocked;
 
     private Map<String, PackageData> mPackageDataMap = new ArrayMap<>();
@@ -49,12 +47,10 @@ class UserData {
     @Nullable
     private String mDefaultSmsApp;
 
-    UserData(@UserIdInt int userId, @NonNull ScheduledExecutorService scheduledExecutorService,
-            ContactsQueryHelper helper) {
+    UserData(@UserIdInt int userId, @NonNull ScheduledExecutorService scheduledExecutorService) {
         mUserId = userId;
         mPerUserPeopleDataDir = new File(Environment.getDataSystemCeDirectory(mUserId), "people");
         mScheduledExecutorService = scheduledExecutorService;
-        mHelper = helper;
     }
 
     @UserIdInt int getUserId() {
@@ -74,7 +70,7 @@ class UserData {
         // data from disk.
         mPerUserPeopleDataDir.mkdirs();
         mPackageDataMap.putAll(PackageData.packagesDataFromDisk(mUserId, this::isDefaultDialer,
-                this::isDefaultSmsApp, mScheduledExecutorService, mPerUserPeopleDataDir, mHelper));
+                this::isDefaultSmsApp, mScheduledExecutorService, mPerUserPeopleDataDir));
     }
 
     void setUserStopped() {
@@ -131,7 +127,7 @@ class UserData {
 
     private PackageData createPackageData(String packageName) {
         return new PackageData(packageName, mUserId, this::isDefaultDialer, this::isDefaultSmsApp,
-                mScheduledExecutorService, mPerUserPeopleDataDir, mHelper);
+                mScheduledExecutorService, mPerUserPeopleDataDir);
     }
 
     private boolean isDefaultDialer(String packageName) {
