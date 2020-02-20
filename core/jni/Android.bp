@@ -323,4 +323,10 @@ cc_library_shared {
         // GraphicsJNI.h includes hwui headers
         "libhwui",
     ],
+
+    product_variables: {
+        experimental_mte: {
+            cflags: ["-DANDROID_EXPERIMENTAL_MTE"],
+        },
+    },
 }

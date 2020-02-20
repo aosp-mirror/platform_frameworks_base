@@ -977,4 +977,9 @@ public final class Zygote {
      */
     @FastNative
     public static native int nativeParseSigChld(byte[] in, int length, int[] out);
+
+    /**
+     * Returns whether the hardware supports memory tagging (ARM MTE).
+     */
+    public static native boolean nativeSupportsMemoryTagging();
 }
