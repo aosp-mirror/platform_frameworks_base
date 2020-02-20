@@ -39,6 +39,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.job.GrantedUriPermissions;
@@ -95,6 +96,15 @@ public final class JobStatus {
                     | CONSTRAINT_CHARGING
                     | CONSTRAINT_CONNECTIVITY
                     | CONSTRAINT_IDLE;
+
+    /**
+     * Standard media URIs that contain the media files that might be important to the user.
+     * @see #mHasMediaBackupExemption
+     */
+    private static final Uri[] MEDIA_URIS_FOR_STANDBY_EXEMPTION = {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+    };
 
     /**
      * The constraints that we want to log to statsd.
@@ -441,13 +451,13 @@ public final class JobStatus {
         if (latestRunTimeElapsedMillis != NO_LATEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_DEADLINE;
         }
-        boolean mediaOnly = false;
+        boolean exemptedMediaUrisOnly = false;
         if (job.getTriggerContentUris() != null) {
             requiredConstraints |= CONSTRAINT_CONTENT_TRIGGER;
-            mediaOnly = true;
+            exemptedMediaUrisOnly = true;
             for (JobInfo.TriggerContentUri uri : job.getTriggerContentUris()) {
-                if (!MediaStore.AUTHORITY.equals(uri.getUri().getAuthority())) {
-                    mediaOnly = false;
+                if (!ArrayUtils.contains(MEDIA_URIS_FOR_STANDBY_EXEMPTION, uri.getUri())) {
+                    exemptedMediaUrisOnly = false;
                     break;
                 }
             }
@@ -475,8 +485,8 @@ public final class JobStatus {
             job.getRequiredNetwork().networkCapabilities.setSingleUid(this.sourceUid);
         }
         final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
-        mHasMediaBackupExemption = !job.hasLateConstraint() && mediaOnly && requiresNetwork
-                && this.sourcePackageName.equals(jsi.getMediaBackupPackage());
+        mHasMediaBackupExemption = !job.hasLateConstraint() && exemptedMediaUrisOnly
+                && requiresNetwork && this.sourcePackageName.equals(jsi.getMediaBackupPackage());
     }
 
     /** Copy constructor: used specifically when cloning JobStatus objects for persistence,
