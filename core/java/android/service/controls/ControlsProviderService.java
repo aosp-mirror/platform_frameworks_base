@@ -15,11 +15,14 @@
  */
 package android.service.controls;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,6 +54,20 @@ public abstract class ControlsProviderService extends Service {
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_CONTROLS =
             "android.service.controls.ControlsProviderService";
+
+    /**
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ADD_CONTROL =
+            "android.service.controls.action.ADD_CONTROL";
+
+    /**
+     * @hide
+     */
+    public static final String EXTRA_CONTROL =
+            "android.service.controls.extra.CONTROL";
+
     /**
      * @hide
      */
@@ -323,6 +340,33 @@ public abstract class ControlsProviderService extends Service {
                 ex.rethrowAsRuntimeException();
             }
         }
+    }
+
+    /**
+     * Request SystemUI to prompt the user to add a control to favorites.
+     *
+     * @param context A context
+     * @param componentName Component name of the {@link ControlsProviderService}
+     * @param control A stateless control to show to the user
+     */
+    public static void requestAddControl(@NonNull Context context,
+            @NonNull ComponentName componentName,
+            @NonNull Control control) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(componentName);
+        Preconditions.checkNotNull(control);
+        final ComponentName sysuiComponent = ComponentName.unflattenFromString(
+                context.getResources().getString(
+                        com.android.internal.R.string.config_systemUIServiceComponent));
+        Intent intent = new Intent(ACTION_ADD_CONTROL);
+        intent.putExtra(Intent.EXTRA_COMPONENT_NAME, componentName);
+        intent.setPackage(sysuiComponent.getPackageName());
+        if (isStatelessControl(control)) {
+            intent.putExtra(EXTRA_CONTROL, control);
+        } else {
+            intent.putExtra(EXTRA_CONTROL, new Control.StatelessBuilder(control).build());
+        }
+        context.sendBroadcast(intent, Manifest.permission.BIND_CONTROLS);
     }
 
     private static class SubscriptionAdapter extends IControlsSubscription.Stub {
