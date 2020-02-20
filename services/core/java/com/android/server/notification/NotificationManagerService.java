@@ -772,7 +772,7 @@ public class NotificationManagerService extends SystemService {
                         parser, mAllowedManagedServicePackages, forRestore, userId);
                 migratedManagedServices = true;
             } else if (mSnoozeHelper.XML_TAG_NAME.equals(parser.getName())) {
-                mSnoozeHelper.readXml(parser);
+                mSnoozeHelper.readXml(parser, System.currentTimeMillis());
             }
             if (LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG.equals(parser.getName())) {
                 if (forRestore && userId != UserHandle.USER_SYSTEM) {
@@ -2322,6 +2322,8 @@ public class NotificationManagerService extends SystemService {
             mConditionProviders.onBootPhaseAppsCanStart();
             mHistoryManager.onBootPhaseAppsCanStart();
             registerDeviceConfigChange();
+        } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            mSnoozeHelper.scheduleRepostsForPersistedNotifications(System.currentTimeMillis());
         }
     }
 
