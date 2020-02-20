@@ -36,6 +36,8 @@ import android.telephony.ims.ImsReasonInfo;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Provides access to telephony configuration values that are carrier-specific.
  */
@@ -4032,7 +4034,7 @@ public class CarrierConfigManager {
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_FORWARDED_NUMBER_BOOL, false);
-        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, 0);
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
     }
 
     /**
