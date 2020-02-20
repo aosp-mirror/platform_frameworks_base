@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -465,6 +466,10 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     public boolean isActivityTypeAssistant() {
         return getActivityType() == ACTIVITY_TYPE_ASSISTANT;
+    }
+
+    public boolean isActivityTypeDream() {
+        return getActivityType() == ACTIVITY_TYPE_DREAM;
     }
 
     public boolean isActivityTypeStandard() {

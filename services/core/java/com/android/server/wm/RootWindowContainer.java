@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -2915,6 +2916,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             case ACTIVITY_TYPE_HOME: return r.isActivityTypeHome();
             case ACTIVITY_TYPE_RECENTS: return r.isActivityTypeRecents();
             case ACTIVITY_TYPE_ASSISTANT: return r.isActivityTypeAssistant();
+            case ACTIVITY_TYPE_DREAM: return r.isActivityTypeDream();
         }
         // TODO(task-hierarchy): Find another way to differentiate tile from normal stack once it is
         //                       part of the hierarchy

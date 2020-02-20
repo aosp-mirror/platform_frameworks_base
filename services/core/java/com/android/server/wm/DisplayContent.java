@@ -4493,6 +4493,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          */
         private int findPositionForStack(int requestedPosition, ActivityStack stack,
                 boolean adding) {
+            if (stack.isActivityTypeDream()) {
+                return POSITION_TOP;
+            }
+
             if (stack.inPinnedWindowingMode()) {
                 return POSITION_TOP;
             }
