@@ -1388,6 +1388,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private static final class UserSwitchHandlerTask implements Runnable {
+        final InputMethodManagerService mService;
+
+        @UserIdInt
+        final int mToUserId;
+
+        @Nullable
+        IInputMethodClient mClientToBeReset;
+
+        UserSwitchHandlerTask(InputMethodManagerService service, @UserIdInt int toUserId,
+                @Nullable IInputMethodClient clientToBeReset) {
+            mService = service;
+            mToUserId = toUserId;
+            mClientToBeReset = clientToBeReset;
+        }
+
+        @Override
+        public void run() {
+            synchronized (mService.mMethodMap) {
+                if (mService.mUserSwitchHandlerTask != this) {
+                    // This task was already canceled before it is handled here. So do nothing.
+                    return;
+                }
+                mService.switchUserOnHandlerLocked(mService.mUserSwitchHandlerTask.mToUserId,
+                        mClientToBeReset);
+                mService.mUserSwitchHandlerTask = null;
+            }
+        }
+    }
+
+    /**
+     * When non-{@code null}, this represents pending user-switch task, which is to be executed as
+     * a handler callback.  This needs to be set and unset only within the lock.
+     */
+    @Nullable
+    @GuardedBy("mMethodMap")
+    private UserSwitchHandlerTask mUserSwitchHandlerTask;
+
     public static final class Lifecycle extends SystemService {
         private InputMethodManagerService mService;
 
@@ -1406,8 +1444,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onSwitchUser(@UserIdInt int userHandle) {
             // Called on ActivityManager thread.
-            // TODO: Dispatch this to a worker thread as needed.
-            mService.onSwitchUser(userHandle);
+            synchronized (mService.mMethodMap) {
+                mService.scheduleSwitchUserTaskLocked(userHandle, null /* clientToBeReset */);
+            }
         }
 
         @Override
@@ -1447,10 +1486,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    void onSwitchUser(@UserIdInt int userId) {
-        synchronized (mMethodMap) {
-            switchUserLocked(userId);
+    @GuardedBy("mMethodMap")
+    void scheduleSwitchUserTaskLocked(@UserIdInt int userId,
+            @Nullable IInputMethodClient clientToBeReset) {
+        if (mUserSwitchHandlerTask != null) {
+            if (mUserSwitchHandlerTask.mToUserId == userId) {
+                mUserSwitchHandlerTask.mClientToBeReset = clientToBeReset;
+                return;
+            }
+            mHandler.removeCallbacks(mUserSwitchHandlerTask);
         }
+        final UserSwitchHandlerTask task = new UserSwitchHandlerTask(this, userId,
+                clientToBeReset);
+        mUserSwitchHandlerTask = task;
+        mHandler.post(task);
     }
 
     public InputMethodManagerService(Context context) {
@@ -1538,7 +1587,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    private void switchUserLocked(int newUserId) {
+    private void switchUserOnHandlerLocked(@UserIdInt int newUserId,
+            IInputMethodClient clientToBeReset) {
         if (DEBUG) Slog.d(TAG, "Switching user stage 1/3. newUserId=" + newUserId
                 + " currentUserId=" + mSettings.getCurrentUserId());
 
@@ -1589,6 +1639,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 + " selectedIme=" + mSettings.getSelectedInputMethod());
 
         mLastSwitchUserId = newUserId;
+
+        if (mIsInteractive && clientToBeReset != null) {
+            final ClientState cs = mClients.get(clientToBeReset.asBinder());
+            if (cs == null) {
+                // The client is already gone.
+                return;
+            }
+            try {
+                cs.client.scheduleStartInputIfNecessary(mInFullscreenMode);
+            } catch (RemoteException e) {
+            }
+        }
     }
 
     void updateCurrentProfileIds() {
@@ -3074,6 +3136,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.NOT_IME_TARGET_WINDOW;
         }
 
+        if (mUserSwitchHandlerTask != null) {
+            // There is already an on-going pending user switch task.
+            final int nextUserId = mUserSwitchHandlerTask.mToUserId;
+            if (userId == nextUserId) {
+                scheduleSwitchUserTaskLocked(userId, cs.client);
+                return InputBindResult.USER_SWITCHING;
+            }
+            for (int profileId : mUserManager.getProfileIdsWithDisabled(nextUserId)) {
+                if (profileId == userId) {
+                    scheduleSwitchUserTaskLocked(userId, cs.client);
+                    return InputBindResult.USER_SWITCHING;
+                }
+            }
+            return InputBindResult.INVALID_USER;
+        }
+
         // cross-profile access is always allowed here to allow profile-switching.
         if (!mSettings.isCurrentProfile(userId)) {
             Slog.w(TAG, "A background user is requesting window. Hiding IME.");
@@ -3085,8 +3163,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (userId != mSettings.getCurrentUserId()) {
-            switchUserLocked(userId);
+            scheduleSwitchUserTaskLocked(userId, cs.client);
+            return InputBindResult.USER_SWITCHING;
         }
+
         // Master feature flag that overrides other conditions and forces IME preRendering.
         if (DEBUG) {
             Slog.v(TAG, "IME PreRendering MASTER flag: "
