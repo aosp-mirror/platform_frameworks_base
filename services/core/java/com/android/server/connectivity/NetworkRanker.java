@@ -16,9 +16,6 @@
 
 package com.android.server.connectivity;
 
-import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
-import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkScore.POLICY_IGNORE_ON_WIFI;
 
 import static com.android.internal.util.FunctionalUtils.findFirst;
@@ -45,15 +42,8 @@ public class NetworkRanker {
             @NonNull final Collection<NetworkAgentInfo> nais) {
         final ArrayList<NetworkAgentInfo> candidates = new ArrayList<>(nais);
         candidates.removeIf(nai -> !nai.satisfies(request));
-
-        // Enforce policy. The order in which the policy is computed is essential, because each
-        // step may remove some of the candidates. For example, filterValidated drops non-validated
-        // networks in presence of validated networks for INTERNET requests, but the bad wifi
-        // avoidance policy takes priority over this, so it must be done before.
-        filterVpn(candidates);
-        filterExplicitlySelected(candidates);
-        filterBadWifiAvoidance(candidates);
-        filterValidated(request, candidates);
+        // Enforce policy.
+        filterBadWifiAvoidancePolicy(candidates);
 
         NetworkAgentInfo bestNetwork = null;
         int bestScore = Integer.MIN_VALUE;
@@ -67,27 +57,9 @@ public class NetworkRanker {
         return bestNetwork;
     }
 
-    // If a network is a VPN it has priority.
-    private void filterVpn(@NonNull final ArrayList<NetworkAgentInfo> candidates) {
-        final NetworkAgentInfo vpn = findFirst(candidates,
-                nai -> nai.networkCapabilities.hasTransport(TRANSPORT_VPN));
-        if (null == vpn) return; // No VPN : this policy doesn't apply.
-        candidates.removeIf(nai -> !nai.networkCapabilities.hasTransport(TRANSPORT_VPN));
-    }
-
-    // If some network is explicitly selected and set to accept unvalidated connectivity, then
-    // drop all networks that are not explicitly selected.
-    private void filterExplicitlySelected(
-            @NonNull final ArrayList<NetworkAgentInfo> candidates) {
-        final NetworkAgentInfo explicitlySelected = findFirst(candidates,
-                nai -> nai.networkAgentConfig.explicitlySelected
-                        && nai.networkAgentConfig.acceptUnvalidated);
-        if (null == explicitlySelected) return; // No explicitly selected network accepting unvalid
-        candidates.removeIf(nai -> !nai.networkAgentConfig.explicitlySelected);
-    }
-
     // If some network with wifi transport is present, drop all networks with POLICY_IGNORE_ON_WIFI.
-    private void filterBadWifiAvoidance(@NonNull final ArrayList<NetworkAgentInfo> candidates) {
+    private void filterBadWifiAvoidancePolicy(
+            @NonNull final ArrayList<NetworkAgentInfo> candidates) {
         final NetworkAgentInfo wifi = findFirst(candidates,
                 nai -> nai.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
                         && nai.everValidated
@@ -98,17 +70,5 @@ public class NetworkRanker {
                         && !nai.avoidUnvalidated);
         if (null == wifi) return; // No wifi : this policy doesn't apply
         candidates.removeIf(nai -> nai.getNetworkScore().hasPolicy(POLICY_IGNORE_ON_WIFI));
-    }
-
-    // If some network is validated and the request asks for INTERNET, drop all networks that are
-    // not validated.
-    private void filterValidated(@NonNull final NetworkRequest request,
-            @NonNull final ArrayList<NetworkAgentInfo> candidates) {
-        if (!request.hasCapability(NET_CAPABILITY_INTERNET)) return;
-        final NetworkAgentInfo validated = findFirst(candidates,
-                nai -> nai.networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED));
-        if (null == validated) return; // No validated network
-        candidates.removeIf(nai ->
-                !nai.networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED));
     }
 }
