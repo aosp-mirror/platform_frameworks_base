@@ -27,22 +27,6 @@ import android.annotation.NonNull;
 public abstract class LocationManagerInternal {
 
     /**
-     * Requests that a provider change its allowed state. A provider may or may not honor this
-     * request, and if the provider does change its state as a result, that may happen
-     * asynchronously after some delay.
-     *
-     * <p>Setting a provider's state to allowed implies that any consents or terms and conditions
-     * that may be necessary to allow the provider are agreed to. Setting a providers state to
-     * disallowed implies that any consents or terms and conditions have their agreement revoked.
-     *
-     * @param provider A location provider as listed by {@link LocationManager#getAllProviders()}
-     * @param allowed  Whether the location provider is being requested to allow or disallow
-     *                 itself
-     * @throws IllegalArgumentException if provider is null
-     */
-    public abstract void requestSetProviderAllowed(@NonNull String provider, boolean allowed);
-
-    /**
      * Returns true if the given provider is enabled for the given user.
      *
      * @param provider A location provider as listed by {@link LocationManager#getAllProviders()}

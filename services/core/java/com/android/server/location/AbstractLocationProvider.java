@@ -366,21 +366,6 @@ public abstract class AbstractLocationProvider {
     protected abstract void onExtraCommand(int uid, int pid, String command, Bundle extras);
 
     /**
-     * Requests a provider to enable itself for the given user id.
-     */
-    public final void requestSetAllowed(boolean allowed) {
-        // all calls into the provider must be moved onto the provider thread to prevent deadlock
-        mExecutor.execute(
-                obtainRunnable(AbstractLocationProvider::onRequestSetAllowed, this, allowed)
-                        .recycleOnUse());
-    }
-
-    /**
-     * Always invoked on the provider executor.
-     */
-    protected abstract void onRequestSetAllowed(boolean allowed);
-
-    /**
      * Dumps debug or log information. May be invoked from any thread.
      */
     public abstract void dump(FileDescriptor fd, PrintWriter pw, String[] args);
