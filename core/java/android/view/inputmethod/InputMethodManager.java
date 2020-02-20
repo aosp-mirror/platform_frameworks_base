@@ -1008,6 +1008,13 @@ public final class InputMethodManager {
         }
 
         @Override
+        public void scheduleStartInputIfNecessary(boolean fullscreen) {
+            // TODO(b/149859205): See if we can optimize this by having a fused dedicated operation.
+            mH.obtainMessage(MSG_SET_ACTIVE, 0 /* active */, fullscreen ? 1 : 0).sendToTarget();
+            mH.obtainMessage(MSG_SET_ACTIVE, 1 /* active */, fullscreen ? 1 : 0).sendToTarget();
+        }
+
+        @Override
         public void reportFullscreenMode(boolean fullscreen) {
             mH.obtainMessage(MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, 0)
                     .sendToTarget();
