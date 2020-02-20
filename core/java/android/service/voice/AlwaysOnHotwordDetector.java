@@ -227,7 +227,6 @@ public class AlwaysOnHotwordDetector {
     @Nullable
     private KeyphraseMetadata mKeyphraseMetadata;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
-    private final IVoiceInteractionService mVoiceInteractionService;
     private final IVoiceInteractionManagerService mModelManagementService;
     private final SoundTriggerListener mInternalCallback;
     private final Callback mExternalCallback;
@@ -413,14 +412,11 @@ public class AlwaysOnHotwordDetector {
      * @param text The keyphrase text to get the detector for.
      * @param locale The java locale for the detector.
      * @param callback A non-null Callback for receiving the recognition events.
-     * @param voiceInteractionService The current voice interaction service.
      * @param modelManagementService A service that allows management of sound models.
-     *
      * @hide
      */
     public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
-            IVoiceInteractionService voiceInteractionService,
             IVoiceInteractionManagerService modelManagementService) {
         mText = text;
         mLocale = locale;
@@ -428,7 +424,6 @@ public class AlwaysOnHotwordDetector {
         mExternalCallback = callback;
         mHandler = new MyHandler();
         mInternalCallback = new SoundTriggerListener(mHandler);
-        mVoiceInteractionService = voiceInteractionService;
         mModelManagementService = modelManagementService;
         new RefreshAvailabiltyTask().execute();
     }
@@ -471,6 +466,8 @@ public class AlwaysOnHotwordDetector {
     /**
      * Get the audio capabilities supported by the platform which can be enabled when
      * starting a recognition.
+     * Caller must be the active voice interaction service via
+     * Settings.Secure.VOICE_INTERACTION_SERVICE.
      *
      * @see #AUDIO_CAPABILITY_ECHO_CANCELLATION
      * @see #AUDIO_CAPABILITY_NOISE_SUPPRESSION
@@ -488,7 +485,7 @@ public class AlwaysOnHotwordDetector {
     private int getSupportedAudioCapabilitiesLocked() {
         try {
             ModuleProperties properties =
-                    mModelManagementService.getDspModuleProperties(mVoiceInteractionService);
+                    mModelManagementService.getDspModuleProperties();
             if (properties != null) {
                 return properties.audioCapabilities;
             }
@@ -501,6 +498,8 @@ public class AlwaysOnHotwordDetector {
 
     /**
      * Starts recognition for the associated keyphrase.
+     * Caller must be the active voice interaction service via
+     * Settings.Secure.VOICE_INTERACTION_SERVICE.
      *
      * @see #RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
      * @see #RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS
@@ -533,6 +532,8 @@ public class AlwaysOnHotwordDetector {
 
     /**
      * Stops recognition for the associated keyphrase.
+     * Caller must be the active voice interaction service via
+     * Settings.Secure.VOICE_INTERACTION_SERVICE.
      *
      * @return Indicates whether the call succeeded or not.
      * @throws UnsupportedOperationException if the recognition isn't supported.
@@ -565,6 +566,8 @@ public class AlwaysOnHotwordDetector {
      * stopping recognition. Once the model is unloaded, the value will be lost.
      * {@link AlwaysOnHotwordDetector#queryParameter} should be checked first before calling this
      * method.
+     * Caller must be the active voice interaction service via
+     * Settings.Secure.VOICE_INTERACTION_SERVICE.
      *
      * @param modelParam   {@link ModelParams}
      * @param value        Value to set
@@ -595,6 +598,8 @@ public class AlwaysOnHotwordDetector {
      * value is returned. See {@link ModelParams} for parameter default values.
      * {@link AlwaysOnHotwordDetector#queryParameter} should be checked first before
      * calling this method.
+     * Caller must be the active voice interaction service via
+     * Settings.Secure.VOICE_INTERACTION_SERVICE.
      *
      * @param modelParam   {@link ModelParams}
      * @return value of parameter
@@ -617,6 +622,8 @@ public class AlwaysOnHotwordDetector {
      * Determine if parameter control is supported for the given model handle.
      * This method should be checked prior to calling {@link AlwaysOnHotwordDetector#setParameter}
      * or {@link AlwaysOnHotwordDetector#getParameter}.
+     * Caller must be the active voice interaction service via
+     * Settings.Secure.VOICE_INTERACTION_SERVICE.
      *
      * @param modelParam {@link ModelParams}
      * @return supported range of parameter, null if not supported
@@ -775,7 +782,7 @@ public class AlwaysOnHotwordDetector {
 
         int code = STATUS_ERROR;
         try {
-            code = mModelManagementService.startRecognition(mVoiceInteractionService,
+            code = mModelManagementService.startRecognition(
                     mKeyphraseMetadata.id, mLocale.toLanguageTag(), mInternalCallback,
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
                             recognitionExtra, null /* additional data */, audioCapabilities));
@@ -791,8 +798,8 @@ public class AlwaysOnHotwordDetector {
     private int stopRecognitionLocked() {
         int code = STATUS_ERROR;
         try {
-            code = mModelManagementService.stopRecognition(
-                    mVoiceInteractionService, mKeyphraseMetadata.id, mInternalCallback);
+            code = mModelManagementService.stopRecognition(mKeyphraseMetadata.id,
+                    mInternalCallback);
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException in stopRecognition!", e);
         }
@@ -805,8 +812,8 @@ public class AlwaysOnHotwordDetector {
 
     private int setParameterLocked(@ModelParams int modelParam, int value) {
         try {
-            int code = mModelManagementService.setParameter(mVoiceInteractionService,
-                    mKeyphraseMetadata.id, modelParam, value);
+            int code = mModelManagementService.setParameter(mKeyphraseMetadata.id, modelParam,
+                    value);
 
             if (code != STATUS_OK) {
                 Slog.w(TAG, "setParameter failed with error code " + code);
@@ -820,8 +827,7 @@ public class AlwaysOnHotwordDetector {
 
     private int getParameterLocked(@ModelParams int modelParam) {
         try {
-            return mModelManagementService.getParameter(mVoiceInteractionService,
-                    mKeyphraseMetadata.id, modelParam);
+            return mModelManagementService.getParameter(mKeyphraseMetadata.id, modelParam);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -831,8 +837,7 @@ public class AlwaysOnHotwordDetector {
     private ModelParamRange queryParameterLocked(@ModelParams int modelParam) {
         try {
             SoundTrigger.ModelParamRange modelParamRange =
-                    mModelManagementService.queryParameter(mVoiceInteractionService,
-                            mKeyphraseMetadata.id, modelParam);
+                    mModelManagementService.queryParameter(mKeyphraseMetadata.id, modelParam);
 
             if (modelParamRange == null) {
                 return null;
@@ -966,7 +971,7 @@ public class AlwaysOnHotwordDetector {
             ModuleProperties dspModuleProperties = null;
             try {
                 dspModuleProperties =
-                        mModelManagementService.getDspModuleProperties(mVoiceInteractionService);
+                        mModelManagementService.getDspModuleProperties();
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in getDspProperties!", e);
             }
@@ -982,7 +987,7 @@ public class AlwaysOnHotwordDetector {
         private void internalUpdateEnrolledKeyphraseMetadata() {
             try {
                 mKeyphraseMetadata = mModelManagementService.getEnrolledKeyphraseMetadata(
-                        mVoiceInteractionService, mText, mLocale.toLanguageTag());
+                        mText, mLocale.toLanguageTag());
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in internalUpdateEnrolledKeyphraseMetadata", e);
             }

@@ -37,7 +37,8 @@ import java.util.Objects;
  * manage voice based sound trigger models.
  * Callers of this class are expected to have whitelist manifest permission MANAGE_VOICE_KEYPHRASES.
  * Callers of this class are expected to be the designated voice interaction service via
- * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}.
+ * {@link Settings.Secure.VOICE_INTERACTION_SERVICE} or a bundled voice model enrollment application
+ * detected by {@link android.hardware.soundtrigger.KeyphraseEnrollmentInfo}.
  * @hide
  */
 @SystemApi
@@ -65,6 +66,10 @@ public final class KeyphraseModelManager {
      * {@link #updateKeyphraseSoundModel}.
      * If the active voice interaction service changes from the current user, all requests will be
      * rejected, and any registered models will be unregistered.
+     * Caller must either be the active voice interaction service via
+     * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}, or the caller must be a voice model
+     * enrollment application detected by
+     * {@link android.hardware.soundtrigger.KeyphraseEnrollmentInfo}.
      *
      * @param keyphraseId The unique identifier for the keyphrase.
      * @param locale The locale language tag supported by the desired model.
@@ -93,6 +98,10 @@ public final class KeyphraseModelManager {
      * will be overwritten with the new model.
      * If the active voice interaction service changes from the current user, all requests will be
      * rejected, and any registered models will be unregistered.
+     * Caller must either be the active voice interaction service via
+     * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}, or the caller must be a voice model
+     * enrollment application detected by
+     * {@link android.hardware.soundtrigger.KeyphraseEnrollmentInfo}.
      *
      * @param model Keyphrase sound model to be updated.
      * @throws ServiceSpecificException Thrown with error code if failed to update the keyphrase
@@ -120,6 +129,10 @@ public final class KeyphraseModelManager {
      * {@link #updateKeyphraseSoundModel}.
      * If the active voice interaction service changes from the current user, all requests will be
      * rejected, and any registered models will be unregistered.
+     * Caller must either be the active voice interaction service via
+     * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}, or the caller must be a voice model
+     * enrollment application detected by
+     * {@link android.hardware.soundtrigger.KeyphraseEnrollmentInfo}.
      *
      * @param keyphraseId The unique identifier for the keyphrase.
      * @param locale The locale language tag supported by the desired model.

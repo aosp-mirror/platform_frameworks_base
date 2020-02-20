@@ -199,7 +199,7 @@ public class VoiceInteractionService extends Service {
             throw new IllegalStateException("Not available until onReady() is called");
         }
         try {
-            mSystemService.showSession(mInterface, args, flags);
+            mSystemService.showSession(args, flags);
         } catch (RemoteException e) {
         }
     }
@@ -302,7 +302,7 @@ public class VoiceInteractionService extends Service {
             // Allow only one concurrent recognition via the APIs.
             safelyShutdownHotwordDetector();
             mHotwordDetector = new AlwaysOnHotwordDetector(keyphrase, locale, callback,
-                    mKeyphraseEnrollmentInfo, mInterface, mSystemService);
+                    mKeyphraseEnrollmentInfo, mSystemService);
         }
         return mHotwordDetector;
     }
@@ -373,7 +373,7 @@ public class VoiceInteractionService extends Service {
         }
 
         try {
-            mSystemService.setUiHints(mInterface, hints);
+            mSystemService.setUiHints(hints);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
