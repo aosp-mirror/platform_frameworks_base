@@ -11509,6 +11509,7 @@ public final class Settings {
          * exempted_sync_duration           (long)
          * system_interaction_duration      (long)
          * initial_foreground_service_start_duration (long)
+         * cross_profile_apps_share_standby_buckets  (boolean)
          * </pre>
          *
          * <p>
