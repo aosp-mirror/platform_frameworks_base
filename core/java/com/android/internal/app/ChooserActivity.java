@@ -1805,6 +1805,10 @@ public class ChooserActivity extends ResolverActivity implements
             if (!TextUtils.isEmpty(dataString)) {
                 return new IntentFilter(intent.getAction(), dataString);
             }
+            if (intent.getType() == null) {
+                Log.e(TAG, "Failed to get target intent filter: intent data and type are null");
+                return null;
+            }
             IntentFilter intentFilter = new IntentFilter(intent.getAction(), intent.getType());
             List<Uri> contentUris = new ArrayList<>();
             if (Intent.ACTION_SEND.equals(intent.getAction())) {
@@ -1825,7 +1829,7 @@ public class ChooserActivity extends ResolverActivity implements
             }
             return intentFilter;
         } catch (Exception e) {
-            Log.e(TAG, "failed to get target intent filter", e);
+            Log.e(TAG, "Failed to get target intent filter", e);
             return null;
         }
     }
