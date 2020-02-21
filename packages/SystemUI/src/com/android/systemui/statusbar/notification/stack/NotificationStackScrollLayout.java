@@ -539,6 +539,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private int mGapHeight;
 
     private int mWaterfallTopInset;
+    private NotificationStackScrollLayoutController mController;
 
     private SysuiColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (colorExtractor, which) -> {
@@ -5430,7 +5431,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         addView(mShelf, index);
         mAmbientState.setShelf(mShelf);
         mStateAnimator.setShelf(mShelf);
-        notificationShelfController.bind(mAmbientState, this);
+        notificationShelfController.bind(mAmbientState, mController);
         if (ANCHOR_SCROLLING) {
             mScrollAnchorView = mShelf;
         }
@@ -5902,6 +5903,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         // The total distance required to fully reveal the header
         float totalDistance = getIntrinsicPadding();
         return MathUtils.smoothStep(0, totalDistance, dragDownAmount);
+    }
+
+    public void setController(
+            NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
+        mController = notificationStackScrollLayoutController;
+    }
+
+    public NotificationStackScrollLayoutController getController() {
+        return mController;
     }
 
     /**

@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ShadeController
@@ -93,7 +93,7 @@ constructor(
         private set
     private val mTouchSlop: Float
     private lateinit var expansionCallback: ExpansionCallback
-    private lateinit var stackScroller: NotificationStackScrollLayout
+    private lateinit var stackScrollerController: NotificationStackScrollLayoutController
     private val mTemp2 = IntArray(2)
     private var mDraggedFarEnough: Boolean = false
     private var mStartingChild: ExpandableView? = null
@@ -315,23 +315,23 @@ constructor(
     private fun findView(x: Float, y: Float): ExpandableView? {
         var totalX = x
         var totalY = y
-        stackScroller.getLocationOnScreen(mTemp2)
+        stackScrollerController.getLocationOnScreen(mTemp2)
         totalX += mTemp2[0].toFloat()
         totalY += mTemp2[1].toFloat()
-        val childAtRawPosition = stackScroller.getChildAtRawPosition(totalX, totalY)
+        val childAtRawPosition = stackScrollerController.getChildAtRawPosition(totalX, totalY)
         return if (childAtRawPosition != null && childAtRawPosition.isContentExpandable) {
             childAtRawPosition
         } else null
     }
 
     fun setUp(
-        stackScroller: NotificationStackScrollLayout,
+        stackScrollerController: NotificationStackScrollLayoutController,
         expansionCallback: ExpansionCallback,
         shadeController: ShadeController
     ) {
         this.expansionCallback = expansionCallback
         this.shadeController = shadeController
-        this.stackScroller = stackScroller
+        this.stackScrollerController = stackScrollerController
     }
 
     fun setPulsing(pulsing: Boolean) {
