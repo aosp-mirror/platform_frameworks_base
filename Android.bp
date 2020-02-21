@@ -474,7 +474,6 @@ java_library {
         "framework-statsd-stubs-module_libs_api",
         "framework-permission-stubs-systemapi",
         "framework-wifi-stubs",
-        "ike-stubs",
         "framework-tethering-stubs",
     ],
     installable: true,
@@ -525,7 +524,6 @@ java_library {
         "framework-sdkextensions-stubs-systemapi",
         "framework-statsd-stubs-module_libs_api",
         "framework-wifi-stubs",
-        "ike-stubs",
         "framework-tethering-stubs",
         // TODO (b/147688669) should be framework-telephony-stubs
         "framework-telephony",
