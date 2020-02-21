@@ -118,9 +118,6 @@ droidstubs {
         " --hide ReferencesHidden" +
         " --hide DeprecationMismatch" +
         " --hide HiddenTypedefConstant",
-    libs: [
-        "framework-all",
-    ],
     visibility: ["//visibility:private"],
     check_api: {
         current: {
