@@ -14,11 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<ImageView
+<com.android.systemui.bubbles.BadgedImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/bubble_overflow_button"
     android:layout_width="@dimen/individual_bubble_size"
     android:layout_height="@dimen/individual_bubble_size"
-    android:src="@drawable/ic_bubble_overflow_button"
-    android:scaleType="center"
-    android:layout_gravity="end"/>
+    android:src="@drawable/ic_bubble_overflow_button"/>

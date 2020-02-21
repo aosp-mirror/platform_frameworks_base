@@ -100,9 +100,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 && !(mTouchedView instanceof BubbleStackView)
                 && !(mTouchedView instanceof BubbleFlyoutView)) {
 
-            if (mTouchedView.getId() == R.id.bubble_overflow_button) {
-                mStack.showOverflow();
-            }
             // Not touching anything touchable, but we shouldn't collapse (e.g. touching edge
             // of expanded view).
             resetForNextGesture();
@@ -225,9 +222,12 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     mBubbleData.setExpanded(!mBubbleData.isExpanded());
                 } else {
                     final String key = ((BadgedImageView) mTouchedView).getKey();
-                    mBubbleData.setSelectedBubble(mBubbleData.getBubbleWithKey(key));
+                    if (key == BubbleOverflow.KEY) {
+                        mStack.showOverflow();
+                    } else {
+                        mBubbleData.setSelectedBubble(mBubbleData.getBubbleWithKey(key));
+                    }
                 }
-
                 resetForNextGesture();
                 break;
         }

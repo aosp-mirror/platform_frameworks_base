@@ -95,6 +95,7 @@ class Bubble implements BubbleViewProvider {
     private int mDotColor;
     private Path mDotPath;
 
+
     public static String groupId(NotificationEntry entry) {
         UserHandle user = entry.getSbn().getUser();
         return user.getIdentifier() + "|" + entry.getSbn().getPackageName();
@@ -111,6 +112,7 @@ class Bubble implements BubbleViewProvider {
         mSuppressionListener = listener;
     }
 
+    @Override
     public String getKey() {
         return mKey;
     }
@@ -127,14 +129,17 @@ class Bubble implements BubbleViewProvider {
         return mEntry.getSbn().getPackageName();
     }
 
+    @Override
     public Bitmap getBadgedImage() {
         return mBadgedImage;
     }
 
+    @Override
     public int getDotColor() {
         return mDotColor;
     }
 
+    @Override
     public Path getDotPath() {
         return mDotPath;
     }
@@ -150,10 +155,12 @@ class Bubble implements BubbleViewProvider {
     }
 
     @Nullable
+    @Override
     public BadgedImageView getIconView() {
         return mIconView;
     }
 
+    @Override
     @Nullable
     public BubbleExpandedView getExpandedView() {
         return mExpandedView;
@@ -240,6 +247,7 @@ class Bubble implements BubbleViewProvider {
      * Note that this contents visibility doesn't affect visibility at {@link android.view.View},
      * and setting {@code false} actually means rendering the expanded view in transparent.
      */
+    @Override
     public void setContentVisibility(boolean visibility) {
         if (mExpandedView != null) {
             mExpandedView.setContentVisibility(visibility);
@@ -333,7 +341,8 @@ class Bubble implements BubbleViewProvider {
     /**
      * Whether the bubble for this notification should show a dot indicating updated content.
      */
-    boolean showDot() {
+    @Override
+    public boolean showDot() {
         return mShowBubbleUpdateDot
                 && !mEntry.shouldSuppressNotificationDot()
                 && !shouldSuppressNotification();
@@ -484,6 +493,7 @@ class Bubble implements BubbleViewProvider {
         return Objects.hash(mKey);
     }
 
+    @Override
     public void logUIEvent(int bubbleCount, int action, float normalX, float normalY, int index) {
         if (this.getEntry() == null
                 || this.getEntry().getSbn() == null) {
