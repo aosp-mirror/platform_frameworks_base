@@ -40,8 +40,8 @@ import androidx.recyclerview.widget.RecyclerView.ItemDecoration;
 import androidx.recyclerview.widget.RecyclerView.State;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.customize.TileAdapter.Holder;
@@ -92,6 +92,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private int mAccessibilityFromIndex;
     private CharSequence mAccessibilityFromLabel;
     private QSTileHost mHost;
+    private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
 
     public TileAdapter(Context context) {
         mContext = context;
@@ -436,20 +437,11 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         move(from, to, mTiles);
         updateDividerLocations();
         if (to >= mEditIndex) {
-            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_REMOVE_SPEC,
-                    strip(mTiles.get(to)));
-            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_REMOVE,
-                    from);
+            mUiEventLogger.log(QSEditEvent.QS_EDIT_REMOVE, 0, strip(mTiles.get(to)));
         } else if (from >= mEditIndex) {
-            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_ADD_SPEC,
-                    strip(mTiles.get(to)));
-            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_ADD,
-                    to);
+            mUiEventLogger.log(QSEditEvent.QS_EDIT_ADD, 0, strip(mTiles.get(to)));
         } else {
-            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_MOVE_SPEC,
-                    strip(mTiles.get(to)));
-            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_MOVE,
-                    to);
+            mUiEventLogger.log(QSEditEvent.QS_EDIT_MOVE, 0, strip(mTiles.get(to)));
         }
         saveSpecs(mHost);
         return true;
