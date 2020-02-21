@@ -38,7 +38,14 @@ interface PeopleHubViewBoundary {
     /** View used for animating the activity launch caused by clicking a person in the hub. */
     val associatedViewForClickAnimation: View
 
-    /** [DataListener]s for individual people in the hub. */
+    /**
+     * [DataListener]s for individual people in the hub.
+     *
+     * These listeners should be ordered such that the first element will be bound to the most
+     * recent person to be added to the hub, and then continuing in descending order. If there are
+     * not enough people to satisfy each listener, `null` will be passed instead, indicating that
+     * the `View` should render a placeholder.
+     */
     val personViewAdapters: Sequence<DataListener<PersonViewModel?>>
 
     /** Sets the visibility of the Hub in the notification shade. */
@@ -80,8 +87,8 @@ private class PeopleHubDataListenerImpl(
         )
         viewBoundary.setVisible(viewModel.isVisible)
         val padded = viewModel.people + repeated(null)
-        for ((personAdapter, personModel) in viewBoundary.personViewAdapters.zip(padded)) {
-            personAdapter.onDataChanged(personModel)
+        for ((adapter, model) in viewBoundary.personViewAdapters.zip(padded)) {
+            adapter.onDataChanged(model)
         }
     }
 }

@@ -38,13 +38,13 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
     override fun onFinishInflate() {
         contents = requireViewById(R.id.people_list)
         personViewAdapters = (0 until contents.childCount)
-                .reversed()
-                .asSequence()
+                .asSequence() // so we can map
                 .mapNotNull { idx ->
+                    // get all our people slots
                     (contents.getChildAt(idx) as? ImageView)?.let(::PersonDataListenerImpl)
                 }
-                .toList()
-                .asSequence()
+                .toList() // cache it
+                .asSequence() // but don't reveal it's a list
         super.onFinishInflate()
         setVisible(true /* nowVisible */, false /* animate */)
     }
@@ -80,6 +80,7 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
             DataListener<PersonViewModel?> {
 
         override fun onDataChanged(data: PersonViewModel?) {
+            avatarView.visibility = data?.let { View.VISIBLE } ?: View.GONE
             avatarView.setImageDrawable(data?.icon)
             avatarView.setOnClickListener { data?.onClick?.invoke() }
         }
