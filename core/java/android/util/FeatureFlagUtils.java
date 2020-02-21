@@ -45,9 +45,6 @@ public class FeatureFlagUtils {
     public static final String NOTIF_CONVO_BYPASS_SHORTCUT_REQ =
             "settings_notif_convo_bypass_shortcut_req";
     /** @hide */
-    public static final String BACKUP_NO_KV_DATA_CHANGE_CALLS =
-            "backup_enable_no_data_notification_calls";
-    /** @hide */
     public static final String SETTINGS_DO_NOT_RESTORE_PRESERVED =
             "settings_do_not_restore_preserved";
     /** @hide */
@@ -70,9 +67,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_controller_loading_enhancement", "false");
         DEFAULT_FLAGS.put("settings_conditionals", "false");
         DEFAULT_FLAGS.put(NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
-
-        // Disabled until backup transports support it.
-        DEFAULT_FLAGS.put(BACKUP_NO_KV_DATA_CHANGE_CALLS, "false");
         // Disabled by default until b/148278926 is resolved. This flags guards a feature
         // introduced in R and will be removed in the next release (b/148367230).
         DEFAULT_FLAGS.put(SETTINGS_DO_NOT_RESTORE_PRESERVED, "false");
