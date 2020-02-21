@@ -58,17 +58,16 @@ public class UseCasePriorityHintsTest {
     @Before
     public void setUp() throws Exception {
         mPriorityHints = new UseCasePriorityHints();
-    }
-
-    @Test
-    public void parseTest_parseSampleXml() {
         try {
             mPriorityHints.parseInternal(
                     new ByteArrayInputStream(mExampleXML.getBytes(StandardCharsets.UTF_8)));
         } catch (IOException | XmlPullParserException e) {
             Slog.e(TAG, "Error parse xml.", e);
         }
+    }
 
+    @Test
+    public void parseTest_parseSampleXml() {
         // Pre-defined foreground
         assertThat(mPriorityHints.getForegroundPriority(
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND)).isEqualTo(180);
@@ -96,5 +95,17 @@ public class UseCasePriorityHintsTest {
         // Vendor use case
         assertThat(mPriorityHints.getForegroundPriority(1001)).isEqualTo(300);
         assertThat(mPriorityHints.getBackgroundPriority(1001)).isEqualTo(80);
+    }
+
+    @Test
+    public void isDefinedUseCaseTest_invalidUseCase() {
+        assertThat(mPriorityHints.isDefinedUseCase(1992)).isFalse();
+    }
+
+    @Test
+    public void isDefinedUseCaseTest_validUseCase() {
+        assertThat(mPriorityHints.isDefinedUseCase(1001)).isTrue();
+        assertThat(mPriorityHints.isDefinedUseCase(
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD)).isTrue();
     }
 }

@@ -452,4 +452,46 @@ public class TunerResourceManagerServiceTest {
                 .get(infos[1].getId()).getOwnerClientId()).isEqualTo(clientId1[0]);
         assertThat(mReclaimingId).isEqualTo(clientId0[0]);
     }
+
+    @Test
+    public void unregisterClientTest_usingFrontend() {
+        // Register client
+        ResourceClientProfile profile = new ResourceClientProfile("0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        int[] clientId = new int[1];
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profile, null /*listener*/, clientId);
+        assertThat(clientId[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+
+        // Init frontend resources.
+        TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
+        infos[0] =
+                new TunerFrontendInfo(0 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
+        infos[1] =
+                new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
+        mTunerResourceManagerService.setFrontendInfoListInternal(infos);
+
+        TunerFrontendRequest request =
+                new TunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
+        int[] frontendId = new int[1];
+        try {
+            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
+                    .isTrue();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        assertThat(frontendId[0]).isEqualTo(infos[0].getId());
+        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[0].getId())
+                .isInUse()).isTrue();
+        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[1].getId())
+                .isInUse()).isTrue();
+
+        // Unregister client when using frontend
+        mTunerResourceManagerService.unregisterClientProfileInternal(clientId[0]);
+        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[0].getId())
+                .isInUse()).isFalse();
+        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[1].getId())
+                .isInUse()).isFalse();
+
+    }
 }

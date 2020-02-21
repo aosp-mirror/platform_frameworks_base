@@ -15,6 +15,9 @@
  */
 package com.android.server.tv.tunerresourcemanager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
   * A client profile object used by the Tuner Resource Manager to record the registered clients'
   * information.
@@ -58,6 +61,11 @@ public final class ClientProfile {
      * Optional nice value for TRM to reduce client’s priority.
      */
     private int mNiceValue;
+
+    /**
+     * List of the frontend ids that are used by the current client.
+     */
+    private List<Integer> mUsingFrontendIds = new ArrayList<>();
 
     /**
      * Optional arbitrary priority value given by the client.
@@ -112,6 +120,30 @@ public final class ClientProfile {
 
     public void setNiceValue(int niceValue) {
         mNiceValue = niceValue;
+    }
+
+    /**
+     * Set when the client starts to use a frontend.
+     *
+     * @param frontendId being used.
+     */
+    public void useFrontend(int frontendId) {
+        mUsingFrontendIds.add(frontendId);
+    }
+
+    public List<Integer> getInUseFrontendIds() {
+        return mUsingFrontendIds;
+    }
+
+    /**
+     * Called when the client released a frontend.
+     *
+     * <p>This could happen when client resource reclaimed.
+     *
+     * @param frontendId being released.
+     */
+    public void releaseFrontend(int frontendId) {
+        mUsingFrontendIds.remove(frontendId);
     }
 
     @Override
