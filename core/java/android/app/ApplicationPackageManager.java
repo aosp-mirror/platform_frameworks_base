@@ -768,6 +768,12 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public void revokeRuntimePermission(String packageName, String permName, UserHandle user,
+            String reason) {
+        // TODO evanseverson: impl
+    }
+
+    @Override
     public int getPermissionFlags(String permName, String packageName, UserHandle user) {
         try {
             return mPermissionManager
