@@ -25,6 +25,7 @@ import android.annotation.SystemService;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.net.wifi.SoftApInfo;
+import android.net.wifi.WifiAnnotations;
 import android.net.wifi.WifiScanner;
 import android.os.Binder;
 import android.os.Handler;
@@ -244,7 +245,7 @@ public class WifiNl80211Manager {
          *                     indication that the SoftAp is not enabled.
          * @param bandwidth The new bandwidth of the SoftAp.
          */
-        void onSoftApChannelSwitched(int frequencyMhz,  int bandwidth);
+        void onSoftApChannelSwitched(int frequencyMhz, @WifiAnnotations.Bandwidth int bandwidth);
     }
 
     /**
@@ -382,7 +383,7 @@ public class WifiNl80211Manager {
                     toFrameworkBandwidth(bandwidth)));
         }
 
-        private  int toFrameworkBandwidth(int bandwidth) {
+        private @WifiAnnotations.Bandwidth int toFrameworkBandwidth(int bandwidth) {
             switch(bandwidth) {
                 case IApInterfaceEventCallback.BANDWIDTH_INVALID:
                     return SoftApInfo.CHANNEL_WIDTH_INVALID;
@@ -855,7 +856,7 @@ public class WifiNl80211Manager {
     /**
      * Return scan type for the parcelable {@link SingleScanSettings}
      */
-    private static int getScanType(int scanType) {
+    private static int getScanType(@WifiAnnotations.ScanType int scanType) {
         switch (scanType) {
             case WifiScanner.SCAN_TYPE_LOW_LATENCY:
                 return IWifiScannerImpl.SCAN_TYPE_LOW_SPAN;
@@ -890,7 +891,7 @@ public class WifiNl80211Manager {
      * @return Returns true on success, false on failure (e.g. when called before the interface
      * has been set up).
      */
-    public boolean startScan(@NonNull String ifaceName,  int scanType,
+    public boolean startScan(@NonNull String ifaceName, @WifiAnnotations.ScanType int scanType,
             @Nullable Set<Integer> freqs, @Nullable List<byte[]> hiddenNetworkSSIDs) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
@@ -1046,7 +1047,7 @@ public class WifiNl80211Manager {
      * @return frequencies vector of valid frequencies (MHz), or an empty array for error.
      * @throws IllegalArgumentException if band is not recognized.
      */
-    public @NonNull int[] getChannelsMhzForBand(int band) {
+    public @NonNull int[] getChannelsMhzForBand(@WifiAnnotations.WifiBandBasic int band) {
         if (mWificond == null) {
             Log.e(TAG, "No valid wificond scanner interface handler");
             return new int[0];
@@ -1225,7 +1226,7 @@ public class WifiNl80211Manager {
      */
     public static class OemSecurityType {
         /** The protocol defined in {@link android.net.wifi.WifiAnnotations.Protocol}. */
-        public final  int protocol;
+        public final @WifiAnnotations.Protocol int protocol;
         /**
          * Supported key management types defined
          * in {@link android.net.wifi.WifiAnnotations.KeyMgmt}.
@@ -1237,7 +1238,7 @@ public class WifiNl80211Manager {
          */
         @NonNull public final List<Integer> pairwiseCipher;
         /** The group cipher type defined in {@link android.net.wifi.WifiAnnotations.Cipher}. */
-        public final  int groupCipher;
+        public final @WifiAnnotations.Cipher int groupCipher;
         /**
          * Default constructor for OemSecurityType
          *
@@ -1251,10 +1252,10 @@ public class WifiNl80211Manager {
          *                    in {@link android.net.wifi.WifiAnnotations.Cipher}.
          */
         public OemSecurityType(
-                int protocol,
+                @WifiAnnotations.Protocol int protocol,
                 @NonNull List<Integer> keyManagement,
                 @NonNull List<Integer> pairwiseCipher,
-                 int groupCipher) {
+                @WifiAnnotations.Cipher int groupCipher) {
             this.protocol = protocol;
             this.keyManagement = (keyManagement != null)
                 ? keyManagement : new ArrayList<Integer>();
