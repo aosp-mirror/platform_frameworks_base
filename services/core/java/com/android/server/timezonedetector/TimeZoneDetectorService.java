@@ -25,6 +25,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -132,6 +134,14 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE,
                 "suggest manual time and time zone");
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        (new TimeZoneDetectorShellCommand(this)).exec(
+                this, in, out, err, args, callback, resultReceiver);
     }
 }
 
