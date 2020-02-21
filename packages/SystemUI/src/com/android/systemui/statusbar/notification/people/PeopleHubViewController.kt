@@ -25,17 +25,16 @@ import android.provider.Settings
 import android.view.View
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /** Boundary between the View and PeopleHub, as seen by the View. */
-interface PeopleHubSectionFooterViewAdapter {
-    fun bindView(viewBoundary: PeopleHubSectionFooterViewBoundary)
+interface PeopleHubViewAdapter {
+    fun bindView(viewBoundary: PeopleHubViewBoundary): Subscription
 }
 
-/** Abstract `View` representation of PeopleHub footer in [NotificationSectionsManager]. */
-interface PeopleHubSectionFooterViewBoundary {
+/** Abstract `View` representation of PeopleHub. */
+interface PeopleHubViewBoundary {
     /** View used for animating the activity launch caused by clicking a person in the hub. */
     val associatedViewForClickAnimation: View
 
@@ -57,23 +56,22 @@ interface PeopleHubViewModelFactory {
 }
 
 /**
- * Wraps a [PeopleHubSectionFooterViewBoundary] in a [DataListener], and connects it to the data
+ * Wraps a [PeopleHubViewBoundary] in a [DataListener], and connects it to the data
  * pipeline.
  *
  * @param dataSource PeopleHub data pipeline.
  */
 @Singleton
-class PeopleHubSectionFooterViewAdapterImpl @Inject constructor(
+class PeopleHubViewAdapterImpl @Inject constructor(
     private val dataSource: DataSource<@JvmSuppressWildcards PeopleHubViewModelFactory>
-) : PeopleHubSectionFooterViewAdapter {
+) : PeopleHubViewAdapter {
 
-    override fun bindView(viewBoundary: PeopleHubSectionFooterViewBoundary) {
-        dataSource.registerListener(PeopleHubDataListenerImpl(viewBoundary))
-    }
+    override fun bindView(viewBoundary: PeopleHubViewBoundary): Subscription =
+            dataSource.registerListener(PeopleHubDataListenerImpl(viewBoundary))
 }
 
 private class PeopleHubDataListenerImpl(
-    private val viewBoundary: PeopleHubSectionFooterViewBoundary
+    private val viewBoundary: PeopleHubViewBoundary
 ) : DataListener<PeopleHubViewModelFactory> {
 
     override fun onDataChanged(data: PeopleHubViewModelFactory) {
@@ -92,7 +90,7 @@ private class PeopleHubDataListenerImpl(
  * Converts [PeopleHubModel]s into [PeopleHubViewModelFactory]s.
  *
  * This class serves as the glue between the View layer (which depends on
- * [PeopleHubSectionFooterViewBoundary]) and the Data layer (which produces [PeopleHubModel]s).
+ * [PeopleHubViewBoundary]) and the Data layer (which produces [PeopleHubModel]s).
  */
 @Singleton
 class PeopleHubViewModelFactoryDataSourceImpl @Inject constructor(

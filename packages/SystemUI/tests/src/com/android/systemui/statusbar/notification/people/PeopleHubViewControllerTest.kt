@@ -43,7 +43,7 @@ class PeopleHubViewControllerTest : SysuiTestCase() {
 
     @JvmField @Rule val mockito: MockitoRule = MockitoJUnit.rule()
 
-    @Mock private lateinit var mockViewBoundary: PeopleHubSectionFooterViewBoundary
+    @Mock private lateinit var mockViewBoundary: PeopleHubViewBoundary
     @Mock private lateinit var mockActivityStarter: ActivityStarter
 
     @Test
@@ -67,7 +67,7 @@ class PeopleHubViewControllerTest : SysuiTestCase() {
                 return mockSubscription
             }
         }
-        val adapter = PeopleHubSectionFooterViewAdapterImpl(fakeFactoryDataSource)
+        val adapter = PeopleHubViewAdapterImpl(fakeFactoryDataSource)
 
         adapter.bindView(mockViewBoundary)
 

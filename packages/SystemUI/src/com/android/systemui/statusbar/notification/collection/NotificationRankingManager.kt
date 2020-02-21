@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.notification.NotificationSectionsFeatureMa
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
+import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationGroupManager
@@ -90,12 +91,12 @@ open class NotificationRankingManager @Inject constructor(
         val bIsHighPriority = b.isHighPriority()
 
         when {
-            usePeopleFiltering && aIsPeople != bIsPeople -> if (aIsPeople) -1 else 1
-            usePeopleFiltering && aIsImportantPeople != bIsImportantPeople ->
-                if (aIsImportantPeople) -1 else 1
             aHeadsUp != bHeadsUp -> if (aHeadsUp) -1 else 1
             // Provide consistent ranking with headsUpManager
             aHeadsUp -> headsUpManager.compare(a, b)
+            usePeopleFiltering && aIsPeople != bIsPeople -> if (aIsPeople) -1 else 1
+            usePeopleFiltering && aIsImportantPeople != bIsImportantPeople ->
+                if (aIsImportantPeople) -1 else 1
             // Upsort current media notification.
             aMedia != bMedia -> if (aMedia) -1 else 1
             // Upsort PRIORITY_MAX system notifications
@@ -162,7 +163,9 @@ open class NotificationRankingManager @Inject constructor(
         isMedia: Boolean,
         isSystemMax: Boolean
     ) {
-        if (usePeopleFiltering && entry.isPeopleNotification()) {
+        if (usePeopleFiltering && isHeadsUp) {
+            entry.bucket = BUCKET_HEADS_UP
+        } else if (usePeopleFiltering && entry.isPeopleNotification()) {
             entry.bucket = BUCKET_PEOPLE
         } else if (isHeadsUp || isMedia || isSystemMax || entry.isHighPriority()) {
             entry.bucket = BUCKET_ALERTING

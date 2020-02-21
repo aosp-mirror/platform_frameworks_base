@@ -45,8 +45,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
-import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewAdapter;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
+import com.android.systemui.statusbar.notification.people.PeopleHubViewAdapter;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
@@ -71,7 +70,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Mock private ActivityStarterDelegate mActivityStarterDelegate;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
-    @Mock private PeopleHubSectionFooterViewAdapter mPeopleHubAdapter;
+    @Mock private PeopleHubViewAdapter mPeopleHubAdapter;
     @Mock private NotificationSectionsFeatureManager mSectionsFeatureManager;
     @Mock private NotificationRowComponent mNotificationRowComponent;
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
@@ -90,18 +89,8 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                         mStatusBarStateController,
                         mConfigurationController,
                         mPeopleHubAdapter,
-                        mSectionsFeatureManager,
-                        new NotificationRowComponent.Builder() {
-                    @Override
-                    public NotificationRowComponent.Builder activatableNotificationView(
-                            ActivatableNotificationView view) {
-                        return this;
-                    }
-
-                    @Override
-                    public NotificationRowComponent build() {
-                        return mNotificationRowComponent;
-                    }});
+                        mSectionsFeatureManager
+                );
         // Required in order for the header inflation to work properly
         when(mNssl.generateLayoutParams(any(AttributeSet.class)))
                 .thenReturn(new ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));

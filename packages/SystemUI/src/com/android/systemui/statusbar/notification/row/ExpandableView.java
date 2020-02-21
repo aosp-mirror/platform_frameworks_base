@@ -67,29 +67,34 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int givenSize = MeasureSpec.getSize(heightMeasureSpec);
+        final int givenHeight = MeasureSpec.getSize(heightMeasureSpec);
         final int viewHorizontalPadding = getPaddingStart() + getPaddingEnd();
+
+        // Max height is as large as possible, unless otherwise requested
         int ownMaxHeight = Integer.MAX_VALUE;
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        if (heightMode != MeasureSpec.UNSPECIFIED && givenSize != 0) {
-            ownMaxHeight = Math.min(givenSize, ownMaxHeight);
+        if (heightMode != MeasureSpec.UNSPECIFIED && givenHeight != 0) {
+            // Set our max height to what was requested from the parent
+            ownMaxHeight = Math.min(givenHeight, ownMaxHeight);
         }
-        int newHeightSpec = MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.AT_MOST);
+
+        // height of the largest child
         int maxChildHeight = 0;
+        int atMostOwnMaxHeightSpec = MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.AT_MOST);
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             if (child.getVisibility() == GONE) {
                 continue;
             }
-            int childHeightSpec = newHeightSpec;
+            int childHeightSpec = atMostOwnMaxHeightSpec;
             ViewGroup.LayoutParams layoutParams = child.getLayoutParams();
             if (layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
                 if (layoutParams.height >= 0) {
-                    // An actual height is set
-                    childHeightSpec = layoutParams.height > ownMaxHeight
-                        ? MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.EXACTLY)
-                        : MeasureSpec.makeMeasureSpec(layoutParams.height, MeasureSpec.EXACTLY);
+                    // If an actual height is set, cap it to the max height
+                    childHeightSpec = MeasureSpec.makeMeasureSpec(
+                            Math.min(layoutParams.height, ownMaxHeight),
+                            MeasureSpec.EXACTLY);
                 }
                 child.measure(getChildMeasureSpec(
                         widthMeasureSpec, viewHorizontalPadding, layoutParams.width),
@@ -100,15 +105,22 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
                 mMatchParentViews.add(child);
             }
         }
+
+        // Set our own height to the given height, or the height of the largest child
         int ownHeight = heightMode == MeasureSpec.EXACTLY
-                ? givenSize : Math.min(ownMaxHeight, maxChildHeight);
-        newHeightSpec = MeasureSpec.makeMeasureSpec(ownHeight, MeasureSpec.EXACTLY);
+                ? givenHeight
+                : Math.min(ownMaxHeight, maxChildHeight);
+        int exactlyOwnHeightSpec = MeasureSpec.makeMeasureSpec(ownHeight, MeasureSpec.EXACTLY);
+
+        // Now that we know our own height, measure the children that are MATCH_PARENT
         for (View child : mMatchParentViews) {
             child.measure(getChildMeasureSpec(
                     widthMeasureSpec, viewHorizontalPadding, child.getLayoutParams().width),
-                    newHeightSpec);
+                    exactlyOwnHeightSpec);
         }
         mMatchParentViews.clear();
+
+        // Finish up
         int width = MeasureSpec.getSize(widthMeasureSpec);
         setMeasuredDimension(width, ownHeight);
     }

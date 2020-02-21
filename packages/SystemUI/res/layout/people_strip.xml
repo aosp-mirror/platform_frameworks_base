@@ -19,39 +19,34 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/notification_section_header_height"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
     android:focusable="true"
     android:clickable="true"
 >
-
-    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
-        android:id="@+id/backgroundNormal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
-        android:id="@+id/backgroundDimmed"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <LinearLayout
         android:id="@+id/people_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:layout_marginEnd="8dp"
+        android:gravity="bottom"
         android:orientation="horizontal">
 
-        <TextView
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="@dimen/notification_section_header_padding_left"
-            android:gravity="start"
-            android:textAlignment="gravity"
-            android:text="@string/notification_section_header_conversations"
-            android:textSize="12sp"
-            android:textColor="@color/notification_section_header_label_color"
-            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-        />
+            android:gravity="start|center_vertical"
+            android:layout_weight="1">
+
+            <TextView
+                style="@style/TextAppearance.NotificationSectionHeaderButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/notification_section_header_conversations"
+            />
+
+        </FrameLayout>
 
         <ImageView
             android:layout_width="48dp"
@@ -84,16 +79,10 @@
         <ImageView
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
             android:padding="8dp"
             android:scaleType="fitCenter"
         />
 
     </LinearLayout>
-
-    <com.android.systemui.statusbar.notification.FakeShadowView
-        android:id="@+id/fake_shadow"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
 </com.android.systemui.statusbar.notification.stack.PeopleHubView>
