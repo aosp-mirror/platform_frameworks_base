@@ -213,10 +213,10 @@ public:
     static int overrideSpotShadowStrength;
 
     static ProfileType getProfileType();
-    ANDROID_API static RenderPipelineType peekRenderPipelineType();
-    ANDROID_API static RenderPipelineType getRenderPipelineType();
+    static RenderPipelineType peekRenderPipelineType();
+    static RenderPipelineType getRenderPipelineType();
 
-    ANDROID_API static bool enableHighContrastText;
+    static bool enableHighContrastText;
 
     // Should be used only by test apps
     static bool waitForGpuCompletion;
@@ -235,17 +235,17 @@ public:
     static bool skpCaptureEnabled;
 
     // For experimentation b/68769804
-    ANDROID_API static bool enableRTAnimations;
+    static bool enableRTAnimations;
 
     // Used for testing only to change the render pipeline.
     static void overrideRenderPipelineType(RenderPipelineType);
 
     static bool runningInEmulator;
 
-    ANDROID_API static bool debuggingEnabled;
-    ANDROID_API static bool isolatedProcess;
+    static bool debuggingEnabled;
+    static bool isolatedProcess;
 
-    ANDROID_API static int contextPriority;
+    static int contextPriority;
 
     static int defaultRenderAhead;
 

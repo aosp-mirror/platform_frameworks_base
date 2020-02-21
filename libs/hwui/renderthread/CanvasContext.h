@@ -170,9 +170,9 @@ public:
     }
 
     // Used to queue up work that needs to be completed before this frame completes
-    ANDROID_API void enqueueFrameWork(std::function<void()>&& func);
+    void enqueueFrameWork(std::function<void()>&& func);
 
-    ANDROID_API int64_t getFrameNumber();
+    int64_t getFrameNumber();
 
     void waitOnFences();
 

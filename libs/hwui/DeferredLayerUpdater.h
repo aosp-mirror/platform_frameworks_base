@@ -44,11 +44,11 @@ class DeferredLayerUpdater : public VirtualLightRefBase, public IGpuContextCallb
 public:
     // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
     // and will not call incrementRef on it as a result.
-    ANDROID_API explicit DeferredLayerUpdater(RenderState& renderState);
+    explicit DeferredLayerUpdater(RenderState& renderState);
 
-    ANDROID_API ~DeferredLayerUpdater();
+    ~DeferredLayerUpdater();
 
-    ANDROID_API bool setSize(int width, int height) {
+    bool setSize(int width, int height) {
         if (mWidth != width || mHeight != height) {
             mWidth = width;
             mHeight = height;
@@ -60,7 +60,7 @@ public:
     int getWidth() { return mWidth; }
     int getHeight() { return mHeight; }
 
-    ANDROID_API bool setBlend(bool blend) {
+    bool setBlend(bool blend) {
         if (blend != mBlend) {
             mBlend = blend;
             return true;
@@ -68,18 +68,18 @@ public:
         return false;
     }
 
-    ANDROID_API void setSurfaceTexture(AutoTextureRelease&& consumer);
+    void setSurfaceTexture(AutoTextureRelease&& consumer);
 
-    ANDROID_API void updateTexImage() { mUpdateTexImage = true; }
+    void updateTexImage() { mUpdateTexImage = true; }
 
-    ANDROID_API void setTransform(const SkMatrix* matrix) {
+    void setTransform(const SkMatrix* matrix) {
         delete mTransform;
         mTransform = matrix ? new SkMatrix(*matrix) : nullptr;
     }
 
     SkMatrix* getTransform() { return mTransform; }
 
-    ANDROID_API void setPaint(const SkPaint* paint);
+    void setPaint(const SkPaint* paint);
 
     void apply();
 

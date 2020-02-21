@@ -69,7 +69,7 @@ enum ClippingFlags {
     CLIP_TO_CLIP_BOUNDS = 0x1 << 1,
 };
 
-class ANDROID_API LayerProperties {
+class LayerProperties {
 public:
     bool setType(LayerType type) {
         if (RP_SET(mType, type)) {
@@ -123,7 +123,7 @@ private:
 /*
  * Data structure that holds the properties for a RenderNode
  */
-class ANDROID_API RenderProperties {
+class RenderProperties {
 public:
     RenderProperties();
     virtual ~RenderProperties();

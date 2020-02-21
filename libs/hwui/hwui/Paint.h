@@ -32,7 +32,7 @@
 
 namespace android {
 
-class ANDROID_API Paint : public SkPaint {
+class Paint : public SkPaint {
 public:
     // Default values for underlined and strikethrough text,
     // as defined by Skia in SkTextFormatParams.h.

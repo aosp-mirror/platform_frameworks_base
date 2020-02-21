@@ -60,69 +60,68 @@ enum {
  * references RenderProxy fields. This is safe as RenderProxy cannot
  * be deleted if it is blocked inside a call.
  */
-class ANDROID_API RenderProxy {
+class RenderProxy {
 public:
-    ANDROID_API RenderProxy(bool opaque, RenderNode* rootNode, IContextFactory* contextFactory);
-    ANDROID_API virtual ~RenderProxy();
+    RenderProxy(bool opaque, RenderNode* rootNode, IContextFactory* contextFactory);
+    virtual ~RenderProxy();
 
     // Won't take effect until next EGLSurface creation
-    ANDROID_API void setSwapBehavior(SwapBehavior swapBehavior);
-    ANDROID_API bool loadSystemProperties();
-    ANDROID_API void setName(const char* name);
+    void setSwapBehavior(SwapBehavior swapBehavior);
+    bool loadSystemProperties();
+    void setName(const char* name);
 
-    ANDROID_API void setSurface(ANativeWindow* window, bool enableTimeout = true);
-    ANDROID_API void allocateBuffers();
-    ANDROID_API bool pause();
-    ANDROID_API void setStopped(bool stopped);
-    ANDROID_API void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
-    ANDROID_API void setLightGeometry(const Vector3& lightCenter, float lightRadius);
-    ANDROID_API void setOpaque(bool opaque);
-    ANDROID_API void setWideGamut(bool wideGamut);
-    ANDROID_API int64_t* frameInfo();
-    ANDROID_API int syncAndDrawFrame();
-    ANDROID_API void destroy();
+    void setSurface(ANativeWindow* window, bool enableTimeout = true);
+    void allocateBuffers();
+    bool pause();
+    void setStopped(bool stopped);
+    void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
+    void setLightGeometry(const Vector3& lightCenter, float lightRadius);
+    void setOpaque(bool opaque);
+    void setWideGamut(bool wideGamut);
+    int64_t* frameInfo();
+    int syncAndDrawFrame();
+    void destroy();
 
-    ANDROID_API static void invokeFunctor(Functor* functor, bool waitForCompletion);
+    static void invokeFunctor(Functor* functor, bool waitForCompletion);
     static void destroyFunctor(int functor);
 
-    ANDROID_API DeferredLayerUpdater* createTextureLayer();
-    ANDROID_API void buildLayer(RenderNode* node);
-    ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap);
-    ANDROID_API void pushLayerUpdate(DeferredLayerUpdater* layer);
-    ANDROID_API void cancelLayerUpdate(DeferredLayerUpdater* layer);
-    ANDROID_API void detachSurfaceTexture(DeferredLayerUpdater* layer);
+    DeferredLayerUpdater* createTextureLayer();
+    void buildLayer(RenderNode* node);
+    bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap);
+    void pushLayerUpdate(DeferredLayerUpdater* layer);
+    void cancelLayerUpdate(DeferredLayerUpdater* layer);
+    void detachSurfaceTexture(DeferredLayerUpdater* layer);
 
-    ANDROID_API void destroyHardwareResources();
-    ANDROID_API static void trimMemory(int level);
-    ANDROID_API static void overrideProperty(const char* name, const char* value);
+    void destroyHardwareResources();
+    static void trimMemory(int level);
+    static void overrideProperty(const char* name, const char* value);
 
-    ANDROID_API void fence();
-    ANDROID_API static int maxTextureSize();
-    ANDROID_API void stopDrawing();
-    ANDROID_API void notifyFramePending();
+    void fence();
+    static int maxTextureSize();
+    void stopDrawing();
+    void notifyFramePending();
 
-    ANDROID_API void dumpProfileInfo(int fd, int dumpFlags);
+    void dumpProfileInfo(int fd, int dumpFlags);
     // Not exported, only used for testing
     void resetProfileInfo();
     uint32_t frameTimePercentile(int p);
-    ANDROID_API static void dumpGraphicsMemory(int fd);
+    static void dumpGraphicsMemory(int fd);
 
-    ANDROID_API static void rotateProcessStatsBuffer();
-    ANDROID_API static void setProcessStatsBuffer(int fd);
-    ANDROID_API int getRenderThreadTid();
+    static void rotateProcessStatsBuffer();
+    static void setProcessStatsBuffer(int fd);
+    int getRenderThreadTid();
 
-    ANDROID_API void addRenderNode(RenderNode* node, bool placeFront);
-    ANDROID_API void removeRenderNode(RenderNode* node);
-    ANDROID_API void drawRenderNode(RenderNode* node);
-    ANDROID_API void setContentDrawBounds(int left, int top, int right, int bottom);
-    ANDROID_API void setPictureCapturedCallback(
-            const std::function<void(sk_sp<SkPicture>&&)>& callback);
-    ANDROID_API void setFrameCallback(std::function<void(int64_t)>&& callback);
-    ANDROID_API void setFrameCompleteCallback(std::function<void(int64_t)>&& callback);
+    void addRenderNode(RenderNode* node, bool placeFront);
+    void removeRenderNode(RenderNode* node);
+    void drawRenderNode(RenderNode* node);
+    void setContentDrawBounds(int left, int top, int right, int bottom);
+    void setPictureCapturedCallback(const std::function<void(sk_sp<SkPicture>&&)>& callback);
+    void setFrameCallback(std::function<void(int64_t)>&& callback);
+    void setFrameCompleteCallback(std::function<void(int64_t)>&& callback);
 
-    ANDROID_API void addFrameMetricsObserver(FrameMetricsObserver* observer);
-    ANDROID_API void removeFrameMetricsObserver(FrameMetricsObserver* observer);
-    ANDROID_API void setForceDark(bool enable);
+    void addFrameMetricsObserver(FrameMetricsObserver* observer);
+    void removeFrameMetricsObserver(FrameMetricsObserver* observer);
+    void setForceDark(bool enable);
 
     /**
      * Sets a render-ahead depth on the backing renderer. This will increase latency by
@@ -139,17 +138,17 @@ public:
      *
      * @param renderAhead How far to render ahead, must be in the range [0..2]
      */
-    ANDROID_API void setRenderAheadDepth(int renderAhead);
+    void setRenderAheadDepth(int renderAhead);
 
-    ANDROID_API static int copySurfaceInto(ANativeWindow* window, int left, int top, int right,
+    static int copySurfaceInto(ANativeWindow* window, int left, int top, int right,
                                            int bottom, SkBitmap* bitmap);
-    ANDROID_API static void prepareToDraw(Bitmap& bitmap);
+    static void prepareToDraw(Bitmap& bitmap);
 
     static int copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap);
 
-    ANDROID_API static void disableVsync();
+    static void disableVsync();
 
-    ANDROID_API static void preload();
+    static void preload();
 
 private:
     RenderThread& mRenderThread;

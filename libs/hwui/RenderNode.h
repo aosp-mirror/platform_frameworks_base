@@ -93,17 +93,17 @@ public:
         DISPLAY_LIST = 1 << 14,
     };
 
-    ANDROID_API RenderNode();
-    ANDROID_API virtual ~RenderNode();
+    RenderNode();
+    virtual ~RenderNode();
 
     // See flags defined in DisplayList.java
     enum ReplayFlag { kReplayFlag_ClipChildren = 0x1 };
 
-    ANDROID_API void setStagingDisplayList(DisplayList* newData);
+    void setStagingDisplayList(DisplayList* newData);
 
-    ANDROID_API void output();
-    ANDROID_API int getUsageSize();
-    ANDROID_API int getAllocatedSize();
+    void output();
+    int getUsageSize();
+    int getAllocatedSize();
 
     bool isRenderable() const { return mDisplayList && !mDisplayList->isEmpty(); }
 
@@ -148,12 +148,12 @@ public:
 
     int getHeight() const { return properties().getHeight(); }
 
-    ANDROID_API virtual void prepareTree(TreeInfo& info);
+    virtual void prepareTree(TreeInfo& info);
     void destroyHardwareResources(TreeInfo* info = nullptr);
     void destroyLayers();
 
     // UI thread only!
-    ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
+    void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
     void removeAnimator(const sp<BaseRenderNodeAnimator>& animator);
 
     // This can only happen during pushStaging()
@@ -178,7 +178,7 @@ public:
     // the frameNumber to appropriately batch/synchronize these transactions.
     // There is no other filtering/batching to ensure that only the "final"
     // state called once per frame.
-    class ANDROID_API PositionListener : public VirtualLightRefBase {
+    class PositionListener : public VirtualLightRefBase {
     public:
         virtual ~PositionListener() {}
         // Called when the RenderNode's position changes
@@ -189,14 +189,14 @@ public:
         virtual void onPositionLost(RenderNode& node, const TreeInfo* info) = 0;
     };
 
-    ANDROID_API void setPositionListener(PositionListener* listener) {
+    void setPositionListener(PositionListener* listener) {
         mStagingPositionListener = listener;
         mPositionListenerDirty = true;
     }
 
     // This is only modified in MODE_FULL, so it can be safely accessed
     // on the UI thread.
-    ANDROID_API bool hasParents() { return mParentCount; }
+    bool hasParents() { return mParentCount; }
 
     void onRemovedFromTree(TreeInfo* info);
 
