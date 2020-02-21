@@ -27,8 +27,6 @@
 #define DEBUG_INPUT_DISPATCHER_POLICY 0
 
 
-#include <nativehelper/JNIHelp.h>
-#include "jni.h"
 #include <atomic>
 #include <cinttypes>
 #include <limits.h>
@@ -50,7 +48,6 @@
 
 #include <inputflinger/InputManager.h>
 
-#include <android/graphics/GraphicsJNI.h>
 #include <android_os_MessageQueue.h>
 #include <android_view_InputChannel.h>
 #include <android_view_InputDevice.h>
