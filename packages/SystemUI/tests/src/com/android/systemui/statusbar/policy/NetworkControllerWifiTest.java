@@ -72,7 +72,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
                     testSsid);
             setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_WIFI, false, true);
             verifyLastQsWifiIcon(true, true, WifiIcons.QS_WIFI_SIGNAL_STRENGTH[0][testLevel],
-                    null);
+                    testSsid);
         }
     }
 

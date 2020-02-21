@@ -88,15 +88,16 @@ public class WifiSignalController extends
         boolean wifiVisible = mCurrentState.enabled
                 && ((mCurrentState.connected && mCurrentState.inetCondition == 1)
                     || !mHasMobileData || visibleWhenEnabled);
-        String wifiDesc = wifiVisible ? mCurrentState.ssid : null;
+        String wifiDesc = mCurrentState.connected ? mCurrentState.ssid : null;
         boolean ssidPresent = wifiVisible && mCurrentState.ssid != null;
         String contentDescription = getTextIfExists(getContentDescription()).toString();
         if (mCurrentState.inetCondition == 0) {
             contentDescription += ("," + mContext.getString(R.string.data_connection_no_internet));
         }
         IconState statusIcon = new IconState(wifiVisible, getCurrentIconId(), contentDescription);
-        IconState qsIcon = new IconState(mCurrentState.connected, getQsCurrentIconId(),
-                contentDescription);
+        IconState qsIcon = new IconState(mCurrentState.connected,
+                mWifiTracker.isCaptivePortal ? R.drawable.ic_qs_wifi_disconnected
+                        : getQsCurrentIconId(), contentDescription);
         callback.setWifiIndicators(mCurrentState.enabled, statusIcon, qsIcon,
                 ssidPresent && mCurrentState.activityIn, ssidPresent && mCurrentState.activityOut,
                 wifiDesc, mCurrentState.isTransient, mCurrentState.statusLabel);

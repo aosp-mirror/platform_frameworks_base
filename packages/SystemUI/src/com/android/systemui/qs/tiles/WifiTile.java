@@ -206,7 +206,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
             state.icon = ResourceIcon.get(cb.wifiSignalIconId);
             state.label = removeDoubleQuotes(cb.ssid);
         } else if (wifiNotConnected) {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_disconnected);
+            state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_NO_NETWORK);
             state.label = r.getString(R.string.quick_settings_wifi_label);
         } else {
             state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_NO_NETWORK);
