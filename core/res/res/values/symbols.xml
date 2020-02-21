@@ -473,6 +473,7 @@
   <java-symbol type="integer" name="config_num_physical_slots" />
   <java-symbol type="array" name="config_integrityRuleProviderPackages" />
   <java-symbol type="bool" name="config_useAssistantVolume" />
+  <java-symbol type="string" name="config_bandwidthEstimateSource" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -3838,9 +3839,6 @@
 
   <!-- For App Standby -->
   <java-symbol type="string" name="as_app_forced_to_restricted_bucket" />
-
-  <!-- Assistant handles -->
-  <java-symbol type="dimen" name="assist_handle_shadow_radius" />
 
   <!-- For Waterfall Display -->
   <java-symbol type="dimen" name="waterfall_display_left_edge_size" />

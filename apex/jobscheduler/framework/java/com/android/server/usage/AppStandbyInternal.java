@@ -147,7 +147,7 @@ public interface AppStandbyInternal {
 
     void postReportExemptedSyncStart(String packageName, int userId);
 
-    void dumpUser(IndentingPrintWriter idpw, int userId, String pkg);
+    void dumpUser(IndentingPrintWriter idpw, int userId, List<String> pkgs);
 
     void dumpState(String[] args, PrintWriter pw);
 

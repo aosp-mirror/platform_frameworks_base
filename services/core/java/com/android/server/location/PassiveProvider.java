@@ -79,10 +79,5 @@ public class PassiveProvider extends AbstractLocationProvider {
     protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {}
 
     @Override
-    protected void onRequestSetAllowed(boolean allowed) {
-        // do nothing - the passive provider is always allowed
-    }
-
-    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {}
 }

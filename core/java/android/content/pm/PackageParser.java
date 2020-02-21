@@ -41,7 +41,6 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 
-import android.annotation.AnyThread;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -56,12 +55,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageParserCacheHelper.ReadHelper;
-import android.content.pm.PackageParserCacheHelper.WriteHelper;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ApkParseUtils;
-import android.content.pm.parsing.PackageImpl;
-import android.content.pm.parsing.ParsedPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
@@ -79,14 +73,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
-import android.system.ErrnoException;
-import android.system.OsConstants;
-import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -118,7 +108,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -315,9 +304,6 @@ public class PackageParser {
     public static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
 
     public int mParseError = PackageManager.INSTALL_SUCCEEDED;
-
-    public ThreadLocal<ApkParseUtils.ParseResult> mSharedResult
-            = ThreadLocal.withInitial(ApkParseUtils.ParseResult::new);
 
     public static boolean sCompatibilityModeEnabled = true;
     public static boolean sUseRoundIcon = false;
@@ -1054,7 +1040,7 @@ public class PackageParser {
      * and unique split names.
      * <p>
      * Note that this <em>does not</em> perform signature verification; that
-     * must be done separately in {@link ApkParseUtils#collectCertificates(AndroidPackage, boolean)}.
+     * must be done separately in {@link #collectCertificates(Package, boolean)}.
      *
      * If {@code useCaches} is true, the package parser might return a cached
      * result from a previous parse of the same {@code packageFile} with the same
@@ -1082,201 +1068,6 @@ public class PackageParser {
     }
 
     /**
-     * Updated method which returns {@link ParsedPackage}, the current representation of a
-     * package parsed from disk.
-     *
-     * @see #parsePackage(File, int, boolean)
-     */
-    @AnyThread
-    public ParsedPackage parseParsedPackage(File packageFile, int flags, boolean useCaches)
-            throws PackageParserException {
-        ParsedPackage parsed = useCaches ? getCachedResult(packageFile, flags) : null;
-        if (parsed != null) {
-            return parsed;
-        }
-
-        long parseTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
-        ApkParseUtils.ParseInput parseInput = mSharedResult.get().reset();
-        parsed = ApkParseUtils.parsePackage(
-                parseInput,
-                mSeparateProcesses,
-                mCallback,
-                mMetrics,
-                mOnlyCoreApps,
-                packageFile,
-                flags
-        )
-                .hideAsParsed();
-
-        long cacheTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
-        cacheResult(packageFile, flags, parsed);
-        if (LOG_PARSE_TIMINGS) {
-            parseTime = cacheTime - parseTime;
-            cacheTime = SystemClock.uptimeMillis() - cacheTime;
-            if (parseTime + cacheTime > LOG_PARSE_TIMINGS_THRESHOLD_MS) {
-                Slog.i(TAG, "Parse times for '" + packageFile + "': parse=" + parseTime
-                        + "ms, update_cache=" + cacheTime + " ms");
-            }
-        }
-
-        return parsed;
-    }
-
-    /**
-     * Returns the cache key for a specified {@code packageFile} and {@code flags}.
-     */
-    private String getCacheKey(File packageFile, int flags) {
-        StringBuilder sb = new StringBuilder(packageFile.getName());
-        sb.append('-');
-        sb.append(flags);
-
-        return sb.toString();
-    }
-
-    @VisibleForTesting
-    protected ParsedPackage fromCacheEntry(byte[] bytes) {
-        return fromCacheEntryStatic(bytes);
-    }
-
-    /** static version of {@link #fromCacheEntry} for unit tests. */
-    @VisibleForTesting
-    public static ParsedPackage fromCacheEntryStatic(byte[] bytes) {
-        final Parcel p = Parcel.obtain();
-        p.unmarshall(bytes, 0, bytes.length);
-        p.setDataPosition(0);
-
-        final ReadHelper helper = new ReadHelper(p);
-        helper.startAndInstall();
-
-        // TODO(b/135203078): Hide PackageImpl constructor?
-        ParsedPackage pkg = new PackageImpl(p);
-
-        p.recycle();
-
-        sCachedPackageReadCount.incrementAndGet();
-
-        return pkg;
-    }
-
-    @VisibleForTesting
-    protected byte[] toCacheEntry(ParsedPackage pkg) {
-        return toCacheEntryStatic(pkg);
-
-    }
-
-    /** static version of {@link #toCacheEntry} for unit tests. */
-    @VisibleForTesting
-    public static byte[] toCacheEntryStatic(ParsedPackage pkg) {
-        final Parcel p = Parcel.obtain();
-        final WriteHelper helper = new WriteHelper(p);
-
-        pkg.writeToParcel(p, 0 /* flags */);
-
-        helper.finishAndUninstall();
-
-        byte[] serialized = p.marshall();
-        p.recycle();
-
-        return serialized;
-    }
-
-    /**
-     * Given a {@code packageFile} and a {@code cacheFile} returns whether the
-     * cache file is up to date based on the mod-time of both files.
-     */
-    private static boolean isCacheUpToDate(File packageFile, File cacheFile) {
-        try {
-            // NOTE: We don't use the File.lastModified API because it has the very
-            // non-ideal failure mode of returning 0 with no excepions thrown.
-            // The nio2 Files API is a little better but is considerably more expensive.
-            final StructStat pkg = android.system.Os.stat(packageFile.getAbsolutePath());
-            final StructStat cache = android.system.Os.stat(cacheFile.getAbsolutePath());
-            return pkg.st_mtime < cache.st_mtime;
-        } catch (ErrnoException ee) {
-            // The most common reason why stat fails is that a given cache file doesn't
-            // exist. We ignore that here. It's easy to reason that it's safe to say the
-            // cache isn't up to date if we see any sort of exception here.
-            //
-            // (1) Exception while stating the package file : This should never happen,
-            // and if it does, we do a full package parse (which is likely to throw the
-            // same exception).
-            // (2) Exception while stating the cache file : If the file doesn't exist, the
-            // cache is obviously out of date. If the file *does* exist, we can't read it.
-            // We will attempt to delete and recreate it after parsing the package.
-            if (ee.errno != OsConstants.ENOENT) {
-                Slog.w("Error while stating package cache : ", ee);
-            }
-
-            return false;
-        }
-    }
-
-    /**
-     * Returns the cached parse result for {@code packageFile} for parse flags {@code flags},
-     * or {@code null} if no cached result exists.
-     */
-    public ParsedPackage getCachedResult(File packageFile, int flags) {
-        if (mCacheDir == null) {
-            return null;
-        }
-
-        final String cacheKey = getCacheKey(packageFile, flags);
-        final File cacheFile = new File(mCacheDir, cacheKey);
-
-        try {
-            // If the cache is not up to date, return null.
-            if (!isCacheUpToDate(packageFile, cacheFile)) {
-                return null;
-            }
-
-            final byte[] bytes = IoUtils.readFileAsByteArray(cacheFile.getAbsolutePath());
-            return fromCacheEntry(bytes);
-        } catch (Throwable e) {
-            Slog.w(TAG, "Error reading package cache: ", e);
-
-            // If something went wrong while reading the cache entry, delete the cache file
-            // so that we regenerate it the next time.
-            cacheFile.delete();
-            return null;
-        }
-    }
-
-    /**
-     * Caches the parse result for {@code packageFile} with flags {@code flags}.
-     */
-    public void cacheResult(File packageFile, int flags, ParsedPackage parsed) {
-        if (mCacheDir == null) {
-            return;
-        }
-
-        try {
-            final String cacheKey = getCacheKey(packageFile, flags);
-            final File cacheFile = new File(mCacheDir, cacheKey);
-
-            if (cacheFile.exists()) {
-                if (!cacheFile.delete()) {
-                    Slog.e(TAG, "Unable to delete cache file: " + cacheFile);
-                }
-            }
-
-            final byte[] cacheEntry = toCacheEntry(parsed);
-
-            if (cacheEntry == null) {
-                return;
-            }
-
-            try (FileOutputStream fos = new FileOutputStream(cacheFile)) {
-                fos.write(cacheEntry);
-            } catch (IOException ioe) {
-                Slog.w(TAG, "Error writing cache entry.", ioe);
-                cacheFile.delete();
-            }
-        } catch (Throwable e) {
-            Slog.w(TAG, "Error saving package cache.", e);
-        }
-    }
-
-    /**
      * Parse all APKs contained in the given directory, treating them as a
      * single package. This also performs sanity checking, such as requiring
      * identical package name and version codes, a single base APK, and unique
@@ -1284,7 +1075,7 @@ public class PackageParser {
      * <p>
      * Note that this <em>does not</em> perform signature verification; that
      * must be done separately in
-     * {@link ApkParseUtils#collectCertificates(AndroidPackage, boolean)}.
+     * {@link #collectCertificates(Package, boolean)} .
      */
     private Package parseClusterPackage(File packageDir, int flags) throws PackageParserException {
         final PackageLite lite = parseClusterPackageLite(packageDir, 0);
@@ -1346,7 +1137,7 @@ public class PackageParser {
      * <p>
      * Note that this <em>does not</em> perform signature verification; that
      * must be done separately in
-     * {@link ApkParseUtils#collectCertificates(AndroidPackage, boolean)}.
+     * {@link #collectCertificates(Package, boolean)}.
      */
     @UnsupportedAppUsage
     public Package parseMonolithicPackage(File apkFile, int flags) throws PackageParserException {
@@ -1695,7 +1486,7 @@ public class PackageParser {
         }
     }
 
-    private static String validateName(String name, boolean requireSeparator,
+    public static String validateName(String name, boolean requireSeparator,
             boolean requireFilename) {
         final int N = name.length();
         boolean hasSep = false;

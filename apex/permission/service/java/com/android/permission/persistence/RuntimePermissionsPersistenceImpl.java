@@ -67,7 +67,7 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
 
     @Nullable
     @Override
-    public RuntimePermissionsState read(@NonNull UserHandle user) {
+    public RuntimePermissionsState readAsUser(@NonNull UserHandle user) {
         File file = getFile(user);
         try (FileInputStream inputStream = new AtomicFile(file).openRead()) {
             XmlPullParser parser = Xml.newPullParser();
@@ -172,7 +172,7 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
     }
 
     @Override
-    public void write(@NonNull RuntimePermissionsState runtimePermissions,
+    public void writeAsUser(@NonNull RuntimePermissionsState runtimePermissions,
             @NonNull UserHandle user) {
         File file = getFile(user);
         AtomicFile atomicFile = new AtomicFile(file);
@@ -252,7 +252,7 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
     }
 
     @Override
-    public void delete(@NonNull UserHandle user) {
+    public void deleteAsUser(@NonNull UserHandle user) {
         getFile(user).delete();
     }
 

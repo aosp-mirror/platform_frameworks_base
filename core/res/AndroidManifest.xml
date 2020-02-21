@@ -399,6 +399,9 @@
     <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
     <protected-broadcast android:name="android.intent.action.ADVANCED_SETTINGS" />
     <protected-broadcast android:name="android.intent.action.APPLICATION_RESTRICTIONS_CHANGED" />
+    <protected-broadcast android:name="com.android.server.adb.WIRELESS_DEBUG_PAIRED_DEVICES" />
+    <protected-broadcast android:name="com.android.server.adb.WIRELESS_DEBUG_PAIRING_RESULT" />
+    <protected-broadcast android:name="com.android.server.adb.WIRELESS_DEBUG_STATUS" />
 
     <!-- Legacy -->
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_START" />
@@ -2771,7 +2774,7 @@
     <permission android:name="android.permission.READ_DEVICE_CONFIG"
         android:protectionLevel="signature|preinstalled" />
 
-    <!-- @SystemApi @hide Allows an application to monitor config settings access.
+    <!-- @hide Allows an application to monitor {@link android.provider.Settings.Config} access.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MONITOR_DEVICE_CONFIG_ACCESS"
         android:protectionLevel="signature"/>
@@ -3081,8 +3084,7 @@
 
     <!-- Allows SystemUI to request third party controls.
          <p>Should only be requested by the System and required by
-         ControlsService declarations.
-         @hide
+         {@link android.service.controls.ControlsProviderService} declarations.
     -->
     <permission android:name="android.permission.BIND_CONTROLS"
         android:protectionLevel="signature" />

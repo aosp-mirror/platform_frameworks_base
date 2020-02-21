@@ -156,6 +156,12 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
+        public void canonicalizeAsync(String callingPkg, String featureId, Uri uri,
+                RemoteCallback callback) {
+            MockContentProvider.this.canonicalizeAsync(uri, callback);
+        }
+
+        @Override
         public Uri uncanonicalize(String callingPkg, @Nullable String featureId, Uri uri)
                 throws RemoteException {
             return MockContentProvider.this.uncanonicalize(uri);
@@ -287,6 +293,18 @@ public class MockContentProvider extends ContentProvider {
     @Override
     public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts) {
         throw new UnsupportedOperationException("unimplemented mock method call");
+    }
+
+    /**
+     * @hide
+     */
+    @SuppressWarnings("deprecation")
+    public void canonicalizeAsync(Uri uri, RemoteCallback callback) {
+        AsyncTask.SERIAL_EXECUTOR.execute(() -> {
+            final Bundle bundle = new Bundle();
+            bundle.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT, canonicalize(uri));
+            callback.sendResult(bundle);
+        });
     }
 
     /**

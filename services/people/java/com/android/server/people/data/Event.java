@@ -20,7 +20,13 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.text.format.DateFormat;
 import android.util.ArraySet;
+import android.util.Slog;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
 
+import com.android.server.people.PeopleEventProto;
+
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
@@ -28,6 +34,8 @@ import java.util.Set;
 
 /** An event representing the interaction with a specific conversation or app. */
 public class Event {
+
+    private static final String TAG = Event.class.getSimpleName();
 
     public static final int TYPE_SHORTCUT_INVOCATION = 1;
 
@@ -142,6 +150,36 @@ public class Event {
         return mDurationSeconds;
     }
 
+    /** Writes field members to {@link ProtoOutputStream}. */
+    void writeToProto(@NonNull ProtoOutputStream protoOutputStream) {
+        protoOutputStream.write(PeopleEventProto.EVENT_TYPE, mType);
+        protoOutputStream.write(PeopleEventProto.TIME, mTimestamp);
+        protoOutputStream.write(PeopleEventProto.DURATION, mDurationSeconds);
+    }
+
+    /** Reads from {@link ProtoInputStream} and constructs {@link Event}. */
+    @NonNull
+    static Event readFromProto(@NonNull ProtoInputStream protoInputStream) throws IOException {
+        Event.Builder builder = new Event.Builder();
+        while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (protoInputStream.getFieldNumber()) {
+                case (int) PeopleEventProto.EVENT_TYPE:
+                    builder.setType(protoInputStream.readInt(PeopleEventProto.EVENT_TYPE));
+                    break;
+                case (int) PeopleEventProto.TIME:
+                    builder.setTimestamp(protoInputStream.readLong(PeopleEventProto.TIME));
+                    break;
+                case (int) PeopleEventProto.DURATION:
+                    builder.setDurationSeconds(protoInputStream.readInt(PeopleEventProto.DURATION));
+                    break;
+                default:
+                    Slog.w(TAG, "Could not read undefined field: "
+                            + protoInputStream.getFieldNumber());
+            }
+        }
+        return builder.build();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -177,11 +215,13 @@ public class Event {
     /** Builder class for {@link Event} objects. */
     static class Builder {
 
-        private final long mTimestamp;
+        private long mTimestamp;
 
-        private final int mType;
+        private int mType;
 
         private int mDurationSeconds;
+
+        private Builder() {}
 
         Builder(long timestamp, @EventType int type) {
             mTimestamp = timestamp;
@@ -190,6 +230,16 @@ public class Event {
 
         Builder setDurationSeconds(int durationSeconds) {
             mDurationSeconds = durationSeconds;
+            return this;
+        }
+
+        private Builder setTimestamp(long timestamp) {
+            mTimestamp = timestamp;
+            return this;
+        }
+
+        private Builder setType(int type) {
+            mType = type;
             return this;
         }
 

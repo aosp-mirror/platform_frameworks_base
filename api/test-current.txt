@@ -846,6 +846,11 @@ package android.content.integrity {
     method @NonNull public static android.content.integrity.IntegrityFormula packageNameEquals(@NonNull String);
   }
 
+  public static final class IntegrityFormula.SourceStamp {
+    method @NonNull public static android.content.integrity.IntegrityFormula notTrusted();
+    method @NonNull public static android.content.integrity.IntegrityFormula stampCertificateHashEquals(@NonNull String);
+  }
+
   public final class Rule implements android.os.Parcelable {
     ctor public Rule(@NonNull android.content.integrity.IntegrityFormula, int);
     method public int describeContents();
@@ -1470,6 +1475,10 @@ package android.media {
   }
 
   public final class MediaRoute2Info implements android.os.Parcelable {
+    method @NonNull public String getOriginalId();
+  }
+
+  public class MediaRouter2.RoutingController {
     method @NonNull public String getOriginalId();
   }
 
@@ -2529,6 +2538,11 @@ package android.os {
     method public void log(android.os.StrictMode.ViolationInfo);
   }
 
+  public static final class StrictMode.VmPolicy.Builder {
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder detectIncorrectContextUse();
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder permitIncorrectContextUse();
+  }
+
   public class SystemConfigManager {
     method @NonNull @RequiresPermission("android.permission.READ_CARRIER_APP_INFO") public java.util.Set<java.lang.String> getDisabledUntilUsedPreinstalledCarrierApps();
     method @NonNull @RequiresPermission("android.permission.READ_CARRIER_APP_INFO") public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
@@ -3145,6 +3159,7 @@ package android.service.autofill {
   public abstract class InlineSuggestionRenderService extends android.app.Service {
     ctor public InlineSuggestionRenderService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method @Nullable public android.os.Bundle onGetInlineSuggestionsRendererInfo();
     method @Nullable public android.view.View onRenderSuggestion(@NonNull android.service.autofill.InlinePresentation, int, int);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.InlineSuggestionRenderService";
   }

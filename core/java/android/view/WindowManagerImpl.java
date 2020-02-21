@@ -101,7 +101,7 @@ public final class WindowManagerImpl implements WindowManager {
     @Override
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
         applyDefaultToken(params);
-        mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
+        mGlobal.addView(view, params, mContext.getDisplayNoVerify(), mParentWindow);
         mIsViewAdded = true;
         mLastView = view;
         mLastParams = (WindowManager.LayoutParams) params;
@@ -158,7 +158,7 @@ public final class WindowManagerImpl implements WindowManager {
 
     @Override
     public Display getDefaultDisplay() {
-        return mContext.getDisplay();
+        return mContext.getDisplayNoVerify();
     }
 
     @Override
@@ -240,7 +240,7 @@ public final class WindowManagerImpl implements WindowManager {
     private Rect getMaximumBounds() {
         // TODO(b/128338354): Current maximum bound is display size, but it should be displayArea
         //  bound after displayArea feature is finished.
-        final Display display = mContext.getDisplay();
+        final Display display = mContext.getDisplayNoVerify();
         final Point displaySize = new Point();
         display.getRealSize(displaySize);
         return new Rect(0, 0, displaySize.x, displaySize.y);

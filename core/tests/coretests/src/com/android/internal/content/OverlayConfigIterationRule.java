@@ -21,11 +21,11 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
-import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.ParsingPackageRead;
 import android.os.Build;
 import android.util.ArrayMap;
 
-import com.android.internal.content.om.OverlayConfig.AndroidPackageProvider;
+import com.android.internal.content.om.OverlayConfig.PackageProvider;
 import com.android.internal.content.om.OverlayScanner;
 import com.android.internal.content.om.OverlayScanner.ParsedOverlayInfo;
 
@@ -39,14 +39,14 @@ import org.mockito.invocation.InvocationOnMock;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
  * A {@link TestRule} that runs a test case twice. First, the test case runs with a non-null
  * {@link OverlayScanner} as if the zygote process is scanning the overlay packages
  * and parsing configuration files. The test case then runs with a non-null
- * {@link AndroidPackageProvider} as if the system server is parsing configuration files.
+ * {@link PackageProvider} as if the system server is parsing configuration files.
  *
  * This simulates what will happen on device. If an exception would be thrown in the zygote, then
  * the exception should be thrown in the first run of the test case.
@@ -60,7 +60,7 @@ public class OverlayConfigIterationRule implements TestRule {
 
     private final ArrayMap<File, ParsedOverlayInfo> mOverlayStubResults = new ArrayMap<>();
     private Supplier<OverlayScanner> mOverlayScanner;
-    private AndroidPackageProvider mAndroidPackageProvider;
+    private PackageProvider mPkgProvider;
     private Iteration mIteration;
 
     /**
@@ -96,9 +96,9 @@ public class OverlayConfigIterationRule implements TestRule {
         return mOverlayScanner;
     }
 
-    /** Retrieves the {@link AndroidPackageProvider} for the current run of the test. */
-    AndroidPackageProvider getPackageProvider() {
-        return mAndroidPackageProvider;
+    /** Retrieves the {@link PackageProvider} for the current run of the test. */
+    PackageProvider getPackageProvider() {
+        return mPkgProvider;
     }
 
     /** Retrieves the current iteration of the test. */
@@ -123,7 +123,7 @@ public class OverlayConfigIterationRule implements TestRule {
                     }
                     return scanner;
                 };
-                mAndroidPackageProvider = null;
+                mPkgProvider = null;
                 mIteration = Iteration.ZYGOTE;
                 base.evaluate();
 
@@ -131,14 +131,15 @@ public class OverlayConfigIterationRule implements TestRule {
                 // the system server is parsing the configuration files and using PackageManager to
                 // retrieving information of overlays.
                 mOverlayScanner = null;
-                mAndroidPackageProvider = Mockito.mock(AndroidPackageProvider.class);
+                mPkgProvider = Mockito.mock(PackageProvider.class);
                 mIteration = Iteration.SYSTEM_SERVER;
                 doAnswer((InvocationOnMock invocation) -> {
                     final Object[] args = invocation.getArguments();
-                    final Consumer<AndroidPackage> f =  (Consumer<AndroidPackage>) args[0];
+                    final BiConsumer<ParsingPackageRead, Boolean> f =
+                            (BiConsumer<ParsingPackageRead, Boolean>) args[0];
                     for (Map.Entry<File, ParsedOverlayInfo> overlay :
                             mOverlayStubResults.entrySet()) {
-                        final AndroidPackage a = Mockito.mock(AndroidPackage.class);
+                        final ParsingPackageRead a = Mockito.mock(ParsingPackageRead.class);
                         final ParsedOverlayInfo info = overlay.getValue();
                         when(a.getPackageName()).thenReturn(info.packageName);
                         when(a.getOverlayTarget()).thenReturn(info.targetPackageName);
@@ -146,12 +147,10 @@ public class OverlayConfigIterationRule implements TestRule {
                         when(a.isOverlayIsStatic()).thenReturn(info.isStatic);
                         when(a.getOverlayPriority()).thenReturn(info.priority);
                         when(a.getBaseCodePath()).thenReturn(info.path.getPath());
-                        when(a.isSystem()).thenReturn(
-                                !info.path.getPath().contains("data/overlay"));
-                        f.accept(a);
+                        f.accept(a, !info.path.getPath().contains("data/overlay"));
                     }
                     return null;
-                }).when(mAndroidPackageProvider).forEachPackage(any());
+                }).when(mPkgProvider).forEachPackage(any());
 
                 base.evaluate();
             }

@@ -1586,6 +1586,19 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         info.addChild(wrapper.getLeashToken());
     }
 
+    @Override
+    public int getImportantForAccessibility() {
+        final int mode = super.getImportantForAccessibility();
+        // If developers explicitly set the important mode for it, don't change the mode.
+        // Only change the mode to important when this SurfaceView isn't explicitly set and has
+        // an embedded hierarchy.
+        if (mRemoteAccessibilityEmbeddedConnection == null
+                || mode != IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            return mode;
+        }
+        return IMPORTANT_FOR_ACCESSIBILITY_YES;
+    }
+
     private void initEmbeddedHierarchyForAccessibility(SurfaceControlViewHost.SurfacePackage p) {
         final IAccessibilityEmbeddedConnection connection = p.getAccessibilityEmbeddedConnection();
         final RemoteAccessibilityEmbeddedConnection wrapper =

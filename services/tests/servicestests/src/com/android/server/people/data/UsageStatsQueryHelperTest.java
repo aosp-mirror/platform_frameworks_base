@@ -16,6 +16,8 @@
 
 package com.android.server.people.data;
 
+import static com.android.server.people.data.TestUtils.timestamp;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -62,7 +64,8 @@ public final class UsageStatsQueryHelperTest {
     private static final LocusId LOCUS_ID_1 = new LocusId("locus_1");
     private static final LocusId LOCUS_ID_2 = new LocusId("locus_2");
 
-    @Mock private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    @Mock
+    private UsageStatsManagerInternal mUsageStatsManagerInternal;
 
     private TestPackageData mPackageData;
     private UsageStatsQueryHelper mHelper;
@@ -76,10 +79,9 @@ public final class UsageStatsQueryHelperTest {
         Context ctx = InstrumentationRegistry.getContext();
         File testDir = new File(ctx.getCacheDir(), "testdir");
         ScheduledExecutorService scheduledExecutorService = new MockScheduledExecutorService();
-        ContactsQueryHelper helper = new ContactsQueryHelper(ctx);
 
         mPackageData = new TestPackageData(PKG_NAME, USER_ID_PRIMARY, pkg -> false, pkg -> false,
-                scheduledExecutorService, testDir, helper);
+                scheduledExecutorService, testDir);
         mPackageData.mConversationStore.mConversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
                 .setLocusId(LOCUS_ID_1)
@@ -218,9 +220,8 @@ public final class UsageStatsQueryHelperTest {
         private ConversationInfo mConversationInfo;
 
         TestConversationStore(File packageDir,
-                ScheduledExecutorService scheduledExecutorService,
-                ContactsQueryHelper helper) {
-            super(packageDir, scheduledExecutorService, helper);
+                ScheduledExecutorService scheduledExecutorService) {
+            super(packageDir, scheduledExecutorService);
         }
 
         @Override
@@ -233,17 +234,16 @@ public final class UsageStatsQueryHelperTest {
     private static class TestPackageData extends PackageData {
 
         private final TestConversationStore mConversationStore;
-        private final TestEventStore mEventStore = new TestEventStore();
+        private final TestEventStore mEventStore;
 
         TestPackageData(@NonNull String packageName, @UserIdInt int userId,
                 @NonNull Predicate<String> isDefaultDialerPredicate,
                 @NonNull Predicate<String> isDefaultSmsAppPredicate,
-                @NonNull ScheduledExecutorService scheduledExecutorService, @NonNull File rootDir,
-                @NonNull ContactsQueryHelper helper) {
+                @NonNull ScheduledExecutorService scheduledExecutorService, @NonNull File rootDir) {
             super(packageName, userId, isDefaultDialerPredicate, isDefaultSmsAppPredicate,
-                    scheduledExecutorService, rootDir, helper);
-            mConversationStore = new TestConversationStore(rootDir, scheduledExecutorService,
-                    helper);
+                    scheduledExecutorService, rootDir);
+            mConversationStore = new TestConversationStore(rootDir, scheduledExecutorService);
+            mEventStore = new TestEventStore(rootDir, scheduledExecutorService);
         }
 
         @Override
@@ -261,8 +261,31 @@ public final class UsageStatsQueryHelperTest {
 
     private static class TestEventStore extends EventStore {
 
-        private final EventHistoryImpl mShortcutEventHistory = new TestEventHistoryImpl();
-        private final EventHistoryImpl mLocusEventHistory = new TestEventHistoryImpl();
+        private static final long CURRENT_TIMESTAMP = timestamp("01-30 18:50");
+        private static final EventIndex.Injector EVENT_INDEX_INJECTOR = new EventIndex.Injector() {
+            @Override
+            long currentTimeMillis() {
+                return CURRENT_TIMESTAMP;
+            }
+        };
+        private static final EventHistoryImpl.Injector EVENT_HISTORY_INJECTOR =
+                new EventHistoryImpl.Injector() {
+                    @Override
+                    EventIndex createEventIndex() {
+                        return new EventIndex(EVENT_INDEX_INJECTOR);
+                    }
+                };
+
+        private final EventHistoryImpl mShortcutEventHistory;
+        private final EventHistoryImpl mLocusEventHistory;
+
+        TestEventStore(File rootDir, ScheduledExecutorService scheduledExecutorService) {
+            super(rootDir, scheduledExecutorService);
+            mShortcutEventHistory = new TestEventHistoryImpl(EVENT_HISTORY_INJECTOR, rootDir,
+                    scheduledExecutorService);
+            mLocusEventHistory = new TestEventHistoryImpl(EVENT_HISTORY_INJECTOR, rootDir,
+                    scheduledExecutorService);
+        }
 
         @Override
         @NonNull
@@ -279,6 +302,11 @@ public final class UsageStatsQueryHelperTest {
     private static class TestEventHistoryImpl extends EventHistoryImpl {
 
         private final List<Event> mEvents = new ArrayList<>();
+
+        TestEventHistoryImpl(Injector injector, File rootDir,
+                ScheduledExecutorService scheduledExecutorService) {
+            super(injector, rootDir, scheduledExecutorService);
+        }
 
         @Override
         @NonNull

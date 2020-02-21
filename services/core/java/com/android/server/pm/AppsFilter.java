@@ -26,13 +26,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
-import android.content.pm.parsing.ComponentParseUtils.ParsedService;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedService;
 import android.os.Binder;
 import android.os.Process;
 import android.os.Trace;
@@ -50,6 +49,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.FgThread;
 import com.android.server.om.OverlayReferenceMapper;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -207,14 +207,14 @@ public class AppsFilter {
     /** Returns true if the querying package may query for the potential target package */
     private static boolean canQueryViaComponents(AndroidPackage querying,
             AndroidPackage potentialTarget) {
-        if (querying.getQueriesIntents() != null) {
+        if (!querying.getQueriesIntents().isEmpty()) {
             for (Intent intent : querying.getQueriesIntents()) {
                 if (matchesIntentFilters(intent, potentialTarget)) {
                     return true;
                 }
             }
         }
-        if (querying.getQueriesProviders() != null
+        if (!querying.getQueriesProviders().isEmpty()
                 && matchesProviders(querying.getQueriesProviders(), potentialTarget)) {
             return true;
         }
@@ -223,7 +223,7 @@ public class AppsFilter {
 
     private static boolean canQueryViaPackage(AndroidPackage querying,
             AndroidPackage potentialTarget) {
-        return querying.getQueriesPackages() != null
+        return !querying.getQueriesPackages().isEmpty()
                 && querying.getQueriesPackages().contains(potentialTarget.getPackageName());
     }
 
@@ -261,7 +261,7 @@ public class AppsFilter {
     private static boolean matchesIntentFilters(Intent intent, AndroidPackage potentialTarget) {
         for (int s = ArrayUtils.size(potentialTarget.getServices()) - 1; s >= 0; s--) {
             ParsedService service = potentialTarget.getServices().get(s);
-            if (!service.exported) {
+            if (!service.isExported()) {
                 continue;
             }
             if (matchesAnyFilter(intent, service)) {
@@ -270,7 +270,7 @@ public class AppsFilter {
         }
         for (int a = ArrayUtils.size(potentialTarget.getActivities()) - 1; a >= 0; a--) {
             ParsedActivity activity = potentialTarget.getActivities().get(a);
-            if (!activity.exported) {
+            if (!activity.isExported()) {
                 continue;
             }
             if (matchesAnyFilter(intent, activity)) {
@@ -279,7 +279,7 @@ public class AppsFilter {
         }
         for (int r = ArrayUtils.size(potentialTarget.getReceivers()) - 1; r >= 0; r--) {
             ParsedActivity receiver = potentialTarget.getReceivers().get(r);
-            if (!receiver.exported) {
+            if (!receiver.isExported()) {
                 continue;
             }
             if (matchesAnyFilter(intent, receiver)) {
@@ -289,9 +289,8 @@ public class AppsFilter {
         return false;
     }
 
-    private static boolean matchesAnyFilter(
-            Intent intent, ParsedComponent<? extends ParsedIntentInfo> component) {
-        List<? extends ParsedIntentInfo> intents = component.intents;
+    private static boolean matchesAnyFilter(Intent intent, ParsedComponent component) {
+        List<ParsedIntentInfo> intents = component.getIntents();
         for (int i = ArrayUtils.size(intents) - 1; i >= 0; i--) {
             IntentFilter intentFilter = intents.get(i);
             if (intentFilter.match(intent.getAction(), intent.getType(), intent.getScheme(),
@@ -673,8 +672,7 @@ public class AppsFilter {
             String targetName) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "callingPkgInstruments");
-            final List<ComponentParseUtils.ParsedInstrumentation> inst =
-                    callingPkgSetting.pkg.getInstrumentations();
+            final List<ParsedInstrumentation> inst = callingPkgSetting.pkg.getInstrumentations();
             for (int i = ArrayUtils.size(inst) - 1; i >= 0; i--) {
                 if (Objects.equals(inst.get(i).getTargetPackage(), targetName)) {
                     if (DEBUG_LOGGING) {

@@ -28,21 +28,21 @@ import java.util.Objects;
  * @hide
  */
 public final class DeviceProductInfo implements Parcelable {
-    final private String mName;
-    final private String mManufacturerPnpId;
-    final private String mProductId;
-    final private Integer mModelYear;
-    final private ManufactureDate mManufactureDate;
+    private final String mName;
+    private final String mManufacturerPnpId;
+    private final String mProductId;
+    private final Integer mModelYear;
+    private final ManufactureDate mManufactureDate;
 
     public DeviceProductInfo(
             String name,
             String manufacturerPnpId,
-            String productCode,
+            String productId,
             Integer modelYear,
             ManufactureDate manufactureDate) {
         this.mName = name;
         this.mManufacturerPnpId = manufacturerPnpId;
-        this.mProductId = productCode;
+        this.mProductId = productId;
         this.mModelYear = modelYear;
         this.mManufactureDate = manufactureDate;
     }
@@ -158,8 +158,8 @@ public final class DeviceProductInfo implements Parcelable {
      * @hide
      */
     public static class ManufactureDate implements Parcelable {
-        final private Integer mWeek;
-        final private Integer mYear;
+        private final Integer mWeek;
+        private final Integer mYear;
 
         public ManufactureDate(Integer week, Integer year) {
             mWeek = week;

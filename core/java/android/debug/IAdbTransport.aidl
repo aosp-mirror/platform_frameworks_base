@@ -16,7 +16,9 @@
 
 package android.debug;
 
+import android.debug.AdbTransportType;
+
 /** @hide */
 interface IAdbTransport {
-    void onAdbEnabled(boolean enabled);
+    void onAdbEnabled(boolean enabled, in AdbTransportType type);
 }

@@ -114,9 +114,10 @@ droidstubs {
     name: "services-stubs.sources",
     srcs: [":services-all-sources"],
     installable: false,
-    // TODO: remove the --hide options below
     args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)" +
         " --hide-annotation android.annotation.Hide" +
+        " --hide InternalClasses" + // com.android.* classes are okay in this interface
+        // TODO: remove the --hide options below
         " --hide-package com.google.android.startop.iorap" +
         " --hide ReferencesHidden" +
         " --hide DeprecationMismatch" +

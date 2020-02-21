@@ -27,6 +27,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
+import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -998,12 +999,10 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testApplyTopFixedRotationTransform() {
         mWm.mIsFixedRotationTransformEnabled = true;
         final Configuration config90 = new Configuration();
-        mDisplayContent.getDisplayRotation().setRotation(ROTATION_90);
-        mDisplayContent.computeScreenConfiguration(config90);
-        mDisplayContent.onRequestedOverrideConfigurationChanged(config90);
+        mDisplayContent.computeScreenConfiguration(config90, ROTATION_90);
 
         final Configuration config = new Configuration();
-        mDisplayContent.getDisplayRotation().setRotation(Surface.ROTATION_0);
+        mDisplayContent.getDisplayRotation().setRotation(ROTATION_0);
         mDisplayContent.computeScreenConfiguration(config);
         mDisplayContent.onRequestedOverrideConfigurationChanged(config);
 
@@ -1014,11 +1013,18 @@ public class DisplayContentTests extends WindowTestsBase {
         app.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         assertTrue(app.isFixedRotationTransforming());
+        assertTrue(mDisplayContent.getDisplayRotation().shouldRotateSeamlessly(
+                ROTATION_0 /* oldRotation */, ROTATION_90 /* newRotation */,
+                false /* forceUpdate */));
+        // The display should keep current orientation and the rotated configuration should apply
+        // to the activity.
         assertEquals(config.orientation, mDisplayContent.getConfiguration().orientation);
         assertEquals(config90.orientation, app.getConfiguration().orientation);
+        assertEquals(config90.windowConfiguration.getBounds(), app.getBounds());
 
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
 
+        // The display should be rotated after the launch is finished.
         assertFalse(app.hasFixedRotationTransform());
         assertEquals(config90.orientation, mDisplayContent.getConfiguration().orientation);
     }

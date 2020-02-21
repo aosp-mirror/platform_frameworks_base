@@ -1045,6 +1045,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        protected IntentFilter getIntentFilter(@NonNull BroadcastFilter input) {
+            return input;
+        }
+
+        @Override
         protected BroadcastFilter[] newArray(int size) {
             return new BroadcastFilter[size];
         }
@@ -7266,7 +7271,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Wait for the provider to be published...
         final long timeout =
-                SystemClock.uptimeMillis() + ContentResolver.CONTENT_PROVIDER_WAIT_TIMEOUT_MILLIS;
+                SystemClock.uptimeMillis() + ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS;
         boolean timedOut = false;
         synchronized (cpr) {
             while (cpr.provider == null) {
@@ -14605,6 +14610,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (index < 0) {
                 ProcessList.remove(app.pid);
             }
+
+            // Remove provider publish timeout because we will start a new timeout when the
+            // restarted process is attaching (if the process contains launching providers).
+            mHandler.removeMessages(CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG, app);
+
             mProcessList.addProcessNameLocked(app);
             app.pendingStart = false;
             mProcessList.startProcessLocked(app,
@@ -19333,7 +19343,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void showWhileInUseDebugToast(int uid, int op, int mode) {
             synchronized (ActivityManagerService.this) {
-                ActivityManagerService.this.mServices.showWhileInUseDebugToastLocked(uid, op, mode);
+                ActivityManagerService.this.mServices.showWhileInUseDebugNotificationLocked(
+                        uid, op, mode);
             }
         }
     }

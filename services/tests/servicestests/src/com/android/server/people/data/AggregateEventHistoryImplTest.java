@@ -21,11 +21,16 @@ import static com.android.server.people.data.TestUtils.timestamp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.content.Context;
+
+import androidx.test.InstrumentationRegistry;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.File;
 import java.util.List;
 
 @RunWith(JUnit4.class)
@@ -60,11 +65,16 @@ public final class AggregateEventHistoryImplTest {
 
         EventHistoryImpl.Injector injector = new EventHistoryImplInjector();
 
-        mEventHistory1 = new EventHistoryImpl(injector);
+        Context ctx = InstrumentationRegistry.getContext();
+        File testDir = new File(ctx.getCacheDir(), "testdir");
+        MockScheduledExecutorService mockScheduledExecutorService =
+                new MockScheduledExecutorService();
+
+        mEventHistory1 = new EventHistoryImpl(injector, testDir, mockScheduledExecutorService);
         mEventHistory1.addEvent(E1);
         mEventHistory1.addEvent(E2);
 
-        mEventHistory2 = new EventHistoryImpl(injector);
+        mEventHistory2 = new EventHistoryImpl(injector, testDir, mockScheduledExecutorService);
         mEventHistory2.addEvent(E3);
         mEventHistory2.addEvent(E4);
     }

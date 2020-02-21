@@ -150,11 +150,7 @@ sk_sp<Bitmap> Bitmap::createFrom(AHardwareBuffer* hardwareBuffer, sk_sp<SkColorS
     AHardwareBuffer_Desc bufferDesc;
     AHardwareBuffer_describe(hardwareBuffer, &bufferDesc);
     SkImageInfo info = uirenderer::BufferDescriptionToImageInfo(bufferDesc, colorSpace);
-
-    // If the stride is 0 we have to use the width as an approximation (eg, compressed buffer)
-    const auto bufferStride = bufferDesc.stride > 0 ? bufferDesc.stride : bufferDesc.width;
-    const size_t rowBytes = info.bytesPerPixel() * bufferStride;
-    return sk_sp<Bitmap>(new Bitmap(hardwareBuffer, info, rowBytes, palette));
+    return createFrom(hardwareBuffer, info, bufferDesc, palette);
 }
 
 sk_sp<Bitmap> Bitmap::createFrom(AHardwareBuffer* hardwareBuffer, SkColorType colorType,
@@ -164,8 +160,14 @@ sk_sp<Bitmap> Bitmap::createFrom(AHardwareBuffer* hardwareBuffer, SkColorType co
     AHardwareBuffer_describe(hardwareBuffer, &bufferDesc);
     SkImageInfo info = SkImageInfo::Make(bufferDesc.width, bufferDesc.height,
                                          colorType, alphaType, colorSpace);
+    return createFrom(hardwareBuffer, info, bufferDesc, palette);
+}
 
-    const size_t rowBytes = info.bytesPerPixel() * bufferDesc.stride;
+sk_sp<Bitmap> Bitmap::createFrom(AHardwareBuffer* hardwareBuffer, const SkImageInfo& info,
+                                 const AHardwareBuffer_Desc& bufferDesc, BitmapPalette palette) {
+    // If the stride is 0 we have to use the width as an approximation (eg, compressed buffer)
+    const auto bufferStride = bufferDesc.stride > 0 ? bufferDesc.stride : bufferDesc.width;
+    const size_t rowBytes = info.bytesPerPixel() * bufferStride;
     return sk_sp<Bitmap>(new Bitmap(hardwareBuffer, info, rowBytes, palette));
 }
 #endif

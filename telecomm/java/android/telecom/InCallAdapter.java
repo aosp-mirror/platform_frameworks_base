@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
 import android.net.Uri;
 import android.os.Bundle;
@@ -97,6 +98,35 @@ public final class InCallAdapter {
     public void rejectCall(String callId, @Call.RejectReason int rejectReason) {
         try {
             mAdapter.rejectCallWithReason(callId, rejectReason);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Instructs Telecom to transfer the specified call.
+     *
+     * @param callId The identifier of the call to transfer.
+     * @param targetNumber The address to transfer to.
+     * @param isConfirmationRequired if {@code true} it will initiate ASSURED transfer,
+     * if {@code false}, it will initiate BLIND transfer.
+     */
+    public void transferCall(@NonNull String callId, @NonNull Uri targetNumber,
+            boolean isConfirmationRequired) {
+        try {
+            mAdapter.transferCall(callId, targetNumber, isConfirmationRequired);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Instructs Telecom to transfer the specified call to another ongoing call.
+     *
+     * @param callId The identifier of the call to transfer.
+     * @param otherCallId The identifier of the other call to which this will be transferred.
+     */
+    public void transferCall(@NonNull String callId, @NonNull String otherCallId) {
+        try {
+            mAdapter.consultativeTransfer(callId, otherCallId);
         } catch (RemoteException e) {
         }
     }

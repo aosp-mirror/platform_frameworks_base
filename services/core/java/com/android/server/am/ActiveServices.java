@@ -62,7 +62,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -91,7 +90,6 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.webkit.WebViewZygote;
-import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.app.procstats.ServiceState;
@@ -4687,20 +4685,35 @@ public final class ActiveServices {
     }
 
     // TODO: remove this toast after feature development is done
-    private void showWhileInUsePermissionInFgsBlockedToastLocked(String callingPackage) {
-        final Resources res = mAm.mContext.getResources();
-        final String toastMsg = res.getString(
-                        R.string.allow_while_in_use_permission_in_fgs, callingPackage);
-        mAm.mUiHandler.post(() -> {
-            Toast.makeText(mAm.mContext, toastMsg, Toast.LENGTH_LONG).show();
-        });
+    private void showWhileInUsePermissionInFgsBlockedNotificationLocked(String callingPackage,
+            String detailInfo) {
+        final Context context = mAm.mContext;
+        final String title = "Foreground Service While-in-use Permission Restricted";
+        final String content = "App affected:" + callingPackage + ", please file a bug report";
+        Notification.Builder n =
+                new Notification.Builder(context,
+                        SystemNotificationChannels.ALERTS)
+                        .setSmallIcon(R.drawable.stat_sys_vitals)
+                        .setWhen(0)
+                        .setColor(context.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
+                        .setTicker(title)
+                        .setContentTitle(title)
+                        .setContentText(content)
+                        .setStyle(new Notification.BigTextStyle().bigText(detailInfo));
+        final NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
+        notificationManager.notifyAsUser(null,
+                SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICE_WHILE_IN_USE_PERMISSION,
+                n.build(), UserHandle.ALL);
     }
 
     // TODO: remove this toast after feature development is done
     // show a toast message to ask user to file a bugreport so we know how many apps are impacted by
     // the new background started foreground service while-in-use permission restriction.
-    void showWhileInUseDebugToastLocked(int uid, int op, int mode) {
-        StringBuilder sb = new StringBuilder();
+    void showWhileInUseDebugNotificationLocked(int uid, int op, int mode) {
+        StringBuilder packageNameBuilder = new StringBuilder();
+        StringBuilder detailInfoBuilder = new StringBuilder();
         for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
             ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
             if (pr.uid != uid) {
@@ -4713,17 +4726,22 @@ public final class ActiveServices {
                 }
                 if (!r.mAllowWhileInUsePermissionInFgs
                         && r.mInfoDenyWhileInUsePermissionInFgs != null) {
-                    Slog.wtf(TAG, r.mInfoDenyWhileInUsePermissionInFgs
-                            + " affected while-use-permission:" + AppOpsManager.opToPublicName(op));
-                    sb.append(r.mRecentCallingPackage + " ");
+                    final String msg = r.mInfoDenyWhileInUsePermissionInFgs
+                            + " affected while-in-use permission:"
+                            + AppOpsManager.opToPublicName(op);
+                    Slog.wtf(TAG, msg);
+                    packageNameBuilder.append(r.mRecentCallingPackage + " ");
+                    detailInfoBuilder.append(msg);
+                    detailInfoBuilder.append("\n");
                 }
             }
         }
 
-        final String callingPackageStr = sb.toString();
+        final String callingPackageStr = packageNameBuilder.toString();
         if (mAm.mConstants.mFlagForegroundServiceStartsLoggingEnabled
                 && !callingPackageStr.isEmpty()) {
-            showWhileInUsePermissionInFgsBlockedToastLocked(callingPackageStr);
+            showWhileInUsePermissionInFgsBlockedNotificationLocked(callingPackageStr,
+                    detailInfoBuilder.toString());
         }
     }
 }

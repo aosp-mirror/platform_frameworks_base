@@ -19,7 +19,7 @@ package com.android.internal.content.om;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackagePartitions;
-import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.ParsingPackageRead;
 import android.os.Build;
 import android.os.Process;
 import android.os.Trace;
@@ -36,7 +36,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -71,10 +71,10 @@ public class OverlayConfig {
      * Interface for providing information on scanned packages.
      * TODO(147840005): Remove this when android:isStatic and android:priority are fully deprecated
      */
-    public interface AndroidPackageProvider {
+    public interface PackageProvider {
 
         /** Performs the given action for each package. */
-        void forEachPackage(Consumer<AndroidPackage> p);
+        void forEachPackage(BiConsumer<ParsingPackageRead, Boolean> p);
     }
 
     private static final Comparator<ParsedConfiguration> sStaticOverlayComparator = (c1, c2) -> {
@@ -100,7 +100,7 @@ public class OverlayConfig {
     @VisibleForTesting
     public OverlayConfig(@Nullable File rootDirectory,
             @Nullable Supplier<OverlayScanner> scannerFactory,
-            @Nullable AndroidPackageProvider packageProvider) {
+            @Nullable PackageProvider packageProvider) {
         Preconditions.checkArgument((scannerFactory == null) != (packageProvider == null),
                 "scannerFactory and packageProvider cannot be both null or both non-null");
 
@@ -186,13 +186,6 @@ public class OverlayConfig {
      */
     @NonNull
     public static OverlayConfig getZygoteInstance() {
-        if (Process.myUid() != Process.ROOT_UID) {
-            // Scan the overlays in the zygote process to generate configuration settings for
-            // overlays on the system image. Do not cache this instance so OverlayConfig will not
-            // be present in applications by default.
-            throw new IllegalStateException("Can only be invoked in the root process");
-        }
-
         Trace.traceBegin(Trace.TRACE_TAG_RRO, "OverlayConfig#getZygoteInstance");
         try {
             return new OverlayConfig(null /* rootDirectory */, OverlayScanner::new,
@@ -208,20 +201,19 @@ public class OverlayConfig {
      * {@link #getSystemInstance()} will return the initialized instance.
      */
     @NonNull
-    public static OverlayConfig initializeSystemInstance(AndroidPackageProvider packageProvider) {
-        if (Process.myUid() != Process.SYSTEM_UID) {
-            throw new IllegalStateException("Can only be invoked in the system process");
-        }
-
+    public static OverlayConfig initializeSystemInstance(PackageProvider packageProvider) {
         Trace.traceBegin(Trace.TRACE_TAG_RRO, "OverlayConfig#initializeSystemInstance");
-        sInstance = new OverlayConfig(null, null, packageProvider);
-        Trace.traceEnd(Trace.TRACE_TAG_RRO);
+        try {
+            sInstance = new OverlayConfig(null, null, packageProvider);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RRO);
+        }
         return sInstance;
     }
 
     /**
      * Retrieves the singleton instance initialized by
-     * {@link #initializeSystemInstance(AndroidPackageProvider)}.
+     * {@link #initializeSystemInstance(PackageProvider)}.
      */
     @NonNull
     public static OverlayConfig getSystemInstance() {
@@ -291,10 +283,10 @@ public class OverlayConfig {
 
     @NonNull
     private static ArrayList<ParsedOverlayInfo> getOverlayPackageInfos(
-            @NonNull AndroidPackageProvider packageManager) {
+            @NonNull PackageProvider packageManager) {
         final ArrayList<ParsedOverlayInfo> overlays = new ArrayList<>();
-        packageManager.forEachPackage((AndroidPackage p) -> {
-            if (p.getOverlayTarget() != null && p.isSystem()) {
+        packageManager.forEachPackage((ParsingPackageRead p, Boolean isSystem) -> {
+            if (p.getOverlayTarget() != null && isSystem) {
                 overlays.add(new ParsedOverlayInfo(p.getPackageName(), p.getOverlayTarget(),
                         p.getTargetSdkVersion(), p.isOverlayIsStatic(), p.getOverlayPriority(),
                         new File(p.getBaseCodePath())));
@@ -373,10 +365,6 @@ public class OverlayConfig {
      */
     @NonNull
     public String[] createImmutableFrameworkIdmapsInZygote() {
-        if (Process.myUid() != Process.ROOT_UID) {
-            throw new IllegalStateException("This method can only be called from the root process");
-        }
-
         final String targetPath = "/system/framework/framework-res.apk";
         final ArrayList<String> idmapPaths = new ArrayList<>();
         final ArrayList<IdmapInvocation> idmapInvocations =

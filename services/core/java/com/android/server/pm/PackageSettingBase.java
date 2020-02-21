@@ -78,12 +78,12 @@ public abstract class PackageSettingBase extends SettingBase {
     /**
      * The primary CPU abi for this package.
      */
-    String primaryCpuAbiString;
+    public String primaryCpuAbiString;
 
     /**
      * The secondary CPU abi for this package.
      */
-    String secondaryCpuAbiString;
+    public String secondaryCpuAbiString;
 
     /**
      * The install time CPU override, if any. This value is written at install time

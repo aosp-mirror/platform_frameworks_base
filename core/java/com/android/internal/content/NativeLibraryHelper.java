@@ -31,7 +31,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.SELinux;
@@ -95,20 +94,12 @@ public class NativeLibraryHelper {
             }
         }
 
-        public static Handle create(AndroidPackage pkg) throws IOException {
-            return create(
-                    pkg.makeListAllCodePaths(),
-                    (pkg.getFlags() & ApplicationInfo.FLAG_MULTIARCH) != 0,
-                    (pkg.getFlags() & ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) != 0,
-                    (pkg.getFlags() & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
-        }
-
         public static Handle create(PackageLite lite) throws IOException {
             return create(lite.getAllCodePaths(), lite.multiArch, lite.extractNativeLibs,
                     lite.debuggable);
         }
 
-        private static Handle create(List<String> codePaths, boolean multiArch,
+        public static Handle create(List<String> codePaths, boolean multiArch,
                 boolean extractNativeLibs, boolean debuggable) throws IOException {
             final int size = codePaths.size();
             final String[] apkPaths = new String[size];

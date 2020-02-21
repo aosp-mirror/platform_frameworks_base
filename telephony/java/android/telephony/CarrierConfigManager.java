@@ -36,6 +36,8 @@ import android.telephony.ims.ImsReasonInfo;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Provides access to telephony configuration values that are carrier-specific.
  */
@@ -838,7 +840,8 @@ public class CarrierConfigManager {
     /**
      * The default flag specifying whether ETWS/CMAS test setting is forcibly disabled in
      * Settings->More->Emergency broadcasts menu even though developer options is turned on.
-     * @deprecated moved to cellbroadcastreceiver resource show_test_settings
+     * @deprecated Use {@code com.android.cellbroadcastreceiver.CellBroadcastReceiver} resource
+     * {@code show_test_settings} to control whether to show test alert settings or not.
      */
     @Deprecated
     public static final String KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL =
@@ -1987,6 +1990,13 @@ public class CarrierConfigManager {
             "carrier_allow_deflect_ims_call_bool";
 
     /**
+     * Flag indicating whether the carrier supports explicit call transfer for an IMS call.
+     * @hide
+     */
+    public static final String KEY_CARRIER_ALLOW_TRANSFER_IMS_CALL_BOOL =
+            "carrier_allow_transfer_ims_call_bool";
+
+    /**
      * Flag indicating whether the carrier always wants to play an "on-hold" tone when a call has
      * been remotely held.
      * <p>
@@ -2016,10 +2026,15 @@ public class CarrierConfigManager {
             "allow_add_call_during_video_call";
 
     /**
-     * When false, indicates that holding a video call is disabled
+     * When {@code true}, indicates that video calls can be put on hold in order to swap to another
+     * call (e.g. a new outgoing call).
+     * When {@code false}, indicates that video calls will be disconnected when swapping to another
+     * call.
+     * <p>
+     * This is {@code true} by default.
      */
-    public static final String KEY_ALLOW_HOLDING_VIDEO_CALL_BOOL =
-            "allow_holding_video_call";
+    public static final String KEY_ALLOW_HOLD_VIDEO_CALL_BOOL =
+            "allow_hold_video_call_bool";
 
     /**
      * When true, indicates that the HD audio icon in the in-call screen should not be shown for
@@ -2464,6 +2479,21 @@ public class CarrierConfigManager {
      */
     public static final String KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT =
             "parameters_use_for_5g_nr_signal_bar_int";
+
+    /**
+     * String array of default bandwidth values per network type.
+     * The entries should be of form "network_name:downstream,upstream", with values in Kbps.
+     * @hide
+     */
+    public static final String KEY_BANDWIDTH_STRING_ARRAY = "bandwidth_string_array";
+
+    /**
+     * For NR (non-standalone), whether to use the LTE value instead of NR value as the default for
+     * upstream bandwidth. Downstream bandwidth will still use the NR value as the default.
+     * @hide
+     */
+    public static final String KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL =
+            "bandwidth_nr_nsa_use_lte_value_for_upstream_bool";
 
     /**
      * Key identifying if voice call barring notification is required to be shown to the user.
@@ -2967,6 +2997,33 @@ public class CarrierConfigManager {
             "5g_icon_display_grace_period_sec_int";
 
     /**
+     * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
+     */
+    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG = "5g_watchdog_time_long";
+
+    /**
+     * Whether NR (non-standalone) should be unmetered for all frequencies.
+     * If either {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL} or
+     * {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL} are true, then this value will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_BOOL = "unmetered_nr_nsa_bool";
+
+    /**
+     * Whether NR (non-standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_MMWAVE_BOOL = "unmetered_nr_nsa_mmwave_bool";
+
+    /**
+     * Whether NR (non-standalone) frequencies below 6GHz (sub6) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_SUB6_BOOL = "unmetered_nr_nsa_sub6_bool";
+
+    /**
      * Support ASCII 7-BIT encoding for long SMS. This carrier config is used to enable
      * this feature.
      * @hide
@@ -3037,11 +3094,6 @@ public class CarrierConfigManager {
     public static final String KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL =
             "ping_test_before_data_switch_bool";
 
-    /**
-     * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
-     */
-    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG =
-            "5g_watchdog_time_long";
     /**
      * Controls whether to switch data to primary from opportunistic subscription
      * if primary is out of service. This control only affects system or 1st party app
@@ -3505,6 +3557,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_CONFIG_VERSION_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_DEFLECT_IMS_CALL_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_ALLOW_TRANSFER_IMS_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_PLAY_REMOTE_HOLD_TONE_BOOL, false);
         sDefaults.putBoolean(KEY_AUTO_RETRY_FAILED_WIFI_EMERGENCY_CALL, false);
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);
@@ -3801,7 +3854,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
-        sDefaults.putBoolean(KEY_ALLOW_HOLDING_VIDEO_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_ALLOW_HOLD_VIDEO_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_WIFI_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_GSM_CDMA_CALLS_CAN_BE_HD_AUDIO, false);
@@ -3917,6 +3970,13 @@ public class CarrierConfigManager {
                 });
         sDefaults.putInt(KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT,
                 CellSignalStrengthNr.USE_SSRSRP);
+        sDefaults.putStringArray(KEY_BANDWIDTH_STRING_ARRAY, new String[]{
+                "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
+                "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
+                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550:", "eHRPD:750,48",
+                "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,15000",
+                "NR_NSA_MMWAVE:145000,15000", "NR_SA:145000,15000"});
+        sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
@@ -3932,6 +3992,11 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:5G,connected:5G");
         sDefaults.putInt(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, 0);
+        /* Default value is 1 hour. */
+        sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT, -108);
@@ -3950,8 +4015,6 @@ public class CarrierConfigManager {
         /* Default value is 3 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 3000);
         sDefaults.putBoolean(KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL, true);
-        /* Default value is 1 hour. */
-        sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putBoolean(KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL, true);
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG, 60000);
@@ -3993,7 +4056,7 @@ public class CarrierConfigManager {
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_FORWARDED_NUMBER_BOOL, false);
-        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, 0);
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
     }
 
     /**

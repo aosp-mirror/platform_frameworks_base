@@ -18,16 +18,14 @@ package com.android.server.om;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.SystemConfig;
-import com.android.server.pm.PackageSetting;
 
 import java.util.Collections;
 import java.util.HashMap;

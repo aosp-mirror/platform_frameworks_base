@@ -95,9 +95,9 @@ interface ILauncherApps {
 
     void registerShortcutChangeCallback(String callingPackage, long changedSince,
             String packageName, in List shortcutIds, in List<LocusId> locusIds,
-            in ComponentName componentName, int flags, in IShortcutChangeCallback callback,
-            int callbackId);
-    void unregisterShortcutChangeCallback(String callingPackage, int callbackId);
+            in ComponentName componentName, int flags, in IShortcutChangeCallback callback);
+    void unregisterShortcutChangeCallback(String callingPackage,
+            in IShortcutChangeCallback callback);
 
     void cacheShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
             in UserHandle user);

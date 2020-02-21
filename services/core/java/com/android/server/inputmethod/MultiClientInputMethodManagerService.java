@@ -63,7 +63,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InputChannel;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
-import android.view.autofill.AutofillId;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputMethodInfo;
@@ -88,6 +87,7 @@ import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.internal.view.InputBindResult;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -192,7 +192,7 @@ public final class MultiClientInputMethodManagerService {
 
                         @Override
                         public void onCreateInlineSuggestionsRequest(int userId,
-                                ComponentName componentName, AutofillId autofillId,
+                                InlineSuggestionsRequestInfo requestInfo,
                                 IInlineSuggestionsRequestCallback cb) {
                             try {
                                 //TODO(b/137800469): support multi client IMEs.

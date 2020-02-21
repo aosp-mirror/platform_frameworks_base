@@ -29,12 +29,10 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
-import android.content.pm.parsing.PackageImpl;
 import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedProvider;
 import android.os.Build;
 import android.os.Process;
 import android.platform.test.annotations.Presubmit;
@@ -44,6 +42,9 @@ import android.util.ArraySet;
 import androidx.annotation.NonNull;
 
 import com.android.server.om.OverlayReferenceMapper;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +75,7 @@ public class AppsFilterTest {
     private ArrayMap<String, PackageSetting> mExisting = new ArrayMap<>();
 
     private static ParsingPackage pkg(String packageName) {
-        return PackageImpl.forParsing(packageName)
+        return PackageImpl.forTesting(packageName)
                 .setTargetSdkVersion(Build.VERSION_CODES.R);
     }
 
@@ -113,7 +114,7 @@ public class AppsFilterTest {
         ParsedActivity activity = new ParsedActivity();
         activity.setPackageName(packageName);
         for (IntentFilter filter : filters) {
-            final ParsedActivityIntentInfo info = new ParsedActivityIntentInfo(packageName, null);
+            final ParsedIntentInfo info = new ParsedIntentInfo();
             if (filter.countActions() > 0) {
                 filter.actionsIterator().forEachRemaining(info::addAction);
             }
@@ -127,7 +128,7 @@ public class AppsFilterTest {
                 filter.schemesIterator().forEachRemaining(info::addDataScheme);
             }
             activity.addIntent(info);
-            activity.exported = true;
+            activity.setExported(true);
         }
 
         return pkg(packageName)
@@ -135,7 +136,7 @@ public class AppsFilterTest {
     }
 
     private static ParsingPackage pkgWithProvider(String packageName, String authority) {
-        ComponentParseUtils.ParsedProvider provider = new ComponentParseUtils.ParsedProvider();
+        ParsedProvider provider = new ParsedProvider();
         provider.setPackageName(packageName);
         provider.setExported(true);
         provider.setAuthority(authority);
@@ -437,7 +438,7 @@ public class AppsFilterTest {
         ParsingPackage target = pkg("com.some.package.target")
                 .addOverlayable("overlayableName", actorName);
         ParsingPackage overlay = pkg("com.some.package.overlay")
-                .setIsOverlay(true)
+                .setOverlay(true)
                 .setOverlayTarget(target.getPackageName())
                 .setOverlayTargetName("overlayableName");
         ParsingPackage actor = pkg("com.some.package.actor");
@@ -499,7 +500,7 @@ public class AppsFilterTest {
         ParsingPackage target = pkg("com.some.package.target")
                 .addOverlayable("overlayableName", actorName);
         ParsingPackage overlay = pkg("com.some.package.overlay")
-                .setIsOverlay(true)
+                .setOverlay(true)
                 .setOverlayTarget(target.getPackageName())
                 .setOverlayTargetName("overlayableName");
         ParsingPackage actorOne = pkg("com.some.package.actor.one");
@@ -618,7 +619,7 @@ public class AppsFilterTest {
 
     private PackageSetting simulateAddPackage(AppsFilter filter,
             ParsingPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action) {
-        AndroidPackage newPkg = newPkgBuilder.hideAsParsed().hideAsFinal();
+        AndroidPackage newPkg = ((ParsedPackage) newPkgBuilder.hideAsParsed()).hideAsFinal();
 
         final PackageSettingBuilder settingBuilder = new PackageSettingBuilder()
                 .setPackage(newPkg)

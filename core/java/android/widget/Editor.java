@@ -83,6 +83,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.ContextMenu;
@@ -151,9 +152,6 @@ public class Editor {
     private static final String TAG = "Editor";
     private static final boolean DEBUG_UNDO = false;
 
-    // Specifies whether to allow starting a cursor drag by dragging anywhere over the text.
-    @VisibleForTesting
-    public static boolean FLAG_ENABLE_CURSOR_DRAG = true;
     // Specifies whether to use the magnifier when pressing the insertion or selection handles.
     private static final boolean FLAG_USE_MAGNIFIER = true;
 
@@ -387,12 +385,24 @@ public class Editor {
 
     private final SuggestionHelper mSuggestionHelper = new SuggestionHelper();
 
-    // Specifies whether the cursor control feature set is enabled.
-    // This can only be true if the text view is editable.
-    private boolean mCursorControlEnabled;
+    private boolean mFlagCursorDragFromAnywhereEnabled;
+    private boolean mFlagInsertionHandleGesturesEnabled;
 
     // Specifies whether the new magnifier (with fish-eye effect) is enabled.
     private final boolean mNewMagnifierEnabled;
+
+    // Line height range in DP for the new magnifier.
+    static private final int MIN_LINE_HEIGHT_FOR_MAGNIFIER = 20;
+    static private final int MAX_LINE_HEIGHT_FOR_MAGNIFIER = 32;
+    // Line height range in pixels for the new magnifier.
+    //  - If the line height is bigger than the max, magnifier should be dismissed.
+    //  - If the line height is smaller than the min, magnifier should apply a bigger zoom factor
+    //    to make sure the text can be seen clearly.
+    private int mMinLineHeightForMagnifier;
+    private int mMaxLineHeightForMagnifier;
+    // The zoom factor initially configured.
+    // The actual zoom value may changes based on this initial zoom value.
+    private float mInitialZoom = 1f;
 
     Editor(TextView textView) {
         mTextView = textView;
@@ -402,26 +412,43 @@ public class Editor {
         mHapticTextHandleEnabled = mTextView.getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
 
-        mCursorControlEnabled = AppGlobals.getIntCoreSetting(
-                WidgetFlags.KEY_ENABLE_CURSOR_CONTROL , 0) != 0;
+        mFlagCursorDragFromAnywhereEnabled = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE,
+                WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT ? 1 : 0) != 0;
+        mFlagInsertionHandleGesturesEnabled = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_ENABLE_INSERTION_HANDLE_GESTURES,
+                WidgetFlags.ENABLE_INSERTION_HANDLE_GESTURES_DEFAULT ? 1 : 0) != 0;
         mNewMagnifierEnabled = AppGlobals.getIntCoreSetting(
-                WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER, 0) != 0;
+                WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER,
+                WidgetFlags.ENABLE_NEW_MAGNIFIER_DEFAULT ? 1 : 0) != 0;
         if (TextView.DEBUG_CURSOR) {
-            logCursor("Editor", "Cursor control is %s.",
-                    mCursorControlEnabled ? "enabled" : "disabled");
+            logCursor("Editor", "Cursor drag from anywhere is %s.",
+                    mFlagCursorDragFromAnywhereEnabled ? "enabled" : "disabled");
+            logCursor("Editor", "Insertion handle gestures is %s.",
+                    mFlagInsertionHandleGesturesEnabled ? "enabled" : "disabled");
             logCursor("Editor", "New magnifier is %s.",
                     mNewMagnifierEnabled ? "enabled" : "disabled");
         }
     }
 
     @VisibleForTesting
-    public void setCursorControlEnabled(boolean enabled) {
-        mCursorControlEnabled = enabled;
+    public boolean getFlagCursorDragFromAnywhereEnabled() {
+        return mFlagCursorDragFromAnywhereEnabled;
     }
 
     @VisibleForTesting
-    public boolean getCursorControlEnabled() {
-        return mCursorControlEnabled;
+    public void setFlagCursorDragFromAnywhereEnabled(boolean enabled) {
+        mFlagCursorDragFromAnywhereEnabled = enabled;
+    }
+
+    @VisibleForTesting
+    public boolean getFlagInsertionHandleGesturesEnabled() {
+        return mFlagInsertionHandleGesturesEnabled;
+    }
+
+    @VisibleForTesting
+    public void setFlagInsertionHandleGesturesEnabled(boolean enabled) {
+        mFlagInsertionHandleGesturesEnabled = enabled;
     }
 
     // Lazy creates the magnifier animator.
@@ -440,12 +467,12 @@ public class Editor {
     private Magnifier.Builder createBuilderWithInlineMagnifierDefaults() {
         final Magnifier.Builder params = new Magnifier.Builder(mTextView);
 
-        // TODO: supports changing the height/width dynamically because the text height can be
-        // dynamically changed.
         float zoom = AppGlobals.getFloatCoreSetting(
-                WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR, 1.5f);
+                WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR,
+                WidgetFlags.MAGNIFIER_ZOOM_FACTOR_DEFAULT);
         float aspectRatio = AppGlobals.getFloatCoreSetting(
-                WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO, 5.5f);
+                WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO,
+                WidgetFlags.MAGNIFIER_ASPECT_RATIO_DEFAULT);
         // Avoid invalid/unsupported values.
         if (zoom < 1.2f || zoom > 1.8f) {
             zoom = 1.5f;
@@ -454,13 +481,20 @@ public class Editor {
             aspectRatio = 5.5f;
         }
 
+        mInitialZoom = zoom;
+        mMinLineHeightForMagnifier = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, MIN_LINE_HEIGHT_FOR_MAGNIFIER,
+                mTextView.getContext().getResources().getDisplayMetrics());
+        mMaxLineHeightForMagnifier = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, MAX_LINE_HEIGHT_FOR_MAGNIFIER,
+                mTextView.getContext().getResources().getDisplayMetrics());
+
         final Layout layout = mTextView.getLayout();
         final int line = layout.getLineForOffset(mTextView.getSelectionStart());
         final int sourceHeight =
             layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
-        // Slightly increase the height to avoid tooLargeTextForMagnifier() returns true.
-        int height = (int)(sourceHeight * zoom) + 2;
-        int width = (int)(aspectRatio * height);
+        final int height = (int)(sourceHeight * zoom);
+        final int width = (int)(aspectRatio * Math.max(sourceHeight, mMinLineHeightForMagnifier));
 
         params.setFishEyeStyle()
                 .setSize(width, height)
@@ -4902,6 +4936,12 @@ public class Editor {
         }
 
         private boolean tooLargeTextForMagnifier() {
+            if (mNewMagnifierEnabled) {
+                Layout layout = mTextView.getLayout();
+                final int line = layout.getLineForOffset(getCurrentCursorOffset());
+                return layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line)
+                        >= mMaxLineHeightForMagnifier;
+            }
             final float magnifierContentHeight = Math.round(
                     mMagnifierAnimator.mMagnifier.getHeight()
                             / mMagnifierAnimator.mMagnifier.getZoom());
@@ -5111,9 +5151,16 @@ public class Editor {
                     int lineRight = (int) layout.getLineRight(line);
                     lineRight += mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
                     mMagnifierAnimator.mMagnifier.setSourceHorizontalBounds(lineLeft, lineRight);
+                    final int lineHeight =
+                            layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
+                    float zoom = mInitialZoom;
+                    if (lineHeight < mMinLineHeightForMagnifier) {
+                        zoom = zoom * mMinLineHeightForMagnifier / lineHeight;
+                    }
+                    mMagnifierAnimator.mMagnifier.updateSourceFactors(lineHeight, zoom);
                     mMagnifierAnimator.mMagnifier.show(showPosInView.x, showPosInView.y);
                 } else {
-                  mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
+                    mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
                 }
                 updateHandlesVisibility();
             } else {
@@ -5259,11 +5306,13 @@ public class Editor {
 
             int deltaHeight = 0;
             int opacity = 255;
-            if (mCursorControlEnabled) {
+            if (mFlagInsertionHandleGesturesEnabled) {
                 deltaHeight = AppGlobals.getIntCoreSetting(
-                        WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT, 25);
+                        WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT,
+                        WidgetFlags.INSERTION_HANDLE_DELTA_HEIGHT_DEFAULT);
                 opacity = AppGlobals.getIntCoreSetting(
-                        WidgetFlags.KEY_INSERTION_HANDLE_OPACITY, 50);
+                        WidgetFlags.KEY_INSERTION_HANDLE_OPACITY,
+                        WidgetFlags.INSERTION_HANDLE_OPACITY_DEFAULT);
                 // Avoid invalid/unsupported values.
                 if (deltaHeight < -25 || deltaHeight > 50) {
                     deltaHeight = 25;
@@ -5329,7 +5378,7 @@ public class Editor {
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            if (mCursorControlEnabled) {
+            if (mFlagInsertionHandleGesturesEnabled) {
                 final int height = Math.max(
                         getPreferredHeight() + mDeltaHeight, mDrawable.getIntrinsicHeight());
                 setMeasuredDimension(getPreferredWidth(), height);
@@ -5340,7 +5389,7 @@ public class Editor {
 
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
-            if (mCursorControlEnabled && FLAG_ENABLE_CURSOR_DRAG) {
+            if (mFlagInsertionHandleGesturesEnabled && mFlagCursorDragFromAnywhereEnabled) {
                 // Should only enable touch through when cursor drag is enabled.
                 // Otherwise the insertion handle view cannot be moved.
                 return touchThrough(ev);
@@ -6012,7 +6061,13 @@ public class Editor {
     @VisibleForTesting
     public class InsertionPointCursorController implements CursorController {
         private InsertionHandleView mHandle;
+        // Tracks whether the cursor is currently being dragged.
         private boolean mIsDraggingCursor;
+        // During a drag, tracks whether the user's finger has adjusted to be over the handle rather
+        // than the cursor bar.
+        private boolean mIsTouchSnappedToHandleDuringDrag;
+        // During a drag, tracks the line of text where the cursor was last positioned.
+        private int mPrevLineDuringDrag;
 
         public void onTouchEvent(MotionEvent event) {
             if (hasSelectionController() && getSelectionController().isCursorBeingModified()) {
@@ -6025,7 +6080,7 @@ public class Editor {
                     }
                     if (mIsDraggingCursor) {
                         performCursorDrag(event);
-                    } else if (FLAG_ENABLE_CURSOR_DRAG
+                    } else if (mFlagCursorDragFromAnywhereEnabled
                                 && mTextView.getLayout() != null
                                 && mTextView.isFocused()
                                 && mTouchState.isMovedEnoughForDrag()
@@ -6043,8 +6098,8 @@ public class Editor {
         }
 
         private void positionCursorDuringDrag(MotionEvent event) {
-            int line = mTextView.getLineAtCoordinate(event.getY());
-            int offset = mTextView.getOffsetAtCoordinate(line, event.getX());
+            mPrevLineDuringDrag = getLineDuringDrag(event);
+            int offset = mTextView.getOffsetAtCoordinate(mPrevLineDuringDrag, event.getX());
             int oldSelectionStart = mTextView.getSelectionStart();
             int oldSelectionEnd = mTextView.getSelectionEnd();
             if (offset == oldSelectionStart && offset == oldSelectionEnd) {
@@ -6057,11 +6112,58 @@ public class Editor {
             }
         }
 
+        /**
+         * Returns the line where the cursor should be positioned during a cursor drag. Rather than
+         * simply returning the line directly at the touch position, this function has the following
+         * additional logic:
+         * 1) Apply some slop to avoid switching lines if the touch moves just slightly off the
+         * current line.
+         * 2) Allow the user's finger to slide down and "snap" to the handle to provide better
+         * visibility of the cursor and text.
+         */
+        private int getLineDuringDrag(MotionEvent event) {
+            final Layout layout = mTextView.getLayout();
+            if (mTouchState.isOnHandle()) {
+                // The drag was initiated from the handle, so no need to apply the snap logic. See
+                // InsertionHandleView.touchThrough().
+                return getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, event.getY());
+            }
+            if (mIsTouchSnappedToHandleDuringDrag) {
+                float cursorY = event.getY() - getHandle().getIdealVerticalOffset();
+                return getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, cursorY);
+            }
+            int line = getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, event.getY());
+            if (mPrevLineDuringDrag == UNSET_LINE || line <= mPrevLineDuringDrag) {
+                // User's finger is on the same line or moving up; continue positioning the cursor
+                // directly at the touch location.
+                return line;
+            }
+            // User's finger is moving downwards; delay jumping to the lower line to allow the
+            // touch to move to the handle.
+            float cursorY = event.getY() - getHandle().getIdealVerticalOffset();
+            line = getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, cursorY);
+            if (line < mPrevLineDuringDrag) {
+                return mPrevLineDuringDrag;
+            }
+            // User's finger is now over the handle, at the ideal offset from the cursor. From now
+            // on, position the cursor higher up from the actual touch location so that the user's
+            // finger stays "snapped" to the handle. This provides better visibility of the text.
+            mIsTouchSnappedToHandleDuringDrag = true;
+            if (TextView.DEBUG_CURSOR) {
+                logCursor("InsertionPointCursorController",
+                        "snapped touch to handle: eventY=%d, cursorY=%d, mLastLine=%d, line=%d",
+                        (int) event.getY(), (int) cursorY, mPrevLineDuringDrag, line);
+            }
+            return line;
+        }
+
         private void startCursorDrag(MotionEvent event) {
             if (TextView.DEBUG_CURSOR) {
                 logCursor("InsertionPointCursorController", "start cursor drag");
             }
             mIsDraggingCursor = true;
+            mIsTouchSnappedToHandleDuringDrag = false;
+            mPrevLineDuringDrag = UNSET_LINE;
             // We don't want the parent scroll/long-press handlers to take over while dragging.
             mTextView.getParent().requestDisallowInterceptTouchEvent(true);
             mTextView.cancelLongPress();
@@ -6084,6 +6186,8 @@ public class Editor {
                 logCursor("InsertionPointCursorController", "end cursor drag");
             }
             mIsDraggingCursor = false;
+            mIsTouchSnappedToHandleDuringDrag = false;
+            mPrevLineDuringDrag = UNSET_LINE;
             // Hide the magnifier and set the handle to be hidden after a delay.
             getHandle().dismissMagnifier();
             getHandle().hideAfterDelay();

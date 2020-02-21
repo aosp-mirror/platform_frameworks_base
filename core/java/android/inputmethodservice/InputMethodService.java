@@ -34,7 +34,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -74,7 +73,6 @@ import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
-import android.view.autofill.AutofillId;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
@@ -99,6 +97,7 @@ import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -526,12 +525,13 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public void onCreateInlineSuggestionsRequest(ComponentName componentName,
-                AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
+        public void onCreateInlineSuggestionsRequest(
+                @NonNull InlineSuggestionsRequestInfo requestInfo,
+                @NonNull IInlineSuggestionsRequestCallback cb) {
             if (DEBUG) {
                 Log.d(TAG, "InputMethodService received onCreateInlineSuggestionsRequest()");
             }
-            handleOnCreateInlineSuggestionsRequest(componentName, cb);
+            handleOnCreateInlineSuggestionsRequest(requestInfo, cb);
         }
 
         /**
@@ -742,11 +742,14 @@ public class InputMethodService extends AbstractInputMethodService {
 
     // TODO(b/137800469): Add detailed docs explaining the inline suggestions process.
     /**
-     * Returns an {@link InlineSuggestionsRequest} to be sent to Autofill.
+     * This method should be implemented by subclass which supports displaying autofill inline
+     * suggestion.
      *
-     * <p>Should be implemented by subclasses.</p>
+     * @param uiExtras the extras that contain the UI renderer related information
+     * @return an {@link InlineSuggestionsRequest} to be sent to Autofill.
      */
-    public @Nullable InlineSuggestionsRequest onCreateInlineSuggestionsRequest() {
+    @Nullable
+    public InlineSuggestionsRequest onCreateInlineSuggestionsRequest(@NonNull Bundle uiExtras) {
         return null;
     }
 
@@ -764,7 +767,8 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     @MainThread
-    private void handleOnCreateInlineSuggestionsRequest(@NonNull ComponentName componentName,
+    private void handleOnCreateInlineSuggestionsRequest(
+            @NonNull InlineSuggestionsRequestInfo requestInfo,
             @NonNull IInlineSuggestionsRequestCallback callback) {
         if (!mInputStarted) {
             try {
@@ -779,8 +783,9 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mInlineSuggestionSession != null) {
             mInlineSuggestionSession.invalidateSession();
         }
-        mInlineSuggestionSession = new InlineSuggestionSession(componentName, callback,
-                this::getEditorInfoPackageName, this::onCreateInlineSuggestionsRequest,
+        mInlineSuggestionSession = new InlineSuggestionSession(requestInfo.getComponentName(),
+                callback, this::getEditorInfoPackageName,
+                () -> onCreateInlineSuggestionsRequest(requestInfo.getUiExtras()),
                 this::getHostInputToken, this::onInlineSuggestionsResponse);
     }
 

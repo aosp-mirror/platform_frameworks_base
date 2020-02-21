@@ -23,4 +23,5 @@ package android.app.trust;
  */
 oneway interface IStrongAuthTracker {
     void onStrongAuthRequiredChanged(int strongAuthRequired, int userId);
+    void onIsNonStrongBiometricAllowedChanged(boolean allowed, int userId);
 }

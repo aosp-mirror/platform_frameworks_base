@@ -176,6 +176,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         private Fingerprint mFingerprint;
         private CryptoObject mCryptoObject;
         private int mUserId;
+        private boolean mIsStrongBiometric;
 
         /**
          * Authentication result
@@ -184,10 +185,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          * @param fingerprint the recognized fingerprint data, if allowed.
          * @hide
          */
-        public AuthenticationResult(CryptoObject crypto, Fingerprint fingerprint, int userId) {
+        public AuthenticationResult(CryptoObject crypto, Fingerprint fingerprint, int userId,
+                boolean isStrongBiometric) {
             mCryptoObject = crypto;
             mFingerprint = fingerprint;
             mUserId = userId;
+            mIsStrongBiometric = isStrongBiometric;
         }
 
         /**
@@ -211,6 +214,15 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          * @hide
          */
         public int getUserId() { return mUserId; }
+
+        /**
+         * Check whether the strength of the fingerprint modality associated with this operation is
+         * strong (i.e. not weak or convenience).
+         * @hide
+         */
+        public boolean isStrongBiometric() {
+            return mIsStrongBiometric;
+        }
     };
 
     /**
@@ -833,7 +845,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                             msg.arg2 /* vendorCode */);
                     break;
                 case MSG_AUTHENTICATION_SUCCEEDED:
-                    sendAuthenticatedSucceeded((Fingerprint) msg.obj, msg.arg1 /* userId */);
+                    sendAuthenticatedSucceeded((Fingerprint) msg.obj, msg.arg1 /* userId */,
+                            msg.arg2 == 1 /* isStrongBiometric */);
                     break;
                 case MSG_AUTHENTICATION_FAILED:
                     sendAuthenticatedFailed();
@@ -890,10 +903,10 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
-    private void sendAuthenticatedSucceeded(Fingerprint fp, int userId) {
+    private void sendAuthenticatedSucceeded(Fingerprint fp, int userId, boolean isStrongBiometric) {
         if (mAuthenticationCallback != null) {
             final AuthenticationResult result =
-                    new AuthenticationResult(mCryptoObject, fp, userId);
+                    new AuthenticationResult(mCryptoObject, fp, userId, isStrongBiometric);
             mAuthenticationCallback.onAuthenticationSucceeded(result);
         }
     }
@@ -1078,8 +1091,10 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
 
         @Override // binder call
-        public void onAuthenticationSucceeded(long deviceId, Fingerprint fp, int userId) {
-            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, 0, fp).sendToTarget();
+        public void onAuthenticationSucceeded(long deviceId, Fingerprint fp, int userId,
+                boolean isStrongBiometric) {
+            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, isStrongBiometric ? 1 : 0,
+                    fp).sendToTarget();
         }
 
         @Override // binder call

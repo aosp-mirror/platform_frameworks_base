@@ -68,8 +68,7 @@ public class RuleBinaryParser implements RuleParser {
     }
 
     private List<Rule> parseRules(
-            RandomAccessInputStream randomAccessInputStream,
-            List<RuleIndexRange> indexRanges)
+            RandomAccessInputStream randomAccessInputStream, List<RuleIndexRange> indexRanges)
             throws IOException {
 
         // Read the rule binary file format version.
@@ -96,8 +95,7 @@ public class RuleBinaryParser implements RuleParser {
     }
 
     private List<Rule> parseIndexedRules(
-            RandomAccessInputStream randomAccessInputStream,
-            List<RuleIndexRange> indexRanges)
+            RandomAccessInputStream randomAccessInputStream, List<RuleIndexRange> indexRanges)
             throws IOException {
         List<Rule> parsedRules = new ArrayList<>();
 
@@ -172,6 +170,7 @@ public class RuleBinaryParser implements RuleParser {
             case AtomicFormula.APP_CERTIFICATE:
             case AtomicFormula.INSTALLER_NAME:
             case AtomicFormula.INSTALLER_CERTIFICATE:
+            case AtomicFormula.STAMP_CERTIFICATE_HASH:
                 boolean isHashedValue = bitInputStream.getNext(IS_HASHED_BITS) == 1;
                 int valueSize = bitInputStream.getNext(VALUE_SIZE_BITS);
                 String stringValue = getStringValue(bitInputStream, valueSize, isHashedValue);
@@ -183,6 +182,7 @@ public class RuleBinaryParser implements RuleParser {
                 long longValue = (upper << 32) | lower;
                 return new AtomicFormula.LongAtomicFormula(key, operator, longValue);
             case AtomicFormula.PRE_INSTALLED:
+            case AtomicFormula.STAMP_TRUSTED:
                 boolean booleanValue = getBooleanValue(bitInputStream);
                 return new AtomicFormula.BooleanAtomicFormula(key, booleanValue);
             default:

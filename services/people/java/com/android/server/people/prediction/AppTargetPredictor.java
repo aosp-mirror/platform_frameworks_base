@@ -73,6 +73,7 @@ public class AppTargetPredictor {
      */
     @MainThread
     public void onAppTargetEvent(AppTargetEvent event) {
+        mCallbackExecutor.execute(() -> reportAppTargetEvent(event));
     }
 
     /**
@@ -102,6 +103,11 @@ public class AppTargetPredictor {
     @VisibleForTesting
     public Consumer<List<AppTarget>> getUpdatePredictionsMethod() {
         return mUpdatePredictionsMethod;
+    }
+
+    /** To be overridden by the subclass to report app target event. */
+    @WorkerThread
+    void reportAppTargetEvent(AppTargetEvent event) {
     }
 
     /** To be overridden by the subclass to predict the targets. */

@@ -21,14 +21,13 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
 
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.AndroidPackage;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
 import android.util.LongSparseArray;
 import android.util.Slog;
 
-import com.android.internal.util.Preconditions;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

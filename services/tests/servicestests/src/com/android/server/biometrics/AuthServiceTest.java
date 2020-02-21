@@ -111,6 +111,29 @@ public class AuthServiceTest {
                 any());
     }
 
+    @Test
+    public void testRegisterAuthenticator_callsInitConfiguredStrength() throws Exception {
+
+        final String[] config = {
+                "0:2:15", // ID0:Fingerprint:Strong
+                "1:4:255", // ID1:Iris:Weak
+                "2:8:4095", // ID2:Face:Convenience
+        };
+
+        when(mInjector.getConfiguration(any())).thenReturn(config);
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final int fingerprintStrength = 15;
+        final int irisStrength = 255;
+        final int faceStrength = 4095;
+
+        verify(mFingerprintService).initConfiguredStrength(eq(fingerprintStrength));
+        verify(mIrisService).initConfiguredStrength(eq(irisStrength));
+        verify(mFaceService).initConfiguredStrength(eq(faceStrength));
+    }
+
 
     // TODO(b/141025588): Check that an exception is thrown when the userId != callingUserId
     @Test

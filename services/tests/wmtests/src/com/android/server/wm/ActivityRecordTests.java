@@ -1025,9 +1025,9 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testDestroyIfPossible_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
         final ActivityStack homeStack = mActivity.getDisplay().getRootHomeTask();
-        homeStack.forAllTasks((t) -> {
+        homeStack.forAllLeafTasks((t) -> {
             homeStack.removeChild(t, "test");
-        }, true /* traverseTopToBottom */, homeStack);
+        }, true /* traverseTopToBottom */);
         mActivity.finishing = true;
         doReturn(false).when(mRootWindowContainer).resumeFocusedStacksTopActivities();
         spyOn(mStack);
@@ -1051,9 +1051,9 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testCompleteFinishing_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
         final ActivityStack homeStack = mActivity.getDisplay().getRootHomeTask();
-        homeStack.forAllTasks((t) -> {
+        homeStack.forAllLeafTasks((t) -> {
             homeStack.removeChild(t, "test");
-        }, true /* traverseTopToBottom */, homeStack);
+        }, true /* traverseTopToBottom */);
         mActivity.finishing = true;
         spyOn(mStack);
 

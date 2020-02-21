@@ -33,6 +33,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
@@ -5740,6 +5741,25 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns whether the admin has enabled always-on VPN lockdown for the current user.
+     *
+     * Only callable by the system.
+    * @hide
+    */
+    @UserHandleAware
+    public boolean isAlwaysOnVpnLockdownEnabled() {
+        throwIfParentInstance("isAlwaysOnVpnLockdownEnabled");
+        if (mService != null) {
+            try {
+                return mService.isAlwaysOnVpnLockdownEnabledForUser(myUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by device or profile owner to query the set of packages that are allowed to access
      * the network directly when always-on VPN is in lockdown mode but not connected. Returns
      * {@code null} when always-on VPN is not active or not in lockdown mode.
@@ -5778,6 +5798,26 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getAlwaysOnVpnPackage(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the VPN package name if the admin has enabled always-on VPN on the current user,
+     * or {@code null} if none is set.
+     *
+     * Only callable by the system.
+     * @hide
+     */
+    @UserHandleAware
+    public @Nullable String getAlwaysOnVpnPackage() {
+        throwIfParentInstance("getAlwaysOnVpnPackage");
+        if (mService != null) {
+            try {
+                return mService.getAlwaysOnVpnPackageForUser(myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8942,49 +8982,6 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 mService.setLocationEnabled(admin, locationEnabled);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Called by device owners to request a location provider to change its allowed state. For a
-     * provider to be enabled requires both that the master location setting is enabled, and that
-     * the provider itself is allowed. Most location providers are always allowed. Some location
-     * providers may have user consents or terms and conditions that must be accepted, or some other
-     * type of blocker before they are allowed however. Every location provider is responsible for
-     * its own allowed state.
-     *
-     * <p>This method requests that a location provider change its allowed state. For providers that
-     * are always allowed and have no state to change, this will have no effect. If the provider
-     * does require some consent, terms and conditions, or other blocking state, using this API
-     * implies that the device owner is agreeing/disagreeing to any consents, terms and conditions,
-     * etc, and the provider should make a best effort to adjust it's allowed state accordingly.
-     *
-     * <p>Location providers are generally only responsible for the current user, and callers must
-     * assume that this method will only affect provider state for the current user. Callers are
-     * responsible for tracking current user changes and re-updating provider state as necessary.
-     *
-     * <p>While providers are expected to make a best effort to honor this request, it is not a
-     * given that all providers will support such a request. If a provider does change its state as
-     * a result of this request, that may happen asynchronously after some delay. Test location
-     * providers set through {@link android.location.LocationManager#addTestProvider} will respond
-     * to this request to aide in testing.
-     *
-     * @param admin          Which {@link DeviceAdminReceiver} this request is associated with
-     * @param provider       A location provider as listed by
-     *                       {@link android.location.LocationManager#getAllProviders()}
-     * @param providerAllowed Whether the location provider is being requested to enable or disable
-     *                       itself
-     * @throws SecurityException if {@code admin} is not a device owner.
-     */
-    public void requestSetLocationProviderAllowed(@NonNull ComponentName admin,
-            @NonNull String provider, boolean providerAllowed) {
-        throwIfParentInstance("requestSetLocationProviderAllowed");
-        if (mService != null) {
-            try {
-                mService.requestSetLocationProviderAllowed(admin, provider, providerAllowed);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

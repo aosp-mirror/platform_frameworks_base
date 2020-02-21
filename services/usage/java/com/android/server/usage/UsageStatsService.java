@@ -86,6 +86,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
@@ -104,6 +105,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -1121,7 +1123,7 @@ public class UsageStatsService extends SystemService implements
 
             boolean checkin = false;
             boolean compact = false;
-            String pkg = null;
+            final ArrayList<String> pkgs = new ArrayList<>();
 
             if (args != null) {
                 for (int i = 0; i < args.length; i++) {
@@ -1214,8 +1216,7 @@ public class UsageStatsService extends SystemService implements
                         return;
                     } else if (arg != null && !arg.startsWith("-")) {
                         // Anything else that doesn't start with '-' is a pkg to filter
-                        pkg = arg;
-                        break;
+                        pkgs.add(arg);
                     }
                 }
             }
@@ -1230,15 +1231,15 @@ public class UsageStatsService extends SystemService implements
                     if (checkin) {
                         mUserState.valueAt(i).checkin(idpw);
                     } else {
-                        mUserState.valueAt(i).dump(idpw, pkg, compact);
+                        mUserState.valueAt(i).dump(idpw, pkgs, compact);
                         idpw.println();
                     }
                 }
-                mAppStandby.dumpUser(idpw, userId, pkg);
+                mAppStandby.dumpUser(idpw, userId, pkgs);
                 idpw.decreaseIndent();
             }
 
-            if (pkg == null) {
+            if (CollectionUtils.isEmpty(pkgs)) {
                 pw.println();
                 mAppStandby.dumpState(args, pw);
             }

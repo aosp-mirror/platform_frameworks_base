@@ -29,6 +29,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCRE
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 
 import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_NOT_CANCELED;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING;
@@ -42,6 +44,9 @@ import android.app.NotificationManager.Policy;
 import android.app.Person;
 import android.app.RemoteInputHistoryItem;
 import android.content.Context;
+import android.content.pm.LauncherApps;
+import android.content.pm.LauncherApps.ShortcutQuery;
+import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
@@ -50,6 +55,7 @@ import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -75,6 +81,8 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -94,10 +102,14 @@ import java.util.Objects;
  * clean this up in the future.
  */
 public final class NotificationEntry extends ListEntry {
+    private static final String TAG = "NotificationEntry";
 
     private final String mKey;
     private StatusBarNotification mSbn;
     private Ranking mRanking;
+
+    private StatusBarIcon mSmallIcon;
+    private StatusBarIcon mPeopleAvatar;
 
     /*
      * Bookkeeping members
@@ -459,12 +471,7 @@ public final class NotificationEntry extends ListEntry {
      */
     public void createIcons(Context context, StatusBarNotification sbn)
             throws InflationException {
-        Notification n = sbn.getNotification();
-        final Icon smallIcon = n.getSmallIcon();
-        if (smallIcon == null) {
-            throw new InflationException("No small icon in notification from "
-                    + sbn.getPackageName());
-        }
+        StatusBarIcon ic = getIcon(context, sbn, false /* redact */);
 
         // Construct the icon.
         icon = new StatusBarIconView(context,
@@ -482,21 +489,20 @@ public final class NotificationEntry extends ListEntry {
         aodIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         aodIcon.setIncreasedSize(true);
 
-        final StatusBarIcon ic = new StatusBarIcon(
-                sbn.getUser(),
-                sbn.getPackageName(),
-                smallIcon,
-                n.iconLevel,
-                n.number,
-                StatusBarIconView.contentDescForNotification(context, n));
-
-        if (!icon.set(ic) || !expandedIcon.set(ic) || !aodIcon.set(ic)) {
+        try {
+            setIcons(ic, Collections.singletonList(icon));
+            if (isSensitive()) {
+                ic = getIcon(context, sbn, true /* redact */);
+            }
+            setIcons(ic, Arrays.asList(expandedIcon, aodIcon));
+        } catch (InflationException e) {
             icon = null;
             expandedIcon = null;
             centeredIcon = null;
             aodIcon = null;
-            throw new InflationException("Couldn't create icon: " + ic);
+            throw e;
         }
+
         expandedIcon.setVisibility(View.INVISIBLE);
         expandedIcon.setOnVisibilityChangedListener(
                 newVisibility -> {
@@ -510,10 +516,130 @@ public final class NotificationEntry extends ListEntry {
             centeredIcon = new StatusBarIconView(context,
                     sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), sbn);
             centeredIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-
-            if (!centeredIcon.set(ic)) {
+            try {
+                setIcons(ic, Collections.singletonList(centeredIcon));
+            } catch (InflationException e) {
                 centeredIcon = null;
-                throw new InflationException("Couldn't update centered icon: " + ic);
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Determines if this icon should be tinted based on the sensitivity of the icon, its context
+     * and the user's indicated sensitivity preference.
+     *
+     * @param ic The icon that should/should not be tinted.
+     * @return
+     */
+    private boolean shouldTintIcon(StatusBarIconView ic) {
+        boolean usedInSensitiveContext = (ic == expandedIcon || ic == aodIcon);
+        return !isImportantConversation() || (usedInSensitiveContext && isSensitive());
+    }
+
+
+    private void setIcons(StatusBarIcon ic, List<StatusBarIconView> icons)
+            throws InflationException {
+        for (StatusBarIconView icon: icons) {
+            if (icon == null) {
+              continue;
+            }
+            icon.setTintIcons(shouldTintIcon(icon));
+            if (!icon.set(ic)) {
+                throw new InflationException("Couldn't create icon" + ic);
+            }
+        }
+    }
+
+    private StatusBarIcon getIcon(Context context, StatusBarNotification sbn, boolean redact)
+            throws InflationException {
+        Notification n = sbn.getNotification();
+        final boolean showPeopleAvatar = isImportantConversation() && !redact;
+
+        // If cached, return corresponding cached values
+        if (showPeopleAvatar && mPeopleAvatar != null) {
+            return mPeopleAvatar;
+        } else if (!showPeopleAvatar && mSmallIcon != null) {
+            return mSmallIcon;
+        }
+
+        Icon icon = showPeopleAvatar ? createPeopleAvatar(context) : n.getSmallIcon();
+        if (icon == null) {
+            throw new InflationException("No icon in notification from " + sbn.getPackageName());
+        }
+
+        StatusBarIcon ic = new StatusBarIcon(
+                    sbn.getUser(),
+                    sbn.getPackageName(),
+                    icon,
+                    n.iconLevel,
+                    n.number,
+                    StatusBarIconView.contentDescForNotification(context, n));
+
+        // Cache if important conversation.
+        if (isImportantConversation()) {
+            if (showPeopleAvatar) {
+                mPeopleAvatar = ic;
+            } else {
+                mSmallIcon = ic;
+            }
+        }
+        return ic;
+    }
+
+    private Icon createPeopleAvatar(Context context) throws InflationException {
+        // Attempt to extract form shortcut.
+        String conversationId = getChannel().getConversationId();
+        ShortcutQuery query = new ShortcutQuery()
+                .setPackage(mSbn.getPackageName())
+                .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED)
+                .setShortcutIds(Collections.singletonList(conversationId));
+        List<ShortcutInfo> shortcuts = context.getSystemService(LauncherApps.class)
+                .getShortcuts(query, mSbn.getUser());
+        Icon ic = null;
+        if (shortcuts != null && !shortcuts.isEmpty()) {
+            ic = shortcuts.get(0).getIcon();
+        }
+
+        // Fall back to notification large icon if available
+        if (ic == null) {
+            ic = mSbn.getNotification().getLargeIcon();
+        }
+
+        // Fall back to extract from message
+        if (ic == null) {
+            Bundle extras = mSbn.getNotification().extras;
+            List<Message> messages = Message.getMessagesFromBundleArray(
+                    extras.getParcelableArray(Notification.EXTRA_MESSAGES));
+            Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
+
+            for (int i = messages.size() - 1; i >= 0; i--) {
+                Message message = messages.get(i);
+                Person sender = message.getSenderPerson();
+                if (sender != null && sender != user) {
+                    ic = message.getSenderPerson().getIcon();
+                    break;
+                }
+            }
+        }
+
+        // Revert to small icon if still not available
+        if (ic == null) {
+            ic = mSbn.getNotification().getSmallIcon();
+        }
+        if (ic == null) {
+            throw new InflationException("No icon in notification from " + mSbn.getPackageName());
+        }
+        return ic;
+    }
+
+    private void updateSensitiveIconState() {
+        try {
+            StatusBarIcon ic = getIcon(getRow().getContext(), mSbn, isSensitive());
+            setIcons(ic, Arrays.asList(expandedIcon, aodIcon));
+        } catch (InflationException e) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Unable to update icon", e);
             }
         }
     }
@@ -544,28 +670,30 @@ public final class NotificationEntry extends ListEntry {
             throws InflationException {
         if (icon != null) {
             // Update the icon
-            Notification n = sbn.getNotification();
-            final StatusBarIcon ic = new StatusBarIcon(
-                    mSbn.getUser(),
-                    mSbn.getPackageName(),
-                    n.getSmallIcon(),
-                    n.iconLevel,
-                    n.number,
-                    StatusBarIconView.contentDescForNotification(context, n));
+            mSmallIcon = null;
+            mPeopleAvatar = null;
+
+            StatusBarIcon ic = getIcon(context, sbn, false /* redact */);
+
             icon.setNotification(sbn);
             expandedIcon.setNotification(sbn);
             aodIcon.setNotification(sbn);
-            if (!icon.set(ic) || !expandedIcon.set(ic) || !aodIcon.set(ic)) {
-                throw new InflationException("Couldn't update icon: " + ic);
+            setIcons(ic, Arrays.asList(icon, expandedIcon));
+
+            if (isSensitive()) {
+                ic = getIcon(context, sbn, true /* redact */);
             }
+            setIcons(ic, Collections.singletonList(aodIcon));
 
             if (centeredIcon != null) {
                 centeredIcon.setNotification(sbn);
-                if (!centeredIcon.set(ic)) {
-                    throw new InflationException("Couldn't update centered icon: " + ic);
-                }
+                setIcons(ic, Collections.singletonList(centeredIcon));
             }
         }
+    }
+
+    private boolean isImportantConversation() {
+        return getChannel() != null && getChannel().isImportantConversation();
     }
 
     public int getContrastedColor(Context context, boolean isLowPriority,
@@ -996,6 +1124,7 @@ public final class NotificationEntry extends ListEntry {
         getRow().setSensitive(sensitive, deviceSensitive);
         if (sensitive != mSensitive) {
             mSensitive = sensitive;
+            updateSensitiveIconState();
             if (mOnSensitiveChangedListener != null) {
                 mOnSensitiveChangedListener.run();
             }

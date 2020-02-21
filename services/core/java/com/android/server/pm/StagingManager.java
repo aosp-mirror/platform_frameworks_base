@@ -29,6 +29,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -39,7 +40,6 @@ import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.parsing.AndroidPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
@@ -68,6 +68,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.rollback.WatchdogRollbackLogger;
 
 import java.io.File;
@@ -284,8 +286,10 @@ public class StagingManager {
             throws PackageManagerException {
         final long activeVersion = activePackage.applicationInfo.longVersionCode;
         final long newVersionCode = newPackage.applicationInfo.longVersionCode;
+        boolean isAppDebuggable = (activePackage.applicationInfo.flags
+                & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         final boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
-                session.params.installFlags, activePackage.applicationInfo.flags);
+                session.params.installFlags, isAppDebuggable);
         if (activeVersion > newVersionCode && !allowsDowngrade) {
             if (!mApexManager.abortStagedSession(session.sessionId)) {
                 Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
@@ -426,11 +430,10 @@ public class StagingManager {
                     + "for snapshotting/restoring user data.");
             return;
         }
-        final String seInfo = pkg.getSeInfo();
 
         int appId = -1;
         long ceDataInode = -1;
-        final PackageSetting ps = (PackageSetting) mPmi.getPackageSetting(packageName);
+        final PackageSetting ps = mPmi.getPackageSetting(packageName);
         if (ps != null) {
             appId = ps.appId;
             ceDataInode = ps.getCeDataInode(UserHandle.USER_SYSTEM);
@@ -438,6 +441,7 @@ public class StagingManager {
             // an update, and hence need to restore data for all installed users.
             final int[] installedUsers = ps.queryInstalledUsers(allUsers, true);
 
+            final String seInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
             try {
                 rm.snapshotAndRestoreUserData(packageName, installedUsers, appId, ceDataInode,
                         seInfo, 0 /*token*/);

@@ -38,6 +38,13 @@ aidl_interface {
         },
         ndk: {
             enabled: true,
-        }
+            apex_available: [
+                // TODO(b/145923087): Remove this once statsd binary is in apex
+                "//apex_available:platform",
+
+                "com.android.os.statsd",
+                "test_com.android.os.statsd",
+            ],
+        },
     }
 }

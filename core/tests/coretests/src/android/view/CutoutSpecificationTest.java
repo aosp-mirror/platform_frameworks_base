@@ -21,10 +21,27 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.testng.Assert.assertThrows;
 
 import android.graphics.Rect;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+/**
+ * Tests for {@link CutoutSpecification} used by {@link DisplayCutout}.
+ *
+ * <p>Build/Install/Run:
+ *  atest FrameworksCoreTests:CutoutSpecificationTest
+ *
+ * <p>This test class is a part of Window Manager Service tests and specified in
+ * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
+ */
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class CutoutSpecificationTest {
     private static final String WITHOUT_BIND_CUTOUT_SPECIFICATION = "M 0,0\n"
             + "h 48\n"
@@ -344,7 +361,7 @@ public class CutoutSpecificationTest {
                         .parse("@bottom"
                                 + "M 0,0\n"
                                 + "v -10\n"
-                                + "h 10\n"
+                                + "h -10\n"
                                 + "v 10\n"
                                 + "z\n"
                                 + "@right\n"

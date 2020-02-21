@@ -202,8 +202,10 @@ public class NotificationPanelViewController extends PanelViewController {
 
                 @Override
                 public void onBiometricAuthenticated(int userId,
-                        BiometricSourceType biometricSourceType) {
-                    if (mFirstBypassAttempt && mUpdateMonitor.isUnlockingWithBiometricAllowed()) {
+                        BiometricSourceType biometricSourceType,
+                        boolean isStrongBiometric) {
+                    if (mFirstBypassAttempt
+                            && mUpdateMonitor.isUnlockingWithBiometricAllowed(isStrongBiometric)) {
                         mDelayShowingKeyguardStatusBar = true;
                     }
                 }

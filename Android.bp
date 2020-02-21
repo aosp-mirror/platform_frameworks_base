@@ -327,7 +327,6 @@ java_defaults {
             "rs/java",
             "sax/java",
             "telecomm/java",
-            "wifi/aidl-export",
         ],
     },
 }
@@ -393,7 +392,7 @@ java_defaults {
 
     exclude_srcs: [
         // See comment on framework-atb-backward-compatibility module below
-        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 
     sdk_version: "core_platform",
@@ -597,7 +596,7 @@ java_library {
     installable: true,
     libs: ["app-compat-annotations"],
     srcs: [
-        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 }
 
@@ -688,6 +687,7 @@ filegroup {
     srcs: [
         "core/java/android/annotation/CallbackExecutor.java",
         "core/java/android/annotation/CheckResult.java",
+        "core/java/android/annotation/CurrentTimeMillisLong.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
         "core/java/android/annotation/NonNull.java",
@@ -1029,22 +1029,6 @@ aidl_interface {
     },
 }
 
-
-subdirs = [
-    "cmds/*",
-    "core/*",
-    "libs/*",
-    "media/*",
-    "proto",
-    "tools/*",
-    "native/android",
-    "native/graphics/jni",
-]
-
-optional_subdirs = [
-    "core/tests/utiltests/jni",
-]
-
 // TODO(b/77285514): remove this once the last few hidl interfaces have been
 // updated to use hwbinder.stubs.
 java_library {
@@ -1104,13 +1088,6 @@ python_binary_host {
 }
 
 filegroup {
-    name: "framework-annotation-nonnull-srcs",
-    srcs: [
-        "core/java/android/annotation/NonNull.java",
-    ],
-}
-
-filegroup {
     name: "framework-media-annotation-srcs",
     srcs: [
         ":framework-annotations",
@@ -1127,7 +1104,6 @@ filegroup {
     srcs: [
         ":framework-annotations",
         "core/java/android/annotation/BytesLong.java",
-        "core/java/android/annotation/CurrentTimeMillisLong.java",
         "core/java/android/annotation/CurrentTimeSecondsLong.java",
         "core/java/android/annotation/DurationMillisLong.java",
     ],
