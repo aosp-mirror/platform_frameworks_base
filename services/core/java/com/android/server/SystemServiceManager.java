@@ -51,7 +51,8 @@ public class SystemServiceManager {
 
     // Constants used on onUser(...)
     private static final String START = "Start";
-    private static final String UNLOCK = "Unlock";
+    private static final String UNLOCKING = "Unlocking";
+    private static final String UNLOCKED = "Unlocked";
     private static final String SWITCH = "Switch";
     private static final String STOP = "Stop";
     private static final String CLEANUP = "Cleanup";
@@ -260,7 +261,14 @@ public class SystemServiceManager {
      * Unlocks the given user.
      */
     public void unlockUser(final @UserIdInt int userHandle) {
-        onUser(UNLOCK, userHandle);
+        onUser(UNLOCKING, userHandle);
+    }
+
+    /**
+     * Called after the user was unlocked.
+     */
+    public void onUserUnlocked(final @UserIdInt int userHandle) {
+        onUser(UNLOCKED, userHandle);
     }
 
     /**
@@ -304,12 +312,12 @@ public class SystemServiceManager {
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
             final String serviceName = service.getClass().getName();
-            boolean supported = service.isSupportedUser(curUser);
+            boolean supported = service.isUserSupported(curUser);
 
             // Must check if either curUser or prevUser is supported (for example, if switching from
             // unsupported to supported, we still need to notify the services)
             if (!supported && prevUser != null) {
-                supported = service.isSupportedUser(prevUser);
+                supported = service.isUserSupported(prevUser);
             }
 
             if (!supported) {
@@ -328,19 +336,22 @@ public class SystemServiceManager {
             try {
                 switch (onWhat) {
                     case SWITCH:
-                        service.onSwitchUser(prevUser, curUser);
+                        service.onUserSwitching(prevUser, curUser);
                         break;
                     case START:
-                        service.onStartUser(curUser);
+                        service.onUserStarting(curUser);
                         break;
-                    case UNLOCK:
-                        service.onUnlockUser(curUser);
+                    case UNLOCKING:
+                        service.onUserUnlocking(curUser);
+                        break;
+                    case UNLOCKED:
+                        service.onUserUnlocked(curUser);
                         break;
                     case STOP:
-                        service.onStopUser(curUser);
+                        service.onUserStopping(curUser);
                         break;
                     case CLEANUP:
-                        service.onCleanupUser(curUser);
+                        service.onUserStopped(curUser);
                         break;
                     default:
                         throw new IllegalArgumentException(onWhat + " what?");

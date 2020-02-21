@@ -167,7 +167,7 @@ public class VoiceInteractionManagerService extends SystemService {
     }
 
     @Override
-    public boolean isSupportedUser(TargetUser user) {
+    public boolean isUserSupported(TargetUser user) {
         return isSupported(user.getUserInfo());
     }
 
