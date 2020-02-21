@@ -247,6 +247,9 @@ public class AppsFilter {
             if (!provider.isExported()) {
                 continue;
             }
+            if (provider.getAuthority() == null) {
+                continue;
+            }
             StringTokenizer authorities = new StringTokenizer(provider.getAuthority(), ";",
                     false);
             while (authorities.hasMoreElements()) {
