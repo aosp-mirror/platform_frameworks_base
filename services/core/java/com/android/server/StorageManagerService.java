@@ -4458,8 +4458,11 @@ class StorageManagerService extends IStorageManager.Stub
                     mVold.fixupAppDir(packageObbDir.getCanonicalPath() + "/", uid);
                 } catch (IOException e) {
                     Log.e(TAG, "Failed to get canonical path for " + packageName);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to fixup app dir for " + packageName);
+                } catch (RemoteException | ServiceSpecificException e) {
+                    // TODO(b/149975102) there is a known case where this fails, when a new
+                    // user is setup and we try to fixup app dirs for some existing apps.
+                    // For now catch the exception and don't crash.
+                    Log.e(TAG, "Failed to fixup app dir for " + packageName, e);
                 }
             }
         }
