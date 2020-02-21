@@ -1519,7 +1519,7 @@ public class StatsPullAtomService extends SystemService {
         }
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            List<Temperature> temperatures = thermalService.getCurrentTemperatures();
+            Temperature temperatures[] = thermalService.getCurrentTemperatures();
             for (Temperature temp : temperatures) {
                 StatsEvent e = StatsEvent.newBuilder()
                         .setAtomId(atomTag)
@@ -1557,7 +1557,7 @@ public class StatsPullAtomService extends SystemService {
         }
         final long callingToken = Binder.clearCallingIdentity();
         try {
-            List<CoolingDevice> devices = thermalService.getCurrentCoolingDevices();
+            CoolingDevice devices[] = thermalService.getCurrentCoolingDevices();
             for (CoolingDevice device : devices) {
                 StatsEvent e = StatsEvent.newBuilder()
                         .setAtomId(atomTag)
