@@ -1158,6 +1158,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error requesting to hide fill UI", e);
             }
+            try {
+                final InlineSuggestionSession.ImeResponse imeResponse =
+                        mInlineSuggestionSession.waitAndGetImeResponse();
+                if (imeResponse == null) {
+                    Log.w(TAG, "Session input method callback is not set yet");
+                    return;
+                }
+                imeResponse.getCallback().onInlineSuggestionsResponse(
+                        new InlineSuggestionsResponse(Collections.EMPTY_LIST));
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException hiding inline suggestions");
+            }
         }
     }
 
