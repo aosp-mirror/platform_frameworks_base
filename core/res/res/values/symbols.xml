@@ -2090,6 +2090,8 @@
   <java-symbol type="string" name="accessibility_binding_label" />
   <java-symbol type="string" name="adb_active_notification_message" />
   <java-symbol type="string" name="adb_active_notification_title" />
+  <java-symbol type="string" name="adbwifi_active_notification_message" />
+  <java-symbol type="string" name="adbwifi_active_notification_title" />
   <java-symbol type="string" name="test_harness_mode_notification_title" />
   <java-symbol type="string" name="test_harness_mode_notification_message" />
   <java-symbol type="string" name="taking_remote_bugreport_notification_title" />
@@ -2232,6 +2234,8 @@
   <java-symbol type="fraction" name="config_maximumScreenDimRatio" />
   <java-symbol type="string" name="config_customAdbPublicKeyConfirmationComponent" />
   <java-symbol type="string" name="config_customAdbPublicKeyConfirmationSecondaryUserComponent" />
+  <java-symbol type="string" name="config_customAdbWifiNetworkConfirmationComponent" />
+  <java-symbol type="string" name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent" />
   <java-symbol type="string" name="config_customVpnConfirmDialogComponent" />
   <java-symbol type="string" name="config_customVpnAlwaysOnDisconnectedDialogComponent" />
   <java-symbol type="string" name="config_platformVpnConfirmDialogComponent" />
