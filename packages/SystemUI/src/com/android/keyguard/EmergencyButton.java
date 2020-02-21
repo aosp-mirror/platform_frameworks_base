@@ -116,17 +116,16 @@ public class EmergencyButton extends Button {
         mLockPatternUtils = new LockPatternUtils(mContext);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         setOnClickListener(v -> takeEmergencyCallAction());
-        setOnLongClickListener(new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
+        if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
+            setOnLongClickListener(v -> {
                 if (!mLongPressWasDragged
                         && mEmergencyAffordanceManager.needsEmergencyAffordance()) {
                     mEmergencyAffordanceManager.performEmergencyCall();
                     return true;
                 }
                 return false;
-            }
-        });
+            });
+        }
         whitelistIpcs(this::updateEmergencyCallButton);
     }
 
