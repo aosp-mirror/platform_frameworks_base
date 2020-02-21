@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import static android.media.MediaRoute2ProviderService.REQUEST_ID_NONE;
 import static android.media.MediaRouter2Utils.getOriginalId;
 import static android.media.MediaRouter2Utils.getProviderId;
 
@@ -30,7 +31,6 @@ import android.media.IMediaRouter2;
 import android.media.IMediaRouter2Manager;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
-import android.media.MediaRoute2ProviderService;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Binder;
@@ -69,6 +69,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 class MediaRouter2ServiceImpl {
     private static final String TAG = "MR2ServiceImpl";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    /**
+     * TODO: Change this with the real request ID from MediaRouter2 when
+     * MediaRouter2 needs to get notified for the failures.
+     */
+    private static final long DUMMY_REQUEST_ID = -1;
 
     private final Context mContext;
     private final Object mLock = new Object();
@@ -365,14 +371,14 @@ class MediaRouter2ServiceImpl {
     }
 
     public void setRouteVolumeWithManager(IMediaRouter2Manager manager,
-            MediaRoute2Info route, int volume) {
+            MediaRoute2Info route, int volume, int requestId) {
         Objects.requireNonNull(manager, "manager must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                setRouteVolumeWithManagerLocked(manager, route, volume);
+                setRouteVolumeWithManagerLocked(manager, route, volume, requestId);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -397,7 +403,7 @@ class MediaRouter2ServiceImpl {
     }
 
     public void selectRouteWithManager(IMediaRouter2Manager manager, String uniqueSessionId,
-            MediaRoute2Info route) {
+            MediaRoute2Info route, int requestId) {
         Objects.requireNonNull(manager, "manager must not be null");
         if (TextUtils.isEmpty(uniqueSessionId)) {
             throw new IllegalArgumentException("uniqueSessionId must not be empty");
@@ -407,7 +413,7 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                selectRouteWithManagerLocked(manager, uniqueSessionId, route);
+                selectRouteWithManagerLocked(manager, uniqueSessionId, route, requestId);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -415,7 +421,7 @@ class MediaRouter2ServiceImpl {
     }
 
     public void deselectRouteWithManager(IMediaRouter2Manager manager, String uniqueSessionId,
-            MediaRoute2Info route) {
+            MediaRoute2Info route, int requestId) {
         Objects.requireNonNull(manager, "manager must not be null");
         if (TextUtils.isEmpty(uniqueSessionId)) {
             throw new IllegalArgumentException("uniqueSessionId must not be empty");
@@ -425,7 +431,7 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                deselectRouteWithManagerLocked(manager, uniqueSessionId, route);
+                deselectRouteWithManagerLocked(manager, uniqueSessionId, route, requestId);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -433,7 +439,7 @@ class MediaRouter2ServiceImpl {
     }
 
     public void transferToRouteWithManager(IMediaRouter2Manager manager, String uniqueSessionId,
-            MediaRoute2Info route) {
+            MediaRoute2Info route, int requestId) {
         Objects.requireNonNull(manager, "manager must not be null");
         if (TextUtils.isEmpty(uniqueSessionId)) {
             throw new IllegalArgumentException("uniqueSessionId must not be empty");
@@ -443,7 +449,7 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                transferToRouteWithManagerLocked(manager, uniqueSessionId, route);
+                transferToRouteWithManagerLocked(manager, uniqueSessionId, route, requestId);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -451,7 +457,7 @@ class MediaRouter2ServiceImpl {
     }
 
     public void setSessionVolumeWithManager(IMediaRouter2Manager manager,
-            String uniqueSessionId, int volume) {
+            String uniqueSessionId, int volume, int requestId) {
         Objects.requireNonNull(manager, "manager must not be null");
         if (TextUtils.isEmpty(uniqueSessionId)) {
             throw new IllegalArgumentException("uniqueSessionId must not be empty");
@@ -460,14 +466,15 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                setSessionVolumeWithManagerLocked(manager, uniqueSessionId, volume);
+                setSessionVolumeWithManagerLocked(manager, uniqueSessionId, volume, requestId);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
         }
     }
 
-    public void releaseSessionWithManager(IMediaRouter2Manager manager, String uniqueSessionId) {
+    public void releaseSessionWithManager(IMediaRouter2Manager manager, String uniqueSessionId,
+            int requestId) {
         Objects.requireNonNull(manager, "manager must not be null");
         if (TextUtils.isEmpty(uniqueSessionId)) {
             throw new IllegalArgumentException("uniqueSessionId must not be empty");
@@ -476,7 +483,7 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                releaseSessionWithManagerLocked(manager, uniqueSessionId);
+                releaseSessionWithManagerLocked(manager, uniqueSessionId, requestId);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -572,7 +579,7 @@ class MediaRouter2ServiceImpl {
                 obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManagers,
                         routerRecord.mUserRecord.mHandler, routerRecord));
         routerRecord.mUserRecord.mHandler.sendMessage(
-                obtainMessage(UserHandler::updateDiscoveryPreference,
+                obtainMessage(UserHandler::updateDiscoveryPreferenceOnHandler,
                         routerRecord.mUserRecord.mHandler));
     }
 
@@ -584,7 +591,7 @@ class MediaRouter2ServiceImpl {
         if (routerRecord != null) {
             routerRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::setRouteVolumeOnHandler,
-                            routerRecord.mUserRecord.mHandler, route, volume));
+                            routerRecord.mUserRecord.mHandler, route, volume, DUMMY_REQUEST_ID));
         }
     }
 
@@ -615,7 +622,8 @@ class MediaRouter2ServiceImpl {
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::selectRouteOnHandler,
-                        routerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route));
+                        routerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route,
+                        DUMMY_REQUEST_ID));
     }
 
     private void deselectRouteWithRouter2Locked(@NonNull IMediaRouter2 router,
@@ -629,7 +637,8 @@ class MediaRouter2ServiceImpl {
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::deselectRouteOnHandler,
-                        routerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route));
+                        routerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route,
+                        DUMMY_REQUEST_ID));
     }
 
     private void transferToRouteWithRouter2Locked(@NonNull IMediaRouter2 router,
@@ -643,7 +652,8 @@ class MediaRouter2ServiceImpl {
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::transferToRouteOnHandler,
-                        routerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route));
+                        routerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route,
+                        DUMMY_REQUEST_ID));
     }
 
     private void setSessionVolumeWithRouter2Locked(@NonNull IMediaRouter2 router,
@@ -657,7 +667,8 @@ class MediaRouter2ServiceImpl {
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::setSessionVolumeOnHandler,
-                        routerRecord.mUserRecord.mHandler, uniqueSessionId, volume));
+                        routerRecord.mUserRecord.mHandler, uniqueSessionId, volume,
+                        DUMMY_REQUEST_ID));
     }
 
     private void releaseSessionWithRouter2Locked(@NonNull IMediaRouter2 router,
@@ -671,7 +682,8 @@ class MediaRouter2ServiceImpl {
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::releaseSessionOnHandler,
-                        routerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId));
+                        routerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId,
+                        DUMMY_REQUEST_ID));
     }
 
     ////////////////////////////////////////////////////////////
@@ -744,16 +756,18 @@ class MediaRouter2ServiceImpl {
     }
 
     private void setRouteVolumeWithManagerLocked(@NonNull IMediaRouter2Manager manager,
-            @NonNull MediaRoute2Info route, int volume) {
+            @NonNull MediaRoute2Info route, int volume, int requestId) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
         if (managerRecord == null) {
             return;
         }
+
+        long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
         managerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::setRouteVolumeOnHandler,
-                        managerRecord.mUserRecord.mHandler, route, volume));
+                        managerRecord.mUserRecord.mHandler, route, volume, uniqueRequestId));
     }
 
     private void requestCreateSessionWithManagerLocked(@NonNull IMediaRouter2Manager manager,
@@ -778,7 +792,7 @@ class MediaRouter2ServiceImpl {
     }
 
     private void selectRouteWithManagerLocked(@NonNull IMediaRouter2Manager manager,
-            @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
+            @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route, int requestId) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
@@ -790,13 +804,15 @@ class MediaRouter2ServiceImpl {
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
 
+        long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
         managerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::selectRouteOnHandler,
-                        managerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route));
+                        managerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route,
+                        uniqueRequestId));
     }
 
     private void deselectRouteWithManagerLocked(@NonNull IMediaRouter2Manager manager,
-            @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
+            @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route, int requestId) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
@@ -808,13 +824,15 @@ class MediaRouter2ServiceImpl {
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
 
+        long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
         managerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::deselectRouteOnHandler,
-                        managerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route));
+                        managerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route,
+                        uniqueRequestId));
     }
 
     private void transferToRouteWithManagerLocked(@NonNull IMediaRouter2Manager manager,
-            @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
+            @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route, int requestId) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
@@ -826,13 +844,15 @@ class MediaRouter2ServiceImpl {
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
 
+        long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
         managerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::transferToRouteOnHandler,
-                        managerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route));
+                        managerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId, route,
+                        uniqueRequestId));
     }
 
     private void setSessionVolumeWithManagerLocked(@NonNull IMediaRouter2Manager manager,
-            @NonNull String uniqueSessionId, int volume) {
+            @NonNull String uniqueSessionId, int volume, int requestId) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
@@ -840,13 +860,15 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
         managerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::setSessionVolumeOnHandler,
-                        managerRecord.mUserRecord.mHandler, uniqueSessionId, volume));
+                        managerRecord.mUserRecord.mHandler, uniqueSessionId, volume,
+                        uniqueRequestId));
     }
 
     private void releaseSessionWithManagerLocked(@NonNull IMediaRouter2Manager manager,
-            @NonNull String uniqueSessionId) {
+            @NonNull String uniqueSessionId, int requestId) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
@@ -856,10 +878,15 @@ class MediaRouter2ServiceImpl {
 
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterforSessionLocked(uniqueSessionId);
+        if (routerRecord == null) {
+            return;
+        }
 
+        long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
         managerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::releaseSessionOnHandler,
-                        managerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId));
+                        managerRecord.mUserRecord.mHandler, routerRecord, uniqueSessionId,
+                        uniqueRequestId));
     }
 
     ////////////////////////////////////////////////////////////
@@ -1100,6 +1127,13 @@ class MediaRouter2ServiceImpl {
                     this, provider, sessionInfo));
         }
 
+        @Override
+        public void onRequestFailed(@NonNull MediaRoute2Provider provider, long requestId,
+                int reason) {
+            sendMessage(PooledLambda.obtainMessage(UserHandler::onRequestFailedOnHandler,
+                    this, provider, requestId, reason));
+        }
+
         @Nullable
         public RouterRecord findRouterforSessionLocked(@NonNull String uniqueSessionId) {
             return mSessionToRouterMap.get(uniqueSessionId);
@@ -1195,7 +1229,7 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 Slog.w(TAG, "Ignoring session creation request since no provider found for"
                         + " given route=" + route);
-                notifySessionCreationFailed(routerRecord, toOriginalRequestId(requestId));
+                notifySessionCreationFailedToRouter(routerRecord, toOriginalRequestId(requestId));
                 return;
             }
 
@@ -1210,7 +1244,7 @@ class MediaRouter2ServiceImpl {
 
         // routerRecord can be null if the session is system's.
         private void selectRouteOnHandler(@Nullable RouterRecord routerRecord,
-                @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
+                @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route, long requestId) {
             if (!checkArgumentsForSessionControl(routerRecord, uniqueSessionId, route,
                     "selecting")) {
                 return;
@@ -1222,12 +1256,12 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 return;
             }
-            provider.selectRoute(getOriginalId(uniqueSessionId), route.getOriginalId());
+            provider.selectRoute(getOriginalId(uniqueSessionId), route.getOriginalId(), requestId);
         }
 
         // routerRecord can be null if the session is system's.
         private void deselectRouteOnHandler(@Nullable RouterRecord routerRecord,
-                @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
+                @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route, long requestId) {
             if (!checkArgumentsForSessionControl(routerRecord, uniqueSessionId, route,
                     "deselecting")) {
                 return;
@@ -1239,12 +1273,13 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 return;
             }
-            provider.deselectRoute(getOriginalId(uniqueSessionId), route.getOriginalId());
+            provider.deselectRoute(getOriginalId(uniqueSessionId), route.getOriginalId(),
+                    requestId);
         }
 
         // routerRecord can be null if the session is system's.
         private void transferToRouteOnHandler(@Nullable RouterRecord routerRecord,
-                @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
+                @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route, long requestId) {
             if (!checkArgumentsForSessionControl(routerRecord, uniqueSessionId, route,
                     "transferring to")) {
                 return;
@@ -1256,7 +1291,8 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 return;
             }
-            provider.transferToRoute(getOriginalId(uniqueSessionId), route.getOriginalId());
+            provider.transferToRoute(getOriginalId(uniqueSessionId), route.getOriginalId(),
+                    requestId);
         }
 
         private boolean checkArgumentsForSessionControl(@Nullable RouterRecord routerRecord,
@@ -1299,7 +1335,7 @@ class MediaRouter2ServiceImpl {
         }
 
         private void releaseSessionOnHandler(@NonNull RouterRecord routerRecord,
-                @NonNull String uniqueSessionId) {
+                @NonNull String uniqueSessionId, long uniqueRequestId) {
             final RouterRecord matchingRecord = mSessionToRouterMap.get(uniqueSessionId);
             if (matchingRecord != routerRecord) {
                 Slog.w(TAG, "Ignoring releasing session from non-matching router."
@@ -1329,14 +1365,14 @@ class MediaRouter2ServiceImpl {
                 return;
             }
 
-            provider.releaseSession(sessionId);
+            provider.releaseSession(sessionId, uniqueRequestId);
         }
 
         private void onSessionCreatedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo, long requestId) {
             notifySessionCreatedToManagers(getManagers(), sessionInfo);
 
-            if (requestId == MediaRoute2ProviderService.REQUEST_ID_UNKNOWN) {
+            if (requestId == REQUEST_ID_NONE) {
                 // The session is created without any matching request.
                 return;
             }
@@ -1362,7 +1398,7 @@ class MediaRouter2ServiceImpl {
 
             if (sessionInfo == null) {
                 // Failed
-                notifySessionCreationFailed(matchingRequest.mRouterRecord,
+                notifySessionCreationFailedToRouter(matchingRequest.mRouterRecord,
                         toOriginalRequestId(requestId));
                 return;
             }
@@ -1374,13 +1410,13 @@ class MediaRouter2ServiceImpl {
                 Slog.w(TAG, "Created session doesn't match the original request."
                         + " originalRouteId=" + originalRouteId
                         + ", requestId=" + requestId + ", sessionInfo=" + sessionInfo);
-                notifySessionCreationFailed(matchingRequest.mRouterRecord,
+                notifySessionCreationFailedToRouter(matchingRequest.mRouterRecord,
                         toOriginalRequestId(requestId));
                 return;
             }
 
             // Succeeded
-            notifySessionCreated(matchingRequest.mRouterRecord,
+            notifySessionCreatedToRouter(matchingRequest.mRouterRecord,
                     sessionInfo, toOriginalRequestId(requestId));
             mSessionToRouterMap.put(sessionInfo.getId(), routerRecord);
         }
@@ -1405,7 +1441,7 @@ class MediaRouter2ServiceImpl {
             }
 
             mSessionCreationRequests.remove(matchingRequest);
-            notifySessionCreationFailed(matchingRequest.mRouterRecord,
+            notifySessionCreationFailedToRouter(matchingRequest.mRouterRecord,
                     toOriginalRequestId(requestId));
         }
 
@@ -1429,7 +1465,7 @@ class MediaRouter2ServiceImpl {
                 Slog.w(TAG, "No matching router found for session=" + sessionInfo);
                 return;
             }
-            notifySessionInfoChanged(routerRecord, sessionInfo);
+            notifySessionInfoChangedToRouter(routerRecord, sessionInfo);
         }
 
         private void onSessionReleasedOnHandler(@NonNull MediaRoute2Provider provider,
@@ -1442,10 +1478,38 @@ class MediaRouter2ServiceImpl {
                 Slog.w(TAG, "No matching router found for session=" + sessionInfo);
                 return;
             }
-            notifySessionReleased(routerRecord, sessionInfo);
+            notifySessionReleasedToRouter(routerRecord, sessionInfo);
         }
 
-        private void notifySessionCreated(@NonNull RouterRecord routerRecord,
+        private void onRequestFailedOnHandler(@NonNull MediaRoute2Provider provider,
+                long requestId, int reason) {
+            final int managerId = toRouterOrManagerId(requestId);
+
+            MediaRouter2ServiceImpl service = mServiceRef.get();
+            if (service == null) {
+                return;
+            }
+
+            ManagerRecord managerToNotifyFailure = null;
+            synchronized (service.mLock) {
+                for (ManagerRecord manager : mUserRecord.mManagerRecords) {
+                    if (manager.mManagerId == managerId) {
+                        managerToNotifyFailure = manager;
+                        break;
+                    }
+                }
+            }
+
+            if (managerToNotifyFailure == null) {
+                Slog.w(TAG, "No matching managerRecord found for managerId=" + managerId);
+                return;
+            }
+
+            notifyRequestFailedToManager(
+                    managerToNotifyFailure.mManager, toOriginalRequestId(requestId), reason);
+        }
+
+        private void notifySessionCreatedToRouter(@NonNull RouterRecord routerRecord,
                 @NonNull RoutingSessionInfo sessionInfo, int requestId) {
             try {
                 routerRecord.mRouter.notifySessionCreated(sessionInfo, requestId);
@@ -1455,7 +1519,7 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifySessionCreationFailed(@NonNull RouterRecord routerRecord,
+        private void notifySessionCreationFailedToRouter(@NonNull RouterRecord routerRecord,
                 int requestId) {
             try {
                 routerRecord.mRouter.notifySessionCreated(/* sessionInfo= */ null, requestId);
@@ -1465,7 +1529,7 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifySessionInfoChanged(@NonNull RouterRecord routerRecord,
+        private void notifySessionInfoChangedToRouter(@NonNull RouterRecord routerRecord,
                 @NonNull RoutingSessionInfo sessionInfo) {
             try {
                 routerRecord.mRouter.notifySessionInfoChanged(sessionInfo);
@@ -1475,7 +1539,7 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifySessionReleased(@NonNull RouterRecord routerRecord,
+        private void notifySessionReleasedToRouter(@NonNull RouterRecord routerRecord,
                 @NonNull RoutingSessionInfo sessionInfo) {
             try {
                 routerRecord.mRouter.notifySessionReleased(sessionInfo);
@@ -1485,21 +1549,23 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void setRouteVolumeOnHandler(@NonNull MediaRoute2Info route, int volume) {
+        private void setRouteVolumeOnHandler(@NonNull MediaRoute2Info route, int volume,
+                long requestId) {
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider != null) {
-                provider.setRouteVolume(route.getOriginalId(), volume);
+                provider.setRouteVolume(route.getOriginalId(), volume, requestId);
             }
         }
 
-        private void setSessionVolumeOnHandler(@NonNull String uniqueSessionId, int volume) {
+        private void setSessionVolumeOnHandler(@NonNull String uniqueSessionId, int volume,
+                long requestId) {
             final MediaRoute2Provider provider = findProvider(getProviderId(uniqueSessionId));
             if (provider == null) {
                 Slog.w(TAG, "setSessionVolume: couldn't find provider for session "
                         + "id=" + uniqueSessionId);
                 return;
             }
-            provider.setSessionVolume(getOriginalId(uniqueSessionId), volume);
+            provider.setSessionVolume(getOriginalId(uniqueSessionId), volume, requestId);
         }
 
         private List<IMediaRouter2> getRouters() {
@@ -1683,7 +1749,17 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void updateDiscoveryPreference() {
+        private void notifyRequestFailedToManager(@NonNull IMediaRouter2Manager manager,
+                int requestId, int reason) {
+            try {
+                manager.notifyRequestFailed(requestId, reason);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify manager of the request failure."
+                        + " Manager probably died.", ex);
+            }
+        }
+
+        private void updateDiscoveryPreferenceOnHandler() {
             MediaRouter2ServiceImpl service = mServiceRef.get();
             if (service == null) {
                 return;

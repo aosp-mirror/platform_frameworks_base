@@ -87,9 +87,9 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     @Override
-    public void releaseSession(String sessionId) {
+    public void releaseSession(String sessionId, long requestId) {
         if (mConnectionReady) {
-            mActiveConnection.releaseSession(sessionId);
+            mActiveConnection.releaseSession(sessionId, requestId);
             updateBinding();
         }
     }
@@ -103,38 +103,38 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     @Override
-    public void selectRoute(String sessionId, String routeId) {
+    public void selectRoute(String sessionId, String routeId, long requestId) {
         if (mConnectionReady) {
-            mActiveConnection.selectRoute(sessionId, routeId);
+            mActiveConnection.selectRoute(sessionId, routeId, requestId);
         }
     }
 
     @Override
-    public void deselectRoute(String sessionId, String routeId) {
+    public void deselectRoute(String sessionId, String routeId, long requestId) {
         if (mConnectionReady) {
-            mActiveConnection.deselectRoute(sessionId, routeId);
+            mActiveConnection.deselectRoute(sessionId, routeId, requestId);
         }
     }
 
     @Override
-    public void transferToRoute(String sessionId, String routeId) {
+    public void transferToRoute(String sessionId, String routeId, long requestId) {
         if (mConnectionReady) {
-            mActiveConnection.transferToRoute(sessionId, routeId);
+            mActiveConnection.transferToRoute(sessionId, routeId, requestId);
         }
     }
 
     @Override
-    public void setRouteVolume(String routeId, int volume) {
+    public void setRouteVolume(String routeId, int volume, long requestId) {
         if (mConnectionReady) {
-            mActiveConnection.setRouteVolume(routeId, volume);
+            mActiveConnection.setRouteVolume(routeId, volume, requestId);
             updateBinding();
         }
     }
 
     @Override
-    public void setSessionVolume(String sessionId, int volume) {
+    public void setSessionVolume(String sessionId, int volume, long requestId) {
         if (mConnectionReady) {
-            mActiveConnection.setSessionVolume(sessionId, volume);
+            mActiveConnection.setSessionVolume(sessionId, volume, requestId);
             updateBinding();
         }
     }
@@ -333,8 +333,8 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             return;
         }
 
-        if (requestId == MediaRoute2ProviderService.REQUEST_ID_UNKNOWN) {
-            Slog.w(TAG, "onSessionCreationFailed: Ignoring requestId REQUEST_ID_UNKNOWN");
+        if (requestId == MediaRoute2ProviderService.REQUEST_ID_NONE) {
+            Slog.w(TAG, "onSessionCreationFailed: Ignoring requestId REQUEST_ID_NONE");
             return;
         }
 
@@ -406,6 +406,19 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         mCallback.onSessionReleased(this, sessionInfo);
     }
 
+    private void onRequestFailed(Connection connection, long requestId, int reason) {
+        if (mActiveConnection != connection) {
+            return;
+        }
+
+        if (requestId == MediaRoute2ProviderService.REQUEST_ID_NONE) {
+            Slog.w(TAG, "onRequestFailed: Ignoring requestId REQUEST_ID_NONE");
+            return;
+        }
+
+        mCallback.onRequestFailed(this, requestId, reason);
+    }
+
     private void disconnect() {
         if (mActiveConnection != null) {
             mConnectionReady = false;
@@ -461,9 +474,9 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             }
         }
 
-        public void releaseSession(String sessionId) {
+        public void releaseSession(String sessionId, long requestId) {
             try {
-                mService.releaseSession(sessionId);
+                mService.releaseSession(sessionId, requestId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "releaseSession: Failed to deliver request.");
             }
@@ -477,41 +490,41 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             }
         }
 
-        public void selectRoute(String sessionId, String routeId) {
+        public void selectRoute(String sessionId, String routeId, long requestId) {
             try {
-                mService.selectRoute(sessionId, routeId);
+                mService.selectRoute(sessionId, routeId, requestId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "selectRoute: Failed to deliver request.", ex);
             }
         }
 
-        public void deselectRoute(String sessionId, String routeId) {
+        public void deselectRoute(String sessionId, String routeId, long requestId) {
             try {
-                mService.deselectRoute(sessionId, routeId);
+                mService.deselectRoute(sessionId, routeId, requestId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "deselectRoute: Failed to deliver request.", ex);
             }
         }
 
-        public void transferToRoute(String sessionId, String routeId) {
+        public void transferToRoute(String sessionId, String routeId, long requestId) {
             try {
-                mService.transferToRoute(sessionId, routeId);
+                mService.transferToRoute(sessionId, routeId, requestId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "transferToRoute: Failed to deliver request.", ex);
             }
         }
 
-        public void setRouteVolume(String routeId, int volume) {
+        public void setRouteVolume(String routeId, int volume, long requestId) {
             try {
-                mService.setRouteVolume(routeId, volume);
+                mService.setRouteVolume(routeId, volume, requestId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "setRouteVolume: Failed to deliver request.", ex);
             }
         }
 
-        public void setSessionVolume(String sessionId, int volume) {
+        public void setSessionVolume(String sessionId, int volume, long requestId) {
             try {
-                mService.setSessionVolume(sessionId, volume);
+                mService.setSessionVolume(sessionId, volume, requestId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "setSessionVolume: Failed to deliver request.", ex);
             }
@@ -540,6 +553,10 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
         void postSessionReleased(RoutingSessionInfo sessionInfo) {
             mHandler.post(() -> onSessionReleased(Connection.this, sessionInfo));
+        }
+
+        void postSessionReleased(long requestId, int reason) {
+            mHandler.post(() -> onRequestFailed(Connection.this, requestId, reason));
         }
     }
 
@@ -592,6 +609,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             Connection connection = mConnectionRef.get();
             if (connection != null) {
                 connection.postSessionReleased(sessionInfo);
+            }
+        }
+
+        @Override
+        public void notifyRequestFailed(long requestId, int reason) {
+            Connection connection = mConnectionRef.get();
+            if (connection != null) {
+                connection.postSessionReleased(requestId, reason);
             }
         }
     }
