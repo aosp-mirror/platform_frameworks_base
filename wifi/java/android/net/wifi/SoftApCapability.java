@@ -100,12 +100,12 @@ public final class SoftApCapability implements Parcelable {
     }
 
     /**
-     * Returns true when feature supported, otherwise false.
+     * Returns true when all of the queried features are supported, otherwise false.
      *
-     * @param feature one of feature from {@link HotspotFeatures}
+     * @param features One or combination of the features from {@link @HotspotFeatures}
      */
-    public boolean isFeatureSupported(@HotspotFeatures long feature) {
-        return (mSupportedFeatures & feature) == feature;
+    public boolean areFeaturesSupported(@HotspotFeatures long features) {
+        return (mSupportedFeatures & features) == features;
     }
 
     /**
@@ -122,7 +122,7 @@ public final class SoftApCapability implements Parcelable {
      * Constructor with combination of the feature.
      * Zero to no supported feature.
      *
-     * @param features One or combination of the feature from {@link @HotspotFeatures}.
+     * @param features One or combination of the features from {@link @HotspotFeatures}.
      * @hide
      */
     public SoftApCapability(@HotspotFeatures long features) {
