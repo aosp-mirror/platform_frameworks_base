@@ -29,6 +29,7 @@ import static android.app.AppOpsManager.OP_WRITE_MEDIA_IMAGES;
 import static android.app.AppOpsManager.OP_WRITE_MEDIA_VIDEO;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.UserHandle.PER_USER_RANGE;
 
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
@@ -2324,17 +2325,34 @@ public class StorageManager {
     private static final String XATTR_CACHE_TOMBSTONE = "user.cache_tombstone";
 
 
-   // Matches AID_MEDIA_RW in android_filesystem_config.h
-    private static final int QUOTA_PROJECT_ID_MEDIA_NONE = 1023;
+    // Project IDs below must match android_projectid_config.h
+    /**
+     * Default project ID for files on external storage
+     *
+     * {@hide}
+     */
+    public static final int PROJECT_ID_EXT_DEFAULT = 1000;
 
-    // Matches AID_MEDIA_IMAGE in android_filesystem_config.h
-    private static final int QUOTA_PROJECT_ID_MEDIA_IMAGE = 1057;
+    /**
+     * project ID for audio files on external storage
+     *
+     * {@hide}
+     */
+    public static final int PROJECT_ID_EXT_MEDIA_AUDIO = 1001;
 
-    // Matches AID_MEDIA_AUDIO in android_filesystem_config.h
-    private static final int QUOTA_PROJECT_ID_MEDIA_AUDIO = 1055;
+    /**
+     * project ID for video files on external storage
+     *
+     * {@hide}
+     */
+    public static final int PROJECT_ID_EXT_MEDIA_VIDEO = 1002;
 
-    // Matches AID_MEDIA_VIDEO in android_filesystem_config.h
-    private static final int QUOTA_PROJECT_ID_MEDIA_VIDEO = 1056;
+    /**
+     * project ID for image files on external storage
+     *
+     * {@hide}
+     */
+    public static final int PROJECT_ID_EXT_MEDIA_IMAGE = 1003;
 
     /**
      * Constant for use with
@@ -2388,6 +2406,11 @@ public class StorageManager {
 
     private static native boolean setQuotaProjectId(String path, long projectId);
 
+    private static long getProjectIdForUser(int userId, int projectId) {
+        // Much like UserHandle.getUid(), store the user ID in the upper bits
+        return userId * PER_USER_RANGE + projectId;
+    }
+
     /**
      * Let StorageManager know that the quota type for a file on external storage should
      * be updated. Android tracks quotas for various media types. Consequently, this should be
@@ -2417,18 +2440,27 @@ public class StorageManager {
             @QuotaType int quotaType) throws IOException {
         long projectId;
         final String filePath = path.getCanonicalPath();
+        final StorageVolume volume = getStorageVolume(path);
+        if (volume == null) {
+            throw new IllegalStateException("Failed to update quota type for " + filePath);
+        }
+
+        final int userId = volume.getOwner().getIdentifier();
+        if (userId < 0) {
+            throw new IllegalStateException("Failed to update quota type for " + filePath);
+        }
         switch (quotaType) {
             case QUOTA_TYPE_MEDIA_NONE:
-                projectId = QUOTA_PROJECT_ID_MEDIA_NONE;
+                projectId = getProjectIdForUser(userId, PROJECT_ID_EXT_DEFAULT);
                 break;
             case QUOTA_TYPE_MEDIA_AUDIO:
-                projectId = QUOTA_PROJECT_ID_MEDIA_AUDIO;
+                projectId = getProjectIdForUser(userId, PROJECT_ID_EXT_MEDIA_AUDIO);
                 break;
             case QUOTA_TYPE_MEDIA_VIDEO:
-                projectId = QUOTA_PROJECT_ID_MEDIA_VIDEO;
+                projectId = getProjectIdForUser(userId, PROJECT_ID_EXT_MEDIA_VIDEO);
                 break;
             case QUOTA_TYPE_MEDIA_IMAGE:
-                projectId = QUOTA_PROJECT_ID_MEDIA_IMAGE;
+                projectId = getProjectIdForUser(userId, PROJECT_ID_EXT_MEDIA_IMAGE);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid quota type: " + quotaType);

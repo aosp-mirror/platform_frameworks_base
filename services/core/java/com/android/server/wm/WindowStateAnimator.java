@@ -873,6 +873,14 @@ class WindowStateAnimator {
             clipRect = mTmpClipRect;
         }
 
+        if (mSurfaceResized && (mAttrType == TYPE_BASE_APPLICATION) &&
+            (task != null) && (task.getMainWindowSizeChangeTransaction() != null)) {
+            mSurfaceController.deferTransactionUntil(mWin.getDeferTransactionBarrier(),
+                    mWin.getFrameNumber());
+            SurfaceControl.mergeToGlobalTransaction(task.getMainWindowSizeChangeTransaction());
+            task.setMainWindowSizeChangeTransaction(null);
+        }
+
         float surfaceWidth = mSurfaceController.getWidth();
         float surfaceHeight = mSurfaceController.getHeight();
 

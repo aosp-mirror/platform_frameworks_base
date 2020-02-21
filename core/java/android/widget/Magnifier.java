@@ -89,7 +89,7 @@ public final class Magnifier {
     // The width of the window containing the magnifier.
     private final int mWindowWidth;
     // The height of the window containing the magnifier.
-    private final int mWindowHeight;
+    private int mWindowHeight;
     // The zoom applied to the view region copied to the magnifier view.
     private float mZoom;
     // The width of the content that will be copied to the magnifier.
@@ -482,6 +482,21 @@ public final class Magnifier {
         mSourceWidth = mIsFishEyeStyle ? mWindowWidth : Math.round(mWindowWidth / mZoom);
         mSourceHeight = Math.round(mWindowHeight / mZoom);
         mDirtyState = true;
+    }
+
+    /**
+     * Updates the factors of source which may impact the magnifier's size.
+     * This can be called while the magnifier is showing and moving.
+     * @param sourceHeight the new source height.
+     * @param zoom the new zoom factor.
+     */
+    void updateSourceFactors(final int sourceHeight, final float zoom) {
+        mZoom = zoom;
+        mSourceHeight = sourceHeight;
+        mWindowHeight = (int) (sourceHeight * zoom);
+        if (mWindow != null) {
+            mWindow.updateContentFactors(mWindowHeight, zoom);
+        }
     }
 
     /**
@@ -904,7 +919,7 @@ public final class Magnifier {
         private final Display mDisplay;
         // The size of the content of the magnifier.
         private final int mContentWidth;
-        private final int mContentHeight;
+        private int mContentHeight;
         // The insets of the content inside the allocated surface.
         private final int mOffsetX;
         private final int mOffsetY;
@@ -947,7 +962,7 @@ public final class Magnifier {
         // The current content of the magnifier. It is mBitmap + mOverlay, only used for testing.
         private Bitmap mCurrentContent;
 
-        private final float mZoom;
+        private float mZoom;
         // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
         private final int mRamp;
         // Whether is in the new magnifier style.
@@ -1009,11 +1024,11 @@ public final class Magnifier {
 
             final RecordingCanvas canvas = mRenderer.getRootNode().beginRecording(width, height);
             try {
-                canvas.insertReorderBarrier();
+                canvas.enableZ();
                 canvas.drawRenderNode(mBitmapRenderNode);
-                canvas.insertInorderBarrier();
+                canvas.disableZ();
                 canvas.drawRenderNode(mOverlayRenderNode);
-                canvas.insertInorderBarrier();
+                canvas.disableZ();
             } finally {
                 mRenderer.getRootNode().endRecording();
             }
@@ -1034,15 +1049,66 @@ public final class Magnifier {
             }
         }
 
+        /**
+         * Updates the factors of content which may resize the window.
+         * @param contentHeight the new height of content.
+         * @param zoom the new zoom factor.
+         */
+        private void updateContentFactors(final int contentHeight, final float zoom) {
+            if (mContentHeight == contentHeight && mZoom == zoom) {
+              return;
+            }
+            if (mContentHeight < contentHeight) {
+                // Grows the surface height as necessary.
+                new SurfaceControl.Transaction().setBufferSize(
+                        mSurfaceControl, mContentWidth, contentHeight).apply();
+                mSurface.copyFrom(mSurfaceControl);
+                mRenderer.setSurface(mSurface);
+
+                final Outline outline = new Outline();
+                outline.setRoundRect(0, 0, mContentWidth, contentHeight, 0);
+                outline.setAlpha(1.0f);
+
+                mBitmapRenderNode.setLeftTopRightBottom(mOffsetX, mOffsetY,
+                        mOffsetX + mContentWidth, mOffsetY + contentHeight);
+                mBitmapRenderNode.setOutline(outline);
+
+                mOverlayRenderNode.setLeftTopRightBottom(mOffsetX, mOffsetY,
+                        mOffsetX + mContentWidth, mOffsetY + contentHeight);
+                mOverlayRenderNode.setOutline(outline);
+
+                final RecordingCanvas canvas =
+                        mRenderer.getRootNode().beginRecording(mContentWidth, contentHeight);
+                try {
+                    canvas.enableZ();
+                    canvas.drawRenderNode(mBitmapRenderNode);
+                    canvas.disableZ();
+                    canvas.drawRenderNode(mOverlayRenderNode);
+                    canvas.disableZ();
+                } finally {
+                    mRenderer.getRootNode().endRecording();
+                }
+            }
+            mContentHeight = contentHeight;
+            mZoom = zoom;
+            fillMeshMatrix();
+        }
+
         private void createMeshMatrixForFishEyeEffect() {
+            mMeshWidth = 1;
+            mMeshHeight = 6;
+            mMeshLeft = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
+            mMeshRight = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
+            fillMeshMatrix();
+        }
+
+        private void fillMeshMatrix() {
             mMeshWidth = 1;
             mMeshHeight = 6;
             final float w = mContentWidth;
             final float h = mContentHeight;
             final float h0 = h / mZoom;
             final float dh = h - h0;
-            mMeshLeft = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
-            mMeshRight = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
             for (int i = 0; i < 2 * (mMeshWidth + 1) * (mMeshHeight + 1); i += 2) {
                 // Calculates X value.
                 final int colIndex = i % (2 * (mMeshWidth + 1)) / 2;
@@ -1197,6 +1263,7 @@ public final class Magnifier {
             if (mBitmap != null) {
                 mBitmap.recycle();
             }
+            mOverlay.setCallback(null);
         }
 
         private void doDraw() {

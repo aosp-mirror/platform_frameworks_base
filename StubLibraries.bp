@@ -49,7 +49,6 @@ stubs_defaults {
         ":opt-net-voip-srcs",
         ":core-current-stubs-source",
         ":core_public_api_files",
-        ":ike-api-srcs",
     ],
     // TODO(b/147699819): remove below aidl includes.
     aidl: {

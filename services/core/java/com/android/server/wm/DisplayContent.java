@@ -4415,7 +4415,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         ArrayList<Task> getVisibleTasks() {
             final ArrayList<Task> visibleTasks = new ArrayList<>();
             forAllTasks(task -> {
-                if (!task.isRootTask() && task.isVisible()) {
+                if (task.isLeafTask() && task.isVisible()) {
                     visibleTasks.add(task);
                 }
             });
@@ -4536,6 +4536,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 positionDisplayAt(moveToTop ? POSITION_TOP : POSITION_BOTTOM,
                         true /* includingParents */);
             }
+
+            child.updateTaskMovement(moveToTop);
 
             setLayoutNeeded();
         }
@@ -5790,7 +5792,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return null;
     }
 
-    boolean alwaysCreateStack(int windowingMode, int activityType) {
+    static boolean alwaysCreateStack(int windowingMode, int activityType) {
         // Always create a stack for fullscreen, freeform, and split-screen-secondary windowing
         // modes so that we can manage visual ordering and return types correctly.
         return activityType == ACTIVITY_TYPE_STANDARD

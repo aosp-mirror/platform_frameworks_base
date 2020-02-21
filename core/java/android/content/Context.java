@@ -3495,13 +3495,23 @@ public abstract class Context {
      * <dl>
      *  <dt> {@link #WINDOW_SERVICE} ("window")
      *  <dd> The top-level window manager in which you can place custom
-     *  windows.  The returned object is a {@link android.view.WindowManager}.
+     *  windows.  The returned object is a {@link android.view.WindowManager}. Must only be obtained
+     *  from a visual context such as Activity or a Context created with
+     *  {@link #createWindowContext(int, Bundle)}, which are adjusted to the configuration and
+     *  visual bounds of an area on screen.
      *  <dt> {@link #LAYOUT_INFLATER_SERVICE} ("layout_inflater")
      *  <dd> A {@link android.view.LayoutInflater} for inflating layout resources
-     *  in this context.
+     *  in this context. Must only be obtained from a visual context such as Activity or a Context
+     *  created with {@link #createWindowContext(int, Bundle)}, which are adjusted to the
+     *  configuration and visual bounds of an area on screen.
      *  <dt> {@link #ACTIVITY_SERVICE} ("activity")
      *  <dd> A {@link android.app.ActivityManager} for interacting with the
      *  global activity state of the system.
+     *  <dt> {@link #WALLPAPER_SERVICE} ("wallpaper")
+     *  <dd> A {@link android.service.wallpaper.WallpaperService} for accessing wallpapers in this
+     *  context. Must only be obtained from a visual context such as Activity or a Context created
+     *  with {@link #createWindowContext(int, Bundle)}, which are adjusted to the configuration and
+     *  visual bounds of an area on screen.
      *  <dt> {@link #POWER_SERVICE} ("power")
      *  <dd> A {@link android.os.PowerManager} for controlling power
      *  management.
@@ -5901,9 +5911,22 @@ public abstract class Context {
      * {@link #createDisplayContext(Display)} to get a display object associated with a Context, or
      * {@link android.hardware.display.DisplayManager#getDisplay} to get a display object by id.
      * @return Returns the {@link Display} object this context is associated with.
+     * @throws UnsupportedOperationException if the method is called on an instance that is not
+     *         associated with any display.
      */
     @Nullable
     public Display getDisplay() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * A version of {@link #getDisplay()} that does not perform a Context misuse check to be used by
+     * legacy APIs.
+     * TODO(b/149790106): Fix usages and remove.
+     * @hide
+     */
+    @Nullable
+    public Display getDisplayNoVerify() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

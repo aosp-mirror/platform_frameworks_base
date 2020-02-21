@@ -688,17 +688,19 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr><th colspan="5">Concurrent stream guaranteed configurations</th></tr>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th rowspan="2">Sample use case(s)</th> </tr>
      * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th> </tr>
-     * <tr> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td>  <td colspan="2" id="rb"></td> <td>In-app video / image processing.</td> </tr>
-     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td>  <td colspan="2" id="rb"></td> <td>In-app viewfinder analysis.</td> </tr>
-     * <tr> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM}</td> <td>In-app video / processing with preview.</td> </tr>
-     * <tr> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV }</td><td id="rb">{@code MAXIMUM}</td> <td>In-app video / processing with preview.</td> </tr>
-     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV }</td><td id="rb">{@code MAXIMUM}</td> <td>Standard Recording.</td> </tr>
+     * <tr> <td>{@code YUV}</td><td id="rb">{@code s1440p}</td>  <td colspan="2" id="rb"></td> <td>In-app video / image processing.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code s1440p}</td>  <td colspan="2" id="rb"></td> <td>In-app viewfinder analysis.</td> </tr>
+     * <tr> <td>{@code JPEG}</td><td id="rb">{@code s1440p}</td>  <td colspan="2" id="rb"></td> <td>No viewfinder still image capture.</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s720p}</td> <td>{@code JPEG}</td><td id="rb">{@code s1440p}</td> <td> Standard still imaging.</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s720p}</td> <td>{@code YUV / PRIV }</td><td id="rb">{@code s1440p}</td> <td>In-app video / processing with preview.</td> </tr>
      * </table><br>
      * </p>
      *
-     * <p> For guaranteed concurrent stream configurations, MAXIMUM refers to the camera device's
-     * resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
+     * <p> For guaranteed concurrent stream configurations:</p>
+     * <p> s720p refers to the camera device's resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
      * 720p(1280X720) whichever is lower. </p>
+     * <p> s1440p refers to the camera device's resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or
+     * 1440p(1920X1440) whichever is lower. </p>
      * <p>MONOCHROME-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}
      * includes {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME MONOCHROME}) devices
      * supporting {@link android.graphics.ImageFormat#Y8 Y8} support substituting {@code YUV}

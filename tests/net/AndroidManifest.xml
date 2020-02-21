@@ -50,6 +50,7 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.net.ipsec.ike" />
     </application>
 
     <instrumentation

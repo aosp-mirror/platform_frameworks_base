@@ -27,10 +27,11 @@
     <string name="notification_action_cancel">Cancel</string>
     <!-- Action on notification: Discard installation [CHAR LIMIT=16] -->
     <string name="notification_action_discard">Discard</string>
-    <!-- Action on notification: Uninstall Dynamic System [CHAR LIMIT=16] -->
-    <string name="notification_action_uninstall">Uninstall</string>
     <!-- Action on notification: Restart to Dynamic System [CHAR LIMIT=16] -->
     <string name="notification_action_reboot_to_dynsystem">Restart</string>
+    <!-- Action on notification: Restart to original Android version [CHAR LIMIT=16] -->
+    <string name="notification_action_reboot_to_origin">Restart</string>
+
 
     <!-- Toast when installed Dynamic System is discarded [CHAR LIMIT=64] -->
     <string name="toast_dynsystem_discarded">Discarded dynamic system</string>

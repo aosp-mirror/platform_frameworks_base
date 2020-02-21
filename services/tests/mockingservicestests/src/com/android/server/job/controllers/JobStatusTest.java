@@ -73,7 +73,9 @@ public class JobStatusTest {
     private static final double DELTA = 0.00001;
     private static final String TEST_PACKAGE = "job.test.package";
     private static final ComponentName TEST_JOB_COMPONENT = new ComponentName(TEST_PACKAGE, "test");
-    private static final Uri TEST_MEDIA_URI = Uri.parse("content://media/path/to/media");
+
+    private static final Uri IMAGES_MEDIA_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+    private static final Uri VIDEO_MEDIA_URI = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
 
     @Mock
     private JobSchedulerInternal mJobSchedulerInternal;
@@ -127,7 +129,7 @@ public class JobStatusTest {
     @Test
     public void testMediaBackupExemption_lateConstraint() {
         final JobInfo triggerContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
-                .addTriggerContentUri(new JobInfo.TriggerContentUri(TEST_MEDIA_URI, 0))
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
                 .setOverrideDeadline(12)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
@@ -138,7 +140,7 @@ public class JobStatusTest {
     @Test
     public void testMediaBackupExemption_noConnectivityConstraint() {
         final JobInfo triggerContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
-                .addTriggerContentUri(new JobInfo.TriggerContentUri(TEST_MEDIA_URI, 0))
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
                 .build();
         when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
         assertEffectiveBucketForMediaExemption(createJobStatus(triggerContentJob), false);
@@ -156,7 +158,7 @@ public class JobStatusTest {
     @Test
     public void testMediaBackupExemption_wrongSourcePackage() {
         final JobInfo networkContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
-                .addTriggerContentUri(new JobInfo.TriggerContentUri(TEST_MEDIA_URI, 0))
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
         when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn("not.test.package");
@@ -164,11 +166,12 @@ public class JobStatusTest {
     }
 
     @Test
-    public void testMediaBackupExemption_nonMediaUri() {
-        final Uri nonMediaUri = Uri.parse("content://not-media/any/path");
+    public void testMediaBackupExemption_nonEligibleUri() {
+        final Uri nonEligibleUri = MediaStore.AUTHORITY_URI.buildUpon()
+                .appendPath("any_path").build();
         final JobInfo networkContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
-                .addTriggerContentUri(new JobInfo.TriggerContentUri(TEST_MEDIA_URI, 0))
-                .addTriggerContentUri(new JobInfo.TriggerContentUri(nonMediaUri, 0))
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(nonEligibleUri, 0))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
         when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
@@ -177,12 +180,25 @@ public class JobStatusTest {
 
     @Test
     public void testMediaBackupExemptionGranted() {
-        final JobInfo networkContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
-                .addTriggerContentUri(new JobInfo.TriggerContentUri(TEST_MEDIA_URI, 0))
+        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        final JobInfo imageUriJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
-        assertEffectiveBucketForMediaExemption(createJobStatus(networkContentJob), true);
+        assertEffectiveBucketForMediaExemption(createJobStatus(imageUriJob), true);
+
+        final JobInfo videoUriJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(VIDEO_MEDIA_URI, 0))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        assertEffectiveBucketForMediaExemption(createJobStatus(videoUriJob), true);
+
+        final JobInfo bothUriJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(VIDEO_MEDIA_URI, 0))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        assertEffectiveBucketForMediaExemption(createJobStatus(bothUriJob), true);
     }
 
     @Test

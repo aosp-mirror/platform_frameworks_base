@@ -126,6 +126,13 @@ class PhysicsAnimator<T> private constructor (val target: T) {
     internal var startAction: () -> Unit = ::startInternal
 
     /**
+     * Action to run when [cancel] is called. This can be changed by
+     * [PhysicsAnimatorTestUtils.prepareForTest] to cancel animations from the main thread, which
+     * is required.
+     */
+    internal var cancelAction: (Set<FloatPropertyCompat<in T>>) -> Unit = ::cancelInternal
+
+    /**
      * Springs a property to the given value, using the provided configuration settings.
      *
      * Springs are used when you know the exact value to which you want to animate. They can be
@@ -429,10 +436,13 @@ class PhysicsAnimator<T> private constructor (val target: T) {
                         max = max(currentValue, this.max)
                     }
 
-                    // Apply the configuration and start the animation. Since flings can't be
-                    // redirected while in motion, cancel it first.
+                    // Flings can't be updated to a new position while maintaining velocity, because
+                    // we're using the explicitly provided start velocity. Cancel any flings (or
+                    // springs) on this property before flinging.
+                    cancel(animatedProperty)
+
+                    // Apply the configuration and start the animation.
                     getFlingAnimation(animatedProperty)
-                            .also { it.cancel() }
                             .also { flingConfig.applyToAnimation(it) }
                             .start()
                 }
@@ -707,11 +717,26 @@ class PhysicsAnimator<T> private constructor (val target: T) {
         return springConfigs.keys.union(flingConfigs.keys)
     }
 
+    /**
+     * Cancels the given properties. This is typically called immediately by [cancel], unless this
+     * animator is under test.
+     */
+    internal fun cancelInternal(properties: Set<FloatPropertyCompat<in T>>) {
+        for (property in properties) {
+            flingAnimations[property]?.cancel()
+            springAnimations[property]?.cancel()
+        }
+    }
+
     /** Cancels all in progress animations on all properties. */
     fun cancel() {
-        for (dynamicAnim in flingAnimations.values.union(springAnimations.values)) {
-            dynamicAnim.cancel()
-        }
+        cancelAction(flingAnimations.keys)
+        cancelAction(springAnimations.keys)
+    }
+
+    /** Cancels in progress animations on the provided properties only. */
+    fun cancel(vararg properties: FloatPropertyCompat<in T>) {
+        cancelAction(properties.toSet())
     }
 
     /**

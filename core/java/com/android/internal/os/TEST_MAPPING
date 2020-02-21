@@ -1,0 +1,30 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "com.android.internal.os.KernelCpuUidFreqTimeReaderTest"
+        },
+        {
+          "include-filter": "com.android.internal.os.KernelCpuUidActiveTimeReaderTest"
+        },
+        {
+          "include-filter": "com.android.internal.os.KernelCpuUidClusterTimeReaderTest"
+        },
+        {
+          "include-filter": "com.android.internal.os.KernelSingleUidTimeReaderTest"
+        },
+        {
+          "include-filter": "com.android.internal.os.KernelCpuUidBpfMapReaderTest"
+        }
+
+      ],
+      "file_patterns": [
+        "KernelCpuUidTimeReader\\.java",
+        "KernelCpuUidBpfMapReader\\.java",
+        "KernelSingleUidTimeReader\\.java"
+      ]
+    }
+  ]
+}

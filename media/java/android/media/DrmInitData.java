@@ -37,7 +37,9 @@ public abstract class DrmInitData {
      *
      * @param schemeUuid The DRM scheme's UUID.
      * @return The initialization data for the scheme, or null if the scheme is not supported.
+     * @deprecated Use {@link #getSchemeInitDataCount} and {@link #getSchemeInitDataAt} instead.
      */
+    @Deprecated
     public abstract SchemeInitData get(UUID schemeUuid);
 
     /**

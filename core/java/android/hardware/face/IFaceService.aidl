@@ -110,4 +110,7 @@ interface IFaceService {
     void getFeature(int userId, int feature, IFaceServiceReceiver receiver, String opPackageName);
 
     void userActivity();
+
+    // Initialize the OEM configured biometric strength
+    void initConfiguredStrength(int strength);
 }

@@ -315,17 +315,6 @@ public abstract class LocationProviderBase {
         return false;
     }
 
-    /**
-     * Invoked when the system wishes to request that the provider sets its allowed state as
-     * desired. This implies that the caller is providing/retracting consent for any terms and
-     * conditions or consents associated with the provider.
-     *
-     * <p>It is generally only necessary to override this function if the provider has some barriers
-     * or gates for enabling/disabling itself, in which case this function should handle those
-     * appropriately. A provider that is always allowed has no need to override this function.
-     */
-    protected void onRequestSetAllowed(boolean allowed) {}
-
     private final class Service extends ILocationProvider.Stub {
 
         @Override
@@ -355,11 +344,6 @@ public abstract class LocationProviderBase {
         @Override
         public void sendExtraCommand(String command, Bundle extras) {
             onSendExtraCommand(command, extras);
-        }
-
-        @Override
-        public void requestSetAllowed(boolean allowed) {
-            onRequestSetAllowed(allowed);
         }
     }
 }

@@ -52,7 +52,7 @@ interface BoundsAnimationTarget {
      * animation is now invalid and not required. In such a case, the cancel will trigger the
      * animation end callback as well, but will not send any further size changes.
      */
-    boolean setPinnedStackSize(Rect stackBounds, Rect taskBounds);
+    boolean setPinnedStackSize(Rect displayedBounds, Rect configBounds);
 
     /** Sets the alpha of the animation target */
     boolean setPinnedStackAlpha(float alpha);

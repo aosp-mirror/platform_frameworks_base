@@ -858,12 +858,9 @@ public class BlobStoreManagerService extends SystemService {
         writeBlobsInfoAsync();
 
         // Cleanup any stale sessions.
-        final ArrayList<Integer> indicesToRemove = new ArrayList<>();
         for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {
             final LongSparseArray<BlobStoreSession> userSessions = mSessions.valueAt(i);
-            indicesToRemove.clear();
-            for (int j = 0, sessionsCount = userSessions.size(); j < sessionsCount; ++j) {
-                final BlobStoreSession blobStoreSession = userSessions.valueAt(j);
+            userSessions.removeIf((sessionId, blobStoreSession) -> {
                 boolean shouldRemove = false;
 
                 // Cleanup sessions which haven't been modified in a while.
@@ -880,13 +877,10 @@ public class BlobStoreManagerService extends SystemService {
                 if (shouldRemove) {
                     blobStoreSession.getSessionFile().delete();
                     mActiveBlobIds.remove(blobStoreSession.getSessionId());
-                    indicesToRemove.add(j);
                     deletedBlobIds.add(blobStoreSession.getSessionId());
                 }
-            }
-            for (int j = 0; j < indicesToRemove.size(); ++j) {
-                userSessions.removeAt(indicesToRemove.get(j));
-            }
+                return shouldRemove;
+            });
         }
         if (LOGV) {
             Slog.v(TAG, "Completed idle maintenance; deleted "

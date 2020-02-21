@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.screenshot;
 
-import android.app.Activity;
-import android.os.Bundle;
+package android.os.strictmode;
 
-import com.android.systemui.tests.R;
+import android.content.Context;
 
 /**
- * A stub activity used in {@link ScreenshotTest}.
+ * Incorrect usage of {@link Context}, such as obtaining a visual service from non-visual
+ * {@link Context} instance.
+ * @see Context#getSystemService(String)
+ * @see Context#getDisplayNoVerify()
+ * @hide
  */
-public class ScreenshotStubActivity extends Activity {
+public final class IncorrectContextUseViolation extends Violation {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+    /** @hide */
+    public IncorrectContextUseViolation(String message, Throwable originStack) {
+        super(message);
+        initCause(originStack);
     }
 }

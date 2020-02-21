@@ -29,6 +29,7 @@ android_test {
     libs: [
         "android.test.runner",
         "android.test.base",
+        "android.test.mock",
     ],
 
     dxflags: ["--multi-dex"],

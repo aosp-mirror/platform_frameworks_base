@@ -311,6 +311,7 @@ public class AuthService extends SystemService {
                 }
 
                 authenticator = new FingerprintAuthenticator(fingerprintService);
+                fingerprintService.initConfiguredStrength(config.mStrength);
                 break;
 
             case TYPE_FACE:
@@ -322,6 +323,7 @@ public class AuthService extends SystemService {
                 }
 
                 authenticator = new FaceAuthenticator(faceService);
+                faceService.initConfiguredStrength(config.mStrength);
                 break;
 
             case TYPE_IRIS:
@@ -333,6 +335,7 @@ public class AuthService extends SystemService {
                 }
 
                 authenticator = new IrisAuthenticator(irisService);
+                irisService.initConfiguredStrength(config.mStrength);
                 break;
 
             default:

@@ -387,7 +387,12 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         boolean fingerprintRunning = mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
-        boolean unlockingAllowed = mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed();
+        // Only checking if unlocking with Biometric is allowed (no matter strong or non-strong
+        // as long as primary auth, i.e. PIN/pattern/password, is not required), so it's ok to
+        // pass true for isStrongBiometric to isUnlockingWithBiometricAllowed() to bypass the
+        // check of whether non-strong biometric is allowed
+        boolean unlockingAllowed = mKeyguardUpdateMonitor
+                        .isUnlockingWithBiometricAllowed(true /* isStrongBiometric */);
         if (fingerprintRunning && unlockingAllowed) {
             AccessibilityNodeInfo.AccessibilityAction unlock
                     = new AccessibilityNodeInfo.AccessibilityAction(

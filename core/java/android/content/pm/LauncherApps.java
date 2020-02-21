@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import static android.Manifest.permission;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -161,7 +162,7 @@ public class LauncherApps {
     private final List<CallbackMessageHandler> mCallbacks = new ArrayList<>();
     private final List<SessionCallbackDelegate> mDelegates = new ArrayList<>();
 
-    private final Map<Integer, Pair<Executor, ShortcutChangeCallback>>
+    private final Map<ShortcutChangeCallback, Pair<Executor, IShortcutChangeCallback>>
             mShortcutChangeCallbacks = new HashMap<>();
 
     /**
@@ -549,8 +550,8 @@ public class LauncherApps {
             android.content.pm.IShortcutChangeCallback.Stub {
         private final WeakReference<Pair<Executor, ShortcutChangeCallback>> mRemoteReferences;
 
-        ShortcutChangeCallbackProxy(Pair<Executor, ShortcutChangeCallback> remoteReferences) {
-            mRemoteReferences = new WeakReference<>(remoteReferences);
+        ShortcutChangeCallbackProxy(Executor executor, ShortcutChangeCallback callback) {
+            mRemoteReferences = new WeakReference<>(new Pair<>(executor, callback));
         }
 
         @Override
@@ -1753,14 +1754,12 @@ public class LauncherApps {
         Objects.requireNonNull(executor, "Executor cannot be null");
 
         synchronized (mShortcutChangeCallbacks) {
-            final int callbackId = callback.hashCode();
-            final Pair<Executor, ShortcutChangeCallback> state = new Pair<>(executor, callback);
-            mShortcutChangeCallbacks.put(callbackId, state);
+            IShortcutChangeCallback proxy = new ShortcutChangeCallbackProxy(executor, callback);
+            mShortcutChangeCallbacks.put(callback, new Pair<>(executor, proxy));
             try {
                 mService.registerShortcutChangeCallback(mContext.getPackageName(),
                         query.mChangedSince, query.mPackage, query.mShortcutIds, query.mLocusIds,
-                        query.mActivity, query.mQueryFlags, new ShortcutChangeCallbackProxy(state),
-                        callbackId);
+                        query.mActivity, query.mQueryFlags, proxy);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1779,12 +1778,10 @@ public class LauncherApps {
         Objects.requireNonNull(callback, "Callback cannot be null");
 
         synchronized (mShortcutChangeCallbacks) {
-            final int callbackId = callback.hashCode();
-            if (mShortcutChangeCallbacks.containsKey(callbackId)) {
-                mShortcutChangeCallbacks.remove(callbackId);
+            if (mShortcutChangeCallbacks.containsKey(callback)) {
+                IShortcutChangeCallback proxy = mShortcutChangeCallbacks.remove(callback).second;
                 try {
-                    mService.unregisterShortcutChangeCallback(mContext.getPackageName(),
-                            callbackId);
+                    mService.unregisterShortcutChangeCallback(mContext.getPackageName(), proxy);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }

@@ -31,6 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricNativeHandle;
 import android.hardware.biometrics.IBiometricService;
@@ -106,6 +107,7 @@ public abstract class BiometricServiceBase extends SystemService
     private PerformanceStats mPerformanceStats;
     protected int mCurrentUserId = UserHandle.USER_NULL;
     protected long mHalDeviceId;
+    private int mOEMStrength; // Tracks the OEM configured biometric modality strength
     // Tracks if the current authentication makes use of CryptoObjects.
     protected boolean mIsCrypto;
     // Normal authentications are tracked by mPerformanceMap.
@@ -679,6 +681,20 @@ public abstract class BiometricServiceBase extends SystemService
 
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                 statsModality(), BiometricsProtoEnums.ISSUE_HAL_DEATH);
+    }
+
+    protected void initConfiguredStrengthInternal(int strength) {
+        if (DEBUG) {
+            Slog.d(getTag(), "initConfiguredStrengthInternal(" + strength + ")");
+        }
+        mOEMStrength = strength;
+    }
+
+    protected boolean isStrongBiometric() {
+        // TODO(b/141025588): need to calculate actual strength when downgrading tiers
+        final int biometricBits = mOEMStrength
+                & BiometricManager.Authenticators.BIOMETRIC_MIN_STRENGTH;
+        return biometricBits == BiometricManager.Authenticators.BIOMETRIC_STRONG;
     }
 
     protected ClientMonitor getCurrentClient() {

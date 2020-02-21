@@ -1963,7 +1963,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (restriction != null) {
                     final int reason = restriction.getReason();
                     serviceContext.cancelExecutingJobLocked(reason,
-                            "restricted due to " + JobParameters.getReasonName(reason));
+                            "restricted due to " + JobParameters.getReasonCodeDescription(reason));
                 }
             }
         }
@@ -3110,7 +3110,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                             final JobRestriction restriction = mJobRestrictions.get(i);
                             if (restriction.isJobRestricted(job)) {
                                 final int reason = restriction.getReason();
-                                pw.write(" " + JobParameters.getReasonName(reason) + "[" + reason + "]");
+                                pw.print(" " + JobParameters.getReasonCodeDescription(reason));
                             }
                         }
                     } else {

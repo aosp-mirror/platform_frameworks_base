@@ -41,8 +41,8 @@ public class KeyguardPresentationTest extends SysuiTestCase {
         InjectionInflationController inflationController = new InjectionInflationController(
                 SystemUIFactory.getInstance().getRootComponent());
         Context context = getContext();
-        KeyguardPresentation keyguardPresentation =
-                new KeyguardPresentation(context, context.getDisplay(), inflationController);
+        KeyguardPresentation keyguardPresentation = new KeyguardPresentation(context,
+                context.getDisplayNoVerify(), inflationController);
         keyguardPresentation.onCreate(null /*savedInstanceState */);
     }
 }

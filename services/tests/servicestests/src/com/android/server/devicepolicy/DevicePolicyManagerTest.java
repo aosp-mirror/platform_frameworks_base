@@ -3952,13 +3952,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testIsOrganizationOwnedDevice() throws Exception {
-        setupProfileOwner();
         // Set up the user manager to return correct user info
-        UserInfo managedProfileUserInfo = new UserInfo(DpmMockContext.CALLER_USER_HANDLE,
-                "managed profile",
-                UserInfo.FLAG_MANAGED_PROFILE);
-        when(getServices().userManager.getUsers())
-                .thenReturn(Arrays.asList(managedProfileUserInfo));
+        addManagedProfile(admin1, DpmMockContext.CALLER_UID, admin1);
 
         // Any caller should be able to call this method.
         assertFalse(dpm.isOrganizationOwnedDeviceWithManagedProfile());
@@ -5909,8 +5904,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private void configureProfileOwnerOfOrgOwnedDevice(ComponentName who, int userId) {
-        when(getServices().userManager.getProfileParent(eq(UserHandle.of(userId))))
-                .thenReturn(UserHandle.SYSTEM);
         final long ident = mServiceContext.binder.clearCallingIdentity();
         mServiceContext.binder.callingUid = UserHandle.getUid(userId, DpmMockContext.SYSTEM_UID);
 

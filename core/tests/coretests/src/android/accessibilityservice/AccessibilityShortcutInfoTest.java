@@ -92,7 +92,7 @@ public class AccessibilityShortcutInfoTest {
     @Test
     public void testLoadAnimatedImage() {
         assertNotNull("Can't find animated image",
-                mShortcutInfo.loadAnimatedImage(mPackageManager));
+                mShortcutInfo.loadAnimatedImage(mTargetContext));
     }
 
     @Test

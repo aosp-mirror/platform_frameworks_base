@@ -65,6 +65,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -283,6 +284,12 @@ public class AppStandbyController implements AppStandbyInternal {
      * start is the first usage of the app
      */
     long mInitialForegroundServiceStartTimeoutMillis;
+    /**
+     * User usage that would elevate an app's standby bucket will also elevate the standby bucket of
+     * cross profile connected apps. Explicit standby bucket setting via
+     * {@link #setAppStandbyBucket(String, int, int, int, int)} will not be propagated.
+     */
+    boolean mLinkCrossProfileApps;
 
     private volatile boolean mAppIdleEnabled;
     private boolean mIsCharging;
@@ -445,10 +452,12 @@ public class AppStandbyController implements AppStandbyInternal {
                     continue;
                 }
                 if (!packageName.equals(providerPkgName)) {
+                    final List<UserHandle> linkedProfiles = getCrossProfileTargets(packageName,
+                            userId);
                     synchronized (mAppIdleLock) {
-                        reportNoninteractiveUsageLocked(packageName, userId, STANDBY_BUCKET_ACTIVE,
-                                REASON_SUB_USAGE_SYNC_ADAPTER, elapsedRealtime,
-                                mSyncAdapterTimeoutMillis);
+                        reportNoninteractiveUsageCrossUserLocked(packageName, userId,
+                                STANDBY_BUCKET_ACTIVE, REASON_SUB_USAGE_SYNC_ADAPTER,
+                                elapsedRealtime, mSyncAdapterTimeoutMillis, linkedProfiles);
                     }
                 }
             } catch (PackageManager.NameNotFoundException e) {
@@ -477,10 +486,10 @@ public class AppStandbyController implements AppStandbyInternal {
         }
 
         final long elapsedRealtime = mInjector.elapsedRealtime();
-
+        final List<UserHandle> linkedProfiles = getCrossProfileTargets(packageName, userId);
         synchronized (mAppIdleLock) {
-            reportNoninteractiveUsageLocked(packageName, userId, bucketToPromote,
-                    usageReason, elapsedRealtime, durationMillis);
+            reportNoninteractiveUsageCrossUserLocked(packageName, userId, bucketToPromote,
+                    usageReason, elapsedRealtime, durationMillis, linkedProfiles);
         }
     }
 
@@ -492,10 +501,11 @@ public class AppStandbyController implements AppStandbyInternal {
             final int currentBucket =
                     mAppIdleHistory.getAppStandbyBucket(packageName, userId, elapsedRealtime);
             if (currentBucket == STANDBY_BUCKET_NEVER) {
+                final List<UserHandle> linkedProfiles = getCrossProfileTargets(packageName, userId);
                 // Bring the app out of the never bucket
-                reportNoninteractiveUsageLocked(packageName, userId, STANDBY_BUCKET_WORKING_SET,
-                        REASON_SUB_USAGE_UNEXEMPTED_SYNC_SCHEDULED, elapsedRealtime,
-                        mUnexemptedSyncScheduledTimeoutMillis);
+                reportNoninteractiveUsageCrossUserLocked(packageName, userId,
+                        STANDBY_BUCKET_WORKING_SET, REASON_SUB_USAGE_UNEXEMPTED_SYNC_SCHEDULED,
+                        elapsedRealtime, mUnexemptedSyncScheduledTimeoutMillis, linkedProfiles);
             }
         }
     }
@@ -504,14 +514,39 @@ public class AppStandbyController implements AppStandbyInternal {
         if (!mAppIdleEnabled) return;
 
         final long elapsedRealtime = mInjector.elapsedRealtime();
-
+        final List<UserHandle> linkedProfiles = getCrossProfileTargets(packageName, userId);
         synchronized (mAppIdleLock) {
-            reportNoninteractiveUsageLocked(packageName, userId, STANDBY_BUCKET_ACTIVE,
+            reportNoninteractiveUsageCrossUserLocked(packageName, userId, STANDBY_BUCKET_ACTIVE,
                     REASON_SUB_USAGE_EXEMPTED_SYNC_START, elapsedRealtime,
-                    mExemptedSyncStartTimeoutMillis);
+                    mExemptedSyncStartTimeoutMillis, linkedProfiles);
         }
     }
 
+    /**
+     * Helper method to report indirect user usage of an app and handle reporting the usage
+     * against cross profile connected apps. <br>
+     * Use {@link #reportNoninteractiveUsageLocked(String, int, int, int, long, long)} if
+     * cross profile connected apps do not need to be handled.
+     */
+    private void reportNoninteractiveUsageCrossUserLocked(String packageName, int userId,
+            int bucket, int subReason, long elapsedRealtime, long nextCheckDelay,
+            List<UserHandle> otherProfiles) {
+        reportNoninteractiveUsageLocked(packageName, userId, bucket, subReason, elapsedRealtime,
+                nextCheckDelay);
+        final int size = otherProfiles.size();
+        for (int profileIndex = 0; profileIndex < size; profileIndex++) {
+            final int otherUserId = otherProfiles.get(profileIndex).getIdentifier();
+            reportNoninteractiveUsageLocked(packageName, otherUserId, bucket, subReason,
+                    elapsedRealtime, nextCheckDelay);
+        }
+    }
+
+    /**
+     * Helper method to report indirect user usage of an app. <br>
+     * Use
+     * {@link #reportNoninteractiveUsageCrossUserLocked(String, int, int, int, long, long, List)}
+     * if cross profile connected apps need to be handled.
+     */
     private void reportNoninteractiveUsageLocked(String packageName, int userId, int bucket,
             int subReason, long elapsedRealtime, long nextCheckDelay) {
         final AppUsageHistory appUsage = mAppIdleHistory.reportUsage(packageName, userId, bucket,
@@ -766,8 +801,16 @@ public class AppStandbyController implements AppStandbyInternal {
                 || eventType == UsageEvents.Event.SLICE_PINNED
                 || eventType == UsageEvents.Event.SLICE_PINNED_PRIV
                 || eventType == UsageEvents.Event.FOREGROUND_SERVICE_START)) {
+            final String pkg = event.getPackageName();
+            final List<UserHandle> linkedProfiles = getCrossProfileTargets(pkg, userId);
             synchronized (mAppIdleLock) {
-                reportEventLocked(event.getPackageName(), eventType, elapsedRealtime, userId);
+                reportEventLocked(pkg, eventType, elapsedRealtime, userId);
+
+                final int size = linkedProfiles.size();
+                for (int profileIndex = 0; profileIndex < size; profileIndex++) {
+                    final int linkedUserId = linkedProfiles.get(profileIndex).getIdentifier();
+                    reportEventLocked(pkg, eventType, elapsedRealtime, linkedUserId);
+                }
             }
         }
     }
@@ -824,6 +867,16 @@ public class AppStandbyController implements AppStandbyInternal {
         if (previouslyIdle) {
             notifyBatteryStats(pkg, userId, false);
         }
+    }
+
+    /**
+     * Note: don't call this with the lock held since it makes calls to other system services.
+     */
+    private @NonNull List<UserHandle> getCrossProfileTargets(String pkg, int userId) {
+        synchronized (mAppIdleLock) {
+            if (!mLinkCrossProfileApps) return Collections.emptyList();
+        }
+        return mInjector.getValidCrossProfileTargets(pkg, userId);
     }
 
     private int usageEventToSubReason(int eventType) {
@@ -1589,6 +1642,7 @@ public class AppStandbyController implements AppStandbyInternal {
         private PackageManagerInternal mPackageManagerInternal;
         private DisplayManager mDisplayManager;
         private PowerManager mPowerManager;
+        private CrossProfileAppsInternal mCrossProfileAppsInternal;
         int mBootPhase;
         /**
          * The minimum amount of time required since the last user interaction before an app can be
@@ -1620,6 +1674,8 @@ public class AppStandbyController implements AppStandbyInternal {
                         Context.DISPLAY_SERVICE);
                 mPowerManager = mContext.getSystemService(PowerManager.class);
                 mBatteryManager = mContext.getSystemService(BatteryManager.class);
+                mCrossProfileAppsInternal = LocalServices.getService(
+                        CrossProfileAppsInternal.class);
 
                 final ActivityManager activityManager =
                         (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -1726,6 +1782,17 @@ public class AppStandbyController implements AppStandbyInternal {
         /** Whether the device is in doze or not. */
         public boolean isDeviceIdleMode() {
             return mPowerManager.isDeviceIdleMode();
+        }
+
+        public List<UserHandle> getValidCrossProfileTargets(String pkg, int userId) {
+            final int uid = mPackageManagerInternal.getPackageUidInternal(pkg, 0, userId);
+            if (uid < 0
+                    || !mPackageManagerInternal.getPackage(uid).isCrossProfile()
+                    || !mCrossProfileAppsInternal
+                            .verifyUidHasInteractAcrossProfilePermission(pkg, uid)) {
+                return Collections.emptyList();
+            }
+            return mCrossProfileAppsInternal.getTargetUserProfiles(pkg, userId);
         }
     }
 
@@ -1857,6 +1924,8 @@ public class AppStandbyController implements AppStandbyInternal {
                 "initial_foreground_service_start_duration";
         private static final String KEY_AUTO_RESTRICTED_BUCKET_DELAY_MS =
                 "auto_restricted_bucket_delay_ms";
+        private static final String KEY_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS =
+                "cross_profile_apps_share_standby_buckets";
         public static final long DEFAULT_STRONG_USAGE_TIMEOUT = 1 * ONE_HOUR;
         public static final long DEFAULT_NOTIFICATION_TIMEOUT = 12 * ONE_HOUR;
         public static final long DEFAULT_SYSTEM_UPDATE_TIMEOUT = 2 * ONE_HOUR;
@@ -1868,6 +1937,7 @@ public class AppStandbyController implements AppStandbyInternal {
         public static final long DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT = 10 * ONE_MINUTE;
         public static final long DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT = 30 * ONE_MINUTE;
         public static final long DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS = ONE_DAY;
+        public static final boolean DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS = true;
 
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
@@ -1973,6 +2043,10 @@ public class AppStandbyController implements AppStandbyInternal {
                         mParser.getDurationMillis(KEY_AUTO_RESTRICTED_BUCKET_DELAY_MS,
                                 COMPRESS_TIME
                                         ? ONE_MINUTE : DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS));
+
+                mLinkCrossProfileApps = mParser.getBoolean(
+                        KEY_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS,
+                        DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS);
             }
 
             // Check if app_idle_enabled has changed. Do this after getting the rest of the settings

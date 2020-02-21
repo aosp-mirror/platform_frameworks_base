@@ -2366,7 +2366,7 @@ class ActivityStarter {
                     // task on top there.
                     // Defer resuming the top activity while moving task to top, since the
                     // current task-top activity may not be the activity that should be resumed.
-                    mTargetStack.moveTaskToFrontLocked(intentTask, mNoAnimation, mOptions,
+                    mTargetStack.moveTaskToFront(intentTask, mNoAnimation, mOptions,
                             mStartActivity.appTimeTracker, DEFER_RESUME,
                             "bringingFoundTaskToFront");
                     mMovedToFront = !isSplitScreenTopStack;
@@ -2396,8 +2396,7 @@ class ActivityStarter {
 
     private void setNewTask(Task taskToAffiliate) {
         final boolean toTop = !mLaunchTaskBehind && !mAvoidMoveToFront;
-        final Task task = mTargetStack.createTask(
-                mSupervisor.getNextTaskIdForUser(mStartActivity.mUserId),
+        final Task task = mTargetStack.reuseOrCreateTask(
                 mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                 mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);

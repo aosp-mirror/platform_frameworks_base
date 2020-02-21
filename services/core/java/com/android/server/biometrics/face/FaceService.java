@@ -740,6 +740,12 @@ public class FaceService extends BiometricServiceBase {
             }
             return 0;
         }
+
+        @Override // Binder call
+        public void initConfiguredStrength(int strength) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            initConfiguredStrengthInternal(strength);
+        }
     }
 
     /**
@@ -809,7 +815,7 @@ public class FaceService extends BiometricServiceBase {
             if (mFaceServiceReceiver != null) {
                 if (biometric == null || biometric instanceof Face) {
                     mFaceServiceReceiver.onAuthenticationSucceeded(deviceId, (Face) biometric,
-                            userId);
+                            userId, isStrongBiometric());
                 } else {
                     Slog.e(TAG, "onAuthenticationSucceeded received non-face biometric");
                 }

@@ -281,7 +281,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void computeMaximumWidgetBitmapMemory() {
-        Display display = mContext.getDisplay();
+        Display display = mContext.getDisplayNoVerify();
         Point size = new Point();
         display.getRealSize(size);
         // Cap memory usage at 1.5 times the size of the display

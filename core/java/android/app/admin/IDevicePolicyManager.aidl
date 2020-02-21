@@ -196,7 +196,9 @@ interface IDevicePolicyManager {
 
     boolean setAlwaysOnVpnPackage(in ComponentName who, String vpnPackage, boolean lockdown, in List<String> lockdownWhitelist);
     String getAlwaysOnVpnPackage(in ComponentName who);
+    String getAlwaysOnVpnPackageForUser(int userHandle);
     boolean isAlwaysOnVpnLockdownEnabled(in ComponentName who);
+    boolean isAlwaysOnVpnLockdownEnabledForUser(int userHandle);
     List<String> getAlwaysOnVpnLockdownWhitelist(in ComponentName who);
 
     void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
@@ -270,7 +272,6 @@ interface IDevicePolicyManager {
     boolean hasLockdownAdminConfiguredNetworks(in ComponentName who);
 
     void setLocationEnabled(in ComponentName who, boolean locationEnabled);
-    void requestSetLocationProviderAllowed(in ComponentName who, in String provider, boolean providerAllowed);
 
     boolean setTime(in ComponentName who, long millis);
     boolean setTimeZone(in ComponentName who, String timeZone);

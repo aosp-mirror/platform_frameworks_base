@@ -1163,8 +1163,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // An activity is considered to be in multi-window mode if its task isn't fullscreen.
         final boolean inMultiWindowMode = inMultiWindowMode();
         if (inMultiWindowMode != mLastReportedMultiWindowMode) {
-            mLastReportedMultiWindowMode = inMultiWindowMode;
-            scheduleMultiWindowModeChanged(getConfiguration());
+            if (!inMultiWindowMode && mLastReportedPictureInPictureMode) {
+                updatePictureInPictureMode(null, false);
+            } else {
+                mLastReportedMultiWindowMode = inMultiWindowMode;
+                scheduleMultiWindowModeChanged(getConfiguration());
+            }
         }
     }
 

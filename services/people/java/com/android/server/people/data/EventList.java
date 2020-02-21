@@ -18,6 +18,8 @@ package com.android.server.people.data;
 
 import android.annotation.NonNull;
 
+import com.android.internal.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +41,16 @@ class EventList {
             return;
         }
         mEvents.add(index, event);
+    }
+
+
+    /**
+     * Call #add on each event to keep the order.
+     */
+    void addAll(@NonNull List<Event> events) {
+        for (Event event : events) {
+            add(event);
+        }
     }
 
     /**
@@ -71,6 +83,44 @@ class EventList {
 
     void clear() {
         mEvents.clear();
+    }
+
+    /**
+     * Returns a copy of events.
+     */
+    @NonNull
+    List<Event> getAllEvents() {
+        return CollectionUtils.copyOf(mEvents);
+    }
+
+    /**
+     * Remove events that are older than the specified cut off threshold timestamp.
+     */
+    void removeOldEvents(long cutOffThreshold) {
+
+        // Everything before the cut off is considered old, and should be removed.
+        int cutOffIndex = firstIndexOnOrAfter(cutOffThreshold);
+        if (cutOffIndex == 0) {
+            return;
+        }
+
+        // Clear entire list if the cut off is greater than the last element.
+        int eventsSize = mEvents.size();
+        if (cutOffIndex == eventsSize) {
+            mEvents.clear();
+            return;
+        }
+
+        // Reorder the list starting from the cut off index.
+        int i = 0;
+        for (; cutOffIndex < eventsSize; i++, cutOffIndex++) {
+            mEvents.set(i, mEvents.get(cutOffIndex));
+        }
+
+        // Clear the list after reordering.
+        if (eventsSize > i) {
+            mEvents.subList(i, eventsSize).clear();
+        }
     }
 
     /** Returns the first index whose timestamp is greater or equal to the provided timestamp. */

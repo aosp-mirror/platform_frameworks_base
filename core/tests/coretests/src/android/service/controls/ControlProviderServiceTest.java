@@ -25,9 +25,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
 import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -44,6 +48,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -59,6 +64,11 @@ import java.util.function.Consumer;
 @RunWith(AndroidJUnit4.class)
 public class ControlProviderServiceTest {
 
+    private static final ComponentName TEST_SYSUI_COMPONENT =
+            ComponentName.unflattenFromString("sysui/.test.cls");
+    private static final ComponentName TEST_COMPONENT =
+            ComponentName.unflattenFromString("test.pkg/.test.cls");
+
     private IBinder mToken = new Binder();
     @Mock
     private IControlsActionCallback.Stub mActionCallback;
@@ -66,6 +76,12 @@ public class ControlProviderServiceTest {
     private IControlsSubscriber.Stub mSubscriber;
     @Mock
     private IIntentSender mIIntentSender;
+    @Mock
+    private Resources mResources;
+    @Mock
+    private Context mContext;
+    @Captor
+    private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
     private PendingIntent mPendingIntent;
     private FakeControlsProviderService mControlsProviderService;
@@ -80,6 +96,10 @@ public class ControlProviderServiceTest {
         when(mActionCallback.queryLocalInterface(any())).thenReturn(mActionCallback);
         when(mSubscriber.asBinder()).thenCallRealMethod();
         when(mSubscriber.queryLocalInterface(any())).thenReturn(mSubscriber);
+
+        when(mResources.getString(com.android.internal.R.string.config_systemUIServiceComponent))
+                .thenReturn(TEST_SYSUI_COMPONENT.flattenToString());
+        when(mContext.getResources()).thenReturn(mResources);
 
         Bundle b = new Bundle();
         b.putBinder(ControlsProviderService.CALLBACK_TOKEN, mToken);
@@ -221,6 +241,21 @@ public class ControlProviderServiceTest {
 
         verify(mActionCallback).accept(mToken, "TEST_ID",
                 ControlAction.RESPONSE_OK);
+    }
+
+    @Test
+    public void testRequestAdd() {
+        Control control = new Control.StatelessBuilder("TEST_ID", mPendingIntent).build();
+        ControlsProviderService.requestAddControl(mContext, TEST_COMPONENT, control);
+
+        verify(mContext).sendBroadcast(mIntentArgumentCaptor.capture(),
+                eq(Manifest.permission.BIND_CONTROLS));
+        Intent intent = mIntentArgumentCaptor.getValue();
+        assertEquals(ControlsProviderService.ACTION_ADD_CONTROL, intent.getAction());
+        assertEquals(TEST_SYSUI_COMPONENT.getPackageName(), intent.getPackage());
+        assertEquals(TEST_COMPONENT, intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME));
+        assertTrue(equals(control,
+                intent.getParcelableExtra(ControlsProviderService.EXTRA_CONTROL)));
     }
 
     private static boolean equals(Control c1, Control c2) {

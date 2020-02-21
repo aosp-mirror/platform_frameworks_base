@@ -17,13 +17,11 @@
 package com.android.tests.rollback;
 
 import static com.android.cts.rollback.lib.RollbackInfoSubject.assertThat;
-import static com.android.cts.rollback.lib.RollbackUtils.getUniqueRollbackInfoForPackage;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.Manifest;
 import android.content.rollback.RollbackInfo;
-import android.content.rollback.RollbackManager;
 
 import com.android.cts.install.lib.Install;
 import com.android.cts.install.lib.InstallUtils;
@@ -77,13 +75,10 @@ public class MultiUserRollbackTest {
      */
     @Test
     public void testMultipleUsersUpgradeToV2() throws Exception {
-        RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
         Install.single(TestApp.A2).setEnableRollback().commit();
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
-        RollbackInfo rollback = getUniqueRollbackInfoForPackage(
-                rm.getAvailableRollbacks(), TestApp.A);
-        assertThat(rollback).isNotNull();
+        RollbackInfo rollback = RollbackUtils.waitForAvailableRollback(TestApp.A);
         assertThat(rollback).packagesContainsExactly(
                 Rollback.from(TestApp.A2).to(TestApp.A1));
     }

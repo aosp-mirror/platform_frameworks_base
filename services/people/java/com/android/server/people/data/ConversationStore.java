@@ -22,8 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.content.LocusId;
 import android.net.Uri;
-import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
@@ -50,8 +48,6 @@ class ConversationStore {
 
     private static final String CONVERSATIONS_FILE_NAME = "conversations";
 
-    private static final long DISK_WRITE_DELAY = 2L * DateUtils.MINUTE_IN_MILLIS;
-
     // Shortcut ID -> Conversation Info
     @GuardedBy("this")
     private final Map<String, ConversationInfo> mConversationInfoMap = new ArrayMap<>();
@@ -74,16 +70,13 @@ class ConversationStore {
 
     private final ScheduledExecutorService mScheduledExecutorService;
     private final File mPackageDir;
-    private final ContactsQueryHelper mHelper;
 
     private ConversationInfosProtoDiskReadWriter mConversationInfosProtoDiskReadWriter;
 
     ConversationStore(@NonNull File packageDir,
-            @NonNull ScheduledExecutorService scheduledExecutorService,
-            @NonNull ContactsQueryHelper helper) {
+            @NonNull ScheduledExecutorService scheduledExecutorService) {
         mScheduledExecutorService = scheduledExecutorService;
         mPackageDir = packageDir;
-        mHelper = helper;
     }
 
     /**
@@ -92,7 +85,7 @@ class ConversationStore {
      */
     @MainThread
     void loadConversationsFromDisk() {
-        mScheduledExecutorService.submit(() -> {
+        mScheduledExecutorService.execute(() -> {
             synchronized (this) {
                 ConversationInfosProtoDiskReadWriter conversationInfosProtoDiskReadWriter =
                         getConversationInfosProtoDiskReadWriter();
@@ -105,7 +98,6 @@ class ConversationStore {
                     return;
                 }
                 for (ConversationInfo conversationInfo : conversationsOnDisk) {
-                    conversationInfo = restoreConversationPhoneNumber(conversationInfo);
                     updateConversationsInMemory(conversationInfo);
                 }
             }
@@ -194,6 +186,15 @@ class ConversationStore {
         return getConversation(mNotifChannelIdToShortcutIdMap.get(notifChannelId));
     }
 
+    synchronized void onDestroy() {
+        mConversationInfoMap.clear();
+        mContactUriToShortcutIdMap.clear();
+        mLocusIdToShortcutIdMap.clear();
+        mNotifChannelIdToShortcutIdMap.clear();
+        mPhoneNumberToShortcutIdMap.clear();
+        mConversationInfosProtoDiskReadWriter.deleteConversationsFile();
+    }
+
     @MainThread
     private synchronized void updateConversationsInMemory(
             @NonNull ConversationInfo conversationInfo) {
@@ -239,41 +240,21 @@ class ConversationStore {
         }
         if (mConversationInfosProtoDiskReadWriter == null) {
             mConversationInfosProtoDiskReadWriter = new ConversationInfosProtoDiskReadWriter(
-                    mPackageDir, CONVERSATIONS_FILE_NAME, DISK_WRITE_DELAY,
-                    mScheduledExecutorService);
+                    mPackageDir, CONVERSATIONS_FILE_NAME, mScheduledExecutorService);
         }
         return mConversationInfosProtoDiskReadWriter;
     }
 
-    /**
-     * Conversation's phone number is not saved on disk, so it has to be fetched.
-     */
-    @WorkerThread
-    private ConversationInfo restoreConversationPhoneNumber(
-            @NonNull ConversationInfo conversationInfo) {
-        if (conversationInfo.getContactUri() != null) {
-            if (mHelper.query(conversationInfo.getContactUri().toString())) {
-                String phoneNumber = mHelper.getPhoneNumber();
-                if (!TextUtils.isEmpty(phoneNumber)) {
-                    conversationInfo = new ConversationInfo.Builder(
-                            conversationInfo).setContactPhoneNumber(
-                            phoneNumber).build();
-                }
-            }
-        }
-        return conversationInfo;
-    }
-
-    /** Reads and writes {@link ConversationInfo} on disk. */
-    static class ConversationInfosProtoDiskReadWriter extends
+    /** Reads and writes {@link ConversationInfo}s on disk. */
+    private static class ConversationInfosProtoDiskReadWriter extends
             AbstractProtoDiskReadWriter<List<ConversationInfo>> {
 
         private final String mConversationInfoFileName;
 
-        ConversationInfosProtoDiskReadWriter(@NonNull File baseDir,
+        ConversationInfosProtoDiskReadWriter(@NonNull File rootDir,
                 @NonNull String conversationInfoFileName,
-                long writeDelayMs, @NonNull ScheduledExecutorService scheduledExecutorService) {
-            super(baseDir, writeDelayMs, scheduledExecutorService);
+                @NonNull ScheduledExecutorService scheduledExecutorService) {
+            super(rootDir, scheduledExecutorService);
             mConversationInfoFileName = conversationInfoFileName;
         }
 
@@ -327,6 +308,11 @@ class ConversationStore {
         @MainThread
         void saveConversationsImmediately(@NonNull List<ConversationInfo> conversationInfos) {
             saveImmediately(mConversationInfoFileName, conversationInfos);
+        }
+
+        @WorkerThread
+        void deleteConversationsFile() {
+            delete(mConversationInfoFileName);
         }
     }
 }

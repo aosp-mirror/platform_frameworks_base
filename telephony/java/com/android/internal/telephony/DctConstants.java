@@ -114,6 +114,7 @@ public class DctConstants {
     public static final int EVENT_SERVICE_STATE_CHANGED = BASE + 52;
     public static final int EVENT_5G_TIMER_HYSTERESIS = BASE + 53;
     public static final int EVENT_5G_TIMER_WATCHDOG = BASE + 54;
+    public static final int EVENT_UPDATE_CARRIER_CONFIGS = BASE + 55;
 
     /***** Constants *****/
 
@@ -123,4 +124,6 @@ public class DctConstants {
 
     public static final String APN_TYPE_KEY = "apnType";
     public static final String PROVISIONING_URL_KEY = "provisioningUrl";
+    public static final String BANDWIDTH_SOURCE_MODEM_KEY = "modem";
+    public static final String BANDWIDTH_SOURCE_CARRIER_CONFIG_KEY = "carrier_config";
 }

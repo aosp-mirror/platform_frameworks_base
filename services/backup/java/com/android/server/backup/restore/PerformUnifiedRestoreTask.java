@@ -76,9 +76,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -802,6 +800,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             final int size = in.getDataSize();
 
             if (excludedKeysForPackage != null && excludedKeysForPackage.contains(key)) {
+                Slog.i(TAG, "Skipping blocked key " + key);
                 in.skipEntityData();
                 continue;
             }

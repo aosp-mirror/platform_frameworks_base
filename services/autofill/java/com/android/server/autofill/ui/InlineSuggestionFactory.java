@@ -82,12 +82,17 @@ public final class InlineSuggestionFactory {
         if (sDebug) Slog.d(TAG, "createInlineSuggestionsResponse called");
         final BiConsumer<Dataset, Integer> onClickFactory;
         if (response.getAuthentication() != null) {
-            onClickFactory = (dataset, datasetIndex) -> client.authenticate(response.getRequestId(),
-                    datasetIndex, response.getAuthentication(), response.getClientState(),
-                    /* authenticateInline= */ true);
+            onClickFactory = (dataset, datasetIndex) -> {
+                client.requestHideFillUi(autofillId);
+                client.authenticate(response.getRequestId(),
+                        datasetIndex, response.getAuthentication(), response.getClientState(),
+                        /* authenticateInline= */ true);
+            };
         } else {
-            onClickFactory = (dataset, datasetIndex) ->
-                    client.fill(response.getRequestId(), datasetIndex, dataset);
+            onClickFactory = (dataset, datasetIndex) -> {
+                client.requestHideFillUi(autofillId);
+                client.fill(response.getRequestId(), datasetIndex, dataset);
+            };
         }
 
         final List<Dataset> datasetList = response.getDatasets();

@@ -337,7 +337,8 @@ public class MediaRouter2Manager {
         }
         if (client != null) {
             try {
-                mMediaRouterService.setRouteVolumeWithManager(client, route, volume);
+                int requestId = mNextRequestId.getAndIncrement();
+                mMediaRouterService.setRouteVolumeWithManager(client, route, volume, requestId);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
             }
@@ -368,8 +369,9 @@ public class MediaRouter2Manager {
         }
         if (client != null) {
             try {
+                int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.setSessionVolumeWithManager(
-                        client, sessionInfo.getId(), volume);
+                        client, sessionInfo.getId(), volume, requestId);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
             }
@@ -440,6 +442,12 @@ public class MediaRouter2Manager {
     void notifySessionInfosChanged() {
         for (CallbackRecord record : mCallbackRecords) {
             record.mExecutor.execute(() -> record.mCallback.onSessionsUpdated());
+        }
+    }
+
+    void notifyRequestFailed(int reason) {
+        for (CallbackRecord record : mCallbackRecords) {
+            record.mExecutor.execute(() -> record.mCallback.onRequestFailed(reason));
         }
     }
 
@@ -593,7 +601,9 @@ public class MediaRouter2Manager {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.selectRouteWithManager(mClient, getSessionId(), route);
+                    int requestId = mNextRequestId.getAndIncrement();
+                    mMediaRouterService.selectRouteWithManager(
+                            mClient, getSessionId(), route, requestId);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to select route for session.", ex);
                 }
@@ -635,7 +645,9 @@ public class MediaRouter2Manager {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.deselectRouteWithManager(mClient, getSessionId(), route);
+                    int requestId = mNextRequestId.getAndIncrement();
+                    mMediaRouterService.deselectRouteWithManager(
+                            mClient, getSessionId(), route, requestId);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to remove route from session.", ex);
                 }
@@ -678,7 +690,9 @@ public class MediaRouter2Manager {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.transferToRouteWithManager(mClient, getSessionId(), route);
+                    int requestId = mNextRequestId.getAndIncrement();
+                    mMediaRouterService.transferToRouteWithManager(
+                            mClient, getSessionId(), route, requestId);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to transfer to route for session.", ex);
                 }
@@ -696,7 +710,9 @@ public class MediaRouter2Manager {
             }
             if (client != null) {
                 try {
-                    mMediaRouterService.releaseSessionWithManager(mClient, getSessionId());
+                    int requestId = mNextRequestId.getAndIncrement();
+                    mMediaRouterService.releaseSessionWithManager(
+                            mClient, getSessionId(), requestId);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to notify of controller release", ex);
                 }
@@ -783,6 +799,17 @@ public class MediaRouter2Manager {
         public void onPreferredFeaturesChanged(@NonNull String packageName,
                 @NonNull List<String> preferredFeatures) {}
 
+        /**
+         * Called when a previous request has failed.
+         *
+         * @param reason the reason that the request has failed. Can be one of followings:
+         *               {@link MediaRoute2ProviderService#REASON_UNKNOWN_ERROR},
+         *               {@link MediaRoute2ProviderService#REASON_REJECTED},
+         *               {@link MediaRoute2ProviderService#REASON_NETWORK_ERROR},
+         *               {@link MediaRoute2ProviderService#REASON_ROUTE_NOT_AVAILABLE},
+         *               {@link MediaRoute2ProviderService#REASON_INVALID_COMMAND},
+         */
+        public void onRequestFailed(int reason) {}
     }
 
     final class CallbackRecord {
@@ -823,6 +850,13 @@ public class MediaRouter2Manager {
             mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifySessionInfosChanged,
                     MediaRouter2Manager.this));
             // do nothing
+        }
+
+        @Override
+        public void notifyRequestFailed(int requestId, int reason) {
+            // Note: requestId is not used.
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyRequestFailed,
+                    MediaRouter2Manager.this, reason));
         }
 
         @Override

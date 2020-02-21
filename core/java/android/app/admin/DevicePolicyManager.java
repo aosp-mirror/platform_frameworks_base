@@ -33,6 +33,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
@@ -5740,6 +5741,25 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns whether the admin has enabled always-on VPN lockdown for the current user.
+     *
+     * Only callable by the system.
+    * @hide
+    */
+    @UserHandleAware
+    public boolean isAlwaysOnVpnLockdownEnabled() {
+        throwIfParentInstance("isAlwaysOnVpnLockdownEnabled");
+        if (mService != null) {
+            try {
+                return mService.isAlwaysOnVpnLockdownEnabledForUser(myUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by device or profile owner to query the set of packages that are allowed to access
      * the network directly when always-on VPN is in lockdown mode but not connected. Returns
      * {@code null} when always-on VPN is not active or not in lockdown mode.
@@ -5778,6 +5798,26 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getAlwaysOnVpnPackage(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the VPN package name if the admin has enabled always-on VPN on the current user,
+     * or {@code null} if none is set.
+     *
+     * Only callable by the system.
+     * @hide
+     */
+    @UserHandleAware
+    public @Nullable String getAlwaysOnVpnPackage() {
+        throwIfParentInstance("getAlwaysOnVpnPackage");
+        if (mService != null) {
+            try {
+                return mService.getAlwaysOnVpnPackageForUser(myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8949,49 +8989,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owners to request a location provider to change its allowed state. For a
-     * provider to be enabled requires both that the master location setting is enabled, and that
-     * the provider itself is allowed. Most location providers are always allowed. Some location
-     * providers may have user consents or terms and conditions that must be accepted, or some other
-     * type of blocker before they are allowed however. Every location provider is responsible for
-     * its own allowed state.
-     *
-     * <p>This method requests that a location provider change its allowed state. For providers that
-     * are always allowed and have no state to change, this will have no effect. If the provider
-     * does require some consent, terms and conditions, or other blocking state, using this API
-     * implies that the device owner is agreeing/disagreeing to any consents, terms and conditions,
-     * etc, and the provider should make a best effort to adjust it's allowed state accordingly.
-     *
-     * <p>Location providers are generally only responsible for the current user, and callers must
-     * assume that this method will only affect provider state for the current user. Callers are
-     * responsible for tracking current user changes and re-updating provider state as necessary.
-     *
-     * <p>While providers are expected to make a best effort to honor this request, it is not a
-     * given that all providers will support such a request. If a provider does change its state as
-     * a result of this request, that may happen asynchronously after some delay. Test location
-     * providers set through {@link android.location.LocationManager#addTestProvider} will respond
-     * to this request to aide in testing.
-     *
-     * @param admin          Which {@link DeviceAdminReceiver} this request is associated with
-     * @param provider       A location provider as listed by
-     *                       {@link android.location.LocationManager#getAllProviders()}
-     * @param providerAllowed Whether the location provider is being requested to enable or disable
-     *                       itself
-     * @throws SecurityException if {@code admin} is not a device owner.
-     */
-    public void requestSetLocationProviderAllowed(@NonNull ComponentName admin,
-            @NonNull String provider, boolean providerAllowed) {
-        throwIfParentInstance("requestSetLocationProviderAllowed");
-        if (mService != null) {
-            try {
-                mService.requestSetLocationProviderAllowed(admin, provider, providerAllowed);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
      * Called by profile or device owners to update {@link android.provider.Settings.Secure}
      * settings. Validation that the value of the setting is in the correct form for the setting
      * type should be performed by the caller.
@@ -9935,20 +9932,27 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to control the security logging feature.
+     * Called by device owner or a profile owner of an organization-owned managed profile to
+     * control the security logging feature.
      *
      * <p> Security logs contain various information intended for security auditing purposes.
-     * See {@link SecurityEvent} for details.
+     * When security logging is enabled by a profile owner of
+     * an organization-owned managed profile, certain security logs are not visible (for example
+     * personal app launch events) or they will be redacted (for example, details of the physical
+     * volume mount events). Please see {@link SecurityEvent} for details.
      *
      * <p><strong>Note:</strong> The device owner won't be able to retrieve security logs if there
      * are unaffiliated secondary users or profiles on the device, regardless of whether the
      * feature is enabled. Logs will be discarded if the internal buffer fills up while waiting for
      * all users to become affiliated. Therefore it's recommended that affiliation ids are set for
-     * new users as soon as possible after provisioning via {@link #setAffiliationIds}.
+     * new users as soon as possible after provisioning via {@link #setAffiliationIds}. Profile
+     * owner of organization-owned managed profile is not subject to this restriction since all
+     * privacy-sensitive events happening outside the managed profile would have been redacted
+     * already.
      *
-     * @param admin Which device owner this request is associated with.
+     * @param admin Which device admin this request is associated with.
      * @param enabled whether security logging should be enabled or not.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not allowed to control security logging.
      * @see #setAffiliationIds
      * @see #retrieveSecurityLogs
      */
@@ -9962,14 +9966,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Return whether security logging is enabled or not by the device owner.
+     * Return whether security logging is enabled or not by the admin.
      *
-     * <p>Can only be called by the device owner, otherwise a {@link SecurityException} will be
-     * thrown.
+     * <p>Can only be called by the device owner or a profile owner of an organization-owned
+     * managed profile, otherwise a {@link SecurityException} will be thrown.
      *
-     * @param admin Which device owner this request is associated with.
+     * @param admin Which device admin this request is associated with.
      * @return {@code true} if security logging is enabled by device owner, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not allowed to control security logging.
      */
     public boolean isSecurityLoggingEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isSecurityLoggingEnabled");
@@ -9981,20 +9985,21 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to retrieve all new security logging entries since the last call to
-     * this API after device boots.
+     * Called by device owner or profile owner of an organization-owned managed profile to retrieve
+     * all new security logging entries since the last call to this API after device boots.
      *
      * <p> Access to the logs is rate limited and it will only return new logs after the device
      * owner has been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
      *
-     * <p>If there is any other user or profile on the device, it must be affiliated with the
-     * device. Otherwise a {@link SecurityException} will be thrown. See {@link #isAffiliatedUser}.
+     * <p> When called by a device owner, if there is any other user or profile on the device,
+     * it must be affiliated with the device. Otherwise a {@link SecurityException} will be thrown.
+     * See {@link #isAffiliatedUser}.
      *
-     * @param admin Which device owner this request is associated with.
+     * @param admin Which device admin this request is associated with.
      * @return the new batch of security logs which is a list of {@link SecurityEvent},
      * or {@code null} if rate limitation is exceeded or if logging is currently disabled.
-     * @throws SecurityException if {@code admin} is not a device owner, or there is at least one
-     * profile or secondary user that is not affiliated with the device.
+     * @throws SecurityException if {@code admin} is not allowed to access security logging,
+     * or there is at least one profile or secondary user that is not affiliated with the device.
      * @see #isAffiliatedUser
      * @see DeviceAdminReceiver#onSecurityLogsAvailable
      */
@@ -10127,21 +10132,23 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owners to retrieve device logs from before the device's last reboot.
+     * Called by device owner or profile owner of an organization-owned managed profile to retrieve
+     * device logs from before the device's last reboot.
      * <p>
      * <strong> This API is not supported on all devices. Calling this API on unsupported devices
      * will result in {@code null} being returned. The device logs are retrieved from a RAM region
      * which is not guaranteed to be corruption-free during power cycles, as a result be cautious
      * about data corruption when parsing. </strong>
      *
-     * <p>If there is any other user or profile on the device, it must be affiliated with the
-     * device. Otherwise a {@link SecurityException} will be thrown. See {@link #isAffiliatedUser}.
+     * <p> When called by a device owner, if there is any other user or profile on the device,
+     * it must be affiliated with the device. Otherwise a {@link SecurityException} will be thrown.
+     * See {@link #isAffiliatedUser}.
      *
-     * @param admin Which device owner this request is associated with.
+     * @param admin Which device admin this request is associated with.
      * @return Device logs from before the latest reboot of the system, or {@code null} if this API
      *         is not supported on the device.
-     * @throws SecurityException if {@code admin} is not a device owner, or there is at least one
-     * profile or secondary user that is not affiliated with the device.
+     * @throws SecurityException if {@code admin} is not allowed to access security logging, or
+     * there is at least one profile or secondary user that is not affiliated with the device.
      * @see #isAffiliatedUser
      * @see #retrieveSecurityLogs
      */

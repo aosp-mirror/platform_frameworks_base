@@ -110,7 +110,7 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             Context context = InstrumentationRegistry.getTargetContext();
             // cannot mock ViewRootImpl since it's final.
-            mViewRoot = new ViewRootImpl(context, context.getDisplay());
+            mViewRoot = new ViewRootImpl(context, context.getDisplayNoVerify());
             try {
                 mViewRoot.setView(new TextView(context), new LayoutParams(), null);
             } catch (BadTokenException e) {

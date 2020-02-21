@@ -2097,7 +2097,7 @@ public class WallpaperManager {
 
         public ColorManagementProxy(@NonNull Context context) {
             // Get a list of supported wide gamut color spaces.
-            Display display = context.getDisplay();
+            Display display = context.getDisplayNoVerify();
             if (display != null) {
                 mSupportedColorSpaces.addAll(Arrays.asList(display.getSupportedWideColorGamut()));
             }

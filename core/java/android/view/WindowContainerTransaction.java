@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
+import android.view.SurfaceControl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,8 +78,28 @@ public class WindowContainerTransaction implements Parcelable {
     public WindowContainerTransaction scheduleFinishEnterPip(IWindowContainer container,
             Rect bounds) {
         Change chg = getOrCreateChange(container.asBinder());
-        chg.mSchedulePipCallback = true;
         chg.mPinnedBounds = new Rect(bounds);
+        chg.mChangeMask |= Change.CHANGE_PIP_CALLBACK;
+
+        return this;
+    }
+
+    /**
+     * Send a SurfaceControl transaction to the server, which the server will apply in sync with
+     * the next bounds change. As this uses deferred transaction and not BLAST it is only
+     * able to sync with a single window, and the first visible window in this hierarchy of type
+     * BASE_APPLICATION to resize will be used. If there are bound changes included in this
+     * WindowContainer transaction (from setBounds or scheduleFinishEnterPip), the SurfaceControl
+     * transaction will be synced with those bounds. If there are no changes, then
+     * the SurfaceControl transaction will be synced with the next bounds change. This means
+     * that you can call this, apply the WindowContainer transaction, and then later call
+     * dismissPip() to achieve synchronization.
+     */
+    public WindowContainerTransaction setBoundsChangeTransaction(IWindowContainer container,
+            SurfaceControl.Transaction t) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mBoundsChangeTransaction = t;
+        chg.mChangeMask |= Change.CHANGE_BOUNDS_TRANSACTION;
         return this;
     }
 
@@ -174,6 +195,8 @@ public class WindowContainerTransaction implements Parcelable {
      */
     public static class Change implements Parcelable {
         public static final int CHANGE_FOCUSABLE = 1;
+        public static final int CHANGE_BOUNDS_TRANSACTION = 1 << 1;
+        public static final int CHANGE_PIP_CALLBACK = 1 << 2;
 
         private final Configuration mConfiguration = new Configuration();
         private boolean mFocusable = true;
@@ -181,8 +204,8 @@ public class WindowContainerTransaction implements Parcelable {
         private @ActivityInfo.Config int mConfigSetMask = 0;
         private @WindowConfiguration.WindowConfig int mWindowSetMask = 0;
 
-        private boolean mSchedulePipCallback = false;
         private Rect mPinnedBounds = null;
+        private SurfaceControl.Transaction mBoundsChangeTransaction = null;
 
         public Change() {}
 
@@ -192,10 +215,13 @@ public class WindowContainerTransaction implements Parcelable {
             mChangeMask = in.readInt();
             mConfigSetMask = in.readInt();
             mWindowSetMask = in.readInt();
-            mSchedulePipCallback = (in.readInt() != 0);
-            if (mSchedulePipCallback ) {
+            if ((mChangeMask & Change.CHANGE_PIP_CALLBACK) != 0) {
                 mPinnedBounds = new Rect();
                 mPinnedBounds.readFromParcel(in);
+            }
+            if ((mChangeMask & Change.CHANGE_BOUNDS_TRANSACTION) != 0) {
+                mBoundsChangeTransaction =
+                    SurfaceControl.Transaction.CREATOR.createFromParcel(in);
             }
         }
 
@@ -233,6 +259,10 @@ public class WindowContainerTransaction implements Parcelable {
             return mPinnedBounds;
         }
 
+        public SurfaceControl.Transaction getBoundsChangeTransaction() {
+            return mBoundsChangeTransaction;
+        }
+
         @Override
         public String toString() {
             final boolean changesBounds =
@@ -264,9 +294,11 @@ public class WindowContainerTransaction implements Parcelable {
             dest.writeInt(mConfigSetMask);
             dest.writeInt(mWindowSetMask);
 
-            dest.writeInt(mSchedulePipCallback ? 1 : 0);
-            if (mSchedulePipCallback ) {
+            if (mPinnedBounds != null) {
                 mPinnedBounds.writeToParcel(dest, flags);
+            }
+            if (mBoundsChangeTransaction != null) {
+                mBoundsChangeTransaction.writeToParcel(dest, flags);
             }
         }
 
