@@ -497,9 +497,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         flashOutAnimator.addUpdateListener(animation ->
                 mScreenshotFlash.setAlpha((float) animation.getAnimatedValue()));
 
-        final PointF startPos = new PointF((float) bounds.left, (float) bounds.top);
-        final PointF finalPos = new PointF(mScreenshotOffsetXPx,
-                mDisplayMetrics.heightPixels - mScreenshotOffsetYPx - height * cornerScale);
+        final PointF startPos = new PointF(bounds.centerX(), bounds.centerY());
+        final PointF finalPos = new PointF(mScreenshotOffsetXPx + width * cornerScale / 2f,
+                mDisplayMetrics.heightPixels - mScreenshotOffsetYPx - height * cornerScale / 2f);
 
         ValueAnimator toCorner = ValueAnimator.ofFloat(0, 1);
         toCorner.setDuration(SCREENSHOT_TO_CORNER_Y_DURATION_MS);
@@ -517,11 +517,13 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             }
 
             if (t < xPositionPct) {
-                mScreenshotView.setX(MathUtils.lerp(
-                        startPos.x, finalPos.x, mFastOutSlowIn.getInterpolation(t / xPositionPct)));
+                float xCenter = MathUtils.lerp(startPos.x, finalPos.x,
+                        mFastOutSlowIn.getInterpolation(t / xPositionPct));
+                mScreenshotView.setX(xCenter - width * mScreenshotView.getScaleX() / 2f);
             }
-            mScreenshotView.setY(MathUtils.lerp(
-                    startPos.y, finalPos.y, mFastOutSlowIn.getInterpolation(t)));
+            float yCenter = MathUtils.lerp(startPos.y, finalPos.y,
+                    mFastOutSlowIn.getInterpolation(t));
+            mScreenshotView.setY(yCenter - height * mScreenshotView.getScaleY() / 2f);
         });
 
         toCorner.addListener(new AnimatorListenerAdapter() {
