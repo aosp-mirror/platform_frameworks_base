@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -86,7 +87,7 @@ public final class NetworkScore implements Parcelable {
         /** toString */
         public String toString() {
             return "latency = " + latencyMs + " downlinkBandwidth = " + downlinkBandwidthKBps
-                    + " uplinkBandwidth = " + uplinkBandwidthKBps;
+                    + "uplinkBandwidth = " + uplinkBandwidthKBps;
         }
 
         @NonNull
@@ -353,26 +354,16 @@ public final class NetworkScore implements Parcelable {
         private Metrics mLinkLayerMetrics = new Metrics(Metrics.LATENCY_UNKNOWN,
                 Metrics.BANDWIDTH_UNKNOWN, Metrics.BANDWIDTH_UNKNOWN);
         @NonNull
-        private Metrics mEndToEndMetrics = new Metrics(Metrics.LATENCY_UNKNOWN,
+        private Metrics mEndToMetrics = new Metrics(Metrics.LATENCY_UNKNOWN,
                 Metrics.BANDWIDTH_UNKNOWN, Metrics.BANDWIDTH_UNKNOWN);
         private int mSignalStrength = UNKNOWN_SIGNAL_STRENGTH;
         private int mRange = RANGE_UNKNOWN;
         private boolean mExiting = false;
         private int mLegacyScore = 0;
+        @NonNull private Bundle mExtensions = new Bundle();
 
         /** Create a new builder. */
         public Builder() { }
-
-        /** @hide */
-        public Builder(@NonNull final NetworkScore source) {
-            mPolicy = source.mPolicy;
-            mLinkLayerMetrics = source.mLinkLayerMetrics;
-            mEndToEndMetrics = source.mEndToEndMetrics;
-            mSignalStrength = source.mSignalStrength;
-            mRange = source.mRange;
-            mExiting = source.mExiting;
-            mLegacyScore = source.mLegacyScore;
-        }
 
         /** Add a policy flag. */
         @NonNull public Builder addPolicy(@Policy final int policy) {
@@ -394,7 +385,7 @@ public final class NetworkScore implements Parcelable {
 
         /** Set the end-to-end metrics. */
         @NonNull public Builder setEndToEndMetrics(@NonNull final Metrics endToEndMetrics) {
-            mEndToEndMetrics = endToEndMetrics;
+            mEndToMetrics = endToEndMetrics;
             return this;
         }
 
@@ -426,7 +417,7 @@ public final class NetworkScore implements Parcelable {
 
         /** Build the NetworkScore object represented by this builder. */
         @NonNull public NetworkScore build() {
-            return new NetworkScore(mPolicy, mLinkLayerMetrics, mEndToEndMetrics,
+            return new NetworkScore(mPolicy, mLinkLayerMetrics, mEndToMetrics,
                     mSignalStrength, mRange, mExiting, mLegacyScore);
         }
     }
