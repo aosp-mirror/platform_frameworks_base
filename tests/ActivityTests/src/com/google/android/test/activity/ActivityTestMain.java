@@ -32,6 +32,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -587,7 +588,7 @@ public class ActivityTestMain extends Activity {
             desc.setLabel("Added #" + i);
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
             if ((i&1) == 0) {
-                desc.setIcon(bitmap);
+                desc.setIcon(Icon.createWithBitmap(bitmap));
             }
             int taskId = am.addAppTask(this, intent, desc, bitmap);
             Log.i(TAG, "Added new task id #" + taskId);

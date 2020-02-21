@@ -98,6 +98,7 @@ package android.app {
   public static class ActivityManager.TaskDescription implements android.os.Parcelable {
     method public String getIconFilename();
     method public int getIconResource();
+    method @Nullable public String getIconResourcePackage();
   }
 
   public class ActivityOptions {
