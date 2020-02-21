@@ -175,6 +175,6 @@ public class SystemServerInitThreadPool {
         final ArrayList<Integer> pids = new ArrayList<>();
         pids.add(Process.myPid());
         ActivityManagerService.dumpStackTraces(pids, null, null,
-                Watchdog.getInterestingNativePids());
+                Watchdog.getInterestingNativePids(), null);
     }
 }

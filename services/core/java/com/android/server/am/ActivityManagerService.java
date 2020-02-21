@@ -3851,10 +3851,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param firstPids of dalvik VM processes to dump stack traces for first
      * @param lastPids of dalvik VM processes to dump stack traces for last
      * @param nativePids optional list of native pids to dump stack crawls
+     * @param logExceptionCreatingFile optional writer to which we log errors creating the file
      */
     public static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
-            ArrayList<Integer> nativePids) {
+            ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile) {
         ArrayList<Integer> extraPids = null;
 
         Slog.i(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
@@ -3894,8 +3895,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         // NOTE: We should consider creating the file in native code atomically once we've
         // gotten rid of the old scheme of dumping and lot of the code that deals with paths
         // can be removed.
-        File tracesFile = createAnrDumpFile(tracesDir);
-        if (tracesFile == null) {
+        File tracesFile;
+        try {
+            tracesFile = createAnrDumpFile(tracesDir);
+        } catch (IOException e) {
+            Slog.w(TAG, "Exception creating ANR dump file:", e);
+            if (logExceptionCreatingFile != null) {
+                logExceptionCreatingFile.append("----- Exception creating ANR dump file -----\n");
+                e.printStackTrace(new PrintWriter(logExceptionCreatingFile));
+            }
             return null;
         }
 
@@ -3906,7 +3914,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("ActivityManagerService.class")
     private static SimpleDateFormat sAnrFileDateFormat;
 
-    private static synchronized File createAnrDumpFile(File tracesDir) {
+    private static synchronized File createAnrDumpFile(File tracesDir) throws IOException {
         if (sAnrFileDateFormat == null) {
             sAnrFileDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
         }
@@ -3914,18 +3922,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         final String formattedDate = sAnrFileDateFormat.format(new Date());
         final File anrFile = new File(tracesDir, "anr_" + formattedDate);
 
-        try {
-            if (anrFile.createNewFile()) {
-                FileUtils.setPermissions(anrFile.getAbsolutePath(), 0600, -1, -1); // -rw-------
-                return anrFile;
-            } else {
-                Slog.w(TAG, "Unable to create ANR dump file: createNewFile failed");
-            }
-        } catch (IOException ioe) {
-            Slog.w(TAG, "Exception creating ANR dump file:", ioe);
+        if (anrFile.createNewFile()) {
+            FileUtils.setPermissions(anrFile.getAbsolutePath(), 0600, -1, -1); // -rw-------
+            return anrFile;
+        } else {
+            throw new IOException("Unable to create ANR dump file: createNewFile failed");
         }
-
-        return null;
     }
 
     /**
