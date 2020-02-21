@@ -2531,7 +2531,7 @@ final public class MediaCodec {
             int offset, int size, long presentationTimeUs, int flags)
         throws CryptoException {
         synchronized(mBufferLock) {
-            if (mBufferMode != BUFFER_MODE_LEGACY) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException();
             }
             invalidateByteBuffer(mCachedInputBuffers, index);
@@ -2783,7 +2783,7 @@ final public class MediaCodec {
             long presentationTimeUs,
             int flags) throws CryptoException {
         synchronized(mBufferLock) {
-            if (mBufferMode != BUFFER_MODE_LEGACY) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException();
             }
             invalidateByteBuffer(mCachedInputBuffers, index);
@@ -2818,7 +2818,7 @@ final public class MediaCodec {
      */
     public final int dequeueInputBuffer(long timeoutUs) {
         synchronized (mBufferLock) {
-            if (mBufferMode != BUFFER_MODE_LEGACY) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException();
             }
         }
@@ -3534,7 +3534,7 @@ final public class MediaCodec {
     public final int dequeueOutputBuffer(
             @NonNull BufferInfo info, long timeoutUs) {
         synchronized (mBufferLock) {
-            if (mBufferMode != BUFFER_MODE_LEGACY) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException();
             }
         }
@@ -3916,7 +3916,7 @@ final public class MediaCodec {
     @NonNull
     public ByteBuffer[] getInputBuffers() {
         synchronized (mBufferLock) {
-            if (mBufferMode != BUFFER_MODE_LEGACY) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException();
             }
             if (mCachedInputBuffers == null) {
@@ -3952,7 +3952,7 @@ final public class MediaCodec {
     @NonNull
     public ByteBuffer[] getOutputBuffers() {
         synchronized (mBufferLock) {
-            if (mBufferMode != BUFFER_MODE_LEGACY) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException();
             }
             if (mCachedOutputBuffers == null) {
@@ -3984,7 +3984,7 @@ final public class MediaCodec {
     @Nullable
     public ByteBuffer getInputBuffer(int index) {
         synchronized (mBufferLock) {
-            if (mBufferMode != BUFFER_MODE_LEGACY) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException();
             }
         }
@@ -4018,7 +4018,7 @@ final public class MediaCodec {
     @Nullable
     public Image getInputImage(int index) {
         synchronized (mBufferLock) {
-            if (mBufferMode != BUFFER_MODE_LEGACY) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException();
             }
         }
@@ -4052,7 +4052,7 @@ final public class MediaCodec {
     @Nullable
     public ByteBuffer getOutputBuffer(int index) {
         synchronized (mBufferLock) {
-            if (mBufferMode != BUFFER_MODE_LEGACY) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException();
             }
         }
@@ -4085,7 +4085,7 @@ final public class MediaCodec {
     @Nullable
     public Image getOutputImage(int index) {
         synchronized (mBufferLock) {
-            if (mBufferMode != BUFFER_MODE_LEGACY) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
                 throw new IncompatibleWithBlockModelException();
             }
         }
