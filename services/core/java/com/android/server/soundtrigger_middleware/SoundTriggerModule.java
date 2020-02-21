@@ -123,7 +123,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
      */
     synchronized @NonNull
     ISoundTriggerModule attach(@NonNull ISoundTriggerCallback callback) {
-        Log.d(TAG, "attach()");
         Session session = new Session(callback);
         mActiveSessions.add(session);
         return session;
@@ -149,8 +148,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
      * @param active true iff external capture is active.
      */
     synchronized void setExternalCaptureState(boolean active) {
-        Log.d(TAG, String.format("setExternalCaptureState(active=%b)", active));
-
         if (mProperties.concurrentCapture) {
             // If we support concurrent capture, we don't care about any of this.
             return;
@@ -235,7 +232,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         @Override
         public void detach() {
-            Log.d(TAG, "detach()");
             synchronized (SoundTriggerModule.this) {
                 if (mCallback == null) {
                     return;
@@ -247,8 +243,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         @Override
         public int loadModel(@NonNull SoundModel model) {
-            Log.d(TAG, String.format("loadModel(model=%s)", model));
-
             // We must do this outside the lock, to avoid possible deadlocks with the remote process
             // that provides the audio sessions, which may also be calling into us.
             SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
@@ -276,8 +270,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         @Override
         public int loadPhraseModel(@NonNull PhraseSoundModel model) {
-            Log.d(TAG, String.format("loadPhraseModel(model=%s)", model));
-
             // We must do this outside the lock, to avoid possible deadlocks with the remote process
             // that provides the audio sessions, which may also be calling into us.
             SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession =
@@ -306,10 +298,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         @Override
         public void unloadModel(int modelHandle) {
-            Log.d(TAG, String.format("unloadModel(handle=%d)", modelHandle));
-
             int sessionId;
-
             synchronized (SoundTriggerModule.this) {
                 checkValid();
                 sessionId = mLoadedModels.get(modelHandle).unload();
@@ -323,8 +312,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         @Override
         public void startRecognition(int modelHandle, @NonNull RecognitionConfig config) {
-            Log.d(TAG,
-                    String.format("startRecognition(handle=%d, config=%s)", modelHandle, config));
             synchronized (SoundTriggerModule.this) {
                 checkValid();
                 mLoadedModels.get(modelHandle).startRecognition(config);
@@ -333,7 +320,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         @Override
         public void stopRecognition(int modelHandle) {
-            Log.d(TAG, String.format("stopRecognition(handle=%d)", modelHandle));
             synchronized (SoundTriggerModule.this) {
                 mLoadedModels.get(modelHandle).stopRecognition();
             }
@@ -341,7 +327,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         @Override
         public void forceRecognitionEvent(int modelHandle) {
-            Log.d(TAG, String.format("forceRecognitionEvent(handle=%d)", modelHandle));
             synchronized (SoundTriggerModule.this) {
                 checkValid();
                 mLoadedModels.get(modelHandle).forceRecognitionEvent();
@@ -350,9 +335,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         @Override
         public void setModelParameter(int modelHandle, int modelParam, int value) {
-            Log.d(TAG,
-                    String.format("setModelParameter(handle=%d, param=%d, value=%d)", modelHandle,
-                            modelParam, value));
             synchronized (SoundTriggerModule.this) {
                 checkValid();
                 mLoadedModels.get(modelHandle).setParameter(modelParam, value);
@@ -361,8 +343,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         @Override
         public int getModelParameter(int modelHandle, int modelParam) {
-            Log.d(TAG, String.format("getModelParameter(handle=%d, param=%d)", modelHandle,
-                    modelParam));
             synchronized (SoundTriggerModule.this) {
                 checkValid();
                 return mLoadedModels.get(modelHandle).getParameter(modelParam);
@@ -372,8 +352,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
         @Override
         @Nullable
         public ModelParameterRange queryModelParameterSupport(int modelHandle, int modelParam) {
-            Log.d(TAG, String.format("queryModelParameterSupport(handle=%d, param=%d)", modelHandle,
-                    modelParam));
             synchronized (SoundTriggerModule.this) {
                 checkValid();
                 return mLoadedModels.get(modelHandle).queryModelParameterSupport(modelParam);
@@ -584,8 +562,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
             public void recognitionCallback(
                     @NonNull ISoundTriggerHwCallback.RecognitionEvent recognitionEvent,
                     int cookie) {
-                Log.d(TAG, String.format("recognitionCallback_2_1(event=%s, cookie=%d)",
-                        recognitionEvent, cookie));
                 synchronized (SoundTriggerModule.this) {
                     android.media.soundtrigger_middleware.RecognitionEvent aidlEvent =
                             ConversionUtil.hidl2aidlRecognitionEvent(recognitionEvent);
@@ -608,8 +584,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
             public void phraseRecognitionCallback(
                     @NonNull ISoundTriggerHwCallback.PhraseRecognitionEvent phraseRecognitionEvent,
                     int cookie) {
-                Log.d(TAG, String.format("phraseRecognitionCallback_2_1(event=%s, cookie=%d)",
-                        phraseRecognitionEvent, cookie));
                 synchronized (SoundTriggerModule.this) {
                     android.media.soundtrigger_middleware.PhraseRecognitionEvent aidlEvent =
                             ConversionUtil.hidl2aidlPhraseRecognitionEvent(phraseRecognitionEvent);
