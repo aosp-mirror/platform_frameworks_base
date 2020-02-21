@@ -40,10 +40,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
@@ -103,7 +103,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
             KeyguardBypassController keyguardBypassController, SysuiColorExtractor colorExtractor,
-            DumpController dumpController) {
+            DumpManager dumpManager) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
@@ -113,7 +113,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         mLpChanged = new LayoutParams();
         mKeyguardBypassController = keyguardBypassController;
         mColorExtractor = colorExtractor;
-        dumpController.registerDumpable(this);
+        dumpManager.registerDumpable(getClass().getName(), this);
 
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);

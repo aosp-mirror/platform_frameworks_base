@@ -39,10 +39,10 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.CollectionUtils;
-import com.android.systemui.DumpController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.external.CustomTile;
@@ -89,7 +89,7 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private Provider<AutoTileManager> mAutoTiles;
     @Mock
-    private DumpController mDumpController;
+    private DumpManager mDumpManager;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
@@ -111,7 +111,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mLooper = TestableLooper.get(this);
         mHandler = new Handler(mLooper.getLooper());
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
-                mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpController,
+                mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpManager,
                 mBroadcastDispatcher, mStatusBar, mQSLogger);
         setUpTileFactory();
         Settings.Secure.putStringForUser(mContext.getContentResolver(), QSTileHost.TILES_SETTING,
@@ -226,10 +226,10 @@ public class QSTileHostTest extends SysuiTestCase {
         TestQSTileHost(Context context, StatusBarIconController iconController,
                 QSFactoryImpl defaultFactory, Handler mainHandler, Looper bgLooper,
                 PluginManager pluginManager, TunerService tunerService,
-                Provider<AutoTileManager> autoTiles, DumpController dumpController,
+                Provider<AutoTileManager> autoTiles, DumpManager dumpManager,
                 BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger) {
             super(context, iconController, defaultFactory, mainHandler, bgLooper, pluginManager,
-                    tunerService, autoTiles, dumpController, broadcastDispatcher,
+                    tunerService, autoTiles, dumpManager, broadcastDispatcher,
                     Optional.of(statusBar), qsLogger);
         }
 

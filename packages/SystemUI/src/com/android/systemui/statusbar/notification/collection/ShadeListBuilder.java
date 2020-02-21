@@ -34,8 +34,8 @@ import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
@@ -101,11 +101,11 @@ public class ShadeListBuilder implements Dumpable {
     public ShadeListBuilder(
             SystemClock systemClock,
             ShadeListBuilderLogger logger,
-            DumpController dumpController) {
+            DumpManager dumpManager) {
         Assert.isMainThread();
         mSystemClock = systemClock;
         mLogger = logger;
-        dumpController.registerDumpable(TAG, this);
+        dumpManager.registerDumpable(TAG, this);
     }
 
     /**

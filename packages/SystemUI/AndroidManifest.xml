@@ -283,6 +283,12 @@
             android:exported="true"
         />
 
+        <!-- Service for dumping extremely verbose content during a bug report -->
+        <service android:name=".dump.SystemUIAuxiliaryDumpService"
+             android:exported="false"
+             android:permission="com.android.systemui.permission.SELF"
+        />
+
         <!-- On user switch, this service is started to ensure that the associated SystemUI
              process for the current user is started. See the resource
              "config_systemUIServiceComponentsPerUser".

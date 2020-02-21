@@ -29,12 +29,12 @@ import android.service.controls.DeviceTypes
 import android.service.controls.actions.ControlAction
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.DumpController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertEquals
@@ -66,8 +66,6 @@ class ControlsControllerImplTest : SysuiTestCase() {
     private lateinit var uiController: ControlsUiController
     @Mock
     private lateinit var bindingController: ControlsBindingController
-    @Mock
-    private lateinit var dumpController: DumpController
     @Mock
     private lateinit var pendingIntent: PendingIntent
     @Mock
@@ -136,7 +134,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 listingController,
                 broadcastDispatcher,
                 Optional.of(persistenceWrapper),
-                dumpController
+                mock(DumpManager::class.java)
         )
         assertTrue(controller.available)
         verify(broadcastDispatcher).registerReceiver(
@@ -169,7 +167,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 listingController,
                 broadcastDispatcher,
                 Optional.of(persistenceWrapper),
-                dumpController
+                mock(DumpManager::class.java)
         )
         assertEquals(listOf(TEST_CONTROL_INFO), controller_other.getFavoriteControls())
     }

@@ -21,10 +21,18 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-public abstract class SystemUI {
+/**
+ * A top-level module of system UI code (sometimes called "system UI services" elsewhere in code).
+ * Which SystemUI modules are loaded can be controlled via a config resource.
+ *
+ * @see SystemUIApplication#startServicesIfNeeded()
+ */
+public abstract class SystemUI implements Dumpable {
     protected final Context mContext;
 
     public SystemUI(Context context) {
@@ -36,7 +44,8 @@ public abstract class SystemUI {
     protected void onConfigurationChanged(Configuration newConfig) {
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
     }
 
     protected void onBootCompleted() {

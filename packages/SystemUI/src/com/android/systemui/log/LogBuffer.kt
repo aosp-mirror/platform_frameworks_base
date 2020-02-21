@@ -17,9 +17,9 @@
 package com.android.systemui.log
 
 import android.util.Log
-import com.android.systemui.DumpController
-import com.android.systemui.Dumpable
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.dagger.LogModule
+import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.ArrayDeque
 import java.util.Locale
@@ -35,11 +35,10 @@ import java.util.Locale
  * You can dump the entire buffer at any time by running:
  *
  * ```
- * $ adb shell dumpsys activity service com.android.systemui/.SystemUIService \
- *      dependency DumpController <bufferName>
+ * $ adb shell dumpsys activity service com.android.systemui/.SystemUIService <bufferName>
  * ```
  *
- * where `bufferName` is the (case-sensitive) [name] passed to the constructor.
+ * ...where `bufferName` is the (case-sensitive) [name] passed to the constructor.
  *
  * By default, only messages of WARN level or higher are echoed to logcat, but this can be adjusted
  * locally (usually for debugging purposes).
@@ -75,8 +74,8 @@ class LogBuffer(
 ) {
     private val buffer: ArrayDeque<LogMessageImpl> = ArrayDeque()
 
-    fun attach(dumpController: DumpController) {
-        dumpController.registerDumpable(name, onDump)
+    fun attach(dumpManager: DumpManager) {
+        dumpManager.registerBuffer(name, this)
     }
 
     /**
@@ -174,22 +173,26 @@ class LogBuffer(
     }
 
     /** Converts the entire buffer to a newline-delimited string */
-    fun dump(): String {
+    fun dump(pw: PrintWriter, tailLength: Int) {
         synchronized(buffer) {
-            val sb = StringBuilder()
-            for (message in buffer) {
-                dumpMessage(message, sb)
+            val start = if (tailLength <= 0) { 0 } else { buffer.size - tailLength }
+
+            for ((i, message) in buffer.withIndex()) {
+                if (i >= start) {
+                    dumpMessage(message, pw)
+                }
             }
-            return sb.toString()
         }
     }
 
-    private fun dumpMessage(message: LogMessage, sb: StringBuilder) {
-        sb.append(DATE_FORMAT.format(message.timestamp))
-                .append(" ").append(message.level)
-                .append(" ").append(message.tag)
-                .append(" ").append(message.printer(message))
-                .append("\n")
+    private fun dumpMessage(message: LogMessage, pw: PrintWriter) {
+        pw.print(DATE_FORMAT.format(message.timestamp))
+        pw.print(" ")
+        pw.print(message.level)
+        pw.print(" ")
+        pw.print(message.tag)
+        pw.print(" ")
+        pw.println(message.printer(message))
     }
 
     private fun echoToLogcat(message: LogMessage) {
@@ -202,10 +205,6 @@ class LogBuffer(
             LogLevel.ERROR -> Log.e(message.tag, strMessage)
             LogLevel.WTF -> Log.wtf(message.tag, strMessage)
         }
-    }
-
-    private val onDump = Dumpable { _, pw, _ ->
-        pw.println(dump())
     }
 }
 

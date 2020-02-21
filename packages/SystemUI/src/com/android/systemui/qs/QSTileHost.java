@@ -30,12 +30,12 @@ import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -81,7 +81,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final TileServices mServices;
     private final TunerService mTunerService;
     private final PluginManager mPluginManager;
-    private final DumpController mDumpController;
+    private final DumpManager mDumpManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final QSLogger mQSLogger;
 
@@ -101,7 +101,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             PluginManager pluginManager,
             TunerService tunerService,
             Provider<AutoTileManager> autoTiles,
-            DumpController dumpController,
+            DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             Optional<StatusBar> statusBarOptional,
             QSLogger qsLogger) {
@@ -109,7 +109,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mContext = context;
         mTunerService = tunerService;
         mPluginManager = pluginManager;
-        mDumpController = dumpController;
+        mDumpManager = dumpManager;
         mQSLogger = qsLogger;
         mBroadcastDispatcher = broadcastDispatcher;
 
@@ -119,7 +119,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         defaultFactory.setHost(this);
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
-        mDumpController.registerDumpable(TAG, this);
+        mDumpManager.registerDumpable(TAG, this);
 
         mainHandler.post(() -> {
             // This is technically a hack to avoid circular dependency of
@@ -141,7 +141,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mTunerService.removeTunable(this);
         mServices.destroy();
         mPluginManager.removePluginListener(this);
-        mDumpController.unregisterDumpable(this);
+        mDumpManager.unregisterDumpable(TAG);
     }
 
     @Override

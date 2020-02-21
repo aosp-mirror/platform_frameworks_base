@@ -20,8 +20,8 @@ import android.content.ContentResolver;
 import android.os.Build;
 import android.os.Looper;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.log.LogcatEchoTrackerDebug;
@@ -43,9 +43,9 @@ public class LogModule {
     @DozeLog
     public static LogBuffer provideDozeLogBuffer(
             LogcatEchoTracker bufferFilter,
-            DumpController dumpController) {
+            DumpManager dumpManager) {
         LogBuffer buffer = new LogBuffer("DozeLog", 100, 10, bufferFilter);
-        buffer.attach(dumpController);
+        buffer.attach(dumpManager);
         return buffer;
     }
 
@@ -55,9 +55,9 @@ public class LogModule {
     @NotificationLog
     public static LogBuffer provideNotificationsLogBuffer(
             LogcatEchoTracker bufferFilter,
-            DumpController dumpController) {
-        LogBuffer buffer = new LogBuffer("NotifLog2", 1000, 10, bufferFilter);
-        buffer.attach(dumpController);
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("NotifLog", 1000, 10, bufferFilter);
+        buffer.attach(dumpManager);
         return buffer;
     }
 
@@ -67,9 +67,9 @@ public class LogModule {
     @QSLog
     public static LogBuffer provideQuickSettingsLogBuffer(
             LogcatEchoTracker bufferFilter,
-            DumpController dumpController) {
+            DumpManager dumpManager) {
         LogBuffer buffer = new LogBuffer("QSLog", 500, 10, bufferFilter);
-        buffer.attach(dumpController);
+        buffer.attach(dumpManager);
         return buffer;
     }
 
