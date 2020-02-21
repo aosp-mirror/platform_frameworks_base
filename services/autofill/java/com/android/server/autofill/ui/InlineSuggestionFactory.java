@@ -134,7 +134,7 @@ public final class InlineSuggestionFactory {
         if (inlineAuthentication != null) {
             InlineSuggestion inlineAuthSuggestion = createInlineAuthSuggestion(inlineAuthentication,
                     remoteRenderService, onClickFactory, onErrorCallback,
-                    request.getHostInputToken());
+                    request.getHostInputToken(), request.getHostDisplayId());
             inlineSuggestions.add(inlineAuthSuggestion);
 
             return new InlineSuggestionsResponse(inlineSuggestions);
@@ -164,7 +164,7 @@ public final class InlineSuggestionFactory {
             InlineSuggestion inlineSuggestion = createInlineSuggestion(isAugmented, dataset,
                     fieldIndex, mergedInlinePresentation(request, datasetIndex, inlinePresentation),
                     onClickFactory, remoteRenderService, onErrorCallback,
-                    request.getHostInputToken());
+                    request.getHostInputToken(), request.getHostDisplayId());
 
             inlineSuggestions.add(inlineSuggestion);
         }
@@ -172,7 +172,8 @@ public final class InlineSuggestionFactory {
             for (InlinePresentation inlinePresentation : inlineActions) {
                 final InlineSuggestion inlineAction = createInlineAction(isAugmented, context,
                         mergedInlinePresentation(request, 0, inlinePresentation),
-                        remoteRenderService, onErrorCallback, request.getHostInputToken());
+                        remoteRenderService, onErrorCallback, request.getHostInputToken(),
+                        request.getHostDisplayId());
                 inlineSuggestions.add(inlineAction);
             }
         }
@@ -215,7 +216,8 @@ public final class InlineSuggestionFactory {
             @NonNull Context context,
             @NonNull InlinePresentation inlinePresentation,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
-            @NonNull Runnable onErrorCallback, @Nullable IBinder hostInputToken) {
+            @NonNull Runnable onErrorCallback, @Nullable IBinder hostInputToken,
+            int displayId) {
         // TODO(b/146453195): fill in the autofill hint properly.
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
@@ -227,7 +229,7 @@ public final class InlineSuggestionFactory {
         };
         return new InlineSuggestion(inlineSuggestionInfo,
                 createInlineContentProvider(inlinePresentation, onClickAction, onErrorCallback,
-                        remoteRenderService, hostInputToken));
+                        remoteRenderService, hostInputToken, displayId));
     }
 
     private static InlineSuggestion createInlineSuggestion(boolean isAugmented,
@@ -235,7 +237,8 @@ public final class InlineSuggestionFactory {
             @NonNull InlinePresentation inlinePresentation,
             @NonNull BiConsumer<Dataset, Integer> onClickFactory,
             @NonNull RemoteInlineSuggestionRenderService remoteRenderService,
-            @NonNull Runnable onErrorCallback, @Nullable IBinder hostInputToken) {
+            @NonNull Runnable onErrorCallback, @Nullable IBinder hostInputToken,
+            int displayId) {
         // TODO(b/146453195): fill in the autofill hint properly.
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
@@ -246,7 +249,7 @@ public final class InlineSuggestionFactory {
         final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
                 createInlineContentProvider(inlinePresentation,
                         () -> onClickFactory.accept(dataset, datasetIndex), onErrorCallback,
-                        remoteRenderService, hostInputToken));
+                        remoteRenderService, hostInputToken, displayId));
 
         return inlineSuggestion;
     }
@@ -255,7 +258,7 @@ public final class InlineSuggestionFactory {
             @NonNull InlinePresentation inlinePresentation,
             @NonNull RemoteInlineSuggestionRenderService remoteRenderService,
             @NonNull BiConsumer<Dataset, Integer> onClickFactory, @NonNull Runnable onErrorCallback,
-            @Nullable IBinder hostInputToken) {
+            @Nullable IBinder hostInputToken, int displayId) {
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
                 InlineSuggestionInfo.SOURCE_AUTOFILL, null, InlineSuggestionInfo.TYPE_SUGGESTION);
@@ -264,7 +267,7 @@ public final class InlineSuggestionFactory {
                 createInlineContentProvider(inlinePresentation,
                         () -> onClickFactory.accept(null,
                                 AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED),
-                        onErrorCallback, remoteRenderService, hostInputToken));
+                        onErrorCallback, remoteRenderService, hostInputToken, displayId));
     }
 
     /**
@@ -291,7 +294,8 @@ public final class InlineSuggestionFactory {
             @NonNull InlinePresentation inlinePresentation, @Nullable Runnable onClickAction,
             @NonNull Runnable onErrorCallback,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
-            @Nullable IBinder hostInputToken) {
+            @Nullable IBinder hostInputToken,
+            int displayId) {
         return new IInlineContentProvider.Stub() {
             @Override
             public void provideContent(int width, int height, IInlineContentCallback callback) {
@@ -305,7 +309,7 @@ public final class InlineSuggestionFactory {
                     }
 
                     remoteRenderService.renderSuggestion(uiCallback, inlinePresentation,
-                            width, height, hostInputToken);
+                            width, height, hostInputToken, displayId);
                 });
             }
         };
