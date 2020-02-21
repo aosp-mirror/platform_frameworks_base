@@ -486,6 +486,15 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // CarFacetButtonController was reset therefore we need to re-add the status bar elements
         // to the controller.
         mCarFacetButtonController.addAllFacetButtons(mStatusBarWindow);
+
+        // Upon restarting the Navigation Bar, CarFacetButtonController should immediately apply the
+        // selection state that reflects the current task stack.
+        try {
+            mCarFacetButtonController.taskChanged(
+                    ActivityTaskManager.getService().getAllStackInfos());
+        } catch (Exception e) {
+            Log.e(TAG, "Getting StackInfo from activity manager failed", e);
+        }
     }
 
     private void addTemperatureViewToController(View v) {
