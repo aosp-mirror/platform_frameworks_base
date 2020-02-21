@@ -30,6 +30,7 @@ java_library_static {
         "android.hardware.vibrator-java",
         "app-compat-annotations",
         "framework-tethering-stubs",
+        "ike-stubs",
     ],
 
     required: [
@@ -54,7 +55,6 @@ java_library_static {
         "android.hidl.manager-V1.2-java",
         "dnsresolver_aidl_interface-V2-java",
         "netd_event_listener_interface-java",
-        "ike-stubs",
     ],
 }
 
