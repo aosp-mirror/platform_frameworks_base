@@ -5474,6 +5474,11 @@ public class NotificationManagerService extends SystemService {
             });
         }
 
+        @Override
+        public void onConversationRemoved(String pkg, int uid, String conversationId) {
+            onConversationRemovedInternal(pkg, uid, conversationId);
+        }
+
         @GuardedBy("mNotificationLock")
         private void removeForegroundServiceFlagLocked(NotificationRecord r) {
             if (r == null) {
@@ -5676,7 +5681,7 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground));
     }
 
-    public void onConversationRemoved(String pkg, int uid, String conversationId) {
+    private void onConversationRemovedInternal(String pkg, int uid, String conversationId) {
         checkCallerIsSystem();
         Preconditions.checkStringNotEmpty(pkg);
         Preconditions.checkStringNotEmpty(conversationId);
