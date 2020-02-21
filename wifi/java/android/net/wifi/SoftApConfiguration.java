@@ -762,7 +762,8 @@ public final class SoftApConfiguration implements Parcelable {
          * {@link #setBand(@BandType int)}.
          *
          * The channel auto selection will offload to driver when
-         * {@link SoftApCapability#isFeatureSupported(SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD)}
+         * {@link SoftApCapability#areFeaturesSupported(
+         * SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD)}
          * return true. Driver will auto select best channel which based on environment
          * interference to get best performance. Check {@link SoftApCapability} to get more detail.
          *
@@ -807,7 +808,7 @@ public final class SoftApConfiguration implements Parcelable {
          *
          * <p>
          * Use {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
-         * {@link SoftApCapability#isFeatureSupported(int)}
+         * {@link SoftApCapability#areFeaturesSupported(int)}
          * with {@link SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT} to determine whether
          * or not this feature is supported.
          *
@@ -882,7 +883,7 @@ public final class SoftApConfiguration implements Parcelable {
          * <p>
          * This method requires hardware support. Hardware support can be determined using
          * {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
-         * {@link SoftApCapability#isFeatureSupported(int)}
+         * {@link SoftApCapability#areFeaturesSupported(int)}
          * with {@link SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT}
          *
          * <p>
