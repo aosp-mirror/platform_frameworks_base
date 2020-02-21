@@ -16,7 +16,7 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.parsing.ParsingPackageImpl.sForString;
+import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
 
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -25,7 +25,6 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide **/
@@ -67,7 +66,7 @@ public class ParsedService extends ParsedMainComponent {
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(this.foregroundServiceType);
-        sForString.parcel(this.permission, dest, flags);
+        sForInternedString.parcel(this.permission, dest, flags);
     }
 
     public ParsedService() {
@@ -76,7 +75,7 @@ public class ParsedService extends ParsedMainComponent {
     protected ParsedService(Parcel in) {
         super(in);
         this.foregroundServiceType = in.readInt();
-        this.permission = sForString.unparcel(in);
+        this.permission = sForInternedString.unparcel(in);
     }
 
     public static final Parcelable.Creator<ParsedService> CREATOR = new Creator<ParsedService>() {

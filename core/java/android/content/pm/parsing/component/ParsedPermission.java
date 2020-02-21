@@ -16,8 +16,6 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.parsing.ParsingPackageImpl.sForString;
-
 import android.annotation.Nullable;
 import android.content.pm.PermissionInfo;
 import android.os.Parcel;
@@ -26,7 +24,6 @@ import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide */
@@ -123,7 +120,7 @@ public class ParsedPermission extends ParsedComponent {
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeString(this.backgroundPermission);
-        sForString.parcel(this.group, dest, flags);
+        dest.writeString(this.group);
         dest.writeInt(this.requestRes);
         dest.writeInt(this.protectionLevel);
         dest.writeBoolean(this.tree);
@@ -135,7 +132,7 @@ public class ParsedPermission extends ParsedComponent {
         // We use the boot classloader for all classes that we load.
         final ClassLoader boot = Object.class.getClassLoader();
         this.backgroundPermission = in.readString();
-        this.group = sForString.unparcel(in);
+        this.group = in.readString();
         this.requestRes = in.readInt();
         this.protectionLevel = in.readInt();
         this.tree = in.readBoolean();

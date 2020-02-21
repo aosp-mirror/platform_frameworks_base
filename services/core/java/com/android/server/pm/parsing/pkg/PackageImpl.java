@@ -21,31 +21,23 @@ import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageImpl;
 import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.res.TypedArray;
-import android.os.Environment;
 import android.os.Parcel;
-import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.parsing.PackageInfoUtils;
 
-import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -486,16 +478,16 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        sForString.parcel(this.manifestPackageName, dest, flags);
+        sForInternedString.parcel(this.manifestPackageName, dest, flags);
         dest.writeBoolean(this.stub);
-        sForString.parcel(this.nativeLibraryDir, dest, flags);
-        sForString.parcel(this.nativeLibraryRootDir, dest, flags);
+        dest.writeString(this.nativeLibraryDir);
+        dest.writeString(this.nativeLibraryRootDir);
         dest.writeBoolean(this.nativeLibraryRootRequiresIsa);
-        sForString.parcel(this.primaryCpuAbi, dest, flags);
-        sForString.parcel(this.secondaryCpuAbi, dest, flags);
-        sForString.parcel(this.secondaryNativeLibraryDir, dest, flags);
-        sForString.parcel(this.seInfo, dest, flags);
-        sForString.parcel(this.seInfoUser, dest, flags);
+        sForInternedString.parcel(this.primaryCpuAbi, dest, flags);
+        sForInternedString.parcel(this.secondaryCpuAbi, dest, flags);
+        dest.writeString(this.secondaryNativeLibraryDir);
+        dest.writeString(this.seInfo);
+        dest.writeString(this.seInfoUser);
         dest.writeInt(this.uid);
         dest.writeBoolean(this.coreApp);
         dest.writeBoolean(this.system);
@@ -511,16 +503,16 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
 
     public PackageImpl(Parcel in) {
         super(in);
-        this.manifestPackageName = sForString.unparcel(in);
+        this.manifestPackageName = sForInternedString.unparcel(in);
         this.stub = in.readBoolean();
-        this.nativeLibraryDir = sForString.unparcel(in);
-        this.nativeLibraryRootDir = sForString.unparcel(in);
+        this.nativeLibraryDir = in.readString();
+        this.nativeLibraryRootDir = in.readString();
         this.nativeLibraryRootRequiresIsa = in.readBoolean();
-        this.primaryCpuAbi = sForString.unparcel(in);
-        this.secondaryCpuAbi = sForString.unparcel(in);
-        this.secondaryNativeLibraryDir = sForString.unparcel(in);
-        this.seInfo = sForString.unparcel(in);
-        this.seInfoUser = sForString.unparcel(in);
+        this.primaryCpuAbi = sForInternedString.unparcel(in);
+        this.secondaryCpuAbi = sForInternedString.unparcel(in);
+        this.secondaryNativeLibraryDir = in.readString();
+        this.seInfo = in.readString();
+        this.seInfoUser = in.readString();
         this.uid = in.readInt();
         this.coreApp = in.readBoolean();
         this.system = in.readBoolean();

@@ -16,7 +16,7 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.parsing.ParsingPackageImpl.sForString;
+import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
@@ -131,7 +131,7 @@ public abstract class ParsedComponent implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        sForString.parcel(this.name, dest, flags);
+        dest.writeString(this.name);
         dest.writeInt(this.getIcon());
         dest.writeInt(this.getLabelRes());
         dest.writeCharSequence(this.getNonLocalizedLabel());
@@ -139,7 +139,7 @@ public abstract class ParsedComponent implements Parcelable {
         dest.writeInt(this.getBanner());
         dest.writeInt(this.getDescriptionRes());
         dest.writeInt(this.getFlags());
-        sForString.parcel(this.packageName, dest, flags);
+        sForInternedString.parcel(this.packageName, dest, flags);
         sForIntentInfos.parcel(this.getIntents(), dest, flags);
         dest.writeBundle(this.metaData);
     }
@@ -148,7 +148,7 @@ public abstract class ParsedComponent implements Parcelable {
         // We use the boot classloader for all classes that we load.
         final ClassLoader boot = Object.class.getClassLoader();
         //noinspection ConstantConditions
-        this.name = sForString.unparcel(in);
+        this.name = in.readString();
         this.icon = in.readInt();
         this.labelRes = in.readInt();
         this.nonLocalizedLabel = in.readCharSequence();
@@ -157,7 +157,7 @@ public abstract class ParsedComponent implements Parcelable {
         this.descriptionRes = in.readInt();
         this.flags = in.readInt();
         //noinspection ConstantConditions
-        this.packageName = sForString.unparcel(in);
+        this.packageName = sForInternedString.unparcel(in);
         this.intents = sForIntentInfos.unparcel(in);
         this.metaData = in.readBundle(boot);
     }
