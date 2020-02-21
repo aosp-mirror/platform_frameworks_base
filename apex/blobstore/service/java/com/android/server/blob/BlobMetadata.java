@@ -26,6 +26,7 @@ import static android.app.blob.XmlTags.TAG_ACCESS_MODE;
 import static android.app.blob.XmlTags.TAG_BLOB_HANDLE;
 import static android.app.blob.XmlTags.TAG_COMMITTER;
 import static android.app.blob.XmlTags.TAG_LEASEE;
+import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.O_RDONLY;
 
 import static com.android.server.blob.BlobStoreConfig.TAG;
@@ -88,7 +89,7 @@ class BlobMetadata {
     private final ArrayMap<String, ArraySet<RevocableFileDescriptor>> mRevocableFds =
             new ArrayMap<>();
 
-    // Do not access this directly, instead use getSessionFile().
+    // Do not access this directly, instead use #getBlobFile().
     private File mBlobFile;
 
     BlobMetadata(Context context, long blobId, BlobHandle blobHandle, int userId) {
@@ -112,12 +113,16 @@ class BlobMetadata {
 
     void addCommitter(@NonNull Committer committer) {
         synchronized (mMetadataLock) {
+            // We need to override the committer data, so first remove any existing
+            // committer before adding the new one.
+            mCommitters.remove(committer);
             mCommitters.add(committer);
         }
     }
 
     void addCommitters(ArraySet<Committer> committers) {
         synchronized (mMetadataLock) {
+            mCommitters.clear();
             mCommitters.addAll(committers);
         }
     }
@@ -147,13 +152,18 @@ class BlobMetadata {
     void addLeasee(String callingPackage, int callingUid, int descriptionResId,
             CharSequence description, long leaseExpiryTimeMillis) {
         synchronized (mMetadataLock) {
-            mLeasees.add(new Leasee(callingPackage, callingUid,
-                    descriptionResId, description, leaseExpiryTimeMillis));
+            // We need to override the leasee data, so first remove any existing
+            // leasee before adding the new one.
+            final Leasee leasee = new Leasee(callingPackage, callingUid,
+                    descriptionResId, description, leaseExpiryTimeMillis);
+            mLeasees.remove(leasee);
+            mLeasees.add(leasee);
         }
     }
 
     void addLeasees(ArraySet<Leasee> leasees) {
         synchronized (mMetadataLock) {
+            mLeasees.clear();
             mLeasees.addAll(leasees);
         }
     }
@@ -178,7 +188,11 @@ class BlobMetadata {
         }
     }
 
-    boolean isAccessAllowedForCaller(String callingPackage, int callingUid) {
+    long getSize() {
+        return getBlobFile().length();
+    }
+
+    boolean isAccessAllowedForCaller(@NonNull String callingPackage, int callingUid) {
         // TODO: verify blob is still valid (expiryTime is not elapsed)
         synchronized (mMetadataLock) {
             // Check if packageName already holds a lease on the blob.
@@ -202,6 +216,61 @@ class BlobMetadata {
                 // by the committer.
                 if (committer.blobAccessMode.isAccessAllowedForCaller(mContext,
                         callingPackage, committer.packageName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    boolean isALeasee(@NonNull String packageName) {
+        return isALeasee(packageName, INVALID_UID);
+    }
+
+    boolean isALeasee(int uid) {
+        return isALeasee(null, uid);
+    }
+
+    boolean hasOtherLeasees(@NonNull String packageName) {
+        return hasOtherLeasees(packageName, INVALID_UID);
+    }
+
+    boolean hasOtherLeasees(int uid) {
+        return hasOtherLeasees(null, uid);
+    }
+
+    private boolean isALeasee(@Nullable String packageName, int uid) {
+        synchronized (mMetadataLock) {
+            // Check if the package is a leasee of the data blob.
+            for (int i = 0, size = mLeasees.size(); i < size; ++i) {
+                final Leasee leasee = mLeasees.valueAt(i);
+                if (packageName != null && uid != INVALID_UID
+                        && leasee.equals(packageName, uid)) {
+                    return true;
+                } else if (packageName != null && leasee.packageName.equals(packageName)) {
+                    return true;
+                } else if (uid != INVALID_UID && leasee.uid == uid) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasOtherLeasees(@Nullable String packageName, int uid) {
+        synchronized (mMetadataLock) {
+            if (mCommitters.size() > 1 || mLeasees.size() > 1) {
+                return true;
+            }
+            for (int i = 0, size = mLeasees.size(); i < size; ++i) {
+                final Leasee leasee = mLeasees.valueAt(i);
+                // TODO: Also exclude packages which are signed with same cert?
+                if (packageName != null && uid != INVALID_UID
+                        && !leasee.equals(packageName, uid)) {
+                    return true;
+                } else if (packageName != null && !leasee.packageName.equals(packageName)) {
+                    return true;
+                } else if (uid != INVALID_UID && leasee.uid != uid) {
                     return true;
                 }
             }
