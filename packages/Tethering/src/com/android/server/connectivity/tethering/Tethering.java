@@ -16,6 +16,8 @@
 
 package com.android.server.connectivity.tethering;
 
+import static android.Manifest.permission.NETWORK_SETTINGS;
+import static android.Manifest.permission.NETWORK_STACK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
@@ -149,10 +151,6 @@ public class Tethering {
     private static final String TAG = Tethering.class.getSimpleName();
     private static final boolean DBG = false;
     private static final boolean VDBG = false;
-
-    // TODO: add the below permissions to @SystemApi
-    private static final String PERMISSION_NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
-    private static final String PERMISSION_NETWORK_STACK = "android.permission.NETWORK_STACK";
 
     private static final Class[] sMessageClasses = {
             Tethering.class, TetherMasterSM.class, IpServer.class
@@ -1987,9 +1985,9 @@ public class Tethering {
     /** Register tethering event callback */
     void registerTetheringEventCallback(ITetheringEventCallback callback) {
         final boolean hasListPermission =
-                hasCallingPermission(PERMISSION_NETWORK_SETTINGS)
+                hasCallingPermission(NETWORK_SETTINGS)
                         || hasCallingPermission(PERMISSION_MAINLINE_NETWORK_STACK)
-                        || hasCallingPermission(PERMISSION_NETWORK_STACK);
+                        || hasCallingPermission(NETWORK_STACK);
         mHandler.post(() -> {
             mTetheringEventCallbacks.register(callback, new CallbackCookie(hasListPermission));
             final TetheringCallbackStartedParcel parcel = new TetheringCallbackStartedParcel();
