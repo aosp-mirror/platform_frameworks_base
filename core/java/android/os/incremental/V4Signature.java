@@ -16,12 +16,12 @@
 
 package android.os.incremental;
 
+import android.os.ParcelFileDescriptor;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -41,11 +41,12 @@ public class V4Signature {
     /**
      * Construct a V4Signature from .idsig file.
      */
-    public static V4Signature readFrom(File file) {
-        try (DataInputStream stream = new DataInputStream(new FileInputStream(file))) {
+    public static V4Signature readFrom(ParcelFileDescriptor pfd) throws IOException {
+        final ParcelFileDescriptor dupedFd = pfd.dup();
+        final ParcelFileDescriptor.AutoCloseInputStream fdInputStream =
+                new ParcelFileDescriptor.AutoCloseInputStream(dupedFd);
+        try (DataInputStream stream = new DataInputStream(fdInputStream)) {
             return readFrom(stream);
-        } catch (IOException e) {
-            return null;
         }
     }
 
