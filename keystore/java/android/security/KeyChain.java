@@ -34,6 +34,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
@@ -811,6 +812,10 @@ public final class KeyChain {
             throw new NullPointerException("context == null");
         }
         ensureNotOnMainThread(context);
+        if (!UserManager.get(context).isUserUnlocked(user)) {
+            throw new IllegalStateException("User must be unlocked");
+        }
+
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final AtomicReference<IKeyChainService> keyChainService = new AtomicReference<>();
         ServiceConnection keyChainServiceConnection = new ServiceConnection() {
