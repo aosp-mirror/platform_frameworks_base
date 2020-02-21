@@ -291,7 +291,6 @@ filegroup {
         ":framework-permission-sources",
         ":framework-wifi-updatable-sources",
         ":framework-telephony-sources",
-        ":ike-srcs",
     ]
 }
 
