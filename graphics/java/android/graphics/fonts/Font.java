@@ -19,7 +19,6 @@ package android.graphics.fonts;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.LocaleList;
@@ -219,25 +218,6 @@ public final class Font {
                                               boolean isAsset, int cookie) throws IOException {
             Preconditions.checkNotNull(am, "assetManager can not be null");
             Preconditions.checkNotNull(path, "path can not be null");
-
-            if (!isAsset) {
-                // Attempt to open as FD, which should work unless the asset is compressed
-                AssetFileDescriptor assetFD;
-                try {
-                    if (cookie > 0) {
-                        assetFD = am.openNonAssetFd(cookie, path);
-                    } else {
-                        assetFD = am.openNonAssetFd(path);
-                    }
-
-                    try (FileInputStream fis = assetFD.createInputStream()) {
-                        final FileChannel fc = fis.getChannel();
-                        return fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-                    }
-                } catch (IOException e) {
-                    // failed to open as FD so now we will attempt to open as an input stream
-                }
-            }
 
             try (InputStream assetStream = isAsset ? am.open(path, AssetManager.ACCESS_BUFFER)
                     : am.openNonAsset(cookie, path, AssetManager.ACCESS_BUFFER)) {
