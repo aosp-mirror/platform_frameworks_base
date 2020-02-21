@@ -28,8 +28,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -380,20 +378,7 @@ public class WifiInfo implements Parcelable {
         }
     }
 
-    /**
-     * WifiInfo exports an immutable public API.
-     * However, test code has a need to construct a WifiInfo in a specific state.
-     * (Note that mocking using Mockito does not work if the object needs to be parceled and
-     * unparceled.)
-     * Export a @SystemApi Builder to allow tests to construct a WifiInfo object
-     * in the desired state, without sacrificing WifiInfo's immutability.
-     *
-     * @hide
-     */
-    // This builder was not made public to reduce confusion for external developers as there are
-    // no legitimate uses for this builder except for testing.
-    @SystemApi
-    @VisibleForTesting
+    /** Builder for WifiInfo */
     public static final class Builder {
         private final WifiInfo mWifiInfo = new WifiInfo();
 

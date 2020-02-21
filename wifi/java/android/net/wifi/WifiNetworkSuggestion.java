@@ -753,7 +753,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                                  boolean isUserInteractionRequired,
                                  boolean isUserAllowedToManuallyConnect,
                                  boolean isInitialAutoJoinEnabled,
-            boolean isNetworkUntrusted) {
+                                 boolean isNetworkUntrusted) {
         checkNotNull(networkConfiguration);
         this.wifiConfiguration = networkConfiguration;
         this.passpointConfiguration = passpointConfiguration;
@@ -858,13 +858,106 @@ public final class WifiNetworkSuggestion implements Parcelable {
     }
 
     /**
+     * Get the BSSID, or null if unset.
+     * @see Builder#setBssid(MacAddress)
+     */
+    @Nullable
+    public MacAddress getBssid() {
+        if (wifiConfiguration.BSSID == null) {
+            return null;
+        }
+        return MacAddress.fromString(wifiConfiguration.BSSID);
+    }
+
+    /** @see Builder#setCredentialSharedWithUser(boolean) */
+    public boolean isCredentialSharedWithUser() {
+        return isUserAllowedToManuallyConnect;
+    }
+
+    /** @see Builder#setIsAppInteractionRequired(boolean) */
+    public boolean isAppInteractionRequired() {
+        return isAppInteractionRequired;
+    }
+
+    /** @see Builder#setIsEnhancedOpen(boolean)  */
+    public boolean isEnhancedOpen() {
+        return wifiConfiguration.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.OWE);
+    }
+
+    /** @see Builder#setIsHiddenSsid(boolean)  */
+    public boolean isHiddenSsid() {
+        return wifiConfiguration.hiddenSSID;
+    }
+
+    /** @see Builder#setIsInitialAutojoinEnabled(boolean)  */
+    public boolean isInitialAutojoinEnabled() {
+        return isInitialAutoJoinEnabled;
+    }
+
+    /** @see Builder#setIsMetered(boolean)  */
+    public boolean isMetered() {
+        return wifiConfiguration.meteredOverride == WifiConfiguration.METERED_OVERRIDE_METERED;
+    }
+
+    /** @see Builder#setIsUserInteractionRequired(boolean)  */
+    public boolean isUserInteractionRequired() {
+        return isUserInteractionRequired;
+    }
+
+    /**
      * Get the {@link PasspointConfiguration} associated with this Suggestion, or null if this
      * Suggestion is not for a Passpoint network.
-     * @hide
      */
-    @SystemApi
     @Nullable
-    public PasspointConfiguration getPasspointConfiguration() {
+    public PasspointConfiguration getPasspointConfig() {
         return passpointConfiguration;
+    }
+
+    /** @see Builder#setPriority(int)  */
+    @IntRange(from = 0)
+    public int getPriority() {
+        return wifiConfiguration.priority;
+    }
+
+    /**
+     * Return the SSID of the network, or null if this is a Passpoint network.
+     * @see Builder#setSsid(String)
+     */
+    @Nullable
+    public String getSsid() {
+        if (wifiConfiguration.SSID == null) {
+            return null;
+        }
+        return WifiInfo.sanitizeSsid(wifiConfiguration.SSID);
+    }
+
+    /** @see Builder#setUntrusted(boolean)  */
+    public boolean isUntrusted() {
+        return isNetworkUntrusted;
+    }
+
+    /**
+     * Get the WifiEnterpriseConfig, or null if unset.
+     * @see Builder#setWapiEnterpriseConfig(WifiEnterpriseConfig)
+     * @see Builder#setWpa2EnterpriseConfig(WifiEnterpriseConfig)
+     * @see Builder#setWpa3EnterpriseConfig(WifiEnterpriseConfig)
+     */
+    @Nullable
+    public WifiEnterpriseConfig getEnterpriseConfig() {
+        return wifiConfiguration.enterpriseConfig;
+    }
+
+    /**
+     * Get the passphrase, or null if unset.
+     * @see Builder#setWapiPassphrase(String)
+     * @see Builder#setWpa2Passphrase(String)
+     * @see Builder#setWpa3Passphrase(String)
+     */
+    @Nullable
+    public String getPassphrase() {
+        if (wifiConfiguration.preSharedKey == null) {
+            return null;
+        }
+        return WifiInfo.removeDoubleQuotes(wifiConfiguration.preSharedKey);
     }
 }

@@ -7169,7 +7169,6 @@ package android.net.wifi {
   }
 
   public class ScanResult implements android.os.Parcelable {
-    ctor public ScanResult();
     field public static final int CIPHER_CCMP = 3; // 0x3
     field public static final int CIPHER_GCMP_256 = 4; // 0x4
     field public static final int CIPHER_NONE = 0; // 0x0
@@ -7377,15 +7376,6 @@ package android.net.wifi {
     field public static final int INVALID_RSSI = -127; // 0xffffff81
   }
 
-  public static final class WifiInfo.Builder {
-    ctor public WifiInfo.Builder();
-    method @NonNull public android.net.wifi.WifiInfo build();
-    method @NonNull public android.net.wifi.WifiInfo.Builder setBssid(@NonNull String);
-    method @NonNull public android.net.wifi.WifiInfo.Builder setNetworkId(int);
-    method @NonNull public android.net.wifi.WifiInfo.Builder setRssi(int);
-    method @NonNull public android.net.wifi.WifiInfo.Builder setSsid(@NonNull byte[]);
-  }
-
   public class WifiManager {
     method @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE) public void addOnWifiUsabilityStatsListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void allowAutojoin(int, boolean);
@@ -7570,7 +7560,6 @@ package android.net.wifi {
   }
 
   public final class WifiNetworkSuggestion implements android.os.Parcelable {
-    method @Nullable public android.net.wifi.hotspot2.PasspointConfiguration getPasspointConfiguration();
     method @NonNull public android.net.wifi.WifiConfiguration getWifiConfiguration();
   }
 
