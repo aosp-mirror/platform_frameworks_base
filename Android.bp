@@ -456,7 +456,6 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
     libs: [
-        "ike-stubs",
         "framework-tethering-stubs",
     ],
     installable: true,
@@ -497,7 +496,6 @@ java_library {
         "framework-minus-apex",
         "updatable_media_stubs",
         "framework-sdkextensions-stubs-systemapi",
-        "ike-stubs",
         "framework-tethering-stubs",
     ],
     sdk_version: "core_platform",
