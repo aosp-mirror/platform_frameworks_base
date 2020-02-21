@@ -22,7 +22,6 @@ import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTE
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST;
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS;
 import static android.provider.Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST;
-import static android.provider.Settings.Global.LOCATION_LAST_LOCATION_MAX_AGE_MILLIS;
 import static android.provider.Settings.Secure.LOCATION_COARSE_ACCURACY_M;
 import static android.provider.Settings.Secure.LOCATION_MODE;
 import static android.provider.Settings.Secure.LOCATION_MODE_OFF;
@@ -92,7 +91,6 @@ public class SettingsHelper {
     private static final long DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS = 30 * 60 * 1000;
     private static final long DEFAULT_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS =
             30 * 60 * 1000;
-    private static final long DEFAULT_MAX_LAST_LOCATION_AGE_MS = 20 * 60 * 1000;
     private static final float DEFAULT_COARSE_LOCATION_ACCURACY_M = 2000.0f;
 
     private final Context mContext;
@@ -279,21 +277,6 @@ public class SettingsHelper {
             return Settings.Global.getLong(mContext.getContentResolver(),
                     LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
                     DEFAULT_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    /**
-     * Retrieve maximum age of the last location.
-     */
-    public long getMaxLastLocationAgeMs() {
-        long identity = Binder.clearCallingIdentity();
-        try {
-            return Settings.Global.getLong(
-                    mContext.getContentResolver(),
-                    LOCATION_LAST_LOCATION_MAX_AGE_MILLIS,
-                    DEFAULT_MAX_LAST_LOCATION_AGE_MS);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

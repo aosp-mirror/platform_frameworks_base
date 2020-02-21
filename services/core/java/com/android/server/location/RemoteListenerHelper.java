@@ -179,13 +179,12 @@ public abstract class RemoteListenerHelper<TRequest, TListener extends IInterfac
         if (LocationPermissionUtil.doesCallerReportToAppOps(context, callerIdentity)) {
             // The caller is identified as a location provider that will report location
             // access to AppOps. Skip noteOp but do checkOp to check for location permission.
-            return mAppOps.checkOpNoThrow(AppOpsManager.OP_FINE_LOCATION, callerIdentity.mUid,
-                    callerIdentity.mPackageName) == AppOpsManager.MODE_ALLOWED;
+            return mAppOps.checkOpNoThrow(AppOpsManager.OP_FINE_LOCATION, callerIdentity.uid,
+                    callerIdentity.packageName) == AppOpsManager.MODE_ALLOWED;
         }
 
-        return mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, callerIdentity.mUid,
-                callerIdentity.mPackageName, callerIdentity.mFeatureId,
-                "Location sent to " + callerIdentity.mListenerIdentifier)
+        return mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, callerIdentity.uid,
+                callerIdentity.packageName, callerIdentity.featureId, null)
                 == AppOpsManager.MODE_ALLOWED;
     }
 

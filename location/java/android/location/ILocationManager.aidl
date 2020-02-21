@@ -47,16 +47,14 @@ interface ILocationManager
     Location getLastLocation(in LocationRequest request, String packageName, String featureId);
     boolean getCurrentLocation(in LocationRequest request,
             in ICancellationSignal cancellationSignal, in ILocationListener listener,
-            String packageName, String featureId, String listenerIdentifier);
+            String packageName, String featureId);
 
     void requestLocationUpdates(in LocationRequest request, in ILocationListener listener,
-            in PendingIntent intent, String packageName, String featureId,
-            String listenerIdentifier);
-    void removeUpdates(in ILocationListener listener, in PendingIntent intent, String packageName);
+            in PendingIntent intent, String packageName, String featureId);
+    void removeUpdates(in ILocationListener listener, in PendingIntent intent);
 
     void requestGeofence(in LocationRequest request, in Geofence geofence,
-            in PendingIntent intent, String packageName, String featureId,
-            String listenerIdentifier);
+            in PendingIntent intent, String packageName, String featureId);
     void removeGeofence(in Geofence fence, in PendingIntent intent, String packageName);
 
     boolean registerGnssStatusCallback(IGnssStatusListener callback, String packageName,
@@ -73,34 +71,31 @@ interface ILocationManager
 
     boolean addGnssMeasurementsListener(in GnssRequest request,
             in IGnssMeasurementsListener listener,
-            String packageName, String featureId,
-            String listenerIdentifier);
+            String packageName, String featureId);
     void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections,
             in String packageName);
-    long getGnssCapabilities(in String packageName);
+    long getGnssCapabilities();
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
 
     boolean addGnssAntennaInfoListener(in IGnssAntennaInfoListener listener,
-             String packageName, String featureId, String listenerIdentifier);
+             String packageName, String featureId);
     void removeGnssAntennaInfoListener(in IGnssAntennaInfoListener listener);
 
     boolean addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener,
-             String packageName, String featureId, String listenerIdentifier);
+             String packageName, String featureId);
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
 
     int getGnssYearOfHardware();
     String getGnssHardwareModelName();
 
     int getGnssBatchSize(String packageName);
-    boolean addGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName,
-             String featureId, String listenerIdentifier);
+    boolean addGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName, String featureId);
     void removeGnssBatchingCallback();
-    boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName);
+    boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName, String featureId);
     void flushGnssBatch(String packageName);
     boolean stopGnssBatch();
     void injectLocation(in Location location);
 
-    @UnsupportedAppUsage
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
@@ -116,11 +111,11 @@ interface ILocationManager
     boolean isProviderEnabledForUser(String provider, int userId);
     boolean isLocationEnabledForUser(int userId);
     void setLocationEnabledForUser(boolean enabled, int userId);
-    void addTestProvider(String name, in ProviderProperties properties, String opPackageName);
-    void removeTestProvider(String provider, String opPackageName);
-    void setTestProviderLocation(String provider, in Location loc, String opPackageName);
-    void setTestProviderEnabled(String provider, boolean enabled, String opPackageName);
-    List<LocationRequest> getTestProviderCurrentRequests(String provider, String opPackageName);
+    void addTestProvider(String name, in ProviderProperties properties, String packageName, String featureId);
+    void removeTestProvider(String provider, String packageName, String featureId);
+    void setTestProviderLocation(String provider, in Location location, String packageName, String featureId);
+    void setTestProviderEnabled(String provider, boolean enabled, String packageName, String featureId);
+    List<LocationRequest> getTestProviderCurrentRequests(String provider);
     LocationTime getGnssTimeMillis();
 
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
