@@ -714,7 +714,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             }
         };
 
-        mGnssMetrics = new GnssMetrics(mBatteryStats);
+        mGnssMetrics = new GnssMetrics(mContext, mBatteryStats);
         mNtpTimeHelper = new NtpTimeHelper(mContext, mLooper, this);
         GnssSatelliteBlacklistHelper gnssSatelliteBlacklistHelper =
                 new GnssSatelliteBlacklistHelper(mContext,
