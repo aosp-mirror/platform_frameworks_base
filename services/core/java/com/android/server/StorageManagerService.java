@@ -279,7 +279,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public void onStartUser(TargetUser user) {
+        public void onUserStarting(TargetUser user) {
             mStorageManagerService.snapshotAndMonitorLegacyStorageAppOp(user.getUserHandle());
         }
     }
