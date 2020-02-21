@@ -2503,7 +2503,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 new Injector.SystemServiceProducer<>(DisplayManager.class),
                 new Injector.SystemServiceProducer<>(StorageManager.class),
                 new Injector.SystemServiceProducer<>(AppOpsManager.class),
-                (i, pm) -> AppsFilter.create(i),
+                (i, pm) -> AppsFilter.create(pm.mPmInternal, i),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"));
 
         PackageManagerService m = new PackageManagerService(injector, factoryTest, onlyCore);

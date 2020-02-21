@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedComponent;
@@ -48,6 +49,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.FgThread;
+import com.android.server.compat.CompatChange;
 import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
@@ -129,15 +131,25 @@ public class AppsFilter {
 
         /** @return true if the feature is enabled for the given package. */
         boolean packageIsEnabled(AndroidPackage pkg);
+
+        /**
+         * Initializes the package enablement state for the given package. This gives opportunity
+         * to do any expensive operations ahead of the actual checks.
+         */
+        void initializePackageState(String packageName);
     }
 
-    private static class FeatureConfigImpl implements FeatureConfig {
+    private static class FeatureConfigImpl implements FeatureConfig, CompatChange.ChangeListener {
         private static final String FILTERING_ENABLED_NAME = "package_query_filtering_enabled";
         private final PackageManagerService.Injector mInjector;
+        private final PackageManagerInternal mPmInternal;
         private volatile boolean mFeatureEnabled =
                 PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT;
+        private final ArraySet<String> mDisabledPackages = new ArraySet<>();
 
-        private FeatureConfigImpl(PackageManagerService.Injector injector) {
+        private FeatureConfigImpl(
+                PackageManagerInternal pmInternal, PackageManagerService.Injector injector) {
+            mPmInternal = pmInternal;
             mInjector = injector;
         }
 
@@ -156,6 +168,8 @@ public class AppsFilter {
                             }
                         }
                     });
+            mInjector.getCompatibility().registerListener(
+                    PackageManager.FILTER_APPLICATION_QUERY, this);
         }
 
         @Override
@@ -171,23 +185,55 @@ public class AppsFilter {
         @Override
         public boolean packageIsEnabled(AndroidPackage pkg) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "packageIsEnabled");
-            final long token = Binder.clearCallingIdentity();
             try {
-                // TODO(b/135203078): Do not use toAppInfo
-                return mInjector.getCompatibility().isChangeEnabled(
-                        PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfoWithoutState());
+                return !mDisabledPackages.contains(pkg.getPackageName());
             } finally {
-                Binder.restoreCallingIdentity(token);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
         }
+
+        private boolean fetchPackageIsEnabled(AndroidPackage pkg) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                // TODO(b/135203078): Do not use toAppInfo
+                final boolean changeEnabled =
+                        mInjector.getCompatibility().isChangeEnabled(
+                                PackageManager.FILTER_APPLICATION_QUERY,
+                                pkg.toAppInfoWithoutState());
+                return changeEnabled;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void onCompatChange(String packageName) {
+            final AndroidPackage pkg = mPmInternal.getPackage(packageName);
+            if (pkg == null) {
+                mDisabledPackages.remove(packageName);
+                return;
+            }
+            boolean enabled = fetchPackageIsEnabled(pkg);
+            if (enabled) {
+                mDisabledPackages.remove(packageName);
+            } else {
+                mDisabledPackages.add(packageName);
+            }
+        }
+
+        @Override
+        public void initializePackageState(String packageName) {
+            onCompatChange(packageName);
+        }
     }
 
-    public static AppsFilter create(PackageManagerService.Injector injector) {
+    /** Builder method for an AppsFilter */
+    public static AppsFilter create(
+            PackageManagerInternal pms, PackageManagerService.Injector injector) {
         final boolean forceSystemAppsQueryable =
                 injector.getContext().getResources()
                         .getBoolean(R.bool.config_forceSystemPackagesQueryable);
-        final FeatureConfig featureConfig = new FeatureConfigImpl(injector);
+        final FeatureConfig featureConfig = new FeatureConfigImpl(pms, injector);
         final String[] forcedQueryablePackageNames;
         if (forceSystemAppsQueryable) {
             // all system apps already queryable, no need to read and parse individual exceptions
@@ -402,6 +448,7 @@ public class AppsFilter {
                 }
             }
             mOverlayReferenceMapper.addPkg(newPkgSetting.pkg, existingPkgs);
+            mFeatureConfig.initializePackageState(newPkgSetting.pkg.getPackageName());
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -453,6 +500,7 @@ public class AppsFilter {
         }
 
         mOverlayReferenceMapper.removePkg(setting.name);
+        mFeatureConfig.initializePackageState(setting.pkg.getPackageName());
     }
 
     /**
