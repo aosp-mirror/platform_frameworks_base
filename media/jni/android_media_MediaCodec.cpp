@@ -22,6 +22,7 @@
 
 #include "android_media_MediaCodec.h"
 
+#include "android_media_MediaCodecLinearBlock.h"
 #include "android_media_MediaCrypto.h"
 #include "android_media_MediaDescrambler.h"
 #include "android_media_MediaMetricsJNI.h"
@@ -174,44 +175,6 @@ struct fields_t {
 static fields_t gFields;
 static const void *sRefBaseOwner;
 
-struct JMediaCodecLinearBlock {
-    std::shared_ptr<C2Buffer> mBuffer;
-    std::shared_ptr<C2ReadView> mReadonlyMapping;
-
-    std::shared_ptr<C2LinearBlock> mBlock;
-    std::shared_ptr<C2WriteView> mReadWriteMapping;
-
-    sp<IMemoryHeap> mHeap;
-    sp<hardware::HidlMemory> mMemory;
-
-    sp<MediaCodecBuffer> mLegacyBuffer;
-
-    std::once_flag mCopyWarningFlag;
-
-    std::shared_ptr<C2Buffer> toC2Buffer(size_t offset, size_t size) {
-        if (mBuffer) {
-            if (mBuffer->data().type() != C2BufferData::LINEAR) {
-                return nullptr;
-            }
-            C2ConstLinearBlock block = mBuffer->data().linearBlocks().front();
-            if (offset == 0 && size == block.capacity()) {
-                return mBuffer;
-            }
-            return C2Buffer::CreateLinearBuffer(block.subBlock(offset, size));
-        }
-        if (mBlock) {
-            return C2Buffer::CreateLinearBuffer(mBlock->share(offset, size, C2Fence{}));
-        }
-        return nullptr;
-    }
-
-    sp<hardware::HidlMemory> toHidlMemory() {
-        if (mMemory) {
-            return mMemory;
-        }
-        return nullptr;
-    }
-};
 
 struct JMediaCodecGraphicBlock {
     std::shared_ptr<C2Buffer> mBuffer;
