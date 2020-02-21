@@ -1882,7 +1882,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 executeOrSendMessage(mCurMethod,
                         mCaller.obtainMessageOOO(MSG_INLINE_SUGGESTIONS_REQUEST, mCurMethod,
                                 requestInfo, new InlineSuggestionsRequestCallbackDecorator(callback,
-                                        imi.getPackageName())));
+                                        imi.getPackageName(), mCurTokenDisplayId)));
             } else {
                 callback.onInlineSuggestionsUnsupported();
             }
@@ -1902,11 +1902,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @NonNull
         private final String mImePackageName;
 
+        private final int mImeDisplayId;
+
         InlineSuggestionsRequestCallbackDecorator(
                 @NonNull IInlineSuggestionsRequestCallback callback,
-                @NonNull String imePackageName) {
+                @NonNull String imePackageName, int displayId) {
             mCallback = callback;
             mImePackageName = imePackageName;
+            mImeDisplayId = displayId;
         }
 
         @Override
@@ -1923,6 +1926,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 + "] doesn't match the IME package name=[" + mImePackageName
                                 + "].");
             }
+            request.setHostDisplayId(mImeDisplayId);
             mCallback.onInlineSuggestionsRequest(request, callback);
         }
     }
