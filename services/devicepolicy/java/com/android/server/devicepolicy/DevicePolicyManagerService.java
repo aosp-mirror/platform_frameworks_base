@@ -444,10 +444,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     });
 
     /**
-     *  System property whose value is either "true" or "false", indicating whether
-     *  device owner is present.
+     * System property whose value indicates whether the device is fully owned by an organization:
+     * it can be either a device owner device, or a device with an organization-owned managed
+     * profile.
+     *
+     * <p>The state is stored as a Boolean string.
      */
-    private static final String PROPERTY_DEVICE_OWNER_PRESENT = "ro.organization_owned";
+    private static final String PROPERTY_ORGANIZATION_OWNED = "ro.organization_owned";
 
     private static final int STATUS_BAR_DISABLE_MASK =
             StatusBarManager.DISABLE_EXPAND |
@@ -2550,7 +2553,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     void loadOwners() {
         synchronized (getLockObject()) {
             mOwners.load();
-            setDeviceOwnerSystemPropertyLocked();
+            setDeviceOwnershipSystemPropertyLocked();
             findOwnerComponentIfNecessaryLocked();
             migrateUserRestrictionsIfNecessaryLocked();
 
@@ -2752,34 +2755,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void setDeviceOwnerSystemPropertyLocked() {
-        final boolean deviceProvisioned =
-                mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0;
-        final boolean hasDeviceOwner = mOwners.hasDeviceOwner();
-        // If the device is not provisioned and there is currently no device owner, do not set the
-        // read-only system property yet, since Device owner may still be provisioned.
-        if (!hasDeviceOwner && !deviceProvisioned) {
-            return;
-        }
-        // Still at the first stage of CryptKeeper double bounce, mOwners.hasDeviceOwner is
-        // always false at this point.
+    private void setDeviceOwnershipSystemPropertyLocked() {
+        // Still at the first stage of CryptKeeper double bounce, nothing can be learnt about
+        // the real system at this point.
         if (StorageManager.inCryptKeeperBounce()) {
             return;
         }
-
-        if (!mInjector.systemPropertiesGet(PROPERTY_DEVICE_OWNER_PRESENT, "").isEmpty()) {
-            Slog.w(LOG_TAG, "Trying to set ro.organization_owned, but it has already been set?");
-        } else {
-            final String value = Boolean.toString(hasDeviceOwner);
-            mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, value);
+        final boolean deviceProvisioned =
+                mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        final boolean hasDeviceOwner = mOwners.hasDeviceOwner();
+        final boolean hasOrgOwnedProfile = isOrganizationOwnedDeviceWithManagedProfile();
+        // If the device is not provisioned and there is currently no management, do not set the
+        // read-only system property yet, since device owner / org-owned profile may still be
+        // provisioned.
+        if (!hasDeviceOwner && !hasOrgOwnedProfile && !deviceProvisioned) {
+            return;
+        }
+        final String value = Boolean.toString(hasDeviceOwner || hasOrgOwnedProfile);
+        final String currentVal = mInjector.systemPropertiesGet(PROPERTY_ORGANIZATION_OWNED, null);
+        if (TextUtils.isEmpty(currentVal)) {
             Slog.i(LOG_TAG, "Set ro.organization_owned property to " + value);
+            mInjector.systemPropertiesSet(PROPERTY_ORGANIZATION_OWNED, value);
+        } else if (!value.equals(currentVal)) {
+            Slog.w(LOG_TAG, "Cannot change existing ro.organization_owned to " + value);
         }
     }
 
     private void maybeStartSecurityLogMonitorOnActivityManagerReady() {
         synchronized (getLockObject()) {
             if (mInjector.securityLogIsLoggingEnabled()) {
-                mSecurityLogMonitor.start();
+                mSecurityLogMonitor.start(getSecurityLoggingEnabledUser());
                 mInjector.runCryptoSelfTest();
                 maybePauseDeviceWideLoggingLocked();
             }
@@ -8391,7 +8396,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mOwners.setDeviceOwner(admin, ownerName, userId);
             mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
-            setDeviceOwnerSystemPropertyLocked();
+            setDeviceOwnershipSystemPropertyLocked();
 
             mInjector.binderWithCleanCallingIdentity(() -> {
                 // Restrict adding a managed profile when a device owner is set on the device.
@@ -9071,21 +9076,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return getApplicationLabel(profileOwner.getPackageName(), userHandle);
     }
 
+    private @UserIdInt int getOrganizationOwnedProfileUserId() {
+        for (UserInfo ui : mUserManagerInternal.getUserInfos()) {
+            if (ui.isManagedProfile() && isProfileOwnerOfOrganizationOwnedDevice(ui.id)) {
+                return ui.id;
+            }
+        }
+        return UserHandle.USER_NULL;
+    }
+
     @Override
     public boolean isOrganizationOwnedDeviceWithManagedProfile() {
         if (!mHasFeature) {
             return false;
         }
-
-        return mInjector.binderWithCleanCallingIdentity(() -> {
-            for (UserInfo ui : mUserManager.getUsers()) {
-                if (ui.isManagedProfile() && isProfileOwnerOfOrganizationOwnedDevice(ui.id)) {
-                    return true;
-                }
-            }
-
-            return false;
-        });
+        return getOrganizationOwnedProfileUserId() != UserHandle.USER_NULL;
     }
 
     @Override
@@ -12046,7 +12051,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 synchronized (getLockObject()) {
                     // Set PROPERTY_DEVICE_OWNER_PRESENT, for the SUW case where setting the property
                     // is delayed until device is marked as provisioned.
-                    setDeviceOwnerSystemPropertyLocked();
+                    setDeviceOwnershipSystemPropertyLocked();
                 }
             } else if (mDefaultImeChanged.equals(uri)) {
                 synchronized (getLockObject()) {
@@ -13671,6 +13676,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
+    private boolean canStartSecurityLogging() {
+        synchronized (getLockObject()) {
+            return isOrganizationOwnedDeviceWithManagedProfile()
+                    || areAllUsersAffiliatedWithDeviceLocked();
+        }
+    }
+
+    private @UserIdInt int getSecurityLoggingEnabledUser() {
+        synchronized (getLockObject()) {
+            if (mOwners.hasDeviceOwner()) {
+                return UserHandle.USER_ALL;
+            }
+        }
+        return getOrganizationOwnedProfileUserId();
+    }
+
     @Override
     public void setSecurityLoggingEnabled(ComponentName admin, boolean enabled) {
         if (!mHasFeature) {
@@ -13679,13 +13700,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(admin);
 
         synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
             if (enabled == mInjector.securityLogGetLoggingEnabledProperty()) {
                 return;
             }
             mInjector.securityLogSetLoggingEnabledProperty(enabled);
             if (enabled) {
-                mSecurityLogMonitor.start();
+                mSecurityLogMonitor.start(getSecurityLoggingEnabledUser());
                 maybePauseDeviceWideLoggingLocked();
             } else {
                 mSecurityLogMonitor.stop();
@@ -13707,7 +13729,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             if (!isCallerWithSystemUid()) {
                 Objects.requireNonNull(admin);
-                getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+                getActiveAdminForCallerLocked(admin,
+                        DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
             }
             return mInjector.securityLogGetLoggingEnabledProperty();
         }
@@ -13731,7 +13754,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         Objects.requireNonNull(admin);
-        ensureDeviceOwnerAndAllUsersAffiliated(admin);
+        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(admin);
+        if (!isOrganizationOwnedDeviceWithManagedProfile()) {
+            ensureAllUsersAffiliated();
+        }
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.RETRIEVE_PRE_REBOOT_SECURITY_LOGS)
@@ -13747,6 +13773,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         ArrayList<SecurityEvent> output = new ArrayList<SecurityEvent>();
         try {
             SecurityLog.readPreviousEvents(output);
+            int enabledUser = getSecurityLoggingEnabledUser();
+            if (enabledUser != UserHandle.USER_ALL) {
+                SecurityLog.redactEvents(output, enabledUser);
+            }
             return new ParceledListSlice<SecurityEvent>(output);
         } catch (IOException e) {
             Slog.w(LOG_TAG, "Fail to read previous events" , e);
@@ -13761,7 +13791,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         Objects.requireNonNull(admin);
-        ensureDeviceOwnerAndAllUsersAffiliated(admin);
+        enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(admin);
+        if (!isOrganizationOwnedDeviceWithManagedProfile()) {
+            ensureAllUsersAffiliated();
+        }
 
         if (!mInjector.securityLogGetLoggingEnabledProperty()) {
             return null;
@@ -14287,11 +14320,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @GuardedBy("getLockObject()")
     private void maybePauseDeviceWideLoggingLocked() {
         if (!areAllUsersAffiliatedWithDeviceLocked()) {
-            Slog.i(LOG_TAG, "There are unaffiliated users, security and network logging will be "
+            Slog.i(LOG_TAG, "There are unaffiliated users, network logging will be "
                     + "paused if enabled.");
-            mSecurityLogMonitor.pause();
             if (mNetworkLogger != null) {
                 mNetworkLogger.pause();
+            }
+            if (!isOrganizationOwnedDeviceWithManagedProfile()) {
+                Slog.i(LOG_TAG, "Not org-owned managed profile device, security logging will be "
+                        + "paused if enabled.");
+                mSecurityLogMonitor.pause();
             }
         }
     }
@@ -14299,14 +14336,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     /** Resumes security and network logging (if they are enabled) if all users are affiliated */
     @GuardedBy("getLockObject()")
     private void maybeResumeDeviceWideLoggingLocked() {
-        if (areAllUsersAffiliatedWithDeviceLocked()) {
-            mInjector.binderWithCleanCallingIdentity(() -> {
+        boolean allUsersAffiliated = areAllUsersAffiliatedWithDeviceLocked();
+        boolean orgOwnedProfileDevice = isOrganizationOwnedDeviceWithManagedProfile();
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            if (allUsersAffiliated || orgOwnedProfileDevice) {
                 mSecurityLogMonitor.resume();
+            }
+            if (allUsersAffiliated) {
                 if (mNetworkLogger != null) {
                     mNetworkLogger.resume();
                 }
-            });
-        }
+            }
+        });
     }
 
     /** Deletes any security and network logs that might have been collected so far */

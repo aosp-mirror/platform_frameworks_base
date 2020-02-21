@@ -23,11 +23,13 @@ import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.EventLog.Event;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -104,7 +106,8 @@ public class SecurityLog {
     /**
      * Indicates that a shell command was issued over ADB via {@code adb shell <command>}
      * The log entry contains a {@code String} payload containing the shell command, accessible
-     * via {@link SecurityEvent#getData()}.
+     * via {@link SecurityEvent#getData()}. If security logging is enabled on organization-owned
+     * managed profile devices, the shell command will be redacted to an empty string.
      */
     public static final int TAG_ADB_SHELL_CMD = SecurityLogTags.SECURITY_ADB_SHELL_COMMAND;
 
@@ -133,6 +136,8 @@ public class SecurityLog {
      * <li> [3] app pid ({@code Integer})
      * <li> [4] seinfo tag ({@code String})
      * <li> [5] SHA-256 hash of the base APK in hexadecimal ({@code String})
+     * If security logging is enabled on organization-owned managed profile devices, only events
+     * happening inside the managed profile will be visible.
      */
     public static final int TAG_APP_PROCESS_START = SecurityLogTags.SECURITY_APP_PROCESS_START;
 
@@ -205,7 +210,8 @@ public class SecurityLog {
      * following information about the event, encapsulated in an {@link Object} array and
      * accessible via {@link SecurityEvent#getData()}:
      * <li> [0] mount point ({@code String})
-     * <li> [1] volume label ({@code String}).
+     * <li> [1] volume label ({@code String}). Redacted to empty string on organization-owned
+     *     managed profile devices.
      */
     public static final int TAG_MEDIA_MOUNT = SecurityLogTags.SECURITY_MEDIA_MOUNTED;
 
@@ -214,7 +220,8 @@ public class SecurityLog {
      * following information about the event, encapsulated in an {@link Object} array and
      * accessible via {@link SecurityEvent#getData()}:
      * <li> [0] mount point ({@code String})
-     * <li> [1] volume label ({@code String}).
+     * <li> [1] volume label ({@code String}). Redacted to empty string on organization-owned
+     *     managed profile devices.
      */
     public static final int TAG_MEDIA_UNMOUNT = SecurityLogTags.SECURITY_MEDIA_UNMOUNTED;
 
@@ -340,6 +347,9 @@ public class SecurityLog {
      * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
      * <li> [1] alias of the key ({@code String})
      * <li> [2] requesting process uid ({@code Integer}).
+     *
+     * If security logging is enabled on organization-owned managed profile devices, only events
+     * happening inside the managed profile will be visible.
      */
     public static final int TAG_KEY_GENERATED =
             SecurityLogTags.SECURITY_KEY_GENERATED;
@@ -351,6 +361,9 @@ public class SecurityLog {
      * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
      * <li> [1] alias of the key ({@code String})
      * <li> [2] requesting process uid ({@code Integer}).
+     *
+     * If security logging is enabled on organization-owned managed profile devices, only events
+     * happening inside the managed profile will be visible.
      */
     public static final int TAG_KEY_IMPORT = SecurityLogTags.SECURITY_KEY_IMPORTED;
 
@@ -361,6 +374,9 @@ public class SecurityLog {
      * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
      * <li> [1] alias of the key ({@code String})
      * <li> [2] requesting process uid ({@code Integer}).
+     *
+     * If security logging is enabled on organization-owned managed profile devices, only events
+     * happening inside the managed profile will be visible.
      */
     public static final int TAG_KEY_DESTRUCTION = SecurityLogTags.SECURITY_KEY_DESTROYED;
 
@@ -370,6 +386,11 @@ public class SecurityLog {
      * {@link Object} array and accessible via {@link SecurityEvent#getData()}:
      * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
      * <li> [1] subject of the certificate ({@code String}).
+     * <li> [2] which user the certificate is installed for ({@code Integer}), only available from
+     *   version {@link android.os.Build.VERSION_CODES#R}.
+     *
+     * If security logging is enabled on organization-owned managed profile devices, only events
+     * happening inside the managed profile will be visible.
      */
     public static final int TAG_CERT_AUTHORITY_INSTALLED =
             SecurityLogTags.SECURITY_CERT_AUTHORITY_INSTALLED;
@@ -380,6 +401,11 @@ public class SecurityLog {
      * {@link Object} array and accessible via {@link SecurityEvent#getData()}:
      * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
      * <li> [1] subject of the certificate ({@code String}).
+     * <li> [2] which user the certificate is removed from ({@code Integer}), only available from
+     *   version {@link android.os.Build.VERSION_CODES#R}.
+     *
+     * If security logging is enabled on organization-owned managed profile devices, only events
+     * happening inside the managed profile will be visible.
      */
     public static final int TAG_CERT_AUTHORITY_REMOVED =
             SecurityLogTags.SECURITY_CERT_AUTHORITY_REMOVED;
@@ -422,6 +448,9 @@ public class SecurityLog {
      * {@link SecurityEvent#getData()}:
      * <li> [0] alias of the key ({@code String})
      * <li> [1] owner application uid ({@code Integer}).
+     *
+     * If security logging is enabled on organization-owned managed profile devices, only events
+     * happening inside the managed profile will be visible.
      */
     public static final int TAG_KEY_INTEGRITY_VIOLATION =
             SecurityLogTags.SECURITY_KEY_INTEGRITY_VIOLATION;
@@ -535,6 +564,16 @@ public class SecurityLog {
             return mEvent.getData();
         }
 
+        /** @hide */
+        public int getIntegerData(int index) {
+            return (Integer) ((Object[]) mEvent.getData())[index];
+        }
+
+        /** @hide */
+        public String getStringData(int index) {
+            return (String) ((Object[]) mEvent.getData())[index];
+        }
+
         /**
          * @hide
          */
@@ -554,7 +593,7 @@ public class SecurityLog {
          * Returns severity level for the event.
          */
         public @SecurityLogLevel int getLogLevel() {
-            switch (mEvent.getTag()) {
+            switch (getTag()) {
                 case TAG_ADB_SHELL_INTERACTIVE:
                 case TAG_ADB_SHELL_CMD:
                 case TAG_SYNC_RECV_FILE:
@@ -608,6 +647,75 @@ public class SecurityLog {
             return array.length >= 1 && array[0] instanceof Integer && (Integer) array[0] != 0;
         }
 
+        /**
+         * Returns a copy of the security event suitable to be consumed by the provided user.
+         * This method will either return the original event itself if the event does not contain
+         * any sensitive data; or a copy of itself but with sensitive information redacted; or
+         * {@code null} if the entire event should not be accessed by the given user.
+         *
+         * @param accessingUser which user this security event is to be accessed, must be a
+         *     concrete user id.
+         * @hide
+         */
+        public SecurityEvent redact(int accessingUser) {
+            // Which user the event is associated with, for the purpose of log redaction.
+            final int userId;
+            switch (getTag()) {
+                case SecurityLog.TAG_ADB_SHELL_CMD:
+                    return new SecurityEvent(getId(), mEvent.withNewData("").getBytes());
+                case SecurityLog.TAG_MEDIA_MOUNT:
+                case SecurityLog.TAG_MEDIA_UNMOUNT:
+                    // Partial redaction
+                    String mountPoint;
+                    try {
+                        mountPoint = getStringData(0);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                    return new SecurityEvent(getId(),
+                            mEvent.withNewData(new Object[] {mountPoint, ""}).getBytes());
+                case SecurityLog.TAG_APP_PROCESS_START:
+                    try {
+                        userId = UserHandle.getUserId(getIntegerData(2));
+                    } catch (Exception e) {
+                        return null;
+                    }
+                    break;
+                case SecurityLog.TAG_CERT_AUTHORITY_INSTALLED:
+                case SecurityLog.TAG_CERT_AUTHORITY_REMOVED:
+                    try {
+                        userId = getIntegerData(2);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                    break;
+                case SecurityLog.TAG_KEY_GENERATED:
+                case SecurityLog.TAG_KEY_IMPORT:
+                case SecurityLog.TAG_KEY_DESTRUCTION:
+                    try {
+                        userId = UserHandle.getUserId(getIntegerData(2));
+                    } catch (Exception e) {
+                        return null;
+                    }
+                    break;
+                case SecurityLog.TAG_KEY_INTEGRITY_VIOLATION:
+                    try {
+                        userId = UserHandle.getUserId(getIntegerData(1));
+                    } catch (Exception e) {
+                        return null;
+                    }
+                    break;
+                default:
+                    userId = UserHandle.USER_NULL;
+            }
+            // If the event is not user-specific, or matches the accessing user, return it
+            // unmodified, else redact by returning null
+            if (userId == UserHandle.USER_NULL || accessingUser == userId) {
+                return this;
+            } else {
+                return null;
+            }
+        }
 
         @Override
         public int describeContents() {
@@ -657,6 +765,30 @@ public class SecurityLog {
             return other != null && mEvent.equals(other.mEvent);
         }
     }
+
+    /**
+     * Redacts events in-place according to which user will consume the events.
+     *
+     * @param accessingUser which user will consume the redacted events, or UserHandle.USER_ALL if
+     *     redaction should be skipped.
+     * @hide
+     */
+    public static void redactEvents(ArrayList<SecurityEvent> logList, int accessingUser) {
+        if (accessingUser == UserHandle.USER_ALL) return;
+        int end = 0;
+        for (int i = 0; i < logList.size(); i++) {
+            SecurityEvent event = logList.get(i);
+            event = event.redact(accessingUser);
+            if (event != null) {
+                logList.set(end, event);
+                end++;
+            }
+        }
+        for (int i = logList.size() - 1; i >= end; i--) {
+            logList.remove(i);
+        }
+    }
+
     /**
      * Retrieve all security logs and return immediately.
      * @hide
