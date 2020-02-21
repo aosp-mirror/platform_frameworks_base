@@ -2433,12 +2433,17 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     void scheduleWriteSettingsLocked() {
+        // We normally invalidate when we write settings, but in cases where we delay and
+        // coalesce settings writes, this strategy would have us invalidate the cache too late.
+        // Invalidating on schedule addresses this problem.
+        PackageManager.invalidatePackageInfoCache();
         if (!mHandler.hasMessages(WRITE_SETTINGS)) {
             mHandler.sendEmptyMessageDelayed(WRITE_SETTINGS, WRITE_SETTINGS_DELAY);
         }
     }
 
     void scheduleWritePackageListLocked(int userId) {
+        PackageManager.invalidatePackageInfoCache();
         if (!mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
             Message msg = mHandler.obtainMessage(WRITE_PACKAGE_LIST);
             msg.arg1 = userId;
@@ -2452,10 +2457,12 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     void scheduleWritePackageRestrictionsLocked(int userId) {
+        PackageManager.invalidatePackageInfoCache();
         final int[] userIds = (userId == UserHandle.USER_ALL)
                 ? mUserManager.getUserIds() : new int[]{userId};
         for (int nextUserId : userIds) {
             if (!mUserManager.exists(nextUserId)) return;
+
             mDirtyUsers.add(nextUserId);
             if (!mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
                 mHandler.sendEmptyMessageDelayed(WRITE_PACKAGE_RESTRICTIONS, WRITE_SETTINGS_DELAY);
@@ -2635,6 +2642,10 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest) {
+        PackageManager.invalidatePackageInfoCache();
+        PackageManager.disableApplicationInfoCache();
+        PackageManager.disablePackageInfoCache();
+
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
         mInjector = injector;

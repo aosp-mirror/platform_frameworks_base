@@ -2215,16 +2215,11 @@ public final class ActivityThread extends ClientTransactionHandler {
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
             int flags, int userId) {
         final boolean differentUser = (UserHandle.myUserId() != userId);
-        ApplicationInfo ai;
-        try {
-            ai = getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_SHARED_LIBRARY_FILES
-                            | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                    (userId < 0) ? UserHandle.myUserId() : userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
+        ApplicationInfo ai = PackageManager.getApplicationInfoAsUserCached(
+                packageName,
+                PackageManager.GET_SHARED_LIBRARY_FILES
+                | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                (userId < 0) ? UserHandle.myUserId() : userId);
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
             if (differentUser) {

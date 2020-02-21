@@ -445,7 +445,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         SystemProperties.set(name, newValueString);
     }
 
-    private Result maybeCheckConsistency(Query query, Result proposedResult) {
+    protected Result maybeCheckConsistency(Query query, Result proposedResult) {
         if (VERIFY) {
             Result resultToCompare = recompute(query);
             boolean nonceChanged = (getCurrentNonce() != mLastSeenNonce);
