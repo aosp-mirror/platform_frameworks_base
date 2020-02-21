@@ -7853,11 +7853,16 @@ public abstract class PackageManager {
     /**
      * Returns if the provided drawable represents the default activity icon provided by the system.
      *
-     * PackageManager provides a default icon for any package/activity if the app itself does not
-     * define one or if the system encountered any error when loading the icon.
+     * PackageManager silently returns a default application icon for any package/activity if the
+     * app itself does not define one or if the system encountered any error when loading the icon.
+     *
+     * Developers can use this to check implement app specific logic around retrying or caching.
      *
      * @return true if the drawable represents the default activity icon, false otherwise
      * @see #getDefaultActivityIcon()
+     * @see PackageItemInfo#loadDefaultIcon(PackageManager)
+     * @see #getActivityIcon
+     * @see LauncherActivityInfo#getIcon(int)
      */
     public boolean isDefaultApplicationIcon(@NonNull Drawable drawable) {
         int resId = drawable instanceof AdaptiveIconDrawable
