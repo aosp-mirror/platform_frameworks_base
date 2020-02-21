@@ -2734,9 +2734,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(userId);
             pw.println("  Fingerprint state (user=" + userId + ")");
-            pw.println("    allowed=" + fingerprint != null
-                    && isUnlockingWithBiometricAllowed(fingerprint.mIsStrongBiometric));
-            pw.println("    auth'd=" + fingerprint != null && fingerprint.mAuthenticated);
+            pw.println("    allowed="
+                    + (fingerprint != null
+                            && isUnlockingWithBiometricAllowed(fingerprint.mIsStrongBiometric)));
+            pw.println("    auth'd=" + (fingerprint != null && fingerprint.mAuthenticated));
             pw.println("    authSinceBoot="
                     + getStrongAuthTracker().hasUserAuthenticatedSinceBoot());
             pw.println("    disabled(DPM)=" + isFingerprintDisabled(userId));
@@ -2751,9 +2752,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated face = mUserFaceAuthenticated.get(userId);
             pw.println("  Face authentication state (user=" + userId + ")");
-            pw.println("    allowed=" + face != null
-                    && isUnlockingWithBiometricAllowed(face.mIsStrongBiometric));
-            pw.println("    auth'd=" + face != null && face.mAuthenticated);
+            pw.println("    allowed="
+                    + (face != null && isUnlockingWithBiometricAllowed(face.mIsStrongBiometric)));
+            pw.println("    auth'd="
+                    + (face != null && face.mAuthenticated));
             pw.println("    authSinceBoot="
                     + getStrongAuthTracker().hasUserAuthenticatedSinceBoot());
             pw.println("    disabled(DPM)=" + isFaceDisabled(userId));
