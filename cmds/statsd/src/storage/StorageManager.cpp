@@ -75,11 +75,11 @@ string StorageManager::getDataHistoryFileName(long wallClockSec, int uid, int64_
                         (long long)id);
 }
 
-static const char* findTrainInfoFileNameLocked(const string& trainName) {
+static string findTrainInfoFileNameLocked(const string& trainName) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(TRAIN_INFO_DIR), closedir);
     if (dir == NULL) {
         VLOG("Path %s does not exist", TRAIN_INFO_DIR);
-        return nullptr;
+        return "";
     }
     dirent* de;
     while ((de = readdir(dir.get()))) {
@@ -90,12 +90,12 @@ static const char* findTrainInfoFileNameLocked(const string& trainName) {
         if (fileNameLength >= trainName.length()) {
             if (0 == strncmp(fileName + fileNameLength - trainName.length(), trainName.c_str(),
                              trainName.length())) {
-                return fileName;
+              return string(fileName);
             }
         }
     }
 
-    return nullptr;
+    return "";
 }
 
 // Returns array of int64_t which contains timestamp in seconds, uid,
@@ -267,13 +267,13 @@ bool StorageManager::readTrainInfo(const std::string& trainName, InstallTrainInf
 
 bool StorageManager::readTrainInfoLocked(const std::string& trainName, InstallTrainInfo& trainInfo) {
     trimToFit(TRAIN_INFO_DIR, /*parseTimestampOnly=*/ true);
-    const char* fileName = findTrainInfoFileNameLocked(trainName);
-    if (fileName == nullptr) {
+    string fileName = findTrainInfoFileNameLocked(trainName);
+    if (fileName.empty()) {
         return false;
     }
-    int fd = open(StringPrintf("%s/%s", TRAIN_INFO_DIR, fileName).c_str(), O_RDONLY | O_CLOEXEC);
+    int fd = open(StringPrintf("%s/%s", TRAIN_INFO_DIR, fileName.c_str()).c_str(), O_RDONLY | O_CLOEXEC);
     if (fd == -1) {
-        VLOG("Failed to open %s", fileName);
+        VLOG("Failed to open %s", fileName.c_str());
         return false;
     }
 
