@@ -21,6 +21,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.Process.NFC_UID;
 import static android.os.Process.ROOT_UID;
+import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
@@ -4647,6 +4648,7 @@ public final class ActiveServices {
             case ROOT_UID:
             case SYSTEM_UID:
             case NFC_UID:
+            case SHELL_UID:
                 isCallerSystem = true;
                 break;
             default:
