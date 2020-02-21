@@ -236,8 +236,7 @@ public class UserSwitcherController implements Dumpable {
                                             picture, avatarSize, avatarSize, true);
                                 }
                             }
-                            int index = isCurrent ? 0 : records.size();
-                            records.add(index, new UserRecord(info, picture, false /* isGuest */,
+                            records.add(new UserRecord(info, picture, false /* isGuest */,
                                     isCurrent, false /* isAddUser */, false /* isRestricted */,
                                     switchToEnabled));
                         }
@@ -269,8 +268,7 @@ public class UserSwitcherController implements Dumpable {
                         records.add(guestRecord);
                     }
                 } else {
-                    int index = guestRecord.isCurrent ? 0 : records.size();
-                    records.add(index, guestRecord);
+                    records.add(guestRecord);
                 }
 
                 if (canCreateUser) {
