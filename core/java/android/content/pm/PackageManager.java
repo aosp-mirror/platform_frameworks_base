@@ -983,7 +983,8 @@ public abstract class PackageManager {
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
      * that the given user's package restrictions state will be serialised to disk after the
-     * component state has been updated.
+     * component state has been updated. Note that this is synchronous disk access, so calls using
+     * this flag should be run on a background thread.
      */
     public static final int SYNCHRONOUS = 0x00000002;
 

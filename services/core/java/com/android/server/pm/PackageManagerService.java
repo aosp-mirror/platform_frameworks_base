@@ -130,6 +130,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
@@ -213,7 +214,6 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.ParsingPackageRead;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
@@ -20180,6 +20180,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @WorkerThread
     @Override
     public void flushPackageRestrictionsAsUser(int userId) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
@@ -20197,6 +20198,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mLock")
     private void flushPackageRestrictionsAsUserInternalLocked(int userId) {
+        // NOTE: this invokes synchronous disk access, so callers using this
+        // method should consider running on a background thread
         mSettings.writePackageRestrictionsLPr(userId);
         mDirtyUsers.remove(userId);
         if (mDirtyUsers.isEmpty()) {

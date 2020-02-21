@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -261,6 +262,7 @@ public abstract class PackageManagerInternal {
     /**
      * Flushes package restrictions for the given user immediately to disk.
      */
+    @WorkerThread
     public abstract void flushPackageRestrictions(int userId);
 
     /**
