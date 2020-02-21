@@ -40,7 +40,7 @@ public class JobScheduledEvent implements Parcelable {
     public static final int TYPE_START_JOB = 0;
     /** JobService#onJobStopped */
     public static final int TYPE_STOP_JOB = 1;
-    private static final int TYPE_MAX = 0;
+    private static final int TYPE_MAX = 1;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "TYPE_" }, value = {
