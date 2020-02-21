@@ -230,6 +230,16 @@ public class DisplayCutoutTest {
     }
 
     @Test
+    public void inset_insets_withWaterfallCutout() throws Exception {
+        DisplayCutout cutout = createCutoutWaterfallOnly(Insets.of(0, 10, 0, 10)).inset(1, 2, 3, 4);
+
+        assertEquals(cutout.getSafeInsetLeft(), 0);
+        assertEquals(cutout.getSafeInsetTop(), 8);
+        assertEquals(cutout.getSafeInsetRight(), 0);
+        assertEquals(cutout.getSafeInsetBottom(), 6);
+    }
+
+    @Test
     public void inset_insets_consumeInset() throws Exception {
         DisplayCutout cutout = mCutoutTop.inset(0, 1000, 0, 0);
 
@@ -457,7 +467,8 @@ public class DisplayCutoutTest {
 
     private static DisplayCutout createCutoutWaterfallOnly(Insets waterfallInsets) {
         return new DisplayCutout(
-                Insets.of(20, 0, 20, 0),
+                Insets.of(waterfallInsets.left, waterfallInsets.top, waterfallInsets.right,
+                        waterfallInsets.bottom),
                 ZERO_RECT,
                 ZERO_RECT,
                 ZERO_RECT,

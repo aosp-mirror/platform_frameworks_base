@@ -554,32 +554,21 @@ public final class DisplayCutout {
      */
     public DisplayCutout inset(int insetLeft, int insetTop, int insetRight, int insetBottom) {
         if (insetLeft == 0 && insetTop == 0 && insetRight == 0 && insetBottom == 0
-                || isBoundsEmpty()) {
+                || (isBoundsEmpty() && mWaterfallInsets.equals(Insets.NONE))) {
             return this;
         }
 
-        Rect safeInsets = new Rect(mSafeInsets);
-
-        // Note: it's not really well defined what happens when the inset is negative, because we
-        // don't know if the safe inset needs to expand in general.
-        if (insetTop > 0 || safeInsets.top > 0) {
-            safeInsets.top = atLeastZero(safeInsets.top - insetTop);
-        }
-        if (insetBottom > 0 || safeInsets.bottom > 0) {
-            safeInsets.bottom = atLeastZero(safeInsets.bottom - insetBottom);
-        }
-        if (insetLeft > 0 || safeInsets.left > 0) {
-            safeInsets.left = atLeastZero(safeInsets.left - insetLeft);
-        }
-        if (insetRight > 0 || safeInsets.right > 0) {
-            safeInsets.right = atLeastZero(safeInsets.right - insetRight);
-        }
+        Rect safeInsets = insetInsets(insetLeft, insetTop, insetRight, insetBottom,
+                new Rect(mSafeInsets));
 
         // If we are not cutting off part of the cutout by insetting it on bottom/right, and we also
         // don't move it around, we can avoid the allocation and copy of the instance.
         if (insetLeft == 0 && insetTop == 0 && mSafeInsets.equals(safeInsets)) {
             return this;
         }
+
+        Rect waterfallInsets = insetInsets(insetLeft, insetTop, insetRight, insetBottom,
+                mWaterfallInsets.toRect());
 
         Rect[] bounds = mBounds.getRects();
         for (int i = 0; i < bounds.length; ++i) {
@@ -588,7 +577,27 @@ public final class DisplayCutout {
             }
         }
 
-        return new DisplayCutout(safeInsets, mWaterfallInsets, bounds, false /* copyArguments */);
+        return new DisplayCutout(safeInsets, Insets.of(waterfallInsets), bounds,
+                false /* copyArguments */);
+    }
+
+    private Rect insetInsets(int insetLeft, int insetTop, int insetRight, int insetBottom,
+            Rect insets) {
+        // Note: it's not really well defined what happens when the inset is negative, because we
+        // don't know if the safe inset needs to expand in general.
+        if (insetTop > 0 || insets.top > 0) {
+            insets.top = atLeastZero(insets.top - insetTop);
+        }
+        if (insetBottom > 0 || insets.bottom > 0) {
+            insets.bottom = atLeastZero(insets.bottom - insetBottom);
+        }
+        if (insetLeft > 0 || insets.left > 0) {
+            insets.left = atLeastZero(insets.left - insetLeft);
+        }
+        if (insetRight > 0 || insets.right > 0) {
+            insets.right = atLeastZero(insets.right - insetRight);
+        }
+        return insets;
     }
 
     /**
