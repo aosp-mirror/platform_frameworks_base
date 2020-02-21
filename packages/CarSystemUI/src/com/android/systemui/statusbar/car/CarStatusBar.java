@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.car;
 
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -99,6 +102,8 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.phone.AutoHideElement;
+import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
@@ -122,6 +127,7 @@ import java.util.Map;
  */
 public class CarStatusBar extends StatusBar implements CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
+    private static final int MODE_INVALID = -1;
     // used to calculate how fast to open or close the window
     private static final float DEFAULT_FLING_VELOCITY = 0;
     // max time a fling animation takes
@@ -268,6 +274,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         }
     };
 
+    private int mNavigationBarMode;
+    private BarTransitions mNavBarTransitions;
+
     @Override
     public void start() {
         // Non blocking call to connect to car service. Call this early so that we'll be connected
@@ -382,6 +391,18 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                         Log.wtf(TAG, " mVolumeChangeCallback failed to connect to car ", e);
                     }
                 });
+
+        mAutoHideController.setNavigationBar(new AutoHideElement() {
+            @Override
+            public void synchronizeState() {
+                checkNavBarModes();
+            }
+
+            @Override
+            public boolean isSemiTransparent() {
+                return mNavigationBarMode == MODE_SEMI_TRANSPARENT;
+            }
+        });
     }
 
     @Override
@@ -419,6 +440,65 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mNavigationBarController = Dependency.get(NavigationBarController.class);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
+    }
+
+    @Override
+    public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+            boolean navbarColorManagedByIme) {
+        // Ensure we store the systemUiVisibility flags before the super call overwrites it.
+        int oldVal = getSystemUiVisibility();
+
+        super.setSystemUiVisibility(displayId, vis, fullscreenStackVis, dockedStackVis, mask,
+                fullscreenStackBounds, dockedStackBounds, navbarColorManagedByIme);
+
+        if (displayId != getDisplayId()) {
+            return;
+        }
+
+        int newVal = (oldVal & ~mask) | (vis & mask);
+
+        // update navigation bar mode
+        int nbMode = mNavigationBarWindow == null ? MODE_INVALID : computeNavBarMode(oldVal,
+                newVal);
+        boolean nbModeChanged = nbMode != MODE_INVALID;
+        if (nbModeChanged) {
+            if (mNavigationBarMode != nbMode) {
+                mNavigationBarMode = nbMode;
+                checkNavBarModes();
+            }
+            mAutoHideController.touchAutoHide();
+        }
+
+        mLightBarController.onNavigationVisibilityChanged(
+                vis, mask, nbModeChanged, mNavigationBarMode, navbarColorManagedByIme);
+    }
+
+    @BarTransitions.TransitionMode
+    private int computeNavBarMode(int oldVis, int newVis) {
+        int oldMode = navBarMode(oldVis);
+        int newMode = navBarMode(newVis);
+        if (oldMode == newMode) {
+            return -1; // no mode change
+        }
+        return newMode;
+    }
+
+    @BarTransitions.TransitionMode
+    private int navBarMode(int vis) {
+        if ((vis & View.NAVIGATION_BAR_TRANSIENT) != 0) {
+            return MODE_SEMI_TRANSPARENT;
+        } else {
+            return MODE_OPAQUE;
+        }
+    }
+
+    /**
+     * Checks current navigation bar mode and make transitions.
+     */
+    private void checkNavBarModes() {
+        boolean anim = isDeviceInteractive() && mBottomNavBarVisible;
+        mNavBarTransitions.transitionTo(mNavigationBarMode, anim);
     }
 
     @Override
@@ -920,7 +1000,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     mNotificationViewController.setIsInForeground(false);
                     // let the status bar know that the panel is closed
                     setPanelExpanded(false);
+                    mAutoHideController.userAutoHide();
                 } else {
+                    mAutoHideController.cancelAutoHide();
                     mNotificationViewController.setIsInForeground(true);
                     // let the status bar know that the panel is open
                     mNotificationView.setVisibleNotificationsAsSeen();
@@ -995,6 +1077,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         if (mShowBottom) {
             mNavigationBarWindow = (ViewGroup) View.inflate(mContext,
                     R.layout.navigation_bar_window, null);
+            mNavBarTransitions = new BarTransitions(mNavigationBarWindow,
+                    R.drawable.nav_background);
         }
         if (mShowLeft) {
             mLeftNavigationBarWindow = (ViewGroup) View.inflate(mContext,

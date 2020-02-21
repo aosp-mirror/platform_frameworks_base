@@ -2205,6 +2205,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                 navbarColorManagedByIme);
     }
 
+    protected final int getSystemUiVisibility() {
+        return mSystemUiVisibility;
+    }
+
+    protected final int getDisplayId() {
+        return mDisplayId;
+    }
+
     @Override
     public void showWirelessChargingAnimation(int batteryLevel) {
         if (mDozing || mKeyguardManager.isKeyguardLocked()) {
