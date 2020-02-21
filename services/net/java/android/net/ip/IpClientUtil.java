@@ -22,7 +22,7 @@ import android.content.Context;
 import android.net.DhcpResultsParcelable;
 import android.net.Layer2PacketParcelable;
 import android.net.LinkProperties;
-import android.net.NetworkStackClient;
+import android.net.networkstack.ModuleNetworkStackClient;
 import android.os.ConditionVariable;
 
 import java.io.FileDescriptor;
@@ -75,11 +75,11 @@ public class IpClientUtil {
      *
      * <p>This is a convenience method to allow clients to use {@link IpClientCallbacks} instead of
      * {@link IIpClientCallbacks}.
-     * @see {@link NetworkStackClient#makeIpClient(String, IIpClientCallbacks)}
+     * @see {@link ModuleNetworkStackClient#makeIpClient(String, IIpClientCallbacks)}
      */
     public static void makeIpClient(Context context, String ifName, IpClientCallbacks callback) {
-        // TODO: migrate clients and remove context argument
-        NetworkStackClient.getInstance().makeIpClient(ifName, new IpClientCallbacksProxy(callback));
+        ModuleNetworkStackClient.getInstance(context)
+                .makeIpClient(ifName, new IpClientCallbacksProxy(callback));
     }
 
     /**
