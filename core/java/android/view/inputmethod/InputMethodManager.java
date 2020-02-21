@@ -1709,7 +1709,7 @@ public final class InputMethodManager {
             }
 
             try {
-                return mService.hideSoftInput(mClient, flags, resultReceiver);
+                return mService.hideSoftInput(mClient, windowToken, flags, resultReceiver);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1986,7 +1986,8 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     void closeCurrentInput() {
         try {
-            mService.hideSoftInput(mClient, HIDE_NOT_ALWAYS, null);
+            mService.hideSoftInput(
+                    mClient, mCurRootView.getView().getWindowToken(), HIDE_NOT_ALWAYS, null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

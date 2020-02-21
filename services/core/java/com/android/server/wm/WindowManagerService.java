@@ -7490,27 +7490,28 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
                 imeTarget = imeTarget.getImeControlTarget();
-
-                final int displayId = imeTarget.getDisplayId();
-                mRoot.getDisplayContent(displayId).getInsetsStateController().getImeSourceProvider()
+                imeTarget.getDisplayContent().getInsetsStateController().getImeSourceProvider()
                         .scheduleShowImePostLayout(imeTarget);
             }
         }
 
         @Override
-        public void hideIme(int displayId) {
+        public void hideIme(IBinder imeTargetWindowToken) {
             synchronized (mGlobalLock) {
-                final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                if (dc != null) {
-                    InsetsControlTarget imeControlTarget = dc.mInputMethodControlTarget;
-                    if (imeControlTarget == null) {
-                        return;
-                    }
-                    // If there was a pending IME show(), reset it as IME has been
-                    // requested to be hidden.
-                    dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
-                    imeControlTarget.hideInsets(WindowInsets.Type.ime(), true /* fromIme */);
+                WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
+                if (imeTarget == null) {
+                    // The target window no longer exists.
+                    return;
                 }
+                final DisplayContent dc = imeTarget.getImeControlTarget().getDisplayContent();
+                // If there was a pending IME show(), reset it as IME has been
+                // requested to be hidden.
+                dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
+                if (dc.mInputMethodControlTarget == null) {
+                    return;
+                }
+                dc.mInputMethodControlTarget.hideInsets(
+                        WindowInsets.Type.ime(), true /* fromIme */);
             }
         }
 
