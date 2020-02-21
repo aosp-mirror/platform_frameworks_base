@@ -77,6 +77,7 @@ import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -89,6 +90,7 @@ import org.mockito.stubbing.Answer;
  * Functional tests for notification inflation from {@link NotificationEntryManager}.
  */
 @SmallTest
+@Ignore("Flaking")
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NotificationEntryManagerInflationTest extends SysuiTestCase {
