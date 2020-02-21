@@ -201,6 +201,16 @@ public class UtilsTest {
 
         requestedStrength = Authenticators.BIOMETRIC_WEAK;
         assertTrue(Utils.isAtLeastStrength(sensorStrength, requestedStrength));
+
+
+        // Test invalid inputs
+
+        sensorStrength = Authenticators.BIOMETRIC_STRONG;
+        requestedStrength = Authenticators.DEVICE_CREDENTIAL;
+        assertFalse(Utils.isAtLeastStrength(sensorStrength, requestedStrength));
+
+        requestedStrength = 1 << 2;
+        assertFalse(Utils.isAtLeastStrength(sensorStrength, requestedStrength));
     }
 
     @Test

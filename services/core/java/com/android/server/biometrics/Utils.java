@@ -130,8 +130,24 @@ public class Utils {
      * @return true only if the sensor is at least as strong as the requested strength
      */
     public static boolean isAtLeastStrength(int sensorStrength, int requestedStrength) {
+        // Clear out any bits that are not reserved for biometric
+        sensorStrength &= Authenticators.BIOMETRIC_MIN_STRENGTH;
+
         // If the authenticator contains bits outside of the requested strength, it is too weak.
-        return (~requestedStrength & sensorStrength) == 0;
+        if ((sensorStrength & ~requestedStrength) != 0) {
+            return false;
+        }
+
+        for (int i = Authenticators.BIOMETRIC_MAX_STRENGTH;
+                i <= requestedStrength; i = (i << 1) | 1) {
+            if (i == sensorStrength) {
+                return true;
+            }
+        }
+
+        Slog.e(BiometricService.TAG, "Unknown sensorStrength: " + sensorStrength
+                + ", requestedStrength: " + requestedStrength);
+        return false;
     }
 
     /**

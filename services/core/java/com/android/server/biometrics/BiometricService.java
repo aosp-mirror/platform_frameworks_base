@@ -825,6 +825,33 @@ public class BiometricService extends SystemService {
                 Slog.e(TAG, "Remote exception", e);
             }
         }
+
+        @Override // Binder call
+        public long[] getAuthenticatorIds() {
+            checkInternalPermission();
+
+            final List<Long> ids = new ArrayList<>();
+            for (AuthenticatorWrapper authenticator : mAuthenticators) {
+                try {
+                    final long id = authenticator.impl.getAuthenticatorId();
+                    if (Utils.isAtLeastStrength(authenticator.getActualStrength(),
+                            Authenticators.BIOMETRIC_STRONG) && id != 0) {
+                        ids.add(id);
+                    } else {
+                        Slog.d(TAG, "Authenticator " + authenticator + ", authenticatorID " + id
+                                + " cannot participate in Keystore operations");
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "RemoteException", e);
+                }
+            }
+
+            long[] result = new long[ids.size()];
+            for (int i = 0; i < ids.size(); i++) {
+                result[i] = ids.get(i);
+            }
+            return result;
+        }
     }
 
     private void checkInternalPermission() {
