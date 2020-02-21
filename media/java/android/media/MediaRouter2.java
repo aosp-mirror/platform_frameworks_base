@@ -976,8 +976,12 @@ public class MediaRouter2 {
         }
 
         /**
-         * Selects a route for the remote session. The given route must satisfy all of the
-         * following conditions:
+         * Selects a route for the remote session. After a route is selected, the media is expected
+         * to be played to the all the selected routes. This is different from {@link
+         * MediaRouter2#transferTo(MediaRoute2Info)} transferring to a route},
+         * where the media is expected to 'move' from one route to another.
+         * <p>
+         * The given route must satisfy all of the following conditions:
          * <ul>
          * <li>ID should not be included in {@link #getSelectedRoutes()}</li>
          * <li>ID should be included in {@link #getSelectableRoutes()}</li>
@@ -1024,8 +1028,10 @@ public class MediaRouter2 {
         }
 
         /**
-         * Deselects a route from the remote session. The given route must satisfy all of the
-         * following conditions:
+         * Deselects a route from the remote session. After a route is deselected, the media is
+         * expected to be stopped on the deselected routes.
+         * <p>
+         * The given route must satisfy all of the following conditions:
          * <ul>
          * <li>ID should be included in {@link #getSelectedRoutes()}</li>
          * <li>ID should be included in {@link #getDeselectableRoutes()}</li>
