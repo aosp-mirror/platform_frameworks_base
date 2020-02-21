@@ -508,6 +508,13 @@ java_library {
     srcs: [":framework-all-sources"],
     installable: false,
     apex_available: ["//apex_available:platform"],
+    visibility: [
+        // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
+        "//external/robolectric-shadows:__subpackages__",
+        "//frameworks/base/packages/Tethering/common/TetheringLib:__subpackages__",
+        "//frameworks/layoutlib:__subpackages__",
+        "//frameworks/opt/net/ike:__subpackages__",
+    ],
 }
 
 java_library {
