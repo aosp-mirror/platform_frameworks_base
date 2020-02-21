@@ -28,6 +28,7 @@ import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
@@ -54,7 +55,7 @@ public class TunerResourceManagerService extends SystemService {
     // Array of the registered client profiles
     @VisibleForTesting private SparseArray<ClientProfile> mClientProfiles = new SparseArray<>();
     private int mNextUnusedClientId = 0;
-    private List<Integer> mReleasedClientId = new ArrayList<Integer>();
+    private List<Integer> mRegisteredClientIds = new ArrayList<Integer>();
 
     // Array of the current available frontend resources
     @VisibleForTesting
@@ -98,8 +99,12 @@ public class TunerResourceManagerService extends SystemService {
                 throw new RemoteException("ResourceClientProfile can't be null");
             }
 
-            if (clientId == null || clientId.length != 1) {
-                throw new RemoteException("clientId must be a size 1 array!");
+            if (clientId == null) {
+                throw new RemoteException("clientId can't be null!");
+            }
+
+            if (!mPriorityCongfig.isDefinedUseCase(profile.getUseCase())) {
+                throw new RemoteException("Use undefined client use case:" + profile.getUseCase());
             }
 
             synchronized (mLock) {
@@ -108,20 +113,20 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
-        public void unregisterClientProfile(int clientId) {
-            if (DEBUG) {
-                Slog.d(TAG, "unregisterClientProfile(clientId=" + clientId + ")");
+        public void unregisterClientProfile(int clientId) throws RemoteException {
+            enforceAccessPermission();
+            synchronized (mLock) {
+                if (!checkClientExists(clientId)) {
+                    Slog.e(TAG, "Unregistering non exists client:" + clientId);
+                    return;
+                }
+                unregisterClientProfileInternal(clientId);
             }
-
-            mClientProfiles.remove(clientId);
-            mListeners.remove(clientId);
-            mReleasedClientId.add(clientId);
         }
 
         @Override
         public boolean updateClientPriority(int clientId, int priority, int niceValue) {
             enforceAccessPermission();
-
             synchronized (mLock) {
                 return updateClientPriorityInternal(clientId, priority, niceValue);
             }
@@ -243,24 +248,38 @@ public class TunerResourceManagerService extends SystemService {
             return;
         }
         // TODO tell if the client already exists
-        if (mReleasedClientId.isEmpty()) {
-            clientId[0] = mNextUnusedClientId++;
-        } else {
-            clientId[0] = mReleasedClientId.get(0);
-            mReleasedClientId.remove(0);
-        }
+        clientId[0] = mNextUnusedClientId++;
 
-        int callingPid = mManager.getClientPid(profile.getTvInputSessionId());
+        int pid = profile.getTvInputSessionId() == null
+                ? Binder.getCallingPid() /*callingPid*/
+                : mManager.getClientPid(profile.getTvInputSessionId()); /*tvAppId*/
 
         ClientProfile clientProfile = new ClientProfile.Builder(clientId[0])
                                               .tvInputSessionId(profile.getTvInputSessionId())
                                               .useCase(profile.getUseCase())
-                                              .processId(callingPid)
+                                              .processId(pid)
                                               .build();
-        clientProfile.setPriority(getClientPriority(profile.getUseCase(), callingPid));
+        clientProfile.setPriority(getClientPriority(profile.getUseCase(), pid));
 
         mClientProfiles.append(clientId[0], clientProfile);
         mListeners.append(clientId[0], listener);
+        mRegisteredClientIds.add(clientId[0]);
+    }
+
+    @VisibleForTesting
+    protected void unregisterClientProfileInternal(int clientId) {
+        if (DEBUG) {
+            Slog.d(TAG, "unregisterClientProfile(clientId=" + clientId + ")");
+        }
+        for (int id : getClientProfile(clientId).getInUseFrontendIds()) {
+            getFrontendResource(id).removeOwner();
+            for (int groupMemberId : getFrontendResource(id).getExclusiveGroupMemberFeIds()) {
+                getFrontendResource(groupMemberId).removeOwner();
+            }
+        }
+        mClientProfiles.remove(clientId);
+        mListeners.remove(clientId);
+        mRegisteredClientIds.remove(clientId);
     }
 
     @VisibleForTesting
@@ -355,12 +374,11 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         frontendId[0] = TunerResourceManager.INVALID_FRONTEND_ID;
-        ClientProfile requestClient = getClientProfile(request.getClientId());
-        if (requestClient == null) {
-            Slog.e(TAG, "Request from unregistered client. Id: " + request.getClientId());
+        if (!checkClientExists(request.getClientId())) {
+            Slog.e(TAG, "Request frontend from unregistered client:" + request.getClientId());
             return false;
         }
-
+        ClientProfile requestClient = getClientProfile(request.getClientId());
         int grantingFrontendId = -1;
         int inUseLowestPriorityFrId = -1;
         // Priority max value is 1000
@@ -393,7 +411,7 @@ public class TunerResourceManagerService extends SystemService {
         // Grant frontend when there is unused resource.
         if (grantingFrontendId > -1) {
             frontendId[0] = grantingFrontendId;
-            updateFrontendResourcesOnNewGrant(frontendId[0], request.getClientId());
+            updateFrontendClientMappingOnNewGrant(frontendId[0], request.getClientId());
             return true;
         }
 
@@ -402,7 +420,7 @@ public class TunerResourceManagerService extends SystemService {
         if (inUseLowestPriorityFrId > -1 && (requestClient.getPriority() > currentLowestPriority)) {
             frontendId[0] = inUseLowestPriorityFrId;
             reclaimFrontendResource(getFrontendResource(frontendId[0]).getOwnerClientId());
-            updateFrontendResourcesOnNewGrant(frontendId[0], request.getClientId());
+            updateFrontendClientMappingOnNewGrant(frontendId[0], request.getClientId());
             return true;
         }
 
@@ -410,20 +428,20 @@ public class TunerResourceManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    protected int getClientPriority(int useCase, int callingPid) {
+    protected int getClientPriority(int useCase, int pid) {
         if (DEBUG) {
             Slog.d(TAG, "getClientPriority useCase=" + useCase
-                    + ", calling Pid=" + callingPid + ")");
+                    + ", pid=" + pid + ")");
         }
 
-        if (isForeground(callingPid)) {
+        if (isForeground(pid)) {
             return mPriorityCongfig.getForegroundPriority(useCase);
         }
         return mPriorityCongfig.getBackgroundPriority(useCase);
     }
 
     @VisibleForTesting
-    protected boolean isForeground(int callingPid) {
+    protected boolean isForeground(int pid) {
         // TODO: how to get fg/bg information from pid
         return true;
     }
@@ -439,11 +457,14 @@ public class TunerResourceManagerService extends SystemService {
         }
     }
 
-    private void updateFrontendResourcesOnNewGrant(int grantingId, int ownerClientId) {
+    private void updateFrontendClientMappingOnNewGrant(int grantingId, int ownerClientId) {
         FrontendResource grantingFrontend = getFrontendResource(grantingId);
+        ClientProfile ownerProfile = getClientProfile(ownerClientId);
         grantingFrontend.setOwner(ownerClientId);
+        ownerProfile.useFrontend(grantingId);
         for (int exclusiveGroupMember : grantingFrontend.getExclusiveGroupMemberFeIds()) {
             getFrontendResource(exclusiveGroupMember).setOwner(ownerClientId);
+            ownerProfile.useFrontend(exclusiveGroupMember);
         }
     }
 
@@ -473,6 +494,10 @@ public class TunerResourceManagerService extends SystemService {
     @VisibleForTesting
     protected SparseArray<FrontendResource> getFrontendResources() {
         return mFrontendResources;
+    }
+
+    private boolean checkClientExists(int clientId) {
+        return mRegisteredClientIds.contains(clientId);
     }
 
     private void enforceAccessPermission() {

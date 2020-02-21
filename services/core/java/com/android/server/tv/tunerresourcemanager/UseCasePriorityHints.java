@@ -95,8 +95,10 @@ public class UseCasePriorityHints {
             } catch (XmlPullParserException e) {
                 Slog.e(TAG, "Unable to parse vendor file: " + file, e);
             }
-        } else if (DEBUG) {
-            Slog.i(TAG, "no vendor priority configuration available. Using default priority");
+        } else {
+            if (DEBUG) {
+                Slog.i(TAG, "no vendor priority configuration available. Using default priority");
+            }
             addNewUseCasePriority(TvInputService.PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND, 180, 100);
             addNewUseCasePriority(TvInputService.PRIORITY_HINT_USE_CASE_TYPE_SCAN, 450, 200);
             addNewUseCasePriority(TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK, 480, 300);
