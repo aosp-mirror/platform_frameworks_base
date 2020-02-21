@@ -359,8 +359,8 @@
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
   <java-symbol type="bool" name="config_enableNewAutoSelectNetworkUI"/>
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
-  <java-symbol type="dimen" name="config_fullTaskSnapshotScale" />
-  <java-symbol type="dimen" name="config_reducedTaskSnapshotScale" />
+  <java-symbol type="dimen" name="config_highResTaskSnapshotScale" />
+  <java-symbol type="dimen" name="config_lowResTaskSnapshotScale" />
   <java-symbol type="bool" name="config_use16BitTaskSnapshotPixelFormat" />
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="string" name="config_recentsComponentName" />

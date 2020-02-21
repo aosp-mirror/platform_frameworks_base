@@ -898,11 +898,11 @@ class Task extends WindowContainer<WindowContainer> {
     /**
      * DO NOT HOLD THE ACTIVITY MANAGER LOCK WHEN CALLING THIS METHOD!
      */
-    TaskSnapshot getSnapshot(boolean reducedResolution, boolean restoreFromDisk) {
+    TaskSnapshot getSnapshot(boolean isLowResolution, boolean restoreFromDisk) {
 
         // TODO: Move this to {@link TaskWindowContainerController} once recent tasks are more
         // synchronized between AM and WM.
-        return mAtmService.mWindowManager.getTaskSnapshot(mTaskId, mUserId, reducedResolution,
+        return mAtmService.mWindowManager.getTaskSnapshot(mTaskId, mUserId, isLowResolution,
                 restoreFromDisk);
     }
 

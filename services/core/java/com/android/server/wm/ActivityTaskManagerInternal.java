@@ -551,7 +551,7 @@ public abstract class ActivityTaskManagerInternal {
      * Gets bitmap snapshot of the provided task id.
      */
     public abstract ActivityManager.TaskSnapshot getTaskSnapshotNoRestore(int taskId,
-            boolean reducedResolution);
+            boolean isLowResolution);
 
     /** Returns true if uid is considered foreground for activity start purposes. */
     public abstract boolean isUidForeground(int uid);

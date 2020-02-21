@@ -89,7 +89,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     static class TaskSnapshotBuilder {
 
         private float mScale = 1f;
-        private boolean mReducedResolution = false;
+        private boolean mIsLowResolution = false;
         private boolean mIsRealSnapshot = true;
         private boolean mIsTranslucent = false;
         private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
@@ -101,8 +101,8 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             return this;
         }
 
-        TaskSnapshotBuilder setReducedResolution(boolean reducedResolution) {
-            mReducedResolution = reducedResolution;
+        TaskSnapshotBuilder setIsLowResolution(boolean isLowResolution) {
+            mIsLowResolution = isLowResolution;
             return this;
         }
 
@@ -140,7 +140,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             return new TaskSnapshot(MOCK_SNAPSHOT_ID, new ComponentName("", ""), buffer,
                     ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
                     mRotation, TEST_INSETS,
-                    mReducedResolution, mScale, mIsRealSnapshot,
+                    mIsLowResolution, mScale, mIsRealSnapshot,
                     mWindowingMode, mSystemUiVisibility, mIsTranslucent);
         }
     }
