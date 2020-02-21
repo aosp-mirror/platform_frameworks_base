@@ -241,6 +241,32 @@ public class TaskOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testSetWindowingMode() {
+        final ActivityStack stack = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+            .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        final WindowContainerTransaction t = new WindowContainerTransaction();
+
+        t.setWindowingMode(stack.mRemoteToken, WINDOWING_MODE_FULLSCREEN);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+
+        assertEquals(WINDOWING_MODE_FULLSCREEN, stack.getWindowingMode());
+    }
+
+    @Test
+    public void testSetActivityWindowingMode() {
+        final ActivityRecord record = makePipableActivity();
+        final ActivityStack stack = record.getStack();
+        final WindowContainerTransaction t = new WindowContainerTransaction();
+
+        t.setWindowingMode(stack.mRemoteToken, WINDOWING_MODE_PINNED);
+        t.setActivityWindowingMode(stack.mRemoteToken, WINDOWING_MODE_FULLSCREEN);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+
+        assertEquals(WINDOWING_MODE_FULLSCREEN, record.getWindowingMode());
+        assertEquals(WINDOWING_MODE_PINNED, stack.getWindowingMode());
+    }
+
+    @Test
     public void testContainerChanges() {
         removeGlobalMinSizeRestriction();
         final ActivityStack stack = new ActivityTestsBase.StackBuilder(mWm.mRoot)

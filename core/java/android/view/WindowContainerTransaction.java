@@ -131,6 +131,31 @@ public class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Set the windowing mode of children of a given root task, without changing
+     * the windowing mode of the Task itself. This can be used during transitions
+     * for example to make the activity render it's fullscreen configuration
+     * while the Task is still in PIP, so you can complete the animation.
+     *
+     * TODO(b/134365562): Can be removed once TaskOrg drives full-screen
+     */
+    public WindowContainerTransaction setActivityWindowingMode(IWindowContainer container,
+            int windowingMode) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mActivityWindowingMode = windowingMode;
+        return this;
+    }
+
+    /**
+     * Sets the windowing mode of the given container.
+     */
+    public WindowContainerTransaction setWindowingMode(IWindowContainer container,
+            int windowingMode) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mWindowingMode = windowingMode;
+        return this;
+    }
+
+    /**
      * Sets whether a container or any of its children can be focusable. When {@code false}, no
      * child can be focused; however, when {@code true}, it is still possible for children to be
      * non-focusable due to WM policy.
@@ -235,6 +260,9 @@ public class WindowContainerTransaction implements Parcelable {
         private Rect mPinnedBounds = null;
         private SurfaceControl.Transaction mBoundsChangeTransaction = null;
 
+        private int mActivityWindowingMode = -1;
+        private int mWindowingMode = -1;
+
         public Change() {}
 
         protected Change(Parcel in) {
@@ -251,6 +279,17 @@ public class WindowContainerTransaction implements Parcelable {
                 mBoundsChangeTransaction =
                     SurfaceControl.Transaction.CREATOR.createFromParcel(in);
             }
+
+            mWindowingMode = in.readInt();
+            mActivityWindowingMode = in.readInt();
+        }
+
+        public int getWindowingMode() {
+            return mWindowingMode;
+        }
+
+        public int getActivityWindowingMode() {
+            return mActivityWindowingMode;
         }
 
         public Configuration getConfiguration() {
@@ -340,6 +379,9 @@ public class WindowContainerTransaction implements Parcelable {
             if (mBoundsChangeTransaction != null) {
                 mBoundsChangeTransaction.writeToParcel(dest, flags);
             }
+
+            dest.writeInt(mWindowingMode);
+            dest.writeInt(mActivityWindowingMode);
         }
 
         @Override
