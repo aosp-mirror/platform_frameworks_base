@@ -3295,7 +3295,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (int i = 0; i < nai.numNetworkRequests(); i++) {
             NetworkRequest request = nai.requestAt(i);
             final NetworkRequestInfo nri = mNetworkRequests.get(request);
-            ensureRunningOnConnectivityServiceThread();
             final NetworkAgentInfo currentNetwork = nri.mSatisfier;
             if (currentNetwork != null && currentNetwork.network.netId == nai.network.netId) {
                 nri.mSatisfier = null;
@@ -3447,7 +3446,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             // If this Network is already the highest scoring Network for a request, or if
             // there is hope for it to become one if it validated, then it is needed.
-            ensureRunningOnConnectivityServiceThread();
             if (nri.request.isRequest() && nai.satisfies(nri.request) &&
                     (nai.isSatisfyingRequest(nri.request.requestId) ||
                     // Note that this catches two important cases:
@@ -3486,7 +3484,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (mNetworkRequests.get(nri.request) == null) {
             return;
         }
-        ensureRunningOnConnectivityServiceThread();
         if (nri.mSatisfier != null) {
             return;
         }
@@ -3524,7 +3521,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNetworkRequestInfoLogs.log("RELEASE " + nri);
         if (nri.request.isRequest()) {
             boolean wasKept = false;
-            ensureRunningOnConnectivityServiceThread();
             final NetworkAgentInfo nai = nri.mSatisfier;
             if (nai != null) {
                 boolean wasBackgroundNetwork = nai.isBackgroundNetwork();
