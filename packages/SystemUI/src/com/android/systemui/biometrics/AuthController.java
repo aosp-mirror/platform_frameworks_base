@@ -376,7 +376,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
 
         if (DEBUG) {
-            Log.d(TAG, "showDialog: " + args
+            Log.d(TAG, "userId: " + userId
                     + " savedState: " + savedState
                     + " mCurrentDialog: " + mCurrentDialog
                     + " newDialog: " + newDialog

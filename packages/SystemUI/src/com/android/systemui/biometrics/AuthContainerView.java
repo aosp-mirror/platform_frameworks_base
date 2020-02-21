@@ -340,6 +340,7 @@ public class AuthContainerView extends LinearLayout
         mBackgroundView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
 
         mCredentialView.setContainerView(this);
+        mCredentialView.setUserId(mConfig.mUserId);
         mCredentialView.setEffectiveUserId(mEffectiveUserId);
         mCredentialView.setCredentialType(credentialType);
         mCredentialView.setCallback(mCredentialCallback);
