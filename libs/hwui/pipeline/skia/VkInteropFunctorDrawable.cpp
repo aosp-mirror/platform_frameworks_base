@@ -121,7 +121,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         DrawGlInfo info;
-        SkM44 mat4(canvas->experimental_getLocalToDevice());
+        SkM44 mat4(canvas->getLocalToDevice());
         SkIRect clipBounds = canvas->getDeviceClipBounds();
 
         info.clipLeft = clipBounds.fLeft;

@@ -134,7 +134,7 @@ struct Concat44 final : Op {
     static const auto kType = Type::Concat44;
     Concat44(const SkScalar m[16]) { memcpy(colMajor, m, sizeof(colMajor)); }
     SkScalar colMajor[16];
-    void draw(SkCanvas* c, const SkMatrix&) const { c->experimental_concat44(colMajor); }
+    void draw(SkCanvas* c, const SkMatrix&) const { c->concat44(colMajor); }
 };
 struct Concat final : Op {
     static const auto kType = Type::Concat;

@@ -26,7 +26,7 @@
 #include "SkAndroidFrameworkUtils.h"
 #include "SkClipStack.h"
 #include "SkRect.h"
-#include "include/private/SkM44.h"
+#include "SkM44.h"
 
 namespace android {
 namespace uirenderer {
@@ -93,7 +93,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
     SkIRect surfaceBounds = canvas->internal_private_getTopLayerBounds();
     SkIRect clipBounds = canvas->getDeviceClipBounds();
-    SkM44 mat4(canvas->experimental_getLocalToDevice());
+    SkM44 mat4(canvas->getLocalToDevice());
     SkRegion clipRegion;
     canvas->temporary_internal_getRgnClip(&clipRegion);
 
