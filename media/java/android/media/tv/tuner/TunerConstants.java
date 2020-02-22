@@ -46,6 +46,19 @@ public final class TunerConstants {
      * Invalid AV Sync ID.
      */
     public static final int INVALID_AV_SYNC_ID = Constants.Constant.INVALID_AV_SYNC_ID;
+    /**
+     * Timestamp is unavailable.
+     *
+     * <p>Returned by {@link android.media.tv.tuner.filter.TimeFilter#getSourceTime()},
+     * {@link android.media.tv.tuner.filter.TimeFilter#getTimeStamp()}, or
+     * {@link Tuner#getAvSyncTime(int)} when the requested timestamp is not available.
+     *
+     * @see android.media.tv.tuner.filter.TimeFilter#getSourceTime()
+     * @see android.media.tv.tuner.filter.TimeFilter#getTimeStamp()
+     * @see Tuner#getAvSyncTime(int)
+     * @hide
+     */
+    public static final long TIMESTAMP_UNAVAILABLE = -1L;
 
     /** @hide */
     @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})
