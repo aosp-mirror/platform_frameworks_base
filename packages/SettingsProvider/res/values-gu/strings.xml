@@ -20,8 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"સેટિંગ્સ સંગ્રહ"</string>
-    <!-- no translation found for wifi_softap_config_change (5688373762357941645) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (8946397286141531087) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"હૉટસ્પૉટ સેટિંગ બદલાઈ ગઈ છે"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"વિગતો જોવા માટે ટૅપ કરો"</string>
 </resources>
