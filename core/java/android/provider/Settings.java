@@ -9275,9 +9275,15 @@ public final class Settings {
         public static final String CUSTOM_BUGREPORT_HANDLER_USER = "custom_bugreport_handler_user";
 
         /**
-         * Whether ADB is enabled.
+         * Whether ADB over USB is enabled.
          */
         public static final String ADB_ENABLED = "adb_enabled";
+
+        /**
+         * Whether ADB over Wifi is enabled.
+         * @hide
+         */
+        public static final String ADB_WIFI_ENABLED = "adb_wifi_enabled";
 
         /**
          * Whether Views are allowed to save their attribute data.

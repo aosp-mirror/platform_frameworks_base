@@ -20,7 +20,7 @@
 #include <android/bitmap.h>
 #include <android/data_space.h>
 #include <android/imagedecoder.h>
-#include <android/graphics/MimeType.h>
+#include <MimeType.h>
 #include <android/rect.h>
 #include <hwui/ImageDecoder.h>
 #include <log/log.h>

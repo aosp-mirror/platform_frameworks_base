@@ -46,9 +46,10 @@ public class DecorContext extends ContextThemeWrapper {
 
     private WeakReference<Context> mActivityContext;
 
+    // TODO(b/149928768): Non-activity context can be passed.
     @VisibleForTesting
     public DecorContext(Context context, Context activityContext) {
-        super(context.createDisplayContext(activityContext.getDisplay()), null);
+        super(context.createDisplayContext(activityContext.getDisplayNoVerify()), null);
         mActivityContext = new WeakReference<>(activityContext);
         mActivityResources = activityContext.getResources();
     }

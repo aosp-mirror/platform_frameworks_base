@@ -59,6 +59,7 @@ public class UserDetailView extends PseudoGridView {
 
         private final Context mContext;
         protected UserSwitcherController mController;
+        private View mCurrentUserView;
 
         public Adapter(Context context, UserSwitcherController controller) {
             super(controller);
@@ -89,6 +90,9 @@ public class UserDetailView extends PseudoGridView {
                 v.bind(name, item.picture, item.info.id);
             }
             v.setActivated(item.isCurrent);
+            if (item.isCurrent) {
+                mCurrentUserView = v;
+            }
             v.setDisabledByAdmin(item.isDisabledByAdmin);
             if (!item.isSwitchToEnabled) {
                 v.setEnabled(false);
@@ -107,6 +111,12 @@ public class UserDetailView extends PseudoGridView {
                 mController.startActivity(intent);
             } else if (tag.isSwitchToEnabled) {
                 MetricsLogger.action(mContext, MetricsEvent.QS_SWITCH_USER);
+                if (!tag.isAddUser && !tag.isRestricted && !tag.isDisabledByAdmin) {
+                    if (mCurrentUserView != null) {
+                        mCurrentUserView.setActivated(false);
+                    }
+                    view.setActivated(true);
+                }
                 switchTo(tag);
             }
         }

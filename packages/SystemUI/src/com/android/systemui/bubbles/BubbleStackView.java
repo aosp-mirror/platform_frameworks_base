@@ -410,13 +410,7 @@ public class BubbleStackView extends FrameLayout {
         setFocusable(true);
         mBubbleContainer.bringToFront();
 
-        mBubbleOverflow = new BubbleOverflow(mContext);
-        if (BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
-            mBubbleOverflow.setUpOverflow(this);
-            mBubbleContainer.addView(mBubbleOverflow.getBtn(), 0,
-                    new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-
-        }
+        setUpOverflow();
 
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
             if (!mIsExpanded || mIsExpansionAnimating) {
@@ -525,14 +519,29 @@ public class BubbleStackView extends FrameLayout {
         addView(mFlyout, new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
     }
 
+    private void setUpOverflow() {
+        if (!BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
+            return;
+        }
+        int overflowBtnIndex = 0;
+        if (mBubbleOverflow == null) {
+            mBubbleOverflow = new BubbleOverflow(mContext);
+            mBubbleOverflow.setUpOverflow(this);
+        } else {
+            mBubbleContainer.removeView(mBubbleOverflow.getBtn());
+            mBubbleOverflow.updateIcon(mContext, this);
+            overflowBtnIndex = mBubbleContainer.getChildCount() - 1;
+        }
+        mBubbleContainer.addView(mBubbleOverflow.getBtn(), overflowBtnIndex,
+                new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+
+    }
     /**
      * Handle theme changes.
      */
     public void onThemeChanged() {
         setUpFlyout();
-        if (BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
-            mBubbleOverflow.setOverflowBtnTheme();
-        }
+        setUpOverflow();
     }
 
     /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
@@ -726,7 +735,7 @@ public class BubbleStackView extends FrameLayout {
         if (mExpandedBubble == null
                 || (BubbleExperimentConfig.allowBubbleOverflow(mContext)
                     && mExpandedBubble.getIconView() == mBubbleOverflow.getBtn()
-                    && mExpandedBubble.getKey() == BubbleOverflowActivity.KEY)) {
+                    && mExpandedBubble.getKey() == BubbleOverflow.KEY)) {
             return null;
         }
         return (Bubble) mExpandedBubble;
@@ -1651,7 +1660,7 @@ public class BubbleStackView extends FrameLayout {
      * is between 0 and the bubble count minus 1.
      */
     int getBubbleIndex(@Nullable BubbleViewProvider provider) {
-        if (provider == null || provider.getKey() == BubbleOverflowActivity.KEY) {
+        if (provider == null || provider.getKey() == BubbleOverflow.KEY) {
             return 0;
         }
         Bubble b = (Bubble) provider;

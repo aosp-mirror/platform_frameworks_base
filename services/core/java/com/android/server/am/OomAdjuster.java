@@ -1128,6 +1128,7 @@ public final class OomAdjuster {
             app.setCurRawAdj(app.maxAdj);
             app.setHasForegroundActivities(false);
             app.setCurrentSchedulingGroup(ProcessList.SCHED_GROUP_DEFAULT);
+            app.curCapability = PROCESS_CAPABILITY_ALL;
             app.setCurProcState(ActivityManager.PROCESS_STATE_PERSISTENT);
             // System processes can do UI, and when they do we want to have
             // them trim their memory after the user leaves the UI.  To

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <android/graphics/jni_runtime.h>
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
 #include "utils/Log.h"
@@ -49,7 +50,6 @@ int register_android_server_PersistentDataBlockService(JNIEnv* env);
 int register_android_server_Watchdog(JNIEnv* env);
 int register_android_server_HardwarePropertiesManagerService(JNIEnv* env);
 int register_android_server_SyntheticPasswordManager(JNIEnv* env);
-int register_android_graphics_GraphicsStatsService(JNIEnv* env);
 int register_android_hardware_display_DisplayViewport(JNIEnv* env);
 int register_android_server_net_NetworkStatsFactory(JNIEnv* env);
 int register_android_server_net_NetworkStatsService(JNIEnv* env);

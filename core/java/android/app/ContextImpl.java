@@ -2409,15 +2409,33 @@ class ContextImpl extends Context {
                     + "other visual contexts, such as Activity or one created with "
                     + "Context#createDisplayContext(Display)");
         }
-        return new WindowContext(this, null /* token */, type, options);
+        return new WindowContext(this, type, options);
     }
 
     ContextImpl createBaseWindowContext(IBinder token) {
         ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mFeatureId,
                 mSplitName, token, mUser, mFlags, mClassLoader, null);
         context.mIsUiContext = true;
+
         context.mIsAssociatedWithDisplay = true;
         return context;
+    }
+
+    Resources createWindowContextResources() {
+        final String resDir = mPackageInfo.getResDir();
+        final String[] splitResDirs = mPackageInfo.getSplitResDirs();
+        final String[] overlayDirs = mPackageInfo.getOverlayDirs();
+        final String[] libDirs = mPackageInfo.getApplicationInfo().sharedLibraryFiles;
+        final int displayId = getDisplayId();
+        final CompatibilityInfo compatInfo = (displayId == Display.DEFAULT_DISPLAY)
+                ? mPackageInfo.getCompatibilityInfo()
+                : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+        final List<ResourcesLoader> loaders = mResources.getLoaders();
+
+        // TODO(b/128338354): Rename to createTokenResources
+        return mResourcesManager.createBaseActivityResources(mToken, resDir, splitResDirs,
+                overlayDirs, libDirs, displayId, null /* overrideConfig */,
+                compatInfo, mClassLoader, loaders);
     }
 
     @Override

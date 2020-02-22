@@ -483,6 +483,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         GLOBAL_SETTINGS_WHITELIST = new ArraySet<>();
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_ENABLED);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_WIFI_ENABLED);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME_ZONE);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.DATA_ROAMING);
@@ -11174,6 +11175,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
+        }
+        if (uninstallBlocked) {
+            final PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
+            pmi.removeNonSystemPackageSuspensions(packageName, userId);
+            pmi.removeDistractingPackageRestrictions(packageName, userId);
+            pmi.flushPackageRestrictions(userId);
         }
         final boolean isDelegate = (who == null);
         DevicePolicyEventLogger

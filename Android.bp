@@ -291,7 +291,6 @@ filegroup {
         ":framework-permission-sources",
         ":framework-wifi-updatable-sources",
         ":framework-telephony-sources",
-        ":ike-srcs",
     ]
 }
 
@@ -452,6 +451,18 @@ filegroup {
     path: "core/java",
 }
 
+filegroup {
+    name: "libpowermanager_aidl",
+    srcs: [
+        "core/java/android/os/Temperature.aidl",
+        "core/java/android/os/CoolingDevice.aidl",
+        "core/java/android/os/IThermalEventListener.aidl",
+        "core/java/android/os/IThermalStatusListener.aidl",
+        "core/java/android/os/IThermalService.aidl",
+    ],
+    path: "core/java",
+}
+
 java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
@@ -462,7 +473,6 @@ java_library {
         "framework-statsd-stubs-module_libs_api",
         "framework-permission-stubs-systemapi",
         "framework-wifi-stubs",
-        "ike-stubs",
         "framework-tethering-stubs",
     ],
     installable: true,
@@ -513,7 +523,6 @@ java_library {
         "framework-sdkextensions-stubs-systemapi",
         "framework-statsd-stubs-module_libs_api",
         "framework-wifi-stubs",
-        "ike-stubs",
         "framework-tethering-stubs",
         // TODO (b/147688669) should be framework-telephony-stubs
         "framework-telephony",
@@ -690,6 +699,7 @@ filegroup {
         "core/java/android/annotation/CurrentTimeMillisLong.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/LongDef.java",
         "core/java/android/annotation/NonNull.java",
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/RequiresPermission.java",
@@ -1215,6 +1225,12 @@ java_library {
         "android_system_stubs_current",
     ],
     visibility: ["//frameworks/base/wifi"],
+}
+
+filegroup {
+    name: "framework-wifi-util-lib-aidls",
+    srcs: ["core/java/android/content/pm/ParceledListSlice.aidl"],
+    path: "core/java",
 }
 
 // utility classes statically linked into wifi-service

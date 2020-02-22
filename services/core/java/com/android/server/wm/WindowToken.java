@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -23,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_WINDOW_MOVEMENT;
+import static com.android.server.wm.ProtoLogGroup.WM_ERROR;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -36,10 +38,12 @@ import static com.android.server.wm.WindowTokenProto.WINDOWS;
 import static com.android.server.wm.WindowTokenProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
+import android.app.IWindowToken;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
@@ -90,6 +94,11 @@ class WindowToken extends WindowContainer<WindowState> {
     final boolean mOwnerCanManageAppTokens;
 
     private FixedRotationTransformState mFixedRotationTransformState;
+
+    private Configuration mLastReportedConfig;
+    private int mLastReportedDisplay = INVALID_DISPLAY;
+
+    private final boolean mFromClientToken;
 
     /**
      * Used to fix the transform of the token to be rotated to a rotation different than it's
@@ -167,13 +176,21 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
-            DisplayContent dc, boolean ownerCanManageAppTokens, boolean roundedCornerOverlay) {
+            DisplayContent dc, boolean ownerCanManageAppTokens, boolean fromClientToken) {
+        this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens,
+                false /* roundedCornersOverlay */, fromClientToken);
+    }
+
+    WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
+            DisplayContent dc, boolean ownerCanManageAppTokens, boolean roundedCornerOverlay,
+            boolean fromClientToken) {
         super(service);
         token = _token;
         windowType = type;
         mPersistOnEmpty = persistOnEmpty;
         mOwnerCanManageAppTokens = ownerCanManageAppTokens;
         mRoundedCornerOverlay = roundedCornerOverlay;
+        mFromClientToken = fromClientToken;
         if (dc != null) {
             dc.addWindowToken(token, this);
         }
@@ -305,8 +322,47 @@ class WindowToken extends WindowContainer<WindowState> {
         // up with goodToGo, so we don't move a window
         // to another display before the window behind
         // it is ready.
-
         super.onDisplayChanged(dc);
+        reportConfigToWindowTokenClient();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        super.onConfigurationChanged(newParentConfig);
+        reportConfigToWindowTokenClient();
+    }
+
+    void reportConfigToWindowTokenClient() {
+        if (asActivityRecord() != null) {
+            // Activities are updated through ATM callbacks.
+            return;
+        }
+
+        // Unfortunately, this WindowToken is not from WindowContext so it cannot handle
+        // its own configuration changes.
+        if (!mFromClientToken) {
+            return;
+        }
+
+        final Configuration config = getConfiguration();
+        final int displayId = getDisplayContent().getDisplayId();
+        if (config.equals(mLastReportedConfig) && displayId == mLastReportedDisplay) {
+            // No changes since last reported time.
+            return;
+        }
+
+        mLastReportedConfig = config;
+        mLastReportedDisplay = displayId;
+
+        IWindowToken windowTokenClient = IWindowToken.Stub.asInterface(token);
+        if (windowTokenClient != null) {
+            try {
+                windowTokenClient.onConfigurationChanged(config, displayId);
+            } catch (RemoteException e) {
+                ProtoLog.w(WM_ERROR,
+                        "Could not report config changes to the window token client.");
+            }
+        }
     }
 
     @Override

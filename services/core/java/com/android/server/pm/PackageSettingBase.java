@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Settings base class for pending and resolved classes.
@@ -426,6 +427,22 @@ public abstract class PackageSettingBase extends SettingBase {
         final PackageUserState existingUserState = modifyUserState(userId);
         if (existingUserState.suspendParams != null) {
             existingUserState.suspendParams.remove(suspendingPackage);
+            if (existingUserState.suspendParams.size() == 0) {
+                existingUserState.suspendParams = null;
+            }
+        }
+        existingUserState.suspended = (existingUserState.suspendParams != null);
+    }
+
+    void removeSuspension(Predicate<String> suspendingPackagePredicate, int userId) {
+        final PackageUserState existingUserState = modifyUserState(userId);
+        if (existingUserState.suspendParams != null) {
+            for (int i = existingUserState.suspendParams.size() - 1; i >= 0; i--) {
+                final String suspendingPackage = existingUserState.suspendParams.keyAt(i);
+                if (suspendingPackagePredicate.test(suspendingPackage)) {
+                    existingUserState.suspendParams.removeAt(i);
+                }
+            }
             if (existingUserState.suspendParams.size() == 0) {
                 existingUserState.suspendParams = null;
             }

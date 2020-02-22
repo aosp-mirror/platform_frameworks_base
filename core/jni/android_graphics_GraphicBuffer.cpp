@@ -31,6 +31,7 @@
 #include <android/native_window.h>
 #include <android/graphics/canvas.h>
 #include <android_runtime/android_graphics_GraphicBuffer.h>
+#include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <private/android/AHardwareBufferHelpers.h>
 
 #include <private/gui/ComposerService.h>
@@ -260,6 +261,16 @@ jobject android_graphics_GraphicBuffer_createFromAHardwareBuffer(JNIEnv* env,
     return obj;
 }
 
+// ----------------------------------------------------------------------------
+// AHB to GraphicBuffer Converter
+// ----------------------------------------------------------------------------
+
+static jobject android_graphics_GraphicBuffer_createFromHardwareBuffer(JNIEnv* env, jobject clazz,
+                                                                       jobject hb) {
+    AHardwareBuffer* ahb = android_hardware_HardwareBuffer_getNativeHardwareBuffer(env, hb);
+    return android_graphics_GraphicBuffer_createFromAHardwareBuffer(env, ahb);
+}
+
 };
 
 using namespace android;
@@ -283,7 +294,10 @@ static const JNINativeMethod gMethods[] = {
     { "nUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)Z",
             (void*) android_graphics_GraphicBuffer_unlockCanvasAndPost },
     { "nWrapGraphicBuffer", "(J)J",
-            (void*) android_graphics_GraphicBuffer_wrap }
+            (void*) android_graphics_GraphicBuffer_wrap },
+    { "nCreateFromHardwareBuffer",
+            "(Landroid/hardware/HardwareBuffer;)Landroid/graphics/GraphicBuffer;",
+            (void*) android_graphics_GraphicBuffer_createFromHardwareBuffer }
 };
 
 int register_android_graphics_GraphicBuffer(JNIEnv* env) {

@@ -2240,7 +2240,7 @@ public final class Bitmap implements Parcelable {
      */
     @UnsupportedAppUsage
     public GraphicBuffer createGraphicBufferHandle() {
-        return nativeCreateGraphicBufferHandle(mNativePtr);
+        return GraphicBuffer.createFromHardwareBuffer(getHardwareBuffer());
     }
 
     /**
@@ -2320,7 +2320,6 @@ public final class Bitmap implements Parcelable {
     private static native Bitmap nativeCopyPreserveInternalConfig(long nativeBitmap);
     private static native Bitmap nativeWrapHardwareBufferBitmap(HardwareBuffer buffer,
                                                                 long nativeColorSpace);
-    private static native GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap);
     private static native HardwareBuffer nativeGetHardwareBuffer(long nativeBitmap);
     private static native ColorSpace nativeComputeColorSpace(long nativePtr);
     private static native void nativeSetColorSpace(long nativePtr, long nativeColorSpace);

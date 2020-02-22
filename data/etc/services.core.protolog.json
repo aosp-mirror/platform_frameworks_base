@@ -709,6 +709,18 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "-650040763": {
+      "message": "rotationForOrientation(orient=%d, last=%d); user=%d %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
+    "-639305784": {
+      "message": "Could not report config changes to the window token client.",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowToken.java"
+    },
     "-635082269": {
       "message": "******** booted=%b msg=%b haveBoot=%b haveApp=%b haveWall=%b wallEnabled=%b haveKeyguard=%b",
       "level": "INFO",
