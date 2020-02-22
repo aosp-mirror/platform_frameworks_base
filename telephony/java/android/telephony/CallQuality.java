@@ -345,8 +345,8 @@ public final class CallQuality implements Parcelable {
                 + " averageRoundTripTime=" + mAverageRoundTripTime
                 + " codecType=" + mCodecType
                 + " rtpInactivityDetected=" + mRtpInactivityDetected
-                + " txSilenceDetected=" + mRxSilenceDetected
-                + " rxSilenceDetected=" + mTxSilenceDetected
+                + " txSilenceDetected=" + mTxSilenceDetected
+                + " rxSilenceDetected=" + mRxSilenceDetected
                 + "}";
     }
 
