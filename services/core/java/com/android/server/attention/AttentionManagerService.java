@@ -90,10 +90,12 @@ public class AttentionManagerService extends SystemService {
      * DeviceConfig flag name, describes how much time we consider a result fresh; if the check
      * attention called within that period - cached value will be returned.
      */
-    @VisibleForTesting static final String KEY_STALE_AFTER_MILLIS = "stale_after_millis";
+    @VisibleForTesting
+    static final String KEY_STALE_AFTER_MILLIS = "stale_after_millis";
 
     /** Default value in absence of {@link DeviceConfig} override. */
-    @VisibleForTesting static final long DEFAULT_STALE_AFTER_MILLIS = 1_000;
+    @VisibleForTesting
+    static final long DEFAULT_STALE_AFTER_MILLIS = 1_000;
 
     /** The size of the buffer that stores recent attention check results. */
     @VisibleForTesting
@@ -237,7 +239,7 @@ public class AttentionManagerService extends SystemService {
                 }
             }
 
-            userState.mCurrentAttentionCheck = createAttentionCheck(callbackInternal, userState);
+            userState.mCurrentAttentionCheck = new AttentionCheck(callbackInternal, userState);
 
             if (userState.mService != null) {
                 try {
@@ -253,46 +255,6 @@ public class AttentionManagerService extends SystemService {
             }
             return true;
         }
-    }
-
-    private AttentionCheck createAttentionCheck(AttentionCallbackInternal callbackInternal,
-            UserState userState) {
-        final IAttentionCallback iAttentionCallback = new IAttentionCallback.Stub() {
-            @Override
-            public void onSuccess(@AttentionSuccessCodes int result, long timestamp) {
-                if (userState.mCurrentAttentionCheck.mIsFulfilled) {
-                    return;
-                }
-                userState.mCurrentAttentionCheck.mIsFulfilled = true;
-                callbackInternal.onSuccess(result, timestamp);
-                logStats(result);
-                synchronized (mLock) {
-                    if (userState.mAttentionCheckCacheBuffer == null) {
-                        userState.mAttentionCheckCacheBuffer = new AttentionCheckCacheBuffer();
-                    }
-                    userState.mAttentionCheckCacheBuffer.add(
-                            new AttentionCheckCache(SystemClock.uptimeMillis(), result, timestamp));
-                }
-            }
-
-            @Override
-            public void onFailure(@AttentionFailureCodes int error) {
-                if (userState.mCurrentAttentionCheck.mIsFulfilled) {
-                    return;
-                }
-                userState.mCurrentAttentionCheck.mIsFulfilled = true;
-                callbackInternal.onFailure(error);
-                logStats(error);
-            }
-
-            private void logStats(int result) {
-                FrameworkStatsLog.write(
-                        FrameworkStatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
-                        result);
-            }
-        };
-
-        return new AttentionCheck(callbackInternal, iAttentionCallback);
     }
 
     /** Cancels the specified attention check. */
@@ -505,13 +467,42 @@ public class AttentionManagerService extends SystemService {
     static final class AttentionCheck {
         private final AttentionCallbackInternal mCallbackInternal;
         private final IAttentionCallback mIAttentionCallback;
+
         private boolean mIsDispatched;
         private boolean mIsFulfilled;
 
-        AttentionCheck(AttentionCallbackInternal callbackInternal,
-                IAttentionCallback iAttentionCallback) {
+        AttentionCheck(AttentionCallbackInternal callbackInternal, UserState userState) {
             mCallbackInternal = callbackInternal;
-            mIAttentionCallback = iAttentionCallback;
+            mIAttentionCallback = new IAttentionCallback.Stub() {
+                @Override
+                public void onSuccess(@AttentionSuccessCodes int result, long timestamp) {
+                    if (mIsFulfilled) {
+                        return;
+                    }
+                    mIsFulfilled = true;
+                    callbackInternal.onSuccess(result, timestamp);
+                    logStats(result);
+                    userState.appendResultToAttentionCacheBuffer(
+                            new AttentionCheckCache(SystemClock.uptimeMillis(), result,
+                                    timestamp));
+                }
+
+                @Override
+                public void onFailure(@AttentionFailureCodes int error) {
+                    if (mIsFulfilled) {
+                        return;
+                    }
+                    mIsFulfilled = true;
+                    callbackInternal.onFailure(error);
+                    logStats(error);
+                }
+
+                private void logStats(int result) {
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
+                            result);
+                }
+            };
         }
 
         void cancelInternal() {
@@ -610,6 +601,16 @@ public class AttentionManagerService extends SystemService {
                 }
             }
         }
+
+        private void appendResultToAttentionCacheBuffer(AttentionCheckCache cache) {
+            synchronized (mLock) {
+                if (mAttentionCheckCacheBuffer == null) {
+                    mAttentionCheckCacheBuffer = new AttentionCheckCacheBuffer();
+                }
+                mAttentionCheckCacheBuffer.add(cache);
+            }
+        }
+
 
         private class AttentionServiceConnection implements ServiceConnection {
             @Override
