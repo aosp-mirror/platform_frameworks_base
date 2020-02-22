@@ -98,6 +98,14 @@ interface IActivityTaskManager {
             in ProfilerInfo profilerInfo, in Bundle options, int userId);
     boolean startNextMatchingActivity(in IBinder callingActivity,
             in Intent intent, in Bundle options);
+
+    /**
+    *  The DreamActivity has to be started in a special way that does not involve the PackageParser.
+    *  The DreamActivity is a framework component inserted in the dream application process. Hence,
+    *  it is not declared in the application's manifest and cannot be parsed. startDreamActivity
+    *  creates the activity and starts it without reaching out to the PackageParser.
+    */
+    boolean startDreamActivity(in Intent intent);
     int startActivityIntentSender(in IApplicationThread caller,
             in IIntentSender target, in IBinder whitelistToken, in Intent fillInIntent,
             in String resolvedType, in IBinder resultTo, in String resultWho, int requestCode,

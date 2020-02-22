@@ -268,6 +268,10 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
+    private ComponentName getActiveDreamComponentInternal(boolean doze) {
+        return chooseDreamForUser(doze, ActivityManager.getCurrentUser());
+    }
+
     private ComponentName chooseDreamForUser(boolean doze, int userId) {
         if (doze) {
             ComponentName dozeComponent = getDozeComponent(userId);
@@ -501,12 +505,18 @@ public final class DreamManagerService extends SystemService {
 
         @Override // Binder call
         public ComponentName[] getDreamComponents() {
-            checkPermission(android.Manifest.permission.READ_DREAM_STATE);
+            return getDreamComponentsForUser(UserHandle.getCallingUserId());
+        }
 
-            final int userId = UserHandle.getCallingUserId();
+        @Override // Binder call
+        public ComponentName[] getDreamComponentsForUser(int userId) {
+            checkPermission(android.Manifest.permission.READ_DREAM_STATE);
+            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, false, true, "getDreamComponents", null);
+
             final long ident = Binder.clearCallingIdentity();
             try {
-                return getDreamComponentsForUser(userId);
+                return DreamManagerService.this.getDreamComponentsForUser(userId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -526,13 +536,28 @@ public final class DreamManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public ComponentName getDefaultDreamComponent() {
-            checkPermission(android.Manifest.permission.READ_DREAM_STATE);
+        public void setDreamComponentsForUser(int userId, ComponentName[] componentNames) {
+            checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
+            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, false, true, "setDreamComponents", null);
 
-            final int userId = UserHandle.getCallingUserId();
             final long ident = Binder.clearCallingIdentity();
             try {
-                return getDefaultDreamComponentForUser(userId);
+                DreamManagerService.this.setDreamComponentsForUser(userId, componentNames);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public ComponentName getDefaultDreamComponentForUser(int userId) {
+            checkPermission(android.Manifest.permission.READ_DREAM_STATE);
+            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, false, true, "getDefaultDreamComponent", null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return DreamManagerService.this.getDefaultDreamComponentForUser(userId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -563,24 +588,25 @@ public final class DreamManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void testDream(ComponentName dream) {
+        public void testDream(int userId, ComponentName dream) {
             if (dream == null) {
                 throw new IllegalArgumentException("dream must not be null");
             }
             checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
+            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, false, true, "testDream", null);
 
-            final int callingUserId = UserHandle.getCallingUserId();
             final int currentUserId = ActivityManager.getCurrentUser();
-            if (callingUserId != currentUserId) {
+            if (userId != currentUserId) {
                 // This check is inherently prone to races but at least it's something.
                 Slog.w(TAG, "Aborted attempt to start a test dream while a different "
-                        + " user is active: callingUserId=" + callingUserId
+                        + " user is active: userId=" + userId
                         + ", currentUserId=" + currentUserId);
                 return;
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                testDreamInternal(dream, callingUserId);
+                testDreamInternal(dream, userId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -670,6 +696,11 @@ public final class DreamManagerService extends SystemService {
         @Override
         public boolean isDreaming() {
             return isDreamingInternal();
+        }
+
+        @Override
+        public ComponentName getActiveDreamComponent(boolean doze) {
+            return getActiveDreamComponentInternal(doze);
         }
     }
 

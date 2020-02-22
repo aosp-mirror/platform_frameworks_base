@@ -16,9 +16,6 @@
 
 package com.android.server.dreams;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,10 +24,10 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.IBinder.DeathRecipient;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -38,14 +35,13 @@ import android.service.dreams.DreamService;
 import android.service.dreams.IDreamService;
 import android.util.Slog;
 import android.view.IWindowManager;
-import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.io.PrintWriter;
 import java.util.NoSuchElementException;
-
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 
 /**
  * Internal controller for starting and stopping the current dream and managing related state.
@@ -86,12 +82,9 @@ final class DreamController {
         }
     };
 
-    private final Runnable mStopStubbornDreamRunnable = new Runnable() {
-        @Override
-        public void run() {
-            Slog.w(TAG, "Stubborn dream did not finish itself in the time allotted");
-            stopDream(true /*immediate*/);
-        }
+    private final Runnable mStopStubbornDreamRunnable = () -> {
+        Slog.w(TAG, "Stubborn dream did not finish itself in the time allotted");
+        stopDream(true /*immediate*/);
     };
 
     public DreamController(Context context, Handler handler, Listener listener) {
@@ -139,14 +132,6 @@ final class DreamController {
             mDreamStartTime = SystemClock.elapsedRealtime();
             MetricsLogger.visible(mContext,
                     mCurrentDream.mCanDoze ? MetricsEvent.DOZING : MetricsEvent.DREAMING);
-
-            try {
-                mIWindowManager.addWindowToken(token, TYPE_DREAM, DEFAULT_DISPLAY);
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Unable to add window token for dream.", ex);
-                stopDream(true /*immediate*/);
-                return;
-            }
 
             Intent intent = new Intent(DreamService.SERVICE_INTERFACE);
             intent.setComponent(name);
@@ -216,9 +201,6 @@ final class DreamController {
             }
 
             if (oldDream.mService != null) {
-                // Tell the dream that it's being stopped so that
-                // it can shut down nicely before we yank its window token out from
-                // under it.
                 try {
                     oldDream.mService.detach();
                 } catch (RemoteException ex) {
@@ -238,18 +220,7 @@ final class DreamController {
             }
             oldDream.releaseWakeLockIfNeeded();
 
-            try {
-                mIWindowManager.removeWindowToken(oldDream.mToken, DEFAULT_DISPLAY);
-            } catch (RemoteException ex) {
-                Slog.w(TAG, "Error removing window token for dream.", ex);
-            }
-
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mListener.onDreamStopped(oldDream.mToken);
-                }
-            });
+            mHandler.post(() -> mListener.onDreamStopped(oldDream.mToken));
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
@@ -313,13 +284,10 @@ final class DreamController {
         // May be called on any thread.
         @Override
         public void binderDied() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mService = null;
-                    if (mCurrentDream == DreamRecord.this) {
-                        stopDream(true /*immediate*/);
-                    }
+            mHandler.post(() -> {
+                mService = null;
+                if (mCurrentDream == DreamRecord.this) {
+                    stopDream(true /*immediate*/);
                 }
             });
         }
@@ -327,16 +295,13 @@ final class DreamController {
         // May be called on any thread.
         @Override
         public void onServiceConnected(ComponentName name, final IBinder service) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mConnected = true;
-                    if (mCurrentDream == DreamRecord.this && mService == null) {
-                        attach(IDreamService.Stub.asInterface(service));
-                        // Wake lock will be released once dreaming starts.
-                    } else {
-                        releaseWakeLockIfNeeded();
-                    }
+            mHandler.post(() -> {
+                mConnected = true;
+                if (mCurrentDream == DreamRecord.this && mService == null) {
+                    attach(IDreamService.Stub.asInterface(service));
+                    // Wake lock will be released once dreaming starts.
+                } else {
+                    releaseWakeLockIfNeeded();
                 }
             });
         }
@@ -344,13 +309,10 @@ final class DreamController {
         // May be called on any thread.
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mService = null;
-                    if (mCurrentDream == DreamRecord.this) {
-                        stopDream(true /*immediate*/);
-                    }
+            mHandler.post(() -> {
+                mService = null;
+                if (mCurrentDream == DreamRecord.this) {
+                    stopDream(true /*immediate*/);
                 }
             });
         }
