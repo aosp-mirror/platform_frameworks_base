@@ -17,6 +17,7 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
+import android.content.Context;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
@@ -27,11 +28,16 @@ import android.media.soundtrigger_middleware.RecognitionConfig;
 import android.media.soundtrigger_middleware.RecognitionEvent;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.Objects;
 
 /**
@@ -56,13 +62,11 @@ import java.util.Objects;
  * String, Object, Object[])}, {@link #logVoidReturnWithObject(Object, String, Object[])} and {@link
  * #logExceptionWithObject(Object, String, Exception, Object[])}.
  */
-public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareService {
+public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareService, Dumpable {
     private static final String TAG = "SoundTriggerMiddlewareLogging";
-
     private final @NonNull ISoundTriggerMiddlewareService mDelegate;
 
-    public SoundTriggerMiddlewareLogging(
-            @NonNull ISoundTriggerMiddlewareService delegate) {
+    public SoundTriggerMiddlewareLogging(@NonNull ISoundTriggerMiddlewareService delegate) {
         mDelegate = delegate;
     }
 
@@ -346,6 +350,21 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareSer
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Actual logging logic below.
+    private static final int NUM_EVENTS_TO_DUMP = 64;
+    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss:SSS");
+    private final @NonNull LinkedList<Event> mLastEvents = new LinkedList<>();
+
+    static private class Event {
+        public final long timestamp = System.currentTimeMillis();
+        public final String message;
+
+        private Event(String message) {
+            this.message = message;
+        }
+    }
+
     static private String formatArgs(Object[] args) {
         String result = Arrays.toString(args);
         // Strip the square brackets.
@@ -354,23 +373,60 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareSer
 
     private void logReturnWithObject(Object object, String methodName, Object retVal,
             Object[] args) {
-        // TODO(ytai): Save last N entries and emit on dump().
-        Log.i(TAG, String.format("%s[this=%s](%s) -> %s", methodName, Objects.toString(object),
+        final String message = String.format("%s[this=%s, caller=%d/%d](%s) -> %s", methodName,
+                Objects.toString(object),
+                Binder.getCallingUid(), Binder.getCallingPid(),
                 formatArgs(args),
-                Objects.toString(retVal)));
+                Objects.toString(retVal));
+        Log.i(TAG, message);
+        appendMessage(message);
     }
 
     private void logVoidReturnWithObject(Object object, String methodName, Object[] args) {
-        // TODO(ytai): Save last N entries and emit on dump().
-        Log.i(TAG, String.format("%s[this=%s](%s)", methodName, Objects.toString(object),
-                formatArgs(args)));
+        final String message = String.format("%s[this=%s, caller=%d/%d](%s)", methodName,
+                Objects.toString(object),
+                Binder.getCallingUid(), Binder.getCallingPid(),
+                formatArgs(args));
+        Log.i(TAG, message);
+        appendMessage(message);
     }
 
     private void logExceptionWithObject(Object object, String methodName, Exception ex,
             Object[] args) {
-        // TODO(ytai): Save last N entries and emit on dump().
-        Log.e(TAG, String.format("%s[this=%s](%s) threw", methodName, Objects.toString(object),
-                formatArgs(args)),
-                ex);
+        final String message = String.format("%s[this=%s, caller=%d/%d](%s) threw", methodName,
+                Objects.toString(object),
+                Binder.getCallingUid(), Binder.getCallingPid(),
+                formatArgs(args));
+        Log.e(TAG, message, ex);
+        appendMessage(message + " " + ex.toString());
+    }
+
+    private void appendMessage(String message) {
+        Event event = new Event(message);
+        synchronized (mLastEvents) {
+            if (mLastEvents.size() > NUM_EVENTS_TO_DUMP) {
+                mLastEvents.remove();
+            }
+            mLastEvents.add(event);
+        }
+    }
+
+    @Override public void dump(PrintWriter pw) {
+        pw.println();
+        pw.println("=========================================");
+        pw.println("Last events");
+        pw.println("=========================================");
+        synchronized (mLastEvents) {
+            for (Event event : mLastEvents) {
+                pw.print(DATE_FORMAT.format(new Date(event.timestamp)));
+                pw.print('\t');
+                pw.println(event.message);
+            }
+        }
+        pw.println();
+
+        if (mDelegate instanceof Dumpable) {
+            ((Dumpable) mDelegate).dump(pw);
+        }
     }
 }
