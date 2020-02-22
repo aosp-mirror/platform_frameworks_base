@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
@@ -685,8 +686,8 @@ public final class ActiveServices {
 
         if (!r.mAllowWhileInUsePermissionInFgs) {
             r.mAllowWhileInUsePermissionInFgs =
-                    shouldAllowWhileInUsePermissionInFgsLocked(callingPackage, callingUid,
-                            service, r, allowBackgroundActivityStarts);
+                    shouldAllowWhileInUsePermissionInFgsLocked(callingPackage, callingPid,
+                            callingUid, service, r, allowBackgroundActivityStarts);
         }
 
         return cmp;
@@ -1865,9 +1866,9 @@ public final class ActiveServices {
             }
 
             if (!s.mAllowWhileInUsePermissionInFgs) {
-                final int callingUid = Binder.getCallingUid();
                 s.mAllowWhileInUsePermissionInFgs =
-                        shouldAllowWhileInUsePermissionInFgsLocked(callingPackage, callingUid,
+                        shouldAllowWhileInUsePermissionInFgsLocked(callingPackage,
+                                Binder.getCallingPid(), Binder.getCallingUid(),
                                 service, s, false);
             }
 
@@ -4625,20 +4626,14 @@ public final class ActiveServices {
      * @return true if allow, false otherwise.
      */
     private boolean shouldAllowWhileInUsePermissionInFgsLocked(String callingPackage,
-            int callingUid, Intent intent, ServiceRecord r, boolean allowBackgroundActivityStarts) {
+            int callingPid, int callingUid, Intent intent, ServiceRecord r,
+            boolean allowBackgroundActivityStarts) {
         // Is the background FGS start restriction turned on?
         if (!mAm.mConstants.mFlagBackgroundFgsStartRestrictionEnabled) {
             return true;
         }
         // Is the allow activity background start flag on?
         if (allowBackgroundActivityStarts) {
-            return true;
-        }
-
-        // Is the service in a whitelist?
-        final boolean hasAllowBackgroundActivityStartsToken = r.app != null
-                ? r.app.mAllowBackgroundActivityStartsTokens.contains(r) : false;
-        if (hasAllowBackgroundActivityStartsToken) {
             return true;
         }
 
@@ -4657,6 +4652,11 @@ public final class ActiveServices {
         }
 
         if (isCallerSystem) {
+            return true;
+        }
+
+        if (mAm.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
+                == PERMISSION_GRANTED) {
             return true;
         }
 
