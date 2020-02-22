@@ -91,7 +91,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
-import static com.android.server.wm.DisplayContentProto.CHANGING_APPS;
 import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
@@ -315,7 +314,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     final ArraySet<ActivityRecord> mOpeningApps = new ArraySet<>();
     final ArraySet<ActivityRecord> mClosingApps = new ArraySet<>();
-    final ArraySet<ActivityRecord> mChangingApps = new ArraySet<>();
+    final ArraySet<WindowContainer> mChangingContainers = new ArraySet<>();
     final UnknownAppVisibilityController mUnknownAppVisibilityController;
     BoundsAnimationController mBoundsAnimationController;
 
@@ -2701,7 +2700,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // Clear all transitions & screen frozen states when removing display.
             mOpeningApps.clear();
             mClosingApps.clear();
-            mChangingApps.clear();
+            mChangingContainers.clear();
             mUnknownAppVisibilityController.clear();
             mAppTransition.removeAppTransitionTimeoutCallbacks();
             handleAnimatingStoppedAndTransition();
@@ -2918,9 +2917,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         for (int i = mClosingApps.size() - 1; i >= 0; i--) {
             mClosingApps.valueAt(i).writeIdentifierToProto(proto, CLOSING_APPS);
-        }
-        for (int i = mChangingApps.size() - 1; i >= 0; i--) {
-            mChangingApps.valueAt(i).writeIdentifierToProto(proto, CHANGING_APPS);
         }
 
         proto.write(SINGLE_TASK_INSTANCE, mSingleTaskInstance);
@@ -3673,7 +3669,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        if (!mOpeningApps.isEmpty() || !mClosingApps.isEmpty() || !mChangingApps.isEmpty()) {
+        if (!mOpeningApps.isEmpty() || !mClosingApps.isEmpty() || !mChangingContainers.isEmpty()) {
             pw.println();
             if (mOpeningApps.size() > 0) {
                 pw.print("  mOpeningApps="); pw.println(mOpeningApps);
@@ -3681,8 +3677,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (mClosingApps.size() > 0) {
                 pw.print("  mClosingApps="); pw.println(mClosingApps);
             }
-            if (mChangingApps.size() > 0) {
-                pw.print("  mChangingApps="); pw.println(mChangingApps);
+            if (mChangingContainers.size() > 0) {
+                pw.print("  mChangingApps="); pw.println(mChangingContainers);
             }
         }
 

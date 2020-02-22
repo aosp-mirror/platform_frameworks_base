@@ -2308,14 +2308,14 @@ public class AppTransition implements Dump {
             }
             notifyAppTransitionTimeoutLocked();
             if (isTransitionSet() || !dc.mOpeningApps.isEmpty() || !dc.mClosingApps.isEmpty()
-                    || !dc.mChangingApps.isEmpty()) {
+                    || !dc.mChangingContainers.isEmpty()) {
                 ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                             "*** APP TRANSITION TIMEOUT. displayId=%d isTransitionSet()=%b "
                                     + "mOpeningApps.size()=%d mClosingApps.size()=%d "
                                     + "mChangingApps.size()=%d",
                             dc.getDisplayId(), dc.mAppTransition.isTransitionSet(),
                             dc.mOpeningApps.size(), dc.mClosingApps.size(),
-                            dc.mChangingApps.size());
+                            dc.mChangingContainers.size());
 
                 setTimeout();
                 mService.mWindowPlacerLocked.performSurfacePlacement();

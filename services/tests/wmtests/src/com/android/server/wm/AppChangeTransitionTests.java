@@ -103,12 +103,12 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         setUpOnDisplay(mDisplayContent);
 
         mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertEquals(1, mDisplayContent.mChangingApps.size());
+        assertEquals(1, mDisplayContent.mChangingContainers.size());
 
         // Verify we are in a change transition, but without a snapshot.
         // Though, the test will actually have crashed by now if a snapshot is attempted.
-        assertNull(mActivity.getThumbnail());
-        assertTrue(mActivity.isInChangeTransition());
+        assertNull(mTask.mSurfaceFreezer.mSnapshot);
+        assertTrue(mTask.isInChangeTransition());
 
         waitUntilHandlersIdle();
         mActivity.removeImmediately();
@@ -121,14 +121,14 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         setUpOnDisplay(mDisplayContent);
 
         mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertEquals(1, mDisplayContent.mChangingApps.size());
-        assertTrue(mActivity.isInChangeTransition());
+        assertEquals(1, mDisplayContent.mChangingContainers.size());
+        assertTrue(mTask.isInChangeTransition());
 
         // Removing the app-token from the display should clean-up the
         // the change leash.
         mDisplayContent.removeAppToken(mActivity.token);
-        assertEquals(0, mDisplayContent.mChangingApps.size());
-        assertFalse(mActivity.isInChangeTransition());
+        assertEquals(0, mDisplayContent.mChangingContainers.size());
+        assertFalse(mTask.isInChangeTransition());
 
         waitUntilHandlersIdle();
         mActivity.removeImmediately();
@@ -152,8 +152,8 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_FULLSCREEN, mTask.getWindowingMode());
 
         // Make sure we're not waiting for a change animation (no leash)
-        assertFalse(mActivity.isInChangeTransition());
-        assertNull(mActivity.getThumbnail());
+        assertFalse(mTask.isInChangeTransition());
+        assertNull(mActivity.mSurfaceFreezer.mSnapshot);
 
         waitUntilHandlersIdle();
         mActivity.removeImmediately();
@@ -165,13 +165,13 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         setUpOnDisplay(mDisplayContent);
 
         mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertEquals(1, mDisplayContent.mChangingApps.size());
-        assertTrue(mActivity.isInChangeTransition());
+        assertEquals(1, mDisplayContent.mChangingContainers.size());
+        assertTrue(mTask.isInChangeTransition());
 
         // Changing visibility should cancel the change transition and become closing
         mActivity.setVisibility(false, false);
-        assertEquals(0, mDisplayContent.mChangingApps.size());
-        assertFalse(mActivity.isInChangeTransition());
+        assertEquals(0, mDisplayContent.mChangingContainers.size());
+        assertFalse(mTask.isInChangeTransition());
 
         waitUntilHandlersIdle();
         mActivity.removeImmediately();
