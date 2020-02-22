@@ -415,9 +415,6 @@ public final class ActiveServices {
         if (!TextUtils.isEmpty(systemCaptionsServicePackageName)) {
             mWhiteListAllowWhileInUsePermissionInFgs.add(systemCaptionsServicePackageName);
         }
-        // TODO change this to configurable in config.xml.
-        final String projectionPackage = "com.google.android.projection.gearhead";
-        mWhiteListAllowWhileInUsePermissionInFgs.add(projectionPackage);
     }
 
     ServiceRecord getServiceByNameLocked(ComponentName name, int callingUser) {
