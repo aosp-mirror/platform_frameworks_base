@@ -132,27 +132,68 @@ java_library {
     ],
 }
 
-droidstubs {
-    name: "framework-wifi-stubs-srcs",
+stubs_defaults {
+    name: "framework-wifi-stubs-srcs-defaults",
     srcs: [
-        ":framework-annotations",
         ":framework-wifi-updatable-sources",
+        ":framework-wifi-util-lib-aidls",
     ],
-    // This is needed as IOnWifiActivityEnergyInfoListener.aidl in framework-wifi depends on
-    // WifiActivityEnergyInfo.aidl in framework-minus-apex
-    aidl: {
-        include_dirs: ["frameworks/base/core/java"],
-    },
-    defaults: [ "framework-module-stubs-defaults-systemapi" ],
-    sdk_version: "core_current",
-    libs: ["android_system_stubs_current"],
+    libs: [ "framework-annotations-lib" ],
+    sdk_version: "module_current",
+}
+
+droidstubs {
+    name: "framework-wifi-stubs-srcs-publicapi",
+    defaults: [
+        "framework-module-stubs-defaults-publicapi",
+        "framework-wifi-stubs-srcs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-wifi-stubs-srcs-systemapi",
+    defaults: [
+        "framework-module-stubs-defaults-systemapi",
+        "framework-wifi-stubs-srcs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-wifi-api-module_libs_api",
+    defaults: [
+        "framework-module-api-defaults-module_libs_api",
+        "framework-wifi-stubs-srcs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-wifi-stubs-srcs-module_libs_api",
+    defaults: [
+        "framework-module-stubs-defaults-module_libs_api",
+        "framework-wifi-stubs-srcs-defaults",
+    ],
 }
 
 java_library {
-    name: "framework-wifi-stubs",
-    srcs: [":framework-wifi-stubs-srcs"],
-    sdk_version: "core_current",
-    libs: ["android_system_stubs_current"],
+    name: "framework-wifi-stubs-publicapi",
+    srcs: [":framework-wifi-stubs-srcs-publicapi"],
+    sdk_version: "module_current",
+    installable: false,
+}
+
+java_library {
+    name: "framework-wifi-stubs-systemapi",
+    srcs: [":framework-wifi-stubs-srcs-systemapi"],
+    sdk_version: "module_current",
+    libs: ["framework-annotations-lib"],
+    installable: false,
+}
+
+java_library {
+    name: "framework-wifi-stubs-module_libs_api",
+    srcs: [":framework-wifi-stubs-srcs-module_libs_api"],
+    sdk_version: "module_current",
+    libs: ["framework-annotations-lib"],
     installable: false,
 }
 
