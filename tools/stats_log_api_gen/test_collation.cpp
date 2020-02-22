@@ -98,7 +98,6 @@ TEST(CollationTest, CollateStats) {
     EXPECT_SET_CONTAINS_SIGNATURE(
         atoms.signatures_to_modules,
         JAVA_TYPE_ATTRIBUTION_CHAIN, // AttributionChain
-        JAVA_TYPE_DOUBLE,            // double
         JAVA_TYPE_FLOAT,             // float
         JAVA_TYPE_LONG,              // int64
         JAVA_TYPE_LONG,              // uint64
@@ -157,13 +156,13 @@ TEST(CollationTest, NonMessageTypeFails) {
 }
 
 /**
- * Test that atoms that have non-primitive types are rejected.
+ * Test that atoms that have non-primitive types or repeated fields are rejected.
  */
 TEST(CollationTest, FailOnBadTypes) {
     Atoms atoms;
     int errorCount = collate_atoms(BadTypesEvent::descriptor(), &atoms);
 
-    EXPECT_EQ(2, errorCount);
+    EXPECT_EQ(4, errorCount);
 }
 
 /**
