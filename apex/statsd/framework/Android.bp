@@ -72,6 +72,8 @@ java_library {
     hostdex: true, // for hiddenapi check
     visibility: [
         "//frameworks/base/apex/statsd:__subpackages__",
+        // TODO(b/149928788): Remove when tests are moved.
+        "//frameworks/base/core/tests/coretests:__pkg__",
     ],
     apex_available: [
         "com.android.os.statsd",
