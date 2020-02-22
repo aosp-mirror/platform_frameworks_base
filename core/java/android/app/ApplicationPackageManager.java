@@ -99,6 +99,7 @@ import android.util.Log;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.Immutable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.UserIcons;
@@ -612,7 +613,11 @@ public class ApplicationPackageManager extends PackageManager {
         return hasSystemFeature(name, 0);
     }
 
-    private class HasSystemFeatureQuery {
+    /**
+     * Identifies a single hasSystemFeature query.
+     */
+    @Immutable
+    private static final class HasSystemFeatureQuery {
         public final String name;
         public final int version;
         public HasSystemFeatureQuery(String n, int v) {
