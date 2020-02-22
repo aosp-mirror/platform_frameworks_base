@@ -45,6 +45,8 @@ import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -498,6 +500,19 @@ public class InsetsState implements Parcelable {
 
     @Override
     public boolean equals(Object o) {
+        return equals(o, false);
+    }
+
+    /**
+     * An equals method can exclude the caption insets. This is useful because we assemble the
+     * caption insets information on the client side, and when we communicate with server, it's
+     * excluded.
+     * @param excludingCaptionInsets {@code true} if we want to compare two InsetsState objects but
+     *                                           ignore the caption insets source value.
+     * @return {@code true} if the two InsetsState objects are equal, {@code false} otherwise.
+     */
+    @VisibleForTesting
+    public boolean equals(Object o, boolean excludingCaptionInsets) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
 
@@ -506,11 +521,24 @@ public class InsetsState implements Parcelable {
         if (!mDisplayFrame.equals(state.mDisplayFrame)) {
             return false;
         }
-        if (mSources.size() != state.mSources.size()) {
+        int size = mSources.size();
+        int otherSize = state.mSources.size();
+        if (excludingCaptionInsets) {
+            if (mSources.get(ITYPE_CAPTION_BAR) != null) {
+                size--;
+            }
+            if (state.mSources.get(ITYPE_CAPTION_BAR) != null) {
+                otherSize--;
+            }
+        }
+        if (size != otherSize) {
             return false;
         }
         for (int i = mSources.size() - 1; i >= 0; i--) {
             InsetsSource source = mSources.valueAt(i);
+            if (excludingCaptionInsets) {
+                if (source.getType() == ITYPE_CAPTION_BAR) continue;
+            }
             InsetsSource otherSource = state.mSources.get(source.getType());
             if (otherSource == null) {
                 return false;
