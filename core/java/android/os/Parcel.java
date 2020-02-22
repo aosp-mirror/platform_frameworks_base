@@ -28,6 +28,7 @@ import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -1827,6 +1828,179 @@ public final class Parcel {
     }
 
     /**
+     * A map used by {@link #maybeWriteSquashed} to keep track of what parcelables have
+     * been seen, and what positions they were written. The value is the absolute position of
+     * each parcelable.
+     */
+    private ArrayMap<Parcelable, Integer> mWrittenSquashableParcelables;
+
+    private void ensureWrittenSquashableParcelables() {
+        if (mWrittenSquashableParcelables != null) {
+            return;
+        }
+        mWrittenSquashableParcelables = new ArrayMap<>();
+    }
+
+    private boolean mAllowSquashing = false;
+
+    /**
+     * Allow "squashing" writes in {@link #maybeWriteSquashed}. This allows subsequent calls to
+     * {@link #maybeWriteSquashed(Parcelable)} to "squash" the same instances into one in a Parcel.
+     *
+     * Typically, this method is called at the beginning of {@link Parcelable#writeToParcel}. The
+     * caller must retain the return value from this method and call {@link #restoreAllowSquashing}
+     * with it.
+     *
+     * See {@link #maybeWriteSquashed(Parcelable)} for the details.
+     *
+     * @see #restoreAllowSquashing(boolean)
+     * @see #maybeWriteSquashed(Parcelable)
+     * @see #readSquashed(SquashReadHelper)
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean allowSquashing() {
+        boolean previous = mAllowSquashing;
+        mAllowSquashing = true;
+        return previous;
+    }
+
+    /**
+     * @see #allowSquashing()
+     * @hide
+     */
+    @TestApi
+    public void restoreAllowSquashing(boolean previous) {
+        mAllowSquashing = previous;
+        if (!mAllowSquashing) {
+            mWrittenSquashableParcelables = null;
+        }
+    }
+
+    private void resetSqaushingState() {
+        if (mAllowSquashing) {
+            Slog.wtf(TAG, "allowSquashing wasn't restored.");
+        }
+        mWrittenSquashableParcelables = null;
+        mReadSquashableParcelables = null;
+        mAllowSquashing = false;
+    }
+
+    /**
+     * A map used by {@link #readSquashed} to cache parcelables. It's a map from
+     * an absolute position in a Parcel to the parcelable stored at the position.
+     */
+    private ArrayMap<Integer, Parcelable> mReadSquashableParcelables;
+
+    private void ensureReadSquashableParcelables() {
+        if (mReadSquashableParcelables != null) {
+            return;
+        }
+        mReadSquashableParcelables = new ArrayMap<>();
+    }
+
+    /**
+     * Write a parcelable with "squash" -- that is, when the same instance is written to the
+     * same Parcelable multiple times, instead of writing the entire instance multiple times,
+     * only write it once, and in subsequent writes we'll only write the offset to the original
+     * object.
+     *
+     * This approach does not work of the resulting Parcel is copied with {@link #appendFrom} with
+     * a non-zero offset, so we do not enable this behavior by default. Instead, we only enable
+     * it between {@link #allowSquashing} and {@link #restoreAllowSquashing}, in order to make sure
+     * we only do so within each "top level" Parcelable.
+     *
+     * Usage: Use this method in {@link Parcelable#writeToParcel}.
+     * If this method returns TRUE, it's a subsequent call, and the offset is already written,
+     * so the caller doesn't have to do anything. If this method returns FALSE, it's the first
+     * time for the instance to be written to this parcel. The caller has to proceed with its
+     * {@link Parcelable#writeToParcel}.
+     *
+     * (See {@code ApplicationInfo} for the example.)
+     *
+     * @param p the target Parcelable to write.
+     *
+     * @see #allowSquashing()
+     * @see #restoreAllowSquashing(boolean)
+     * @see #readSquashed(SquashReadHelper)
+     *
+     * @hide
+     */
+    public boolean maybeWriteSquashed(@NonNull Parcelable p) {
+        if (!mAllowSquashing) {
+            // Don't squash, and don't put it in the map either.
+            writeInt(0);
+            return false;
+        }
+        ensureWrittenSquashableParcelables();
+        final Integer firstPos = mWrittenSquashableParcelables.get(p);
+        if (firstPos != null) {
+            // Already written.
+            // Write the relative offset from the current position to the first position.
+            final int pos = dataPosition();
+
+            // We want the offset from the next byte of this integer, so we need to +4.
+            writeInt(pos - firstPos + 4);
+            return true;
+        }
+        // First time seen, write a marker.
+        writeInt(0);
+
+        // Remember the position.
+        final int pos = dataPosition();
+        mWrittenSquashableParcelables.put(p, pos);
+
+        // Return false and let the caller actually write the content.
+        return false;
+    }
+
+    /**
+     * Helper function that's used by {@link #readSquashed(SquashReadHelper)}
+     * @hide
+     */
+    public interface SquashReadHelper<T> {
+        /** Read and instantiate {@code T} from a Parcel. */
+        @NonNull
+        T readRawParceled(@NonNull Parcel p);
+    }
+
+    /**
+     * Read a {@link Parcelable} that's written with {@link #maybeWriteSquashed}.
+     *
+     * @param reader a callback function that instantiates an instance from a parcel.
+     * Typicallly, a lambda to the instructor that takes a {@link Parcel} is passed.
+     *
+     * @see #maybeWriteSquashed(Parcelable)
+     *
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <T extends Parcelable> T readSquashed(SquashReadHelper<T> reader) {
+        final int offset = readInt();
+        final int pos = dataPosition();
+
+        if (offset == 0) {
+            // First time read. Unparcel, and remember it.
+            final T p = reader.readRawParceled(this);
+            ensureReadSquashableParcelables();
+            mReadSquashableParcelables.put(pos, p);
+            return p;
+        }
+        // Subsequent read.
+        final int firstAbsolutePos = pos - offset;
+
+        final Parcelable p = mReadSquashableParcelables.get(firstAbsolutePos);
+        if (p == null) {
+            Slog.wtfStack(TAG, "Map doesn't contain offset "
+                    + firstAbsolutePos
+                    + " : contains=" + new ArrayList<>(mReadSquashableParcelables.keySet()));
+        }
+        return (T) p;
+    }
+
+    /**
      * Write a generic serializable object in to a Parcel.  It is strongly
      * recommended that this method be avoided, since the serialization
      * overhead is extremely large, and this approach will be much slower than
@@ -3247,6 +3421,7 @@ public final class Parcel {
     }
 
     private void freeBuffer() {
+        resetSqaushingState();
         if (mOwnsNativeParcelObject) {
             updateNativeSize(nativeFreeBuffer(mNativePtr));
         }
@@ -3254,6 +3429,7 @@ public final class Parcel {
     }
 
     private void destroy() {
+        resetSqaushingState();
         if (mNativePtr != 0) {
             if (mOwnsNativeParcelObject) {
                 nativeDestroy(mNativePtr);
@@ -3261,7 +3437,6 @@ public final class Parcel {
             }
             mNativePtr = 0;
         }
-        mReadWriteHelper = null;
     }
 
     @Override
