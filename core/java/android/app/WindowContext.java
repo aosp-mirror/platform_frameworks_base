@@ -15,10 +15,12 @@
  */
 package android.app;
 
+import static android.view.WindowManagerGlobal.ADD_OKAY;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -26,73 +28,62 @@ import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerImpl;
 
+import java.lang.ref.Reference;
+
 /**
  * {@link WindowContext} is a context for non-activity windows such as
  * {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY} windows or system
  * windows. Its resources and configuration are adjusted to the area of the display that will be
- * used when a new window is added via {@link android.view.WindowManager.addView}.
+ * used when a new window is added via {@link android.view.WindowManager#addView}.
  *
  * @see Context#createWindowContext(int, Bundle)
  * @hide
  */
-// TODO(b/128338354): Handle config/display changes from server side.
 public class WindowContext extends ContextWrapper {
     private final WindowManagerImpl mWindowManager;
     private final IWindowManager mWms;
-    private final IBinder mToken;
-    private final int mDisplayId;
+    private final WindowTokenClient mToken;
     private boolean mOwnsToken;
 
     /**
-     * Default constructor. Can either accept an existing token or generate one and registers it
-     * with the server if necessary.
+     * Default constructor. Will generate a {@link WindowTokenClient} and attach this context to
+     * the token.
      *
      * @param base Base {@link Context} for this new instance.
-     * @param token A valid {@link com.android.server.wm.WindowToken}. Pass {@code null} to generate
-     *              one.
      * @param type Window type to be used with this context.
      * @hide
      */
-    public WindowContext(Context base, IBinder token, int type, Bundle options) {
+    public WindowContext(@NonNull Context base, int type, @Nullable Bundle options) {
+        // Correct base context will be built once the token is resolved, so passing 'null' here.
         super(null /* base */);
 
         mWms = WindowManagerGlobal.getWindowManagerService();
-        if (token != null && !isWindowToken(token)) {
-            throw new IllegalArgumentException("Token must be registered to server.");
-        }
-        mToken = token != null ? token : new Binder();
+        mToken = new WindowTokenClient();
+
 
         final ContextImpl contextImpl = createBaseWindowContext(base, mToken);
         attachBaseContext(contextImpl);
         contextImpl.setOuterContext(this);
 
-        mDisplayId = getDisplayId();
+        mToken.attachContext(this);
+
         mWindowManager = new WindowManagerImpl(this);
         mWindowManager.setDefaultToken(mToken);
 
-        // TODO(b/128338354): Obtain the correct config from WM and adjust resources.
-        if (token != null) {
-            mOwnsToken = false;
-            return;
-        }
+        int result;
         try {
-            mWms.addWindowTokenWithOptions(mToken, type, mDisplayId, options, getPackageName());
+            // Register the token with WindowManager. This will also call back with the current
+            // config back to the client.
+            result = mWms.addWindowTokenWithOptions(
+                    mToken, type, getDisplayId(), options, getPackageName());
+
             // TODO(window-context): remove token with a DeathObserver
         }  catch (RemoteException e) {
             mOwnsToken = false;
             throw e.rethrowFromSystemServer();
         }
-        mOwnsToken = true;
-    }
-
-    /** Check if the passed window token is registered with the server. */
-    private boolean isWindowToken(@NonNull IBinder token) {
-        try {
-            return mWms.isWindowToken(token);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-        return false;
+        mOwnsToken = result == ADD_OKAY;
+        Reference.reachabilityFence(this);
     }
 
     private static ContextImpl createBaseWindowContext(Context outer, IBinder token) {
@@ -112,7 +103,7 @@ public class WindowContext extends ContextWrapper {
     protected void finalize() throws Throwable {
         if (mOwnsToken) {
             try {
-                mWms.removeWindowToken(mToken, mDisplayId);
+                mWms.removeWindowToken(mToken, getDisplayId());
                 mOwnsToken = false;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();

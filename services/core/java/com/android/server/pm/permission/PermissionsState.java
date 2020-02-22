@@ -91,6 +91,10 @@ public final class PermissionsState {
         }
     }
 
+    private static void invalidateCache() {
+        PackageManager.invalidatePackageInfoCache();
+    }
+
     /**
      * Initialized this instance from another one.
      *
@@ -562,6 +566,7 @@ public final class PermissionsState {
 
         synchronized (mLock) {
             mPermissions = null;
+            invalidateCache();
         }
 
         mPermissionReviewRequired = null;
@@ -769,6 +774,7 @@ public final class PermissionsState {
 
                 userState.mGranted = true;
 
+                invalidateCache();
                 return true;
             }
         }
@@ -790,6 +796,7 @@ public final class PermissionsState {
                     mUserStates.remove(userId);
                 }
 
+                invalidateCache();
                 return true;
             }
         }
@@ -831,6 +838,9 @@ public final class PermissionsState {
                 }
 
                 final int newFlags = flagValues & flagMask;
+
+                // Okay to do before the modification because we hold the lock.
+                invalidateCache();
 
                 PermissionState userState = mUserStates.get(userId);
                 if (userState != null) {

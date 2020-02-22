@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
 import static android.media.MediaRoute2Info.FEATURE_LIVE_VIDEO;
+import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -130,26 +131,27 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void releaseSession(String sessionId) {
+    public void releaseSession(String sessionId, long requestId) {
         // Do nothing
     }
+
     @Override
     public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
         // Do nothing
     }
 
     @Override
-    public void selectRoute(String sessionId, String routeId) {
+    public void selectRoute(String sessionId, String routeId, long requestId) {
         // Do nothing since we don't support multiple BT yet.
     }
 
     @Override
-    public void deselectRoute(String sessionId, String routeId) {
+    public void deselectRoute(String sessionId, String routeId, long requestId) {
         // Do nothing since we don't support multiple BT yet.
     }
 
     @Override
-    public void transferToRoute(String sessionId, String routeId) {
+    public void transferToRoute(String sessionId, String routeId, long requestId) {
         if (TextUtils.equals(routeId, mDefaultRoute.getId())) {
             mBtRouteProvider.transferTo(null);
         } else {
@@ -158,7 +160,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void setRouteVolume(String routeId, int volume) {
+    public void setRouteVolume(String routeId, int volume, long requestId) {
         if (!TextUtils.equals(routeId, mSelectedRouteId)) {
             return;
         }
@@ -166,7 +168,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void setSessionVolume(String sessionId, int volume) {
+    public void setSessionVolume(String sessionId, int volume, long requestId) {
         // Do nothing since we don't support grouping volume yet.
     }
 
@@ -192,6 +194,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .setVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
+                //TODO: Guess the exact type using AudioDevice
+                .setType(TYPE_BUILTIN_SPEAKER)
                 .addFeature(FEATURE_LIVE_AUDIO)
                 .addFeature(FEATURE_LIVE_VIDEO)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_CONNECTED)

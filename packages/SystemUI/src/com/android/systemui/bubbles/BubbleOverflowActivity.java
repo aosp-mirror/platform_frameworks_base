@@ -29,7 +29,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,7 +46,6 @@ import javax.inject.Inject;
  * Must be public to be accessible to androidx...AppComponentFactory
  */
 public class BubbleOverflowActivity extends Activity {
-    public static final String KEY = "Overflow";
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleOverflowActivity" : TAG_BUBBLES;
 
     private LinearLayout mEmptyState;
@@ -73,10 +71,10 @@ public class BubbleOverflowActivity extends Activity {
                 new GridLayoutManager(getApplicationContext(),
                         getResources().getInteger(R.integer.bubbles_overflow_columns)));
 
+        int bubbleMargin = getResources().getDimensionPixelSize(R.dimen.bubble_overflow_margin);
         mAdapter = new BubbleOverflowAdapter(mOverflowBubbles,
-                mBubbleController::promoteBubbleFromOverflow);
+                mBubbleController::promoteBubbleFromOverflow, bubbleMargin);
         mRecyclerView.setAdapter(mAdapter);
-
         onDataChanged(mBubbleController.getOverflowBubbles());
         mBubbleController.setOverflowCallback(() -> {
             onDataChanged(mBubbleController.getOverflowBubbles());
@@ -141,10 +139,13 @@ public class BubbleOverflowActivity extends Activity {
 class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.ViewHolder> {
     private Consumer<Bubble> mPromoteBubbleFromOverflow;
     private List<Bubble> mBubbles;
+    private int mBubbleMargin;
 
-    public BubbleOverflowAdapter(List<Bubble> list, Consumer<Bubble> promoteBubble) {
+    public BubbleOverflowAdapter(List<Bubble> list, Consumer<Bubble> promoteBubble,
+            int bubbleMargin) {
         mBubbles = list;
         mPromoteBubbleFromOverflow = promoteBubble;
+        mBubbleMargin = bubbleMargin;
     }
 
     @Override
@@ -152,6 +153,12 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
             int viewType) {
         BadgedImageView view = (BadgedImageView) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.bubble_view, parent, false);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(mBubbleMargin, mBubbleMargin, mBubbleMargin, mBubbleMargin);
+        view.setLayoutParams(params);
         return new ViewHolder(view);
     }
 

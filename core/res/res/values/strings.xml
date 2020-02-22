@@ -421,6 +421,14 @@
          [CHAR LIMIT=NONE] -->
     <string name="location_changed_notification_text">Tap to see your location settings.</string>
 
+    <!-- Feature Id for Country Detector. [CHAR LIMIT=NONE]-->
+    <string name="country_detector">Country Detector</string>
+    <!-- Feature Id for Location service. [CHAR LIMIT=NONE]-->
+    <string name="location_service">Location Service</string>
+    <!-- Feature Id for Sensor Notification service. [CHAR LIMIT=NONE]-->
+    <string name="sensor_notification_service">Sensor Notification Service</string>
+    <!-- Feature Id for Twilight service. [CHAR LIMIT=NONE]-->
+    <string name="twilight_service">Twilight Service</string>
 
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
@@ -3527,6 +3535,12 @@
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_message">Tap to turn off USB debugging</string>
     <string name="adb_active_notification_message" product="tv">Select to disable USB debugging.</string>
+    <!-- Title of notification shown when ADB Wireless is actively connected to the phone. [CHAR LIMIT=NONE] -->
+    <string name="adbwifi_active_notification_title">Wireless debugging connected</string>
+    <!-- Message of notification shown when ADB Wireless is actively connected to the phone. [CHAR LIMIT=NONE] -->
+    <string name="adbwifi_active_notification_message">Tap to turn off wireless debugging</string>
+    <!-- Message of notification shown when ADB Wireless is actively connected to the TV. [CHAR LIMIT=NONE] -->
+    <string name="adbwifi_active_notification_message" product="tv">Select to disable wireless debugging.</string>
 
     <!-- Title of notification shown when Test Harness Mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="test_harness_mode_notification_title">Test Harness Mode enabled</string>

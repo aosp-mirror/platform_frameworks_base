@@ -27,9 +27,9 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -79,8 +79,10 @@ public class AppOpsControllerImpl implements AppOpsController,
     };
 
     @Inject
-    public AppOpsControllerImpl(Context context,
-            @Background Looper bgLooper, DumpController dumpController) {
+    public AppOpsControllerImpl(
+            Context context,
+            @Background Looper bgLooper,
+            DumpManager dumpManager) {
         mContext = context;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mBGHandler = new H(bgLooper);
@@ -88,7 +90,7 @@ public class AppOpsControllerImpl implements AppOpsController,
         for (int i = 0; i < numOps; i++) {
             mCallbacksByCode.put(OPS[i], new ArraySet<>());
         }
-        dumpController.registerDumpable(TAG, this);
+        dumpManager.registerDumpable(TAG, this);
     }
 
     @VisibleForTesting

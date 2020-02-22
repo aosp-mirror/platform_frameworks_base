@@ -458,7 +458,7 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
-     * Returns the largets {@link WindowMetrics} an app may expect in the current system state.
+     * Returns the largest {@link WindowMetrics} an app may expect in the current system state.
      * <p>
      * The metrics describe the size of the largest potential area the window might occupy with
      * {@link LayoutParams#MATCH_PARENT MATCH_PARENT} width and height, and the {@link WindowInsets}

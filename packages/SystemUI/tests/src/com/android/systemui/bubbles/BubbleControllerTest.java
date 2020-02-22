@@ -54,10 +54,10 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.systemui.DumpController;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -169,7 +169,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Mock
     private FeatureFlags mFeatureFlagsOldPipeline;
     @Mock
-    private DumpController mDumpController;
+    private DumpManager mDumpManager;
 
     private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private BubbleData mBubbleData;
@@ -204,7 +204,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardBypassController, mColorExtractor,
-                mDumpController);
+                mDumpManager);
         mNotificationShadeWindowController.setNotificationShadeView(
                 mSuperStatusBarViewFactory.getNotificationShadeWindowView());
         mNotificationShadeWindowController.attach();
@@ -234,7 +234,8 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mock(NotificationInterruptionStateProvider.HeadsUpSuppressor.class));
         mBubbleData = new BubbleData(mContext);
         when(mFeatureFlagsOldPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
-        mBubbleController = new TestableBubbleController(mContext,
+        mBubbleController = new TestableBubbleController(
+                mContext,
                 mNotificationShadeWindowController,
                 mStatusBarStateController,
                 mShadeController,
@@ -247,7 +248,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mNotificationEntryManager,
                 mNotifPipeline,
                 mFeatureFlagsOldPipeline,
-                mDumpController,
+                mDumpManager,
                 mFloatingContentCoordinator);
         mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
         mBubbleController.setExpandListener(mBubbleExpandListener);

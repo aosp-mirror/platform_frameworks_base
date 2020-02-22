@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
@@ -47,7 +47,7 @@ public class NotifCoordinators implements Dumpable {
      */
     @Inject
     public NotifCoordinators(
-            DumpController dumpController,
+            DumpManager dumpManager,
             FeatureFlags featureFlags,
             KeyguardCoordinator keyguardCoordinator,
             RankingCoordinator rankingCoordinator,
@@ -55,7 +55,7 @@ public class NotifCoordinators implements Dumpable {
             DeviceProvisionedCoordinator deviceProvisionedCoordinator,
             BubbleCoordinator bubbleCoordinator,
             PreparationCoordinator preparationCoordinator) {
-        dumpController.registerDumpable(TAG, this);
+        dumpManager.registerDumpable(TAG, this);
 
         mCoordinators.add(new HideLocallyDismissedNotifsCoordinator());
         mCoordinators.add(keyguardCoordinator);

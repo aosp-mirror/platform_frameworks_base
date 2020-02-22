@@ -190,6 +190,7 @@ static inline std::vector<char> readBytes(borrowed_fd fd) {
 }
 
 static inline int32_t skipIdSigHeaders(borrowed_fd fd) {
+    readBEInt32(fd);        // version
     readBytes(fd);          // verityRootHash
     readBytes(fd);          // v3Digest
     readBytes(fd);          // pkcs7SignatureBlock

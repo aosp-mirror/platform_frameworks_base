@@ -53,15 +53,15 @@ abstract class MediaRoute2Provider {
 
     public abstract void requestCreateSession(String packageName, String routeId, long requestId,
             @Nullable Bundle sessionHints);
-    public abstract void releaseSession(String sessionId);
+    public abstract void releaseSession(String sessionId, long requestId);
     public abstract void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference);
 
-    public abstract void selectRoute(String sessionId, String routeId);
-    public abstract void deselectRoute(String sessionId, String routeId);
-    public abstract void transferToRoute(String sessionId, String routeId);
+    public abstract void selectRoute(String sessionId, String routeId, long requestId);
+    public abstract void deselectRoute(String sessionId, String routeId, long requestId);
+    public abstract void transferToRoute(String sessionId, String routeId, long requestId);
 
-    public abstract void setRouteVolume(String routeId, int volume);
-    public abstract void setSessionVolume(String sessionId, int volume);
+    public abstract void setRouteVolume(String routeId, int volume, long requestId);
+    public abstract void setSessionVolume(String sessionId, int volume, long requestId);
 
     @NonNull
     public String getUniqueId() {
@@ -116,5 +116,6 @@ abstract class MediaRoute2Provider {
                 @NonNull RoutingSessionInfo sessionInfo);
         void onSessionReleased(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo);
+        void onRequestFailed(@NonNull MediaRoute2Provider provider, long requestId, int reason);
     }
 }

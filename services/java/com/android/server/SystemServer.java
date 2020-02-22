@@ -1908,16 +1908,14 @@ public final class SystemServer {
                 t.traceEnd();
             }
 
-            if (hasFeatureFace || hasFeatureIris || hasFeatureFingerprint) {
-                // Start this service after all biometric services.
-                t.traceBegin("StartBiometricService");
-                mSystemServiceManager.startService(BiometricService.class);
-                t.traceEnd();
+            // Start this service after all biometric services.
+            t.traceBegin("StartBiometricService");
+            mSystemServiceManager.startService(BiometricService.class);
+            t.traceEnd();
 
-                t.traceBegin("StartAuthService");
-                mSystemServiceManager.startService(AuthService.class);
-                t.traceEnd();
-            }
+            t.traceBegin("StartAuthService");
+            mSystemServiceManager.startService(AuthService.class);
+            t.traceEnd();
 
 
             t.traceBegin("StartBackgroundDexOptService");

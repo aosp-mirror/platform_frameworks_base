@@ -123,7 +123,9 @@ public class WifiConfiguration implements Parcelable {
                 WPA_PSK_SHA256,
                 WPA_EAP_SHA256,
                 WAPI_PSK,
-                WAPI_CERT})
+                WAPI_CERT,
+                FILS_SHA256,
+                FILS_SHA384})
         public @interface KeyMgmtScheme {}
 
         /** WPA is not used; plaintext or static WEP could be used. */
@@ -204,12 +206,23 @@ public class WifiConfiguration implements Parcelable {
         @SystemApi
         public static final int WAPI_CERT = 14;
 
+        /**
+        * IEEE 802.11ai FILS SK with SHA256
+         * @hide
+        */
+        public static final int FILS_SHA256 = 15;
+        /**
+         * IEEE 802.11ai FILS SK with SHA384:
+         * @hide
+         */
+        public static final int FILS_SHA384 = 16;
+
         public static final String varName = "key_mgmt";
 
         public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP",
                 "IEEE8021X", "WPA2_PSK", "OSEN", "FT_PSK", "FT_EAP",
                 "SAE", "OWE", "SUITE_B_192", "WPA_PSK_SHA256", "WPA_EAP_SHA256",
-                "WAPI_PSK", "WAPI_CERT" };
+                "WAPI_PSK", "WAPI_CERT", "FILS_SHA256", "FILS_SHA384" };
     }
 
     /**

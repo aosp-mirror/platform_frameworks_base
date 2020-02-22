@@ -16,6 +16,8 @@
 
 package com.android.internal.location.gnssmetrics;
 
+import android.app.StatsManager;
+import android.content.Context;
 import android.location.GnssStatus;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -24,16 +26,19 @@ import android.server.location.ServerLocationProtoEnums;
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.util.StatsEvent;
 import android.util.TimeUtils;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.nano.GnssLogsProto.GnssLog;
 import com.android.internal.location.nano.GnssLogsProto.PowerMetrics;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * GnssMetrics: Is used for logging GNSS metrics
@@ -96,7 +101,34 @@ public class GnssMetrics {
     /** Total number of L5 sv status messages processed, where sv is used in fix */
     private int mNumL5SvStatusUsedInFix;
 
-    public GnssMetrics(IBatteryStats stats) {
+    /* Statsd Logging Variables Section Start */
+    /** Location failure reports since boot used for statsd logging */
+    private Statistics mLocationFailureReportsStatistics;
+    /** Time to first fix milli-seconds since boot used for statsd logging */
+    private Statistics mTimeToFirstFixMilliSReportsStatistics;
+    /** Position accuracy meters since boot used for statsd logging  */
+    private Statistics mPositionAccuracyMetersReportsStatistics;
+    /** Top 4 average CN0 (db-mHz) since boot used for statsd logging  */
+    private Statistics mTopFourAverageCn0DbmHzReportsStatistics;
+    /** Top 4 average CN0 (db-mHz) L5 since boot used for statsd logging  */
+    private Statistics mL5TopFourAverageCn0DbmHzReportsStatistics;
+    /** Total number of sv status reports processed since boot used for statsd logging  */
+    private long mSvStatusReports;
+    /** Total number of L5 sv status reports processed since boot used for statsd logging  */
+    private long mL5SvStatusReports;
+    /** Total number of sv status reports processed, where sv is used in fix since boot used for
+     * statsd logging  */
+    private long mSvStatusReportsUsedInFix;
+    /** Total number of L5 sv status reports processed, where sv is used in fix since boot used for
+     * statsd logging  */
+    private long mL5SvStatusReportsUsedInFix;
+    /** Stats manager service for reporting atoms */
+    private StatsManager mStatsManager;
+    /** Pull atom callback, this is called when atom pull request occurs */
+    private StatsPullAtomCallbackImpl mPullAtomCallback;
+    /* Statds Logging Variables Section End */
+
+    public GnssMetrics(Context context, IBatteryStats stats) {
         mGnssPowerMetrics = new GnssPowerMetrics(stats);
         mLocationFailureStatistics = new Statistics();
         mTimeToFirstFixSecStatistics = new Statistics();
@@ -104,6 +136,13 @@ public class GnssMetrics {
         mTopFourAverageCn0Statistics = new Statistics();
         mTopFourAverageCn0StatisticsL5 = new Statistics();
         reset();
+        mLocationFailureReportsStatistics = new Statistics();
+        mTimeToFirstFixMilliSReportsStatistics = new Statistics();
+        mPositionAccuracyMetersReportsStatistics = new Statistics();
+        mTopFourAverageCn0DbmHzReportsStatistics = new Statistics();
+        mL5TopFourAverageCn0DbmHzReportsStatistics = new Statistics();
+        mStatsManager = (StatsManager) context.getSystemService(Context.STATS_MANAGER);
+        registerGnssStats();
     }
 
     /**
@@ -112,9 +151,11 @@ public class GnssMetrics {
     public void logReceivedLocationStatus(boolean isSuccessful) {
         if (!isSuccessful) {
             mLocationFailureStatistics.addItem(1.0);
+            mLocationFailureReportsStatistics.addItem(1.0);
             return;
         }
         mLocationFailureStatistics.addItem(0.0);
+        mLocationFailureReportsStatistics.addItem(0.0);
     }
 
     /**
@@ -127,6 +168,7 @@ public class GnssMetrics {
         if (numReportMissed > 0) {
             for (int i = 0; i < numReportMissed; i++) {
                 mLocationFailureStatistics.addItem(1.0);
+                mLocationFailureReportsStatistics.addItem(1.0);
             }
         }
     }
@@ -136,6 +178,7 @@ public class GnssMetrics {
      */
     public void logTimeToFirstFixMilliSecs(int timeToFirstFixMilliSeconds) {
         mTimeToFirstFixSecStatistics.addItem((double) (timeToFirstFixMilliSeconds / 1000));
+        mTimeToFirstFixMilliSReportsStatistics.addItem(timeToFirstFixMilliSeconds);
     }
 
     /**
@@ -143,6 +186,7 @@ public class GnssMetrics {
      */
     public void logPositionAccuracyMeters(float positionAccuracyMeters) {
         mPositionAccuracyMeterStatistics.addItem((double) positionAccuracyMeters);
+        mPositionAccuracyMetersReportsStatistics.addItem(positionAccuracyMeters);
     }
 
     /**
@@ -174,6 +218,8 @@ public class GnssMetrics {
             }
             top4AvgCn0 /= 4;
             mTopFourAverageCn0Statistics.addItem(top4AvgCn0);
+            // Convert to mHz for accuracy
+            mTopFourAverageCn0DbmHzReportsStatistics.addItem(top4AvgCn0 * 1000);
         }
     }
     /* Helper function to check if a SV is L5 */
@@ -191,14 +237,18 @@ public class GnssMetrics {
         for (int i = 0; i < status.getSatelliteCount(); i++) {
             if (status.hasCarrierFrequencyHz(i)) {
                 mNumSvStatus++;
+                mSvStatusReports++;
                 isL5 = isL5Sv(status.getCarrierFrequencyHz(i));
                 if (isL5) {
                     mNumL5SvStatus++;
+                    mL5SvStatusReports++;
                 }
                 if (status.usedInFix(i)) {
                     mNumSvStatusUsedInFix++;
+                    mSvStatusReportsUsedInFix++;
                     if (isL5) {
                         mNumL5SvStatusUsedInFix++;
+                        mL5SvStatusReportsUsedInFix++;
                     }
                 }
             }
@@ -233,6 +283,8 @@ public class GnssMetrics {
             }
             top4AvgCn0 /= 4;
             mTopFourAverageCn0StatisticsL5.addItem(top4AvgCn0);
+            // Convert to mHz for accuracy
+            mL5TopFourAverageCn0DbmHzReportsStatistics.addItem(top4AvgCn0 * 1000);
         }
         return;
     }
@@ -421,12 +473,14 @@ public class GnssMetrics {
         private int mCount;
         private double mSum;
         private double mSumSquare;
+        private long mLongSum;
 
         /** Resets statistics */
         public void reset() {
             mCount = 0;
             mSum = 0.0;
             mSumSquare = 0.0;
+            mLongSum = 0;
         }
 
         /** Adds an item */
@@ -434,6 +488,7 @@ public class GnssMetrics {
             mCount++;
             mSum += item;
             mSumSquare += item * item;
+            mLongSum += item;
         }
 
         /** Returns number of items added */
@@ -455,6 +510,11 @@ public class GnssMetrics {
                 return Math.sqrt(v - m);
             }
             return 0;
+        }
+
+        /** Returns long sum */
+        public long getLongSum() {
+            return mLongSum;
         }
     }
 
@@ -559,6 +619,46 @@ public class GnssMetrics {
                 return GnssMetrics.GPS_SIGNAL_QUALITY_GOOD;
             }
             return GnssMetrics.GPS_SIGNAL_QUALITY_POOR;
+        }
+    }
+
+    private void registerGnssStats() {
+        mPullAtomCallback = new StatsPullAtomCallbackImpl();
+        mStatsManager.registerPullAtomCallback(
+                FrameworkStatsLog.GNSS_STATS,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(), mPullAtomCallback);
+    }
+
+    /**
+     * Stats Pull Atom Callback
+     * Calls the pull method to fill out gnss stats
+     */
+    private class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCallback {
+        @Override
+        public int onPullAtom(int atomTag, List<StatsEvent> data) {
+            if (atomTag != FrameworkStatsLog.GNSS_STATS) {
+                throw new UnsupportedOperationException("Unknown tagId = " + atomTag);
+            }
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeLong(mLocationFailureReportsStatistics.getCount())
+                    .writeLong(mLocationFailureReportsStatistics.getLongSum())
+                    .writeLong(mTimeToFirstFixMilliSReportsStatistics.getCount())
+                    .writeLong(mTimeToFirstFixMilliSReportsStatistics.getLongSum())
+                    .writeLong(mPositionAccuracyMetersReportsStatistics.getCount())
+                    .writeLong(mPositionAccuracyMetersReportsStatistics.getLongSum())
+                    .writeLong(mTopFourAverageCn0DbmHzReportsStatistics.getCount())
+                    .writeLong(mTopFourAverageCn0DbmHzReportsStatistics.getLongSum())
+                    .writeLong(mL5TopFourAverageCn0DbmHzReportsStatistics.getCount())
+                    .writeLong(mL5TopFourAverageCn0DbmHzReportsStatistics.getLongSum())
+                    .writeLong(mSvStatusReports)
+                    .writeLong(mSvStatusReportsUsedInFix)
+                    .writeLong(mL5SvStatusReports)
+                    .writeLong(mL5SvStatusReportsUsedInFix)
+                    .build();
+            data.add(e);
+            return StatsManager.PULL_SUCCESS;
         }
     }
 }

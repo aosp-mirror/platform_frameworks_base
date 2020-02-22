@@ -60,14 +60,14 @@ class TaskSnapshotLoader {
      *
      * @param taskId The id of the task to load.
      * @param userId The id of the user the task belonged to.
-     * @param reducedResolution Whether to load a reduced resolution version of the snapshot.
+     * @param isLowResolution Whether to load a reduced resolution version of the snapshot.
      * @return The loaded {@link TaskSnapshot} or {@code null} if it couldn't be loaded.
      */
-    TaskSnapshot loadTask(int taskId, int userId, boolean reducedResolution) {
+    TaskSnapshot loadTask(int taskId, int userId, boolean isLowResolution) {
         final File protoFile = mPersister.getProtoFile(taskId, userId);
-        final File bitmapFile = reducedResolution
-                ? mPersister.getReducedResolutionBitmapFile(taskId, userId)
-                : mPersister.getBitmapFile(taskId, userId);
+        final File bitmapFile = isLowResolution
+                ? mPersister.getLowResolutionBitmapFile(taskId, userId)
+                : mPersister.getHighResolutionBitmapFile(taskId, userId);
         if (bitmapFile == null || !protoFile.exists() || !bitmapFile.exists()) {
             return null;
         }
@@ -100,12 +100,12 @@ class TaskSnapshotLoader {
             final ComponentName topActivityComponent = ComponentName.unflattenFromString(
                     proto.topActivityComponent);
             // For legacy snapshots, restore the scale based on the reduced resolution state
-            final float legacyScale = reducedResolution ? mPersister.getReducedScale() : 1f;
+            final float legacyScale = isLowResolution ? mPersister.getLowResScale() : 1f;
             final float scale = Float.compare(proto.scale, 0f) != 0 ? proto.scale : legacyScale;
             return new TaskSnapshot(proto.id, topActivityComponent, buffer, hwBitmap.getColorSpace(),
                     proto.orientation, proto.rotation,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
-                    reducedResolution, scale, proto.isRealSnapshot, proto.windowingMode,
+                    isLowResolution, scale, proto.isRealSnapshot, proto.windowingMode,
                     proto.systemUiVisibility, proto.isTranslucent);
         } catch (IOException e) {
             Slog.w(TAG, "Unable to load task snapshot data for taskId=" + taskId);

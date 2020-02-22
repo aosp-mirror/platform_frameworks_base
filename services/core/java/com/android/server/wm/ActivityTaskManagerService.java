@@ -4518,17 +4518,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution) {
+    public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution) {
         enforceCallerIsRecentsOrHasPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
-            return getTaskSnapshot(taskId, reducedResolution, true /* restoreFromDisk */);
+            return getTaskSnapshot(taskId, isLowResolution, true /* restoreFromDisk */);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution,
+    private ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution,
             boolean restoreFromDisk) {
         final Task task;
         synchronized (mGlobalLock) {
@@ -4540,7 +4540,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
         // Don't call this while holding the lock as this operation might hit the disk.
-        return task.getSnapshot(reducedResolution, restoreFromDisk);
+        return task.getSnapshot(isLowResolution, restoreFromDisk);
     }
 
     @Override
@@ -7483,8 +7483,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public ActivityManager.TaskSnapshot getTaskSnapshotNoRestore(int taskId,
-                boolean reducedResolution) {
-            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, reducedResolution,
+                boolean isLowResolution) {
+            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution,
                     false /* restoreFromDisk */);
         }
 

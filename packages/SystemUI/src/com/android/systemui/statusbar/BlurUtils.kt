@@ -24,10 +24,10 @@ import android.view.SurfaceControl
 import android.view.ViewRootImpl
 import androidx.annotation.VisibleForTesting
 import com.android.internal.util.IndentingPrintWriter
-import com.android.systemui.DumpController
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -36,7 +36,7 @@ import javax.inject.Singleton
 @Singleton
 open class BlurUtils @Inject constructor(
     @Main private val resources: Resources,
-    val dumpController: DumpController
+    dumpManager: DumpManager
 ) : Dumpable {
     private val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
     private val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
@@ -44,7 +44,7 @@ open class BlurUtils @Inject constructor(
             .getBoolean("ro.surface_flinger.supports_background_blur", false)
 
     init {
-        dumpController.registerDumpable(this)
+        dumpManager.registerDumpable(javaClass.name, this)
     }
 
     /**
@@ -90,7 +90,7 @@ open class BlurUtils @Inject constructor(
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
-        IndentingPrintWriter(pw, "  ").use {
+        IndentingPrintWriter(pw, "  ").let {
             it.println("BlurUtils:")
             it.increaseIndent()
             it.println("minBlurRadius: $minBlurRadius")

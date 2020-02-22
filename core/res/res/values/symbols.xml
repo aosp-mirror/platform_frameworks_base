@@ -359,8 +359,8 @@
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
   <java-symbol type="bool" name="config_enableNewAutoSelectNetworkUI"/>
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
-  <java-symbol type="dimen" name="config_fullTaskSnapshotScale" />
-  <java-symbol type="dimen" name="config_reducedTaskSnapshotScale" />
+  <java-symbol type="dimen" name="config_highResTaskSnapshotScale" />
+  <java-symbol type="dimen" name="config_lowResTaskSnapshotScale" />
   <java-symbol type="bool" name="config_use16BitTaskSnapshotPixelFormat" />
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="string" name="config_recentsComponentName" />
@@ -2009,6 +2009,8 @@
   <java-symbol type="string" name="accessibility_binding_label" />
   <java-symbol type="string" name="adb_active_notification_message" />
   <java-symbol type="string" name="adb_active_notification_title" />
+  <java-symbol type="string" name="adbwifi_active_notification_message" />
+  <java-symbol type="string" name="adbwifi_active_notification_title" />
   <java-symbol type="string" name="test_harness_mode_notification_title" />
   <java-symbol type="string" name="test_harness_mode_notification_message" />
   <java-symbol type="string" name="console_running_notification_title" />
@@ -2154,6 +2156,8 @@
   <java-symbol type="integer" name="config_attentiveWarningDuration" />
   <java-symbol type="string" name="config_customAdbPublicKeyConfirmationComponent" />
   <java-symbol type="string" name="config_customAdbPublicKeyConfirmationSecondaryUserComponent" />
+  <java-symbol type="string" name="config_customAdbWifiNetworkConfirmationComponent" />
+  <java-symbol type="string" name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent" />
   <java-symbol type="string" name="config_customVpnConfirmDialogComponent" />
   <java-symbol type="string" name="config_customVpnAlwaysOnDisconnectedDialogComponent" />
   <java-symbol type="string" name="config_platformVpnConfirmDialogComponent" />

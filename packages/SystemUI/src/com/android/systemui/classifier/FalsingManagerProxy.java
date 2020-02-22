@@ -29,13 +29,13 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.classifier.brightline.FalsingDataProvider;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingPlugin;
 import com.android.systemui.plugins.PluginListener;
@@ -75,7 +75,7 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
             DisplayMetrics displayMetrics, ProximitySensor proximitySensor,
             DeviceConfigProxy deviceConfig, DockManager dockManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DumpController dumpController,
+            DumpManager dumpManager,
             @UiBackground Executor uiBgExecutor) {
         mDisplayMetrics = displayMetrics;
         mProximitySensor = proximitySensor;
@@ -110,7 +110,7 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
 
         pluginManager.addPluginListener(mPluginListener, FalsingPlugin.class);
 
-        dumpController.registerDumpable("FalsingManager", this);
+        dumpManager.registerDumpable("FalsingManager", this);
     }
 
     private void onDeviceConfigPropertiesChanged(Context context, String namespace) {

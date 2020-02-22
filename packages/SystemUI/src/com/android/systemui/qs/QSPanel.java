@@ -47,10 +47,10 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.Dependency;
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -103,7 +103,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     private QSDetail.Callback mCallback;
     private BrightnessController mBrightnessController;
-    private DumpController mDumpController;
+    private final DumpManager mDumpManager;
     private final QSLogger mQSLogger;
     protected QSTileHost mHost;
 
@@ -148,13 +148,14 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     public QSPanel(
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
-            DumpController dumpController,
+            DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger
     ) {
         super(context, attrs);
         mContext = context;
         mQSLogger = qsLogger;
+        mDumpManager = dumpManager;
 
         setOrientation(VERTICAL);
 
@@ -190,7 +191,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         mBrightnessController = new BrightnessController(getContext(),
                 findViewById(R.id.brightness_slider), broadcastDispatcher);
-        mDumpController = dumpController;
     }
 
     @Override
@@ -357,7 +357,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.addCallback(this);
         }
-        if (mDumpController != null) mDumpController.registerDumpable(getDumpableTag(), this);
+        mDumpManager.registerDumpable(getDumpableTag(), this);
     }
 
     @Override
@@ -372,7 +372,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.removeCallback(this);
         }
-        if (mDumpController != null) mDumpController.unregisterDumpable(this);
+        mDumpManager.unregisterDumpable(getDumpableTag());
         if (mLocalMediaManager != null) {
             mLocalMediaManager.stopScan();
             mLocalMediaManager.unregisterCallback(mDeviceCallback);

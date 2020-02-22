@@ -62,8 +62,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
@@ -135,7 +135,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         mCollection = new NotifCollection(
                 mStatusBarService,
-                mock(DumpController.class),
+                mock(DumpManager.class),
                 mFeatureFlags,
                 mLogger);
         mCollection.attach(mGroupCoalescer);

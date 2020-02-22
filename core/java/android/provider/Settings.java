@@ -9275,9 +9275,15 @@ public final class Settings {
         public static final String CUSTOM_BUGREPORT_HANDLER_USER = "custom_bugreport_handler_user";
 
         /**
-         * Whether ADB is enabled.
+         * Whether ADB over USB is enabled.
          */
         public static final String ADB_ENABLED = "adb_enabled";
+
+        /**
+         * Whether ADB over Wifi is enabled.
+         * @hide
+         */
+        public static final String ADB_WIFI_ENABLED = "adb_wifi_enabled";
 
         /**
          * Whether Views are allowed to save their attribute data.
@@ -10607,6 +10613,17 @@ public final class Settings {
         * change the ringer mode. See AudioManager.
         */
        public static final String MODE_RINGER = "mode_ringer";
+
+        /**
+         * Specifies whether Enhanced Connectivity is enabled or not. This setting allows the
+         * Connectivity Thermal Power Manager to actively help the device to save power in 5G
+         * scenarios
+         * Type: int 1 is enabled, 0 is disabled
+         *
+         * @hide
+         */
+        public static final String ENHANCED_CONNECTIVITY_ENABLED =
+                "enhanced_connectivity_enable";
 
         /**
          * Overlay display devices setting.

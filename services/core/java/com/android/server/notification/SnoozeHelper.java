@@ -36,6 +36,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -43,9 +44,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -172,7 +171,7 @@ public class SnoozeHelper {
             for (int i = 0; i < allRecords.size(); i++) {
                 NotificationRecord r = allRecords.valueAt(i);
                 String currentGroupKey = r.getSbn().getGroup();
-                if (currentGroupKey.equals(groupKey)) {
+                if (Objects.equals(currentGroupKey, groupKey)) {
                     records.add(r);
                 }
             }
@@ -217,7 +216,7 @@ public class SnoozeHelper {
 
         snooze(record);
         scheduleRepost(pkg, key, userId, duration);
-        Long activateAt = System.currentTimeMillis() + duration;
+        Long activateAt = SystemClock.elapsedRealtime() + duration;
         synchronized (mPersistedSnoozedNotifications) {
             storeRecord(pkg, key, userId, mPersistedSnoozedNotifications, activateAt);
         }
@@ -244,8 +243,6 @@ public class SnoozeHelper {
         }
         storeRecord(record.getSbn().getPackageName(), record.getKey(),
                 userId, mSnoozedNotifications, record);
-        mPackages.put(record.getKey(), record.getSbn().getPackageName());
-        mUsers.put(record.getKey(), userId);
     }
 
     private <T> void storeRecord(String pkg, String key, Integer userId,
@@ -258,6 +255,8 @@ public class SnoozeHelper {
         keyToValue.put(key, object);
         targets.put(getPkgKey(userId, pkg), keyToValue);
 
+        mPackages.put(key, pkg);
+        mUsers.put(key, userId);
     }
 
     private <T> T removeRecord(String pkg, String key, Integer userId,
@@ -425,12 +424,34 @@ public class SnoozeHelper {
                 PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
+    public void scheduleRepostsForPersistedNotifications(long currentTime) {
+        for (ArrayMap<String, Long> snoozed : mPersistedSnoozedNotifications.values()) {
+            for (int i = 0; i < snoozed.size(); i++) {
+                String key = snoozed.keyAt(i);
+                Long time = snoozed.valueAt(i);
+                String pkg = mPackages.get(key);
+                Integer userId = mUsers.get(key);
+                if (time == null || pkg == null || userId == null) {
+                    Slog.w(TAG, "data out of sync: " + time + "|" + pkg + "|" + userId);
+                    continue;
+                }
+                if (time != null && time > currentTime) {
+                    scheduleRepostAtTime(pkg, key, userId, time);
+                }
+            }
+
+        }
+    }
+
     private void scheduleRepost(String pkg, String key, int userId, long duration) {
+        scheduleRepostAtTime(pkg, key, userId, SystemClock.elapsedRealtime() + duration);
+    }
+
+    private void scheduleRepostAtTime(String pkg, String key, int userId, long time) {
         long identity = Binder.clearCallingIdentity();
         try {
             final PendingIntent pi = createPendingIntent(pkg, key, userId);
             mAm.cancel(pi);
-            long time = SystemClock.elapsedRealtime() + duration;
             if (DEBUG) Slog.d(TAG, "Scheduling evaluate for " + new Date(time));
             mAm.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, time, pi);
         } finally {
@@ -496,6 +517,7 @@ public class SnoozeHelper {
     private interface Inserter<T> {
         void insert(T t) throws IOException;
     }
+
     private <T> void writeXml(XmlSerializer out,
             ArrayMap<String, ArrayMap<String, T>> targets, String tag,
             Inserter<T> attributeInserter)
@@ -503,12 +525,13 @@ public class SnoozeHelper {
         synchronized (targets) {
             final int M = targets.size();
             for (int i = 0; i < M; i++) {
-                String userIdPkgKey = targets.keyAt(i);
                 // T is a String (snoozed until context) or Long (snoozed until time)
                 ArrayMap<String, T> keyToValue = targets.valueAt(i);
                 for (int j = 0; j < keyToValue.size(); j++) {
                     String key = keyToValue.keyAt(j);
                     T value = keyToValue.valueAt(j);
+                    String pkg = mPackages.get(key);
+                    Integer userId = mUsers.get(key);
 
                     out.startTag(null, tag);
 
@@ -518,8 +541,7 @@ public class SnoozeHelper {
                             XML_SNOOZED_NOTIFICATION_VERSION);
                     out.attribute(null, XML_SNOOZED_NOTIFICATION_KEY, key);
 
-                    String pkg = mPackages.get(key);
-                    int userId = mUsers.get(key);
+
                     out.attribute(null, XML_SNOOZED_NOTIFICATION_PKG, pkg);
                     out.attribute(null, XML_SNOOZED_NOTIFICATION_USER_ID,
                             String.valueOf(userId));
@@ -530,7 +552,7 @@ public class SnoozeHelper {
         }
     }
 
-    protected void readXml(XmlPullParser parser)
+    protected void readXml(XmlPullParser parser, long currentTime)
             throws XmlPullParserException, IOException {
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -547,16 +569,15 @@ public class SnoozeHelper {
                 try {
                     final String key = parser.getAttributeValue(null, XML_SNOOZED_NOTIFICATION_KEY);
                     final String pkg = parser.getAttributeValue(null, XML_SNOOZED_NOTIFICATION_PKG);
-                    final int userId = Integer.parseInt(
-                            parser.getAttributeValue(null, XML_SNOOZED_NOTIFICATION_USER_ID));
+                    final int userId = XmlUtils.readIntAttribute(
+                            parser, XML_SNOOZED_NOTIFICATION_USER_ID, UserHandle.USER_ALL);
                     if (tag.equals(XML_SNOOZED_NOTIFICATION)) {
-                        final Long time = Long.parseLong(
-                                parser.getAttributeValue(null, XML_SNOOZED_NOTIFICATION_TIME));
-                        if (time > System.currentTimeMillis()) { //only read new stuff
+                        final Long time = XmlUtils.readLongAttribute(
+                                parser, XML_SNOOZED_NOTIFICATION_TIME, 0);
+                        if (time > currentTime) { //only read new stuff
                             synchronized (mPersistedSnoozedNotifications) {
                                 storeRecord(pkg, key, userId, mPersistedSnoozedNotifications, time);
                             }
-                            scheduleRepost(pkg, key, userId, time - System.currentTimeMillis());
                         }
                     }
                     if (tag.equals(XML_SNOOZED_NOTIFICATION_CONTEXT)) {

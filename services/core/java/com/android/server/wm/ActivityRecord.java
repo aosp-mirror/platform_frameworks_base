@@ -837,7 +837,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pw.print(" icon="); pw.print(taskDescription.getInMemoryIcon() != null
                                 ? taskDescription.getInMemoryIcon().getByteCount() + " bytes"
                                 : "null");
-                        pw.print(" iconResource="); pw.print(taskDescription.getIconResource());
+                        pw.print(" iconResource=");
+                                pw.print(taskDescription.getIconResourcePackage());
+                                pw.print("/");
+                                pw.print(taskDescription.getIconResource());
                         pw.print(" iconFilename="); pw.print(taskDescription.getIconFilename());
                         pw.print(" primaryColor=");
                         pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
@@ -1718,7 +1721,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final ActivityManager.TaskSnapshot snapshot =
                 mWmService.mTaskSnapshotController.getSnapshot(task.mTaskId, task.mUserId,
-                        false /* restoreFromDisk */, false /* reducedResolution */);
+                        false /* restoreFromDisk */, false /* isLowResolution */);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, fromRecents, snapshot);
 
@@ -7367,12 +7370,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 componentSpecified = Boolean.parseBoolean(attrValue);
             } else if (ATTR_USERID.equals(attrName)) {
                 userId = Integer.parseInt(attrValue);
-            } else if (attrName.startsWith(ATTR_TASKDESCRIPTION_PREFIX)) {
-                taskDescription.restoreFromXml(attrName, attrValue);
-            } else {
+            } else if (!attrName.startsWith(ATTR_TASKDESCRIPTION_PREFIX)) {
                 Log.d(TAG, "Unknown ActivityRecord attribute=" + attrName);
             }
         }
+        taskDescription.restoreFromXml(in);
 
         int event;
         while (((event = in.next()) != END_DOCUMENT) &&

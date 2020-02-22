@@ -587,25 +587,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
-     * Retrieves the authenticator token for binding keys to the lifecycle
-     * of the calling user's face. Used only by internal clients.
-     *
-     * @hide
-     */
-    public long getAuthenticatorId() {
-        if (mService != null) {
-            try {
-                return mService.getAuthenticatorId(mContext.getOpPackageName());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Log.w(TAG, "getAuthenticatorId(): Service not connected!");
-        }
-        return 0;
-    }
-
-    /**
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)

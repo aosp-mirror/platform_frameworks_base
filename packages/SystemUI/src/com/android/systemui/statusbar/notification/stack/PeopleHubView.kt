@@ -25,30 +25,32 @@ import com.android.systemui.R
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin
 import com.android.systemui.statusbar.notification.people.DataListener
 import com.android.systemui.statusbar.notification.people.PersonViewModel
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView
+import com.android.systemui.statusbar.notification.row.StackScrollerDecorView
 
 class PeopleHubView(context: Context, attrs: AttributeSet) :
-        ActivatableNotificationView(context, attrs), SwipeableView {
+        StackScrollerDecorView(context, attrs), SwipeableView {
 
     private lateinit var contents: ViewGroup
-    private lateinit var personControllers: List<PersonDataListenerImpl>
 
-    val personViewAdapters: Sequence<DataListener<PersonViewModel?>>
-        get() = personControllers.asSequence()
+    lateinit var personViewAdapters: Sequence<DataListener<PersonViewModel?>>
+        private set
 
     override fun onFinishInflate() {
-        super.onFinishInflate()
         contents = requireViewById(R.id.people_list)
-        personControllers = (0 until contents.childCount)
-                .reversed()
-                .asSequence()
+        personViewAdapters = (0 until contents.childCount)
+                .asSequence() // so we can map
                 .mapNotNull { idx ->
+                    // get all our people slots
                     (contents.getChildAt(idx) as? ImageView)?.let(::PersonDataListenerImpl)
                 }
-                .toList()
+                .toList() // cache it
+                .asSequence() // but don't reveal it's a list
+        super.onFinishInflate()
+        setVisible(true /* nowVisible */, false /* animate */)
     }
 
-    override fun getContentView(): View = contents
+    override fun findContentView(): View = contents
+    override fun findSecondaryView(): View? = null
 
     override fun hasFinishedInitialization(): Boolean = true
 
@@ -78,6 +80,7 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
             DataListener<PersonViewModel?> {
 
         override fun onDataChanged(data: PersonViewModel?) {
+            avatarView.visibility = data?.let { View.VISIBLE } ?: View.GONE
             avatarView.setImageDrawable(data?.icon)
             avatarView.setOnClickListener { data?.onClick?.invoke() }
         }

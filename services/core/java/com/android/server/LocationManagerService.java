@@ -149,7 +149,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @Override
         public void onStart() {
+            // enable client caches by doing the first invalidate
+            LocationManager.invalidateLocalLocationEnabledCaches();
+
             publishBinderService(Context.LOCATION_SERVICE, mService);
+            // disable caching for whatever process contains LocationManagerService
+            ((LocationManager) mService.mContext.getSystemService(LocationManager.class))
+                    .disableLocalLocationEnabledCaches();
         }
 
         @Override
@@ -193,6 +199,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     // we don't unnecessarily filter events that are otherwise on
     // time
     private static final int MAX_PROVIDER_SCHEDULING_JITTER_MS = 100;
+
+    private static final String FEATURE_ID = "LocationService";
 
     private static final LocationRequest DEFAULT_LOCATION_REQUEST = new LocationRequest();
 
@@ -238,7 +246,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private int mBatterySaverMode;
 
     private LocationManagerService(Context context) {
-        mContext = context;
+        mContext = context.createFeatureContext(FEATURE_ID);
         mHandler = FgThread.getHandler();
         mLocalService = new LocalService();
 
@@ -439,6 +447,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private void onLocationModeChanged(int userId) {
         boolean enabled = mSettingsHelper.isLocationEnabled(userId);
+        LocationManager.invalidateLocalLocationEnabledCaches();
 
         if (D) {
             Log.d(TAG, "[u" + userId + "] location enabled = " + enabled);
@@ -2534,6 +2543,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS,
                 "Requires WRITE_SECURE_SETTINGS permission");
+
+        LocationManager.invalidateLocalLocationEnabledCaches();
         mSettingsHelper.setLocationEnabled(enabled, userId);
     }
 

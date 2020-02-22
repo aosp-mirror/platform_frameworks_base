@@ -16,7 +16,7 @@
 
 package android.net.wifi;
 
-import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -47,7 +47,7 @@ public final class SoftApCapability implements Parcelable {
      * {@link SoftApInfo#getFrequency} and {@link SoftApInfo#getBandwidth} to get
      * driver channel selection result.
      */
-    public static final int SOFTAP_FEATURE_ACS_OFFLOAD = 1 << 0;
+    public static final long SOFTAP_FEATURE_ACS_OFFLOAD = 1 << 0;
 
     /**
      * Support for client force disconnect.
@@ -59,7 +59,7 @@ public final class SoftApCapability implements Parcelable {
      * Check feature support before invoking
      * {@link SoftApConfiguration.Builder#setMaxNumberOfClients(int)}
      */
-    public static final int SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT = 1 << 1;
+    public static final long SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT = 1 << 1;
 
 
     /**
@@ -67,18 +67,18 @@ public final class SoftApCapability implements Parcelable {
      *
      * flag when {@link config_wifi_softap_sae_supported)} is true.
      */
-    public static final int SOFTAP_FEATURE_WPA3_SAE = 1 << 2;
+    public static final long SOFTAP_FEATURE_WPA3_SAE = 1 << 2;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "SOFTAP_FEATURE_" }, value = {
+    @LongDef(flag = true, prefix = { "SOFTAP_FEATURE_" }, value = {
             SOFTAP_FEATURE_ACS_OFFLOAD,
             SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT,
             SOFTAP_FEATURE_WPA3_SAE,
     })
     public @interface HotspotFeatures {}
 
-    private @HotspotFeatures int mSupportedFeatures = 0;
+    private @HotspotFeatures long mSupportedFeatures = 0;
 
     private int mMaximumSupportedClientNumber;
 
@@ -104,7 +104,7 @@ public final class SoftApCapability implements Parcelable {
      *
      * @param feature one of feature from {@link HotspotFeatures}
      */
-    public boolean isFeatureSupported(@HotspotFeatures int feature) {
+    public boolean isFeatureSupported(@HotspotFeatures long feature) {
         return (mSupportedFeatures & feature) == feature;
     }
 
@@ -125,7 +125,7 @@ public final class SoftApCapability implements Parcelable {
      * @param features One or combination of the feature from {@link @HotspotFeatures}.
      * @hide
      */
-    public SoftApCapability(@HotspotFeatures int features) {
+    public SoftApCapability(@HotspotFeatures long features) {
         mSupportedFeatures = features;
     }
 
@@ -138,7 +138,7 @@ public final class SoftApCapability implements Parcelable {
     @Override
     /** Implement the Parcelable interface */
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mSupportedFeatures);
+        dest.writeLong(mSupportedFeatures);
         dest.writeInt(mMaximumSupportedClientNumber);
     }
 
@@ -146,7 +146,7 @@ public final class SoftApCapability implements Parcelable {
     /** Implement the Parcelable interface */
     public static final Creator<SoftApCapability> CREATOR = new Creator<SoftApCapability>() {
         public SoftApCapability createFromParcel(Parcel in) {
-            int supportedFeatures = in.readInt();
+            long supportedFeatures = in.readLong();
             SoftApCapability capability = new SoftApCapability(supportedFeatures);
             capability.mMaximumSupportedClientNumber = in.readInt();
             return capability;

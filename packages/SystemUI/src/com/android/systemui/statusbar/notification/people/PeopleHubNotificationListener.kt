@@ -195,7 +195,10 @@ private fun NotificationLockscreenUserManager.registerListener(
 
 class PeopleHubManager {
 
+    // People currently visible in the notification shade, and so are not in the hub
     private val activePeople = mutableMapOf<PersonKey, PersonModel>()
+
+    // People that were once "active" and have been dismissed, and so can be displayed in the hub
     private val inactivePeople = ArrayDeque<PersonModel>(MAX_STORED_INACTIVE_PEOPLE)
 
     fun removeActivePerson(key: PersonKey): Boolean {
@@ -203,7 +206,7 @@ class PeopleHubManager {
             if (inactivePeople.size >= MAX_STORED_INACTIVE_PEOPLE) {
                 inactivePeople.removeLast()
             }
-            inactivePeople.add(data)
+            inactivePeople.addFirst(data)
             return true
         }
         return false

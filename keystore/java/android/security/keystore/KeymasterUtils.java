@@ -16,9 +16,7 @@
 
 package android.security.keystore;
 
-import android.content.pm.PackageManager;
-import android.hardware.face.FaceManager;
-import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.biometrics.BiometricManager;
 import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.security.keymaster.KeymasterArguments;
@@ -115,28 +113,16 @@ public abstract class KeymasterUtils {
         }
 
         if (spec.getUserAuthenticationValidityDurationSeconds() == 0) {
-            PackageManager pm = KeyStore.getApplicationContext().getPackageManager();
-            // Every use of this key needs to be authorized by the user. This currently means
-            // fingerprint or face auth.
-            FingerprintManager fingerprintManager = null;
-            FaceManager faceManager = null;
+            // Every use of this key needs to be authorized by the user.
+            final BiometricManager bm = KeyStore.getApplicationContext()
+                    .getSystemService(BiometricManager.class);
 
-            if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-                fingerprintManager = KeyStore.getApplicationContext()
-                        .getSystemService(FingerprintManager.class);
-            }
-            if (pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
-                faceManager = KeyStore.getApplicationContext().getSystemService(FaceManager.class);
-            }
+            // TODO: Restore permission check in getAuthenticatorIds once the ID is no longer
+            // needed here.
 
-            // TODO: Restore USE_FINGERPRINT permission check in
-            // FingerprintManager.getAuthenticatorId once the ID is no longer needed here.
-            final long fingerprintOnlySid =
-                    (fingerprintManager != null) ? fingerprintManager.getAuthenticatorId() : 0;
-            final long faceOnlySid =
-                    (faceManager != null) ? faceManager.getAuthenticatorId() : 0;
+            final long[] biometricSids = bm.getAuthenticatorIds();
 
-            if (fingerprintOnlySid == 0 && faceOnlySid == 0) {
+            if (biometricSids.length == 0) {
                 throw new IllegalStateException(
                         "At least one biometric must be enrolled to create keys requiring user"
                         + " authentication for every use");
@@ -148,8 +134,9 @@ public abstract class KeymasterUtils {
             } else if (spec.isInvalidatedByBiometricEnrollment()) {
                 // The biometric-only SIDs will change on biometric enrollment or removal of all
                 // enrolled templates, invalidating the key.
-                sids.add(fingerprintOnlySid);
-                sids.add(faceOnlySid);
+                for (long sid : biometricSids) {
+                    sids.add(sid);
+                }
             } else {
                 // The root SID will *not* change on fingerprint enrollment, or removal of all
                 // enrolled fingerprints, allowing the key to remain valid.

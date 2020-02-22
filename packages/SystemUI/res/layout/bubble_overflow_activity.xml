@@ -25,6 +25,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/bubble_overflow_recycler"
         android:layout_gravity="center_horizontal"
+        android:nestedScrollingEnabled="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
@@ -32,6 +33,8 @@
         android:id="@+id/bubble_overflow_empty_state"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingLeft="@dimen/bubble_overflow_empty_state_padding"
+        android:paddingRight="@dimen/bubble_overflow_empty_state_padding"
         android:orientation="vertical"
         android:gravity="center">
 

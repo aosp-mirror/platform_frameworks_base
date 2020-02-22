@@ -18,9 +18,9 @@ package com.android.systemui.bubbles.dagger;
 
 import android.content.Context;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubbleData;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -61,7 +61,7 @@ public interface BubbleModule {
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
-            DumpController dumpController,
+            DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator) {
         return new BubbleController(
                 context,
@@ -78,7 +78,7 @@ public interface BubbleModule {
                 entryManager,
                 notifPipeline,
                 featureFlags,
-                dumpController,
+                dumpManager,
                 floatingContentCoordinator);
     }
 }

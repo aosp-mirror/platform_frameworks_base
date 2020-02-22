@@ -72,4 +72,9 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     public void setActiveUser(int uid) throws RemoteException {
         mFaceService.setActiveUser(uid);
     }
+
+    @Override
+    public long getAuthenticatorId() throws RemoteException {
+        return mFaceService.getAuthenticatorId();
+    }
 }

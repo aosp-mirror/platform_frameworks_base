@@ -24,8 +24,8 @@ import android.view.Choreographer;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
-import com.android.systemui.DumpController;
 import com.android.systemui.assist.AssistModule;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -85,16 +85,17 @@ public abstract class SystemUIModule {
     @Singleton
     @Provides
     @Nullable
-    static KeyguardLiftController provideKeyguardLiftController(Context context,
+    static KeyguardLiftController provideKeyguardLiftController(
+            Context context,
             StatusBarStateController statusBarStateController,
             AsyncSensorManager asyncSensorManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DumpController dumpController) {
+            DumpManager dumpManager) {
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
             return null;
         }
         return new KeyguardLiftController(statusBarStateController, asyncSensorManager,
-                keyguardUpdateMonitor, dumpController);
+                keyguardUpdateMonitor, dumpManager);
     }
 
     @Singleton
@@ -102,14 +103,14 @@ public abstract class SystemUIModule {
     @Nullable
     static NotificationShadeWindowBlurController providesBlurController(BlurUtils blurUtils,
             SysuiStatusBarStateController statusBarStateController,
-            DumpController dumpController, BiometricUnlockController biometricUnlockController,
+            DumpManager dumpManager, BiometricUnlockController biometricUnlockController,
             KeyguardStateController keyguardStateController,
             NotificationShadeWindowController notificationShadeWindowController,
             Choreographer choreographer) {
         return blurUtils.supportsBlursOnWindows() ? new NotificationShadeWindowBlurController(
                 statusBarStateController, blurUtils, biometricUnlockController,
                 keyguardStateController, notificationShadeWindowController, choreographer,
-                dumpController) : null;
+                dumpManager) : null;
     }
 
     /** */

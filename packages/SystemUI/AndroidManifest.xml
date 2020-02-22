@@ -283,6 +283,12 @@
             android:exported="true"
         />
 
+        <!-- Service for dumping extremely verbose content during a bug report -->
+        <service android:name=".dump.SystemUIAuxiliaryDumpService"
+             android:exported="false"
+             android:permission="com.android.systemui.permission.SELF"
+        />
+
         <!-- On user switch, this service is started to ensure that the associated SystemUI
              process for the current user is started. See the resource
              "config_systemUIServiceComponentsPerUser".
@@ -452,6 +458,25 @@
             android:exported="true">
         </activity-alias>
         <activity android:name=".usb.UsbDebuggingSecondaryUserActivity"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+        </activity>
+
+        <!-- started from WirelessDebuggingManager -->
+        <activity android:name=".wifi.WifiDebuggingActivity"
+            android:permission="android.permission.MANAGE_DEBUGGING"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+        </activity>
+        <activity-alias
+            android:name=".WifiDebuggingActivityAlias"
+            android:permission="android.permission.DUMP"
+            android:targetActivity=".wifi.WifiDebuggingActivity"
+            android:exported="true">
+        </activity-alias>
+        <activity android:name=".wifi.WifiDebuggingSecondaryUserActivity"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">

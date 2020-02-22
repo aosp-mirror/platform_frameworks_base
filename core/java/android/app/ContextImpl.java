@@ -73,6 +73,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.permission.IPermissionManager;
+import android.permission.PermissionManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -1941,27 +1942,7 @@ class ContextImpl extends Context {
         if (permission == null) {
             throw new IllegalArgumentException("permission is null");
         }
-
-        final IActivityManager am = ActivityManager.getService();
-        if (am == null) {
-            // Well this is super awkward; we somehow don't have an active
-            // ActivityManager instance. If we're testing a root or system
-            // UID, then they totally have whatever permission this is.
-            final int appId = UserHandle.getAppId(uid);
-            if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
-                Slog.w(TAG, "Missing ActivityManager; assuming " + uid + " holds " + permission);
-                return PERMISSION_GRANTED;
-            }
-            Slog.w(TAG, "Missing ActivityManager; assuming " + uid + " does not hold "
-                    + permission);
-            return PackageManager.PERMISSION_DENIED;
-        }
-
-        try {
-            return am.checkPermission(permission, pid, uid);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return PermissionManager.checkPermission(permission, pid, uid);
     }
 
     /** @hide */
@@ -2409,15 +2390,33 @@ class ContextImpl extends Context {
                     + "other visual contexts, such as Activity or one created with "
                     + "Context#createDisplayContext(Display)");
         }
-        return new WindowContext(this, null /* token */, type, options);
+        return new WindowContext(this, type, options);
     }
 
     ContextImpl createBaseWindowContext(IBinder token) {
         ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mFeatureId,
                 mSplitName, token, mUser, mFlags, mClassLoader, null);
         context.mIsUiContext = true;
+
         context.mIsAssociatedWithDisplay = true;
         return context;
+    }
+
+    Resources createWindowContextResources() {
+        final String resDir = mPackageInfo.getResDir();
+        final String[] splitResDirs = mPackageInfo.getSplitResDirs();
+        final String[] overlayDirs = mPackageInfo.getOverlayDirs();
+        final String[] libDirs = mPackageInfo.getApplicationInfo().sharedLibraryFiles;
+        final int displayId = getDisplayId();
+        final CompatibilityInfo compatInfo = (displayId == Display.DEFAULT_DISPLAY)
+                ? mPackageInfo.getCompatibilityInfo()
+                : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+        final List<ResourcesLoader> loaders = mResources.getLoaders();
+
+        // TODO(b/128338354): Rename to createTokenResources
+        return mResourcesManager.createBaseActivityResources(mToken, resDir, splitResDirs,
+                overlayDirs, libDirs, displayId, null /* overrideConfig */,
+                compatInfo, mClassLoader, loaders);
     }
 
     @Override

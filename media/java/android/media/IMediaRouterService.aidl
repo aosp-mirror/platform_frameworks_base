@@ -71,16 +71,17 @@ interface IMediaRouterService {
     void registerManager(IMediaRouter2Manager manager, String packageName);
     void unregisterManager(IMediaRouter2Manager manager);
     void setRouteVolumeWithManager(IMediaRouter2Manager manager, in MediaRoute2Info route,
-            int volume);
+            int volume, int requestId);
 
     void requestCreateSessionWithManager(IMediaRouter2Manager manager, String packageName,
             in @nullable MediaRoute2Info route, int requestId);
     void selectRouteWithManager(IMediaRouter2Manager manager, String sessionId,
-            in MediaRoute2Info route);
+            in MediaRoute2Info route, int requestId);
     void deselectRouteWithManager(IMediaRouter2Manager manager, String sessionId,
-            in MediaRoute2Info route);
+            in MediaRoute2Info route, int requestId);
     void transferToRouteWithManager(IMediaRouter2Manager manager, String sessionId,
-            in MediaRoute2Info route);
-    void setSessionVolumeWithManager(IMediaRouter2Manager manager, String sessionId, int volume);
-    void releaseSessionWithManager(IMediaRouter2Manager manager, String sessionId);
+            in MediaRoute2Info route, int requestId);
+    void setSessionVolumeWithManager(IMediaRouter2Manager manager, String sessionId, int volume,
+            int requestId);
+    void releaseSessionWithManager(IMediaRouter2Manager manager, String sessionId, int requestId);
 }

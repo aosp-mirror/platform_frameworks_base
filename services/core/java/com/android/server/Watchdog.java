@@ -50,6 +50,7 @@ import com.android.server.wm.SurfaceAnimationThread;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -583,7 +584,7 @@ public class Watchdog extends Thread {
                             ArrayList<Integer> pids = new ArrayList<Integer>();
                             pids.add(Process.myPid());
                             ActivityManagerService.dumpStackTraces(pids, null, null,
-                                getInterestingNativePids());
+                                    getInterestingNativePids(), null);
                             waitedHalf = true;
                         }
                         continue;
@@ -609,16 +610,21 @@ public class Watchdog extends Thread {
             if (mPhonePid > 0) pids.add(mPhonePid);
 
             long anrTime = SystemClock.uptimeMillis();
+            StringBuilder report = new StringBuilder();
+            report.append(MemoryPressureUtil.currentPsiState());
             ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
+            StringWriter tracesFileException = new StringWriter();
             final File stack = ActivityManagerService.dumpStackTraces(
-                    pids, processCpuTracker, new SparseArray<>(), getInterestingNativePids());
+                    pids, processCpuTracker, new SparseArray<>(), getInterestingNativePids(),
+                    tracesFileException);
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.
             SystemClock.sleep(5000);
 
             processCpuTracker.update();
-            String cpuInfo = processCpuTracker.printCurrentState(anrTime);
+            report.append(processCpuTracker.printCurrentState(anrTime));
+            report.append(tracesFileException.getBuffer());
 
             // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the kernel log
             doSysRq('w');
@@ -634,7 +640,7 @@ public class Watchdog extends Thread {
                         if (mActivity != null) {
                             mActivity.addErrorToDropBox(
                                     "watchdog", null, "system_server", null, null, null,
-                                    subject, cpuInfo, stack, null);
+                                    subject, report.toString(), stack, null);
                         }
                         FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED,
                                 subject);

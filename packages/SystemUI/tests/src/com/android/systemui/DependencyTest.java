@@ -15,28 +15,19 @@
 package com.android.systemui;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Dependency.DependencyKey;
 import com.android.systemui.statusbar.policy.FlashlightController;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
 @SmallTest
 public class DependencyTest extends SysuiTestCase {
-
-    public static final DependencyKey<Dumpable> DUMPABLE = new DependencyKey<>("dumpable");
 
     @Test
     public void testClassDependency() {
@@ -50,17 +41,6 @@ public class DependencyTest extends SysuiTestCase {
         Looper l = Looper.getMainLooper();
         mDependency.injectTestDependency(Dependency.BG_LOOPER, l);
         assertEquals(l, Dependency.get(Dependency.BG_LOOPER));
-    }
-
-    @Test
-    public void testDump() {
-        Dumpable d = mock(Dumpable.class);
-        String[] args = new String[0];
-        FileDescriptor fd = mock(FileDescriptor.class);
-        mDependency.injectTestDependency(DUMPABLE, d);
-        Dependency.get(DUMPABLE);
-        mDependency.dump(fd, mock(PrintWriter.class), args);
-        verify(d).dump(eq(fd), any(), eq(args));
     }
 
     @Test

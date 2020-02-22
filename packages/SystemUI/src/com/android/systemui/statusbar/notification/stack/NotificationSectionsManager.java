@@ -16,11 +16,10 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
-
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
@@ -35,18 +34,21 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.people.DataListener;
-import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewAdapter;
-import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewBoundary;
+import com.android.systemui.statusbar.notification.people.PeopleHubViewAdapter;
+import com.android.systemui.statusbar.notification.people.PeopleHubViewBoundary;
 import com.android.systemui.statusbar.notification.people.PersonViewModel;
+import com.android.systemui.statusbar.notification.people.Subscription;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -63,63 +65,65 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     private static final String TAG = "NotifSectionsManager";
     private static final boolean DEBUG = false;
 
-    private NotificationStackScrollLayout mParent;
     private final ActivityStarter mActivityStarter;
     private final StatusBarStateController mStatusBarStateController;
     private final ConfigurationController mConfigurationController;
-    private final int mNumberOfSections;
+    private final PeopleHubViewAdapter mPeopleHubViewAdapter;
     private final NotificationSectionsFeatureManager mSectionsFeatureManager;
-    private final NotificationRowComponent.Builder mNotificationRowComponentBuilder;
+    private final int mNumberOfSections;
+
+    private final PeopleHubViewBoundary mPeopleHubViewBoundary = new PeopleHubViewBoundary() {
+        @Override
+        public void setVisible(boolean isVisible) {
+            if (mPeopleHubVisible != isVisible) {
+                mPeopleHubVisible = isVisible;
+                if (mInitialized) {
+                    updateSectionBoundaries();
+                }
+            }
+        }
+
+        @NonNull
+        @Override
+        public View getAssociatedViewForClickAnimation() {
+            return mPeopleHubView;
+        }
+
+        @NonNull
+        @Override
+        public Sequence<DataListener<PersonViewModel>> getPersonViewAdapters() {
+            return mPeopleHubView.getPersonViewAdapters();
+        }
+    };
+
+    private NotificationStackScrollLayout mParent;
     private boolean mInitialized = false;
 
     private SectionHeaderView mGentleHeader;
-    private boolean mGentleHeaderVisible = false;
-
-    private boolean mPeopleHubVisible = false;
-    private PeopleHubView mPeopleHubView;
-    private final PeopleHubSectionFooterViewAdapter mPeopleHubViewAdapter;
-    private final PeopleHubSectionFooterViewBoundary mPeopleHubViewBoundary =
-            new PeopleHubSectionFooterViewBoundary() {
-                @Override
-                public void setVisible(boolean isVisible) {
-                    if (mPeopleHubVisible != isVisible) {
-                        mPeopleHubVisible = isVisible;
-                        if (mInitialized) {
-                            updateSectionBoundaries();
-                        }
-                    }
-                }
-
-                @NonNull
-                @Override
-                public View getAssociatedViewForClickAnimation() {
-                    return mPeopleHubView;
-                }
-
-                @NonNull
-                @Override
-                public Sequence<DataListener<PersonViewModel>> getPersonViewAdapters() {
-                    return mPeopleHubView.getPersonViewAdapters();
-                }
-            };
-
+    private boolean mGentleHeaderVisible;
     @Nullable private View.OnClickListener mOnClearGentleNotifsClickListener;
+
+    private SectionHeaderView mAlertingHeader;
+    private boolean mAlertingHeaderVisible;
+
+    private PeopleHubView mPeopleHubView;
+    private boolean mPeopleHeaderVisible;
+    private boolean mPeopleHubVisible = false;
+    @Nullable private Subscription mPeopleHubSubscription;
 
     @Inject
     NotificationSectionsManager(
             ActivityStarter activityStarter,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
-            PeopleHubSectionFooterViewAdapter peopleHubViewAdapter,
-            NotificationSectionsFeatureManager sectionsFeatureManager,
-            NotificationRowComponent.Builder notificationRowComponentBuilder) {
+            PeopleHubViewAdapter peopleHubViewAdapter,
+            NotificationSectionsFeatureManager sectionsFeatureManager) {
         mActivityStarter = activityStarter;
         mStatusBarStateController = statusBarStateController;
         mConfigurationController = configurationController;
         mPeopleHubViewAdapter = peopleHubViewAdapter;
         mSectionsFeatureManager = sectionsFeatureManager;
         mNumberOfSections = mSectionsFeatureManager.getNumberOfBuckets();
-        mNotificationRowComponentBuilder = notificationRowComponentBuilder;
     }
 
     NotificationSection[] createSectionsForBuckets() {
@@ -141,105 +145,81 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         mInitialized = true;
         mParent = parent;
         reinflateViews(layoutInflater);
-        mPeopleHubViewAdapter.bindView(mPeopleHubViewBoundary);
         mConfigurationController.addCallback(mConfigurationListener);
+    }
+
+    private <T extends ExpandableView> T reinflateView(
+            T view, LayoutInflater layoutInflater, @LayoutRes int layoutResId) {
+        int oldPos = -1;
+        if (view != null) {
+            if (view.getTransientContainer() != null) {
+                view.getTransientContainer().removeView(mGentleHeader);
+            } else if (view.getParent() != null) {
+                oldPos = mParent.indexOfChild(view);
+                mParent.removeView(view);
+            }
+        }
+
+        view = (T) layoutInflater.inflate(layoutResId, mParent, false);
+
+        if (oldPos != -1) {
+            mParent.addView(view, oldPos);
+        }
+
+        return view;
     }
 
     /**
      * Reinflates the entire notification header, including all decoration views.
      */
     void reinflateViews(LayoutInflater layoutInflater) {
-        int oldGentleHeaderPos = -1;
-        int oldPeopleHubPos = -1;
-        if (mGentleHeader != null) {
-            if (mGentleHeader.getTransientContainer() != null) {
-                mGentleHeader.getTransientContainer().removeView(mGentleHeader);
-            } else if (mGentleHeader.getParent() != null) {
-                oldGentleHeaderPos = mParent.indexOfChild(mGentleHeader);
-                mParent.removeView(mGentleHeader);
-            }
-        }
-        if (mPeopleHubView != null) {
-            if (mPeopleHubView.getTransientContainer() != null) {
-                mPeopleHubView.getTransientContainer().removeView(mPeopleHubView);
-            } else if (mPeopleHubView.getParent() != null) {
-                oldPeopleHubPos = mParent.indexOfChild(mPeopleHubView);
-                mParent.removeView(mPeopleHubView);
-            }
-        }
-
-        mGentleHeader = (SectionHeaderView) layoutInflater.inflate(
-                R.layout.status_bar_notification_section_header, mParent, false);
-        NotificationRowComponent sectionHeaderComponent = mNotificationRowComponentBuilder
-                .activatableNotificationView(mGentleHeader)
-                .build();
-        sectionHeaderComponent.getActivatableNotificationViewController().init();
-
+        mGentleHeader = reinflateView(
+                mGentleHeader, layoutInflater, R.layout.status_bar_notification_section_header);
+        mGentleHeader.setHeaderText(R.string.notification_section_header_gentle);
         mGentleHeader.setOnHeaderClickListener(this::onGentleHeaderClick);
         mGentleHeader.setOnClearAllClickListener(this::onClearGentleNotifsClick);
 
-        if (oldGentleHeaderPos != -1) {
-            mParent.addView(mGentleHeader, oldGentleHeaderPos);
+        mAlertingHeader = reinflateView(
+                mAlertingHeader, layoutInflater, R.layout.status_bar_notification_section_header);
+        mAlertingHeader.setHeaderText(R.string.notification_section_header_alerting);
+        mAlertingHeader.setOnHeaderClickListener(this::onGentleHeaderClick);
+
+        if (mPeopleHubSubscription != null) {
+            mPeopleHubSubscription.unsubscribe();
         }
-
-        mPeopleHubView = (PeopleHubView) layoutInflater.inflate(
-                R.layout.people_strip, mParent, false);
-
-        NotificationRowComponent notificationRowComponent = mNotificationRowComponentBuilder
-                .activatableNotificationView(mPeopleHubView)
-                .build();
-        notificationRowComponent.getActivatableNotificationViewController().init();
-
-        if (oldPeopleHubPos != -1) {
-            mParent.addView(mPeopleHubView, oldPeopleHubPos);
-        }
+        mPeopleHubView = reinflateView(mPeopleHubView, layoutInflater, R.layout.people_strip);
+        mPeopleHubSubscription = mPeopleHubViewAdapter.bindView(mPeopleHubViewBoundary);
     }
 
-    /** Listener for when the "clear all" buttton is clciked on the gentle notification header. */
+    /** Listener for when the "clear all" button is clicked on the gentle notification header. */
     void setOnClearGentleNotifsClickListener(View.OnClickListener listener) {
         mOnClearGentleNotifsClickListener = listener;
     }
 
-    /** Must be called whenever the UI mode changes (i.e. when we enter night mode). */
-    void onUiModeChanged() {
-        mGentleHeader.onUiModeChanged();
-    }
-
     @Override
     public boolean beginsSection(@NonNull View view, @Nullable View previous) {
-        boolean begin = false;
-        if (view instanceof ActivatableNotificationView) {
-            if (previous instanceof ActivatableNotificationView) {
-                // If we're drawing the first non-person notification, break out a section
-                ActivatableNotificationView curr = (ActivatableNotificationView) view;
-                ActivatableNotificationView prev = (ActivatableNotificationView) previous;
-
-                begin = getBucket(curr) != getBucket(prev);
-            }
-        }
-
-        if (!begin) {
-            begin = view == mGentleHeader || view == mPeopleHubView;
-        }
-
-        return begin;
+        return view == mGentleHeader
+                || view == mPeopleHubView
+                || view == mAlertingHeader
+                || !Objects.equals(getBucket(view), getBucket(previous));
     }
 
     private boolean isUsingMultipleSections() {
         return mNumberOfSections > 1;
     }
 
-    private @PriorityBucket int getBucket(ActivatableNotificationView view)
-            throws IllegalArgumentException {
-        if (view instanceof ExpandableNotificationRow) {
-            return ((ExpandableNotificationRow) view).getEntry().getBucket();
-        } else if (view == mGentleHeader) {
+    @Nullable
+    private Integer getBucket(View view) {
+        if (view == mGentleHeader) {
             return BUCKET_SILENT;
         } else if (view == mPeopleHubView) {
             return BUCKET_PEOPLE;
+        } else if (view == mAlertingHeader) {
+            return BUCKET_ALERTING;
+        } else if (view instanceof ExpandableNotificationRow) {
+            return ((ExpandableNotificationRow) view).getEntry().getBucket();
         }
-
-        throw new IllegalArgumentException("I don't know how to find a bucket for this view :(");
+        return null;
     }
 
     /**
@@ -251,116 +231,102 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             return;
         }
 
-        boolean peopleNotificationsPresent = false;
-        int firstNonHeadsUpIndex = -1;
-        int firstGentleIndex = -1;
-        int notifCount = 0;
+        final boolean showHeaders = mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
+        final boolean usingPeopleFiltering = mSectionsFeatureManager.isFilteringEnabled();
 
-        final int n = mParent.getChildCount();
-        for (int i = 0; i < n; i++) {
-            View child = mParent.getChildAt(i);
-            if (child instanceof ExpandableNotificationRow && child.getVisibility() != View.GONE) {
-                notifCount++;
+        boolean peopleNotifsPresent = false;
+        int peopleHeaderTarget = -1;
+        int alertingHeaderTarget = -1;
+        int gentleHeaderTarget = -1;
+
+        int viewCount = 0;
+
+        if (showHeaders) {
+            final int childCount = mParent.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View child = mParent.getChildAt(i);
+                if (child.getVisibility() == View.GONE
+                        || !(child instanceof ExpandableNotificationRow)) {
+                    continue;
+                }
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (firstNonHeadsUpIndex == -1 && !row.isHeadsUp()) {
-                    firstNonHeadsUpIndex = i;
+                switch (row.getEntry().getBucket()) {
+                    case BUCKET_PEOPLE:
+                        if (peopleHeaderTarget == -1) {
+                            peopleNotifsPresent = true;
+                            peopleHeaderTarget = viewCount;
+                            viewCount++;
+                        }
+                        break;
+                    case BUCKET_ALERTING:
+                        if (usingPeopleFiltering && alertingHeaderTarget == -1) {
+                            alertingHeaderTarget = viewCount;
+                            viewCount++;
+                        }
+                        break;
+                    case BUCKET_SILENT:
+                        if (gentleHeaderTarget == -1) {
+                            gentleHeaderTarget = viewCount;
+                            viewCount++;
+                        }
+                        break;
                 }
-                if (row.getEntry().getBucket() == BUCKET_PEOPLE) {
-                    peopleNotificationsPresent = true;
-                }
-                if (row.getEntry().getBucket() == BUCKET_SILENT) {
-                    firstGentleIndex = i;
-                    break;
+                viewCount++;
+            }
+            if (usingPeopleFiltering && mPeopleHubVisible && peopleHeaderTarget == -1) {
+                // Insert the people header even if there are no people visible, in order to show
+                // the hub. Put it directly above the next header.
+                if (alertingHeaderTarget != -1) {
+                    peopleHeaderTarget = alertingHeaderTarget;
+                    alertingHeaderTarget++;
+                    gentleHeaderTarget++;
+                } else if (gentleHeaderTarget != -1) {
+                    peopleHeaderTarget = gentleHeaderTarget;
+                    gentleHeaderTarget++;
+                } else {
+                    // Put it at the end of the list.
+                    peopleHeaderTarget = viewCount;
                 }
             }
         }
 
-        if (firstNonHeadsUpIndex == -1) {
-            firstNonHeadsUpIndex = firstGentleIndex != -1 ? firstGentleIndex : notifCount;
-        }
+        // Allow swiping the people header if the section is empty
+        mPeopleHubView.setCanSwipe(mPeopleHubVisible && !peopleNotifsPresent);
 
-        // make room for peopleHub
-        int offset = adjustPeopleHubVisibilityAndPosition(
-                firstNonHeadsUpIndex, peopleNotificationsPresent);
-        if (firstGentleIndex != -1) {
-            firstGentleIndex += offset;
-        }
-
-        adjustGentleHeaderVisibilityAndPosition(firstGentleIndex);
-
-        mGentleHeader.setAreThereDismissableGentleNotifs(
-                mParent.hasActiveClearableNotifications(ROWS_GENTLE));
+        mPeopleHeaderVisible = adjustHeaderVisibilityAndPosition(
+                peopleHeaderTarget, mPeopleHubView, mPeopleHeaderVisible);
+        mAlertingHeaderVisible = adjustHeaderVisibilityAndPosition(
+                alertingHeaderTarget, mAlertingHeader, mAlertingHeaderVisible);
+        mGentleHeaderVisible = adjustHeaderVisibilityAndPosition(
+                gentleHeaderTarget, mGentleHeader, mGentleHeaderVisible);
     }
 
-    private void adjustGentleHeaderVisibilityAndPosition(int firstGentleNotifIndex) {
-        final boolean showGentleHeader =
-                firstGentleNotifIndex != -1
-                        && mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
-        final int currentHeaderIndex = mParent.indexOfChild(mGentleHeader);
-
-        if (!showGentleHeader) {
-            if (mGentleHeaderVisible) {
-                mGentleHeaderVisible = false;
-                mParent.removeView(mGentleHeader);
+    private boolean adjustHeaderVisibilityAndPosition(
+            int targetIndex, StackScrollerDecorView header, boolean isCurrentlyVisible) {
+        if (targetIndex == -1) {
+            if (isCurrentlyVisible) {
+                mParent.removeView(header);
             }
+            return false;
         } else {
-            if (!mGentleHeaderVisible) {
-                mGentleHeaderVisible = true;
+            if (header instanceof SwipeableView) {
+                ((SwipeableView) header).resetTranslation();
+            }
+            if (!isCurrentlyVisible) {
                 // If the header is animating away, it will still have a parent, so detach it first
                 // TODO: We should really cancel the active animations here. This will happen
                 // automatically when the view's intro animation starts, but it's a fragile link.
-                if (mGentleHeader.getTransientContainer() != null) {
-                    mGentleHeader.getTransientContainer().removeTransientView(mGentleHeader);
-                    mGentleHeader.setTransientContainer(null);
+                if (header.getTransientContainer() != null) {
+                    header.getTransientContainer().removeTransientView(header);
+                    header.setTransientContainer(null);
                 }
-                mParent.addView(mGentleHeader, firstGentleNotifIndex);
-            } else if (currentHeaderIndex != firstGentleNotifIndex - 1) {
-                // Relocate the header to be immediately before the first child in the section
-                int targetIndex = firstGentleNotifIndex;
-                if (currentHeaderIndex < firstGentleNotifIndex) {
-                    // Adjust the target index to account for the header itself being temporarily
-                    // removed during the position change.
-                    targetIndex--;
-                }
-
-                mParent.changeViewPosition(mGentleHeader, targetIndex);
+                header.setContentVisible(true);
+                mParent.addView(header, targetIndex);
+            } else if (mParent.indexOfChild(header) != targetIndex) {
+                mParent.changeViewPosition(header, targetIndex);
             }
+            return true;
         }
-    }
-
-    private int adjustPeopleHubVisibilityAndPosition(
-            int targetIndex, boolean peopleNotificationsPresent) {
-        final boolean showPeopleHeader = mNumberOfSections > 2
-                && mStatusBarStateController.getState() != StatusBarState.KEYGUARD
-                && (peopleNotificationsPresent || mPeopleHubVisible);
-        final int currentHubIndex = mParent.indexOfChild(mPeopleHubView);
-        final boolean currentlyVisible = currentHubIndex >= 0;
-
-        mPeopleHubView.setCanSwipe(showPeopleHeader && !peopleNotificationsPresent);
-
-        if (!showPeopleHeader) {
-            if (currentlyVisible) {
-                mParent.removeView(mPeopleHubView);
-                return -1;
-            }
-        } else {
-            mPeopleHubView.unDismiss();
-            mPeopleHubView.resetTranslation();
-            if (!currentlyVisible) {
-                if (mPeopleHubView.getTransientContainer() != null) {
-                    mPeopleHubView.getTransientContainer().removeTransientView(mPeopleHubView);
-                    mPeopleHubView.setTransientContainer(null);
-                }
-                mParent.addView(mPeopleHubView, targetIndex);
-                return 1;
-            } else if (currentHubIndex != targetIndex) {
-                if (currentHubIndex < targetIndex) {
-                    targetIndex--;
-                }
-                mParent.changeViewPosition(mPeopleHubView, targetIndex);
-            }
-        }
-        return 0;
     }
 
     /**
@@ -388,7 +354,12 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
 
             //TODO: do this in a single pass, and more better
             for (ActivatableNotificationView v : children)  {
-                if (getBucket(v) == filter) {
+                Integer bucket = getBucket(v);
+                if (bucket == null) {
+                    throw new IllegalArgumentException("Cannot find section bucket for view");
+                }
+
+                if (bucket == filter) {
                     viewsInBucket.add(v);
                 }
 
@@ -463,16 +434,17 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     /**
      * For now, declare the available notification buckets (sections) here so that other
      * presentation code can decide what to do based on an entry's buckets
-     *
      */
     @Retention(SOURCE)
     @IntDef(prefix = { "BUCKET_" }, value = {
+            BUCKET_HEADS_UP,
             BUCKET_PEOPLE,
             BUCKET_ALERTING,
             BUCKET_SILENT
     })
     public @interface PriorityBucket {}
-    public static final int BUCKET_PEOPLE = 0;
-    public static final int BUCKET_ALERTING = 1;
-    public static final int BUCKET_SILENT = 2;
+    public static final int BUCKET_HEADS_UP = 0;
+    public static final int BUCKET_PEOPLE = 1;
+    public static final int BUCKET_ALERTING = 2;
+    public static final int BUCKET_SILENT = 3;
 }

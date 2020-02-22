@@ -195,11 +195,11 @@ public final class DeviceProductInfo implements Parcelable {
                     }
                 };
 
-        public int getYear() {
+        public Integer getYear() {
             return mYear;
         }
 
-        public int getWeek() {
+        public Integer getWeek() {
             return mWeek;
         }
 

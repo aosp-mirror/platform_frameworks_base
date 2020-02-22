@@ -65,4 +65,9 @@ public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
     @Override
     public void setActiveUser(int uid) throws RemoteException {
     }
+
+    @Override
+    public long getAuthenticatorId() throws RemoteException {
+        return 0;
+    }
 }

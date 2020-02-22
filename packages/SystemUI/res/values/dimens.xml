@@ -744,7 +744,7 @@
     <!-- The top padding of the clear all button -->
     <dimen name="clear_all_padding_top">12dp</dimen>
 
-    <dimen name="notification_section_header_height">48dp</dimen>
+    <dimen name="notification_section_header_height">56dp</dimen>
     <dimen name="notification_section_header_padding_left">16dp</dimen>
 
     <!-- Largest size an avatar might need to be drawn in the user picker, status bar, or
@@ -1128,8 +1128,10 @@
     <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Size of individual bubbles. -->
     <dimen name="individual_bubble_size">60dp</dimen>
+    <!-- Size of bubble bitmap. -->
+    <dimen name="bubble_bitmap_size">52dp</dimen>
     <!-- Size of bubble icon bitmap. -->
-    <dimen name="bubble_icon_bitmap_size">52dp</dimen>
+    <dimen name="bubble_overflow_icon_bitmap_size">24dp</dimen>
     <!-- Extra padding added to the touchable rect for bubbles so they are easier to grab. -->
     <dimen name="bubble_touch_padding">12dp</dimen>
     <!-- Size of the circle around the bubbles when they're in the dismiss target. -->
@@ -1141,6 +1143,12 @@
     <dimen name="bubble_expanded_view_slop">8dp</dimen>
     <!-- Default (and minimum) height of the expanded view shown when the bubble is expanded -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
+    <!-- Default height of bubble overflow -->
+    <dimen name="bubble_overflow_height">380dp</dimen>
+    <!-- Bubble overflow padding when there are no bubbles  -->
+    <dimen name="bubble_overflow_empty_state_padding">16dp</dimen>
+    <!-- Margin of overflow bubbles -->
+    <dimen name="bubble_overflow_margin">16dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
     <dimen name="bubble_pointer_height">4dp</dimen>
     <!-- Width of the triangle that points to the expanded bubble -->

@@ -74,3 +74,12 @@ package com.android.server {
 
 }
 
+package com.android.server.wifi {
+
+  public class SupplicantManager {
+    method public static void start();
+    method public static void stop();
+  }
+
+}
+

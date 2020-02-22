@@ -652,7 +652,7 @@ public class Tuner implements AutoCloseable  {
         if (filter != null) {
             filter.setMainType(mainType);
             filter.setSubtype(subType);
-            filter.setCallback(cb);
+            filter.setCallback(cb, executor);
             if (mHandler == null) {
                 mHandler = createEventHandler();
             }

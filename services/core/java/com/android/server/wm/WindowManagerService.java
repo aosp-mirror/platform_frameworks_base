@@ -1169,10 +1169,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
 
-        mUseBLAST = SystemProperties.getBoolean(
-                    String.join(".", "persist.device_config",
+        mUseBLAST = DeviceConfig.getBoolean(
                     DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
-                    WM_USE_BLAST_ADAPTER_FLAG), false);
+                    WM_USE_BLAST_ADAPTER_FLAG, false);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);
@@ -2584,11 +2583,18 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void addWindowToken(IBinder binder, int type, int displayId) {
         addWindowTokenWithOptions(binder, type, displayId, null /* options */,
-                null /* packageName */);
+                null /* packageName */, false /* fromClientToken */);
     }
 
+    @Override
     public int addWindowTokenWithOptions(IBinder binder, int type, int displayId, Bundle options,
             String packageName) {
+        return addWindowTokenWithOptions(binder, type, displayId, options, packageName,
+                true /* fromClientToken */);
+    }
+
+    private int addWindowTokenWithOptions(IBinder binder, int type, int displayId, Bundle options,
+            String packageName, boolean fromClientToken) {
         final boolean callerCanManageAppTokens =
                 checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()");
         if (!callerCanManageAppTokens) {
@@ -3638,10 +3644,14 @@ public class WindowManagerService extends IWindowManager.Stub
         return true;
     }
 
-    public TaskSnapshot getTaskSnapshot(int taskId, int userId, boolean reducedResolution,
+    /**
+     * Retrieves a snapshot. If restoreFromDisk equals equals {@code true}, DO NOT HOLD THE WINDOW
+     * MANAGER LOCK WHEN CALLING THIS METHOD!
+     */
+    public TaskSnapshot getTaskSnapshot(int taskId, int userId, boolean isLowResolution,
             boolean restoreFromDisk) {
         return mTaskSnapshotController.getSnapshot(taskId, userId, restoreFromDisk,
-                reducedResolution);
+                isLowResolution);
     }
 
     /**

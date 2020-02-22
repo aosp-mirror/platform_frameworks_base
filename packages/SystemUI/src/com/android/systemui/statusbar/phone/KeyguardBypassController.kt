@@ -20,8 +20,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
-import com.android.systemui.DumpController
 import com.android.systemui.Dumpable
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
@@ -81,7 +81,7 @@ open class KeyguardBypassController : Dumpable {
         statusBarStateController: StatusBarStateController,
         lockscreenUserManager: NotificationLockscreenUserManager,
         keyguardStateController: KeyguardStateController,
-        dumpController: DumpController
+        dumpManager: DumpManager
     ) {
         this.mKeyguardStateController = keyguardStateController
         this.statusBarStateController = statusBarStateController
@@ -91,7 +91,7 @@ open class KeyguardBypassController : Dumpable {
             return
         }
 
-        dumpController.registerDumpable("KeyguardBypassController", this)
+        dumpManager.registerDumpable("KeyguardBypassController", this)
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
             override fun onStateChanged(newState: Int) {
                 if (newState != StatusBarState.KEYGUARD) {

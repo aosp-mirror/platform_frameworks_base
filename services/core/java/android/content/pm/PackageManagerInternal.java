@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -235,6 +236,34 @@ public abstract class PackageManagerInternal {
      * @see PackageManager#isPackageSuspended(String)
      */
     public abstract boolean isPackageSuspended(String packageName, int userId);
+
+    /**
+     * Removes all package suspensions imposed by any non-system packages.
+     */
+    public abstract void removeAllNonSystemPackageSuspensions(int userId);
+
+    /**
+     * Removes all suspensions imposed on the given package by non-system packages.
+     */
+    public abstract void removeNonSystemPackageSuspensions(String packageName, int userId);
+
+    /**
+     * Removes all {@link PackageManager.DistractionRestriction restrictions} set on the given
+     * package
+     */
+    public abstract void removeDistractingPackageRestrictions(String packageName, int userId);
+
+    /**
+     * Removes all {@link PackageManager.DistractionRestriction restrictions} set on all the
+     * packages.
+     */
+    public abstract void removeAllDistractingPackageRestrictions(int userId);
+
+    /**
+     * Flushes package restrictions for the given user immediately to disk.
+     */
+    @WorkerThread
+    public abstract void flushPackageRestrictions(int userId);
 
     /**
      * Get the name of the package that suspended the given package. Packages can be suspended by

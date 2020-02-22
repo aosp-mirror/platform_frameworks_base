@@ -265,6 +265,32 @@ public class AuthService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
         }
+
+        @Override
+        public long[] getAuthenticatorIds() throws RemoteException {
+            // In this method, we're not checking whether the caller is permitted to use face
+            // API because current authenticator ID is leaked (in a more contrived way) via Android
+            // Keystore (android.security.keystore package): the user of that API can create a key
+            // which requires face authentication for its use, and then query the key's
+            // characteristics (hidden API) which returns, among other things, face
+            // authenticator ID which was active at key creation time.
+            //
+            // Reason: The part of Android Keystore which runs inside an app's process invokes this
+            // method in certain cases. Those cases are not always where the developer demonstrates
+            // explicit intent to use biometric functionality. Thus, to avoiding throwing an
+            // unexpected SecurityException this method does not check whether its caller is
+            // permitted to use face API.
+            //
+            // The permission check should be restored once Android Keystore no longer invokes this
+            // method from inside app processes.
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mBiometricService.getAuthenticatorIds();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
     }
 
     public AuthService(Context context) {
@@ -305,8 +331,8 @@ public class AuthService extends SystemService {
             case TYPE_FINGERPRINT:
                 final IFingerprintService fingerprintService = mInjector.getFingerprintService();
                 if (fingerprintService == null) {
-                    Slog.e(TAG, "Attempting to register with null FingerprintService. Please check"
-                            + " your device configuration.");
+                    Slog.e(TAG, "Attempting to register with null FingerprintService."
+                            + " Please check your device configuration.");
                     return;
                 }
 
@@ -317,8 +343,8 @@ public class AuthService extends SystemService {
             case TYPE_FACE:
                 final IFaceService faceService = mInjector.getFaceService();
                 if (faceService == null) {
-                    Slog.e(TAG, "Attempting to register with null FaceService. Please check your"
-                            + " device configuration.");
+                    Slog.e(TAG, "Attempting to register with null FaceService. Please check "
+                            + " your device configuration.");
                     return;
                 }
 
@@ -329,8 +355,8 @@ public class AuthService extends SystemService {
             case TYPE_IRIS:
                 final IIrisService irisService = mInjector.getIrisService();
                 if (irisService == null) {
-                    Slog.e(TAG, "Attempting to register with null IrisService. Please check your"
-                            + " device configuration.");
+                    Slog.e(TAG, "Attempting to register with null IrisService. Please check"
+                            + " your device configuration.");
                     return;
                 }
 
@@ -346,7 +372,6 @@ public class AuthService extends SystemService {
         mBiometricService.registerAuthenticator(config.mId, config.mModality, config.mStrength,
                 authenticator);
     }
-
 
     private void checkInternalPermission() {
         getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL,
