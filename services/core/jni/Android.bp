@@ -21,6 +21,7 @@ cc_library_static {
         "BroadcastRadio/convert.cpp",
         "BroadcastRadio/regions.cpp",
         "com_android_server_AlarmManagerService.cpp",
+        "com_android_server_adb_AdbDebuggingManager.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_connectivity_Vpn.cpp",
         "com_android_server_ConsumerIrService.cpp",
@@ -69,6 +70,8 @@ cc_library_static {
 cc_defaults {
     name: "libservices.core-libs",
     shared_libs: [
+        "libadb_pairing_server",
+        "libadb_pairing_connection",
         "libandroid_runtime",
         "libandroidfw",
         "libaudioclient",
