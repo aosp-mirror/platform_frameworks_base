@@ -322,7 +322,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     private boolean mForceNextConfigUpdate;
 
-    private final boolean mUseBLASTAdapter;
+    private boolean mUseBLASTAdapter;
 
     /**
      * Signals that compatibility booleans have been initialized according to
@@ -9640,5 +9640,17 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public void onDescendantUnbufferedRequested() {
         mUnbufferedInputSource = mView.mUnbufferedInputSource;
+    }
+
+    /**
+     * Force disabling use of the BLAST adapter regardless of the system
+     * flag. Needs to be called before addView.
+     */
+    void forceDisableBLAST() {
+        mUseBLASTAdapter = false;
+    }
+
+    boolean useBLAST() {
+        return mUseBLASTAdapter;
     }
 }
