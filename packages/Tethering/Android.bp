@@ -98,7 +98,6 @@ java_defaults {
     // Build system doesn't track transitive dependeicies for jni_libs, list all the dependencies
     // explicitly.
     jni_libs: [
-        "liblog",
         "libnativehelper_compat_libc++",
         "libtetherutilsjni",
     ],
