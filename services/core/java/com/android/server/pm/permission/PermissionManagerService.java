@@ -38,6 +38,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
 import static android.permission.PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED;
 
+import static com.android.internal.util.CollectionUtils.isEmpty;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PERMISSIONS;
@@ -3091,6 +3092,36 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    @Override
+    public Map<String, List<String>> getAutoRevokeExemptionRequestedPermissions(int userId) {
+        mContext.enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                "Must hold " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
+
+        ArrayMap<String, List<String>> result = new ArrayMap<>();
+        mPackageManagerInt.forEachInstalledPackage(pkg -> {
+            List<String> perms = pkg.getAutoRevokeExemptionRequestedPermissions();
+            if (!isEmpty(perms)) {
+                result.put(pkg.getPackageName(), perms);
+            }
+        }, userId);
+        return result;
+    }
+
+    @Override
+    public Map<String, List<String>> getAutoRevokeExemptionGrantedPermissions(int userId) {
+        mContext.enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                "Must hold " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
+
+        ArrayMap<String, List<String>> result = new ArrayMap<>();
+        mPackageManagerInt.forEachInstalledPackage(pkg -> {
+            List<String> perms = pkg.getAutoRevokeExemptionGrantedPermissions();
+            if (!isEmpty(perms)) {
+                result.put(pkg.getPackageName(), perms);
+            }
+        }, userId);
+        return result;
     }
 
     private boolean isNewPlatformPermissionForPackage(String perm, AndroidPackage pkg) {

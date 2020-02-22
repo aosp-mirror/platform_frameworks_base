@@ -85,6 +85,10 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage addRequestedPermission(String permission);
 
+    ParsingPackage addAutoRevokeExemptionRequestedPermission(String permission);
+
+    ParsingPackage addAutoRevokeExemptionGrantedPermission(String permission);
+
     ParsingPackage addService(ParsedService parsedService);
 
     ParsingPackage addUsesLibrary(String libraryName);
