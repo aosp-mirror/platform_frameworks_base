@@ -44,8 +44,6 @@ import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.BatteryControllerImpl;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastController;
@@ -175,12 +173,6 @@ public abstract class DependencyBinder {
     @Binds
     public abstract UserInfoController provideUserInfoContrller(
             UserInfoControllerImpl controllerImpl);
-
-    /**
-     */
-    @Binds
-    public abstract BatteryController provideBatteryController(
-            BatteryControllerImpl controllerImpl);
 
     /**
      */
