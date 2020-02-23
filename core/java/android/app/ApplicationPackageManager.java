@@ -84,6 +84,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.permission.IOnPermissionsChangeListener;
 import android.permission.IPermissionManager;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -191,16 +192,15 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
-        try {
-            PackageInfo pi = mPM.getPackageInfo(packageName,
-                    updateFlagsForPackage(flags, userId), userId);
-            if (pi != null) {
-                return pi;
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        PackageInfo pi =
+                getPackageInfoAsUserCached(
+                        packageName,
+                        updateFlagsForPackage(flags, userId),
+                        userId);
+        if (pi == null) {
+            throw new NameNotFoundException(packageName);
         }
-        throw new NameNotFoundException(packageName);
+        return pi;
     }
 
     @Override
@@ -410,20 +410,14 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public ApplicationInfo getApplicationInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
-        try {
-            ApplicationInfo ai = mPM.getApplicationInfo(packageName,
-                    updateFlagsForApplication(flags, userId), userId);
-            if (ai != null) {
-                // This is a temporary hack. Callers must use
-                // createPackageContext(packageName).getApplicationInfo() to
-                // get the right paths.
-                return maybeAdjustApplicationInfo(ai);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        ApplicationInfo ai = getApplicationInfoAsUserCached(
+                        packageName,
+                        updateFlagsForApplication(flags, userId),
+                        userId);
+        if (ai == null) {
+            throw new NameNotFoundException(packageName);
         }
-
-        throw new NameNotFoundException(packageName);
+        return maybeAdjustApplicationInfo(ai);
     }
 
     private static ApplicationInfo maybeAdjustApplicationInfo(ApplicationInfo info) {
@@ -680,11 +674,8 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public int checkPermission(String permName, String pkgName) {
-        try {
-            return mPermissionManager.checkPermission(permName, pkgName, getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return PermissionManager
+                .checkPackageNamePermission(permName, pkgName);
     }
 
     @Override
@@ -774,6 +765,12 @@ public class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    public void revokeRuntimePermission(String packageName, String permName, UserHandle user,
+            String reason) {
+        // TODO evanseverson: impl
     }
 
     @Override

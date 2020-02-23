@@ -21,6 +21,7 @@ import android.app.Service;
 import com.android.systemui.ImageWallpaper;
 import com.android.systemui.SystemUIService;
 import com.android.systemui.doze.DozeService;
+import com.android.systemui.dump.SystemUIAuxiliaryDumpService;
 import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.screenrecord.RecordingService;
 import com.android.systemui.screenshot.TakeScreenshotService;
@@ -58,6 +59,12 @@ public abstract class DefaultServiceBinder {
     @IntoMap
     @ClassKey(SystemUIService.class)
     public abstract Service bindSystemUIService(SystemUIService service);
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(SystemUIAuxiliaryDumpService.class)
+    public abstract Service bindSystemUIAuxiliaryDumpService(SystemUIAuxiliaryDumpService service);
 
     /** */
     @Binds

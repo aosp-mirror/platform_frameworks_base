@@ -18,6 +18,7 @@ package com.android.systemui
 
 import android.util.Log
 import com.android.internal.annotations.GuardedBy
+import com.android.systemui.dump.DumpManager
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
@@ -32,7 +33,7 @@ import javax.inject.Singleton
  * boot is completed.
  */
 @Singleton
-class BootCompleteCacheImpl @Inject constructor(private val dumpController: DumpController) :
+class BootCompleteCacheImpl @Inject constructor(dumpManager: DumpManager) :
         BootCompleteCache, Dumpable {
 
     companion object {
@@ -41,7 +42,7 @@ class BootCompleteCacheImpl @Inject constructor(private val dumpController: Dump
     }
 
     init {
-        dumpController.registerDumpable(TAG, this)
+        dumpManager.registerDumpable(TAG, this)
     }
 
     @GuardedBy("listeners")

@@ -16,7 +16,6 @@
 
 package com.android.systemui;
 
-import android.annotation.NonNull;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
@@ -24,12 +23,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.os.BinderInternal;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.shared.plugins.PluginManagerImpl;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.dump.SystemUIAuxiliaryDumpService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -39,11 +39,15 @@ import javax.inject.Inject;
 public class SystemUIService extends Service {
 
     private final Handler mMainHandler;
+    private final DumpManager mDumpManager;
 
     @Inject
-    public SystemUIService(@Main Handler mainHandler) {
+    public SystemUIService(
+            @Main Handler mainHandler,
+            DumpManager dumpManager) {
         super();
         mMainHandler = mainHandler;
+        mDumpManager = dumpManager;
     }
 
     @Override
@@ -70,6 +74,11 @@ public class SystemUIService extends Service {
                         }
                     }, mMainHandler);
         }
+
+        // Bind the dump service so we can dump extra info during a bug report
+        startServiceAsUser(
+                new Intent(getApplicationContext(), SystemUIAuxiliaryDumpService.class),
+                UserHandle.SYSTEM);
     }
 
     @Override
@@ -79,62 +88,16 @@ public class SystemUIService extends Service {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        dumpServices(((SystemUIApplication) getApplication()).getServices(), fd, pw, args);
-
-        if (args == null || args.length == 0 || args[0].equals("--config")) {
-            dumpConfig(pw);
+        // If no args are passed, assume we're being dumped as part of a bug report (sadly, we have
+        // no better way to guess whether this is taking place). Set the appropriate dump priority
+        // (CRITICAL) to reflect that this is taking place.
+        String[] massagedArgs = args;
+        if (args.length == 0) {
+            massagedArgs = new String[] {
+                    DumpManager.PRIORITY_ARG,
+                    DumpManager.PRIORITY_ARG_CRITICAL};
         }
-    }
 
-    static void dumpServices(
-            SystemUI[] services, FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (args == null || args.length == 0) {
-            pw.println("dumping service: " + Dependency.class.getName());
-            Dependency.staticDump(fd, pw, args);
-            for (SystemUI ui: services) {
-                pw.println("dumping service: " + ui.getClass().getName());
-                ui.dump(fd, pw, args);
-            }
-            if (Build.IS_DEBUGGABLE) {
-                pw.println("dumping plugins:");
-                ((PluginManagerImpl) Dependency.get(PluginManager.class)).dump(fd, pw, args);
-            }
-        } else {
-            String svc = args[0].toLowerCase();
-            if (Dependency.class.getName().toLowerCase().endsWith(svc)) {
-                Dependency.staticDump(fd, pw, args);
-            }
-            for (SystemUI ui: services) {
-                String name = ui.getClass().getName().toLowerCase();
-                if (name.endsWith(svc)) {
-                    ui.dump(fd, pw, args);
-                }
-            }
-        }
-    }
-
-    private void dumpConfig(@NonNull PrintWriter pw) {
-        pw.println("SystemUiServiceComponents configuration:");
-
-        pw.print("vendor component: ");
-        pw.println(getResources().getString(R.string.config_systemUIVendorServiceComponent));
-
-        dumpConfig(pw, "global", R.array.config_systemUIServiceComponents);
-        dumpConfig(pw, "per-user", R.array.config_systemUIServiceComponentsPerUser);
-    }
-
-    private void dumpConfig(@NonNull PrintWriter pw, @NonNull String type, int resId) {
-        final String[] services = getResources().getStringArray(resId);
-        pw.print(type); pw.print(": ");
-        if (services == null) {
-            pw.println("N/A");
-            return;
-        }
-        pw.print(services.length);
-        pw.println(" services");
-        for (int i = 0; i < services.length; i++) {
-            pw.print("  "); pw.print(i); pw.print(": "); pw.println(services[i]);
-        }
+        mDumpManager.dump(fd, pw, massagedArgs);
     }
 }
-

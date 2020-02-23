@@ -27,6 +27,7 @@ import android.media.tv.tuner.TunerUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Tuner data filter.
@@ -177,6 +178,7 @@ public class Filter implements AutoCloseable {
 
     private long mNativeContext;
     private FilterCallback mCallback;
+    private Executor mExecutor;
     private final int mId;
     private int mMainType;
     private int mSubtype;
@@ -199,6 +201,12 @@ public class Filter implements AutoCloseable {
     private void onFilterStatus(int status) {
     }
 
+    private void onFilterEvent(FilterEvent[] events) {
+        if (mCallback != null && mExecutor != null) {
+            mExecutor.execute(() -> mCallback.onFilterEvent(this, events));
+        }
+    }
+
     /** @hide */
     public void setMainType(@Type int mainType) {
         mMainType = mainType;
@@ -209,8 +217,9 @@ public class Filter implements AutoCloseable {
     }
 
     /** @hide */
-    public void setCallback(FilterCallback cb) {
+    public void setCallback(FilterCallback cb, Executor executor) {
         mCallback = cb;
+        mExecutor = executor;
     }
     /** @hide */
     public FilterCallback getCallback() {

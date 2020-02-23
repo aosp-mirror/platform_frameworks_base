@@ -28,11 +28,11 @@ import android.util.DisplayMetrics;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
@@ -56,6 +56,7 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
     ProximitySensor mProximitySensor;
     @Mock(stubOnly = true)
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock DumpManager mDumpManager;
     private FalsingManagerProxy mProxy;
     private DeviceConfigProxy mDeviceConfig;
     private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
@@ -82,7 +83,7 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
     public void test_brightLineFalsingManagerDisabled() {
         mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor, mDisplayMetrics,
                 mProximitySensor, mDeviceConfig, mDockManager, mKeyguardUpdateMonitor,
-                new DumpController(), mUiBgExecutor);
+                mDumpManager, mUiBgExecutor);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
     }
 
@@ -93,7 +94,7 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
         mExecutor.runAllReady();
         mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor, mDisplayMetrics,
                 mProximitySensor, mDeviceConfig, mDockManager, mKeyguardUpdateMonitor,
-                new DumpController(), mUiBgExecutor);
+                mDumpManager, mUiBgExecutor);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(BrightLineFalsingManager.class));
     }
 
@@ -101,7 +102,7 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
     public void test_brightLineFalsingManagerToggled() throws InterruptedException {
         mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor, mDisplayMetrics,
                 mProximitySensor, mDeviceConfig, mDockManager, mKeyguardUpdateMonitor,
-                new DumpController(), mUiBgExecutor);
+                mDumpManager, mUiBgExecutor);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
 
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,

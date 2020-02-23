@@ -72,4 +72,9 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
     public void setActiveUser(int uid) throws RemoteException {
         mFingerprintService.setActiveUser(uid);
     }
+
+    @Override
+    public long getAuthenticatorId() throws RemoteException {
+        return mFingerprintService.getAuthenticatorId();
+    }
 }

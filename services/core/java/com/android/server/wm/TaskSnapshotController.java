@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
-import static com.android.server.wm.TaskSnapshotPersister.DISABLE_FULL_SIZED_BITMAPS;
+import static com.android.server.wm.TaskSnapshotPersister.DISABLE_HIGH_RES_BITMAPS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -105,7 +105,7 @@ class TaskSnapshotController {
     private final ArraySet<Task> mSkipClosingAppSnapshotTasks = new ArraySet<>();
     private final ArraySet<Task> mTmpTasks = new ArraySet<>();
     private final Handler mHandler = new Handler();
-    private final float mFullSnapshotScale;
+    private final float mHighResTaskSnapshotScale;
 
     private final Rect mTmpRect = new Rect();
 
@@ -135,8 +135,8 @@ class TaskSnapshotController {
                 PackageManager.FEATURE_EMBEDDED);
         mIsRunningOnWear = mService.mContext.getPackageManager().hasSystemFeature(
             PackageManager.FEATURE_WATCH);
-        mFullSnapshotScale = mService.mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_fullTaskSnapshotScale);
+        mHighResTaskSnapshotScale = mService.mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_highResTaskSnapshotScale);
     }
 
     void systemReady() {
@@ -223,13 +223,13 @@ class TaskSnapshotController {
     }
 
     /**
-     * Retrieves a snapshot. If {@param restoreFromDisk} equals {@code true}, DO HOLD THE WINDOW
+     * Retrieves a snapshot. If {@param restoreFromDisk} equals {@code true}, DO NOT HOLD THE WINDOW
      * MANAGER LOCK WHEN CALLING THIS METHOD!
      */
     @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
-            boolean reducedResolution) {
-        return mCache.getSnapshot(taskId, userId, restoreFromDisk, reducedResolution
-                || DISABLE_FULL_SIZED_BITMAPS);
+            boolean isLowResolution) {
+        return mCache.getSnapshot(taskId, userId, restoreFromDisk, isLowResolution
+                || DISABLE_HIGH_RES_BITMAPS);
     }
 
     /**
@@ -318,12 +318,12 @@ class TaskSnapshotController {
 
         if (scaleFraction == SNAPSHOT_SCALE_AUTO) {
             builder.setScaleFraction(isLowRamDevice
-                    ? mPersister.getReducedScale()
-                    : mFullSnapshotScale);
-            builder.setReducedResolution(isLowRamDevice);
+                    ? mPersister.getLowResScale()
+                    : mHighResTaskSnapshotScale);
+            builder.setIsLowResolution(isLowRamDevice);
         } else {
             builder.setScaleFraction(scaleFraction);
-            builder.setReducedResolution(scaleFraction < 1.0f);
+            builder.setIsLowResolution(scaleFraction < 1.0f);
         }
 
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
@@ -471,9 +471,9 @@ class TaskSnapshotController {
         final LayoutParams attrs = mainWindow.getAttrs();
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.systemUiVisibility, task.getTaskDescription(),
-                mFullSnapshotScale, mainWindow.getRequestedInsetsState());
-        final int width = (int) (task.getBounds().width() * mFullSnapshotScale);
-        final int height = (int) (task.getBounds().height() * mFullSnapshotScale);
+                mHighResTaskSnapshotScale, mainWindow.getRequestedInsetsState());
+        final int width = (int) (task.getBounds().width() * mHighResTaskSnapshotScale);
+        final int height = (int) (task.getBounds().height() * mHighResTaskSnapshotScale);
 
         final RenderNode node = RenderNode.create("TaskSnapshotController", null);
         node.setLeftTopRightBottom(0, 0, width, height);
@@ -495,8 +495,8 @@ class TaskSnapshotController {
                 topChild.mActivityComponent, hwBitmap.createGraphicBufferHandle(),
                 hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
                 mainWindow.getWindowConfiguration().getRotation(),
-                getInsets(mainWindow), ActivityManager.isLowRamDeviceStatic() /* reduced */,
-                mFullSnapshotScale, false /* isRealSnapshot */, task.getWindowingMode(),
+                getInsets(mainWindow), ActivityManager.isLowRamDeviceStatic() /* isLowResolution */,
+                mHighResTaskSnapshotScale, false /* isRealSnapshot */, task.getWindowingMode(),
                 getSystemUiVisibility(task), false);
     }
 
@@ -586,7 +586,7 @@ class TaskSnapshotController {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "mFullSnapshotScale=" + mFullSnapshotScale);
+        pw.println(prefix + "mHighResTaskSnapshotScale=" + mHighResTaskSnapshotScale);
         mCache.dump(pw, prefix);
     }
 }

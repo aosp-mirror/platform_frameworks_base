@@ -20,22 +20,22 @@ import android.content.res.Resources
 import android.view.SurfaceControl
 import android.view.ViewRootImpl
 import androidx.test.filters.SmallTest
-import com.android.systemui.DumpController
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 class BlurUtilsTest : SysuiTestCase() {
 
     @Mock lateinit var resources: Resources
-    @Mock lateinit var dumpController: DumpController
+    @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var transaction: SurfaceControl.Transaction
     lateinit var blurUtils: BlurUtils
 
@@ -70,7 +70,7 @@ class BlurUtilsTest : SysuiTestCase() {
         verify(transaction).apply()
     }
 
-    inner class TestableBlurUtils() : BlurUtils(resources, dumpController) {
+    inner class TestableBlurUtils() : BlurUtils(resources, dumpManager) {
         override fun supportsBlursOnWindows(): Boolean {
             return true
         }

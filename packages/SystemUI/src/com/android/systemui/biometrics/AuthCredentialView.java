@@ -69,6 +69,7 @@ public abstract class AuthCredentialView extends LinearLayout {
     protected AuthContainerView mContainerView;
     protected Callback mCallback;
     protected AsyncTask<?, ?, ?> mPendingLockCheck;
+    protected int mUserId;
     protected int mEffectiveUserId;
     protected ErrorTimer mErrorTimer;
 
@@ -141,6 +142,10 @@ public abstract class AuthCredentialView extends LinearLayout {
 
     private void setText(TextView view, CharSequence text) {
         view.setText(text);
+    }
+
+    void setUserId(int userId) {
+        mUserId = userId;
     }
 
     void setEffectiveUserId(int effectiveUserId) {

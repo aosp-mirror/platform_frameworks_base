@@ -58,8 +58,8 @@ import android.util.Pair;
 import androidx.annotation.NonNull;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.coalescer.CoalescedEvent;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
@@ -130,13 +130,13 @@ public class NotifCollection implements Dumpable {
     @Inject
     public NotifCollection(
             IStatusBarService statusBarService,
-            DumpController dumpController,
+            DumpManager dumpManager,
             FeatureFlags featureFlags,
             NotifCollectionLogger logger) {
         Assert.isMainThread();
         mStatusBarService = statusBarService;
         mLogger = logger;
-        dumpController.registerDumpable(TAG, this);
+        dumpManager.registerDumpable(TAG, this);
         mFeatureFlags = featureFlags;
     }
 

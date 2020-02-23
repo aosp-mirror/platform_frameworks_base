@@ -17,12 +17,17 @@
 #define LOG_TAG "TvTuner-JNI"
 #include <utils/Log.h>
 
+#include "android_media_MediaCodecLinearBlock.h"
 #include "android_media_tv_Tuner.h"
 #include "android_runtime/AndroidRuntime.h"
 
+#include <C2BlockInternal.h>
+#include <C2HandleIonInternal.h>
 #include <android/hardware/tv/tuner/1.0/ITuner.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <utils/NativeHandle.h>
 
 #pragma GCC diagnostic ignored "-Wunused-function"
 
@@ -36,6 +41,7 @@ using ::android::hardware::tv::tuner::V1_0::DemuxAlpLengthType;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterAvSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterDownloadSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterMediaEvent;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterPesDataSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterRecordSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterSectionBits;
@@ -130,9 +136,12 @@ struct fields_t {
     jmethodID lnbInitID;
     jmethodID onLnbEventID;
     jmethodID descramblerInitID;
+    jmethodID linearBlockInitID;
+    jmethodID linearBlockSetInternalStateID;
 };
 
 static fields_t gFields;
+
 
 static int IP_V4_LENGTH = 4;
 static int IP_V6_LENGTH = 16;
@@ -198,8 +207,66 @@ DvrMQ& Dvr::getDvrMQ() {
 
 /////////////// FilterCallback ///////////////////////
 //TODO: implement filter callback
-Return<void> FilterCallback::onFilterEvent(const DemuxFilterEvent& /*filterEvent*/) {
+jobject FilterCallback::handleToLinearBlock(const native_handle_t* handle, uint32_t size) {
+    ALOGD("FilterCallback::handleToLinearBlock");
+    C2HandleIon* ion = new C2HandleIon(handle->data[0], size);
+    std::shared_ptr<C2LinearBlock> block = _C2BlockFactory::CreateLinearBlock(ion);
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
+    context->mBlock = block;
+
+    jobject linearBlock =
+            env->NewObject(
+                    env->FindClass("android/media/MediaCodec$LinearBlock"),
+                    gFields.linearBlockInitID);
+    env->CallVoidMethod(
+            linearBlock,
+            gFields.linearBlockSetInternalStateID,
+            (jlong)context.release(),
+            true);
+    return linearBlock;
+}
+
+jobject FilterCallback::getMediaEvent(const DemuxFilterEvent::Event& event) {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/MediaEvent");
+    jmethodID eventInit = env->GetMethodID(clazz,
+            "<init>",
+            "(IZJJJLandroid/media/MediaCodec$LinearBlock;"
+            "ZJIZLandroid/media/tv/tuner/filter/AudioDescriptor;)V");
+
+    DemuxFilterMediaEvent mediaEvent = event.media();
+    uint32_t dataLength = mediaEvent.dataLength;
+    const native_handle_t* h = mediaEvent.avMemory.getNativeHandle();
+    jobject block = handleToLinearBlock(h, dataLength);
+    // TODO: handle other fields
+
+    return env->NewObject(clazz, eventInit, (jint) 0, (jboolean) 0, (jlong) 0, (jlong) 0, (jlong) 0,
+            block, (jboolean) 0, (jlong) 0, (jint) 0, (jboolean) 0, NULL);
+}
+
+Return<void> FilterCallback::onFilterEvent(const DemuxFilterEvent& filterEvent) {
     ALOGD("FilterCallback::onFilterEvent");
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/Filter");
+
+    std::vector<DemuxFilterEvent::Event> events = filterEvent.events;
+    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/FilterEvent");
+    jobjectArray array = env->NewObjectArray(events.size(), eventClazz, NULL);
+
+    for (int i = 0; i < events.size(); i++) {
+        auto event = events[i];
+        if (event.getDiscriminator() == DemuxFilterEvent::Event::hidl_discriminator::media) {
+            env->SetObjectArrayElement(array, i, getMediaEvent(event));
+        }
+    }
+    env->CallVoidMethod(
+            mFilter,
+            env->GetMethodID(clazz, "onFilterEvent",
+                    "([Landroid/media/tv/tuner/filter/FilterEvent;)V"),
+            array);
     return Void();
 }
 
@@ -1483,6 +1550,11 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
     jclass dvrClazz = env->FindClass("android/media/tv/tuner/dvr/Dvr");
     gFields.dvrContext = env->GetFieldID(dvrClazz, "mNativeContext", "J");
     gFields.dvrInitID = env->GetMethodID(dvrClazz, "<init>", "()V");
+
+    jclass linearBlockClazz = env->FindClass("android/media/MediaCodec$LinearBlock");
+    gFields.linearBlockInitID = env->GetMethodID(linearBlockClazz, "<init>", "()V");
+    gFields.linearBlockSetInternalStateID =
+            env->GetMethodID(linearBlockClazz, "setInternalStateLocked", "(JZ)V");
 }
 
 static void android_media_tv_Tuner_native_setup(JNIEnv *env, jobject thiz) {

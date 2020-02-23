@@ -69,10 +69,10 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.dagger.BubbleModule;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder;
@@ -286,12 +286,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
-            DumpController dumpController,
+            DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator) {
         this(context, notificationShadeWindowController, statusBarStateController, shadeController,
                 data, null /* synchronizer */, configurationController, interruptionStateProvider,
                 zenModeController, notifUserManager, groupManager, entryManager,
-                notifPipeline, featureFlags, dumpController, floatingContentCoordinator);
+                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator);
     }
 
     /**
@@ -311,9 +311,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             NotificationEntryManager entryManager,
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
-            DumpController dumpController,
+            DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator) {
-        dumpController.registerDumpable(TAG, this);
+        dumpManager.registerDumpable(TAG, this);
         mContext = context;
         mShadeController = shadeController;
         mNotificationInterruptionStateProvider = interruptionStateProvider;

@@ -130,6 +130,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
@@ -213,7 +214,6 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.ParsingPackageRead;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
@@ -2433,12 +2433,17 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     void scheduleWriteSettingsLocked() {
+        // We normally invalidate when we write settings, but in cases where we delay and
+        // coalesce settings writes, this strategy would have us invalidate the cache too late.
+        // Invalidating on schedule addresses this problem.
+        PackageManager.invalidatePackageInfoCache();
         if (!mHandler.hasMessages(WRITE_SETTINGS)) {
             mHandler.sendEmptyMessageDelayed(WRITE_SETTINGS, WRITE_SETTINGS_DELAY);
         }
     }
 
     void scheduleWritePackageListLocked(int userId) {
+        PackageManager.invalidatePackageInfoCache();
         if (!mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
             Message msg = mHandler.obtainMessage(WRITE_PACKAGE_LIST);
             msg.arg1 = userId;
@@ -2452,10 +2457,12 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     void scheduleWritePackageRestrictionsLocked(int userId) {
+        PackageManager.invalidatePackageInfoCache();
         final int[] userIds = (userId == UserHandle.USER_ALL)
                 ? mUserManager.getUserIds() : new int[]{userId};
         for (int nextUserId : userIds) {
             if (!mUserManager.exists(nextUserId)) return;
+
             mDirtyUsers.add(nextUserId);
             if (!mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
                 mHandler.sendEmptyMessageDelayed(WRITE_PACKAGE_RESTRICTIONS, WRITE_SETTINGS_DELAY);
@@ -2496,7 +2503,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 new Injector.SystemServiceProducer<>(DisplayManager.class),
                 new Injector.SystemServiceProducer<>(StorageManager.class),
                 new Injector.SystemServiceProducer<>(AppOpsManager.class),
-                (i, pm) -> AppsFilter.create(i),
+                (i, pm) -> AppsFilter.create(pm.mPmInternal, i),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"));
 
         PackageManagerService m = new PackageManagerService(injector, factoryTest, onlyCore);
@@ -2635,6 +2642,10 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest) {
+        PackageManager.invalidatePackageInfoCache();
+        PackageManager.disableApplicationInfoCache();
+        PackageManager.disablePackageInfoCache();
+
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
         mInjector = injector;
@@ -20169,6 +20180,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @WorkerThread
     @Override
     public void flushPackageRestrictionsAsUser(int userId) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
@@ -20186,6 +20198,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mLock")
     private void flushPackageRestrictionsAsUserInternalLocked(int userId) {
+        // NOTE: this invokes synchronous disk access, so callers using this
+        // method should consider running on a background thread
         mSettings.writePackageRestrictionsLPr(userId);
         mDirtyUsers.remove(userId);
         if (mDirtyUsers.isEmpty()) {

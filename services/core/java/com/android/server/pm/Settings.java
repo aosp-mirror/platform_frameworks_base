@@ -439,6 +439,10 @@ public final class Settings {
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
     }
 
+    private static void invalidatePackageCache() {
+        PackageManager.invalidatePackageInfoCache();
+    }
+
     PackageSetting getPackageLPr(String pkgName) {
         return mPackages.get(pkgName);
     }
@@ -1971,6 +1975,8 @@ public final class Settings {
     }
 
     void writePackageRestrictionsLPr(int userId) {
+        invalidatePackageCache();
+
         if (DEBUG_MU) {
             Log.i(TAG, "Writing package restrictions for user=" + userId);
         }
@@ -2377,6 +2383,12 @@ public final class Settings {
         //Debug.startMethodTracing("/data/system/packageprof", 8 * 1024 * 1024);
 
         final long startTime = SystemClock.uptimeMillis();
+
+        // Whenever package manager changes something on the system, it writes out whatever it
+        // changed in the form of a settings object change, and it does so under its internal
+        // lock --- so if we invalidate the package cache here, we end up invalidating at the
+        // right time.
+        invalidatePackageCache();
 
         // Keep the old settings around until we know the new ones have
         // been successfully written.

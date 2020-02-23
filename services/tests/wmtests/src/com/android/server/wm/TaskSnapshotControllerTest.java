@@ -147,7 +147,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             builder.setSystemUiVisibility(systemUiVisibility);
             builder.setWindowingMode(windowingMode);
             builder.setColorSpace(sRGB);
-            builder.setReducedResolution(true);
+            builder.setIsLowResolution(true);
             builder.setOrientation(orientation);
             builder.setContentInsets(contentInsets);
             builder.setIsTranslucent(true);
@@ -165,7 +165,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             assertEquals(systemUiVisibility, snapshot.getSystemUiVisibility());
             assertEquals(windowingMode, snapshot.getWindowingMode());
             assertEquals(sRGB, snapshot.getColorSpace());
-            assertTrue(snapshot.isReducedResolution());
+            assertTrue(snapshot.isLowResolution());
             assertEquals(orientation, snapshot.getOrientation());
             assertEquals(contentInsets, snapshot.getContentInsets());
             assertTrue(snapshot.isTranslucent());

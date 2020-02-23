@@ -33,6 +33,7 @@ import android.util.TimingsTraceLog;
 
 import com.android.systemui.dagger.ContextComponentHelper;
 import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
@@ -171,6 +172,8 @@ public class SystemUIApplication extends Application implements
             }
         }
 
+        final DumpManager dumpManager = mRootComponent.createDumpManager();
+
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
         TimingsTraceLog log = new TimingsTraceLog("SystemUIBootTiming",
@@ -209,6 +212,8 @@ public class SystemUIApplication extends Application implements
             if (mBootCompleteCache.isBootComplete()) {
                 mServices[i].onBootCompleted();
             }
+
+            dumpManager.registerDumpable(mServices[i].getClass().getName(), mServices[i]);
         }
         mRootComponent.getInitController().executePostInitTasks();
         log.traceEnd();

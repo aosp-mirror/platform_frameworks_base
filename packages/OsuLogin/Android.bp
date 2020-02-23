@@ -3,6 +3,10 @@ android_app {
     static_libs: ["androidx.legacy_legacy-support-v4"],
     resource_dirs: ["res"],
     srcs: ["src/**/*.java"],
-    platform_apis: true,
-    certificate: "platform",
+    sdk_version: "system_current",
+
+    apex_available: [
+        "com.android.wifi",
+        "test_com.android.wifi",
+    ],
 }

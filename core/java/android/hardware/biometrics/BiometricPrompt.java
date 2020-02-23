@@ -898,29 +898,24 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mExecutor = executor;
             mAuthenticationCallback = callback;
             final long sessionId = crypto != null ? crypto.getOpId() : 0;
-            if (BiometricManager.hasBiometrics(mContext)) {
-                final Bundle bundle;
-                if (crypto != null) {
-                    // Allowed authenticators should default to BIOMETRIC_STRONG for crypto auth.
-                    // Note that we use a new bundle here so as to not overwrite the application's
-                    // preference, since it is possible that the same prompt configuration be used
-                    // without a crypto object later.
-                    bundle = new Bundle(mBundle);
-                    bundle.putInt(KEY_AUTHENTICATORS_ALLOWED,
-                            mBundle.getInt(KEY_AUTHENTICATORS_ALLOWED,
-                                    Authenticators.BIOMETRIC_STRONG));
-                } else {
-                    bundle = mBundle;
-                }
 
-                mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
-                        mContext.getOpPackageName(), bundle);
+            final Bundle bundle;
+            if (crypto != null) {
+                // Allowed authenticators should default to BIOMETRIC_STRONG for crypto auth.
+                // Note that we use a new bundle here so as to not overwrite the application's
+                // preference, since it is possible that the same prompt configuration be used
+                // without a crypto object later.
+                bundle = new Bundle(mBundle);
+                bundle.putInt(KEY_AUTHENTICATORS_ALLOWED,
+                        mBundle.getInt(KEY_AUTHENTICATORS_ALLOWED,
+                                Authenticators.BIOMETRIC_STRONG));
             } else {
-                mExecutor.execute(() -> {
-                    callback.onAuthenticationError(BiometricPrompt.BIOMETRIC_ERROR_HW_NOT_PRESENT,
-                            mContext.getString(R.string.biometric_error_hw_unavailable));
-                });
+                bundle = mBundle;
             }
+
+            mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
+                    mContext.getOpPackageName(), bundle);
+
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
             mExecutor.execute(() -> {

@@ -27,9 +27,9 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.DumpController;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
@@ -70,11 +70,11 @@ public class QuickQSPanel extends QSPanel {
     public QuickQSPanel(
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
-            DumpController dumpController,
+            DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger
     ) {
-        super(context, attrs, dumpController, broadcastDispatcher, qsLogger);
+        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }

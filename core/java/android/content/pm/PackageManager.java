@@ -32,9 +32,11 @@ import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.app.AppDetailsActivity;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
+import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.StorageStatsManager;
 import android.compat.annotation.ChangeId;
@@ -63,6 +65,7 @@ import android.os.UserManager;
 import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.permission.PermissionManager;
 import android.util.AndroidException;
 import android.util.Log;
 
@@ -76,6 +79,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -979,7 +983,8 @@ public abstract class PackageManager {
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
      * that the given user's package restrictions state will be serialised to disk after the
-     * component state has been updated.
+     * component state has been updated. Note that this is synchronous disk access, so calls using
+     * this flag should be run on a background thread.
      */
     public static final int SYNCHRONOUS = 0x00000002;
 
@@ -4353,6 +4358,36 @@ public abstract class PackageManager {
     @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
     public abstract void revokeRuntimePermission(@NonNull String packageName,
             @NonNull String permName, @NonNull UserHandle user);
+
+    /**
+     * Revoke a runtime permission that was previously granted by {@link
+     * #grantRuntimePermission(String, String, android.os.UserHandle)}. The
+     * permission must have been requested by and granted to the application.
+     * If the application is not allowed to hold the permission, a {@link
+     * java.lang.SecurityException} is thrown. If the package or permission is
+     * invalid, a {@link java.lang.IllegalArgumentException} is thrown.
+     * <p>
+     * <strong>Note: </strong>Using this API requires holding
+     * android.permission.REVOKE_RUNTIME_PERMISSIONS and if the user id is
+     * not the current user android.permission.INTERACT_ACROSS_USERS_FULL.
+     * </p>
+     *
+     * @param packageName The package from which to revoke the permission.
+     * @param permName The permission name to revoke.
+     * @param user The user for which to revoke the permission.
+     * @param reason The reason for the revoke.
+     *
+     * @see #grantRuntimePermission(String, String, android.os.UserHandle)
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
+    public void revokeRuntimePermission(@NonNull String packageName,
+            @NonNull String permName, @NonNull UserHandle user, @NonNull String reason) {
+        revokeRuntimePermission(packageName, permName, user);
+    }
 
     /**
      * Gets the state flags associated with a permission.
@@ -7863,4 +7898,191 @@ public abstract class PackageManager {
         throw new UnsupportedOperationException(
                 "getMimeGroup not implemented in subclass");
     }
+
+    // Some of the flags don't affect the query result, but let's be conservative and cache
+    // each combination of flags separately.
+
+    private static final class ApplicationInfoQuery {
+        final String packageName;
+        final int flags;
+        final int userId;
+
+        ApplicationInfoQuery(@Nullable String packageName, int flags, int userId) {
+            this.packageName = packageName;
+            this.flags = flags;
+            this.userId = userId;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "ApplicationInfoQuery(packageName=\"%s\", flags=%s, userId=%s)",
+                    packageName, flags, userId);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = Objects.hashCode(packageName);
+            hash = hash * 13 + Objects.hashCode(flags);
+            hash = hash * 13 + Objects.hashCode(userId);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object rval) {
+            if (rval == null) {
+                return false;
+            }
+            ApplicationInfoQuery other;
+            try {
+                other = (ApplicationInfoQuery) rval;
+            } catch (ClassCastException ex) {
+                return false;
+            }
+            return Objects.equals(packageName, other.packageName)
+                    && flags == other.flags
+                    && userId == other.userId;
+        }
+    }
+
+    private static ApplicationInfo getApplicationInfoAsUserUncached(
+            String packageName, int flags, int userId) {
+        try {
+            return ActivityThread.getPackageManager()
+                    .getApplicationInfo(packageName, flags, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static final PropertyInvalidatedCache<ApplicationInfoQuery, ApplicationInfo>
+            sApplicationInfoCache =
+            new PropertyInvalidatedCache<ApplicationInfoQuery, ApplicationInfo>(
+                    16, PermissionManager.CACHE_KEY_PACKAGE_INFO) {
+                @Override
+                protected ApplicationInfo recompute(ApplicationInfoQuery query) {
+                    return getApplicationInfoAsUserUncached(
+                            query.packageName, query.flags, query.userId);
+                }
+                @Override
+                protected ApplicationInfo maybeCheckConsistency(
+                        ApplicationInfoQuery query, ApplicationInfo proposedResult) {
+                    // Implementing this debug check for ApplicationInfo would require a
+                    // complicated deep comparison, so just bypass it for now.
+                    return proposedResult;
+                }
+            };
+
+    /** @hide */
+    public static ApplicationInfo getApplicationInfoAsUserCached(
+            String packageName, int flags, int userId) {
+        return sApplicationInfoCache.query(
+                new ApplicationInfoQuery(packageName, flags, userId));
+    }
+
+    /**
+     * Make getApplicationInfoAsUser() bypass the cache in this process.
+     *
+     * @hide
+     */
+    public static void disableApplicationInfoCache() {
+        sApplicationInfoCache.disableLocal();
+    }
+
+    /**
+     * Invalidate caches of package and permission information system-wide.
+     *
+     * @hide
+     */
+    public static void invalidatePackageInfoCache() {
+        PropertyInvalidatedCache.invalidateCache(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+    }
+
+    // Some of the flags don't affect the query result, but let's be conservative and cache
+    // each combination of flags separately.
+
+    private static final class PackageInfoQuery {
+        final String packageName;
+        final int flags;
+        final int userId;
+
+        PackageInfoQuery(@Nullable String packageName, int flags, int userId) {
+            this.packageName = packageName;
+            this.flags = flags;
+            this.userId = userId;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "PackageInfoQuery(packageName=\"%s\", flags=%s, userId=%s)",
+                    packageName, flags, userId);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = Objects.hashCode(packageName);
+            hash = hash * 13 + Objects.hashCode(flags);
+            hash = hash * 13 + Objects.hashCode(userId);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object rval) {
+            if (rval == null) {
+                return false;
+            }
+            PackageInfoQuery other;
+            try {
+                other = (PackageInfoQuery) rval;
+            } catch (ClassCastException ex) {
+                return false;
+            }
+            return Objects.equals(packageName, other.packageName)
+                    && flags == other.flags
+                    && userId == other.userId;
+        }
+    }
+
+    private static PackageInfo getPackageInfoAsUserUncached(
+            String packageName, int flags, int userId) {
+        try {
+            return ActivityThread.getPackageManager().getPackageInfo(packageName, flags, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static final PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>
+            sPackageInfoCache =
+            new PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>(
+                    16, PermissionManager.CACHE_KEY_PACKAGE_INFO) {
+                @Override
+                protected PackageInfo recompute(PackageInfoQuery query) {
+                    return getPackageInfoAsUserUncached(
+                            query.packageName, query.flags, query.userId);
+                }
+                @Override
+                protected PackageInfo maybeCheckConsistency(
+                        PackageInfoQuery query, PackageInfo proposedResult) {
+                    // Implementing this debug check for PackageInfo would require a
+                    // complicated deep comparison, so just bypass it for now.
+                    return proposedResult;
+                }
+            };
+
+    /** @hide */
+    public static PackageInfo getPackageInfoAsUserCached(
+            String packageName, int flags, int userId) {
+        return sPackageInfoCache.query(new PackageInfoQuery(packageName, flags, userId));
+    }
+
+    /**
+     * Make getPackageInfoAsUser() bypass the cache in this process.
+     * @hide
+     */
+    public static void disablePackageInfoCache() {
+        sPackageInfoCache.disableLocal();
+    }
+
 }

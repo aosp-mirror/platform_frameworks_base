@@ -16,5 +16,5 @@ java_library {
   name: "BlobStoreTestUtils",
   srcs: ["src/**/*.java"],
   static_libs: ["truth-prebuilt"],
-  platform_apis: true
+  sdk_version: "test_current",
 }

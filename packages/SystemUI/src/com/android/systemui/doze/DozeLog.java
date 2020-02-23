@@ -23,8 +23,8 @@ import androidx.annotation.NonNull;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -56,7 +56,7 @@ public class DozeLog implements Dumpable {
     @Inject
     public DozeLog(
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DumpController dumpController,
+            DumpManager dumpManager,
             DozeLogger logger) {
         mLogger = logger;
         mSince = System.currentTimeMillis();
@@ -76,7 +76,7 @@ public class DozeLog implements Dumpable {
             keyguardUpdateMonitor.registerCallback(mKeyguardCallback);
         }
 
-        dumpController.registerDumpable("DumpStats", this);
+        dumpManager.registerDumpable("DumpStats", this);
     }
 
     /**

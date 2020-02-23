@@ -50,10 +50,10 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.systemui.DumpController;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -163,7 +163,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     @Mock
     private FeatureFlags mFeatureFlagsNewPipeline;
     @Mock
-    private DumpController mDumpController;
+    private DumpManager mDumpManager;
 
     private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private BubbleData mBubbleData;
@@ -198,7 +198,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardBypassController, mColorExtractor,
-                mDumpController);
+                mDumpManager);
         mNotificationShadeWindowController.setNotificationShadeView(
                 mSuperStatusBarViewFactory.getNotificationShadeWindowView());
         mNotificationShadeWindowController.attach();
@@ -223,7 +223,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mock(NotificationInterruptionStateProvider.HeadsUpSuppressor.class));
         mBubbleData = new BubbleData(mContext);
         when(mFeatureFlagsNewPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
-        mBubbleController = new TestableBubbleController(mContext,
+        mBubbleController = new TestableBubbleController(
+                mContext,
                 mNotificationShadeWindowController,
                 mStatusBarStateController,
                 mShadeController,
@@ -236,7 +237,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mNotificationEntryManager,
                 mNotifPipeline,
                 mFeatureFlagsNewPipeline,
-                mDumpController,
+                mDumpManager,
                 mFloatingContentCoordinator);
         mBubbleController.addNotifCallback(mNotifCallback);
         mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
