@@ -149,11 +149,30 @@
         <font weight="700" style="normal" fallbackFor="serif">NotoSerifArmenian-Bold.otf</font>
     </family>
     <family lang="und-Geor,und-Geok">
-        <font weight="400" style="normal">NotoSansGeorgian-Regular.otf</font>
-        <font weight="500" style="normal">NotoSansGeorgian-Medium.otf</font>
-        <font weight="700" style="normal">NotoSansGeorgian-Bold.otf</font>
-        <font weight="400" style="normal" fallbackFor="serif">NotoSerifGeorgian-Regular.otf</font>
-        <font weight="700" style="normal" fallbackFor="serif">NotoSerifGeorgian-Bold.otf</font>
+        <font weight="400" style="normal">NotoSansGeorgian-VF.ttf
+            <axis tag="wght" stylevalue="400" />
+        </font>
+        <font weight="500" style="normal">NotoSansGeorgian-VF.ttf
+            <axis tag="wght" stylevalue="500" />
+        </font>
+        <font weight="600" style="normal">NotoSansGeorgian-VF.ttf
+            <axis tag="wght" stylevalue="600" />
+        </font>
+        <font weight="700" style="normal">NotoSansGeorgian-VF.ttf
+            <axis tag="wght" stylevalue="700" />
+        </font>
+        <font weight="400" style="normal" fallbackFor="serif">NotoSerifGeorgian-VF.ttf
+            <axis tag="wght" stylevalue="400" />
+        </font>
+        <font weight="500" style="normal" fallbackFor="serif">NotoSerifGeorgian-VF.ttf
+            <axis tag="wght" stylevalue="500" />
+        </font>
+        <font weight="600" style="normal" fallbackFor="serif">NotoSerifGeorgian-VF.ttf
+            <axis tag="wght" stylevalue="600" />
+        </font>
+        <font weight="700" style="normal" fallbackFor="serif">NotoSerifGeorgian-VF.ttf
+            <axis tag="wght" stylevalue="700" />
+        </font>
     </family>
     <family lang="und-Deva" variant="elegant">
         <font weight="400" style="normal">NotoSansDevanagari-Regular.otf</font>
@@ -346,7 +365,18 @@
         <font weight="400" style="normal">NotoSansAhom-Regular.otf</font>
     </family>
     <family lang="und-Adlm">
-        <font weight="400" style="normal">NotoSansAdlam-Regular.ttf</font>
+        <font weight="400" style="normal">NotoSansAdlam-VF.ttf
+            <axis tag="wght" stylevalue="400" />
+        </font>
+        <font weight="500" style="normal">NotoSansAdlam-VF.ttf
+            <axis tag="wght" stylevalue="500" />
+        </font>
+        <font weight="600" style="normal">NotoSansAdlam-VF.ttf
+            <axis tag="wght" stylevalue="600" />
+        </font>
+        <font weight="700" style="normal">NotoSansAdlam-VF.ttf
+            <axis tag="wght" stylevalue="700" />
+        </font>
     </family>
     <family lang="und-Avst">
         <font weight="400" style="normal">NotoSansAvestan-Regular.ttf</font>
@@ -534,7 +564,7 @@
         <font weight="700" style="normal">NotoSansTibetan-Bold.ttf</font>
     </family>
     <family lang="und-Tfng">
-        <font weight="400" style="normal">NotoSansTifinagh-Regular.ttf</font>
+        <font weight="400" style="normal">NotoSansTifinagh-Regular.otf</font>
     </family>
     <family lang="und-Ugar">
         <font weight="400" style="normal">NotoSansUgaritic-Regular.ttf</font>
@@ -642,5 +672,23 @@
     </family>
     <family lang="und-Sora">
         <font weight="400" style="normal">NotoSansSoraSompeng-Regular.otf</font>
+    </family>
+    <family lang="und-Gong">
+        <font weight="400" style="normal">NotoSansGunjalaGondi-Regular.otf</font>
+    </family>
+    <family lang="und-Rohg">
+        <font weight="400" style="normal">NotoSansHanifiRohingya-Regular.otf</font>
+    </family>
+    <family lang="und-Khoj">
+        <font weight="400" style="normal">NotoSansKhojki-Regular.otf</font>
+    </family>
+    <family lang="und-Gonm">
+        <font weight="400" style="normal">NotoSansMasaramGondi-Regular.otf</font>
+    </family>
+    <family lang="und-Wcho">
+        <font weight="400" style="normal">NotoSansWancho-Regular.otf</font>
+    </family>
+    <family lang="und-Wara">
+        <font weight="400" style="normal">NotoSansWarangCiti-Regular.otf</font>
     </family>
 </familyset>
