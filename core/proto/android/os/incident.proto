@@ -58,6 +58,7 @@ import "frameworks/base/core/proto/android/service/sensor_service.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
+import "frameworks/base/core/proto/android/util/textdump.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
 import "frameworks/base/proto/src/ipconnectivity.proto";
@@ -508,6 +509,17 @@ message IncidentProto {
     optional android.service.SensorServiceProto sensor_service = 3053 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "sensorservice --proto"
+    ];
+
+    // Dumps in text format (on userdebug and eng builds only): 4000 ~ 4999
+    optional android.util.TextDumpProto textdump_wifi = 4000 [
+        (section).type = SECTION_TEXT_DUMPSYS,
+        (section).args = "wifi"
+    ];
+
+    optional android.util.TextDumpProto textdump_bluetooth = 4001 [
+        (section).type = SECTION_TEXT_DUMPSYS,
+        (section).args = "bluetooth_manager"
     ];
 
     // Reserved for OEMs.
