@@ -238,12 +238,12 @@ public abstract class SystemService {
      * <p>By default returns {@code true}, but subclasses should extend for optimization, if they
      * don't support some types (like headless system user).
      */
-    public boolean isSupportedUser(@NonNull TargetUser user) {
+    public boolean isUserSupported(@NonNull TargetUser user) {
         return true;
     }
 
     /**
-     * Helper method used to dump which users are {@link #onStartUser(TargetUser) supported}.
+     * Helper method used to dump which users are {@link #onUserStarting(TargetUser) supported}.
      *
      * @hide
      */
@@ -264,7 +264,7 @@ public abstract class SystemService {
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onStartUser(TargetUser)} instead
+     * @deprecated subclasses should extend {@link #onUserStarting(TargetUser)} instead
      * (which by default calls this method).
      *
      * @hide
@@ -273,7 +273,7 @@ public abstract class SystemService {
     public void onStartUser(@UserIdInt int userId) {}
 
     /**
-     * @deprecated subclasses should extend {@link #onStartUser(TargetUser)} instead
+     * @deprecated subclasses should extend {@link #onUserStarting(TargetUser)} instead
      * (which by default calls this method).
      *
      * @hide
@@ -287,17 +287,17 @@ public abstract class SystemService {
      * Called when a new user is starting, for system services to initialize any per-user
      * state they maintain for running users.
      *
-     * <p>This method is only called when the service {@link #isSupportedUser(TargetUser) supports}
+     * <p>This method is only called when the service {@link #isUserSupported(TargetUser) supports}
      * this user.
      *
      * @param user target user
      */
-    public void onStartUser(@NonNull TargetUser user) {
+    public void onUserStarting(@NonNull TargetUser user) {
         onStartUser(user.getUserInfo());
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onUnlockUser(TargetUser)} instead (which by
+     * @deprecated subclasses should extend {@link #onUserUnlocking(TargetUser)} instead (which by
      * default calls this method).
      *
      * @hide
@@ -306,7 +306,7 @@ public abstract class SystemService {
     public void onUnlockUser(@UserIdInt int userId) {}
 
     /**
-     * @deprecated subclasses should extend {@link #onUnlockUser(TargetUser)} instead (which by
+     * @deprecated subclasses should extend {@link #onUserUnlocking(TargetUser)} instead (which by
      * default calls this method).
      *
      * @hide
@@ -326,19 +326,30 @@ public abstract class SystemService {
      * the user will transition into the {@code STATE_RUNNING_UNLOCKED} state.
      * Code written inside system services should use
      * {@link UserManager#isUserUnlockingOrUnlocked(int)} to handle both of
-     * these states.
+     * these states, or use {@link #onUserUnlocked(TargetUser)} instead.
      * <p>
-     * This method is only called when the service {@link #isSupportedUser(TargetUser) supports}
+     * This method is only called when the service {@link #isUserSupported(TargetUser) supports}
      * this user.
      *
      * @param user target user
      */
-    public void onUnlockUser(@NonNull TargetUser user) {
+    public void onUserUnlocking(@NonNull TargetUser user) {
         onUnlockUser(user.getUserInfo());
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onSwitchUser(TargetUser, TargetUser)} instead
+     * Called after an existing user is unlocked.
+     *
+     * <p>This method is only called when the service {@link #isUserSupported(TargetUser) supports}
+     * this user.
+     *
+     * @param user target user
+     */
+    public void onUserUnlocked(@NonNull TargetUser user) {
+    }
+
+    /**
+     * @deprecated subclasses should extend {@link #onUserSwitching(TargetUser, TargetUser)} instead
      * (which by default calls this method).
      *
      * @hide
@@ -347,7 +358,7 @@ public abstract class SystemService {
     public void onSwitchUser(@UserIdInt int toUserId) {}
 
     /**
-     * @deprecated subclasses should extend {@link #onSwitchUser(TargetUser, TargetUser)} instead
+     * @deprecated subclasses should extend {@link #onUserSwitching(TargetUser, TargetUser)} instead
      * (which by default calls this method).
      *
      * @hide
@@ -362,7 +373,7 @@ public abstract class SystemService {
      * special behavior for whichever user is currently in the foreground.  This is called
      * before any application processes are aware of the new user.
      *
-     * <p>This method is only called when the service {@link #isSupportedUser(TargetUser) supports}
+     * <p>This method is only called when the service {@link #isUserSupported(TargetUser) supports}
      * either of the users ({@code from} or {@code to}).
      *
      * <b>NOTE: </b> both {@code from} and {@code to} are "live" objects
@@ -371,12 +382,12 @@ public abstract class SystemService {
      * @param from the user switching from
      * @param to the user switching to
      */
-    public void onSwitchUser(@Nullable TargetUser from, @NonNull TargetUser to) {
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         onSwitchUser((from == null ? null : from.getUserInfo()), to.getUserInfo());
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onStopUser(TargetUser)} instead
+     * @deprecated subclasses should extend {@link #onUserStopping(TargetUser)} instead
      * (which by default calls this method).
      *
      * @hide
@@ -385,7 +396,7 @@ public abstract class SystemService {
     public void onStopUser(@UserIdInt int userId) {}
 
     /**
-     * @deprecated subclasses should extend {@link #onStopUser(TargetUser)} instead
+     * @deprecated subclasses should extend {@link #onUserStopping(TargetUser)} instead
      * (which by default calls this method).
      *
      * @hide
@@ -402,19 +413,19 @@ public abstract class SystemService {
      * broadcast to the user; it is a good place to stop making use of any resources of that
      * user (such as binding to a service running in the user).
      *
-     * <p>This method is only called when the service {@link #isSupportedUser(TargetUser) supports}
+     * <p>This method is only called when the service {@link #isUserSupported(TargetUser) supports}
      * this user.
      *
      * <p>NOTE: This is the last callback where the callee may access the target user's CE storage.
      *
      * @param user target user
      */
-    public void onStopUser(@NonNull TargetUser user) {
+    public void onUserStopping(@NonNull TargetUser user) {
         onStopUser(user.getUserInfo());
     }
 
     /**
-     * @deprecated subclasses should extend {@link #onCleanupUser(TargetUser)} instead (which by
+     * @deprecated subclasses should extend {@link #onUserStopped(TargetUser)} instead (which by
      * default calls this method).
      *
      * @hide
@@ -423,7 +434,7 @@ public abstract class SystemService {
     public void onCleanupUser(@UserIdInt int userId) {}
 
     /**
-     * @deprecated subclasses should extend {@link #onCleanupUser(TargetUser)} instead (which by
+     * @deprecated subclasses should extend {@link #onUserStopped(TargetUser)} instead (which by
      * default calls this method).
      *
      * @hide
@@ -434,20 +445,16 @@ public abstract class SystemService {
     }
 
     /**
-     * Called when an existing user is stopping, for system services to finalize any per-user
-     * state they maintain for running users.  This is called after all application process
-     * teardown of the user is complete.
+     * Called after an existing user is stopped.
      *
-     * <p>This method is only called when the service {@link #isSupportedUser(TargetUser) supports}
+     * <p>This is called after all application process teardown of the user is complete.
+     *
+     * <p>This method is only called when the service {@link #isUserSupported(TargetUser) supports}
      * this user.
-     *
-     * <p>NOTE: When this callback is called, the CE storage for the target user may not be
-     * accessible already.  Use {@link #onStopUser(TargetUser)} instead if you need to access the CE
-     * storage.
      *
      * @param user target user
      */
-    public void onCleanupUser(@NonNull TargetUser user) {
+    public void onUserStopped(@NonNull TargetUser user) {
         onCleanupUser(user.getUserInfo());
     }
 
