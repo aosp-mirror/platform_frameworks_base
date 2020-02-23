@@ -34,4 +34,7 @@
     <dimen name="config_customCutoutBottomWidth">0.0px</dimen>
     <dimen name="config_customCutoutBottomHeight">0.0px</dimen>
 
+    <!-- Size of the FOD animation -->
+    <dimen name="fod_animation_size">280dp</dimen>
+
 </resources>
