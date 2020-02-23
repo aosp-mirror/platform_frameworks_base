@@ -255,6 +255,10 @@ message SystemMessage {
     // Inform the user a foreground service while-in-use permission is restricted.
     NOTE_FOREGROUND_SERVICE_WHILE_IN_USE_PERMISSION = 61;
 
+    // Display the Android Debug Protocol status
+    // Package: android
+    NOTE_ADB_WIFI_ACTIVE = 62;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
