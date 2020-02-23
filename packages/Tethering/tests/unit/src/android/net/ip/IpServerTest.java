@@ -547,9 +547,9 @@ public class IpServerTest {
         reset(mNetd);
 
         // Link-local and multicast neighbors are ignored.
-        recvNewNeigh(notMyIfindex, neighLL, NUD_REACHABLE, macA);
+        recvNewNeigh(myIfindex, neighLL, NUD_REACHABLE, macA);
         verifyNoMoreInteractions(mNetd);
-        recvNewNeigh(notMyIfindex, neighMC, NUD_REACHABLE, macA);
+        recvNewNeigh(myIfindex, neighMC, NUD_REACHABLE, macA);
         verifyNoMoreInteractions(mNetd);
 
         // A neighbor that is no longer valid causes the rule to be removed.
