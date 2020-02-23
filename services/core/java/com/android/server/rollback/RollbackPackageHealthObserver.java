@@ -218,11 +218,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                         packageInstaller.getSessionInfo(sessionId);
                 if (sessionInfo.isStagedSessionReady() && markStagedSessionHandled(rollbackId)) {
                     mContext.unregisterReceiver(listener);
-                    if (logPackage != null) {
-                        // We save the rollback id so that after reboot, we can log if rollback was
-                        // successful or not. If logPackage is null, then there is nothing to log.
-                        saveStagedRollbackId(rollbackId);
-                    }
+                    saveStagedRollbackId(rollbackId);
                     WatchdogRollbackLogger.logEvent(logPackage,
                             FrameworkStatsLog
                             .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED,

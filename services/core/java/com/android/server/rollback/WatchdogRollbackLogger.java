@@ -159,6 +159,12 @@ public final class WatchdogRollbackLogger {
             return;
         }
 
+        // If no logging packages are found, use a null package to ensure the rollback status
+        // is still logged.
+        if (oldLoggingPackages.isEmpty()) {
+            oldLoggingPackages.add(null);
+        }
+
         for (VersionedPackage oldLoggingPackage : oldLoggingPackages) {
             if (sessionInfo.isStagedSessionApplied()) {
                 logEvent(oldLoggingPackage,
