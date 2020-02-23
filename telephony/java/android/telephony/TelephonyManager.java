@@ -2706,39 +2706,22 @@ public class TelephonyManager {
     /**
      * Returns the ISO-3166 country code equivalent of the MCC (Mobile Country Code) of the current
      * registered operator or the cell nearby, if available.
-     * <p>
-     * The ISO-3166 country code is provided in lowercase 2 character format.
-     * <p>
-     * Note: In multi-sim, this returns a shared emergency network country iso from other
-     * subscription if the subscription used to create the TelephonyManager doesn't camp on
-     * a network due to some reason (e.g. pin/puk locked), or sim is absent in the corresponding
-     * slot.
+     *
      * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
      * if on a CDMA network).
      * <p>
      * @return the lowercase 2 character ISO-3166 country code, or empty string if not available.
      */
     public String getNetworkCountryIso() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony == null) return "";
-            return telephony.getNetworkCountryIsoForPhone(getPhoneId(),
-                    null /* no permission check */, null);
-        } catch (RemoteException ex) {
-            return "";
-        }
+        return getNetworkCountryIso(getSlotIndex());
     }
 
     /**
      * Returns the ISO-3166 country code equivalent of the MCC (Mobile Country Code) of the current
-     * registered operator or the cell nearby, if available.
-     * <p>
-     * The ISO-3166 country code is provided in lowercase 2 character format.
-     * <p>
-     * Note: In multi-sim, this returns a shared emergency network country iso from other
-     * subscription if the subscription used to create the TelephonyManager doesn't camp on
-     * a network due to some reason (e.g. pin/puk locked), or sim is absent in the corresponding
-     * slot.
+     * registered operator or the cell nearby, if available. This is same as
+     * {@link #getNetworkCountryIso()} but allowing specifying the SIM slot index. This is used for
+     * accessing network country info from the SIM slot that does not have SIM inserted.
+     *
      * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
      * if on a CDMA network).
      * <p>
@@ -2749,22 +2732,18 @@ public class TelephonyManager {
      *
      * @throws IllegalArgumentException when the slotIndex is invalid.
      *
-     * {@hide}
      */
-    @SystemApi
-    @TestApi
     @NonNull
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getNetworkCountryIso(int slotIndex) {
         try {
-            if (!SubscriptionManager.isValidSlotIndex(slotIndex)) {
+            if (slotIndex != SubscriptionManager.DEFAULT_SIM_SLOT_INDEX
+                    && !SubscriptionManager.isValidSlotIndex(slotIndex)) {
                 throw new IllegalArgumentException("invalid slot index " + slotIndex);
             }
 
             ITelephony telephony = getITelephony();
             if (telephony == null) return "";
-            return telephony.getNetworkCountryIsoForPhone(slotIndex, getOpPackageName(),
-                    getFeatureId());
+            return telephony.getNetworkCountryIsoForPhone(slotIndex);
         } catch (RemoteException ex) {
             return "";
         }
