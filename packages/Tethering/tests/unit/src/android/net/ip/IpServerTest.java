@@ -624,16 +624,15 @@ public class IpServerTest {
      * @param v6lp IPv6 LinkProperties of the upstream interface, or null for an IPv4-only upstream.
      */
     private void dispatchTetherConnectionChanged(String upstreamIface, LinkProperties v6lp) {
-        mIpServer.sendMessage(IpServer.CMD_TETHER_CONNECTION_CHANGED,
-                new InterfaceSet(upstreamIface));
-        if (v6lp != null) {
-            mIpServer.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, v6lp);
-        }
+        dispatchTetherConnectionChanged(upstreamIface);
+        mIpServer.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, v6lp);
         mLooper.dispatchAll();
     }
 
     private void dispatchTetherConnectionChanged(String upstreamIface) {
-        dispatchTetherConnectionChanged(upstreamIface, null);
+        final InterfaceSet ifs = (upstreamIface != null) ? new InterfaceSet(upstreamIface) : null;
+        mIpServer.sendMessage(IpServer.CMD_TETHER_CONNECTION_CHANGED, ifs);
+        mLooper.dispatchAll();
     }
 
     private void assertIPv4AddressAndDirectlyConnectedRoute(LinkProperties lp) {
