@@ -3356,6 +3356,7 @@ public abstract class Context {
             CONSUMER_IR_SERVICE,
             //@hide: TRUST_SERVICE,
             TV_INPUT_SERVICE,
+            //@hide: TV_TUNER_RESOURCE_MGR_SERVICE,
             //@hide: NETWORK_SCORE_SERVICE,
             USAGE_STATS_SERVICE,
             MEDIA_SESSION_SERVICE,
@@ -4584,6 +4585,17 @@ public abstract class Context {
      * @see android.media.tv.TvInputManager
      */
     public static final String TV_INPUT_SERVICE = "tv_input";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.tv.tunerresourcemanager.TunerResourceManager} for interacting with TV
+     * tuner resources on the device.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.tv.TunerResourceManager
+     * @hide
+     */
+    public static final String TV_TUNER_RESOURCE_MGR_SERVICE = "tv_tuner_resource_mgr";
 
     /**
      * {@link android.net.NetworkScoreManager} for managing network scoring.
