@@ -49,14 +49,15 @@ package com.android.server {
   public abstract class SystemService {
     ctor public SystemService(@NonNull android.content.Context);
     method @NonNull public final android.content.Context getContext();
-    method public boolean isSupportedUser(@NonNull com.android.server.SystemService.TargetUser);
+    method public boolean isUserSupported(@NonNull com.android.server.SystemService.TargetUser);
     method public void onBootPhase(int);
-    method public void onCleanupUser(@NonNull com.android.server.SystemService.TargetUser);
     method public abstract void onStart();
-    method public void onStartUser(@NonNull com.android.server.SystemService.TargetUser);
-    method public void onStopUser(@NonNull com.android.server.SystemService.TargetUser);
-    method public void onSwitchUser(@Nullable com.android.server.SystemService.TargetUser, @NonNull com.android.server.SystemService.TargetUser);
-    method public void onUnlockUser(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserStarting(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserStopped(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserStopping(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserSwitching(@Nullable com.android.server.SystemService.TargetUser, @NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserUnlocked(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserUnlocking(@NonNull com.android.server.SystemService.TargetUser);
     method protected final void publishBinderService(@NonNull String, @NonNull android.os.IBinder);
     method protected final void publishBinderService(@NonNull String, @NonNull android.os.IBinder, boolean);
     field public static final int PHASE_ACTIVITY_MANAGER_READY = 550; // 0x226

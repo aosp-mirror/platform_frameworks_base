@@ -146,6 +146,7 @@ class UserController implements Handler.Callback {
     static final int REPORT_USER_SWITCH_COMPLETE_MSG = 80;
     static final int USER_SWITCH_CALLBACKS_TIMEOUT_MSG = 90;
     static final int USER_UNLOCK_MSG = 100;
+    static final int USER_UNLOCKED_MSG = 105;
     static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 110;
     static final int START_USER_SWITCH_FG_MSG = 120;
 
@@ -625,6 +626,9 @@ class UserController implements Handler.Callback {
                     FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__FRAMEWORK_BOOT_COMPLETED,
                     elapsedTimeMs);
         }
+
+        mHandler.obtainMessage(USER_UNLOCKED_MSG, userId, 0).sendToTarget();
+
         final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
         bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
@@ -2365,6 +2369,9 @@ class UserController implements Handler.Callback {
                     mInjector.loadUserRecents(userId);
                 });
                 finishUserUnlocked((UserState) msg.obj);
+                break;
+            case USER_UNLOCKED_MSG:
+                mInjector.getSystemServiceManager().onUserUnlocked(msg.arg1);
                 break;
             case USER_CURRENT_MSG:
                 mInjector.batteryStatsServiceNoteEvent(
