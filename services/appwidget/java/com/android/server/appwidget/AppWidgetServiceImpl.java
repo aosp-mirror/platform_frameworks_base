@@ -641,8 +641,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     final SuspendDialogInfo dialogInfo =
                             mPackageManagerInternal.getSuspendedDialogInfo(providerPackage,
                                     suspendingPackage, providerUserId);
-                    // TODO(b/148035643): Send the original widget intent or ACTION_MAIN as an
-                    // IntentSender to SuspendedAppActivity.
+                    // onUnsuspend is null because we don't want to start any activity on
+                    // unsuspending from a suspended widget.
                     onClickIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(
                             providerPackage, suspendingPackage, dialogInfo, null, null,
                             providerUserId);
