@@ -3358,7 +3358,6 @@ public abstract class Connection extends Conferenceable {
         private boolean mImmutable = false;
         public FailureSignalingConnection(DisconnectCause disconnectCause) {
             setDisconnected(disconnectCause);
-            mImmutable = true;
         }
 
         public void checkImmutable() {
