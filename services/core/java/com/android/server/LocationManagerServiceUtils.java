@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 
 import com.android.server.location.CallerIdentity;
 
@@ -31,9 +30,6 @@ import java.util.function.Consumer;
  * Shared utilities for LocationManagerService and GnssManager.
  */
 public class LocationManagerServiceUtils {
-
-    private static final String TAG = "LocManagerServiceUtils";
-    private static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
      * Listener that can be linked to a binder.
@@ -49,10 +45,9 @@ public class LocationManagerServiceUtils {
         public LinkedListener(
                 @Nullable TRequest request,
                 @NonNull TListener listener,
-                String listenerName,
                 @NonNull CallerIdentity callerIdentity,
                 @NonNull Consumer<TListener> binderDeathCallback) {
-            super(callerIdentity, listenerName);
+            super(callerIdentity);
             mListener = listener;
             mRequest = request;
             mBinderDeathCallback = binderDeathCallback;
@@ -65,7 +60,6 @@ public class LocationManagerServiceUtils {
 
         @Override
         public void binderDied() {
-            if (D) Log.d(TAG, "Remote " + mListenerName + " died.");
             mBinderDeathCallback.accept(mListener);
         }
     }
@@ -75,26 +69,18 @@ public class LocationManagerServiceUtils {
      */
     public abstract static class LinkedListenerBase implements IBinder.DeathRecipient {
         protected final CallerIdentity mCallerIdentity;
-        protected final String mListenerName;
 
-        LinkedListenerBase(
-                @NonNull CallerIdentity callerIdentity, @NonNull String listenerName) {
+        LinkedListenerBase(@NonNull CallerIdentity callerIdentity) {
             mCallerIdentity = callerIdentity;
-            mListenerName = listenerName;
         }
 
         @Override
         public String toString() {
-            return mListenerName + "[" + mCallerIdentity.mPackageName + "(" + mCallerIdentity.mPid
-                    + ")]";
+            return mCallerIdentity.toString();
         }
 
         public CallerIdentity getCallerIdentity() {
             return mCallerIdentity;
-        }
-
-        public String getListenerName() {
-            return mListenerName;
         }
 
         /**
@@ -105,9 +91,6 @@ public class LocationManagerServiceUtils {
                 binder.linkToDeath(this, 0 /* flags */);
                 return true;
             } catch (RemoteException e) {
-                // if the remote process registering the listener is already dead, just swallow the
-                // exception and return
-                Log.w(TAG, "Could not link " + mListenerName + " death callback.", e);
                 return false;
             }
         }
@@ -119,7 +102,7 @@ public class LocationManagerServiceUtils {
             try {
                 binder.unlinkToDeath(this, 0 /* flags */);
             } catch (NoSuchElementException e) {
-                Log.w(TAG, "Could not unlink " + mListenerName + " death callback.", e);
+                // ignore
             }
         }
     }
