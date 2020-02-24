@@ -2483,6 +2483,17 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
+        public Point getDisplayPosition(int displayId) {
+            synchronized (mSyncRoot) {
+                LogicalDisplay display = mLogicalDisplays.get(displayId);
+                if (display != null) {
+                    return display.getDisplayPosition();
+                }
+                return null;
+            }
+        }
+
+        @Override
         public void registerDisplayTransactionListener(DisplayTransactionListener listener) {
             if (listener == null) {
                 throw new IllegalArgumentException("listener must not be null");

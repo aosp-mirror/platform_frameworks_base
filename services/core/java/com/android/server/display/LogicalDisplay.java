@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
 import android.view.Display;
@@ -96,6 +97,11 @@ final class LogicalDisplay {
     // The display offsets to apply to the display projection.
     private int mDisplayOffsetX;
     private int mDisplayOffsetY;
+
+    /**
+     * The position of the display projection sent to SurfaceFlinger
+     */
+    private final Point mDisplayPosition = new Point();
 
     /**
      * {@code true} if display scaling is disabled, or {@code false} if the default scaling mode
@@ -335,6 +341,16 @@ final class LogicalDisplay {
     }
 
     /**
+     * Returns the position of the display's projection.
+     *
+     * @return The x, y coordinates of the display. The return object must be treated as immutable.
+     */
+    Point getDisplayPosition() {
+        // Allocate a new object to avoid a data race.
+        return new Point(mDisplayPosition);
+    }
+
+    /**
      * Applies the layer stack and transformation to the given display device
      * so that it shows the contents of this logical display.
      *
@@ -445,6 +461,8 @@ final class LogicalDisplay {
         } else {  // Surface.ROTATION_270
             mTempDisplayRect.offset(-mDisplayOffsetY, mDisplayOffsetX);
         }
+
+        mDisplayPosition.set(mTempDisplayRect.left, mTempDisplayRect.top);
         device.setProjectionLocked(t, orientation, mTempLayerStackRect, mTempDisplayRect);
     }
 
