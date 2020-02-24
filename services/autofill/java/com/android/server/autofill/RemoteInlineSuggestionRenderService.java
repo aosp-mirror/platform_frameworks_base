@@ -86,9 +86,9 @@ public final class RemoteInlineSuggestionRenderService extends
      */
     public void renderSuggestion(@NonNull IInlineSuggestionUiCallback callback,
             @NonNull InlinePresentation presentation, int width, int height,
-            @Nullable IBinder hostInputToken) {
-        scheduleAsyncRequest(
-                (s) -> s.renderSuggestion(callback, presentation, width, height, hostInputToken));
+            @Nullable IBinder hostInputToken, int displayId) {
+        scheduleAsyncRequest((s) -> s.renderSuggestion(callback, presentation, width, height,
+                hostInputToken, displayId));
     }
 
     @Nullable

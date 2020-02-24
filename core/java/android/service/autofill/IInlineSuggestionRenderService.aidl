@@ -28,5 +28,5 @@ import android.service.autofill.InlinePresentation;
 oneway interface IInlineSuggestionRenderService {
     void renderSuggestion(in IInlineSuggestionUiCallback callback,
                           in InlinePresentation presentation, int width, int height,
-                          in IBinder hostInputToken);
+                          in IBinder hostInputToken, int displayId);
 }
