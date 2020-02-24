@@ -110,18 +110,18 @@ public class UsbService extends IUsbManager.Stub {
         }
 
         @Override
-        public void onSwitchUser(TargetUser from, TargetUser to) {
+        public void onUserSwitching(TargetUser from, TargetUser to) {
             FgThread.getHandler()
                     .postAtFrontOfQueue(() -> mUsbService.onSwitchUser(to.getUserIdentifier()));
         }
 
         @Override
-        public void onStopUser(TargetUser userInfo) {
+        public void onUserStopping(TargetUser userInfo) {
             mUsbService.onStopUser(userInfo.getUserHandle());
         }
 
         @Override
-        public void onUnlockUser(TargetUser userInfo) {
+        public void onUserUnlocking(TargetUser userInfo) {
             mUsbService.onUnlockUser(userInfo.getUserIdentifier());
         }
     }
