@@ -10969,10 +10969,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // to null here, only to reset them at a later point.
             Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, sharedUserSetting,
                     destCodeFile, destResourceFile, parsedPackage.getNativeLibraryDir(),
-                    AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage),
-                    AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage),
-                    PackageInfoWithoutStateUtils.appInfoFlags(parsedPackage),
-                    PackageInfoWithoutStateUtils.appInfoPrivateFlags(parsedPackage),
+                    AndroidPackageUtils.getPrimaryCpuAbi(parsedPackage, pkgSetting),
+                    AndroidPackageUtils.getSecondaryCpuAbi(parsedPackage, pkgSetting),
+                    PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting),
+                    PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting),
                     UserManagerService.getInstance(),
                     usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
                     parsedPackage.getMimeGroups());
@@ -11164,6 +11164,8 @@ public class PackageManagerService extends IPackageManager.Stub
         // TODO(b/135203078): Remove, move to constructor
         pkgSetting.pkg = parsedPackage;
         pkgSetting.pkgFlags = PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting);
+        pkgSetting.pkgPrivateFlags =
+                PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting);
         if (parsedPackage.getLongVersionCode() != pkgSetting.versionCode) {
             pkgSetting.versionCode = parsedPackage.getLongVersionCode();
         }
@@ -16954,6 +16956,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final boolean vendor = oldPackage.isVendor();
                     final boolean product = oldPackage.isProduct();
                     final boolean odm = oldPackage.isOdm();
+                    final boolean systemExt = oldPackage.isSystemExt();
                     final @ParseFlags int systemParseFlags = parseFlags;
                     final @ScanFlags int systemScanFlags = scanFlags
                             | SCAN_AS_SYSTEM
@@ -16961,14 +16964,14 @@ public class PackageManagerService extends IPackageManager.Stub
                             | (oem ? SCAN_AS_OEM : 0)
                             | (vendor ? SCAN_AS_VENDOR : 0)
                             | (product ? SCAN_AS_PRODUCT : 0)
-                            | (odm ? SCAN_AS_ODM : 0);
+                            | (odm ? SCAN_AS_ODM : 0)
+                            | (systemExt ? SCAN_AS_SYSTEM_EXT : 0);
 
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG, "replaceSystemPackageLI: new=" + parsedPackage
                                 + ", old=" + oldPackage);
                     }
                     res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
-                    ps.getPkgState().setUpdatedSystemApp(true);
                     targetParseFlags = systemParseFlags;
                     targetScanFlags = systemScanFlags;
                 } else { // non system replace
