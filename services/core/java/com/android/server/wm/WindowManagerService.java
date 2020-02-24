@@ -8075,32 +8075,39 @@ public class WindowManagerService extends IWindowManager.Stub
     public void getWindowInsets(WindowManager.LayoutParams attrs,
             int displayId, Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper displayCutout) {
-        synchronized (mGlobalLock) {
-            final DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
-            if (dc == null) {
-                throw new WindowManager.InvalidDisplayException("Display#" + displayId
-                        + "could not be found!");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = getDisplayContentOrCreate(displayId, attrs.token);
+                if (dc == null) {
+                    throw new WindowManager.InvalidDisplayException("Display#" + displayId
+                            + "could not be found!");
+                }
+                final WindowToken windowToken = dc.getWindowToken(attrs.token);
+                final ActivityRecord activity;
+                if (windowToken != null && windowToken.asActivityRecord() != null) {
+                    activity = windowToken.asActivityRecord();
+                } else {
+                    activity = null;
+                }
+                final Rect taskBounds;
+                final boolean floatingStack;
+                if (activity != null && activity.getTask() != null) {
+                    final Task task = activity.getTask();
+                    taskBounds = new Rect();
+                    task.getBounds(taskBounds);
+                    floatingStack = task.isFloating();
+                } else {
+                    taskBounds = null;
+                    floatingStack = false;
+                }
+                final DisplayFrames displayFrames = dc.mDisplayFrames;
+                final DisplayPolicy policy = dc.getDisplayPolicy();
+                policy.getLayoutHintLw(attrs, taskBounds, displayFrames, floatingStack,
+                        new Rect(), outContentInsets, outStableInsets, displayCutout);
             }
-            final WindowToken windowToken = dc.getWindowToken(attrs.token);
-            final ActivityRecord activity;
-            if (windowToken != null && windowToken.asActivityRecord() != null) {
-                activity = windowToken.asActivityRecord();
-            } else {
-                activity = null;
-            }
-            final Rect taskBounds = new Rect();
-            final boolean floatingStack;
-            if (activity != null && activity.getTask() != null) {
-                final Task task = activity.getTask();
-                task.getBounds(taskBounds);
-                floatingStack = task.isFloating();
-            } else {
-                floatingStack = false;
-            }
-            final DisplayFrames displayFrames = dc.mDisplayFrames;
-            final DisplayPolicy policy = dc.getDisplayPolicy();
-            policy.getLayoutHintLw(attrs, taskBounds, displayFrames, floatingStack,
-                    new Rect(), outContentInsets, outStableInsets, displayCutout);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 }
