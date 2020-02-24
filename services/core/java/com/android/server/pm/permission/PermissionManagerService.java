@@ -2795,7 +2795,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             if ((changedInstallPermission || replace) && !ps.areInstallPermissionsFixed() &&
-                    !ps.isSystem() || !ps.getPkgState().isUpdatedSystemApp()) {
+                    !ps.isSystem() || ps.getPkgState().isUpdatedSystemApp()) {
                 // This is the first that we have heard about this package, so the
                 // permissions we have now selected are fixed until explicitly
                 // changed.
