@@ -40,6 +40,56 @@ public final class TimeZoneDetectorImpl implements TimeZoneDetector {
     }
 
     @Override
+   @NonNull
+    public TimeZoneCapabilities getCapabilities() {
+        if (DEBUG) {
+            Log.d(TAG, "getCapabilities called");
+        }
+        try {
+            return mITimeZoneDetectorService.getCapabilities();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    @NonNull
+    public TimeZoneConfiguration getConfiguration() {
+        if (DEBUG) {
+            Log.d(TAG, "getConfiguration called");
+        }
+        try {
+            return mITimeZoneDetectorService.getConfiguration();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public boolean updateConfiguration(@NonNull TimeZoneConfiguration configuration) {
+        if (DEBUG) {
+            Log.d(TAG, "updateConfiguration called: " + configuration);
+        }
+        try {
+            return mITimeZoneDetectorService.updateConfiguration(configuration);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void addConfigurationListener(@NonNull ITimeZoneConfigurationListener listener) {
+        if (DEBUG) {
+            Log.d(TAG, "addConfigurationListener called: " + listener);
+        }
+        try {
+            mITimeZoneDetectorService.addConfigurationListener(listener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public boolean suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
         if (DEBUG) {
             Log.d(TAG, "suggestManualTimeZone called: " + timeZoneSuggestion);
