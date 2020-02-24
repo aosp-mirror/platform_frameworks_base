@@ -76,10 +76,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
     private static final String REASON_APP_CRASH = "REASON_APP_CRASH";
     private static final String REASON_NATIVE_CRASH = "REASON_NATIVE_CRASH";
-    private static final String REASON_EXPLICIT_HEALTH_CHECK = "REASON_EXPLICIT_HEALTH_CHECK";
 
     private static final String ROLLBACK_INITIATE = "ROLLBACK_INITIATE";
     private static final String ROLLBACK_BOOT_TRIGGERED = "ROLLBACK_BOOT_TRIGGERED";
+    private static final String ROLLBACK_SUCCESS = "ROLLBACK_SUCCESS";
 
     private WatchdogEventLogger mLogger = new WatchdogEventLogger();
 
@@ -146,6 +146,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                 REASON_APP_CRASH, TESTAPP_A));
         assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
                 null, null));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
     }
 
     @Test
@@ -179,6 +180,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                         REASON_NATIVE_CRASH, null));
         assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
                 null, null));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
     }
 
     @Test
@@ -219,6 +221,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                         REASON_NATIVE_CRASH, null));
         assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
                 null, null));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
     }
 
     /**
@@ -290,6 +293,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                 REASON_APP_CRASH, TESTAPP_A));
         assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
                 null, null));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
     }
 
     /**
