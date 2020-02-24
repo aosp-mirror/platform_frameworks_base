@@ -397,7 +397,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10075
+    // Next: 10076
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -479,6 +479,7 @@ message Atom {
         PackageNotificationChannelGroupPreferences package_notification_channel_group_preferences =
                 10073 [(module) = "framework"];
         GnssStats gnss_stats = 10074 [(module) = "framework"];
+        AppFeaturesOps app_features_ops = 10075 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -7545,6 +7546,51 @@ message AppOps {
 
     // Whether AppOps is guarded by Runtime permission
     optional bool is_runtime_permission = 10;
+}
+
+/**
+ * Historical app ops data per package and features.
+ */
+message AppFeaturesOps {
+    // Uid of the package requesting the op
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Name of the package performing the op
+    optional string package_name = 2;
+
+    // feature id; provided by developer when accessing related API, limited at 50 chars by API.
+    // Features must be provided through manifest using <feature> tag available in R and above.
+    optional string feature_id = 3;
+
+    // operation id; maps to the OPSTR_* constants in AppOpsManager.java
+    optional string op = 4;
+
+    // The number of times the op was granted while the app was in the
+    // foreground (only for trusted requests)
+    optional int64 trusted_foreground_granted_count = 5;
+
+    // The number of times the op was granted while the app was in the
+    // background (only for trusted requests)
+    optional int64 trusted_background_granted_count = 6;
+
+    // The number of times the op was rejected while the app was in the
+    // foreground (only for trusted requests)
+    optional int64 trusted_foreground_rejected_count = 7;
+
+    // The number of times the op was rejected while the app was in the
+    // background (only for trusted requests)
+    optional int64 trusted_background_rejected_count = 8;
+
+    // For long-running operations, total duration of the operation
+    // while the app was in the foreground (only for trusted requests)
+    optional int64 trusted_foreground_duration_millis = 9;
+
+    // For long-running operations, total duration of the operation
+    // while the app was in the background (only for trusted requests)
+    optional int64 trusted_background_duration_millis = 10;
+
+    // Whether AppOps is guarded by Runtime permission
+    optional bool is_runtime_permission = 11;
 }
 
 /**
