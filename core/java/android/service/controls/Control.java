@@ -334,7 +334,7 @@ public final class Control implements Parcelable {
      *     <li> Subtitle: {@code ""}
      * </ul>
      * This fixes the values relating to state of the {@link Control} as required by
-     * {@link ControlsProviderService#loadAvailableControls}:
+     * {@link ControlsProviderService#publisherForAllAvailable}:
      * <ul>
      *     <li> Status: {@link Status#STATUS_UNKNOWN}
      *     <li> Control template: {@link ControlTemplate#NO_TEMPLATE}

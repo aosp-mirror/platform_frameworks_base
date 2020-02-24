@@ -38,7 +38,6 @@ import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
@@ -84,19 +83,6 @@ public abstract class ControlsProviderService extends Service {
     private RequestHandler mHandler;
 
     /**
-     * Retrieve all available controls, using the stateless builder
-     * {@link Control.StatelessBuilder} to build each Control, then use the
-     * provided consumer to callback to the call originator.
-     *
-     * @deprecated Removing consumer-based load apis. Use publisherForAllAvailable() instead
-     */
-    @Deprecated
-    public void loadAvailableControls(@NonNull Consumer<List<Control>> consumer) {
-        // pending removal
-        consumer.accept(Collections.emptyList());
-    }
-
-    /**
      * Publisher for all available controls
      *
      * Retrieve all available controls. Use the stateless builder {@link Control.StatelessBuilder}
@@ -104,11 +90,8 @@ public abstract class ControlsProviderService extends Service {
      * controls, or {@link Subscriber#onError} for error scenarios. Duplicate Controls will
      * replace the original.
      */
-    @Nullable
-    public Publisher<Control> publisherForAllAvailable() {
-        // will be abstract and @nonnull when consumers are removed
-        return null;
-    }
+    @NonNull
+    public abstract Publisher<Control> publisherForAllAvailable();
 
     /**
      * (Optional) Publisher for suggested controls
@@ -198,13 +181,7 @@ public abstract class ControlsProviderService extends Service {
                     final IControlsSubscriber cs = (IControlsSubscriber) msg.obj;
                     final SubscriberProxy proxy = new SubscriberProxy(true, mToken, cs);
 
-                    Publisher<Control> publisher =
-                            ControlsProviderService.this.publisherForAllAvailable();
-                    if (publisher == null) {
-                        ControlsProviderService.this.loadAvailableControls(consumerFor(proxy));
-                    } else {
-                        publisher.subscribe(proxy);
-                    }
+                    ControlsProviderService.this.publisherForAllAvailable().subscribe(proxy);
                     break;
                 }
 
@@ -254,37 +231,6 @@ public abstract class ControlsProviderService extends Service {
                 } catch (RemoteException ex) {
                     ex.rethrowAsRuntimeException();
                 }
-            };
-        }
-
-        /**
-         * Method will be removed during migration to publisher
-         */
-        private Consumer<List<Control>> consumerFor(final Subscriber<Control> subscriber) {
-            return (@NonNull final List<Control> controls) -> {
-                Preconditions.checkNotNull(controls);
-
-                subscriber.onSubscribe(new Subscription() {
-                        public void request(long n) {
-                            for (Control control: controls) {
-                                Control c;
-                                if (control == null) {
-                                    Log.e(TAG, "onLoad: null control.");
-                                }
-                                if (isStatelessControl(control)) {
-                                    c = control;
-                                } else {
-                                    Log.w(TAG, "onLoad: control is not stateless.");
-                                    c = new Control.StatelessBuilder(control).build();
-                                }
-
-                                subscriber.onNext(c);
-                            }
-                            subscriber.onComplete();
-                        }
-
-                        public void cancel() {}
-                    });
             };
         }
     }

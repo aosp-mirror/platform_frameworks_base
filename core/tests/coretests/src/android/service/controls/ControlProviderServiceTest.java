@@ -284,8 +284,12 @@ public class ControlProviderServiceTest {
         }
 
         @Override
-        public void loadAvailableControls(Consumer<List<Control>> cb) {
-            cb.accept(mControls);
+        public Publisher<Control> publisherForAllAvailable() {
+            return new Publisher<Control>() {
+                public void subscribe(final Subscriber s) {
+                    s.onSubscribe(createSubscription(s, mControls));
+                }
+            };
         }
 
         @Override
