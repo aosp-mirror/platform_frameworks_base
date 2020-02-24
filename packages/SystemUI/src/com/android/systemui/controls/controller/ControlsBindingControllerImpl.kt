@@ -26,9 +26,7 @@ import android.service.controls.IControlsActionCallback
 import android.service.controls.IControlsSubscriber
 import android.service.controls.IControlsSubscription
 import android.service.controls.actions.ControlAction
-import android.util.ArrayMap
 import android.util.Log
-import com.android.internal.annotations.GuardedBy
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -56,12 +54,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     override val currentUserId: Int
         get() = currentUser.identifier
 
-    @GuardedBy("componentMap")
-    private val tokenMap: MutableMap<IBinder, ControlsProviderLifecycleManager> =
-            ArrayMap<IBinder, ControlsProviderLifecycleManager>()
-    @GuardedBy("componentMap")
-    private val componentMap: MutableMap<Key, ControlsProviderLifecycleManager> =
-            ArrayMap<Key, ControlsProviderLifecycleManager>()
+    private var currentProvider: ControlsProviderLifecycleManager? = null
 
     private val actionCallbackService = object : IControlsActionCallback.Stub() {
         override fun accept(
@@ -108,83 +101,63 @@ open class ControlsBindingControllerImpl @Inject constructor(
     }
 
     private fun retrieveLifecycleManager(component: ComponentName):
-            ControlsProviderLifecycleManager {
-        synchronized(componentMap) {
-            val provider = componentMap.getOrPut(Key(component, currentUser)) {
-                createProviderManager(component)
-            }
-            tokenMap.putIfAbsent(provider.token, provider)
-            return provider
+            ControlsProviderLifecycleManager? {
+        if (currentProvider != null && currentProvider?.componentName != component) {
+            unbind()
         }
+
+        if (currentProvider == null) {
+            currentProvider = createProviderManager(component)
+        }
+
+        return currentProvider
     }
 
     override fun bindAndLoad(
         component: ComponentName,
         callback: ControlsBindingController.LoadCallback
     ) {
-        val provider = retrieveLifecycleManager(component)
-        provider.maybeBindAndLoad(LoadSubscriber(callback))
+        retrieveLifecycleManager(component)?.maybeBindAndLoad(LoadSubscriber(callback))
     }
 
-    override fun subscribe(controls: List<ControlInfo>) {
-        val controlsByComponentName = controls.groupBy { it.component }
+    override fun subscribe(structureInfo: StructureInfo) {
         if (refreshing.compareAndSet(false, true)) {
-            controlsByComponentName.forEach {
-                val provider = retrieveLifecycleManager(it.key)
-                backgroundExecutor.execute {
-                    provider.maybeBindAndSubscribe(it.value.map { it.controlId })
-                }
-            }
-        }
-        // Unbind unneeded providers
-        val providersWithFavorites = controlsByComponentName.keys
-        synchronized(componentMap) {
-            componentMap.forEach {
-                if (it.key.component !in providersWithFavorites) {
-                    backgroundExecutor.execute { it.value.unbindService() }
-                }
-            }
+            val provider = retrieveLifecycleManager(structureInfo.componentName)
+            provider?.maybeBindAndSubscribe(structureInfo.controls.map { it.controlId })
         }
     }
 
     override fun unsubscribe() {
         if (refreshing.compareAndSet(true, false)) {
-            val providers = synchronized(componentMap) {
-                componentMap.values.toList()
-            }
-            providers.forEach {
-                backgroundExecutor.execute { it.unsubscribe() }
-            }
+            currentProvider?.unsubscribe()
         }
     }
 
-    override fun action(controlInfo: ControlInfo, action: ControlAction) {
-        val provider = retrieveLifecycleManager(controlInfo.component)
-        provider.maybeBindAndSendAction(controlInfo.controlId, action)
+    override fun action(
+        componentName: ComponentName,
+        controlInfo: ControlInfo,
+        action: ControlAction
+    ) {
+        retrieveLifecycleManager(componentName)
+            ?.maybeBindAndSendAction(controlInfo.controlId, action)
     }
 
-    override fun bindServices(components: List<ComponentName>) {
-        components.forEach {
-            val provider = retrieveLifecycleManager(it)
-            backgroundExecutor.execute { provider.bindService() }
-        }
+    override fun bindService(component: ComponentName) {
+        retrieveLifecycleManager(component)?.bindService()
     }
 
     override fun changeUser(newUser: UserHandle) {
         if (newUser == currentUser) return
-        synchronized(componentMap) {
-            unbindAllProvidersLocked() // unbind all providers from the old user
-        }
+
+        unbind()
+
         refreshing.set(false)
         currentUser = newUser
     }
 
-    private fun unbindAllProvidersLocked() {
-        componentMap.values.forEach {
-            if (it.user == currentUser) {
-                it.unbindService()
-            }
-        }
+    private fun unbind() {
+        currentProvider?.unbindService()
+        currentProvider = null
     }
 
     override fun onComponentRemoved(componentName: ComponentName) {
@@ -203,20 +176,12 @@ open class ControlsBindingControllerImpl @Inject constructor(
         return StringBuilder("  ControlsBindingController:\n").apply {
             append("    refreshing=${refreshing.get()}\n")
             append("    currentUser=$currentUser\n")
-            append("    Providers:\n")
-            synchronized(componentMap) {
-                componentMap.values.forEach {
-                    append("      $it\n")
-                }
-            }
+            append("    Providers=$currentProvider\n")
         }.toString()
     }
 
     private abstract inner class CallbackRunnable(val token: IBinder) : Runnable {
-        protected val provider: ControlsProviderLifecycleManager? =
-                synchronized(componentMap) {
-                    tokenMap.get(token)
-                }
+        protected val provider: ControlsProviderLifecycleManager? = currentProvider
     }
 
     private inner class OnLoadRunnable(
@@ -233,11 +198,9 @@ open class ControlsBindingControllerImpl @Inject constructor(
                 Log.e(TAG, "User ${provider.user} is not current user")
                 return
             }
-            synchronized(componentMap) {
-                if (token !in tokenMap.keys) {
-                    Log.e(TAG, "Provider for token:$token does not exist anymore")
-                    return
-                }
+            if (token != provider.token) {
+                Log.e(TAG, "Provider for token:$token does not exist anymore")
+                return
             }
             callback.accept(list)
             provider.unbindService()

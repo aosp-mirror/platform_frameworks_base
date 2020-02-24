@@ -35,8 +35,9 @@ import android.widget.LinearLayout
 import android.widget.Space
 
 import com.android.settingslib.widget.CandidateInfo
-import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlInfo
+import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Background
@@ -56,8 +57,11 @@ import javax.inject.Singleton
 private const val TOKEN = "https://www.googleapis.com/auth/assistant"
 private const val SCOPE = "oauth2:" + TOKEN
 private var tokenProviderConnection: TokenProviderConnection? = null
-class TokenProviderConnection(val cc: ControlsController, val context: Context)
-    : ServiceConnection {
+class TokenProviderConnection(
+    val cc: ControlsController,
+    val context: Context,
+    val structure: StructureInfo?
+) : ServiceConnection {
     private var mTokenProvider: TokenProvider? = null
 
     override fun onServiceConnected(cName: ComponentName, binder: IBinder) {
@@ -71,7 +75,9 @@ class TokenProviderConnection(val cc: ControlsController, val context: Context)
                 Log.e(ControlsUiController.TAG, "NO ACCOUNT IS SET. Open HomeMock app")
             } else {
                 mTokenProvider?.setAuthToken(getAuthToken(mLastAccountName))
-                cc.subscribeToFavorites()
+                structure?.let {
+                    cc.subscribeToFavorites(it)
+                }
             }
         }, "TokenProviderThread").start()
     }
@@ -120,7 +126,16 @@ class ControlsUiControllerImpl @Inject constructor (
     val controlsListingController: Lazy<ControlsListingController>
 ) : ControlsUiController {
 
-    private lateinit var controlInfos: List<ControlInfo>
+    companion object {
+        private val EMPTY_STRUCTURE = StructureInfo(
+            ComponentName("", ""),
+            "",
+            mutableListOf<ControlInfo>()
+        )
+    }
+
+    private var selectedStructure: StructureInfo = EMPTY_STRUCTURE
+    private lateinit var allStructures: List<StructureInfo>
     private val controlsById = mutableMapOf<ControlKey, ControlWithState>()
     private val controlViewsById = mutableMapOf<ControlKey, ControlViewHolder>()
     private lateinit var parent: ViewGroup
@@ -148,26 +163,31 @@ class ControlsUiControllerImpl @Inject constructor (
 
         this.parent = parent
 
-        controlInfos = controlsController.get().getFavoriteControls()
+        allStructures = controlsController.get().getFavorites()
 
-        controlInfos.map {
-            ControlWithState(it, null)
-        }.associateByTo(controlsById) { ControlKey(it.ci.component, it.ci.controlId) }
-
-        if (controlInfos.isEmpty()) {
+        if (allStructures.isEmpty()) {
             showInitialSetupView()
         } else {
+            selectedStructure = allStructures.get(0)
+            selectedStructure.controls.map {
+                ControlWithState(selectedStructure.componentName, it, null)
+            }.associateByTo(controlsById) {
+                ControlKey(selectedStructure.componentName, it.ci.controlId)
+            }
+
             showControlsView()
         }
 
         // Temp code to pass auth
-        tokenProviderConnection = TokenProviderConnection(controlsController.get(), context)
+        tokenProviderConnection = TokenProviderConnection(controlsController.get(), context,
+                selectedStructure)
+
         val serviceIntent = Intent()
         serviceIntent.setComponent(ComponentName("com.android.systemui.home.mock",
                 "com.android.systemui.home.mock.AuthService"))
         if (!context.bindService(serviceIntent, tokenProviderConnection!!,
                 Context.BIND_AUTO_CREATE)) {
-            controlsController.get().subscribeToFavorites()
+            controlsController.get().subscribeToFavorites(selectedStructure)
         }
     }
 
@@ -215,7 +235,7 @@ class ControlsUiControllerImpl @Inject constructor (
 
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
-        controlInfos.forEach {
+        selectedStructure.controls.forEach {
             Log.d(ControlsUiController.TAG, "favorited control id: " + it.controlId)
             if (lastRow.getChildCount() == 2) {
                 lastRow = createRow(inflater, listView)
@@ -224,12 +244,12 @@ class ControlsUiControllerImpl @Inject constructor (
                 R.layout.controls_base_item, lastRow, false) as ViewGroup
             lastRow.addView(item)
             val cvh = ControlViewHolder(item, controlsController.get(), uiExecutor, bgExecutor)
-            val key = ControlKey(it.component, it.controlId)
+            val key = ControlKey(selectedStructure.componentName, it.controlId)
             cvh.bindData(controlsById.getValue(key))
             controlViewsById.put(key, cvh)
         }
 
-        if ((controlInfos.size % 2) == 1) {
+        if ((selectedStructure.controls.size % 2) == 1) {
             lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
         }
 
@@ -254,7 +274,7 @@ class ControlsUiControllerImpl @Inject constructor (
         controls.forEach { c ->
             controlsById.get(ControlKey(componentName, c.getControlId()))?.let {
                 Log.d(ControlsUiController.TAG, "onRefreshState() for id: " + c.getControlId())
-                val cws = ControlWithState(it.ci, c)
+                val cws = ControlWithState(componentName, it.ci, c)
                 val key = ControlKey(componentName, c.getControlId())
                 controlsById.put(key, cws)
 

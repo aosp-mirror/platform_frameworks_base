@@ -55,14 +55,23 @@ class ControlsFavoritePersistenceWrapperTest : SysuiTestCase() {
 
     @Test
     fun testSaveAndRestore() {
-        val controlInfo1 = ControlInfo(
-                ComponentName.unflattenFromString("TEST_PKG/.TEST_CLS_1")!!,
-                "id1", "name_1", DeviceTypes.TYPE_UNKNOWN)
-        val controlInfo2 = ControlInfo(
-                ComponentName.unflattenFromString("TEST_PKG/.TEST_CLS_2")!!,
-                "id2", "name_2", DeviceTypes.TYPE_GENERIC_ON_OFF)
-        val list = listOf(controlInfo1, controlInfo2)
+        val structureInfo1 = StructureInfo(
+            ComponentName.unflattenFromString("TEST_PKG/.TEST_CLS_1")!!,
+            "",
+            listOf(
+                ControlInfo("id1", "name_1", DeviceTypes.TYPE_UNKNOWN)
+            )
+        )
 
+        val structureInfo2 = StructureInfo(
+            ComponentName.unflattenFromString("TEST_PKG/.TEST_CLS_2")!!,
+            "structure1",
+            listOf(
+                ControlInfo("id2", "name_2", DeviceTypes.TYPE_GENERIC_ON_OFF),
+                ControlInfo("id3", "name_3", DeviceTypes.TYPE_GENERIC_ON_OFF)
+            )
+        )
+        val list = listOf(structureInfo1, structureInfo2)
         wrapper.storeFavorites(list)
 
         executor.runAllReady()

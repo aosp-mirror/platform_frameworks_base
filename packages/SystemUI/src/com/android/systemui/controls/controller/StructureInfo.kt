@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.controls.ui
+package com.android.systemui.controls.controller
 
 import android.content.ComponentName
-import android.service.controls.Control
-
-import com.android.systemui.controls.controller.ControlInfo
 
 /**
- * A container for:
- * <ul>
- *  <li>ComponentName - Component responsible for this Control
- *  <li>ControlInfo - Basic cached info about a Control
- *  <li>Control - Actual Control parcelable received directly from
- *  the participating application
- * </ul>
+ * Stores basic information about a Structure to persist and keep track of favorites.
+ *
+ * Every [component] [structure] pair uniquely identifies the structure.
+ *
+ * @property componentName the name of the component that provides the [Control].
+ * @property structure common structure name of all underlying [controls], or empty string
+ * @property controls all controls in the name structure
  */
-data class ControlWithState(
+data class StructureInfo(
     val componentName: ComponentName,
-    val ci: ControlInfo,
-    val control: Control?
+    val structure: CharSequence,
+    val controls: List<ControlInfo>
 )
