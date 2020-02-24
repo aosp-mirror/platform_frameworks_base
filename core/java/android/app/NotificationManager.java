@@ -1573,6 +1573,15 @@ public class NotificationManager {
                 PRIORITY_CATEGORY_CONVERSATIONS,
         };
 
+        /** @hide */
+        @IntDef(prefix = { "PRIORITY_SENDERS_" }, value = {
+                PRIORITY_SENDERS_ANY,
+                PRIORITY_SENDERS_CONTACTS,
+                PRIORITY_SENDERS_STARRED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface PrioritySenders {}
+
         /** Any sender is prioritized. */
         public static final int PRIORITY_SENDERS_ANY = 0;
         /** Saved contacts are prioritized. */
@@ -1816,8 +1825,9 @@ public class NotificationManager {
          * @param suppressedVisualEffects which visual interruptions should be suppressed from
          *                                notifications that are filtered by DND.
          */
-        public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders,
-                int suppressedVisualEffects, int priorityConversationSenders) {
+        public Policy(int priorityCategories, @PrioritySenders int priorityCallSenders,
+                @PrioritySenders int priorityMessageSenders,
+                int suppressedVisualEffects, @ConversationSenders int priorityConversationSenders) {
             this(priorityCategories, priorityCallSenders, priorityMessageSenders,
                     suppressedVisualEffects, STATE_UNSET, priorityConversationSenders);
         }
