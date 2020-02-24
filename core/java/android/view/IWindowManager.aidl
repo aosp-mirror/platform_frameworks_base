@@ -724,11 +724,12 @@ interface IWindowManager
 
     /**
      * Called to get the expected window insets.
-     * TODO(window-context): Remove when new insets flag is available.
+     *
+     * @return {@code true} if system bars are always comsumed.
      */
-    void getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
+    boolean getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
             out Rect outContentInsets, out Rect outStableInsets,
-            out DisplayCutout.ParcelableWrapper displayCutout);
+            out DisplayCutout.ParcelableWrapper outDisplayCutout, out InsetsState outInsetsState);
 
     /**
      * Called to show global actions.

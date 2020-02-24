@@ -8009,9 +8009,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void getWindowInsets(WindowManager.LayoutParams attrs,
+    public boolean getWindowInsets(WindowManager.LayoutParams attrs,
             int displayId, Rect outContentInsets, Rect outStableInsets,
-            DisplayCutout.ParcelableWrapper displayCutout) {
+            DisplayCutout.ParcelableWrapper outDisplayCutout, InsetsState outInsetsState) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -8021,8 +8021,13 @@ public class WindowManagerService extends IWindowManager.Stub
                             + "could not be found!");
                 }
                 final WindowToken windowToken = dc.getWindowToken(attrs.token);
-                dc.getDisplayPolicy().getLayoutHint(attrs, windowToken, mTmpRect /* outFrame */,
-                        outContentInsets, outStableInsets, displayCutout);
+                final InsetsStateController insetsStateController =
+                        dc.getInsetsStateController();
+                outInsetsState.set(insetsStateController.getInsetsForWindowMetrics(attrs));
+
+                return dc.getDisplayPolicy().getLayoutHint(attrs, windowToken,
+                        mTmpRect /* outFrame */, outContentInsets, outStableInsets,
+                        outDisplayCutout);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

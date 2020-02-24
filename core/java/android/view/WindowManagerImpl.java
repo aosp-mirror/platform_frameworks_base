@@ -18,8 +18,11 @@ package android.view;
 
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 
 import android.annotation.NonNull;
 import android.app.ResourcesManager;
@@ -215,9 +218,9 @@ public final class WindowManagerImpl implements WindowManager {
     @Override
     public WindowMetrics getCurrentWindowMetrics() {
         final Context context = mParentWindow != null ? mParentWindow.getContext() : mContext;
-        final Rect bound = getCurrentBounds(context);
+        final Rect bounds = getCurrentBounds(context);
 
-        return new WindowMetrics(toSize(bound), computeWindowInsets());
+        return new WindowMetrics(toSize(bounds), computeWindowInsets(bounds));
     }
 
     private static Rect getCurrentBounds(Context context) {
@@ -228,7 +231,8 @@ public final class WindowManagerImpl implements WindowManager {
 
     @Override
     public WindowMetrics getMaximumWindowMetrics() {
-        return new WindowMetrics(toSize(getMaximumBounds()), computeWindowInsets());
+        final Rect maxBounds = getMaximumBounds();
+        return new WindowMetrics(toSize(maxBounds), computeWindowInsets(maxBounds));
     }
 
     private Size toSize(Rect frame) {
@@ -244,9 +248,8 @@ public final class WindowManagerImpl implements WindowManager {
         return new Rect(0, 0, displaySize.x, displaySize.y);
     }
 
-    private WindowInsets computeWindowInsets() {
-        // TODO(b/118118435): This can only be properly implemented
-        //  once we flip the new insets mode flag.
+    // TODO(b/150095967): Set window type to LayoutParams
+    private WindowInsets computeWindowInsets(Rect bounds) {
         // Initialize params which used for obtaining all system insets.
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
@@ -257,21 +260,34 @@ public final class WindowManagerImpl implements WindowManager {
         params.setFitInsetsTypes(0);
         params.setFitInsetsSides(0);
 
-        return getWindowInsetsFromServer(params);
+        return getWindowInsetsFromServer(params, bounds);
     }
 
-    private WindowInsets getWindowInsetsFromServer(WindowManager.LayoutParams attrs) {
+    private WindowInsets getWindowInsetsFromServer(WindowManager.LayoutParams attrs, Rect bounds) {
         try {
             final Rect systemWindowInsets = new Rect();
             final Rect stableInsets = new Rect();
             final DisplayCutout.ParcelableWrapper displayCutout =
                     new DisplayCutout.ParcelableWrapper();
-            WindowManagerGlobal.getWindowManagerService().getWindowInsets(attrs,
-                    mContext.getDisplayId(), systemWindowInsets, stableInsets, displayCutout);
-            return new WindowInsets.Builder()
-                    .setSystemWindowInsets(Insets.of(systemWindowInsets))
-                    .setStableInsets(Insets.of(stableInsets))
-                    .setDisplayCutout(displayCutout.get()).build();
+            final InsetsState insetsState = new InsetsState();
+            final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
+                    .getWindowInsets(attrs, mContext.getDisplayId(), systemWindowInsets,
+                    stableInsets, displayCutout, insetsState);
+            final boolean isScreenRound =
+                    mContext.getResources().getConfiguration().isScreenRound();
+            if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
+                return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState*/,
+                        isScreenRound, alwaysConsumeSystemBars, displayCutout.get(),
+                        systemWindowInsets, stableInsets, SOFT_INPUT_ADJUST_NOTHING,
+                        SYSTEM_UI_FLAG_VISIBLE, null /* typeSideMap */);
+            } else {
+                return new WindowInsets.Builder()
+                        .setAlwaysConsumeSystemBars(alwaysConsumeSystemBars)
+                        .setRound(isScreenRound)
+                        .setSystemWindowInsets(Insets.of(systemWindowInsets))
+                        .setStableInsets(Insets.of(stableInsets))
+                        .setDisplayCutout(displayCutout.get()).build();
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

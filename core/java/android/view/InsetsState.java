@@ -80,6 +80,12 @@ public class InsetsState implements Parcelable {
     })
     public @interface InternalInsetsType {}
 
+    /**
+     * Special value to be used to by methods returning an {@link InternalInsetsType} to indicate
+     * that the objects/parameters aren't associated with an {@link InternalInsetsType}
+     */
+    public static final int ITYPE_INVALID = -1;
+
     static final int FIRST_TYPE = 0;
 
     public static final int ITYPE_STATUS_BAR = FIRST_TYPE;
