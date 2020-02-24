@@ -82,6 +82,9 @@ public class DynamicSystemInstallationService extends Service
     static final String DEFAULT_DSU_SLOT = "dsu";
     static final String KEY_PUBKEY = "KEY_PUBKEY";
 
+    // Default userdata partition size is 2GiB.
+    private static final long DEFAULT_USERDATA_SIZE = 2L << 30;
+
     /*
      * Intent actions
      */
@@ -269,6 +272,10 @@ public class DynamicSystemInstallationService extends Service
         mEnableWhenCompleted = intent.getBooleanExtra(KEY_ENABLE_WHEN_COMPLETED, false);
         String dsuSlot = intent.getStringExtra(KEY_DSU_SLOT);
         String publicKey = intent.getStringExtra(KEY_PUBKEY);
+
+        if (userdataSize == 0) {
+            userdataSize = DEFAULT_USERDATA_SIZE;
+        }
 
         if (TextUtils.isEmpty(dsuSlot)) {
             dsuSlot = DEFAULT_DSU_SLOT;
