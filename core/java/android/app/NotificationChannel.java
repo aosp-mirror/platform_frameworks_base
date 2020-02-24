@@ -15,6 +15,7 @@
  */
 package android.app;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -63,6 +64,7 @@ public final class NotificationChannel implements Parcelable {
      * string takes two arguments, in this order: the
      * {@link #getId()} of the original notification channel, and the
      * {@link ShortcutInfo#getId() id} of the conversation.
+     * @hide
      */
     public static final String CONVERSATION_CHANNEL_ID_FORMAT = "%1$s : %2$s";
 
@@ -554,8 +556,8 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Sets this channel as being person-centric. Different settings and functionality may be
-     * exposed for people-centric channels.
+     * Sets this channel as being converastion-centric. Different settings and functionality may be
+     * exposed for conversation-centric channels.
      *
      * @param parentChannelId The {@link #getId()} id} of the generic channel that notifications of
      *                        this type would be posted to in absence of a specific conversation id.
@@ -564,8 +566,8 @@ public final class NotificationChannel implements Parcelable {
      * @param conversationId The {@link ShortcutInfo#getId()} of the shortcut representing this
      *                       channel's conversation.
      */
-    public void setConversationId(@Nullable String parentChannelId,
-            @Nullable String conversationId) {
+    public void setConversationId(@NonNull String parentChannelId,
+            @NonNull String conversationId) {
         mParentId = parentChannelId;
         mConversationId = conversationId;
     }
