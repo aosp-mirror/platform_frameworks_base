@@ -16,14 +16,15 @@
 
 package android.accessibilityservice;
 
+import static android.accessibilityservice.util.AccessibilityUtils.getFilteredHtmlText;
+import static android.accessibilityservice.util.AccessibilityUtils.loadSafeAnimatedImage;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.StringRes;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -31,17 +32,12 @@ import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Activities of interest to users with accessibility needs may request to be targets of the
@@ -93,13 +89,6 @@ public final class AccessibilityShortcutInfo {
      * Resource id of the html description of the accessibility shortcut target.
      */
     private final int mHtmlDescriptionRes;
-
-    // Used for html description of accessibility service. The <img> src tag must follow the
-    // prefix rule. e.g. <img src="R.drawable.fileName"/>
-    private static final String IMG_PREFIX = "R.drawable.";
-    private static final String ANCHOR_TAG = "a";
-    private static final List<String> UNSUPPORTED_TAG_LIST = new ArrayList<>(
-            Collections.singletonList(ANCHOR_TAG));
 
     /**
      * Creates a new instance.
@@ -221,6 +210,8 @@ public final class AccessibilityShortcutInfo {
      *
      * @return The animated image drawable, or null if the resource is invalid or the image
      * exceed the screen size.
+     *
+     * @hide
      */
     @Nullable
     public Drawable loadAnimatedImage(@NonNull Context context) {
@@ -236,6 +227,8 @@ public final class AccessibilityShortcutInfo {
      * It filters the <img> tag which do not meet the custom specification and the <a> tag.
      *
      * @return The localized and restricted html description.
+     *
+     * @hide
      */
     @Nullable
     public String loadHtmlDescription(@NonNull PackageManager packageManager) {
@@ -304,104 +297,5 @@ public final class AccessibilityShortcutInfo {
         stringBuilder.append("activityInfo: ").append(mActivityInfo);
         stringBuilder.append("]");
         return stringBuilder.toString();
-    }
-
-    /**
-     * Gets the filtered html string for
-     * {@link android.accessibilityservice.AccessibilityServiceInfo} and
-     * {@link android.accessibilityservice.AccessibilityShortcutInfo}. It filters
-     * the <img> tag which do not meet the custom specification and the <a> tag.
-     *
-     * @param text the target text is html format.
-     * @return the filtered html string.
-     *
-     * @hide
-     */
-    public static @NonNull String getFilteredHtmlText(@NonNull String text) {
-        final String replacementStart = "<invalidtag ";
-        final String replacementEnd = "</invalidtag>";
-
-        for (String tag : UNSUPPORTED_TAG_LIST) {
-            final String regexStart = "(?i)<" + tag + "(\\s+|>)";
-            final String regexEnd = "(?i)</" + tag + "\\s*>";
-            text = Pattern.compile(regexStart).matcher(text).replaceAll(replacementStart);
-            text = Pattern.compile(regexEnd).matcher(text).replaceAll(replacementEnd);
-        }
-
-        final String regexInvalidImgTag = "(?i)<img\\s+(?!src\\s*=\\s*\"(?-i)" + IMG_PREFIX + ")";
-        text = Pattern.compile(regexInvalidImgTag).matcher(text).replaceAll(
-                replacementStart);
-
-        return text;
-    }
-
-    /**
-     * Loads the animated image for
-     * {@link android.accessibilityservice.AccessibilityServiceInfo} and
-     * {@link android.accessibilityservice.AccessibilityShortcutInfo}. It checks the resource
-     * whether to exceed the screen size.
-     *
-     * @param context the current context.
-     * @param applicationInfo the current application.
-     * @param resId the animated image resource id.
-     * @return the animated image which is safe.
-     *
-     * @hide
-     */
-    @Nullable
-    public static Drawable loadSafeAnimatedImage(@NonNull Context context,
-            @NonNull ApplicationInfo applicationInfo, @StringRes int resId) {
-        if (resId == /* invalid */ 0) {
-            return null;
-        }
-
-        final PackageManager packageManager = context.getPackageManager();
-        final String packageName = applicationInfo.packageName;
-        final Drawable bannerDrawable = packageManager.getDrawable(packageName, resId,
-                applicationInfo);
-        if (bannerDrawable == null) {
-            return null;
-        }
-
-        final boolean isImageWidthOverScreenLength =
-                bannerDrawable.getIntrinsicWidth() > getScreenWidthPixels(context);
-        final boolean isImageHeightOverScreenLength =
-                bannerDrawable.getIntrinsicHeight() > getScreenHeightPixels(context);
-
-        return (isImageWidthOverScreenLength || isImageHeightOverScreenLength)
-                ? null
-                : bannerDrawable;
-    }
-
-    /**
-     * Gets the width of the screen.
-     *
-     * @param context the current context.
-     * @return the width of the screen in term of pixels.
-     *
-     * @hide
-     */
-    private static int getScreenWidthPixels(@NonNull Context context) {
-        final Resources resources = context.getResources();
-        final int screenWidthDp = resources.getConfiguration().screenWidthDp;
-
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, screenWidthDp,
-                resources.getDisplayMetrics()));
-    }
-
-    /**
-     * Gets the height of the screen.
-     *
-     * @param context the current context.
-     * @return the height of the screen in term of pixels.
-     *
-     * @hide
-     */
-    private static int getScreenHeightPixels(@NonNull Context context) {
-        final Resources resources = context.getResources();
-        final int screenHeightDp = resources.getConfiguration().screenHeightDp;
-
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, screenHeightDp,
-                resources.getDisplayMetrics()));
     }
 }
