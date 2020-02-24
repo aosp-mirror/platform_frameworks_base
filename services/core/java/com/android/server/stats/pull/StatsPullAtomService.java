@@ -188,6 +188,7 @@ public class StatsPullAtomService extends SystemService {
     private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
     private static final int CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES = 8;
     private static final int OP_FLAGS_PULLED = OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED;
+    private static final String COMMON_PERMISSION_PREFIX = "android.permission.";
 
     private final Object mNetworkStatsLock = new Object();
     @GuardedBy("mNetworkStatsLock")
@@ -2625,6 +2626,10 @@ public class StatsPullAtomService extends SystemService {
 
                         if (permissionInfo.getProtection() != PROTECTION_DANGEROUS) {
                             continue;
+                        }
+
+                        if (permName.startsWith(COMMON_PERMISSION_PREFIX)) {
+                            permName = permName.substring(COMMON_PERMISSION_PREFIX.length());
                         }
 
                         StatsEvent.Builder e = StatsEvent.newBuilder();
