@@ -17,6 +17,9 @@
 package com.android.server.accessibility.gestures;
 
 import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_HOVER_ENTER;
+import static android.view.MotionEvent.ACTION_HOVER_EXIT;
+import static android.view.MotionEvent.ACTION_HOVER_MOVE;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
@@ -29,6 +32,7 @@ import static com.android.server.accessibility.gestures.TouchState.STATE_TOUCH_E
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
@@ -37,6 +41,7 @@ import android.os.SystemClock;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -123,9 +128,22 @@ public class TouchExplorerTest {
     }
 
     @Test
+    public void testOneFingerMove_shouldInjectHoverEvents() {
+        goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
+        try {
+            Thread.sleep(2 * ViewConfiguration.getDoubleTapTimeout());
+        } catch (InterruptedException e) {
+            fail("Interrupted while waiting for transition to touch exploring state.");
+        }
+        moveEachPointers(mLastEvent, p(10, 10));
+        send(mLastEvent);
+        goToStateClearFrom(STATE_TOUCH_EXPLORING_1FINGER);
+        assertCapturedEvents(ACTION_HOVER_ENTER, ACTION_HOVER_MOVE, ACTION_HOVER_EXIT);
+    }
+
+    @Test
     public void testTwoFingersMove_shouldDelegatingAndInjectActionDownPointerDown() {
         goFromStateClearTo(STATE_MOVING_2FINGERS);
-
         assertState(STATE_DELEGATING);
         goToStateClearFrom(STATE_MOVING_2FINGERS);
         assertState(STATE_CLEAR);
@@ -263,24 +281,16 @@ public class TouchExplorerTest {
                     send(upEvent());
                     break;
                 case STATE_TOUCH_EXPLORING_2FINGER:
+                case STATE_MOVING_2FINGERS:
+                case STATE_DRAGGING_2FINGERS:
+                case STATE_PINCH_2FINGERS:
                     send(pointerUpEvent());
                     goToStateClearFrom(STATE_TOUCH_EXPLORING_1FINGER);
                     break;
                 case STATE_TOUCH_EXPLORING_3FINGER:
+                case STATE_MOVING_3FINGERS:
                     send(thirdPointerUpEvent());
                     goToStateClearFrom(STATE_TOUCH_EXPLORING_2FINGER);
-                    break;
-                case STATE_MOVING_2FINGERS:
-                    goToStateClearFrom(STATE_TOUCH_EXPLORING_2FINGER);
-                    break;
-                case STATE_DRAGGING_2FINGERS:
-                    goToStateClearFrom(STATE_TOUCH_EXPLORING_2FINGER);
-                    break;
-                case STATE_PINCH_2FINGERS:
-                    goToStateClearFrom(STATE_DRAGGING_2FINGERS);
-                    break;
-                case STATE_MOVING_3FINGERS:
-                    goToStateClearFrom(STATE_TOUCH_EXPLORING_3FINGER);
                     break;
                 default:
                     throw new IllegalArgumentException("Illegal state: " + state);
@@ -337,7 +347,7 @@ public class TouchExplorerTest {
     }
 
     private MotionEvent upEvent() {
-        MotionEvent event = downEvent();
+        MotionEvent event = MotionEvent.obtainNoHistory(mLastEvent);
         event.setAction(ACTION_UP);
         return event;
     }
