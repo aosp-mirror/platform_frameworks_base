@@ -161,16 +161,16 @@ public final class WifiMigration {
      * Load data from OEM's config store.
      * <p>
      * Note:
-     * <li> OEM's need to implement {@link #loadFromConfigStore()} ()} only if their
-     * existing config store format or file locations differs from the vanilla AOSP implementation (
-     * which is what the wifi mainline module understands).
+     * <li>OEMs need to implement {@link #loadFromConfigStore()} ()} only if their
+     * existing config store format or file locations differs from the vanilla AOSP implementation.
      * </li>
-     * <li> The wifi mainline module will invoke {@link #loadFromConfigStore()} method on every
+     * <li>The wifi mainline module will invoke {@link #loadFromConfigStore()} method on every
      * bootup, its the responsibility of the OEM implementation to ensure that this method returns
      * non-null data only on the first bootup. Once the migration is done, the OEM can safely delete
-     * their config store files and then return null on any subsequent reboots. The first & only
-     * relevant invocation of {@link #loadFromConfigStore()} occurs when a previously released
-     * device upgrades to the wifi mainline module from an OEM implementation of the wifi stack.
+     * their config store files when {@link #removeConfigStore()} is invoked.
+     * <li>The first & only relevant invocation of {@link #loadFromConfigStore()} occurs when a
+     * previously released device upgrades to the wifi mainline module from an OEM implementation
+     * of the wifi stack.
      * </li>
      *
      * @return Instance of {@link ConfigStoreMigrationData} for migrating data, null if no
@@ -178,8 +178,24 @@ public final class WifiMigration {
      */
     @Nullable
     public static ConfigStoreMigrationData loadFromConfigStore() {
-        // Note: OEM's should add code to parse data from their config store format here!
+        // Note: OEMs should add code to parse data from their config store format here!
         return null;
+    }
+
+    /**
+     * Remove OEM's config store.
+     * <p>
+     * Note:
+     * <li>OEMs need to implement {@link #removeConfigStore()} only if their
+     * existing config store format or file locations differs from the vanilla AOSP implementation (
+     * which is what the wifi mainline module understands).
+     * </li>
+     * <li> The wifi mainline module will invoke {@link #removeConfigStore()} after it migrates
+     * all the existing data retrieved from {@link #loadFromConfigStore()}.
+     * </li>
+     */
+    public static void removeConfigStore() {
+        // Note: OEMs should remove their custom config store files here!
     }
 
     /**

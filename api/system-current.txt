@@ -7557,6 +7557,7 @@ package android.net.wifi {
   public final class WifiMigration {
     method @Nullable public static android.net.wifi.WifiMigration.ConfigStoreMigrationData loadFromConfigStore();
     method @NonNull public static android.net.wifi.WifiMigration.SettingsMigrationData loadFromSettings(@NonNull android.content.Context);
+    method public static void removeConfigStore();
   }
 
   public static final class WifiMigration.ConfigStoreMigrationData implements android.os.Parcelable {
