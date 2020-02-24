@@ -4069,7 +4069,8 @@ public class CarrierConfigManager {
         /** Prefix of all Wifi.KEY_* constants. */
         public static final String KEY_PREFIX = "wifi.";
         /**
-        * It contains the maximum client count definition that the carrier owns.
+        * It contains the maximum client count definition that the carrier sets.
+        * The default is 0, which means that the carrier hasn't set a requirement.
         */
         public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT =
                 KEY_PREFIX + "hotspot_maximum_client_count";
