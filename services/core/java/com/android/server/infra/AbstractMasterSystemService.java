@@ -713,7 +713,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
     /**
      * Gets a list of all supported users (i.e., those that pass the
-     * {@link #isSupportedUser(TargetUser)}check).
+     * {@link #isUserSupported(TargetUser)}check).
      */
     @NonNull
     protected List<UserInfo> getSupportedUsers() {
@@ -722,7 +722,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         final List<UserInfo> supportedUsers = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             final UserInfo userInfo = allUsers[i];
-            if (isSupportedUser(new TargetUser(userInfo))) {
+            if (isUserSupported(new TargetUser(userInfo))) {
                 supportedUsers.add(userInfo);
             }
         }
