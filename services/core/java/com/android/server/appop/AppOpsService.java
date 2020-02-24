@@ -4060,9 +4060,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     private void readOp(XmlPullParser parser, @NonNull UidState uidState,
         @NonNull String pkgName, boolean isPrivileged) throws NumberFormatException,
         XmlPullParserException, IOException {
-        Op op = new Op(uidState, pkgName,
-                Integer.parseInt(parser.getAttributeValue(null, "n")),
-                uidState.uid);
+        int opCode = Integer.parseInt(parser.getAttributeValue(null, "n"));
+        if (isIgnoredAppOp(opCode)) {
+            return;
+        }
+        Op op = new Op(uidState, pkgName, opCode, uidState.uid);
 
         final int mode = XmlUtils.readIntAttribute(parser, "m",
                 AppOpsManager.opToDefaultMode(op.op));
@@ -4094,6 +4096,16 @@ public class AppOpsService extends IAppOpsService.Stub {
             uidState.pkgOps.put(pkgName, ops);
         }
         ops.put(op.op, op);
+    }
+
+    //TODO(b/149995538): Remove once this has reached all affected devices
+    private static boolean isIgnoredAppOp(int op) {
+        switch (op) {
+            case AppOpsManager.OP_MANAGE_EXTERNAL_STORAGE:
+                return true;
+            default:
+                return false;
+        }
     }
 
     void writeState() {
