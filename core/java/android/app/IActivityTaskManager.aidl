@@ -244,32 +244,8 @@ interface IActivityTaskManager {
      */
     boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop);
     void moveTaskToStack(int taskId, int stackId, boolean toTop);
-    /**
-     * Resizes the input pinned stack to the given bounds with animation.
-     *
-     * @param stackId Id of the pinned stack to resize.
-     * @param bounds Bounds to resize the stack to or {@code null} for fullscreen.
-     * @param animationDuration The duration of the resize animation in milliseconds or -1 if the
-     *                          default animation duration should be used.
-     * @throws RemoteException
-     */
-    void animateResizePinnedStack(int stackId, in Rect bounds, int animationDuration);
     boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
             boolean animate, in Rect initialBounds, boolean showRecents);
-    /**
-     * Use the offset to adjust the stack boundary with animation.
-     *
-     * @param stackId Id of the stack to adjust.
-     * @param compareBounds Offset is only applied if the current pinned stack bounds is equal to
-     *                      the compareBounds.
-     * @param xOffset The horizontal offset.
-     * @param yOffset The vertical offset.
-     * @param animationDuration The duration of the resize animation in milliseconds or -1 if the
-     *                          default animation duration should be used.
-     * @throws RemoteException
-     */
-    void offsetPinnedStackBounds(int stackId, in Rect compareBounds, int xOffset, int yOffset,
-            int animationDuration);
     /**
      * Removes stacks in the input windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
@@ -379,22 +355,9 @@ interface IActivityTaskManager {
     void startLocalVoiceInteraction(in IBinder token, in Bundle options);
     void stopLocalVoiceInteraction(in IBinder token);
     boolean supportsLocalVoiceInteraction();
-    void notifyPinnedStackAnimationStarted();
-    void notifyPinnedStackAnimationEnded();
 
     // Get device configuration
     ConfigurationInfo getDeviceConfigurationInfo();
-
-    /**
-     * Resizes the pinned stack.
-     *
-     * @param pinnedBounds The bounds for the pinned stack.
-     * @param tempPinnedTaskBounds The temporary bounds for the tasks in the pinned stack, which
-     *                             might be different from the stack bounds to allow more
-     *                             flexibility while resizing, or {@code null} if they should be the
-     *                             same as the stack bounds.
-     */
-    void resizePinnedStack(in Rect pinnedBounds, in Rect tempPinnedTaskBounds);
 
     void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback,
             in CharSequence message);

@@ -2990,8 +2990,7 @@ class Task extends WindowContainer<WindowContainer> {
      * we will have a jump at the end.
      */
     boolean isFloating() {
-        return getWindowConfiguration().tasksAreFloating()
-                && !getStack().isAnimatingBoundsToFullscreen() && !mPreserveNonFloatingState;
+        return getWindowConfiguration().tasksAreFloating() && !mPreserveNonFloatingState;
     }
 
     /**

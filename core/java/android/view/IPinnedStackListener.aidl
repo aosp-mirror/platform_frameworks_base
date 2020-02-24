@@ -43,8 +43,7 @@ oneway interface IPinnedStackListener {
      * pinned stack (the final bounds if animating, the current bounds if not),
      * which may be helpful in calculating dependent animation bounds.
      */
-    void onMovementBoundsChanged(in Rect animatingBounds, boolean fromImeAdjustment,
-            boolean fromShelfAdjustment);
+    void onMovementBoundsChanged(in Rect animatingBounds, boolean fromImeAdjustment);
 
     /**
      * Called when window manager decides to adjust the pinned stack bounds because of the IME, or
@@ -53,12 +52,6 @@ oneway interface IPinnedStackListener {
      * with fromImeAdjustement set to {@code true}.
      */
     void onImeVisibilityChanged(boolean imeVisible, int imeHeight);
-
-    /**
-     * Called when window manager decides to adjust the minimized state, or when the listener
-     * is first registered to allow the listener to synchronized its state with the controller.
-     */
-    void onMinimizedStateChanged(boolean isMinimized);
 
     /**
      * Called when the set of actions for the current PiP activity changes, or when the listener
@@ -99,13 +92,4 @@ oneway interface IPinnedStackListener {
      * Called by the window manager when the aspect ratio is reset.
      */
     void onAspectRatioChanged(float aspectRatio);
-
-    /**
-     * Called by the window manager to notify the listener to prepare for PiP animation.
-     * Internally, the target bounds would be calculated from the given {@param aspectRatio}
-     * and {@param bounds}, the saved reentry snap fraction also contributes.
-     * Caller would wait for a IPinnedStackController#startAnimation callback to actually
-     * start the animation, see details in IPinnedStackController.
-     */
-    void onPrepareAnimation(in Rect sourceRectHint, float aspectRatio, in Rect bounds);
 }
