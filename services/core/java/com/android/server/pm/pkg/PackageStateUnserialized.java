@@ -35,6 +35,9 @@ import java.util.List;
  *
  * It is assumed that anything inside the package was not cached or written to disk, so none of
  * these fields are either. They must be set on every boot from other state on the device.
+ *
+ * These fields are also not copied into any cloned PackageSetting, to preserve the old behavior
+ * where they would be lost implicitly by re-generating the package object.
  */
 @DataClass(genSetters = true, genConstructor = false, genBuilder = false)
 public class PackageStateUnserialized {
