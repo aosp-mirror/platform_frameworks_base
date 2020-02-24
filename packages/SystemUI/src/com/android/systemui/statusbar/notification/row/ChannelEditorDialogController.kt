@@ -285,7 +285,7 @@ class ChannelEditorDialogController @Inject constructor(
             window?.apply {
                 setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                 addFlags(wmFlags)
-                setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL)
+                setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
                 setWindowAnimations(com.android.internal.R.style.Animation_InputMethod)
 
                 attributes = attributes.apply {
