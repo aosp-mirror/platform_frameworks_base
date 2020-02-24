@@ -25,9 +25,13 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Binder;
+import android.os.RemoteException;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.IWindow;
+import android.view.IWindowSession;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -37,6 +41,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
 import com.android.systemui.R;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -46,7 +51,6 @@ import com.android.systemui.shared.system.WindowManagerWrapper;
  */
 public class WindowMagnificationController implements View.OnTouchListener, SurfaceHolder.Callback,
         MirrorWindowControl.MirrorWindowDelegate {
-    private final int mBorderSize;
 
     private final Context mContext;
     private final Point mDisplaySize = new Point();
@@ -73,6 +77,7 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
 
     private View mMirrorView;
     private SurfaceView mMirrorSurfaceView;
+    private int mMirrorSurfaceMargin;
     private View mOverlayView;
     // The boundary of magnification frame.
     private final Rect mMagnificationFrameBoundary = new Rect();
@@ -89,7 +94,7 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 
         Resources r = context.getResources();
-        mBorderSize = (int) r.getDimension(R.dimen.magnification_border_size);
+        mMirrorSurfaceMargin = r.getDimensionPixelSize(R.dimen.magnification_mirror_surface_margin);
 
         mScale = r.getInteger(R.integer.magnification_default_scale);
         mMirrorWindowControl = mirrorWindowControl;
@@ -187,10 +192,8 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
     private void createMirrorWindow() {
         // The window should be the size the mirrored surface will be but also add room for the
         // border and the drag handle.
-        int dragViewHeight = (int) mContext.getResources().getDimension(
-                R.dimen.magnification_drag_view_height);
-        int windowWidth = mMagnificationFrame.width() + 2 * mBorderSize;
-        int windowHeight = mMagnificationFrame.height() + dragViewHeight + 2 * mBorderSize;
+        int windowWidth = mMagnificationFrame.width() + 2 * mMirrorSurfaceMargin;
+        int windowHeight = mMagnificationFrame.height() + 2 * mMirrorSurfaceMargin;
 
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 windowWidth, windowHeight,
@@ -207,9 +210,14 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
 
         mMirrorView = LayoutInflater.from(mContext).inflate(R.layout.window_magnifier_view, null);
         mMirrorSurfaceView = mMirrorView.findViewById(R.id.surface_view);
-        // This places the SurfaceView's SurfaceControl above the ViewRootImpl's SurfaceControl to
-        // ensure the mirrored area can get touch instead of going to the window
-        mMirrorSurfaceView.setZOrderOnTop(true);
+
+        // Allow taps to go through to the mirror SurfaceView below.
+        mMirrorSurfaceView.addOnLayoutChangeListener(
+                (View v, int left, int top, int right, int bottom, int oldLeft, int oldTop,
+                        int oldRight, int oldBottom)
+                        -> {
+                    applyTapExcludeRegion();
+                });
 
         mMirrorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -226,6 +234,24 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
         addDragTouchListeners();
     }
 
+    private void applyTapExcludeRegion() {
+        final Region tapExcludeRegion = calculateTapExclude();
+        final IWindow window = IWindow.Stub.asInterface(mMirrorView.getWindowToken());
+        try {
+            IWindowSession session = WindowManagerGlobal.getWindowSession();
+            session.updateTapExcludeRegion(window, tapExcludeRegion);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private Region calculateTapExclude() {
+        final int borderDragSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnification_border_drag_size);
+        Region regionInsideDragBorder = new Region(borderDragSize, borderDragSize,
+                mMirrorView.getWidth() - borderDragSize, mMirrorView.getHeight() - borderDragSize);
+        return regionInsideDragBorder;
+    }
+
     private void createControls() {
         if (mMirrorWindowControl != null) {
             mMirrorWindowControl.showControl(mOverlayView.getWindowToken());
@@ -234,9 +260,9 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
 
     private void setInitialStartBounds() {
         // Sets the initial frame area for the mirror and places it in the center of the display.
-        int initSize = Math.min(mDisplaySize.x, mDisplaySize.y) / 2;
-        int initX = mDisplaySize.x / 2 - initSize / 2;
-        int initY = mDisplaySize.y / 2 - initSize / 2;
+        int initSize = Math.min(mDisplaySize.x, mDisplaySize.y) / 2 + 2 * mMirrorSurfaceMargin;
+        int initX = mDisplaySize.x / 2 - initSize / 2 - mMirrorSurfaceMargin;
+        int initY = mDisplaySize.y / 2 - initSize / 2 - mMirrorSurfaceMargin;
         mMagnificationFrame.set(initX, initY, initX + initSize, initY + initSize);
     }
 
