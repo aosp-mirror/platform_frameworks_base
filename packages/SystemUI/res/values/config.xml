@@ -488,4 +488,7 @@
     <!-- Preferred refresh rate at keyguard, if supported by the display -->
     <integer name="config_keyguardRefreshRate">-1</integer>
 
+    <!-- Respect the drawable/rounded.xml that allow to customize as multiple radius corner path -->
+    <bool name="config_roundedCornerMultipleRadius">false</bool>
+
 </resources>
