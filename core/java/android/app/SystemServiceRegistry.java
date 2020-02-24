@@ -933,17 +933,11 @@ final class SystemServiceRegistry {
                     @Override
                     public BiometricManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        if (BiometricManager.hasBiometrics(ctx)) {
-                            final IBinder binder =
-                                    ServiceManager.getServiceOrThrow(Context.BIOMETRIC_SERVICE);
-                            final IBiometricService service =
-                                    IBiometricService.Stub.asInterface(binder);
-                            return new BiometricManager(ctx.getOuterContext(), service);
-                        } else {
-                            // Allow access to the manager when service is null. This saves memory
-                            // on devices without biometric hardware.
-                            return new BiometricManager(ctx.getOuterContext(), null);
-                        }
+                        final IBinder binder =
+                                ServiceManager.getServiceOrThrow(Context.BIOMETRIC_SERVICE);
+                        final IBiometricService service =
+                                IBiometricService.Stub.asInterface(binder);
+                        return new BiometricManager(ctx.getOuterContext(), service);
                     }
                 });
 
