@@ -159,7 +159,7 @@ public class Chronometer extends TextView {
     public boolean isTheFinalCountDown() {
         try {
             getContext().startActivity(
-                    new Intent(Intent.ACTION_VIEW, Uri.parse("https://youtu.be/9jK-NcRmVcw"))
+                    new Intent(Intent.ACTION_VIEW, Uri.parse("https://youtu.be/6w0YLvC33bk"))
                             .addCategory(Intent.CATEGORY_BROWSABLE)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT
                                     | Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT));
