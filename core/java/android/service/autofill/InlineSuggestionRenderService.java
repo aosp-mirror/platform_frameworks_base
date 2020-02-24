@@ -23,14 +23,18 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Service;
 import android.app.slice.Slice;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
@@ -61,7 +65,8 @@ public abstract class InlineSuggestionRenderService extends Service {
     private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
     private void handleRenderSuggestion(IInlineSuggestionUiCallback callback,
-            InlinePresentation presentation, int width, int height, IBinder hostInputToken) {
+            InlinePresentation presentation, int width, int height, IBinder hostInputToken,
+            int displayId) {
         if (hostInputToken == null) {
             try {
                 callback.onError();
@@ -70,8 +75,17 @@ public abstract class InlineSuggestionRenderService extends Service {
             }
             return;
         }
-        final SurfaceControlViewHost host = new SurfaceControlViewHost(this, this.getDisplay(),
-                hostInputToken);
+
+        final DisplayManager displayManager = getSystemService(DisplayManager.class);
+        final Display targetDisplay = displayManager.getDisplay(displayId);
+        if (targetDisplay == null) {
+            sendResult(callback, /*surface*/ null);
+            return;
+        }
+        final Context displayContext = createDisplayContext(targetDisplay);
+
+        final SurfaceControlViewHost host = new SurfaceControlViewHost(displayContext,
+                displayContext.getDisplay(), hostInputToken);
         final SurfaceControl surface = host.getSurfacePackage().getSurfaceControl();
 
         final View suggestionView = onRenderSuggestion(presentation, width, height);
@@ -90,6 +104,11 @@ public abstract class InlineSuggestionRenderService extends Service {
                 new WindowManager.LayoutParams(width, height,
                         WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSPARENT);
         host.addView(suggestionRoot, lp);
+        sendResult(callback, surface);
+    }
+
+    private void sendResult(@NonNull IInlineSuggestionUiCallback callback,
+            @Nullable SurfaceControl surface) {
         try {
             callback.onContent(surface);
         } catch (RemoteException e) {
@@ -105,11 +124,11 @@ public abstract class InlineSuggestionRenderService extends Service {
                 @Override
                 public void renderSuggestion(@NonNull IInlineSuggestionUiCallback callback,
                         @NonNull InlinePresentation presentation, int width, int height,
-                        @Nullable IBinder hostInputToken) {
+                        @Nullable IBinder hostInputToken, int displayId) {
                     mHandler.sendMessage(obtainMessage(
                             InlineSuggestionRenderService::handleRenderSuggestion,
                             InlineSuggestionRenderService.this, callback, presentation,
-                            width, height, hostInputToken));
+                            width, height, hostInputToken, displayId));
                 }
             }.asBinder();
         }
