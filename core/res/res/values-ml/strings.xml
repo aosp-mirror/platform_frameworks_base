@@ -195,6 +195,14 @@
     <skip />
     <!-- no translation found for location_changed_notification_text (198907268219396399) -->
     <skip />
+    <!-- no translation found for country_detector (7023275114706088854) -->
+    <skip />
+    <!-- no translation found for location_service (2439187616018455546) -->
+    <skip />
+    <!-- no translation found for sensor_notification_service (7474531979178682676) -->
+    <skip />
+    <!-- no translation found for twilight_service (8964898045693187224) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"അഡ്‌മിൻ ആപ്പ് ഉപയോഗിക്കാനാകില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ മായ്ക്കപ്പെടും.\n\nനിങ്ങൾക്ക് ചോദ്യങ്ങൾ ഉണ്ടെങ്കിൽ, നിങ്ങളുടെ സ്ഥാപനത്തിന്റെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> പ്രിന്റിംഗ് പ്രവർത്തനരഹിതമാക്കി."</string>
@@ -549,8 +557,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസറില്ല."</string>
-    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"കൈവിരൽ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -594,8 +601,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് സജ്ജീകരിച്ചില്ല."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല."</string>
-    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
-    <skip />
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി."</string>
     <string name="face_name_template" msgid="3877037340223318119">"മുഖം <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1321,6 +1327,12 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB ഡീബഗ്ഗിംഗ് കണക്റ്റ് ചെയ്തു"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ഡീബഗ്ഗിംഗ് ഓഫാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ഡീബഗ്ഗുചെയ്യൽ പ്രവർത്തനരഹിതമാക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
+    <!-- no translation found for adbwifi_active_notification_title (6147343659168302473) -->
+    <skip />
+    <!-- no translation found for adbwifi_active_notification_message (930987922852867972) -->
+    <skip />
+    <!-- no translation found for adbwifi_active_notification_message (8633421848366915478) -->
+    <skip />
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"പരിശോധനാ സംവിധാനങ്ങൾ മോഡ് പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"പരിശോധനാ സംവിധാന മോഡ് പ്രവർത്തനരഹിതമാക്കാൻ ഫാക്‌ടറി പുനഃക്രമീകരണം നിർവഹിക്കുക."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"സീരിയൽ കൺസോൾ പ്രവർത്തനക്ഷമമാക്കി"</string>
@@ -1624,8 +1636,7 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> എന്നതിൽ നിന്നുള്ള പശ്ചാത്തലത്തിൽ ആരംഭിച്ച് ഫോർഗ്രൗണ്ടിൽ വരുന്ന സേവനത്തിന് ഭാവി R ബിൽഡുകളിൽ, \'ഉപയോഗിക്കുമ്പോൾ മാത്രമുള്ള അനുമതി\' ഉണ്ടായിരിക്കില്ല. go/r-bg-fgs-restriction കണ്ട് ബഗ് റിപ്പോർട്ട് ഫയൽ ചെയ്യുക."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"മുകളിൽക്കൊടുത്തിരിക്കുന്ന ശുപാർശചെയ്‌ത ലെവലിലേക്ക് വോളിയം വർദ്ധിപ്പിക്കണോ?\n\nഉയർന്ന വോളിയത്തിൽ ദീർഘനേരം കേൾക്കുന്നത് നിങ്ങളുടെ ശ്രവണ ശേഷിയെ ദോഷകരമായി ബാധിക്കാം."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ഉപയോഗസഹായി കുറുക്കുവഴി ഉപയോഗിക്കണോ?"</string>
-    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
-    <skip />
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"കുറുക്കുവഴി ഓണായിരിക്കുമ്പോൾ, രണ്ട് വോളിയം ബട്ടണുകളും 3 സെക്കൻഡ് നേരത്തേക്ക് അമർത്തുന്നത് ഉപയോഗസഹായി ഫീച്ചർ ആരംഭിക്കും."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"കുറുക്കുവഴികൾ തിരുത്തുക"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"റദ്ദാക്കുക"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"കുറുക്കുവഴി ‌ഓഫാക്കുക"</string>
@@ -2021,20 +2032,16 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> നിയന്ത്രിത ബക്കറ്റിലേക്ക് നീക്കി"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"വ്യക്തിപരമായത്"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ജോലിസ്ഥലം"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ഔദ്യോഗിക ആപ്പുകൾ ഉപയോഗിച്ച് പങ്കിടാനാവില്ല"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"വ്യക്തിപരമാക്കിയ ആപ്പുകൾ ഉപയോഗിച്ച് പങ്കിടാനാവില്ല"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"വ്യക്തിപരമാക്കിയ ആപ്പുകളുടെയും ഔദ്യോഗിക ആപ്പുകളുടെയും ഇടയിലുള്ള പങ്കിടൽ നിങ്ങളുടെ ഐടി അഡ്മിൻ ബ്ലോക്ക് ചെയ്തു"</string>
+    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"ഔദ്യോഗിക ആപ്പുകൾ ഓണാക്കുക"</string>
+    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"ഔദ്യോഗിക ആപ്പുകൾ, കോൺടാക്റ്റുകൾ എന്നിവ ആക്സസ് ചെയ്യാൻ ഔദ്യോഗിക ആപ്പുകൾ ഓണാക്കുക"</string>
+    <string name="resolver_no_apps_available" msgid="7710339903040989654">"ആപ്പുകളൊന്നും ലഭ്യമല്ല"</string>
+    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"ഞങ്ങൾക്ക് ആപ്പുകളൊന്നും കണ്ടെത്താൻ കഴിഞ്ഞില്ല"</string>
+    <string name="resolver_switch_on_work" msgid="8294542702883688533">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുക"</string>
+    <!-- no translation found for permlab_accessCallAudio (1682957511874097664) -->
     <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
-    <skip />
-    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
-    <skip />
-    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <!-- no translation found for permdesc_accessCallAudio (8448360894684277823) -->
     <skip />
 </resources>

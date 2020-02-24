@@ -193,6 +193,14 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‏‎‎‎‏‏‎‏‎‎‎‎‏‎‏‎‏‎‎‎‏‏‎‏‎‎‏‎‏‎‎‎‏‎‏‎‎‎‎‎Your organization manages this device and may monitor network traffic. Tap for details.‎‏‎‎‏‎"</string>
     <string name="location_changed_notification_title" msgid="4119726617105166830">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‎‎‏‎‏‏‎‎‎‎‏‏‎‏‎‏‏‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‎‏‏‎‎‏‏‏‎‎‎‏‏‏‏‎‏‏‏‎‎Location settings changed by your admin‎‏‎‎‏‎"</string>
     <string name="location_changed_notification_text" msgid="198907268219396399">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‎‎‎‎‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‏‏‏‎‏‎‏‏‏‏‎‎‎‎‏‎‎‏‎‏‏‏‏‎Tap to see your location settings.‎‏‎‎‏‎"</string>
+    <!-- no translation found for country_detector (7023275114706088854) -->
+    <skip />
+    <!-- no translation found for location_service (2439187616018455546) -->
+    <skip />
+    <!-- no translation found for sensor_notification_service (7474531979178682676) -->
+    <skip />
+    <!-- no translation found for twilight_service (8964898045693187224) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‎‏‎‎‎‏‎‏‎‏‏‎‏‎‏‎‏‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎Your device will be erased‎‏‎‎‏‎"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‎‎‎‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‎‏‎The admin app can\'t be used. Your device will now be erased.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎If you have questions, contact your organization\'s admin.‎‏‎‎‏‎"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‎‎‎‎‏‎‏‎‏‎‏‏‎‏‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‎‎‏‎‏‏‏‏‎‎‏‎Printing disabled by ‎‏‎‎‏‏‎<xliff:g id="OWNER_APP">%s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
@@ -1316,6 +1324,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‏‏‎‏‎‏‎‏‎‏‏‏‎‎‏‎‎‏‏‎‎‎‏‎‎‎‎‏‎‎‏‏‏‎‏‎‎‏‏‎‏‎‏‏‎‏‏‏‏‎‏‎‎‏‎‏‏‎USB debugging connected‎‏‎‎‏‎"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‏‏‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‎‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‏‏‎‎‎‎‏‏‎‎‎‏‏‏‎‎‎‏‏‎Tap to turn off USB debugging‎‏‎‎‏‎"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‎‏‏‏‎‏‏‏‏‎‎‏‎‎‎‏‏‎‎‏‎‏‎‏‎‎‏‏‏‎‎‎‎‎‎‎‏‏‏‎‏‏‎‎‎‎‎‏‏‎‏‏‏‎Select to disable USB debugging.‎‏‎‎‏‎"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‎‎‏‏‏‏‏‏‎‎‎‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‏‎‎‏‏‏‏‏‎‏‎‎‎‎‎‎‏‎‏‏‎‎‎‏‎‎‏‎Wireless debugging connected‎‏‎‎‏‎"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‏‏‏‎‏‎‏‏‏‎‎‎‏‎‎‎‏‎‎‏‎‏‎‏‎‏‎‎‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‎‏‏‏‏‏‎‎‎‎‏‎‎‎Tap to turn off wireless debugging‎‏‎‎‏‎"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‏‎‎‎‎‎‎‎‏‎‎‏‏‎‏‏‎‏‏‎‏‏‏‏‎‎‏‎‎‎‎‎‎‎‎‎‏‏‎‎‏‏‏‏‏‏‎‎‏‎‏‏‎‎Select to disable wireless debugging.‎‏‎‎‏‎"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‏‎‏‎‏‏‎‏‎‎‏‎‏‎‎‎‏‏‏‎‎‎‏‏‎‏‏‎‏‎‏‏‏‎‏‎‎‎‎‏‎‏‏‏‏‎Test Harness Mode enabled‎‏‎‎‏‎"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎‏‎‏‏‎‏‎‎‏‎‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‎‎‎‏‏‎‎‏‏‎‎‎‏‏‏‏‎‎‏‏‏‎‎‏‎‏‎‎‎Perform a factory reset to disable Test Harness Mode.‎‏‎‎‏‎"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‏‏‎‏‎‏‏‏‏‎‎‎‎‏‏‏‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‏‏‎‏‎‏‎‎‎‎‎‎‎Serial console enabled‎‏‎‎‏‎"</string>
@@ -2023,4 +2034,6 @@
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‏‎‎‎‎‎‎‎‎‏‎‏‎‎‎‎‏‎‏‎‎‏‎‏‎‎‏‏‎‏‎‏‎‎‏‎‎‎‏‏‏‎‎‏‎‏‎‎‏‏‏‎‏‎‏‏‎‎No apps available‎‏‎‎‏‎"</string>
     <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‎‏‎‏‏‎‏‎‏‎‎‏‏‎‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‏‏‏‏‎‎‏‎‏‎‏‏‏‏‎‎‎‏‏‎‎‎‎‏‎‎‎‎‎We couldn’t find any apps‎‏‎‎‏‎"</string>
     <string name="resolver_switch_on_work" msgid="8294542702883688533">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‏‏‎‎‎‎‏‎‎‎‏‎‏‎‏‎‎‏‎‎‎‏‎‏‎‎‏‏‏‎‏‏‎‎‎‎‏‏‎‏‎‎‎‎‎‏‎‏‎‏‎‏‎Switch on work‎‏‎‎‏‎"</string>
+    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‏‏‎‏‏‎‎‎‏‎‎‎‎‏‏‏‏‎‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‎‏‎‎‏‎‏‏‎‎‏‎‎‎‎‎‎‎‎‎‎Record or play audio in telephony calls‎‏‎‎‏‎"</string>
+    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‏‏‏‏‎‏‎‎‏‏‎‏‏‎‏‏‏‏‎‎‎‏‏‏‎‏‏‎‏‏‏‏‏‎‏‎‏‎‎‏‎‏‏‎‎‎‎‏‏‏‏‏‏‎Allows this app, when assigned as default dialer application, to record or play audio in telephony calls.‎‏‎‎‏‎"</string>
 </resources>

@@ -193,6 +193,14 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ඔබගේ ආයතනය මෙම උපාංගය කළමනාකරණය කරන අතර එය ජාල තදබදය නිරීක්ෂණය කළ හැක. විස්තර සඳහා තට්ටු කරන්න."</string>
     <string name="location_changed_notification_title" msgid="4119726617105166830">"ස්ථාන සැකසීම් ඔබේ පරිපාලක විසින් වෙනස් කරන ලදී"</string>
     <string name="location_changed_notification_text" msgid="198907268219396399">"ඔබේ ස්ථාන සැකසීම් බැලීමට තට්ටු කරන්න."</string>
+    <!-- no translation found for country_detector (7023275114706088854) -->
+    <skip />
+    <!-- no translation found for location_service (2439187616018455546) -->
+    <skip />
+    <!-- no translation found for sensor_notification_service (7474531979178682676) -->
+    <skip />
+    <!-- no translation found for twilight_service (8964898045693187224) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"පරිපාලක යෙදුම භාවිතා කළ නොහැකිය. ඔබේ උපාංගය දැන් මකා දමනු ඇත.\n\nඔබට ප්‍රශ්න තිබේ නම්, ඔබේ සංවිධානයේ පරිපාලකට අමතන්න."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> විසින් මුද්‍රණය කිරීම අබල කර ඇත."</string>
@@ -546,8 +554,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ඇඟිලි සලකුණු ඇතුළත් කර නොමැත."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"මෙම උපාංගයේ ඇඟිලි සලකුණු සංවේදකයක් නොමැත."</string>
-    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -591,8 +598,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"මුහුණ සත්‍යාපන කළ නොහැක. නැවත උත්සාහ කරන්න."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"ඔබ මුහුණු අඟුලු ඇරීම සකසා නැත"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"මෙම උපාංගයෙහි මුහුණු අඟුලු ඇරීමට සහය නොදැක්වේ"</string>
-    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
-    <skip />
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"සංවේදකය තාවකාලිකව අබල කර ඇත."</string>
     <string name="face_name_template" msgid="3877037340223318119">"මුහුණු <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1320,6 +1326,12 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB නිදොස්කරණය සම්බන්ධිතයි"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB නිදොස් කිරීම ක්‍රියාවිරහිත කිරීමට තට්ටු කරන්න"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB නිදොස්කරණය අබල කිරීමට තෝරන්න."</string>
+    <!-- no translation found for adbwifi_active_notification_title (6147343659168302473) -->
+    <skip />
+    <!-- no translation found for adbwifi_active_notification_message (930987922852867972) -->
+    <skip />
+    <!-- no translation found for adbwifi_active_notification_message (8633421848366915478) -->
+    <skip />
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"පුරක පරීක්‍ෂා ප්‍රකාරය සබලයි"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"පුරක පරීක්‍ෂා ප්‍රකාරය අබල කිරීමට කර්මාන්තශාලා යළි සැකසීමක් ඉටු කරන්න."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"අනුක්‍රමික කොන්සෝලය සබලයි"</string>
@@ -1623,8 +1635,7 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> වෙතින් පසුබිම ආරම්භ කරන ලද පෙරබිම් සේවාව අනාගත R තැනුම්වලදී භාවිතයේ අවසරය නැත. කරුණාකර go/r-bg-fgs-අවහිරතාව බලා දෝෂ වාර්තාවක් ගොනු කරන්න."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"නිර්දේශිතයි මට්ටමට වඩා ශබ්දය වැඩිද?\n\nදිගු කාලයක් සඳහා ඉහළ ශබ්දයක් ඇසීමෙන් ඇතැම් විට ඔබගේ ඇසීමට හානි විය හැක."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ප්‍රවේශ්‍යතා කෙටිමඟ භාවිතා කරන්නද?"</string>
-    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
-    <skip />
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"කෙටිමග ක්‍රියාත්මක විට, හඬ පරිමා බොත්තම් දෙකම තත්පර 3ක් තිස්සේ එබීමෙන් ප්‍රවේශ්‍යතා විශේෂාංගය ආරම්භ වනු ඇත."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"කෙටිමං සංස්කරණ කරන්න"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"අවලංගු කරන්න"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"කෙටිමඟ ක්‍රියාවිරහිත කරන්න"</string>
@@ -2020,20 +2031,16 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> අවහිර කළ බාල්දියට දමා ඇත"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"පුද්ගලික"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"කාර්යාල"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"කාර්යාල යෙදුම් සමග බෙදා ගැනීමට නොහැකිය"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"පෞද්ගලික යෙදුම් සමග බෙදා ගැනීමට නොහැකිය"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"ඔබේ IT පරිපාලක පෞද්ගලික සහ කාර්යාල යෙදුම් අතර බෙදා ගැනීම අවහිර කළා"</string>
+    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"කාර්යාල යෙදුම් ක්‍රියාත්මක කරන්න"</string>
+    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"කාර්යාල යෙදුම් &amp; සම්බන්ධතා වෙත ප්‍රවේශ වීමට කාර්යාල යෙදුම් ක්‍රියාත්මක කරන්න"</string>
+    <string name="resolver_no_apps_available" msgid="7710339903040989654">"ලබා ගත හැකි යෙදුම් නැත"</string>
+    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"අපට කිසිදු යෙදුමක් සොයා ගැනීමට නොහැකි විය"</string>
+    <string name="resolver_switch_on_work" msgid="8294542702883688533">"කාර්යාලයට මාරු කරන්න"</string>
+    <!-- no translation found for permlab_accessCallAudio (1682957511874097664) -->
     <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
-    <skip />
-    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
-    <skip />
-    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <!-- no translation found for permdesc_accessCallAudio (8448360894684277823) -->
     <skip />
 </resources>
