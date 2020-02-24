@@ -320,12 +320,9 @@ public class SmsMessage {
      * @param data Message data.
      * @param isCdma Indicates weather the type of the SMS is CDMA.
      * @return An SmsMessage representing the message.
-     *
-     * @hide
      */
-    @SystemApi
     @Nullable
-    public static SmsMessage createFromNativeSmsSubmitPdu(@NonNull byte[] data, boolean isCdma) {
+    public static SmsMessage createSmsSubmitPdu(@NonNull byte[] data, boolean isCdma) {
         SmsMessageBase wrappedMessage;
 
         if (isCdma) {
