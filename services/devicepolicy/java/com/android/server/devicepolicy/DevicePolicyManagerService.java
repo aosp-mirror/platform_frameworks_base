@@ -4674,22 +4674,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return getUserDataUnchecked(userHandle).mAdminList;
         }
         ArrayList<ActiveAdmin> admins = new ArrayList<>();
-        for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
-            DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
-            if (userInfo.id == userHandle) {
-                admins.addAll(policy.mAdminList);
-            } else if (userInfo.isManagedProfile()) {
-                // For managed profiles, policies set on the parent profile will be included
-                for (int i = 0; i < policy.mAdminList.size(); i++) {
-                    ActiveAdmin admin = policy.mAdminList.get(i);
-                    if (admin.hasParentActiveAdmin()) {
-                        admins.add(admin.getParentActiveAdmin());
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
+                if (userInfo.id == userHandle) {
+                    admins.addAll(policy.mAdminList);
+                } else if (userInfo.isManagedProfile()) {
+                    // For managed profiles, policies set on the parent profile will be included
+                    for (int i = 0; i < policy.mAdminList.size(); i++) {
+                        ActiveAdmin admin = policy.mAdminList.get(i);
+                        if (admin.hasParentActiveAdmin()) {
+                            admins.add(admin.getParentActiveAdmin());
+                        }
                     }
+                } else {
+                    Slog.w(LOG_TAG, "Unknown user type: " + userInfo);
                 }
-            } else {
-                Slog.w(LOG_TAG, "Unknown user type: " + userInfo);
             }
-        }
+        });
         return admins;
     }
 
