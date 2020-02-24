@@ -7374,28 +7374,6 @@ package android.service.carrier {
     method @NonNull @WorkerThread public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
   }
 
-  public abstract class CarrierMessagingServiceWrapper {
-    ctor public CarrierMessagingServiceWrapper();
-    method public boolean bindToCarrierMessagingService(@NonNull android.content.Context, @NonNull String);
-    method public void disposeConnection(@NonNull android.content.Context);
-    method public void downloadMms(@NonNull android.net.Uri, int, @NonNull android.net.Uri, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-    method public void filterSms(@NonNull android.service.carrier.MessagePdu, @NonNull String, int, int, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-    method public abstract void onServiceReady();
-    method public void sendDataSms(@NonNull byte[], int, @NonNull String, int, int, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-    method public void sendMms(@NonNull android.net.Uri, int, @NonNull android.net.Uri, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-    method public void sendMultipartTextSms(@NonNull java.util.List<java.lang.String>, int, @NonNull String, int, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-    method public void sendTextSms(@NonNull String, int, @NonNull String, int, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-  }
-
-  public abstract static class CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper {
-    ctor public CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper();
-    method public void onDownloadMmsComplete(int);
-    method public void onFilterComplete(int);
-    method public void onSendMmsComplete(int, @Nullable byte[]);
-    method public void onSendMultipartSmsComplete(int, @Nullable int[]);
-    method public void onSendSmsComplete(int, int);
-  }
-
 }
 
 package android.service.contentcapture {
