@@ -34,9 +34,9 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-public final class WifiOemMigrationHook {
+public final class WifiMigration {
 
-    private WifiOemMigrationHook() { }
+    private WifiMigration() { }
 
     /**
      * Container for all the wifi config data to migrate.

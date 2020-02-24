@@ -7554,6 +7554,51 @@ package android.net.wifi {
     method public void stop(int);
   }
 
+  public final class WifiMigration {
+    method @Nullable public static android.net.wifi.WifiMigration.ConfigStoreMigrationData loadFromConfigStore();
+    method @NonNull public static android.net.wifi.WifiMigration.SettingsMigrationData loadFromSettings(@NonNull android.content.Context);
+  }
+
+  public static final class WifiMigration.ConfigStoreMigrationData implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
+    method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiMigration.ConfigStoreMigrationData> CREATOR;
+  }
+
+  public static final class WifiMigration.ConfigStoreMigrationData.Builder {
+    ctor public WifiMigration.ConfigStoreMigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData build();
+    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
+    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
+  }
+
+  public static final class WifiMigration.SettingsMigrationData implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getP2pDeviceName();
+    method public boolean isP2pFactoryResetPending();
+    method public boolean isScanAlwaysAvailable();
+    method public boolean isScanThrottleEnabled();
+    method public boolean isSoftApTimeoutEnabled();
+    method public boolean isVerboseLoggingEnabled();
+    method public boolean isWakeUpEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiMigration.SettingsMigrationData> CREATOR;
+  }
+
+  public static final class WifiMigration.SettingsMigrationData.Builder {
+    ctor public WifiMigration.SettingsMigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData build();
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setP2pDeviceName(@Nullable String);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setP2pFactoryResetPending(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setScanAlwaysAvailable(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setScanThrottleEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setSoftApTimeoutEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setVerboseLoggingEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setWakeUpEnabled(boolean);
+  }
+
   public class WifiNetworkConnectionStatistics implements android.os.Parcelable {
     ctor public WifiNetworkConnectionStatistics(int, int);
     ctor public WifiNetworkConnectionStatistics();
@@ -7576,51 +7621,6 @@ package android.net.wifi {
 
   public static final class WifiNetworkSuggestion.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
-  }
-
-  public final class WifiOemMigrationHook {
-    method @Nullable public static android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData loadFromConfigStore();
-    method @NonNull public static android.net.wifi.WifiOemMigrationHook.SettingsMigrationData loadFromSettings(@NonNull android.content.Context);
-  }
-
-  public static final class WifiOemMigrationHook.ConfigStoreMigrationData implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
-    method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData> CREATOR;
-  }
-
-  public static final class WifiOemMigrationHook.ConfigStoreMigrationData.Builder {
-    ctor public WifiOemMigrationHook.ConfigStoreMigrationData.Builder();
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData build();
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
-  }
-
-  public static final class WifiOemMigrationHook.SettingsMigrationData implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public String getP2pDeviceName();
-    method public boolean isP2pFactoryResetPending();
-    method public boolean isScanAlwaysAvailable();
-    method public boolean isScanThrottleEnabled();
-    method public boolean isSoftApTimeoutEnabled();
-    method public boolean isVerboseLoggingEnabled();
-    method public boolean isWakeUpEnabled();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemMigrationHook.SettingsMigrationData> CREATOR;
-  }
-
-  public static final class WifiOemMigrationHook.SettingsMigrationData.Builder {
-    ctor public WifiOemMigrationHook.SettingsMigrationData.Builder();
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData build();
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setP2pDeviceName(@Nullable String);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setP2pFactoryResetPending(boolean);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setScanAlwaysAvailable(boolean);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setScanThrottleEnabled(boolean);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setSoftApTimeoutEnabled(boolean);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setVerboseLoggingEnabled(boolean);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setWakeUpEnabled(boolean);
   }
 
   public class WifiScanner {
