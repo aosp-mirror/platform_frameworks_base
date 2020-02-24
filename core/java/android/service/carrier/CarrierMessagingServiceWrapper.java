@@ -18,7 +18,6 @@ package android.service.carrier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -47,7 +46,6 @@ import java.util.List;
  * CarrierMessagingService.
  * @hide
  */
-@SystemApi
 public abstract class CarrierMessagingServiceWrapper {
     // Populated by bindToCarrierMessagingService. bindToCarrierMessagingService must complete
     // prior to calling disposeConnection so that mCarrierMessagingServiceConnection is initialized.
@@ -64,7 +62,6 @@ public abstract class CarrierMessagingServiceWrapper {
      * @return true upon successfully binding to a carrier messaging service, false otherwise
      * @hide
      */
-    @SystemApi
     public boolean bindToCarrierMessagingService(@NonNull Context context,
             @NonNull String carrierPackageName) {
         Preconditions.checkState(mCarrierMessagingServiceConnection == null);
@@ -82,7 +79,6 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param context the context
      * @hide
      */
-    @SystemApi
     public void disposeConnection(@NonNull Context context) {
         Preconditions.checkNotNull(mCarrierMessagingServiceConnection);
         context.unbindService(mCarrierMessagingServiceConnection);
@@ -93,7 +89,6 @@ public abstract class CarrierMessagingServiceWrapper {
      * Implemented by subclasses to use the carrier messaging service once it is ready.
      * @hide
      */
-    @SystemApi
     public abstract void onServiceReady();
 
     /**
@@ -117,7 +112,6 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param callback the callback to notify upon completion
      * @hide
      */
-    @SystemApi
     public void filterSms(@NonNull MessagePdu pdu, @NonNull String format, int destPort,
             int subId, @NonNull final CarrierMessagingCallbackWrapper callback) {
         if (mICarrierMessagingService != null) {
@@ -142,7 +136,6 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param callback the callback to notify upon completion
      * @hide
      */
-    @SystemApi
     public void sendTextSms(@NonNull String text, int subId, @NonNull String destAddress,
             int sendSmsFlag, @NonNull final CarrierMessagingCallbackWrapper callback) {
         if (mICarrierMessagingService != null) {
@@ -168,7 +161,6 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param callback the callback to notify upon completion
      * @hide
      */
-    @SystemApi
     public void sendDataSms(@NonNull byte[] data, int subId, @NonNull String destAddress,
             int destPort, int sendSmsFlag,
             @NonNull final CarrierMessagingCallbackWrapper callback) {
@@ -194,7 +186,6 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param callback the callback to notify upon completion
      * @hide
      */
-    @SystemApi
     public void sendMultipartTextSms(@NonNull List<String> parts, int subId,
             @NonNull String destAddress, int sendSmsFlag,
             @NonNull final CarrierMessagingCallbackWrapper callback) {
@@ -220,7 +211,6 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param callback the callback to notify upon completion
      * @hide
      */
-    @SystemApi
     public void sendMms(@NonNull Uri pduUri, int subId, @NonNull Uri location,
             @NonNull final CarrierMessagingCallbackWrapper callback) {
         if (mICarrierMessagingService != null) {
@@ -244,7 +234,6 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param callback the callback to notify upon completion
      * @hide
      */
-    @SystemApi
     public void downloadMms(@NonNull Uri pduUri, int subId, @NonNull Uri location,
             @NonNull final CarrierMessagingCallbackWrapper callback) {
         if (mICarrierMessagingService != null) {
@@ -276,7 +265,6 @@ public abstract class CarrierMessagingServiceWrapper {
      * {@link CarrierMessagingServiceWrapper}.
      * @hide
      */
-    @SystemApi
     public abstract static class CarrierMessagingCallbackWrapper {
 
         /**
@@ -289,7 +277,6 @@ public abstract class CarrierMessagingServiceWrapper {
          *               {@see CarrierMessagingService#onReceiveTextSms}.
          * @hide
          */
-        @SystemApi
         public void onFilterComplete(int result) {
 
         }
@@ -304,7 +291,6 @@ public abstract class CarrierMessagingServiceWrapper {
          *                   only if result is {@link CarrierMessagingService#SEND_STATUS_OK}.
          * @hide
          */
-        @SystemApi
         public void onSendSmsComplete(int result, int messageRef) {
 
         }
@@ -319,7 +305,6 @@ public abstract class CarrierMessagingServiceWrapper {
          *                    {@link CarrierMessagingService#SEND_STATUS_OK}.
          * @hide
          */
-        @SystemApi
         public void onSendMultipartSmsComplete(int result, @Nullable int[] messageRefs) {
 
         }
@@ -334,7 +319,6 @@ public abstract class CarrierMessagingServiceWrapper {
          *                    {@link CarrierMessagingService#SEND_STATUS_OK}.
          * @hide
          */
-        @SystemApi
         public void onSendMmsComplete(int result, @Nullable byte[] sendConfPdu) {
 
         }
@@ -346,7 +330,6 @@ public abstract class CarrierMessagingServiceWrapper {
          *               and {@link CarrierMessagingService#SEND_STATUS_ERROR}.
          * @hide
          */
-        @SystemApi
         public void onDownloadMmsComplete(int result) {
 
         }
