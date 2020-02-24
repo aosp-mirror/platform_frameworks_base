@@ -8189,7 +8189,7 @@ message FrameTimingHistogram {
  */
 message CameraActionEvent {
     // Camera session duration
-    optional int64 duration = 1;
+    optional int64 duration_millis = 1;
 
     // Camera API level used
     optional int32 api_level = 2;
