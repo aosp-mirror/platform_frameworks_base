@@ -131,8 +131,16 @@ public final class CameraManager {
     }
 
     /**
-     * Return the list of combinations of currently connected camera devices identifiers, which
+     * Return the set of combinations of currently connected camera device identifiers, which
      * support configuring camera device sessions concurrently.
+     *
+     * <p>The devices in these combinations can be concurrently configured by the same
+     * client camera application. Using these camera devices concurrently by two different
+     * applications is not guaranteed to be supported, however.</p>
+     *
+     * <p>Each device in a combination, is guaranteed to support stream combinations which may be
+     * obtained by querying {@link #getCameraCharacteristics} for the key
+     * {@link android.hardware.camera2.CameraCharacteristics#SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS}.</p>
      *
      * <p>The set of combinations may include camera devices that may be in use by other camera API
      * clients.</p>
@@ -174,7 +182,7 @@ public final class CameraManager {
      * to be used for exploring the entire space of supported concurrent stream combinations. The
      * available mandatory concurrent stream combinations may be obtained by querying
      * {@link #getCameraCharacteristics} for the key
-     * SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS. </p>
+     * {@link android.hardware.camera2.CameraCharacteristics#SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS}. </p>
      *
      * <p>Note that session parameters will be ignored and calls to
      * {@link SessionConfiguration#setSessionParameters} are not required.</p>
