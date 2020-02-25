@@ -18,20 +18,19 @@ package com.android.server.om;
 
 import static android.content.Context.IDMAP_SERVICE;
 
-import static com.android.server.om.OverlayManagerService.DEBUG;
 import static com.android.server.om.OverlayManagerService.TAG;
 
 import android.os.IBinder;
 import android.os.IIdmap2;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
+import android.os.SystemClock;
+import android.os.SystemService;
 import android.util.Slog;
 
 import com.android.server.FgThread;
 
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -45,13 +44,14 @@ class IdmapDaemon {
 
     // The amount of time in milliseconds to wait when attempting to connect to idmap service.
     private static final int SERVICE_CONNECT_TIMEOUT_MS = 5000;
+    private static final int SERVICE_CONNECT_INTERVAL_SLEEP_MS = 200;
 
-    private static final Object IDMAP_TOKEN = new Object();
     private static final String IDMAP_DAEMON = "idmap2d";
 
     private static IdmapDaemon sInstance;
     private volatile IIdmap2 mService;
     private final AtomicInteger mOpenedCount = new AtomicInteger();
+    private final Object mIdmapToken = new Object();
 
     /**
      * An {@link AutoCloseable} connection to the idmap service. When the connection is closed or
@@ -62,14 +62,14 @@ class IdmapDaemon {
         private boolean mOpened = true;
 
         private Connection() {
-            synchronized (IDMAP_TOKEN) {
+            synchronized (mIdmapToken) {
                 mOpenedCount.incrementAndGet();
             }
         }
 
         @Override
         public void close() {
-            synchronized (IDMAP_TOKEN) {
+            synchronized (mIdmapToken) {
                 if (!mOpened) {
                     return;
                 }
@@ -82,7 +82,7 @@ class IdmapDaemon {
                 }
 
                 FgThread.getHandler().postDelayed(() -> {
-                    synchronized (IDMAP_TOKEN) {
+                    synchronized (mIdmapToken) {
                         // Only stop the service if the service does not have an open connection.
                         if (mService == null || mOpenedCount.get() != 0) {
                             return;
@@ -91,7 +91,7 @@ class IdmapDaemon {
                         stopIdmapService();
                         mService = null;
                     }
-                }, IDMAP_TOKEN, SERVICE_TIMEOUT_MS);
+                }, mIdmapToken, SERVICE_TIMEOUT_MS);
             }
         }
     }
@@ -104,14 +104,14 @@ class IdmapDaemon {
     }
 
     String createIdmap(String targetPath, String overlayPath, int policies, boolean enforce,
-            int userId) throws Exception {
-        try (Connection connection = connect()) {
+            int userId) throws TimeoutException, RemoteException {
+        try (Connection c = connect()) {
             return mService.createIdmap(targetPath, overlayPath, policies, enforce, userId);
         }
     }
 
-    boolean removeIdmap(String overlayPath, int userId) throws Exception {
-        try (Connection connection = connect()) {
+    boolean removeIdmap(String overlayPath, int userId) throws TimeoutException, RemoteException {
+        try (Connection c = connect()) {
             return mService.removeIdmap(overlayPath, userId);
         }
     }
@@ -119,76 +119,54 @@ class IdmapDaemon {
     boolean verifyIdmap(String targetPath, String overlayPath, int policies, boolean enforce,
              int userId)
             throws Exception {
-        try (Connection connection = connect()) {
+        try (Connection c = connect()) {
             return mService.verifyIdmap(targetPath, overlayPath, policies, enforce, userId);
         }
     }
 
-    String getIdmapPath(String overlayPath, int userId) throws Exception {
-        try (Connection connection = connect()) {
+    String getIdmapPath(String overlayPath, int userId) throws TimeoutException, RemoteException {
+        try (Connection c = connect()) {
             return mService.getIdmapPath(overlayPath, userId);
         }
     }
 
-    private static void startIdmapService() {
-        SystemProperties.set("ctl.start", IDMAP_DAEMON);
+    private IBinder getIdmapService() throws TimeoutException, RemoteException {
+        SystemService.start(IDMAP_DAEMON);
+
+        final long endMillis = SystemClock.elapsedRealtime() + SERVICE_CONNECT_TIMEOUT_MS;
+        while (SystemClock.elapsedRealtime() <= endMillis) {
+            final IBinder binder = ServiceManager.getService(IDMAP_SERVICE);
+            if (binder != null) {
+                binder.linkToDeath(
+                        () -> Slog.w(TAG, String.format("service '%s' died", IDMAP_SERVICE)), 0);
+                return binder;
+            }
+
+            try {
+                Thread.sleep(SERVICE_CONNECT_INTERVAL_SLEEP_MS);
+            } catch (InterruptedException ignored) {
+            }
+        }
+
+        throw new TimeoutException(
+            String.format("Failed to connect to '%s' in %d milliseconds", IDMAP_SERVICE,
+                    SERVICE_CONNECT_TIMEOUT_MS));
     }
 
     private static void stopIdmapService() {
-        SystemProperties.set("ctl.stop", IDMAP_DAEMON);
+        SystemService.stop(IDMAP_DAEMON);
     }
 
-    private Connection connect() throws Exception {
-        synchronized (IDMAP_TOKEN) {
-            FgThread.getHandler().removeCallbacksAndMessages(IDMAP_TOKEN);
+    private Connection connect() throws TimeoutException, RemoteException {
+        synchronized (mIdmapToken) {
+            FgThread.getHandler().removeCallbacksAndMessages(mIdmapToken);
             if (mService != null) {
                 // Not enough time has passed to stop the idmap service. Reuse the existing
                 // interface.
                 return new Connection();
             }
 
-            // Start the idmap service if it is not currently running.
-            startIdmapService();
-
-            // Block until the service is found.
-            FutureTask<IBinder> bindIdmap = new FutureTask<>(() -> {
-                while (true) {
-                    try {
-                        IBinder binder = ServiceManager.getService(IDMAP_SERVICE);
-                        if (binder != null) {
-                            return binder;
-                        }
-                    } catch (Exception e) {
-                        Slog.e(TAG, "service '" + IDMAP_SERVICE + "' not retrieved; "
-                                + e.getMessage());
-                    }
-                    Thread.sleep(100);
-                }
-            });
-
-            IBinder binder;
-            try {
-                FgThread.getHandler().postAtFrontOfQueue(bindIdmap);
-                binder = bindIdmap.get(SERVICE_CONNECT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-            } catch (Exception rethrow) {
-                Slog.e(TAG, "service '" + IDMAP_SERVICE + "' not found;");
-                throw rethrow;
-            }
-
-            try {
-                binder.linkToDeath(() -> {
-                    Slog.w(TAG, "service '" + IDMAP_SERVICE + "' died");
-                }, 0);
-            } catch (RemoteException rethrow) {
-                Slog.e(TAG, "service '" + IDMAP_SERVICE + "' failed to be bound");
-                throw rethrow;
-            }
-
-            mService = IIdmap2.Stub.asInterface(binder);
-            if (DEBUG) {
-                Slog.d(TAG, "service '" + IDMAP_SERVICE + "' connected");
-            }
-
+            mService = IIdmap2.Stub.asInterface(getIdmapService());
             return new Connection();
         }
     }
