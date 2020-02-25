@@ -354,14 +354,13 @@ public class AppsFilter {
      * Grants access based on an interaction between a calling and target package, granting
      * visibility of the caller from the target.
      *
-     * @param callingUid the uid initiating the interaction
-     * @param targetUid  the uid being interacted with and thus gaining visibility of the
-     *                   initiating uid.
+     * @param recipientUid the uid gaining visibility of the {@code visibleUid}.
+     * @param visibleUid the uid becoming visible to the {@recipientUid}
      */
-    public void grantImplicitAccess(int callingUid, int targetUid) {
-        if (targetUid != callingUid
-                && mImplicitlyQueryable.add(targetUid, callingUid) && DEBUG_LOGGING) {
-            Slog.wtf(TAG, "implicit access granted: " + targetUid + " -> " + callingUid);
+    public void grantImplicitAccess(int recipientUid, int visibleUid) {
+        if (recipientUid != visibleUid
+                && mImplicitlyQueryable.add(recipientUid, visibleUid) && DEBUG_LOGGING) {
+            Slog.wtf(TAG, "implicit access granted: " + recipientUid + " -> " + visibleUid);
         }
     }
 
