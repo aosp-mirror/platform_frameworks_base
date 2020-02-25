@@ -430,13 +430,6 @@ public class PackageParserTest {
             ParsedProvider b
     ) {
         assertComponentsEqual(a, b);
-
-        // Sanity check for ProviderInfo
-        ProviderInfo aInfo = PackageInfoUtils.generateProviderInfo(aPkg, a, 0,
-                new PackageUserState(), 0, mockPkgSetting(aPkg));
-        ProviderInfo bInfo = PackageInfoUtils.generateProviderInfo(bPkg, b, 0,
-                new PackageUserState(), 0, mockPkgSetting(bPkg));
-        assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }
 
