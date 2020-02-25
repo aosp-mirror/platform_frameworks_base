@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.notification.ConversationNotificationManag
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -187,10 +188,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
     private KeyguardClockSwitchController mKeyguardClockSwitchController;
-    private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController =
-            new NotificationStackScrollLayoutController();
-    private FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
-
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
 
@@ -215,7 +212,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         when(mKeyguardBottomArea.getRightView()).thenReturn(mock(KeyguardAffordanceView.class));
         when(mView.findViewById(R.id.big_clock_container)).thenReturn(mBigClockContainer);
         when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
-        mFlingAnimationUtilsBuilder = new FlingAnimationUtils.Builder(mDisplayMetrics);
+        FlingAnimationUtils.Builder flingAnimationUtilsBuilder = new FlingAnimationUtils.Builder(
+                mDisplayMetrics);
 
         doAnswer((Answer<Void>) invocation -> {
             mTouchHandler = invocation.getArgument(0);
@@ -235,6 +233,11 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mock(NotificationRoundnessManager.class),
                 mStatusBarStateController,
                 new FalsingManagerFake());
+        NotificationStackScrollLayoutController notificationStackScrollLayoutController =
+                new NotificationStackScrollLayoutController(
+                        true /* allowLongPress */,
+                        mock(NotificationGutsManager.class)
+                );
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mInjectionInflationController,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
@@ -244,11 +247,11 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mMetricsLogger, mActivityManager, mZenModeController, mConfigurationController,
-                mFlingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
+                flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 () -> mKeyguardClockSwitchController,
-                mNotificationStackScrollLayoutController);
+                notificationStackScrollLayoutController);
         mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
                 mNotificationShelfController, mNotificationAreaController, mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
@@ -256,8 +259,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
 
         ArgumentCaptor<View.AccessibilityDelegate> accessibilityDelegateArgumentCaptor =
                 ArgumentCaptor.forClass(View.AccessibilityDelegate.class);
-        verify(mView)
-                .setAccessibilityDelegate(accessibilityDelegateArgumentCaptor.capture());
+        verify(mView).setAccessibilityDelegate(accessibilityDelegateArgumentCaptor.capture());
         mAccessibiltyDelegate = accessibilityDelegateArgumentCaptor.getValue();
     }
 
