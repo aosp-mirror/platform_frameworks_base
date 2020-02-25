@@ -26,8 +26,6 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.BoundsAnimationController.BOUNDS;
-import static com.android.server.wm.BoundsAnimationController.FADE_IN;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
@@ -425,11 +423,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         if (controller == null) {
             return;
         }
-
-        final DisplayContent dc =
-                mService.mRootWindowContainer.getDefaultDisplay().mDisplayContent;
-        dc.mBoundsAnimationController.setAnimationType(
-                controller.shouldDeferCancelUntilNextTransition() ? FADE_IN : BOUNDS);
 
         // We defer canceling the recents animation until the next app transition in the following
         // cases:

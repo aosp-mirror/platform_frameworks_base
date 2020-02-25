@@ -111,7 +111,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.Icon;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -120,7 +119,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.DisplayInfo;
@@ -2910,8 +2908,7 @@ class Task extends WindowContainer<WindowContainer> {
      * we will have a jump at the end.
      */
     boolean isFloating() {
-        return getWindowConfiguration().tasksAreFloating()
-                && !getStack().isAnimatingBoundsToFullscreen() && !mPreserveNonFloatingState;
+        return getWindowConfiguration().tasksAreFloating() && !mPreserveNonFloatingState;
     }
 
     /**
