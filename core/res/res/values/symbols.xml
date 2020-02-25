@@ -3052,6 +3052,7 @@
   <!-- Override Wake Key Behavior When Screen is Off -->
   <java-symbol type="bool" name="config_wakeOnDpadKeyPress" />
   <java-symbol type="bool" name="config_wakeOnAssistKeyPress" />
+  <java-symbol type="bool" name="config_wakeOnBackKeyPress" />
 
   <!-- Pinner Service -->
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />

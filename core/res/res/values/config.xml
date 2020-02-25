@@ -4404,6 +4404,7 @@
          Determines whether the specified key groups can be used to wake up the device. -->
     <bool name="config_wakeOnDpadKeyPress">true</bool>
     <bool name="config_wakeOnAssistKeyPress">true</bool>
+    <bool name="config_wakeOnBackKeyPress">true</bool>
 
     <!-- Whether to default to an expanded list of users on the lock screen user switcher. -->
     <bool name="config_expandLockScreenUserSwitcher">false</bool>
