@@ -50,7 +50,9 @@ import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.pip.BasePipManager;
+import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipBoundsHandler;
+import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -66,7 +68,7 @@ import javax.inject.Singleton;
  * Manages the picture-in-picture (PIP) UI and states.
  */
 @Singleton
-public class PipManager implements BasePipManager {
+public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitionCallback {
     private static final String TAG = "PipManager";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -91,7 +93,6 @@ public class PipManager implements BasePipManager {
     private static final int INVALID_RESOURCE_TYPE = -1;
 
     public static final int SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH = 0x1;
-    public static final int SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_OVERLAY_ACTIVITY_FINISH = 0x2;
 
     /**
      * PIPed activity is playing a media and it can be paused.
@@ -112,6 +113,7 @@ public class PipManager implements BasePipManager {
 
     private Context mContext;
     private PipBoundsHandler mPipBoundsHandler;
+    private PipTaskOrganizer mPipTaskOrganizer;
     private IActivityTaskManager mActivityTaskManager;
     private MediaSessionManager mMediaSessionManager;
     private int mState = STATE_NO_PIP;
@@ -205,8 +207,7 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment,
-                boolean fromShelfAdjustment) {
+        public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment) {
             mHandler.post(() -> {
                 // Populate the inset / normal bounds and DisplayInfo from mPipBoundsHandler first.
                 mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
@@ -234,6 +235,8 @@ public class PipManager implements BasePipManager {
         mInitialized = true;
         mContext = context;
         mPipBoundsHandler = new PipBoundsHandler(context);
+        mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler);
+        mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();
@@ -279,9 +282,12 @@ public class PipManager implements BasePipManager {
 
         mMediaSessionManager =
                 (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
+        mPipTaskOrganizer.registerPipTransitionCallback(this);
 
         try {
             WindowManagerWrapper.getInstance().addPinnedStackListener(mPinnedStackListener);
+            ActivityTaskManager.getTaskOrganizerController().registerTaskOrganizer(
+                    mPipTaskOrganizer, WINDOWING_MODE_PINNED);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
@@ -422,20 +428,13 @@ public class PipManager implements BasePipManager {
             case STATE_PIP_MENU:
                 mCurrentPipBounds = mMenuModePipBounds;
                 break;
-            case STATE_PIP:
-                mCurrentPipBounds = mPipBounds;
-                break;
+            case STATE_PIP: // fallthrough
             default:
                 mCurrentPipBounds = mPipBounds;
                 break;
         }
-        try {
-            int animationDurationMs = -1;
-            mActivityTaskManager.animateResizePinnedStack(mPinnedStackId, mCurrentPipBounds,
-                    animationDurationMs);
-        } catch (RemoteException e) {
-            Log.e(TAG, "resizeStack failed", e);
-        }
+        mPipTaskOrganizer.resizePinnedStack(
+                mCurrentPipBounds, PipAnimationController.DURATION_DEFAULT_MS);
     }
 
     /**
@@ -446,13 +445,6 @@ public class PipManager implements BasePipManager {
             return mResumeResizePinnedStackRunnableState;
         }
         return mState;
-    }
-
-    /**
-     * Returns the default PIP bound.
-     */
-    public Rect getPipBounds() {
-        return mPipBounds;
     }
 
     /**
@@ -692,18 +684,27 @@ public class PipManager implements BasePipManager {
             // If PIPed activity is launched again by Launcher or intent, make it fullscreen.
             movePipToFullscreen();
         }
-
-        @Override
-        public void onPinnedStackAnimationEnded() {
-            if (DEBUG) Log.d(TAG, "onPinnedStackAnimationEnded()");
-
-            switch (getState()) {
-                case STATE_PIP_MENU:
-                    showPipMenu();
-                    break;
-            }
-        }
     };
+
+    @Override
+    public void onPipTransitionStarted() { }
+
+    @Override
+    public void onPipTransitionFinished() {
+        onPipTransitionFinishedOrCanceled();
+    }
+
+    @Override
+    public void onPipTransitionCanceled() {
+        onPipTransitionFinishedOrCanceled();
+    }
+
+    private void onPipTransitionFinishedOrCanceled() {
+        if (DEBUG) Log.d(TAG, "onPipTransitionFinishedOrCanceled()");
+        if (getState() == STATE_PIP_MENU) {
+            showPipMenu();
+        }
+    }
 
     /**
      * A listener interface to receive notification on changes in PIP.

@@ -36,7 +36,6 @@ import android.util.Size;
 import android.util.TypedValue;
 import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.IPinnedStackController;
 import android.view.IWindowManager;
 import android.view.WindowContainerTransaction;
 import android.view.WindowManagerGlobal;
@@ -56,9 +55,7 @@ public class PipBoundsHandler {
     private final IWindowManager mWindowManager;
     private final PipSnapAlgorithm mSnapAlgorithm;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
-    private final Rect mStableInsets = new Rect();
     private final Rect mTmpInsets = new Rect();
-    private final Point mTmpDisplaySize = new Point();
 
     /**
      * Tracks the destination bounds, used for any following
@@ -66,7 +63,6 @@ public class PipBoundsHandler {
      */
     private final Rect mLastDestinationBounds = new Rect();
 
-    private IPinnedStackController mPinnedStackController;
     private ComponentName mLastPipComponentName;
     private float mReentrySnapFraction = INVALID_SNAP_FRACTION;
     private Size mReentrySize = null;
@@ -80,7 +76,6 @@ public class PipBoundsHandler {
     private Point mScreenEdgeInsets;
     private int mCurrentMinSize;
 
-    private boolean mIsMinimized;
     private boolean mIsImeShowing;
     private int mImeHeight;
     private boolean mIsShelfShowing;
@@ -123,10 +118,6 @@ public class PipBoundsHandler {
                 com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
     }
 
-    public void setPinnedStackController(IPinnedStackController controller) {
-        mPinnedStackController = controller;
-    }
-
     public void setMinEdgeSize(int minEdgeSize) {
         mCurrentMinSize = minEdgeSize;
     }
@@ -152,14 +143,6 @@ public class PipBoundsHandler {
     public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
         mIsImeShowing = imeVisible;
         mImeHeight = imeHeight;
-    }
-
-    /**
-     * Responds to IPinnedStackListener on minimized state change.
-     */
-    public void onMinimizedStateChanged(boolean minimized) {
-        mIsMinimized = minimized;
-        mSnapAlgorithm.setMinimized(minimized);
     }
 
     /**
@@ -238,9 +221,9 @@ public class PipBoundsHandler {
     }
 
     /**
-     * Responds to IPinnedStackListener on preparing the pinned stack animation.
+     * @return {@link Rect} of the destination PiP window bounds.
      */
-    public void onPrepareAnimation(Rect sourceRectHint, float aspectRatio, Rect bounds) {
+    Rect getDestinationBounds(float aspectRatio, Rect bounds) {
         final Rect destinationBounds;
         final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
         if (bounds == null) {
@@ -253,17 +236,16 @@ public class PipBoundsHandler {
                     false /* useCurrentMinEdgeSize */);
         }
         if (destinationBounds.equals(bounds)) {
-            return;
+            return bounds;
         }
         mAspectRatio = aspectRatio;
         onResetReentryBoundsUnchecked();
-        try {
-            mPinnedStackController.startAnimation(destinationBounds, sourceRectHint,
-                    -1 /* animationDuration */);
-            mLastDestinationBounds.set(destinationBounds);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to start PiP animation from SysUI", e);
-        }
+        mLastDestinationBounds.set(destinationBounds);
+        return destinationBounds;
+    }
+
+    float getDefaultAspectRatio() {
+        return mDefaultAspectRatio;
     }
 
     /**
@@ -307,18 +289,10 @@ public class PipBoundsHandler {
                 false /* adjustForIme */);
         mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
                 snapFraction);
-        if (mIsMinimized) {
-            applyMinimizedOffset(postChangeStackBounds, postChangeMovementBounds);
-        }
 
-        try {
-            outBounds.set(postChangeStackBounds);
-            mLastDestinationBounds.set(outBounds);
-            mPinnedStackController.resetBoundsAnimation(outBounds);
-            t.setBounds(pinnedStackInfo.stackToken, outBounds);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to resize PiP on display rotation", e);
-        }
+        outBounds.set(postChangeStackBounds);
+        mLastDestinationBounds.set(outBounds);
+        t.setBounds(pinnedStackInfo.stackToken, outBounds);
         return true;
     }
 
@@ -370,9 +344,6 @@ public class PipBoundsHandler {
         final int top = (int) (stackBounds.centerY() - size.getHeight() / 2f);
         stackBounds.set(left, top, left + size.getWidth(), top + size.getHeight());
         mSnapAlgorithm.applySnapFraction(stackBounds, getMovementBounds(stackBounds), snapFraction);
-        if (mIsMinimized) {
-            applyMinimizedOffset(stackBounds, getMovementBounds(stackBounds));
-        }
     }
 
     /**
@@ -436,20 +407,6 @@ public class PipBoundsHandler {
     }
 
     /**
-     * Applies the minimized offsets to the given stack bounds.
-     */
-    private void applyMinimizedOffset(Rect stackBounds, Rect movementBounds) {
-        mTmpDisplaySize.set(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
-        try {
-            mWindowManager.getStableInsets(mContext.getDisplayId(), mStableInsets);
-            mSnapAlgorithm.applyMinimizedOffset(stackBounds, movementBounds, mTmpDisplaySize,
-                    mStableInsets);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get stable insets from WM", e);
-        }
-    }
-
-    /**
      * @return the default snap fraction to apply instead of the default gravity when calculating
      *         the default stack bounds when first entering PiP.
      */
@@ -486,7 +443,6 @@ public class PipBoundsHandler {
         pw.println(innerPrefix + "mMaxAspectRatio=" + mMaxAspectRatio);
         pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
         pw.println(innerPrefix + "mDefaultStackGravity=" + mDefaultStackGravity);
-        pw.println(innerPrefix + "mIsMinimized=" + mIsMinimized);
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);

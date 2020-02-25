@@ -1078,15 +1078,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             final ActivityStack stack = getRootTask();
-            if (inPinnedWindowingMode() && stack != null
-                    && stack.lastAnimatingBoundsWasToFullscreen()) {
-                // PIP edge case: When going from pinned to fullscreen, we apply a
-                // tempInsetFrame for the full task - but we're still at the start of the animation.
-                // To prevent a jump if there's a letterbox, restrict to the parent frame.
-                mInsetFrame.intersectUnchecked(windowFrames.mParentFrame);
-                windowFrames.mContainingFrame.intersectUnchecked(windowFrames.mParentFrame);
-            }
-
             layoutDisplayFrame = new Rect(windowFrames.mDisplayFrame);
             windowFrames.mDisplayFrame.set(windowFrames.mContainingFrame);
             layoutXDiff = mInsetFrame.left - windowFrames.mContainingFrame.left;
@@ -1340,16 +1331,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void updateResizingWindowIfNeeded() {
         final WindowStateAnimator winAnimator = mWinAnimator;
         if (!mHasSurface || getDisplayContent().mLayoutSeq != mLayoutSeq || isGoneForLayoutLw()) {
-            return;
-        }
-
-        final Task task = getTask();
-        // In the case of stack bound animations, the window frames will update (unlike other
-        // animations which just modify various transformation properties). We don't want to
-        // notify the client of frame changes in this case. Not only is it a lot of churn, but
-        // the frame may not correspond to the surface size or the onscreen area at various
-        // phases in the animation, and the client will become sad and confused.
-        if (task != null && task.getStack().isAnimatingBounds()) {
             return;
         }
 
