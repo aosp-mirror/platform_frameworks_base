@@ -42,12 +42,14 @@ Usage: launch_application package activity | parse_metrics --package <name> --ti
     -h, --help                  usage information (this)
     -v, --verbose               enable extra verbose printing
     -t, --timeout <sec>         how many seconds to timeout when trying to wait for logcat to change
+    -rfd, --reportfullydrawn    wait for report fully drawn (default: off)
 EOF
 }
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$DIR/lib/common"
 
+report_fully_drawn="n"
 package=""
 activity=""
 timeout=5
@@ -81,6 +83,11 @@ parse_arguments() {
       -s|--simulate)
         simulate="y"
         ;;
+      -rfd|--reportfullydrawn)
+        report_fully_drawn="y"
+        ;;
+
+
       *)
         echo "Invalid argument: $1" >&2
         exit 1
@@ -190,12 +197,15 @@ re_pattern='.*Displayed[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\
 
 parse_metric_from_logcat "Displayed_ms" "$pattern" "$re_pattern"
 
-# 01-16 17:31:44.550 11172 11204 I ActivityTaskManager: Fully drawn com.google.android.GoogleCamera/com.android.camera.CameraLauncher: +10s897ms
-pattern="ActivityTaskManager: Fully drawn ${package}"
-#re_pattern='.*Fully drawn[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+\).*'
-re_pattern='.*Fully drawn[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+ms\|[[:digit:]]\+s[[:digit:]]\+ms\).*'
+# Only track ReportFullyDrawn with --reportfullydrawn/-rfd flags
+if [[ $report_fully_drawn == y ]]; then
+  # 01-16 17:31:44.550 11172 11204 I ActivityTaskManager: Fully drawn com.google.android.GoogleCamera/com.android.camera.CameraLauncher: +10s897ms
+  pattern="ActivityTaskManager: Fully drawn ${package}"
+  #re_pattern='.*Fully drawn[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+\).*'
+  re_pattern='.*Fully drawn[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+ms\|[[:digit:]]\+s[[:digit:]]\+ms\).*'
 
-parse_metric_from_logcat "Fully_drawn_ms" "$pattern" "$re_pattern"
+  parse_metric_from_logcat "Fully_drawn_ms" "$pattern" "$re_pattern"
+fi
 
 # also call into package-specific scripts if there are additional metrics
 if [[ -x "$DIR/metrics/$package" ]]; then
