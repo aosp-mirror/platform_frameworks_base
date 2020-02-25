@@ -1160,32 +1160,17 @@ public class DreamService extends Service implements Window.Callback {
         @Override
         public void attach(final IBinder windowToken, final boolean canDoze,
                 IRemoteCallback started) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    DreamService.this.attach(windowToken, canDoze, started);
-                }
-            });
+            mHandler.post(() -> DreamService.this.attach(windowToken, canDoze, started));
         }
 
         @Override
         public void detach() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    DreamService.this.detach();
-                }
-            });
+            mHandler.post(DreamService.this::detach);
         }
 
         @Override
         public void wakeUp() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    DreamService.this.wakeUp(true /*fromSystem*/);
-                }
-            });
+            mHandler.post(() -> DreamService.this.wakeUp(true /*fromSystem*/));
         }
     }
 }
