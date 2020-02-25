@@ -24152,6 +24152,18 @@ public class PackageManagerService extends IPackageManager.Stub
         public List<String> getMimeGroup(String packageName, String mimeGroup) {
             return PackageManagerService.this.getMimeGroup(packageName, mimeGroup);
         }
+
+        @Override
+        public void setVisibilityLogging(String packageName, boolean enable) {
+            final PackageSetting pkg;
+            synchronized (mLock) {
+                pkg = mSettings.getPackageLPr(packageName);
+            }
+            if (pkg == null) {
+                throw new IllegalStateException("No package found for " + packageName);
+            }
+            mAppsFilter.getFeatureConfig().enableLogging(pkg.appId, enable);
+        }
     }
 
     @GuardedBy("mLock")
