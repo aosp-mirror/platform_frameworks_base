@@ -2109,7 +2109,7 @@ public class TextToSpeech {
                     public void onError(String utteranceId, int errorCode) {
                         UtteranceProgressListener listener = mUtteranceProgressListener;
                         if (listener != null) {
-                            listener.onError(utteranceId);
+                            listener.onError(utteranceId, errorCode);
                         }
                     }
 
