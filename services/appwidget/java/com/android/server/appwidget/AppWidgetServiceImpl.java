@@ -794,6 +794,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         proto.write(WidgetProto.PROVIDER_PACKAGE, widget.provider.id.componentName.getPackageName());
         proto.write(WidgetProto.PROVIDER_CLASS, widget.provider.id.componentName.getClassName());
         if (widget.options != null) {
+            proto.write(WidgetProto.RESTORE_COMPLETED,
+                    widget.options.getBoolean(AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED));
             proto.write(WidgetProto.MIN_WIDTH,
                 widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0));
             proto.write(WidgetProto.MIN_HEIGHT,
@@ -2509,7 +2511,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         out.endTag(null, "h");
     }
 
-    private static void serializeAppWidget(XmlSerializer out, Widget widget) throws IOException {
+    private static void serializeAppWidget(XmlSerializer out, Widget widget,
+            boolean saveRestoreCompleted) throws IOException {
         out.startTag(null, "g");
         out.attribute(null, "id", Integer.toHexString(widget.appWidgetId));
         out.attribute(null, "rid", Integer.toHexString(widget.restoredId));
@@ -2528,8 +2531,48 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             out.attribute(null, "max_height", Integer.toHexString((maxHeight > 0) ? maxHeight : 0));
             out.attribute(null, "host_category", Integer.toHexString(widget.options.getInt(
                     AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)));
+            if (saveRestoreCompleted) {
+                boolean restoreCompleted = widget.options.getBoolean(
+                        AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED);
+                out.attribute(null, "restore_completed", Boolean.toString(restoreCompleted));
+            }
         }
         out.endTag(null, "g");
+    }
+
+    private static Bundle parseWidgetIdOptions(XmlPullParser parser) {
+        Bundle options = new Bundle();
+        String restoreCompleted = parser.getAttributeValue(null, "restore_completed");
+        if (restoreCompleted != null) {
+            options.putBoolean(AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED,
+                    Boolean.valueOf(restoreCompleted));
+        }
+        String minWidthString = parser.getAttributeValue(null, "min_width");
+        if (minWidthString != null) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
+                    Integer.parseInt(minWidthString, 16));
+        }
+        String minHeightString = parser.getAttributeValue(null, "min_height");
+        if (minHeightString != null) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
+                    Integer.parseInt(minHeightString, 16));
+        }
+        String maxWidthString = parser.getAttributeValue(null, "max_width");
+        if (maxWidthString != null) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
+                    Integer.parseInt(maxWidthString, 16));
+        }
+        String maxHeightString = parser.getAttributeValue(null, "max_height");
+        if (maxHeightString != null) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
+                    Integer.parseInt(maxHeightString, 16));
+        }
+        String categoryString = parser.getAttributeValue(null, "host_category");
+        if (categoryString != null) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                    Integer.parseInt(categoryString, 16));
+        }
+        return options;
     }
 
     @Override
@@ -3064,7 +3107,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 if (widget.host.getUserId() != userId) {
                     continue;
                 }
-                serializeAppWidget(out, widget);
+                serializeAppWidget(out, widget, true);
             }
 
             Iterator<Pair<Integer, String>> it = mPackagesWithBindWidgetPermission.iterator();
@@ -3203,34 +3246,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         String restoredIdString = parser.getAttributeValue(null, "rid");
                         widget.restoredId = (restoredIdString == null) ? 0
                                 : Integer.parseInt(restoredIdString, 16);
-
-                        Bundle options = new Bundle();
-                        String minWidthString = parser.getAttributeValue(null, "min_width");
-                        if (minWidthString != null) {
-                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
-                                    Integer.parseInt(minWidthString, 16));
-                        }
-                        String minHeightString = parser.getAttributeValue(null, "min_height");
-                        if (minHeightString != null) {
-                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
-                                    Integer.parseInt(minHeightString, 16));
-                        }
-                        String maxWidthString = parser.getAttributeValue(null, "max_width");
-                        if (maxWidthString != null) {
-                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
-                                    Integer.parseInt(maxWidthString, 16));
-                        }
-                        String maxHeightString = parser.getAttributeValue(null, "max_height");
-                        if (maxHeightString != null) {
-                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
-                                    Integer.parseInt(maxHeightString, 16));
-                        }
-                        String categoryString = parser.getAttributeValue(null, "host_category");
-                        if (categoryString != null) {
-                            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                                    Integer.parseInt(categoryString, 16));
-                        }
-                        widget.options = options;
+                        widget.options = parseWidgetIdOptions(parser);
 
                         final int hostTag = Integer.parseInt(parser.getAttributeValue(
                                 null, "h"), 16);
@@ -4382,7 +4398,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         if (widget.host.isInPackageForUser(backedupPackage, userId)
                                 || (provider != null
                                 &&  provider.isInPackageForUser(backedupPackage, userId))) {
-                            serializeAppWidget(out, widget);
+                            serializeAppWidget(out, widget, false);
                         }
                     }
 
@@ -4813,36 +4829,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             // Backup only widgets hosted or provided by the owner profile.
             return widget.host.getUserId() == userId && (widget.provider == null
                     || widget.provider.getUserId() == userId);
-        }
-
-        private Bundle parseWidgetIdOptions(XmlPullParser parser) {
-            Bundle options = new Bundle();
-            String minWidthString = parser.getAttributeValue(null, "min_width");
-            if (minWidthString != null) {
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
-                        Integer.parseInt(minWidthString, 16));
-            }
-            String minHeightString = parser.getAttributeValue(null, "min_height");
-            if (minHeightString != null) {
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
-                        Integer.parseInt(minHeightString, 16));
-            }
-            String maxWidthString = parser.getAttributeValue(null, "max_width");
-            if (maxWidthString != null) {
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
-                        Integer.parseInt(maxWidthString, 16));
-            }
-            String maxHeightString = parser.getAttributeValue(null, "max_height");
-            if (maxHeightString != null) {
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
-                        Integer.parseInt(maxHeightString, 16));
-            }
-            String categoryString = parser.getAttributeValue(null, "host_category");
-            if (categoryString != null) {
-                options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                        Integer.parseInt(categoryString, 16));
-            }
-            return options;
         }
 
         private int countPendingUpdates(ArrayList<RestoreUpdateRecord> updates) {
