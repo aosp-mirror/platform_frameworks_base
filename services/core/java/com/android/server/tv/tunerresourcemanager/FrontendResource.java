@@ -15,12 +15,11 @@
  */
 package com.android.server.tv.tunerresourcemanager;
 
-import android.annotation.Nullable;
 import android.media.tv.tuner.frontend.FrontendSettings.Type;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A frontend resource object used by the Tuner Resource Manager to record the tuner frontend
@@ -50,7 +49,7 @@ public final class FrontendResource {
     /**
      * An array to save all the FE ids under the same exclisive group.
      */
-    private List<Integer> mExclusiveGroupMemberFeIds = new ArrayList<>();
+    private Set<Integer> mExclusiveGroupMemberFeIds = new HashSet<>();
 
     /**
      * If the current resource is in use. Once resources under the same exclusive group id is in use
@@ -82,12 +81,12 @@ public final class FrontendResource {
         return mExclusiveGroupId;
     }
 
-    public List<Integer> getExclusiveGroupMemberFeIds() {
+    public Set<Integer> getExclusiveGroupMemberFeIds() {
         return mExclusiveGroupMemberFeIds;
     }
 
     /**
-     * Add one id into the exclusive group member id list.
+     * Add one id into the exclusive group member id collection.
      *
      * @param id the id to be added.
      */
@@ -96,21 +95,21 @@ public final class FrontendResource {
     }
 
     /**
-     * Add one id list to the exclusive group member id list.
+     * Add one id collection to the exclusive group member id collection.
      *
-     * @param ids the id list to be added.
+     * @param ids the id collection to be added.
      */
-    public void addExclusiveGroupMemberFeId(List<Integer> ids) {
+    public void addExclusiveGroupMemberFeIds(Collection<Integer> ids) {
         mExclusiveGroupMemberFeIds.addAll(ids);
     }
 
     /**
-     * Remove one id from the exclusive group member id list.
+     * Remove one id from the exclusive group member id collection.
      *
      * @param id the id to be removed.
      */
     public void removeExclusiveGroupMemberFeId(int id) {
-        mExclusiveGroupMemberFeIds.remove(new Integer(id));
+        mExclusiveGroupMemberFeIds.remove(id);
     }
 
     public boolean isInUse() {
@@ -143,20 +142,8 @@ public final class FrontendResource {
     public String toString() {
         return "FrontendResource[id=" + this.mId + ", type=" + this.mType
                 + ", exclusiveGId=" + this.mExclusiveGroupId + ", exclusiveGMemeberIds="
-                + Arrays.toString(this.mExclusiveGroupMemberFeIds.toArray())
+                + this.mExclusiveGroupMemberFeIds
                 + ", isInUse=" + this.mIsInUse + ", ownerClientId=" + this.mOwnerClientId + "]";
-    }
-
-    @Override
-    public boolean equals(@Nullable Object o) {
-        if (o instanceof FrontendResource) {
-            FrontendResource fe = (FrontendResource) o;
-            return mId == fe.getId() && mType == fe.getType()
-                    && mExclusiveGroupId == fe.getExclusiveGroupId()
-                    && mExclusiveGroupMemberFeIds.equals(fe.getExclusiveGroupMemberFeIds())
-                    && mIsInUse == fe.isInUse() && mOwnerClientId == fe.getOwnerClientId();
-        }
-        return false;
     }
 
     /**
