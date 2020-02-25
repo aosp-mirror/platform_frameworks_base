@@ -6910,11 +6910,7 @@ public class AppOpsManager {
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
      */
     public int unsafeCheckOpRaw(@NonNull String op, int uid, @NonNull String packageName) {
-        try {
-            return mService.checkOperationRaw(strOpToOp(op), uid, packageName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return unsafeCheckOpRawNoThrow(op, uid, packageName);
     }
 
     /**
@@ -6923,8 +6919,17 @@ public class AppOpsManager {
      * {@link #MODE_FOREGROUND}.
      */
     public int unsafeCheckOpRawNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
+        return unsafeCheckOpRawNoThrow(strOpToOp(op), uid, packageName);
+    }
+
+    /**
+     * Returns the <em>raw</em> mode associated with the op.
+     * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     * @hide
+     */
+    public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
         try {
-            return mService.checkOperationRaw(strOpToOp(op), uid, packageName);
+            return mService.checkOperationRaw(op, uid, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
