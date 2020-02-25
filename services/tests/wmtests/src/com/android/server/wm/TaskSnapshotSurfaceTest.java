@@ -38,6 +38,7 @@ import android.graphics.Color;
 import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.Surface;
@@ -67,12 +68,22 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
             int windowFlags, Rect taskBounds) {
         final GraphicBuffer buffer = GraphicBuffer.create(width, height, PixelFormat.RGBA_8888,
                 GraphicBuffer.USAGE_SW_READ_RARELY | GraphicBuffer.USAGE_SW_WRITE_NEVER);
+
+        // Previously when constructing TaskSnapshots for this test, scale was 1.0f, so to mimic
+        // this behavior set the taskSize to be the same as the taskBounds width and height. The
+        // taskBounds passed here are assumed to be the same task bounds as when the snapshot was
+        // taken. We assume there is no aspect ratio mismatch between the screenshot and the
+        // taskBounds
+        assertEquals(width, taskBounds.width());
+        assertEquals(height, taskBounds.height());
+        Point taskSize = new Point(taskBounds.width(), taskBounds.height());
+
         final TaskSnapshot snapshot = new TaskSnapshot(
                 System.currentTimeMillis(),
                 new ComponentName("", ""), buffer,
                 ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
-                Surface.ROTATION_0, contentInsets, false,
-                1.0f, true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN,
+                Surface.ROTATION_0, taskSize, contentInsets, false,
+                true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN,
                 0 /* systemUiVisibility */, false /* isTranslucent */);
         mSurface = new TaskSnapshotSurface(mWm, new Window(), new SurfaceControl(), snapshot, "Test",
                 createTaskDescription(Color.WHITE, Color.RED, Color.BLUE), sysuiVis, windowFlags, 0,
@@ -152,7 +163,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
 
     @Test
     public void testCalculateSnapshotCrop_taskNotOnTop() {
-        setupSurface(100, 100, new Rect(0, 10, 0, 10), 0, 0, new Rect(0, 50, 100, 100));
+        setupSurface(100, 100, new Rect(0, 10, 0, 10), 0, 0, new Rect(0, 50, 100, 150));
         assertEquals(new Rect(0, 10, 100, 90), mSurface.calculateSnapshotCrop());
     }
 
