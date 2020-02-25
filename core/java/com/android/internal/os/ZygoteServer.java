@@ -411,7 +411,7 @@ class ZygoteServer {
         }
     }
 
-    void resetUsapRefillState() {
+    private void resetUsapRefillState() {
         mUsapPoolRefillAction = UsapPoolRefillAction.NONE;
         mUsapPoolRefillTriggerTimestamp = INVALID_TIMESTAMP;
     }
