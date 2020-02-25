@@ -524,13 +524,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         if (mSurfaceControl != null) {
             getPendingTransaction().remove(mSurfaceControl);
-
-            // Merge to parent transaction to ensure the transactions on this WindowContainer are
-            // applied in native even if WindowContainer is removed.
-            if (mParent != null) {
-                mParent.getPendingTransaction().merge(getPendingTransaction());
-            }
-
             setSurfaceControl(null);
             mLastSurfacePosition.set(0, 0);
             scheduleAnimation();
