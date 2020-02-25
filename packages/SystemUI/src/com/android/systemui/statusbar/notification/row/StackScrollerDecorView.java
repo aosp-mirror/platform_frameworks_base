@@ -206,6 +206,11 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     }
 
     @Override
+    public boolean needsClippingToShelf() {
+        return false;
+    }
+
+    @Override
     public boolean hasOverlappingRendering() {
         return false;
     }

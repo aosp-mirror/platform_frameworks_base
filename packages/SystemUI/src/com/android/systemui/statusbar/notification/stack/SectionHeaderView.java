@@ -114,6 +114,11 @@ public class SectionHeaderView extends StackScrollerDecorView {
         mClearAllButton.setOnClickListener(listener);
     }
 
+    @Override
+    public boolean needsClippingToShelf() {
+        return true;
+    }
+
     void setHeaderText(@StringRes int resId) {
         mLabelView.setText(resId);
     }

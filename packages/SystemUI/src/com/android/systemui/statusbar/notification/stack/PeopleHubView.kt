@@ -76,6 +76,10 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
             }
         }
 
+    override fun needsClippingToShelf(): Boolean {
+        return true
+    }
+
     private inner class PersonDataListenerImpl(val avatarView: ImageView) :
             DataListener<PersonViewModel?> {
 

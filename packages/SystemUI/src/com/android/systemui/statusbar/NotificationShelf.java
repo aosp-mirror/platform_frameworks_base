@@ -269,47 +269,38 @@ public class NotificationShelf extends ActivatableNotificationView implements
         int backgroundTop = 0;
         int clipTopAmount = 0;
         float firstElementRoundness = 0.0f;
-        ActivatableNotificationView previousRow = null;
+        ActivatableNotificationView previousAnv = null;
 
         for (int i = 0; i < mHostLayout.getChildCount(); i++) {
             ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
 
-            if (!(child instanceof ActivatableNotificationView)
-                    || child.getVisibility() == GONE || child == this) {
+            if (!child.needsClippingToShelf() || child.getVisibility() == GONE) {
                 continue;
             }
 
-            ActivatableNotificationView row = (ActivatableNotificationView) child;
             float notificationClipEnd;
-            boolean aboveShelf = ViewState.getFinalTranslationZ(row) > baseZHeight
-                    || row.isPinned();
+            boolean aboveShelf = ViewState.getFinalTranslationZ(child) > baseZHeight
+                    || child.isPinned();
             boolean isLastChild = child == lastChild;
-            float rowTranslationY = row.getTranslationY();
+            float rowTranslationY = child.getTranslationY();
             if ((isLastChild && !child.isInShelf()) || aboveShelf || backgroundForceHidden) {
                 notificationClipEnd = shelfStart + getIntrinsicHeight();
             } else {
                 notificationClipEnd = shelfStart - mPaddingBetweenElements;
-                float height = notificationClipEnd - rowTranslationY;
-                if (!row.isBelowSpeedBump() && height <= getNotificationMergeSize()) {
-                    // We want the gap to close when we reached the minimum size and only shrink
-                    // before
-                    notificationClipEnd = Math.min(shelfStart,
-                            rowTranslationY + getNotificationMergeSize());
-                }
             }
-            int clipTop = updateNotificationClipHeight(row, notificationClipEnd, notGoneIndex);
+            int clipTop = updateNotificationClipHeight(child, notificationClipEnd, notGoneIndex);
             clipTopAmount = Math.max(clipTop, clipTopAmount);
 
             // If the current row is an ExpandableNotificationRow, update its color, roundedness,
             // and icon state.
-            if (row instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow expandableRow = (ExpandableNotificationRow) row;
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow expandableRow = (ExpandableNotificationRow) child;
 
                 float inShelfAmount = updateIconAppearance(expandableRow, expandAmount, scrolling,
                         scrollingFast,
                         expandingAnimated, isLastChild);
                 numViewsInShelf += inShelfAmount;
-                int ownColorUntinted = row.getBackgroundColorWithoutTint();
+                int ownColorUntinted = expandableRow.getBackgroundColorWithoutTint();
                 if (rowTranslationY >= shelfStart && mNotGoneIndex == -1) {
                     mNotGoneIndex = notGoneIndex;
                     setTintColor(previousColor);
@@ -326,10 +317,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     if (colorOfViewBeforeLast == NO_COLOR) {
                         colorOfViewBeforeLast = ownColorUntinted;
                     }
-                    row.setOverrideTintColor(colorOfViewBeforeLast, inShelfAmount);
+                    expandableRow.setOverrideTintColor(colorOfViewBeforeLast, inShelfAmount);
                 } else {
                     colorOfViewBeforeLast = ownColorUntinted;
-                    row.setOverrideTintColor(NO_COLOR, 0 /* overrideAmount */);
+                    expandableRow.setOverrideTintColor(NO_COLOR, 0 /* overrideAmount */);
                 }
                 if (notGoneIndex != 0 || !aboveShelf) {
                     expandableRow.setAboveShelf(false);
@@ -342,8 +333,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     // since they don't show up on AOD
                     if (iconState != null && iconState.clampedAppearAmount == 1.0f) {
                         // only if the first icon is fully in the shelf we want to clip to it!
-                        backgroundTop = (int) (row.getTranslationY() - getTranslationY());
-                        firstElementRoundness = row.getCurrentTopRoundness();
+                        backgroundTop = (int) (child.getTranslationY() - getTranslationY());
+                        firstElementRoundness = expandableRow.getCurrentTopRoundness();
                     }
                 }
 
@@ -351,25 +342,31 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 notGoneIndex++;
             }
 
-            if (row.isFirstInSection() && previousRow != null && previousRow.isLastInSection()) {
-                // If the top of the shelf is between the view before a gap and the view after a gap
-                // then we need to adjust the shelf's top roundness.
-                float distanceToGapBottom = row.getTranslationY() - getTranslationY();
-                float distanceToGapTop = getTranslationY()
-                        - (previousRow.getTranslationY() + previousRow.getActualHeight());
-                if (distanceToGapTop > 0) {
-                    // We interpolate our top roundness so that it's fully rounded if we're at the
-                    // bottom of the gap, and not rounded at all if we're at the top of the gap
-                    // (directly up against the bottom of previousRow)
-                    // Then we apply the same roundness to the bottom of previousRow so that the
-                    // corners join together as the shelf approaches previousRow.
-                    firstElementRoundness = (float) Math.min(1.0, distanceToGapTop / mGapHeight);
-                    previousRow.setBottomRoundness(firstElementRoundness,
-                            false /* don't animate */);
-                    backgroundTop = (int) distanceToGapBottom;
+            if (child instanceof ActivatableNotificationView) {
+                ActivatableNotificationView anv =
+                        (ActivatableNotificationView) child;
+                if (anv.isFirstInSection() && previousAnv != null
+                        && previousAnv.isLastInSection()) {
+                    // If the top of the shelf is between the view before a gap and the view after a
+                    // gap then we need to adjust the shelf's top roundness.
+                    float distanceToGapBottom = child.getTranslationY() - getTranslationY();
+                    float distanceToGapTop = getTranslationY()
+                            - (previousAnv.getTranslationY() + previousAnv.getActualHeight());
+                    if (distanceToGapTop > 0) {
+                        // We interpolate our top roundness so that it's fully rounded if we're at
+                        // the bottom of the gap, and not rounded at all if we're at the top of the
+                        // gap (directly up against the bottom of previousAnv)
+                        // Then we apply the same roundness to the bottom of previousAnv so that the
+                        // corners join together as the shelf approaches previousAnv.
+                        firstElementRoundness = (float) Math.min(1.0,
+                                distanceToGapTop / mGapHeight);
+                        previousAnv.setBottomRoundness(firstElementRoundness,
+                                false /* don't animate */);
+                        backgroundTop = (int) distanceToGapBottom;
+                    }
                 }
+                previousAnv = anv;
             }
-            previousRow = row;
         }
         clipTransientViews();
 
@@ -489,27 +486,27 @@ public class NotificationShelf extends ActivatableNotificationView implements
      * Update the clipping of this view.
      * @return the amount that our own top should be clipped
      */
-    private int updateNotificationClipHeight(ActivatableNotificationView row,
+    private int updateNotificationClipHeight(ExpandableView view,
             float notificationClipEnd, int childIndex) {
-        float viewEnd = row.getTranslationY() + row.getActualHeight();
-        boolean isPinned = (row.isPinned() || row.isHeadsUpAnimatingAway())
-                && !mAmbientState.isDozingAndNotPulsing(row);
+        float viewEnd = view.getTranslationY() + view.getActualHeight();
+        boolean isPinned = (view.isPinned() || view.isHeadsUpAnimatingAway())
+                && !mAmbientState.isDozingAndNotPulsing(view);
         boolean shouldClipOwnTop;
         if (mAmbientState.isPulseExpanding()) {
             shouldClipOwnTop = childIndex == 0;
         } else {
-            shouldClipOwnTop = row.showingPulsing();
+            shouldClipOwnTop = view.showingPulsing();
         }
         if (viewEnd > notificationClipEnd && !shouldClipOwnTop
                 && (mAmbientState.isShadeExpanded() || !isPinned)) {
             int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
             if (isPinned) {
-                clipBottomAmount = Math.min(row.getIntrinsicHeight() - row.getCollapsedHeight(),
+                clipBottomAmount = Math.min(view.getIntrinsicHeight() - view.getCollapsedHeight(),
                         clipBottomAmount);
             }
-            row.setClipBottomAmount(clipBottomAmount);
+            view.setClipBottomAmount(clipBottomAmount);
         } else {
-            row.setClipBottomAmount(0);
+            view.setClipBottomAmount(0);
         }
         if (shouldClipOwnTop) {
             return (int) (viewEnd - getTranslationY());
@@ -944,6 +941,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
             int oldTop, int oldRight, int oldBottom) {
         updateRelativeOffset();
+    }
+
+    @Override
+    public boolean needsClippingToShelf() {
+        return false;
     }
 
     public void onUiModeChanged() {

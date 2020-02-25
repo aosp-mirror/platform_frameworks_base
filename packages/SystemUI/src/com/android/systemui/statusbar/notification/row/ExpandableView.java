@@ -140,6 +140,22 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     }
 
     /**
+     * @return if this view needs to be clipped to the shelf
+     */
+    public boolean needsClippingToShelf() {
+        return true;
+    }
+
+
+    public boolean isPinned() {
+        return false;
+    }
+
+    public boolean isHeadsUpAnimatingAway() {
+        return false;
+    }
+
+    /**
      * Sets the actual height of this notification. This is different than the laid out
      * {@link View#getHeight()}, as we want to avoid layouting during scrolling and expanding.
      *

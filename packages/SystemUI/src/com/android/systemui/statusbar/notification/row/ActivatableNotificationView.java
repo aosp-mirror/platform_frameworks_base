@@ -968,14 +968,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return mCurrentBackgroundTint;
     }
 
-    public boolean isPinned() {
-        return false;
-    }
-
-    public boolean isHeadsUpAnimatingAway() {
-        return false;
-    }
-
     public boolean isHeadsUp() {
         return false;
     }
