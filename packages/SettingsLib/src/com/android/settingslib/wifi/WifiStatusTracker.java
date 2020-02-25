@@ -68,6 +68,7 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
 
     private WifiInfo mWifiInfo;
     public boolean enabled;
+    public boolean isCaptivePortal;
     public int state;
     public boolean connected;
     public String ssid;
@@ -155,9 +156,11 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
     private void updateStatusLabel() {
         final NetworkCapabilities networkCapabilities
                 = mConnectivityManager.getNetworkCapabilities(mWifiManager.getCurrentNetwork());
+        isCaptivePortal = false;
         if (networkCapabilities != null) {
             if (networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)) {
                 statusLabel = mContext.getString(R.string.wifi_status_sign_in_required);
+                isCaptivePortal = true;
                 return;
             } else if (networkCapabilities.hasCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY)) {
                 statusLabel = mContext.getString(R.string.wifi_limited_connection);
