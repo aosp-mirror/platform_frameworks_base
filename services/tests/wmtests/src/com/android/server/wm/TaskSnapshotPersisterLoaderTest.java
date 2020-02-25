@@ -19,12 +19,16 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -36,10 +40,12 @@ import android.view.View;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.server.wm.TaskSnapshotLoader.PreRLegacySnapshotConfig;
 import com.android.server.wm.TaskSnapshotPersister.RemoveObsoleteFilesQueueItem;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoSession;
 
 import java.io.File;
 import java.util.function.Predicate;
@@ -54,6 +60,8 @@ import java.util.function.Predicate;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBase {
+
+    private static final float DELTA = 0.00001f;
 
     private static final Rect TEST_INSETS = new Rect(10, 20, 30, 40);
 
@@ -148,29 +156,172 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     }
 
     @Test
-    public void testLowResolutionPersistAndLoadSnapshot() {
+    public void testLegacyPLowRamConfig() throws Exception {
+        MockitoSession mockSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(ActivityManager.class)
+                .startMocking();
+
+        when(ActivityManager.isLowRamDeviceStatic()).thenReturn(true);
+
+        // taskWidth and legacyScale as would be defined in the proto, and presence of a *.jpg file,
+        // for any P low_ram device
+        final int taskWidth = 0;
+        final float legacyScale = 0f;
+        final boolean hasHighResFile = false;
+
+        PreRLegacySnapshotConfig highResConf = mLoader.getLegacySnapshotConfig(
+                taskWidth, legacyScale, hasHighResFile, false /* loadLowResolutionBitmap */);
+        assertNotNull(highResConf);
+        assertEquals(highResConf.mScale, 0.6f, DELTA);
+        assertTrue(highResConf.mForceLoadReducedJpeg);
+
+        PreRLegacySnapshotConfig lowResConf = mLoader.getLegacySnapshotConfig(
+                taskWidth, legacyScale, hasHighResFile, true /* loadLowResolutionBitmap */);
+        assertNotNull(lowResConf);
+        assertEquals(lowResConf.mScale, 0.6f, DELTA);
+        assertTrue(lowResConf.mForceLoadReducedJpeg);
+
+        mockSession.finishMocking();
+    }
+
+    @Test
+    public void testLegacyPNonLowRamConfig() throws Exception {
+        MockitoSession mockSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(ActivityManager.class)
+                .startMocking();
+
+        when(ActivityManager.isLowRamDeviceStatic()).thenReturn(false);
+
+        // taskWidth and legacyScale as would be defined in the proto, and presence of a *.jpg file,
+        // for any O device, or a P non-low_ram device
+        final int taskWidth = 0;
+        final float legacyScale = 0f;
+        final boolean hasHighResFile = true;
+
+        PreRLegacySnapshotConfig highResConf = mLoader.getLegacySnapshotConfig(
+                taskWidth, legacyScale, hasHighResFile, false /* loadLowResolutionBitmap */);
+        assertNotNull(highResConf);
+        assertEquals(highResConf.mScale, 1.0f, DELTA);
+        assertFalse(highResConf.mForceLoadReducedJpeg);
+
+        PreRLegacySnapshotConfig lowResConf = mLoader.getLegacySnapshotConfig(
+                taskWidth, legacyScale, hasHighResFile, true /* loadLowResolutionBitmap */);
+        assertNotNull(lowResConf);
+        assertEquals(lowResConf.mScale, 0.5f, DELTA);
+        assertFalse(lowResConf.mForceLoadReducedJpeg);
+
+        mockSession.finishMocking();
+    }
+
+    @Test
+    public void testLegacyQLowRamConfig() throws Exception {
+        MockitoSession mockSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(ActivityManager.class)
+                .startMocking();
+
+        when(ActivityManager.isLowRamDeviceStatic()).thenReturn(true);
+
+        // taskWidth and legacyScale as would be defined in the proto, and presence of a *.jpg file,
+        // for any Q low_ram device
+        final int taskWidth = 0;
+        final float legacyScale = 0.6f;
+        final boolean hasHighResFile = false;
+
+        PreRLegacySnapshotConfig highResConf = mLoader.getLegacySnapshotConfig(
+                taskWidth, legacyScale, hasHighResFile, false /* loadLowResolutionBitmap */);
+        assertNotNull(highResConf);
+        assertEquals(highResConf.mScale, legacyScale, DELTA);
+        assertEquals(highResConf.mScale, 0.6f, DELTA);
+        assertTrue(highResConf.mForceLoadReducedJpeg);
+
+        PreRLegacySnapshotConfig lowResConf = mLoader.getLegacySnapshotConfig(
+                taskWidth, legacyScale, hasHighResFile, true /* loadLowResolutionBitmap */);
+        assertNotNull(lowResConf);
+        assertEquals(lowResConf.mScale, legacyScale, DELTA);
+        assertEquals(lowResConf.mScale, 0.6f, DELTA);
+        assertTrue(lowResConf.mForceLoadReducedJpeg);
+
+        mockSession.finishMocking();
+    }
+
+    @Test
+    public void testLegacyQNonLowRamConfig() throws Exception {
+        MockitoSession mockSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(ActivityManager.class)
+                .startMocking();
+
+        when(ActivityManager.isLowRamDeviceStatic()).thenReturn(false);
+
+        // taskWidth and legacyScale as would be defined in the proto, and presence of a *.jpg file,
+        // for any Q non-low_ram device
+        final int taskWidth = 0;
+        final float legacyScale = 0.8f;
+        final boolean hasHighResFile = true;
+
+        PreRLegacySnapshotConfig highResConf = mLoader.getLegacySnapshotConfig(
+                taskWidth, legacyScale, hasHighResFile, false /* loadLowResolutionBitmap */);
+        assertNotNull(highResConf);
+        assertEquals(highResConf.mScale, legacyScale, DELTA);
+        assertEquals(highResConf.mScale, 0.8f, DELTA);
+        assertFalse(highResConf.mForceLoadReducedJpeg);
+
+        PreRLegacySnapshotConfig lowResConf = mLoader.getLegacySnapshotConfig(
+                taskWidth, legacyScale, hasHighResFile, true /* loadLowResolutionBitmap */);
+        assertNotNull(lowResConf);
+        assertEquals(lowResConf.mScale, 0.5f * legacyScale, DELTA);
+        assertEquals(lowResConf.mScale, 0.5f * 0.8f, DELTA);
+        assertFalse(lowResConf.mForceLoadReducedJpeg);
+
+        mockSession.finishMocking();
+    }
+
+    @Test
+    public void testNonLegacyRConfig() throws Exception {
+        // taskWidth and legacyScale as would be defined in the proto, and presence of a *.jpg file,
+        // for any R device
+        final int taskWidth = 1440;
+        final float legacyScale = 0f;
+        final boolean hasHighResFile = true;
+
+        PreRLegacySnapshotConfig highResConf = mLoader.getLegacySnapshotConfig(
+                taskWidth, legacyScale, hasHighResFile, false /* loadLowResolutionBitmap */);
+        assertNull(highResConf);
+
+        PreRLegacySnapshotConfig lowResConf = mLoader.getLegacySnapshotConfig(
+                taskWidth, legacyScale, hasHighResFile, true /* loadLowResolutionBitmap */);
+        assertNull(lowResConf);
+    }
+
+    @Test
+    public void testDisabledLowResolutionPersistAndLoadSnapshot() {
+        mPersister.setEnableLowResSnapshots(false);
+
         TaskSnapshot a = new TaskSnapshotBuilder()
-                .setScale(0.5f)
+                .setScaleFraction(0.5f)
                 .setIsLowResolution(true)
                 .build();
         assertTrue(a.isLowResolution());
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.waitForQueueEmpty();
         final File[] files = new File[]{new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
-                new File(FILES_DIR.getPath() + "/snapshots/1_reduced.jpg")};
+                new File(FILES_DIR.getPath() + "/snapshots/1.jpg")};
         final File[] nonExistsFiles = new File[]{
-                new File(FILES_DIR.getPath() + "/snapshots/1.jpg"),
+                new File(FILES_DIR.getPath() + "/snapshots/1_reduced.jpg"),
         };
         assertTrueForFiles(files, File::exists, " must exist");
         assertTrueForFiles(nonExistsFiles, file -> !file.exists(), " must not exist");
-        final TaskSnapshot snapshot = mLoader.loadTask(1, mTestUserId, true /* isLowResolution */);
+        final TaskSnapshot snapshot = mLoader.loadTask(1, mTestUserId, false /* isLowResolution */);
         assertNotNull(snapshot);
         assertEquals(TEST_INSETS, snapshot.getContentInsets());
         assertNotNull(snapshot.getSnapshot());
         assertEquals(Configuration.ORIENTATION_PORTRAIT, snapshot.getOrientation());
 
         final TaskSnapshot snapshotNotExist = mLoader.loadTask(1, mTestUserId,
-                false /* isLowResolution */);
+                true /* isLowResolution */);
         assertNull(snapshotNotExist);
     }
 
@@ -271,13 +422,11 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     @Test
     public void testScalePersistAndLoadSnapshot() {
         TaskSnapshot a = new TaskSnapshotBuilder()
-                .setScale(0.25f)
+                .setScaleFraction(0.25f)
                 .build();
         TaskSnapshot b = new TaskSnapshotBuilder()
-                .setScale(0.75f)
+                .setScaleFraction(0.75f)
                 .build();
-        assertEquals(0.25f, a.getScale(), 1E-5);
-        assertEquals(0.75f, b.getScale(), 1E-5);
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.persistSnapshot(2, mTestUserId, b);
         mPersister.waitForQueueEmpty();
@@ -287,8 +436,6 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
                 false /* isLowResolution */);
         assertNotNull(snapshotA);
         assertNotNull(snapshotB);
-        assertEquals(0.25f, snapshotA.getScale(), 1E-5);
-        assertEquals(0.75f, snapshotB.getScale(), 1E-5);
     }
 
     @Test

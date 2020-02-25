@@ -2012,15 +2012,16 @@ public class ActivityManager {
         /** See {@link android.view.Surface.Rotation} */
         @Surface.Rotation
         private int mRotation;
+        /** The size of the snapshot before scaling */
+        private final Point mTaskSize;
         private final Rect mContentInsets;
-        // Whether this snapshot is a down-sampled version of the full resolution, used mainly for
-        // low-ram devices
+        // Whether this snapshot is a down-sampled version of the high resolution snapshot, used
+        // mainly for loading snapshots quickly from disk when user is flinging fast
         private final boolean mIsLowResolution;
         // Whether or not the snapshot is a real snapshot or an app-theme generated snapshot due to
         // the task having a secure window or having previews disabled
         private final boolean mIsRealSnapshot;
         private final int mWindowingMode;
-        private final float mScale;
         private final int mSystemUiVisibility;
         private final boolean mIsTranslucent;
         // Must be one of the named color spaces, otherwise, always use SRGB color space.
@@ -2028,9 +2029,9 @@ public class ActivityManager {
 
         public TaskSnapshot(long id,
                 @NonNull ComponentName topActivityComponent, GraphicBuffer snapshot,
-                @NonNull ColorSpace colorSpace, int orientation, int rotation, Rect contentInsets,
-                boolean isLowResolution, float scale, boolean isRealSnapshot, int windowingMode,
-                int systemUiVisibility, boolean isTranslucent) {
+                @NonNull ColorSpace colorSpace, int orientation, int rotation, Point taskSize,
+                Rect contentInsets, boolean isLowResolution, boolean isRealSnapshot,
+                int windowingMode, int systemUiVisibility, boolean isTranslucent) {
             mId = id;
             mTopActivityComponent = topActivityComponent;
             mSnapshot = snapshot;
@@ -2038,9 +2039,9 @@ public class ActivityManager {
                     ? ColorSpace.get(ColorSpace.Named.SRGB) : colorSpace;
             mOrientation = orientation;
             mRotation = rotation;
+            mTaskSize = new Point(taskSize);
             mContentInsets = new Rect(contentInsets);
             mIsLowResolution = isLowResolution;
-            mScale = scale;
             mIsRealSnapshot = isRealSnapshot;
             mWindowingMode = windowingMode;
             mSystemUiVisibility = systemUiVisibility;
@@ -2057,9 +2058,9 @@ public class ActivityManager {
                     : ColorSpace.get(ColorSpace.Named.SRGB);
             mOrientation = source.readInt();
             mRotation = source.readInt();
+            mTaskSize = source.readParcelable(null /* classLoader */);
             mContentInsets = source.readParcelable(null /* classLoader */);
             mIsLowResolution = source.readBoolean();
-            mScale = source.readFloat();
             mIsRealSnapshot = source.readBoolean();
             mWindowingMode = source.readInt();
             mSystemUiVisibility = source.readInt();
@@ -2111,6 +2112,14 @@ public class ActivityManager {
         }
 
         /**
+         * @return The size of the task at the point this snapshot was taken.
+         */
+        @UnsupportedAppUsage
+        public Point getTaskSize() {
+            return mTaskSize;
+        }
+
+        /**
          * @return The system/content insets on the snapshot. These can be clipped off in order to
          *         remove any areas behind system bars in the snapshot.
          */
@@ -2159,14 +2168,6 @@ public class ActivityManager {
             return mSystemUiVisibility;
         }
 
-        /**
-         * @return The scale this snapshot was taken in.
-         */
-        @UnsupportedAppUsage
-        public float getScale() {
-            return mScale;
-        }
-
         @Override
         public int describeContents() {
             return 0;
@@ -2180,9 +2181,9 @@ public class ActivityManager {
             dest.writeInt(mColorSpace.getId());
             dest.writeInt(mOrientation);
             dest.writeInt(mRotation);
+            dest.writeParcelable(mTaskSize, 0);
             dest.writeParcelable(mContentInsets, 0);
             dest.writeBoolean(mIsLowResolution);
-            dest.writeFloat(mScale);
             dest.writeBoolean(mIsRealSnapshot);
             dest.writeInt(mWindowingMode);
             dest.writeInt(mSystemUiVisibility);
@@ -2200,9 +2201,11 @@ public class ActivityManager {
                     + " mColorSpace=" + mColorSpace.toString()
                     + " mOrientation=" + mOrientation
                     + " mRotation=" + mRotation
+                    + " mTaskSize=" + mTaskSize.toString()
                     + " mContentInsets=" + mContentInsets.toShortString()
-                    + " mIsLowResolution=" + mIsLowResolution + " mScale=" + mScale
-                    + " mIsRealSnapshot=" + mIsRealSnapshot + " mWindowingMode=" + mWindowingMode
+                    + " mIsLowResolution=" + mIsLowResolution
+                    + " mIsRealSnapshot=" + mIsRealSnapshot
+                    + " mWindowingMode=" + mWindowingMode
                     + " mSystemUiVisibility=" + mSystemUiVisibility
                     + " mIsTranslucent=" + mIsTranslucent;
         }
@@ -2224,9 +2227,8 @@ public class ActivityManager {
             private ColorSpace mColorSpace;
             private int mOrientation;
             private int mRotation;
+            private Point mTaskSize;
             private Rect mContentInsets;
-            private boolean mIsLowResolution;
-            private float mScaleFraction;
             private boolean mIsRealSnapshot;
             private int mWindowingMode;
             private int mSystemUiVisibility;
@@ -2263,25 +2265,16 @@ public class ActivityManager {
                 return this;
             }
 
+            /**
+             * Sets the original size of the task
+             */
+            public Builder setTaskSize(Point size) {
+                mTaskSize = size;
+                return this;
+            }
+
             public Builder setContentInsets(Rect contentInsets) {
                 mContentInsets = contentInsets;
-                return this;
-            }
-
-            /**
-             * Set to true if this is a low-resolution snapshot stored in *_reduced.jpg.
-             */
-            public Builder setIsLowResolution(boolean isLowResolution) {
-                mIsLowResolution = isLowResolution;
-                return this;
-            }
-
-            public float getScaleFraction() {
-                return mScaleFraction;
-            }
-
-            public Builder setScaleFraction(float scaleFraction) {
-                mScaleFraction = scaleFraction;
                 return this;
             }
 
@@ -2322,9 +2315,12 @@ public class ActivityManager {
                         mColorSpace,
                         mOrientation,
                         mRotation,
+                        mTaskSize,
                         mContentInsets,
-                        mIsLowResolution,
-                        mScaleFraction,
+                        // When building a TaskSnapshot with the Builder class, isLowResolution
+                        // is always false. Low-res snapshots are only created when loading from
+                        // disk.
+                        false /* isLowResolution */,
                         mIsRealSnapshot,
                         mWindowingMode,
                         mSystemUiVisibility,

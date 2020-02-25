@@ -18,19 +18,18 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
-import static com.android.server.wm.TaskSnapshotPersister.DISABLE_HIGH_RES_BITMAPS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
@@ -88,14 +87,6 @@ class TaskSnapshotController {
      */
     @VisibleForTesting
     static final int SNAPSHOT_MODE_NONE = 2;
-
-    /**
-     * Constant for <code>scaleFactor</code> when calling {@link #snapshotTask} which is
-     * interpreted as using the most appropriate scale ratio for the system.
-     * This may yield a smaller ratio on low memory devices.
-     */
-    @VisibleForTesting
-    static final float SNAPSHOT_SCALE_AUTO = -1f;
 
     private final WindowManagerService mService;
 
@@ -229,7 +220,7 @@ class TaskSnapshotController {
     @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
             boolean isLowResolution) {
         return mCache.getSnapshot(taskId, userId, restoreFromDisk, isLowResolution
-                || DISABLE_HIGH_RES_BITMAPS);
+                && mPersister.enableLowResSnapshots());
     }
 
     /**
@@ -273,8 +264,6 @@ class TaskSnapshotController {
      * information from the task and populates the builder.
      *
      * @param task the task to capture
-     * @param scaleFraction the scale fraction between 0-1.0, or {@link #SNAPSHOT_SCALE_AUTO}
-     *                      to automatically select
      * @param pixelFormat the desired pixel format, or {@link PixelFormat#UNKNOWN} to
      *                    automatically select
      * @param builder the snapshot builder to populate
@@ -282,8 +271,7 @@ class TaskSnapshotController {
      * @return true if the state of the task is ok to proceed
      */
     @VisibleForTesting
-    boolean prepareTaskSnapshot(Task task, float scaleFraction, int pixelFormat,
-            TaskSnapshot.Builder builder) {
+    boolean prepareTaskSnapshot(Task task, int pixelFormat, TaskSnapshot.Builder builder) {
         if (!mService.mPolicy.isScreenOn()) {
             if (DEBUG_SCREENSHOT) {
                 Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
@@ -314,18 +302,6 @@ class TaskSnapshotController {
         builder.setId(System.currentTimeMillis());
         builder.setContentInsets(getInsets(mainWindow));
 
-        final boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
-
-        if (scaleFraction == SNAPSHOT_SCALE_AUTO) {
-            builder.setScaleFraction(isLowRamDevice
-                    ? mPersister.getLowResScale()
-                    : mHighResTaskSnapshotScale);
-            builder.setIsLowResolution(isLowRamDevice);
-        } else {
-            builder.setScaleFraction(scaleFraction);
-            builder.setIsLowResolution(scaleFraction < 1.0f);
-        }
-
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         final boolean isShowWallpaper = (mainWindow.getAttrs().flags & FLAG_SHOW_WALLPAPER) != 0;
 
@@ -351,13 +327,23 @@ class TaskSnapshotController {
 
     @Nullable
     SurfaceControl.ScreenshotGraphicBuffer createTaskSnapshot(@NonNull Task task,
-            float scaleFraction) {
-        return createTaskSnapshot(task, scaleFraction, PixelFormat.RGBA_8888);
+            TaskSnapshot.Builder builder) {
+        Point taskSize = new Point();
+        final SurfaceControl.ScreenshotGraphicBuffer taskSnapshot = createTaskSnapshot(task,
+                mHighResTaskSnapshotScale, builder.getPixelFormat(), taskSize);
+        builder.setTaskSize(taskSize);
+        return taskSnapshot;
     }
 
     @Nullable
     SurfaceControl.ScreenshotGraphicBuffer createTaskSnapshot(@NonNull Task task,
-            float scaleFraction, int pixelFormat) {
+            float scaleFraction) {
+        return createTaskSnapshot(task, scaleFraction, PixelFormat.RGBA_8888, null);
+    }
+
+    @Nullable
+    SurfaceControl.ScreenshotGraphicBuffer createTaskSnapshot(@NonNull Task task,
+            float scaleFraction, int pixelFormat, Point outTaskSize) {
         if (task.getSurfaceControl() == null) {
             if (DEBUG_SCREENSHOT) {
                 Slog.w(TAG_WM, "Failed to take screenshot. No surface control for " + task);
@@ -369,6 +355,10 @@ class TaskSnapshotController {
         final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
                 SurfaceControl.captureLayers(
                         task.getSurfaceControl(), mTmpRect, scaleFraction, pixelFormat);
+        if (outTaskSize != null) {
+            outTaskSize.x = mTmpRect.width();
+            outTaskSize.y = mTmpRect.height();
+        }
         final GraphicBuffer buffer = screenshotBuffer != null ? screenshotBuffer.getGraphicBuffer()
                 : null;
         if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
@@ -379,21 +369,20 @@ class TaskSnapshotController {
 
     @Nullable
     TaskSnapshot snapshotTask(Task task) {
-        return snapshotTask(task, SNAPSHOT_SCALE_AUTO, PixelFormat.UNKNOWN);
+        return snapshotTask(task, PixelFormat.UNKNOWN);
     }
 
     @Nullable
-    TaskSnapshot snapshotTask(Task task, float scaleFraction, int pixelFormat) {
+    TaskSnapshot snapshotTask(Task task, int pixelFormat) {
         TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
 
-        if (!prepareTaskSnapshot(task, scaleFraction, pixelFormat, builder)) {
+        if (!prepareTaskSnapshot(task, pixelFormat, builder)) {
             // Failed some pre-req. Has been logged.
             return null;
         }
 
         final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
-                createTaskSnapshot(task, builder.getScaleFraction(),
-                builder.getPixelFormat());
+                createTaskSnapshot(task, builder);
 
         if (screenshotBuffer == null) {
             // Failed to acquire image. Has been logged.
@@ -472,8 +461,10 @@ class TaskSnapshotController {
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.systemUiVisibility, task.getTaskDescription(),
                 mHighResTaskSnapshotScale, mainWindow.getRequestedInsetsState());
-        final int width = (int) (task.getBounds().width() * mHighResTaskSnapshotScale);
-        final int height = (int) (task.getBounds().height() * mHighResTaskSnapshotScale);
+        final int taskWidth = task.getBounds().width();
+        final int taskHeight = task.getBounds().height();
+        final int width = (int) (taskWidth * mHighResTaskSnapshotScale);
+        final int height = (int) (taskHeight * mHighResTaskSnapshotScale);
 
         final RenderNode node = RenderNode.create("TaskSnapshotController", null);
         node.setLeftTopRightBottom(0, 0, width, height);
@@ -494,9 +485,9 @@ class TaskSnapshotController {
                 System.currentTimeMillis() /* id */,
                 topChild.mActivityComponent, hwBitmap.createGraphicBufferHandle(),
                 hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
-                mainWindow.getWindowConfiguration().getRotation(),
-                getInsets(mainWindow), ActivityManager.isLowRamDeviceStatic() /* isLowResolution */,
-                mHighResTaskSnapshotScale, false /* isRealSnapshot */, task.getWindowingMode(),
+                mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),
+                getInsets(mainWindow), false /* isLowResolution */,
+                false /* isRealSnapshot */, task.getWindowingMode(),
                 getSystemUiVisibility(task), false);
     }
 
