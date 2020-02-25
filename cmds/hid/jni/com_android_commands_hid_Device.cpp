@@ -146,6 +146,8 @@ std::unique_ptr<Device> Device::open(int32_t id, const char* name, int32_t vid, 
     struct uhid_event ev = {};
     ev.type = UHID_CREATE2;
     strlcpy(reinterpret_cast<char*>(ev.u.create2.name), name, sizeof(ev.u.create2.name));
+    std::string uniq = android::base::StringPrintf("Id: %d", id);
+    strlcpy(reinterpret_cast<char*>(ev.u.create2.uniq), uniq.c_str(), sizeof(ev.u.create2.uniq));
     memcpy(&ev.u.create2.rd_data, descriptor.data(), size * sizeof(ev.u.create2.rd_data[0]));
     ev.u.create2.rd_size = size;
     ev.u.create2.bus = bus;
