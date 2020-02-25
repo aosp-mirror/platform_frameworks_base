@@ -86,6 +86,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         mContext.addMockService(comp, mKeyChainService);
 
         when(mUserManager.getUserInfo(anyInt())).thenReturn(new UserInfo());
+        when(mUserManager.isUserUnlocked(any())).thenReturn(true);
 
         when(mKeyChainService.getUserCaAliases())
                 .thenReturn(new StringParceledListSlice(new ArrayList<String>()));
