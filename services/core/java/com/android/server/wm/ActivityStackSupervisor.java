@@ -1696,40 +1696,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    void resizePinnedStack(Rect displayedBounds, Rect inConfigBounds) {
-        // TODO(multi-display): The display containing the stack should be passed in.
-        final ActivityStack stack =
-                mRootWindowContainer.getDefaultDisplay().getRootPinnedTask();
-        if (stack == null) {
-            Slog.w(TAG, "resizePinnedStackLocked: pinned stack not found");
-            return;
-        }
-
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "resizePinnedStack");
-        mService.deferWindowLayout();
-        try {
-            Rect configBounds = null;
-            if (inConfigBounds != null) {
-                // Use 0,0 as the position for the inset rect because we are headed for fullscreen.
-                configBounds = tempRect;
-                configBounds.top = 0;
-                configBounds.left = 0;
-                configBounds.right = inConfigBounds.width();
-                configBounds.bottom = inConfigBounds.height();
-            }
-            if (displayedBounds != null && inConfigBounds == null) {
-                // We have finished the animation into PiP, and are resizing the tasks to match the
-                // stack bounds, while layouts are deferred, update any task state as a part of
-                // transitioning it from fullscreen into a floating state.
-                stack.onPipAnimationEndResize();
-            }
-            stack.resize(displayedBounds, configBounds, !PRESERVE_WINDOWS, !DEFER_RESUME);
-        } finally {
-            mService.continueWindowLayout();
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
     private void removeStackInSurfaceTransaction(ActivityStack stack) {
         if (stack.getWindowingMode() == WINDOWING_MODE_PINNED) {
             /**

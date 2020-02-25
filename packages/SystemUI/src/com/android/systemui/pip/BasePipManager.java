@@ -18,6 +18,8 @@ package com.android.systemui.pip;
 
 import android.content.res.Configuration;
 
+import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
+
 import java.io.PrintWriter;
 
 
@@ -27,5 +29,7 @@ public interface BasePipManager {
     default void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {}
     void onConfigurationChanged(Configuration newConfig);
     default void setShelfHeight(boolean visible, int height) {}
+    default void setPinnedStackAnimationType(int animationType) {}
+    default void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) {}
     default void dump(PrintWriter pw) {}
 }
