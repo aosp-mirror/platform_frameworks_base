@@ -212,6 +212,8 @@ import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
+import android.service.dreams.DreamActivity;
+import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.sysprop.DisplayProperties;
@@ -1227,6 +1229,52 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return false;
             }
             return true;
+        }
+    }
+
+    @Override
+    public boolean startDreamActivity(Intent intent) {
+        final WindowProcessController process = mProcessMap.getProcess(Binder.getCallingPid());
+        final long origId = Binder.clearCallingIdentity();
+
+        // The dream activity is only called for non-doze dreams.
+        final ComponentName currentDream = LocalServices.getService(DreamManagerInternal.class)
+                .getActiveDreamComponent(/* doze= */ false);
+
+        if (currentDream == null || currentDream.getPackageName() == null
+                || !currentDream.getPackageName().equals(process.mInfo.packageName)) {
+            Slog.e(TAG, "Calling package is not the current dream package. "
+                    + "Aborting startDreamActivity...");
+            return false;
+        }
+
+        final ActivityInfo a = new ActivityInfo();
+        a.theme = com.android.internal.R.style.Theme_Dream;
+        a.exported = true;
+        a.name = DreamActivity.class.getName();
+
+
+        a.packageName = process.mInfo.packageName;
+        a.applicationInfo = process.mInfo;
+        a.processName = process.mInfo.processName;
+        a.uiOptions = process.mInfo.uiOptions;
+        a.taskAffinity = "android:" + a.packageName + "/dream";
+        a.enabled = true;
+        a.launchMode = ActivityInfo.LAUNCH_SINGLE_INSTANCE;
+
+        a.persistableMode = ActivityInfo.PERSIST_NEVER;
+        a.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        a.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+        a.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
+
+        try {
+            getActivityStartController().obtainStarter(intent, "dream")
+                    .setActivityInfo(a)
+                    .setIsDream(true)
+                    .execute();
+            return true;
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -2403,7 +2451,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final ActivityStarter starter = getActivityStartController().obtainStarter(
                 null /* intent */, "moveTaskToFront");
         if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage, -1,
-                -1, callerApp, null, false, null)) {
+                -1, callerApp, null, false, false, null)) {
             if (!isBackgroundActivityStartsEnabled()) {
                 return;
             }
