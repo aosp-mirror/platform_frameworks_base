@@ -78,7 +78,8 @@ public final class ResourceClientProfile implements Parcelable {
      *                {@link android.media.tv.TvInputService.PRIORITY_HINT_USE_CASE_TYPE_LIVE}
      *                {@link android.media.tv.TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD}.
      *                New [use case : priority value] pair can be defined in the manifest by the
-     *                OEM. Any undefined use case would cause IllegalArgumentException.
+     *                OEM. The id of the useCaseVendor should be passed through this parameter. Any
+     *                undefined use case would cause IllegalArgumentException.
      */
     public ResourceClientProfile(@NonNull String tvInputSessionId,
                                  int useCase) {
