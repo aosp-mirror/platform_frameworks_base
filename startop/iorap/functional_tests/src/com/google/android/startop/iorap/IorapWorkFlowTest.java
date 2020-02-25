@@ -70,7 +70,7 @@ public class IorapWorkFlowTest {
   private static final Duration TIMEOUT = Duration.ofSeconds(300L);
 
   private static final String READAHEAD_INDICATOR =
-      "Description = /data/misc/iorapd/com.android.settings/none/com.android.settings.Settings/compiled_traces/compiled_trace.pb";
+      "Description = /data/misc/iorapd/com.android.settings/-?\\d+/com.android.settings.Settings/compiled_traces/compiled_trace.pb";
 
   private UiDevice mDevice;
 
@@ -326,14 +326,14 @@ public class IorapWorkFlowTest {
       return false;
     }
 
-    String log = executeShellCommand("logcat -s iorapd -d");
+    String log = executeShellCommand("logcat -d");
 
     Pattern p = Pattern.compile(
-        ".*" + READAHEAD_INDICATOR
-            + ".*Total File Paths=(\\d+) \\(good: (\\d+)%\\)\n"
-            + ".*Total Entries=(\\d+) \\(good: (\\d+)%\\)\n"
-            + ".*Total Bytes=(\\d+) \\(good: (\\d+)%\\).*",
-        Pattern.DOTALL);
+    ".*" + READAHEAD_INDICATOR
+        + ".*Total File Paths=(\\d+) \\(good: (\\d+[.]?\\d*)%\\)\n"
+        + ".*Total Entries=(\\d+) \\(good: (\\d+[.]?\\d*)%\\)\n"
+        + ".*Total Bytes=(\\d+) \\(good: (\\d+[.]?\\d*)%\\).*",
+    Pattern.DOTALL);
     Matcher m = p.matcher(log);
 
     if (!m.matches()) {
