@@ -7314,8 +7314,8 @@ package android.net.wifi {
     method @Deprecated public int getDisableReasonCounter(int);
     method @Deprecated public long getDisableTime();
     method @Deprecated public static int getMaxNetworkSelectionDisableReason();
-    method @Deprecated @Nullable public static String getNetworkDisableReasonString(int);
     method @Deprecated public int getNetworkSelectionDisableReason();
+    method @Deprecated @Nullable public static String getNetworkSelectionDisableReasonString(int);
     method @Deprecated public int getNetworkSelectionStatus();
     method @Deprecated @NonNull public String getNetworkStatusString();
     method @Deprecated public boolean hasEverConnected();
