@@ -96,9 +96,6 @@ public class DynamicSystemClient {
 
     private static final String TAG = "DynSystemClient";
 
-    private static final long DEFAULT_USERDATA_SIZE = (10L << 30);
-
-
     /** Listener for installation status updates. */
     public interface OnStatusChangedListener {
         /**
@@ -386,7 +383,7 @@ public class DynamicSystemClient {
     @SystemApi
     @TestApi
     public void start(@NonNull Uri systemUrl, @BytesLong long systemSize) {
-        start(systemUrl, systemSize, DEFAULT_USERDATA_SIZE);
+        start(systemUrl, systemSize, 0 /* Use the default userdata size */);
     }
 
     /**
