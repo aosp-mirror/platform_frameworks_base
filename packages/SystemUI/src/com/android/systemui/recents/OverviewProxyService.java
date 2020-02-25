@@ -61,9 +61,11 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dumpable;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipUI;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
+import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -385,6 +387,32 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             Divider divider = mDividerOptional.get();
             if (divider != null) {
                 divider.setMinimized(minimized);
+            }
+        }
+
+        @Override
+        public void notifySwipeToHomeFinished() {
+            if (!verifyCaller("notifySwipeToHomeFinished")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mPipUI.setPinnedStackAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) {
+            if (!verifyCaller("setPinnedStackAnimationListener")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mPipUI.setPinnedStackAnimationListener(listener);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 

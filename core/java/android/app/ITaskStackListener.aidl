@@ -46,16 +46,6 @@ oneway interface ITaskStackListener {
     void onPinnedActivityRestartAttempt(boolean clearedTask);
 
     /**
-     * Called whenever the pinned stack is starting animating a resize.
-     */
-    void onPinnedStackAnimationStarted();
-
-    /**
-     * Called whenever the pinned stack is done animating a resize.
-     */
-    void onPinnedStackAnimationEnded();
-
-    /**
      * Called when we launched an activity that we forced to be resizable.
      *
      * @param packageName Package name of the top activity in the task.

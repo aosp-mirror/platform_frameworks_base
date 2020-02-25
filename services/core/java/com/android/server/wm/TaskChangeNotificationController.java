@@ -37,7 +37,6 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 2;
     private static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 3;
     private static final int NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 4;
-    private static final int NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG = 5;
     private static final int NOTIFY_FORCED_RESIZABLE_MSG = 6;
     private static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 7;
     private static final int NOTIFY_TASK_ADDED_LISTENERS_MSG = 8;
@@ -48,7 +47,6 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_TASK_REMOVAL_STARTED_LISTENERS = 13;
     private static final int NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG = 14;
     private static final int NOTIFY_TASK_SNAPSHOT_CHANGED_LISTENERS_MSG = 15;
-    private static final int NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG = 16;
     private static final int NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG = 17;
     private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG = 18;
     private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED_MSG = 19;
@@ -122,14 +120,6 @@ class TaskChangeNotificationController {
 
     private final TaskStackConsumer mNotifyPinnedActivityRestartAttempt = (l, m) -> {
         l.onPinnedActivityRestartAttempt(m.arg1 != 0);
-    };
-
-    private final TaskStackConsumer mNotifyPinnedStackAnimationStarted = (l, m) -> {
-        l.onPinnedStackAnimationStarted();
-    };
-
-    private final TaskStackConsumer mNotifyPinnedStackAnimationEnded = (l, m) -> {
-        l.onPinnedStackAnimationEnded();
     };
 
     private final TaskStackConsumer mNotifyActivityForcedResizable = (l, m) -> {
@@ -232,12 +222,6 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyPinnedActivityRestartAttempt, msg);
-                    break;
-                case NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG:
-                    forAllRemoteListeners(mNotifyPinnedStackAnimationStarted, msg);
-                    break;
-                case NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG:
-                    forAllRemoteListeners(mNotifyPinnedStackAnimationEnded, msg);
                     break;
                 case NOTIFY_FORCED_RESIZABLE_MSG:
                     forAllRemoteListeners(mNotifyActivityForcedResizable, msg);
@@ -383,24 +367,6 @@ class TaskChangeNotificationController {
                 mHandler.obtainMessage(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG,
                         clearedTask ? 1 : 0, 0);
         forAllLocalListeners(mNotifyPinnedActivityRestartAttempt, msg);
-        msg.sendToTarget();
-    }
-
-    /** Notifies all listeners when the pinned stack animation starts. */
-    void notifyPinnedStackAnimationStarted() {
-        mHandler.removeMessages(NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG);
-        final Message msg =
-                mHandler.obtainMessage(NOTIFY_PINNED_STACK_ANIMATION_STARTED_LISTENERS_MSG);
-        forAllLocalListeners(mNotifyPinnedStackAnimationStarted, msg);
-        msg.sendToTarget();
-    }
-
-    /** Notifies all listeners when the pinned stack animation ends. */
-    void notifyPinnedStackAnimationEnded() {
-        mHandler.removeMessages(NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG);
-        final Message msg =
-                mHandler.obtainMessage(NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG);
-        forAllLocalListeners(mNotifyPinnedStackAnimationEnded, msg);
         msg.sendToTarget();
     }
 

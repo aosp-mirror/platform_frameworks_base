@@ -77,13 +77,6 @@ interface IRecentsAnimationController {
     void hideCurrentInputMethod();
 
     /**
-     * This call is deprecated, use #setDeferCancelUntilNextTransition() instead
-     * TODO(138144750): Remove this method once there are no callers
-     * @deprecated
-     */
-    void setCancelWithDeferredScreenshot(boolean screenshot);
-
-    /**
      * Clean up the screenshot of previous task which was created during recents animation that
      * was cancelled by a stack order change.
      *

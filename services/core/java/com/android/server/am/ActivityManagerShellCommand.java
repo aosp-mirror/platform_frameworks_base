@@ -2570,8 +2570,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         switch (op) {
             case "move-task":
                 return runStackMoveTask(pw);
-            case "resize-animated":
-                return runStackResizeAnimated(pw);
             case "resize-docked-stack":
                 return runStackResizeDocked(pw);
             case "positiontask":
@@ -2645,23 +2643,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         mTaskInterface.moveTaskToStack(taskId, stackId, toTop);
-        return 0;
-    }
-
-    int runStackResizeAnimated(PrintWriter pw) throws RemoteException {
-        String stackIdStr = getNextArgRequired();
-        int stackId = Integer.parseInt(stackIdStr);
-        final Rect bounds;
-        if ("null".equals(peekNextArg())) {
-            bounds = null;
-        } else {
-            bounds = getBounds();
-            if (bounds == null) {
-                getErrPrintWriter().println("Error: invalid input bounds");
-                return -1;
-            }
-        }
-        mTaskInterface.animateResizePinnedStack(stackId, bounds, -1);
         return 0;
     }
 
@@ -3285,8 +3266,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("       move-task <TASK_ID> <STACK_ID> [true|false]");
             pw.println("           Move <TASK_ID> from its current stack to the top (true) or");
             pw.println("           bottom (false) of <STACK_ID>.");
-            pw.println("       resize-animated <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>");
-            pw.println("           Same as resize, but allow animation.");
             pw.println("       resize-docked-stack <LEFT,TOP,RIGHT,BOTTOM> [<TASK_LEFT,TASK_TOP,TASK_RIGHT,TASK_BOTTOM>]");
             pw.println("           Change docked stack to <LEFT,TOP,RIGHT,BOTTOM>");
             pw.println("           and supplying temporary different task bounds indicated by");
