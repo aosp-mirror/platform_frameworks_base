@@ -58,6 +58,10 @@ public class InsetsSource implements Parcelable {
                 : null;
     }
 
+    public void setFrame(int left, int top, int right, int bottom) {
+        mFrame.set(left, top, right, bottom);
+    }
+
     public void setFrame(Rect frame) {
         mFrame.set(frame);
     }
