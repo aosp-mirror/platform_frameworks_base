@@ -17,13 +17,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/menu_container"
-    android:layout_width="@dimen/navigation_key_width"
+    android:layout_width="@dimen/navigation_side_padding"
     android:layout_height="match_parent"
     android:importantForAccessibility="no"
     >
     <!-- Use nav button width & height=match_parent for parent FrameLayout and buttons because they
     are placed inside a view that has a size controlled by weight. Ensure weight is large enough to
-    support icon size. -->
+    support icon size. Use layout_width=navigation_side_padding like other navbar buttons. -->
 
     <com.android.systemui.statusbar.policy.KeyButtonView
         android:id="@+id/menu"
