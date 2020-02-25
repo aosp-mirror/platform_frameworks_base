@@ -598,6 +598,15 @@ class GnssNetworkConnectivityHandler {
         }
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        // During an emergency call with an active sub id, get the Telephony Manager specific
+        // to the active sub to get the correct value from getServiceState and getNetworkType
+        if (mNiHandler.getInEmergency() && mActiveSubId >= 0) {
+            TelephonyManager subIdTelManager =
+                    phone.createForSubscriptionId(mActiveSubId);
+            if (subIdTelManager != null) {
+                phone = subIdTelManager;
+            }
+        }
         ServiceState serviceState = phone.getServiceState();
         String projection = null;
         String selection = null;
