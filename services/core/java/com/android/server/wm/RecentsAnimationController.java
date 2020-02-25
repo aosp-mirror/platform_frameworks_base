@@ -54,6 +54,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -299,7 +300,8 @@ public class RecentsAnimationController implements DeathRecipient {
                 final InputMethodManagerInternal inputMethodManagerInternal =
                         LocalServices.getService(InputMethodManagerInternal.class);
                 if (inputMethodManagerInternal != null) {
-                    inputMethodManagerInternal.hideCurrentInputMethod();
+                    inputMethodManagerInternal.hideCurrentInputMethod(
+                            SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
