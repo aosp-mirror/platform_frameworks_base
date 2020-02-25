@@ -22,6 +22,7 @@ apex {
     binaries: [ "derive_sdk" ],
     prebuilts: [ "cur_sdkinfo" ],
     manifest: "manifest.json",
+    min_sdk_version: "current",
 }
 
 apex_defaults {
