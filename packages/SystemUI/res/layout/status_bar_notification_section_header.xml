@@ -32,6 +32,8 @@
         android:layout_gravity="bottom"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:forceHasOverlappingRendering="false"
+        android:clipChildren="false"
         >
         <include layout="@layout/status_bar_notification_section_header_contents"/>
     </LinearLayout>

@@ -49,6 +49,7 @@ public abstract class StackScrollerDecorView extends ExpandableView {
 
     public StackScrollerDecorView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setClipChildren(false);
     }
 
     @Override

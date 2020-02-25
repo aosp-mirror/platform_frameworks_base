@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.row;
 
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -28,6 +29,9 @@ import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.Interpolators;
+import com.android.systemui.R;
+import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
@@ -58,11 +62,26 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private ViewGroup mTransientContainer;
     private boolean mInShelf;
     private boolean mTransformingInShelf;
+    protected float mContentTransformationAmount;
+    protected boolean mIsLastChild;
+    protected int mContentShift;
     private final ExpandableViewState mViewState;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mViewState = createExpandableViewState();
+        initDimens();
+    }
+
+    private void initDimens() {
+        mContentShift = getResources().getDimensionPixelSize(
+                R.dimen.shelf_transform_content_shift);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        initDimens();
     }
 
     @Override
@@ -594,7 +613,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     /**
      * @return whether the current view doesn't add height to the overall content. This means that
-     * if it is added to a list of items, it's content will still have the same height.
+     * if it is added to a list of items, its content will still have the same height.
      * An example is the notification shelf, that is always placed on top of another view.
      */
     public boolean hasNoContentHeight() {
@@ -610,6 +629,59 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     public boolean isInShelf() {
         return mInShelf;
+    }
+
+    public @Nullable StatusBarIconView getShelfIcon() {
+        return null;
+    }
+
+    /**
+     * Set how much this notification is transformed into the shelf.
+     *
+     * @param contentTransformationAmount A value from 0 to 1 indicating how much we are transformed
+     *                                 to the content away
+     * @param isLastChild is this the last child in the list. If true, then the transformation is
+     *                    different since its content fades out.
+     */
+    public void setContentTransformationAmount(float contentTransformationAmount,
+            boolean isLastChild) {
+        boolean changeTransformation = isLastChild != mIsLastChild;
+        changeTransformation |= mContentTransformationAmount != contentTransformationAmount;
+        mIsLastChild = isLastChild;
+        mContentTransformationAmount = contentTransformationAmount;
+        if (changeTransformation) {
+            updateContentTransformation();
+        }
+    }
+
+    /**
+     * Update the content representation based on the amount we are transformed into the shelf.
+     */
+    protected void updateContentTransformation() {
+        float translationY = -mContentTransformationAmount * getContentTransformationShift();
+        float contentAlpha = 1.0f - mContentTransformationAmount;
+        contentAlpha = Math.min(contentAlpha / 0.5f, 1.0f);
+        contentAlpha = Interpolators.ALPHA_OUT.getInterpolation(contentAlpha);
+        if (mIsLastChild) {
+            translationY *= 0.4f;
+        }
+        applyContentTransformation(contentAlpha, translationY);
+    }
+
+    /**
+     * @return how much the content shifts up when going into the shelf
+     */
+    protected float getContentTransformationShift() {
+        return mContentShift;
+    }
+
+    /**
+     * Apply the contentTransformation when going into the shelf.
+     *
+     * @param contentAlpha The alpha that should be applied
+     * @param translationY the translationY that should be applied
+     */
+    protected void applyContentTransformation(float contentAlpha, float translationY) {
     }
 
     /**

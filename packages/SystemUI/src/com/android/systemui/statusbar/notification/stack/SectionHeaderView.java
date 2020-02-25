@@ -108,6 +108,15 @@ public class SectionHeaderView extends StackScrollerDecorView {
         mLabelView.setOnClickListener(listener);
     }
 
+    @Override
+    protected void applyContentTransformation(float contentAlpha, float translationY) {
+        super.applyContentTransformation(contentAlpha, translationY);
+        mLabelView.setAlpha(contentAlpha);
+        mLabelView.setTranslationY(translationY);
+        mClearAllButton.setAlpha(contentAlpha);
+        mClearAllButton.setTranslationY(translationY);
+    }
+
     /** Fired when the user clicks on the "X" button on the far right of the header. */
     void setOnClearAllClickListener(View.OnClickListener listener) {
         mOnClearClickListener = listener;
