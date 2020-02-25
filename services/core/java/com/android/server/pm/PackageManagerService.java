@@ -16345,7 +16345,27 @@ public class PackageManagerService extends IPackageManager.Stub
                         REASON_INSTALL,
                         DexoptOptions.DEXOPT_BOOT_COMPLETE
                                 | DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE);
-                mPackageDexOptimizer.performDexOpt(pkg, reconciledPkg.pkgSetting,
+                ScanResult result = reconciledPkg.scanResult;
+
+                // This mirrors logic from commitReconciledScanResultLocked, where the library files
+                // needed for dexopt are assigned.
+                // TODO: Fix this to have 1 mutable PackageSetting for scan/install. If the previous
+                //  setting needs to be passed to have a comparison, hide it behind an immutable
+                //  interface. There's no good reason to have 3 different ways to access the real
+                //  PackageSetting object, only one of which is actually correct.
+                PackageSetting realPkgSetting = result.existingSettingCopied
+                        ? result.request.pkgSetting : result.pkgSetting;
+                if (realPkgSetting == null) {
+                    realPkgSetting = reconciledPkg.pkgSetting;
+                }
+
+                // Unfortunately, the updated system app flag is only tracked on this PackageSetting
+                boolean isUpdatedSystemApp = reconciledPkg.pkgSetting.getPkgState()
+                        .isUpdatedSystemApp();
+
+                realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
+
+                mPackageDexOptimizer.performDexOpt(pkg, realPkgSetting,
                         null /* instructionSets */,
                         getOrCreateCompilerPackageStats(pkg),
                         mDexManager.getPackageUseInfoOrDefault(packageName),
