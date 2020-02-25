@@ -1334,6 +1334,13 @@ public final class SystemServiceRegistry {
                         IBinder b = ServiceManager.getServiceOrThrow(Context.APP_INTEGRITY_SERVICE);
                         return new AppIntegrityManager(IAppIntegrityManager.Stub.asInterface(b));
                     }});
+        registerService(Context.DREAM_SERVICE, DreamManager.class,
+                new CachedServiceFetcher<DreamManager>() {
+                    @Override
+                    public DreamManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new DreamManager(ctx);
+                    }});
 
         sInitializing = true;
         try {
