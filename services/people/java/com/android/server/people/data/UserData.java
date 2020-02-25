@@ -22,14 +22,24 @@ import android.annotation.UserIdInt;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Slog;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 
 /** The data associated with a user profile. */
 class UserData {
+
+    private static final String TAG = UserData.class.getSimpleName();
+
+    private static final int CONVERSATIONS_END_TOKEN = -1;
 
     private final @UserIdInt int mUserId;
 
@@ -123,6 +133,48 @@ class UserData {
     @Nullable
     PackageData getDefaultSmsApp() {
         return mDefaultSmsApp != null ? getPackageData(mDefaultSmsApp) : null;
+    }
+
+    @Nullable
+    byte[] getBackupPayload() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+        for (PackageData packageData : mPackageDataMap.values()) {
+            try {
+                byte[] conversationsBackupPayload =
+                        packageData.getConversationStore().getBackupPayload();
+                out.writeInt(conversationsBackupPayload.length);
+                out.write(conversationsBackupPayload);
+                out.writeUTF(packageData.getPackageName());
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to write conversations to backup payload.", e);
+                return null;
+            }
+        }
+        try {
+            out.writeInt(CONVERSATIONS_END_TOKEN);
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to write conversations end token to backup payload.", e);
+            return null;
+        }
+        return baos.toByteArray();
+    }
+
+    void restore(@NonNull byte[] payload) {
+        DataInputStream in = new DataInputStream(new ByteArrayInputStream(payload));
+        try {
+            for (int conversationsPayloadSize = in.readInt();
+                    conversationsPayloadSize != CONVERSATIONS_END_TOKEN;
+                    conversationsPayloadSize = in.readInt()) {
+                byte[] conversationsPayload = new byte[conversationsPayloadSize];
+                in.readFully(conversationsPayload, 0, conversationsPayloadSize);
+                String packageName = in.readUTF();
+                getOrCreatePackageData(packageName).getConversationStore().restore(
+                        conversationsPayload);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to restore conversations from backup payload.", e);
+        }
     }
 
     private PackageData createPackageData(String packageName) {
