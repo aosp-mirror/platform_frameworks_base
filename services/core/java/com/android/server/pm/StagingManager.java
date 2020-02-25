@@ -1246,7 +1246,7 @@ public class StagingManager {
             try {
                 IStorageManager storageManager = PackageHelper.getStorageManager();
                 if (storageManager.supportsCheckpoint()) {
-                    storageManager.startCheckpoint(1);
+                    storageManager.startCheckpoint(2);
                 }
             } catch (Exception e) {
                 // Failed to get hold of StorageManager
