@@ -17,8 +17,8 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.SystemApi;
-import android.media.tv.tuner.TunerConstants;
-import android.media.tv.tuner.TunerConstants.Result;
+import android.media.tv.tuner.Tuner;
+import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.TunerUtils;
 
 /**
@@ -34,17 +34,6 @@ import android.media.tv.tuner.TunerUtils;
  */
 @SystemApi
 public class TimeFilter implements AutoCloseable {
-
-    /**
-     * Timestamp is unavailable.
-     *
-     * <p>Returned by {@link #getSourceTime()} or {@link #getTimeStamp()} when the requested
-     * timestamp is not available.
-     *
-     * @see #getSourceTime()
-     * @see #getTimeStamp()
-     */
-    public static final long TIMESTAMP_UNAVAILABLE = -1L;
 
 
     private native int nativeSetTimestamp(long timestamp);
@@ -108,12 +97,12 @@ public class TimeFilter implements AutoCloseable {
      *
      * @return current timestamp in the time filter. It's based on the 90KHz counter, and it's
      * the same format as PTS (Presentation Time Stamp) defined in ISO/IEC 13818-1:2019. The
-     * timestamps may or may not be related to PTS or DTS. Returns {@link #TIMESTAMP_UNAVAILABLE}
-     * if the timestamp is never set.
+     * timestamps may or may not be related to PTS or DTS. Returns
+     * {@link Tuner#INVALID_TIMESTAMP} if the timestamp is never set.
      */
     public long getTimeStamp() {
         if (!mEnable) {
-            return TIMESTAMP_UNAVAILABLE;
+            return Tuner.INVALID_TIMESTAMP;
         }
         return nativeGetTimestamp();
     }
@@ -126,11 +115,11 @@ public class TimeFilter implements AutoCloseable {
      * @return first timestamp of incoming data stream. It's based on the 90KHz counter, and
      * it's the same format as PTS (Presentation Time Stamp) defined in ISO/IEC 13818-1:2019.
      * The timestamps may or may not be related to PTS or DTS. Returns
-     * {@link #TIMESTAMP_UNAVAILABLE} if the timestamp is not available.
+     * {@link Tuner#INVALID_TIMESTAMP} if the timestamp is not available.
      */
     public long getSourceTime() {
         if (!mEnable) {
-            return TIMESTAMP_UNAVAILABLE;
+            return Tuner.INVALID_TIMESTAMP;
         }
         return nativeGetSourceTime();
     }
@@ -144,7 +133,7 @@ public class TimeFilter implements AutoCloseable {
     @Override
     public void close() {
         int res = nativeClose();
-        if (res != TunerConstants.RESULT_SUCCESS) {
+        if (res != Tuner.RESULT_SUCCESS) {
             TunerUtils.throwExceptionForResult(res, "Failed to close time filter.");
         }
     }

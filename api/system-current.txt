@@ -4896,16 +4896,10 @@ package android.media.tv.tuner {
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void updateResourcePriority(int, int);
-  }
-
-  public static interface Tuner.OnResourceLostListener {
-    method public void onResourceLost(@NonNull android.media.tv.tuner.Tuner);
-  }
-
-  public final class TunerConstants {
     field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
     field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
     field public static final int INVALID_STREAM_ID = 65535; // 0xffff
+    field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
     field public static final int INVALID_TS_PID = 65535; // 0xffff
     field public static final int RESULT_INVALID_ARGUMENT = 4; // 0x4
     field public static final int RESULT_INVALID_STATE = 3; // 0x3
@@ -4917,6 +4911,10 @@ package android.media.tv.tuner {
     field public static final int SCAN_TYPE_AUTO = 1; // 0x1
     field public static final int SCAN_TYPE_BLIND = 2; // 0x2
     field public static final int SCAN_TYPE_UNDEFINED = 0; // 0x0
+  }
+
+  public static interface Tuner.OnResourceLostListener {
+    method public void onResourceLost(@NonNull android.media.tv.tuner.Tuner);
   }
 
 }
@@ -5279,7 +5277,6 @@ package android.media.tv.tuner.filter {
     method public long getSourceTime();
     method public long getTimeStamp();
     method public int setCurrentTimestamp(long);
-    field public static final long TIMESTAMP_UNAVAILABLE = -1L; // 0xffffffffffffffffL
   }
 
   public final class TlvFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {

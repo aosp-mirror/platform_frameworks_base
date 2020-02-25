@@ -22,7 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.TunerConstants.Result;
+import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.TunerUtils;
 
 import java.lang.annotation.Retention;

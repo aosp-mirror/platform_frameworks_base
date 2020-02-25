@@ -171,22 +171,22 @@ public final class TunerUtils {
      */
     @Nullable
     public static void throwExceptionForResult(
-            @TunerConstants.Result int r, @Nullable String msg) {
+            @Tuner.Result int r, @Nullable String msg) {
         if (msg == null) {
             msg = "";
         }
         switch (r) {
-            case TunerConstants.RESULT_INVALID_ARGUMENT:
+            case Tuner.RESULT_INVALID_ARGUMENT:
                 throw new IllegalArgumentException(msg);
-            case TunerConstants.RESULT_INVALID_STATE:
+            case Tuner.RESULT_INVALID_STATE:
                 throw new IllegalStateException(msg);
-            case TunerConstants.RESULT_NOT_INITIALIZED:
+            case Tuner.RESULT_NOT_INITIALIZED:
                 throw new IllegalStateException("Invalid state: not initialized. " + msg);
-            case TunerConstants.RESULT_OUT_OF_MEMORY:
+            case Tuner.RESULT_OUT_OF_MEMORY:
                 throw new OutOfMemoryError(msg);
-            case TunerConstants.RESULT_UNAVAILABLE:
+            case Tuner.RESULT_UNAVAILABLE:
                 throw new IllegalStateException("Invalid state: resource unavailable. " + msg);
-            case TunerConstants.RESULT_UNKNOWN_ERROR:
+            case Tuner.RESULT_UNKNOWN_ERROR:
                 throw new RuntimeException("Unknown error" + msg);
             default:
                 break;
