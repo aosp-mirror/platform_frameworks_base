@@ -685,7 +685,7 @@
     <!-- The size of the right icon image when on low ram -->
     <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size</dimen>
 
-    <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
+    <dimen name="messaging_avatar_size">52dp</dimen>
 
     <dimen name="messaging_group_sending_progress_size">24dp</dimen>
 
