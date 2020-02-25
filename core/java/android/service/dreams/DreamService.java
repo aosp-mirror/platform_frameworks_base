@@ -608,6 +608,8 @@ public class DreamService extends Service implements Window.Callback {
      * Marks this dream as windowless.  Only available to doze dreams.
      *
      * @hide
+     *
+     * TODO: Remove @UnsupportedAppUsage.
      */
     @UnsupportedAppUsage
     public void setWindowless(boolean windowless) {
@@ -904,12 +906,9 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mActivity == null) {
             Slog.w(TAG, "Finish was called before the dream was attached.");
-            return;
-        }
-
-        // In case the activity is not finished yet, do it now. This can happen if someone calls
-        // finish() directly, without going through wakeUp().
-        if (!mActivity.isFinishing()) {
+        } else if (!mActivity.isFinishing()) {
+            // In case the activity is not finished yet, do it now. This can happen if someone calls
+            // finish() directly, without going through wakeUp().
             mActivity.finishAndRemoveTask();
             return;
         }
@@ -924,7 +923,6 @@ public class DreamService extends Service implements Window.Callback {
             } catch (RemoteException ex) {
                 // system server died
             }
-
         }
     }
 
@@ -995,6 +993,8 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mActivity != null && !mActivity.isFinishing()) {
             mActivity.finishAndRemoveTask();
+        } else {
+            finish();
         }
 
         mDreamToken = null;
