@@ -37,8 +37,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.qs.QS;
@@ -86,6 +86,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private int mY;
     private boolean mOpening;
     private boolean mIsShowingNavBackdrop;
+    private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
 
     @Inject
     public QSCustomizer(Context context, AttributeSet attrs,
@@ -187,7 +188,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             int containerLocation[] = findViewById(R.id.customize_container).getLocationOnScreen();
             mX = x - containerLocation[0];
             mY = y - containerLocation[1];
-            MetricsLogger.visible(getContext(), MetricsProto.MetricsEvent.QS_EDIT);
+            mUiEventLogger.log(QSEditEvent.QS_EDIT_OPEN);
             isShown = true;
             mOpening = true;
             setTileSpecs();
@@ -224,7 +225,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     public void hide() {
         final boolean animate = mScreenLifecycle.getScreenState() != ScreenLifecycle.SCREEN_OFF;
         if (isShown) {
-            MetricsLogger.hidden(getContext(), MetricsProto.MetricsEvent.QS_EDIT);
+            mUiEventLogger.log(QSEditEvent.QS_EDIT_CLOSED);
             isShown = false;
             mToolbar.dismissPopupMenus();
             setCustomizing(false);
@@ -258,7 +259,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case MENU_RESET:
-                MetricsLogger.action(getContext(), MetricsProto.MetricsEvent.ACTION_QS_EDIT_RESET);
+                mUiEventLogger.log(QSEditEvent.QS_EDIT_RESET);
                 reset();
                 break;
         }
