@@ -32,7 +32,7 @@ import java.io.UnsupportedEncodingException;
  * <p>
  * This API is not as convenient or type safe as the standard protobuf
  * classes. If possible, the best recommended library is to use protobuf lite.
- * However, in environements (such as the Android platform itself), a
+ * However, in environments (such as the Android platform itself), a
  * more memory efficient version is necessary.
  *
  * <p>Each write method takes an ID code from the protoc generated classes
