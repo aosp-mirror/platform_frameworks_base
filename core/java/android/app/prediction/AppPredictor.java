@@ -260,6 +260,7 @@ public final class AppPredictor {
                 Log.e(TAG, "Failed to notify app target event", e);
                 e.rethrowAsRuntimeException();
             }
+            mRegisteredCallbacks.clear();
         } else {
             throw new IllegalStateException("This client has already been destroyed.");
         }
