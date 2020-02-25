@@ -67,6 +67,7 @@ class ControlsControllerImpl @Inject constructor (
         internal const val CONTROLS_AVAILABLE = "systemui.controls_available"
         internal val URI = Settings.Secure.getUriFor(CONTROLS_AVAILABLE)
         private const val USER_CHANGE_RETRY_DELAY = 500L // ms
+        private const val DEFAULT_ENABLED = 1
     }
 
     // Map of map: ComponentName -> (String -> ControlInfo).
@@ -79,7 +80,8 @@ class ControlsControllerImpl @Inject constructor (
 
     private val contentResolver: ContentResolver
         get() = context.contentResolver
-    override var available = Settings.Secure.getInt(contentResolver, CONTROLS_AVAILABLE, 0) != 0
+    override var available = Settings.Secure.getInt(
+            contentResolver, CONTROLS_AVAILABLE, DEFAULT_ENABLED) != 0
         private set
 
     private var currentUser = context.user
@@ -104,7 +106,7 @@ class ControlsControllerImpl @Inject constructor (
                 userContext.filesDir, ControlsFavoritePersistenceWrapper.FILE_NAME)
         persistenceWrapper.changeFile(fileName)
         available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
-                /* default */ 0, newUser.identifier) != 0
+                /* default */ DEFAULT_ENABLED, newUser.identifier) != 0
         synchronized(currentFavorites) {
             currentFavorites.clear()
         }
@@ -140,7 +142,7 @@ class ControlsControllerImpl @Inject constructor (
                 return
             }
             available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
-                    /* default */ 0, currentUserId) != 0
+                    /* default */ DEFAULT_ENABLED, currentUserId) != 0
             synchronized(currentFavorites) {
                 currentFavorites.clear()
             }
