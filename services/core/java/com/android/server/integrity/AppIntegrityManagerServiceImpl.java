@@ -40,7 +40,6 @@ import android.content.integrity.Rule;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
@@ -202,7 +201,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                                 intent,
                                 /* onFinished= */ null,
                                 /* handler= */ null);
-                    } catch (IntentSender.SendIntentException e) {
+                    } catch (Exception e) {
                         Slog.e(TAG, "Error sending status feedback.", e);
                     }
                 });
