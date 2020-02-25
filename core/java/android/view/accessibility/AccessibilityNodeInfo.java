@@ -52,6 +52,7 @@ import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
 import android.util.Size;
 import android.util.TypedValue;
+import android.view.SurfaceView;
 import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
@@ -916,6 +917,15 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Find the view that has the specified focus type. The search starts from
      * the view represented by this node info.
      *
+     * <p>
+     * <strong>Note:</strong> If this view hierarchy has a {@link SurfaceView} embedding another
+     * view hierarchy via {@link SurfaceView#setChildSurfacePackage}, there is a limitation that
+     * this API won't be able to find the node for the view on the embedded view hierarchy. It's
+     * because views don't know about the embedded hierarchies. Instead, you could traverse all
+     * the children to find the node. Or, use {@link AccessibilityService#findFocus(int)} for
+     * {@link #FOCUS_ACCESSIBILITY} only since it has no such limitation.
+     * </p>
+     *
      * @param focus The focus to find. One of {@link #FOCUS_INPUT} or
      *         {@link #FOCUS_ACCESSIBILITY}.
      * @return The node info of the focused view or null.
@@ -936,6 +946,14 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Searches for the nearest view in the specified direction that can take
      * the input focus.
+     *
+     * <p>
+     * <strong>Note:</strong> If this view hierarchy has a {@link SurfaceView} embedding another
+     * view hierarchy via {@link SurfaceView#setChildSurfacePackage}, there is a limitation that
+     * this API won't be able to find the node for the view in the specified direction on the
+     * embedded view hierarchy. It's because views don't know about the embedded hierarchies.
+     * Instead, you could traverse all the children to find the node.
+     * </p>
      *
      * @param direction The direction. Can be one of:
      *     {@link View#FOCUS_DOWN},
@@ -1723,6 +1741,13 @@ public class AccessibilityNodeInfo implements Parcelable {
      *     received info by calling {@link AccessibilityNodeInfo#recycle()}
      *     to avoid creating of multiple instances.
      * </p>
+     * <p>
+     * <strong>Note:</strong> If this view hierarchy has a {@link SurfaceView} embedding another
+     * view hierarchy via {@link SurfaceView#setChildSurfacePackage}, there is a limitation that
+     * this API won't be able to find the node for the view on the embedded view hierarchy. It's
+     * because views don't know about the embedded hierarchies. Instead, you could traverse all
+     * the children to find the node.
+     * </p>
      *
      * @param text The searched text.
      * @return A list of node info.
@@ -1753,6 +1778,13 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   and in order to report the fully qualified view id if an {@link AccessibilityNodeInfo}
      *   the client has to set the {@link AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS}
      *   flag when configuring his {@link android.accessibilityservice.AccessibilityService}.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> If this view hierarchy has a {@link SurfaceView} embedding another
+     * view hierarchy via {@link SurfaceView#setChildSurfacePackage}, there is a limitation that
+     * this API won't be able to find the node for the view on the embedded view hierarchy. It's
+     * because views don't know about the embedded hierarchies. Instead, you could traverse all
+     * the children to find the node.
      * </p>
      *
      * @param viewId The fully qualified resource name of the view id to find.
