@@ -34,6 +34,9 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class WindowMagnification extends SystemUI {
+    private static final int CONFIG_MASK =
+            ActivityInfo.CONFIG_DENSITY | ActivityInfo.CONFIG_ORIENTATION;
+
     private WindowMagnificationController mWindowMagnificationController;
     private final Handler mHandler;
 
@@ -49,7 +52,7 @@ public class WindowMagnification extends SystemUI {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         final int configDiff = newConfig.diff(mLastConfiguration);
-        if ((configDiff & ActivityInfo.CONFIG_DENSITY) == 0) {
+        if ((configDiff & CONFIG_MASK) == 0) {
             return;
         }
         mLastConfiguration.setTo(newConfig);
