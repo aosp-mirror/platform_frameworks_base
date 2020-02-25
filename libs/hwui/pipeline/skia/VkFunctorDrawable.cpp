@@ -20,7 +20,7 @@
 #include <GrBackendDrawableInfo.h>
 #include <SkAndroidFrameworkUtils.h>
 #include <SkImage.h>
-#include "include/private/SkM44.h"
+#include <SkM44.h>
 #include <utils/Color.h>
 #include <utils/Trace.h>
 #include <utils/TraceUtils.h>
