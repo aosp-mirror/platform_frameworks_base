@@ -162,7 +162,8 @@ public final class InlineSuggestionFactory {
                 continue;
             }
             InlineSuggestion inlineSuggestion = createInlineSuggestion(isAugmented, dataset,
-                    fieldIndex, mergedInlinePresentation(request, datasetIndex, inlinePresentation),
+                    datasetIndex,
+                    mergedInlinePresentation(request, datasetIndex, inlinePresentation),
                     onClickFactory, remoteRenderService, onErrorCallback,
                     request.getHostInputToken(), request.getHostDisplayId());
 
