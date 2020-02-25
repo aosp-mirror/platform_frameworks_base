@@ -56,8 +56,9 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
 
     private int mHotspotState;
     private volatile int mNumConnectedDevices;
-    private volatile boolean mIsTetheringSupported;
-    private volatile boolean mHasTetherableWifiRegexs;
+    // Assume tethering is available until told otherwise
+    private volatile boolean mIsTetheringSupported = true;
+    private volatile boolean mHasTetherableWifiRegexs = true;
     private boolean mWaitingForTerminalState;
 
     private TetheringManager.TetheringEventCallback mTetheringCallback =
@@ -97,6 +98,15 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
                 new HandlerExecutor(backgroundHandler), mTetheringCallback);
     }
 
+    /**
+     * Whether hotspot is currently supported.
+     *
+     * This will return {@code true} immediately on creation of the controller, but may be updated
+     * later. Callbacks from this controllers will notify if the state changes.
+     *
+     * @return {@code true} if hotspot is supported (or we haven't been told it's not)
+     * @see #addCallback
+     */
     @Override
     public boolean isHotspotSupported() {
         return mIsTetheringSupported && mHasTetherableWifiRegexs
