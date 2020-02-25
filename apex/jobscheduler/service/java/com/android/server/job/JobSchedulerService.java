@@ -1955,9 +1955,19 @@ public class JobSchedulerService extends com.android.server.SystemService
                 continue;
             }
             if (!running.isReady()) {
-                serviceContext.cancelExecutingJobLocked(
-                        JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED,
-                        "cancelled due to unsatisfied constraints");
+                // If a restricted job doesn't have dynamic constraints satisfied, assume that's
+                // the reason the job is being stopped, instead of because of other constraints
+                // not being satisfied.
+                if (running.getEffectiveStandbyBucket() == RESTRICTED_INDEX
+                        && !running.areDynamicConstraintsSatisfied()) {
+                    serviceContext.cancelExecutingJobLocked(
+                            JobParameters.REASON_RESTRICTED_BUCKET,
+                            "cancelled due to restricted bucket");
+                } else {
+                    serviceContext.cancelExecutingJobLocked(
+                            JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED,
+                            "cancelled due to unsatisfied constraints");
+                }
             } else {
                 final JobRestriction restriction = checkIfRestricted(running);
                 if (restriction != null) {
