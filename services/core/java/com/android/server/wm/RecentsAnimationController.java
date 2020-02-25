@@ -26,7 +26,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
-import static com.android.server.wm.BoundsAnimationController.FADE_IN;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
@@ -231,7 +230,6 @@ public class RecentsAnimationController implements DeathRecipient {
                 mCallbacks.onAnimationFinished(moveHomeToTop
                         ? REORDER_MOVE_TO_TOP
                         : REORDER_MOVE_TO_ORIGINAL_POSITION, sendUserLeaveHint);
-                mDisplayContent.mBoundsAnimationController.setAnimationType(FADE_IN);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -305,14 +303,6 @@ public class RecentsAnimationController implements DeathRecipient {
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
-        @Deprecated
-        public void setCancelWithDeferredScreenshot(boolean screenshot) {
-            synchronized (mService.mGlobalLock) {
-                setDeferredCancel(true /* deferred */, screenshot);
             }
         }
 
