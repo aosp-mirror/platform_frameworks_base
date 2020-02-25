@@ -32,7 +32,7 @@ namespace os {
 namespace statsd {
 
 
-class StatsLogProcessor : public ConfigListener {
+class StatsLogProcessor : public ConfigListener, public virtual PackageInfoListener {
 public:
     StatsLogProcessor(const sp<UidMap>& uidMap, const sp<StatsPullerManager>& pullerManager,
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
@@ -90,6 +90,16 @@ public:
 
     /* Sets the active status/ttl for all configs and metrics to the status in ActiveConfigList. */
     void SetConfigsActiveState(const ActiveConfigList& activeConfigList, int64_t currentTimeNs);
+
+    /* Notify all MetricsManagers of app upgrades */
+    void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
+                          const int64_t version) override;
+
+    /* Notify all MetricsManagers of app removals */
+    void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid) override;
+
+    /* Notify all MetricsManagers of uid map snapshots received */
+    void onUidMapReceived(const int64_t& eventTimeNs) override;
 
     // Reset all configs.
     void resetConfigs();
