@@ -184,7 +184,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     /**
      * Implement this to know when the notification panel is revealed
      *
-     * @param items Number of items on the panel at time of opening
+     * @param items Number of notifications on the panel at time of opening
      */
     public void onPanelRevealed(int items) {
 
