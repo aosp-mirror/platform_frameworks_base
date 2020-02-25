@@ -25,7 +25,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.IActivityManager;
-import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.WallpaperManager;
@@ -152,7 +151,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final IDreamManager mDreamManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final LockPatternUtils mLockPatternUtils;
-    private final KeyguardManager mKeyguardManager;
+    private final KeyguardStateController mKeyguardStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ContentResolver mContentResolver;
     private final Resources mResources;
@@ -198,7 +197,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     public GlobalActionsDialog(Context context, GlobalActionsManager windowManagerFuncs,
             AudioManager audioManager, IDreamManager iDreamManager,
             DevicePolicyManager devicePolicyManager, LockPatternUtils lockPatternUtils,
-            KeyguardManager keyguardManager, BroadcastDispatcher broadcastDispatcher,
+            BroadcastDispatcher broadcastDispatcher,
             ConnectivityManager connectivityManager, TelephonyManager telephonyManager,
             ContentResolver contentResolver, @Nullable Vibrator vibrator, @Main Resources resources,
             ConfigurationController configurationController, ActivityStarter activityStarter,
@@ -216,7 +215,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mDreamManager = iDreamManager;
         mDevicePolicyManager = devicePolicyManager;
         mLockPatternUtils = lockPatternUtils;
-        mKeyguardManager = keyguardManager;
+        mKeyguardStateController = keyguardStateController;
         mBroadcastDispatcher = broadcastDispatcher;
         mContentResolver = contentResolver;
         mResources = resources;
@@ -427,7 +426,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                                 .startPendingIntentDismissingKeyguard(intent);
                                     }
                                 },
-                                mKeyguardManager.isDeviceLocked())
+                                !mKeyguardStateController.isUnlocked())
                         : null;
 
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController,
@@ -444,12 +443,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private boolean shouldDisplayLockdown() {
-        int userId = getCurrentUser().id;
         // Lockdown is meaningless without a place to go.
-        if (!mKeyguardManager.isDeviceSecure(userId)) {
+        if (!mKeyguardStateController.isMethodSecure()) {
             return false;
         }
 
+        int userId = getCurrentUser().id;
         // Only show the lockdown button if the device isn't locked down (for whatever reason).
         int state = mLockPatternUtils.getStrongAuthForUser(userId);
         return (state == STRONG_AUTH_NOT_REQUIRED
@@ -1914,7 +1913,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private boolean shouldShowControls() {
-        return !mKeyguardManager.isDeviceLocked()
+        return mKeyguardStateController.isUnlocked()
                 && mControlsUiController.getAvailable();
     }
 }
