@@ -114,8 +114,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private final RuleEvaluationEngine mEvaluationEngine;
     private final IntegrityFileManager mIntegrityFileManager;
 
-    private final boolean mCheckIntegrityForRuleProviders;
-
     /** Create an instance of {@link AppIntegrityManagerServiceImpl}. */
     public static AppIntegrityManagerServiceImpl create(Context context) {
         HandlerThread handlerThread = new HandlerThread("AppIntegrityManagerServiceHandler");
@@ -126,13 +124,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 LocalServices.getService(PackageManagerInternal.class),
                 RuleEvaluationEngine.getRuleEvaluationEngine(),
                 IntegrityFileManager.getInstance(),
-                handlerThread.getThreadHandler(),
-                Settings.Global.getInt(
-                        context.getContentResolver(),
-                        Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
-                        0)
-                        == 1
-        );
+                handlerThread.getThreadHandler());
     }
 
     @VisibleForTesting
@@ -141,14 +133,12 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             PackageManagerInternal packageManagerInternal,
             RuleEvaluationEngine evaluationEngine,
             IntegrityFileManager integrityFileManager,
-            Handler handler,
-            boolean checkIntegrityForRuleProviders) {
+            Handler handler) {
         mContext = context;
         mPackageManagerInternal = packageManagerInternal;
         mEvaluationEngine = evaluationEngine;
         mIntegrityFileManager = integrityFileManager;
         mHandler = handler;
-        mCheckIntegrityForRuleProviders = checkIntegrityForRuleProviders;
 
         IntentFilter integrityVerificationFilter = new IntentFilter();
         integrityVerificationFilter.addAction(ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION);
@@ -259,7 +249,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             String installerPackageName = getInstallerPackageName(intent);
 
             // Skip integrity verification if the verifier is doing the install.
-            if (!mCheckIntegrityForRuleProviders
+            if (!integrityCheckIncludesRuleProvider()
                     && isRuleProvider(installerPackageName)) {
                 Slog.i(TAG, "Verifier doing the install. Skipping integrity check.");
                 mPackageManagerInternal.setIntegrityVerificationResult(
@@ -270,8 +260,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             List<String> appCertificates = getCertificateFingerprint(packageInfo);
             List<String> installerCertificates =
                     getInstallerCertificateFingerprint(installerPackageName);
-
-            Slog.w(TAG, appCertificates.toString());
 
             AppInstallMetadata.Builder builder = new AppInstallMetadata.Builder();
 
@@ -630,5 +618,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private boolean isRuleProvider(String installerPackageName) {
         return getAllowedRuleProviders().stream()
                 .anyMatch(ruleProvider -> ruleProvider.equals(installerPackageName));
+    }
+
+    private boolean integrityCheckIncludesRuleProvider() {
+        return Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
+                0)
+                == 1;
     }
 }
