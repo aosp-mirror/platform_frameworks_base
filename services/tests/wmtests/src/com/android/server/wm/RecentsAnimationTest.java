@@ -208,7 +208,6 @@ public class RecentsAnimationTest extends ActivityTestsBase {
     @Test
     public void testSetLaunchTaskBehindOfTargetActivity() {
         DisplayContent display = mRootWindowContainer.getDefaultDisplay();
-        display.mDisplayContent.mBoundsAnimationController = mock(BoundsAnimationController.class);
         ActivityStack homeStack = display.getRootHomeTask();
         // Assume the home activity support recents.
         ActivityRecord targetActivity = homeStack.getTopNonFinishingActivity();
@@ -254,7 +253,6 @@ public class RecentsAnimationTest extends ActivityTestsBase {
     @Test
     public void testCancelAnimationOnVisibleStackOrderChange() {
         DisplayContent display = mService.mRootWindowContainer.getDefaultDisplay();
-        display.mDisplayContent.mBoundsAnimationController = mock(BoundsAnimationController.class);
         ActivityStack fullscreenStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         new ActivityBuilder(mService)

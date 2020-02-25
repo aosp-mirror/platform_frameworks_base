@@ -25,6 +25,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 
 import com.android.systemui.SystemUI;
+import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.statusbar.CommandQueue;
 
 import java.io.FileDescriptor;
@@ -96,6 +97,18 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
         }
 
         mPipManager.setShelfHeight(visible, height);
+    }
+
+    public void setPinnedStackAnimationType(int animationType) {
+        if (mPipManager != null) {
+            mPipManager.setPinnedStackAnimationType(animationType);
+        }
+    }
+
+    public void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) {
+        if (mPipManager != null) {
+            mPipManager.setPinnedStackAnimationListener(listener);
+        }
     }
 
     @Override
