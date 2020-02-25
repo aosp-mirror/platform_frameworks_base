@@ -92,6 +92,7 @@ import com.android.systemui.MultiListLayout;
 import com.android.systemui.MultiListLayout.MultiListAdapter;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.controls.ui.ControlsUiController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -189,6 +190,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private ControlsUiController mControlsUiController;
     private final IWindowManager mIWindowManager;
     private final Executor mBackgroundExecutor;
+    private final ControlsListingController mControlsListingController;
+    private boolean mAnyControlsProviders = false;
 
     /**
      * @param context everything needs a context :(
@@ -208,7 +211,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             IStatusBarService statusBarService,
             NotificationShadeWindowController notificationShadeWindowController,
             ControlsUiController controlsUiController, IWindowManager iWindowManager,
-            @Background Executor backgroundExecutor) {
+            @Background Executor backgroundExecutor,
+            ControlsListingController controlsListingController) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -232,6 +236,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mControlsUiController = controlsUiController;
         mIWindowManager = iWindowManager;
         mBackgroundExecutor = backgroundExecutor;
+        mControlsListingController = controlsListingController;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -268,6 +273,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 }
             }
         });
+
+        mControlsListingController.addCallback(list -> mAnyControlsProviders = !list.isEmpty());
     }
 
     /**
@@ -1914,6 +1921,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private boolean shouldShowControls() {
         return mKeyguardStateController.isUnlocked()
-                && mControlsUiController.getAvailable();
+                && mControlsUiController.getAvailable()
+                && mAnyControlsProviders;
     }
 }
