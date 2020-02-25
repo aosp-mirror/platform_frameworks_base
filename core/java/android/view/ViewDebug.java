@@ -1209,6 +1209,7 @@ public class ViewDebug {
         ByteArrayOutputStream baOut = new ByteArrayOutputStream();
 
         final ViewHierarchyEncoder encoder = new ViewHierarchyEncoder(baOut);
+        encoder.setUserPropertiesEnabled(false);
         encoder.addProperty("window:left", view.mAttachInfo.mWindowLeft);
         encoder.addProperty("window:top", view.mAttachInfo.mWindowTop);
         view.encode(encoder);
