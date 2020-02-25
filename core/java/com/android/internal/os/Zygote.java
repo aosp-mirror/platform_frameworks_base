@@ -590,7 +590,7 @@ public final class Zygote {
     static Runnable forkUsap(LocalServerSocket usapPoolSocket,
                              int[] sessionSocketRawFDs,
                              boolean isPriorityFork) {
-        FileDescriptor[] pipeFDs = null;
+        FileDescriptor[] pipeFDs;
 
         try {
             pipeFDs = Os.pipe2(O_CLOEXEC);
