@@ -53,6 +53,7 @@ public class NetworkStagedRollbackTest extends BaseHostJUnit4Test {
 
     private static final String ROLLBACK_INITIATE = "ROLLBACK_INITIATE";
     private static final String ROLLBACK_BOOT_TRIGGERED = "ROLLBACK_BOOT_TRIGGERED";
+    private static final String ROLLBACK_SUCCESS = "ROLLBACK_SUCCESS";
 
     private WatchdogEventLogger mLogger = new WatchdogEventLogger();
 
@@ -93,6 +94,7 @@ public class NetworkStagedRollbackTest extends BaseHostJUnit4Test {
                     REASON_EXPLICIT_HEALTH_CHECK, null));
             assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
                     null, null));
+            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
         } finally {
             // Reconnect internet again so we won't break tests which assume internet available
             getDevice().executeShellCommand("svc wifi enable");
