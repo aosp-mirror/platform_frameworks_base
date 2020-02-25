@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -140,13 +139,16 @@ public class HotspotControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDefault_hotspotNotSupported() {
-        assertFalse(mController.isHotspotSupported());
+    public void testHotspotSupported_default() {
+        assertTrue(mController.isHotspotSupported());
     }
 
     @Test
     public void testHotspotSupported_rightConditions() {
         mTetheringCallbackCaptor.getValue().onTetheringSupported(true);
+
+        assertTrue(mController.isHotspotSupported());
+
         mTetheringCallbackCaptor.getValue()
                 .onTetherableInterfaceRegexpsChanged(mTetheringInterfaceRegexps);
 
@@ -154,13 +156,21 @@ public class HotspotControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHotspotSupported_callbackCalledOnChange() {
+    public void testHotspotSupported_callbackCalledOnChange_tetheringSupported() {
         mController.addCallback(mCallback1);
-        mTetheringCallbackCaptor.getValue().onTetheringSupported(true);
+        mTetheringCallbackCaptor.getValue().onTetheringSupported(false);
+
+        verify(mCallback1).onHotspotAvailabilityChanged(false);
+    }
+
+    @Test
+    public void testHotspotSupported_callbackCalledOnChange_tetherableInterfaces() {
+        when(mTetheringInterfaceRegexps.getTetherableWifiRegexs())
+                .thenReturn(Collections.emptyList());
+        mController.addCallback(mCallback1);
         mTetheringCallbackCaptor.getValue()
                 .onTetherableInterfaceRegexpsChanged(mTetheringInterfaceRegexps);
 
-        verify(mCallback1).onHotspotAvailabilityChanged(true);
+        verify(mCallback1).onHotspotAvailabilityChanged(false);
     }
-
 }
