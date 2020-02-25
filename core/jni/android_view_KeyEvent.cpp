@@ -75,6 +75,7 @@ static struct {
     jmethodID obtain;
     jmethodID recycle;
 
+    jfieldID mId;
     jfieldID mDeviceId;
     jfieldID mSource;
     jfieldID mDisplayId;
@@ -96,6 +97,7 @@ jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent* event) {
     ScopedLocalRef<jbyteArray> hmac = toJbyteArray(env, event->getHmac());
     jobject eventObj =
             env->CallStaticObjectMethod(gKeyEventClassInfo.clazz, gKeyEventClassInfo.obtain,
+                                        event->getId(),
                                         nanoseconds_to_milliseconds(event->getDownTime()),
                                         nanoseconds_to_milliseconds(event->getEventTime()),
                                         event->getAction(), event->getKeyCode(),
@@ -114,6 +116,7 @@ jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent* event) {
 
 status_t android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj,
         KeyEvent* event) {
+    jint id = env->GetIntField(eventObj, gKeyEventClassInfo.mId);
     jint deviceId = env->GetIntField(eventObj, gKeyEventClassInfo.mDeviceId);
     jint source = env->GetIntField(eventObj, gKeyEventClassInfo.mSource);
     jint displayId = env->GetIntField(eventObj, gKeyEventClassInfo.mDisplayId);
@@ -131,7 +134,7 @@ status_t android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj,
     jlong downTime = env->GetLongField(eventObj, gKeyEventClassInfo.mDownTime);
     jlong eventTime = env->GetLongField(eventObj, gKeyEventClassInfo.mEventTime);
 
-    event->initialize(deviceId, source, displayId, *hmac, action, flags, keyCode, scanCode,
+    event->initialize(id, deviceId, source, displayId, *hmac, action, flags, keyCode, scanCode,
                       metaState, repeatCount, milliseconds_to_nanoseconds(downTime),
                       milliseconds_to_nanoseconds(eventTime));
     return OK;
@@ -159,14 +162,18 @@ static jint android_view_KeyEvent_nativeKeyCodeFromString(JNIEnv* env, jobject c
     return KeyEvent::getKeyCodeFromLabel(keyLabel.c_str());
 }
 
+static jint android_view_KeyEvent_nativeNextId() {
+    return static_cast<jint>(InputEvent::nextId());
+}
 
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod g_methods[] = {
-    { "nativeKeyCodeToString", "(I)Ljava/lang/String;",
-        (void*)android_view_KeyEvent_nativeKeyCodeToString},
-    { "nativeKeyCodeFromString", "(Ljava/lang/String;)I",
-        (void*)android_view_KeyEvent_nativeKeyCodeFromString},
+        {"nativeKeyCodeToString", "(I)Ljava/lang/String;",
+         (void*)android_view_KeyEvent_nativeKeyCodeToString},
+        {"nativeKeyCodeFromString", "(Ljava/lang/String;)I",
+         (void*)android_view_KeyEvent_nativeKeyCodeFromString},
+        {"nativeNextId", "()I", (void*)android_view_KeyEvent_nativeNextId},
 };
 
 int register_android_view_KeyEvent(JNIEnv* env) {
@@ -175,10 +182,11 @@ int register_android_view_KeyEvent(JNIEnv* env) {
 
     gKeyEventClassInfo.obtain =
             GetStaticMethodIDOrDie(env, gKeyEventClassInfo.clazz, "obtain",
-                                   "(JJIIIIIIIII[BLjava/lang/String;)Landroid/view/KeyEvent;");
+                                   "(IJJIIIIIIIII[BLjava/lang/String;)Landroid/view/KeyEvent;");
     gKeyEventClassInfo.recycle = GetMethodIDOrDie(env, gKeyEventClassInfo.clazz,
             "recycle", "()V");
 
+    gKeyEventClassInfo.mId = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mId", "I");
     gKeyEventClassInfo.mDeviceId = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mDeviceId", "I");
     gKeyEventClassInfo.mSource = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mSource", "I");
     gKeyEventClassInfo.mDisplayId = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mDisplayId",
