@@ -394,6 +394,11 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * @param deviceType the device type for the {@link Control}. Setting an invalid value not
+         *                   in {@link DeviceTypes} will set it to {@link DeviceTypes#TYPE_UNKNOWN}.
+         * @return {@code this}
+         */
         @NonNull
         public StatelessBuilder setDeviceType(@DeviceTypes.DeviceType int deviceType) {
             if (!DeviceTypes.validDeviceType(deviceType)) {
@@ -416,6 +421,10 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * @param subtitle the user facing subtitle for the {@link Control}
+         * @return {@code this}
+         */
         @NonNull
         public StatelessBuilder setSubtitle(@NonNull CharSequence subtitle) {
             Preconditions.checkNotNull(subtitle);
@@ -423,12 +432,22 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * @param structure the user facing name of the structure for the {@link Control}.
+         *                  {@code null} indicates that it's not associated with any structure.
+         * @return {@code this}
+         */
         @NonNull
         public StatelessBuilder setStructure(@Nullable CharSequence structure) {
             mStructure = structure;
             return this;
         }
 
+        /**
+         * @param zone the user facing name of the zone for the {@link Control}. {@code null}
+         *             indicates that it's not associated with any zone.
+         * @return {@code this}
+         */
         @NonNull
         public StatelessBuilder setZone(@Nullable CharSequence zone) {
             mZone = zone;
@@ -446,12 +465,20 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * @param customIcon an {@link Icon} to override the one determined by the device type.
+         * @return {@code this}
+         */
         @NonNull
         public StatelessBuilder setCustomIcon(@Nullable Icon customIcon) {
             mCustomIcon = customIcon;
             return this;
         }
 
+        /**
+         * @param customColor a list of colors to override the ones determined by the device type.
+         * @return {@code this}
+         */
         @NonNull
         public StatelessBuilder setCustomColor(@Nullable ColorStateList customColor) {
             mCustomColor = customColor;
@@ -459,7 +486,7 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * Build a {@link Control}
+         * Build a stateless {@link Control}
          * @return a valid {@link Control}
          */
         @NonNull
@@ -482,7 +509,7 @@ public final class Control implements Parcelable {
     /**
      * Builder class for {@link Control}.
      *
-     * This class facilitates the creation of {@link Control}.
+     * This class facilitates the creation of {@link Control} with an associated state.
      * It provides the following defaults for non-optional parameters:
      * <ul>
      *     <li> Device type: {@link DeviceTypes#TYPE_UNKNOWN}
@@ -551,6 +578,11 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * @param deviceType the device type for the {@link Control}. Setting an invalid value not
+         *                   in {@link DeviceTypes} will set it to {@link DeviceTypes#TYPE_UNKNOWN}.
+         * @return {@code this}
+         */
         @NonNull
         public StatefulBuilder setDeviceType(@DeviceTypes.DeviceType int deviceType) {
             if (!DeviceTypes.validDeviceType(deviceType)) {
@@ -573,6 +605,10 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * @param subtitle the user facing subtitle for the {@link Control}
+         * @return {@code this}
+         */
         @NonNull
         public StatefulBuilder setSubtitle(@NonNull CharSequence subtitle) {
             Preconditions.checkNotNull(subtitle);
@@ -580,12 +616,22 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * @param structure the user facing name of the structure for the {@link Control}.
+         *                  {@code null} indicates that it's not associated with any structure.
+         * @return {@code this}
+         */
         @NonNull
         public StatefulBuilder setStructure(@Nullable CharSequence structure) {
             mStructure = structure;
             return this;
         }
 
+        /**
+         * @param zone the user facing name of the zone for the {@link Control}. {@code null}
+         *             indicates that it's not associated with any zone.
+         * @return {@code this}
+         */
         @NonNull
         public StatefulBuilder setZone(@Nullable CharSequence zone) {
             mZone = zone;
@@ -603,18 +649,31 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * @param customIcon an {@link Icon} to override the one determined by the device type.
+         * @return {@code this}
+         */
         @NonNull
         public StatefulBuilder setCustomIcon(@Nullable Icon customIcon) {
             mCustomIcon = customIcon;
             return this;
         }
 
+        /**
+         * @param customColor a list of colors to override the ones determined by the device type.
+         * @return {@code this}
+         */
         @NonNull
         public StatefulBuilder setCustomColor(@Nullable ColorStateList customColor) {
             mCustomColor = customColor;
             return this;
         }
 
+        /**
+         * @param status the status of the {@link Control}. Setting an invalid value not in
+         *               {@link Control} will set it to {@link Control#STATUS_UNKNOWN}.
+         * @return {@code this}
+         */
         @NonNull
         public StatefulBuilder setStatus(@Status int status) {
             if (status < 0 || status >= NUM_STATUS) {
@@ -626,6 +685,10 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * @param controlTemplate a template for the {@link Control}
+         * @return {@code this}
+         */
         @NonNull
         public StatefulBuilder setControlTemplate(@NonNull ControlTemplate controlTemplate) {
             Preconditions.checkNotNull(controlTemplate);
@@ -633,6 +696,10 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * @param statusText a user facing text representing the status of the {@link Control}.
+         * @return {@code this}
+         */
         @NonNull
         public StatefulBuilder setStatusText(@NonNull CharSequence statusText) {
             Preconditions.checkNotNull(statusText);
@@ -640,6 +707,10 @@ public final class Control implements Parcelable {
             return this;
         }
 
+        /**
+         * Build a stateless {@link Control}
+         * @return a valid {@link Control}
+         */
         @NonNull
         public Control build() {
             return new Control(mControlId,

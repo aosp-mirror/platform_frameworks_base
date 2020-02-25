@@ -19,10 +19,15 @@ package android.service.controls.actions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
+import android.service.controls.Control;
+import android.service.controls.templates.ToggleRangeTemplate;
 import android.service.controls.templates.ToggleTemplate;
 
 /**
- * Action sent by a {@link ToggleTemplate}
+ * Action sent by user toggling a {@link Control} between checked/unchecked.
+ *
+ * This action is available when the {@link Control} was constructed with either a
+ * {@link ToggleTemplate} or a {@link ToggleRangeTemplate}.
  */
 public final class BooleanAction extends ControlAction {
 
@@ -40,8 +45,8 @@ public final class BooleanAction extends ControlAction {
     }
 
     /**
-     * @param templateId the identifier of the {@link ToggleTemplate} that originated this action.
-     * @param newState new value for the state displayed by the {@link ToggleTemplate}.
+     * @param templateId the identifier of the template that originated this action.
+     * @param newState new value for the state displayed by the template.
      * @param challengeValue a value sent by the user along with the action to authenticate. {@code}
      *                       null is sent when no authentication is needed or has not been
      *                       requested.
@@ -64,8 +69,7 @@ public final class BooleanAction extends ControlAction {
     /**
      * The new state set for the button in the corresponding {@link ToggleTemplate}.
      *
-     * @return {@code true} if the button was toggled from an {@code off} state to an {@code on}
-     *         state.
+     * @return {@code true} if the button was toggled from unchecked to checked.
      */
     public boolean getNewState() {
         return mNewState;
