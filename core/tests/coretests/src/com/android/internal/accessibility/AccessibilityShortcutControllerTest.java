@@ -36,6 +36,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -85,7 +86,9 @@ import org.mockito.invocation.InvocationOnMock;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 
 @RunWith(AndroidJUnit4.class)
@@ -532,6 +535,36 @@ public class AccessibilityShortcutControllerTest {
         onInitCap.getValue().onInit(TextToSpeech.ERROR);
         verify(mTextToSpeech, times(0)).speak(any(), anyInt(), any(), any());
         verify(mRingtone).play();
+    }
+
+    @Test
+    public void testOnAccessibilityShortcut_showsWarningDialog_ttsLongTimeInit_retrySpoken()
+            throws Exception {
+        configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
+        configureValidShortcutService();
+        configureTtsSpokenPromptEnabled();
+        configureHandlerCallbackInvocation();
+        AccessibilityShortcutController accessibilityShortcutController = getController();
+        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0);
+        Set<String> features = new HashSet<>();
+        features.add(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED);
+        doReturn(features, Collections.emptySet()).when(mVoice).getFeatures();
+        doReturn(TextToSpeech.LANG_NOT_SUPPORTED, TextToSpeech.LANG_AVAILABLE)
+                .when(mTextToSpeech).setLanguage(any());
+        accessibilityShortcutController.performAccessibilityShortcut();
+
+        verify(mAlertDialog).show();
+        ArgumentCaptor<TextToSpeech.OnInitListener> onInitCap = ArgumentCaptor.forClass(
+                TextToSpeech.OnInitListener.class);
+        verify(mFrameworkObjectProvider).getTextToSpeech(any(), onInitCap.capture());
+        onInitCap.getValue().onInit(TextToSpeech.SUCCESS);
+        verify(mTextToSpeech).speak(any(), eq(TextToSpeech.QUEUE_FLUSH), any(), any());
+        ArgumentCaptor<DialogInterface.OnDismissListener> onDismissCap = ArgumentCaptor.forClass(
+                DialogInterface.OnDismissListener.class);
+        verify(mAlertDialog).setOnDismissListener(onDismissCap.capture());
+        onDismissCap.getValue().onDismiss(mAlertDialog);
+        verify(mTextToSpeech).shutdown();
+        verify(mRingtone, times(0)).play();
     }
 
     private void configureNoShortcutService() throws Exception {
