@@ -286,7 +286,7 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 }
 
 bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseTimeNs,
-                 const int64_t currentTimeNs, UidMap& uidMap,
+                 const int64_t currentTimeNs,
                  const sp<StatsPullerManager>& pullerManager,
                  const unordered_map<int64_t, int>& logTrackerMap,
                  const unordered_map<int64_t, int>& conditionTrackerMap,
@@ -600,9 +600,6 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         }
         noReportMetricIds.insert(no_report_metric);
     }
-    for (const auto& it : allMetricProducers) {
-        uidMap.addListener(it);
-    }
     return true;
 }
 
@@ -807,7 +804,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
         return false;
     }
 
-    if (!initMetrics(key, config, timeBaseNs, currentTimeNs, uidMap, pullerManager, logTrackerMap,
+    if (!initMetrics(key, config, timeBaseNs, currentTimeNs, pullerManager, logTrackerMap,
                      conditionTrackerMap, allAtomMatchers, allConditionTrackers, allMetricProducers,
                      conditionToMetricMap, trackerToMetricMap, metricProducerMap,
                      noReportMetricIds)) {
