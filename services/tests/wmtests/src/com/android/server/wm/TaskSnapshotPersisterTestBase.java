@@ -30,6 +30,7 @@ import android.graphics.Color;
 import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.UserManager;
 import android.view.Surface;
@@ -87,8 +88,10 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
      * Builds a TaskSnapshot.
      */
     static class TaskSnapshotBuilder {
+        private static final int SNAPSHOT_WIDTH = 100;
+        private static final int SNAPSHOT_HEIGHT = 100;
 
-        private float mScale = 1f;
+        private float mScaleFraction = 1f;
         private boolean mIsLowResolution = false;
         private boolean mIsRealSnapshot = true;
         private boolean mIsTranslucent = false;
@@ -96,8 +99,11 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         private int mSystemUiVisibility = 0;
         private int mRotation = Surface.ROTATION_0;
 
-        TaskSnapshotBuilder setScale(float scale) {
-            mScale = scale;
+        TaskSnapshotBuilder() {
+        }
+
+        TaskSnapshotBuilder setScaleFraction(float scale) {
+            mScaleFraction = scale;
             return this;
         }
 
@@ -132,15 +138,20 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         }
 
         TaskSnapshot build() {
-            final GraphicBuffer buffer = GraphicBuffer.create(100, 100, PixelFormat.RGBA_8888,
+            // To satisfy existing tests, ensure the graphics buffer is always 100x100, and
+            // compute the ize of the task according to mScaleFraction.
+            Point taskSize = new Point((int) (SNAPSHOT_WIDTH / mScaleFraction),
+                    (int) (SNAPSHOT_HEIGHT / mScaleFraction));
+            final GraphicBuffer buffer = GraphicBuffer.create(SNAPSHOT_WIDTH, SNAPSHOT_HEIGHT,
+                    PixelFormat.RGBA_8888,
                     USAGE_HW_TEXTURE | USAGE_SW_READ_RARELY | USAGE_SW_READ_RARELY);
             Canvas c = buffer.lockCanvas();
             c.drawColor(Color.RED);
             buffer.unlockCanvasAndPost(c);
             return new TaskSnapshot(MOCK_SNAPSHOT_ID, new ComponentName("", ""), buffer,
                     ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
-                    mRotation, TEST_INSETS,
-                    mIsLowResolution, mScale, mIsRealSnapshot,
+                    mRotation, taskSize, TEST_INSETS,
+                    mIsLowResolution, mIsRealSnapshot,
                     mWindowingMode, mSystemUiVisibility, mIsTranslucent);
         }
     }
