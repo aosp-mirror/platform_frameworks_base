@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.LocusId;
+import android.os.FileUtils;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 
@@ -251,5 +252,6 @@ public class PackageData {
     void onDestroy() {
         mEventStore.onDestroy();
         mConversationStore.onDestroy();
+        FileUtils.deleteContentsAndDir(mPackageDataDir);
     }
 }
