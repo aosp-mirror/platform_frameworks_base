@@ -112,12 +112,28 @@ private:
 };
 
 /**
- * Section that calls dumpsys on a system service.
+ * Section that calls protobuf dumpsys on a system service, usually
+ * "dumpsys [service_name] --proto".
  */
 class DumpsysSection : public WorkerThreadSection {
 public:
     DumpsysSection(int id, const char* service, ...);
     virtual ~DumpsysSection();
+
+    virtual status_t BlockingCall(unique_fd& pipeWriteFd) const;
+
+private:
+    String16 mService;
+    Vector<String16> mArgs;
+};
+
+/**
+ * Section that calls text dumpsys on a system service, usually "dumpsys [service_name]".
+ */
+class TextDumpsysSection : public WorkerThreadSection {
+public:
+    TextDumpsysSection(int id, const char* service, ...);
+    virtual ~TextDumpsysSection();
 
     virtual status_t BlockingCall(unique_fd& pipeWriteFd) const;
 
