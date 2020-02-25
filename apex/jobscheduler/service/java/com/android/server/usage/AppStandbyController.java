@@ -1844,7 +1844,7 @@ public class AppStandbyController implements AppStandbyInternal {
                     break;
 
                 case MSG_REPORT_SYNC_SCHEDULED:
-                    final boolean exempted = msg.arg1 > 0 ? true : false;
+                    final boolean exempted = msg.arg2 > 0 ? true : false;
                     if (exempted) {
                         reportExemptedSyncScheduled((String) msg.obj, msg.arg1);
                     } else {
