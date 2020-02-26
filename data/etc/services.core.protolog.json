@@ -697,6 +697,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-668956537": {
+      "message": "  THUMBNAIL %s: CREATE",
+      "level": "INFO",
+      "group": "WM_SHOW_TRANSACTIONS",
+      "at": "com\/android\/server\/wm\/SurfaceFreezer.java"
+    },
     "-666510420": {
       "message": "With display frozen, orientationChangeComplete=%b",
       "level": "VERBOSE",
