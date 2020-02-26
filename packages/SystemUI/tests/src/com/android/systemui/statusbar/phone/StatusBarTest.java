@@ -247,6 +247,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private KeyguardDismissUtil mKeyguardDismissUtil;
     @Mock private ExtensionController mExtensionController;
     @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
+    @Mock private PhoneStatusBarPolicy mPhoneStatusBarPolicy;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -400,6 +401,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardDismissUtil,
                 mExtensionController,
                 mUserInfoControllerImpl,
+                mPhoneStatusBarPolicy,
                 mDismissCallbackRegistry,
                 mStatusBarTouchableRegionManager);
 
