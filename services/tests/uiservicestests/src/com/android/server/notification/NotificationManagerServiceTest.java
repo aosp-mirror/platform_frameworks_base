@@ -6089,7 +6089,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Pretend the shortcut exists
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
-        shortcutInfos.add(mock(ShortcutInfo.class));
+        ShortcutInfo info = mock(ShortcutInfo.class);
+        when(info.isLongLived()).thenReturn(true);
+        shortcutInfos.add(info);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
 
         // Test: Send the bubble notification
@@ -6116,7 +6118,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mLauncherApps, times(1)).unregisterCallback(launcherAppsCallback.getValue());
 
         // We're no longer a bubble
-        Notification notif2 = mService.getNotificationRecord(nr.getSbn().getKey()).getNotification();
+        Notification notif2 = mService.getNotificationRecord(
+                nr.getSbn().getKey()).getNotification();
         assertFalse(notif2.isBubbleNotification());
     }
 
@@ -6409,11 +6412,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         convos.add(convo2);
         when(mPreferencesHelper.getConversations(anyString(), anyInt())).thenReturn(convos);
 
-        // only one valid shortcut
-        LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery()
-                .setPackage(PKG_P)
-                .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED)
-                .setShortcutIds(Arrays.asList(channel1.getConversationId()));
         ShortcutInfo si = mock(ShortcutInfo.class);
         when(si.getShortLabel()).thenReturn("Hello");
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(Arrays.asList(si));
