@@ -21,6 +21,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewStub
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -85,6 +86,10 @@ class ControlsProviderSelectorActivity @Inject constructor(
                 resources.getText(R.string.controls_providers_title)
         requireViewById<TextView>(R.id.subtitle).text =
                 resources.getText(R.string.controls_providers_subtitle)
+
+        requireViewById<Button>(R.id.done).setOnClickListener {
+            this@ControlsProviderSelectorActivity.finishAffinity()
+        }
 
         currentUserTracker.startTracking()
     }
