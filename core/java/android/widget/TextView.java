@@ -13174,7 +13174,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         stream.addProperty("text:selectionStart", getSelectionStart());
         stream.addProperty("text:selectionEnd", getSelectionEnd());
         stream.addProperty("text:curTextColor", mCurTextColor);
-        stream.addProperty("text:text", mText == null ? null : mText.toString());
+        stream.addUserProperty("text:text", mText == null ? null : mText.toString());
         stream.addProperty("text:gravity", mGravity);
     }
 
