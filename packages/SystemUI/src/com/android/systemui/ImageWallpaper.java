@@ -20,7 +20,9 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
@@ -94,18 +96,28 @@ public class ImageWallpaper extends WallpaperService {
         private EglHelper mEglHelper;
         private StatusBarStateController mController;
         private final Runnable mFinishRenderingTask = this::finishRendering;
-        private final boolean mNeedTransition;
         private boolean mShouldStopTransition;
-        @VisibleForTesting
-        final boolean mIsHighEndGfx;
-        private final boolean mDisplayNeedsBlanking;
         private final DisplayInfo mDisplayInfo = new DisplayInfo();
         private final Object mMonitor = new Object();
+        @VisibleForTesting
+        boolean mIsHighEndGfx;
+        private boolean mDisplayNeedsBlanking;
+        private boolean mNeedTransition;
         private boolean mNeedRedraw;
         // This variable can only be accessed in synchronized block.
         private boolean mWaitingForRendering;
 
         GLEngine(Context context, DozeParameters dozeParameters) {
+            init(dozeParameters);
+        }
+
+        @VisibleForTesting
+        GLEngine(DozeParameters dozeParameters, Handler handler) {
+            super(SystemClock::elapsedRealtime, handler);
+            init(dozeParameters);
+        }
+
+        private void init(DozeParameters dozeParameters) {
             mIsHighEndGfx = ActivityManager.isHighEndGfx();
             mDisplayNeedsBlanking = dozeParameters.getDisplayNeedsBlanking();
             mNeedTransition = mIsHighEndGfx && !mDisplayNeedsBlanking;
