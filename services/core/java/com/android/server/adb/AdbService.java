@@ -144,6 +144,18 @@ public class AdbService extends IAdbManager.Stub {
         public File getAdbTempKeysFile() {
             return mDebuggingManager.getAdbTempKeysFile();
         }
+
+        @Override
+        public void startAdbdForTransport(byte transportType) {
+            FgThread.getHandler().sendMessage(obtainMessage(
+                    AdbService::setAdbdEnabledForTransport, AdbService.this, true, transportType));
+        }
+
+        @Override
+        public void stopAdbdForTransport(byte transportType) {
+            FgThread.getHandler().sendMessage(obtainMessage(
+                    AdbService::setAdbdEnabledForTransport, AdbService.this, false, transportType));
+        }
     }
 
     private void initAdbState() {
@@ -434,6 +446,19 @@ public class AdbService extends IAdbManager.Stub {
     private void stopAdbd() {
         if (!mIsAdbUsbEnabled && !mIsAdbWifiEnabled) {
             SystemProperties.set(CTL_STOP, ADBD);
+        }
+    }
+
+    private void setAdbdEnabledForTransport(boolean enable, byte transportType) {
+        if (transportType == AdbTransportType.USB) {
+            mIsAdbUsbEnabled = enable;
+        } else if (transportType == AdbTransportType.WIFI) {
+            mIsAdbWifiEnabled = enable;
+        }
+        if (enable) {
+            startAdbd();
+        } else {
+            stopAdbd();
         }
     }
 
