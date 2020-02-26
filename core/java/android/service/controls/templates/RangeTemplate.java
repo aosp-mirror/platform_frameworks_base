@@ -19,7 +19,6 @@ package android.service.controls.templates;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.service.controls.Control;
 import android.service.controls.actions.FloatAction;
 
@@ -85,7 +84,7 @@ public final class RangeTemplate extends ControlTemplate {
     }
 
     /**
-     * Construct a new {@link RangeTemplate} from a {@link Parcel}.
+     * Construct a new {@link RangeTemplate} from a {@link Bundle}.
      *
      * @throws IllegalArgumentException if the parameters passed do not make a valid range
      * @see RangeTemplate#RangeTemplate(String, float, float, float, float, CharSequence)
