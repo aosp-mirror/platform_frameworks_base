@@ -27,6 +27,7 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.CloseGuard;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -39,11 +40,13 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-public final class BluetoothMap implements BluetoothProfile {
+public final class BluetoothMap implements BluetoothProfile, AutoCloseable {
 
     private static final String TAG = "BluetoothMap";
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
+
+    private CloseGuard mCloseGuard;
 
     /** @hide */
     @SuppressLint("ActionValue")
@@ -86,15 +89,16 @@ public final class BluetoothMap implements BluetoothProfile {
         if (DBG) Log.d(TAG, "Create BluetoothMap proxy object");
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mProfileConnector.connect(context, listener);
+        mCloseGuard = new CloseGuard();
+        mCloseGuard.open("close");
     }
 
-    @SuppressLint("GenericException")
-    protected void finalize() throws Throwable {
-        try {
-            close();
-        } finally {
-            super.finalize();
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    protected void finalize() {
+        if (mCloseGuard != null) {
+            mCloseGuard.warnIfOpen();
         }
+        close();
     }
 
     /**
@@ -105,7 +109,10 @@ public final class BluetoothMap implements BluetoothProfile {
      *
      * @hide
      */
-    public synchronized void close() {
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public void close() {
+        if (VDBG) log("close()");
         mProfileConnector.disconnect();
     }
 
@@ -250,6 +257,7 @@ public final class BluetoothMap implements BluetoothProfile {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (DBG) log("getConnectedDevices()");
         final IBluetoothMap service = getService();
