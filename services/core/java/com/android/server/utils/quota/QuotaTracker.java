@@ -552,6 +552,7 @@ abstract class QuotaTracker {
                     mTriggerTimeElapsed = nextTriggerTimeElapsed;
                 }
             } else {
+                cancelAlarm(this);
                 mTriggerTimeElapsed = 0;
             }
         }
