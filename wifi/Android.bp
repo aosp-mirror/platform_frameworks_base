@@ -47,7 +47,7 @@ filegroup {
         // framework-wifi.jar. This is not a good idea, should move WifiNetworkScoreCache
         // to a separate package.
         "java/android/net/wifi/WifiNetworkScoreCache.java",
-        "java/android/net/wifi/WifiOemMigrationHook.java",
+        "java/android/net/wifi/WifiMigration.java",
         "java/android/net/wifi/nl80211/*.java",
         ":libwificond_ipc_aidl",
     ],
