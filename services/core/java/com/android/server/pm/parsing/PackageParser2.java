@@ -42,7 +42,7 @@ import java.io.File;
  */
 public class PackageParser2 {
 
-    private static final String TAG = "PackageParser2";
+    static final String TAG = "PackageParser2";
 
     private static final boolean LOG_PARSE_TIMINGS = Build.IS_DEBUGGABLE;
     private static final int LOG_PARSE_TIMINGS_THRESHOLD_MS = 100;
