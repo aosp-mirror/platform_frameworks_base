@@ -17,7 +17,7 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
-import android.content.Context;
+import android.annotation.Nullable;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
@@ -30,6 +30,7 @@ import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -38,7 +39,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.Objects;
 
 /**
  * An ISoundTriggerMiddlewareService decorator, which adds logging of all API calls (and
@@ -365,43 +365,65 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareSer
         }
     }
 
-    static private String formatArgs(Object[] args) {
-        String result = Arrays.toString(args);
-        // Strip the square brackets.
-        return result.substring(1, result.length() - 1);
+    private static String printArgs(@NonNull Object[] args) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < args.length; ++i) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            printObject(result, args[i]);
+        }
+        return result.toString();
     }
 
-    private void logReturnWithObject(Object object, String methodName, Object retVal,
-            Object[] args) {
+    private static void printObject(@NonNull StringBuilder builder, @Nullable Object obj) {
+        if (obj instanceof Parcelable) {
+            ObjectPrinter.print(builder, obj, true, 16);
+        } else {
+            builder.append(obj.toString());
+        }
+    }
+
+    private static String printObject(@Nullable Object obj) {
+        StringBuilder builder = new StringBuilder();
+        printObject(builder, obj);
+        return builder.toString();
+    }
+
+    private void logReturnWithObject(@NonNull Object object, String methodName,
+            @Nullable Object retVal,
+            @NonNull Object[] args) {
         final String message = String.format("%s[this=%s, caller=%d/%d](%s) -> %s", methodName,
-                Objects.toString(object),
+                object,
                 Binder.getCallingUid(), Binder.getCallingPid(),
-                formatArgs(args),
-                Objects.toString(retVal));
+                printArgs(args),
+                printObject(retVal));
         Log.i(TAG, message);
         appendMessage(message);
     }
 
-    private void logVoidReturnWithObject(Object object, String methodName, Object[] args) {
+    private void logVoidReturnWithObject(@NonNull Object object, @NonNull String methodName,
+            @NonNull Object[] args) {
         final String message = String.format("%s[this=%s, caller=%d/%d](%s)", methodName,
-                Objects.toString(object),
+                object,
                 Binder.getCallingUid(), Binder.getCallingPid(),
-                formatArgs(args));
+                printArgs(args));
         Log.i(TAG, message);
         appendMessage(message);
     }
 
-    private void logExceptionWithObject(Object object, String methodName, Exception ex,
+    private void logExceptionWithObject(@NonNull Object object, @NonNull String methodName,
+            @NonNull Exception ex,
             Object[] args) {
         final String message = String.format("%s[this=%s, caller=%d/%d](%s) threw", methodName,
-                Objects.toString(object),
+                object,
                 Binder.getCallingUid(), Binder.getCallingPid(),
-                formatArgs(args));
+                printArgs(args));
         Log.e(TAG, message, ex);
         appendMessage(message + " " + ex.toString());
     }
 
-    private void appendMessage(String message) {
+    private void appendMessage(@NonNull String message) {
         Event event = new Event(message);
         synchronized (mLastEvents) {
             if (mLastEvents.size() > NUM_EVENTS_TO_DUMP) {
