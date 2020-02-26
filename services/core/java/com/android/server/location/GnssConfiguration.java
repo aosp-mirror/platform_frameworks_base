@@ -79,7 +79,7 @@ class GnssConfiguration {
 
     // Represents an HAL interface version. Instances of this class are created in the JNI layer
     // and returned through native methods.
-    private static class HalInterfaceVersion {
+    static class HalInterfaceVersion {
         final int mMajor;
         final int mMinor;
 
@@ -205,6 +205,10 @@ class GnssConfiguration {
         native_set_satellite_blacklist(constellations, svids);
     }
 
+    HalInterfaceVersion getHalInterfaceVersion() {
+        return native_get_gnss_configuration_version();
+    }
+
     interface SetCarrierProperty {
         boolean set(int value);
     }
@@ -231,8 +235,7 @@ class GnssConfiguration {
 
         logConfigurations();
 
-        final HalInterfaceVersion gnssConfigurationIfaceVersion =
-                native_get_gnss_configuration_version();
+        final HalInterfaceVersion gnssConfigurationIfaceVersion = getHalInterfaceVersion();
         if (gnssConfigurationIfaceVersion != null) {
             // Set to a range checked value.
             if (isConfigEsExtensionSecSupported(gnssConfigurationIfaceVersion)
