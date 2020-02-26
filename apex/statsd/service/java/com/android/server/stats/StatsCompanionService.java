@@ -21,11 +21,13 @@ import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
 import android.app.StatsManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -84,12 +86,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static final int INSTALLER_FIELD_ID = 5;
 
     public static final int DEATH_THRESHOLD = 10;
-
-    // TODO(b/149090705): Implement an alternative to sending broadcast with @hide flag
-    // FLAG_RECEIVER_INCLUDE_BACKGROUND. Instead of using the flag, find the
-    // list of registered broadcast receivers and send them directed broadcasts
-    // to wake them up. See b/147374337.
-    private static final int FLAG_RECEIVER_INCLUDE_BACKGROUND = 0x01000000;
 
     static final class CompanionHandler extends Handler {
         CompanionHandler(Looper looper) {
@@ -498,9 +494,25 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             Log.d(TAG, "learned that statsdReady");
         }
         sayHiToStatsd(); // tell statsd that we're ready too and link to it
-        mContext.sendBroadcastAsUser(new Intent(StatsManager.ACTION_STATSD_STARTED)
-                        .addFlags(FLAG_RECEIVER_INCLUDE_BACKGROUND),
-                UserHandle.SYSTEM, android.Manifest.permission.DUMP);
+
+        final Intent intent = new Intent(StatsManager.ACTION_STATSD_STARTED);
+        // Retrieve list of broadcast receivers for this broadcast & send them directed broadcasts
+        // to wake them up (if they're in background).
+        List<ResolveInfo> resolveInfos =
+                mContext.getPackageManager().queryBroadcastReceiversAsUser(
+                        intent, 0, UserHandle.SYSTEM);
+        if (resolveInfos == null || resolveInfos.isEmpty()) {
+            return; // No need to send broadcast.
+        }
+
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            Intent intentToSend = new Intent(intent);
+            intentToSend.setComponent(new ComponentName(
+                    resolveInfo.activityInfo.applicationInfo.packageName,
+                    resolveInfo.activityInfo.name));
+            mContext.sendBroadcastAsUser(intentToSend, UserHandle.SYSTEM,
+                    android.Manifest.permission.DUMP);
+        }
     }
 
     @Override
