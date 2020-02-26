@@ -20,6 +20,7 @@ import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.app.INotificationManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
@@ -34,6 +35,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.Prefs;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
@@ -75,6 +77,13 @@ public class DependencyProvider {
         HandlerThread thread = new HandlerThread("TimeTick");
         thread.start();
         return new Handler(thread.getLooper());
+    }
+
+    /** */
+    @Provides
+    @Main
+    public SharedPreferences provideSharePreferences(Context context) {
+        return Prefs.get(context);
     }
 
     /** */

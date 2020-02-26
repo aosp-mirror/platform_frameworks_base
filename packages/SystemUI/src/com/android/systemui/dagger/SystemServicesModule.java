@@ -209,6 +209,7 @@ public class SystemServicesModule {
 
     @Provides
     @Singleton
+    @Nullable
     static TelecomManager provideTelecomManager(Context context) {
         return context.getSystemService(TelecomManager.class);
     }
