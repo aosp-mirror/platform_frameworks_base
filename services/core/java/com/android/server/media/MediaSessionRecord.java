@@ -271,7 +271,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
      *          activity. {@code false} otherwise to tell session about the real caller.
      * @param direction The direction to adjust volume in.
      * @param flags Any of the flags from {@link AudioManager}.
-     * @param useSuggested True to use adjustSuggestedStreamVolume instead of
+     * @param useSuggested True to use adjustSuggestedStreamVolumeForUid instead of
+     *          adjustStreamVolumeForUid
      */
     public void adjustVolume(String packageName, String opPackageName, int pid, int uid,
             boolean asSystemService, int direction, int flags, boolean useSuggested) {
