@@ -20,11 +20,9 @@ import android.content.res.Resources;
 
 public class FakeProximitySensor extends ProximitySensor {
     private boolean mAvailable;
-    private boolean mPaused;
 
     public FakeProximitySensor(Resources resources, AsyncSensorManager sensorManager) {
         super(resources, sensorManager);
-
         mAvailable = true;
     }
 
