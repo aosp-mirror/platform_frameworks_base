@@ -1849,6 +1849,7 @@ public class AdbDebuggingManager {
         public void removeKey(String key) {
             if (mKeyMap.containsKey(key)) {
                 mKeyMap.remove(key);
+                writeKeys(mKeyMap.keySet());
                 sendPersistKeyStoreMessage();
             }
         }
