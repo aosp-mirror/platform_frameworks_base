@@ -28,5 +28,6 @@
     <FrameLayout
         android:id="@+id/status_bar_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="@drawable/system_bar_background" />
 </com.android.systemui.statusbar.phone.StatusBarWindowView>
