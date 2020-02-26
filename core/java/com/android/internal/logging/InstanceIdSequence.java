@@ -25,7 +25,7 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 /**
- * Generates random InstanceIds in range [0, instanceIdMax) for passing to
+ * Generates random InstanceIds in range [1, instanceIdMax] for passing to
  * UiEventLogger.logWithInstanceId(). Holds a SecureRandom, which self-seeds on
  * first use; try to give it a long lifetime. Safe for concurrent use.
  */
@@ -34,12 +34,12 @@ public class InstanceIdSequence {
     private final Random mRandom = new SecureRandom();
 
     /**
-     * Constructs a sequence with identifiers [0, instanceIdMax).  Capped at INSTANCE_ID_MAX.
+     * Constructs a sequence with identifiers [1, instanceIdMax].  Capped at INSTANCE_ID_MAX.
      * @param instanceIdMax Limiting value of identifiers. Normally positive: otherwise you get
-     *                      an all-zero sequence.
+     *                      an all-1 sequence.
      */
     public InstanceIdSequence(int instanceIdMax) {
-        mInstanceIdMax = min(max(0, instanceIdMax), InstanceId.INSTANCE_ID_MAX);
+        mInstanceIdMax = min(max(1, instanceIdMax), InstanceId.INSTANCE_ID_MAX);
     }
 
     /**
@@ -47,7 +47,7 @@ public class InstanceIdSequence {
      * @return new InstanceId
      */
     public InstanceId newInstanceId() {
-        return newInstanceIdInternal(mRandom.nextInt(mInstanceIdMax));
+        return newInstanceIdInternal(1 + mRandom.nextInt(mInstanceIdMax));
     }
 
     /**
