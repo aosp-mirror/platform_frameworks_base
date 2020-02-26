@@ -18,7 +18,6 @@ package com.android.systemui.pip;
 
 import static com.android.systemui.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.systemui.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
-import static com.android.systemui.pip.PipAnimationController.DURATION_DEFAULT_MS;
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_NONE;
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_SAME;
 import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_FULLSCREEN;
@@ -81,6 +80,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     private final Rect mLastReportedBounds = new Rect();
     private final int mCornerRadius;
     private final Map<IBinder, Rect> mBoundsToRestore = new HashMap<>();
+    private final int mEnterExitAnimationDuration;
 
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
@@ -180,6 +180,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         mPipBoundsHandler = boundsHandler;
         mPipAnimationController = new PipAnimationController(context);
         mCornerRadius = context.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
+        mEnterExitAnimationDuration = context.getResources()
+                .getInteger(R.integer.config_pipResizeAnimationDuration);
     }
 
     public Handler getUpdateHandler() {
@@ -235,14 +237,14 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         mBoundsToRestore.put(mToken.asBinder(), currentBounds);
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             scheduleAnimateResizePip(currentBounds, destinationBounds,
-                    TRANSITION_DIRECTION_TO_PIP, DURATION_DEFAULT_MS, null);
+                    TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration, null);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             mUpdateHandler.post(() -> mPipAnimationController
                     .getAnimator(mLeash, destinationBounds, 0f, 1f)
                     .setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
                     .setCornerRadius(mCornerRadius)
                     .setPipAnimationCallback(mPipAnimationCallback)
-                    .setDuration(DURATION_DEFAULT_MS)
+                    .setDuration(mEnterExitAnimationDuration)
                     .start());
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
         } else {
@@ -260,7 +262,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         }
         final Rect boundsToRestore = mBoundsToRestore.remove(mToken.asBinder());
         scheduleAnimateResizePip(mLastReportedBounds, boundsToRestore,
-                TRANSITION_DIRECTION_TO_FULLSCREEN, DURATION_DEFAULT_MS, null);
+                TRANSITION_DIRECTION_TO_FULLSCREEN, mEnterExitAnimationDuration, null);
         mInPip = false;
     }
 
@@ -278,7 +280,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
                 getAspectRatioOrDefault(newParams), null /* bounds */);
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
-        scheduleAnimateResizePip(destinationBounds, DURATION_DEFAULT_MS, null);
+        scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration, null);
     }
 
     /**
