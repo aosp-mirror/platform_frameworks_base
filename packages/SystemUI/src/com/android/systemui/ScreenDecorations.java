@@ -99,7 +99,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private static final boolean DEBUG_COLOR = DEBUG_SCREENSHOT_ROUNDED_CORNERS;
 
     private DisplayManager mDisplayManager;
-    private boolean mIsRegistered;
+    @VisibleForTesting
+    protected boolean mIsRegistered;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final Handler mMainHandler;
     private final TunerService mTunerService;
@@ -168,7 +169,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         updateRoundedCornerRadii();
         setupDecorations();
-
         mDisplayListener = new DisplayManager.DisplayListener() {
             @Override
             public void onDisplayAdded(int displayId) {
@@ -230,7 +230,10 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             removeAllOverlays();
         }
 
-        if (hasOverlays() && !mIsRegistered) {
+        if (hasOverlays()) {
+            if (mIsRegistered) {
+                return;
+            }
             DisplayMetrics metrics = new DisplayMetrics();
             mDisplayManager.getDisplay(DEFAULT_DISPLAY).getMetrics(metrics);
             mDensity = metrics.density;
@@ -271,7 +274,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         return mContext.getDisplay().getCutout();
     }
 
-    private boolean hasOverlays() {
+    @VisibleForTesting
+    boolean hasOverlays() {
         if (mOverlays == null) {
             return false;
         }
