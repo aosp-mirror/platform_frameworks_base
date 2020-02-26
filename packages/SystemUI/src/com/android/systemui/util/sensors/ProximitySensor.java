@@ -40,7 +40,7 @@ import javax.inject.Inject;
  */
 public class ProximitySensor {
     private static final String TAG = "ProxSensor";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Sensor mSensor;
     private final AsyncSensorManager mSensorManager;
