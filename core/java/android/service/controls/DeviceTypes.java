@@ -21,6 +21,9 @@ import android.annotation.IntDef;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * Device types for {@link Control}.
+ */
 public class DeviceTypes {
 
     // Update this when adding new concrete types. Does not count TYPE_UNKNOWN

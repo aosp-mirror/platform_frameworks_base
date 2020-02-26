@@ -19,7 +19,15 @@ package android.service.controls.actions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
+import android.service.controls.Control;
+import android.service.controls.templates.TemperatureControlTemplate;
 
+/**
+ * Action sent by the user to indicate a change of mode.
+ *
+ * This action is available when the {@link Control} was created with a
+ * {@link TemperatureControlTemplate}.
+ */
 public final class ModeAction extends ControlAction {
 
     private static final @ActionType int TYPE = TYPE_MODE;
@@ -27,16 +35,32 @@ public final class ModeAction extends ControlAction {
 
     private final int mNewMode;
 
+    /**
+     * @return {@link ControlAction#TYPE_MODE}.
+     */
     @Override
     public int getActionType() {
         return TYPE;
     }
 
+    /**
+     * @param templateId the identifier of the {@link TemperatureControlTemplate} that originated
+     *                   this action.
+     * @param newMode new value for the mode.
+     * @param challengeValue a value sent by the user along with the action to authenticate. {@code}
+     *                       null is sent when no authentication is needed or has not been
+     *                       requested.
+     */
     public ModeAction(@NonNull String templateId, int newMode, @Nullable String challengeValue) {
         super(templateId, challengeValue);
         mNewMode = newMode;
     }
 
+    /**
+     * @param templateId the identifier of the {@link TemperatureControlTemplate} that originated
+     *                   this action.
+     * @param newMode new value for the mode.
+     */
     public ModeAction(@NonNull String templateId, int newMode) {
         this(templateId, newMode, null);
     }
