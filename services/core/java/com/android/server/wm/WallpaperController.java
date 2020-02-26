@@ -669,8 +669,7 @@ class WallpaperController {
      * Adjusts the wallpaper windows if the input display has a pending wallpaper layout or one of
      * the opening apps should be a wallpaper target.
      */
-    void adjustWallpaperWindowsForAppTransitionIfNeeded(ArraySet<ActivityRecord> openingApps,
-            ArraySet<ActivityRecord> changingApps) {
+    void adjustWallpaperWindowsForAppTransitionIfNeeded(ArraySet<ActivityRecord> openingApps) {
         boolean adjust = false;
         if ((mDisplayContent.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
             adjust = true;
@@ -680,15 +679,6 @@ class WallpaperController {
                 if (activity.windowsCanBeWallpaperTarget()) {
                     adjust = true;
                     break;
-                }
-            }
-            if (!adjust) {
-                for (int i = changingApps.size() - 1; i >= 0; --i) {
-                    final ActivityRecord activity = changingApps.valueAt(i);
-                    if (activity.windowsCanBeWallpaperTarget()) {
-                        adjust = true;
-                        break;
-                    }
                 }
             }
         }

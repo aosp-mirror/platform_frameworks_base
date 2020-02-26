@@ -128,7 +128,8 @@ class SurfaceAnimator {
      */
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
             @AnimationType int type,
-            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback,
+            @Nullable SurfaceFreezer freezer) {
         cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
         mAnimation = anim;
         mAnimationType = type;
@@ -139,14 +140,25 @@ class SurfaceAnimator {
             cancelAnimation();
             return;
         }
-        mLeash = createAnimationLeash(surface, t,
-                mAnimatable.getSurfaceWidth(), mAnimatable.getSurfaceHeight(), hidden);
-        mAnimatable.onAnimationLeashCreated(t, mLeash);
+        mLeash = freezer != null ? freezer.takeLeashForAnimation() : null;
+        if (mLeash == null) {
+            mLeash = createAnimationLeash(mAnimatable, surface, t,
+                    mAnimatable.getSurfaceWidth(), mAnimatable.getSurfaceHeight(), 0 /* x */,
+                    0 /* y */, hidden);
+            mAnimatable.onAnimationLeashCreated(t, mLeash);
+        }
+        mAnimatable.onLeashAnimationStarting(t, mLeash);
         if (mAnimationStartDelayed) {
             if (DEBUG_ANIM) Slog.i(TAG, "Animation start delayed");
             return;
         }
         mAnimation.startAnimation(mLeash, t, type, mInnerAnimationFinishedCallback);
+    }
+
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
+            @AnimationType int type,
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
+        startAnimation(t, anim, hidden, type, animationFinishedCallback, null /* freezer */);
     }
 
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
@@ -311,15 +323,31 @@ class SurfaceAnimator {
     }
 
     private void reset(Transaction t, boolean destroyLeash) {
-        final SurfaceControl surface = mAnimatable.getSurfaceControl();
-        final SurfaceControl parent = mAnimatable.getParentSurfaceControl();
+        mService.mAnimationTransferMap.remove(mAnimation);
+        mAnimation = null;
+        mAnimationFinishedCallback = null;
+        mAnimationType = ANIMATION_TYPE_NONE;
+        if (mLeash == null) {
+            return;
+        }
+        SurfaceControl leash = mLeash;
+        mLeash = null;
+        final boolean scheduleAnim = removeLeash(t, mAnimatable, leash, destroyLeash);
+        if (scheduleAnim) {
+            mService.scheduleAnimationLocked();
+        }
+    }
 
+    static boolean removeLeash(Transaction t, Animatable animatable, @NonNull SurfaceControl leash,
+            boolean destroy) {
         boolean scheduleAnim = false;
+        final SurfaceControl surface = animatable.getSurfaceControl();
+        final SurfaceControl parent = animatable.getParentSurfaceControl();
 
         // If the surface was destroyed or the leash is invalid, we don't care to reparent it back.
         // Note that we also set this variable to true even if the parent isn't valid anymore, in
         // order to ensure onAnimationLeashLost still gets called in this case.
-        final boolean reparent = mLeash != null && surface != null;
+        final boolean reparent = surface != null;
         if (reparent) {
             if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to original parent: " + parent);
             // We shouldn't really need these isValid checks but we do
@@ -329,40 +357,30 @@ class SurfaceAnimator {
                 scheduleAnim = true;
             }
         }
-        mService.mAnimationTransferMap.remove(mAnimation);
-        if (mLeash != null && destroyLeash) {
-            t.remove(mLeash);
+        if (destroy) {
+            t.remove(leash);
             scheduleAnim = true;
         }
-        mLeash = null;
-        mAnimation = null;
-        mAnimationFinishedCallback = null;
-        mAnimationType = ANIMATION_TYPE_NONE;
 
         if (reparent) {
             // Make sure to inform the animatable after the surface was reparented (or reparent
             // wasn't possible, but we still need to invoke the callback)
-            mAnimatable.onAnimationLeashLost(t);
+            animatable.onAnimationLeashLost(t);
             scheduleAnim = true;
         }
-
-        if (scheduleAnim) {
-            mService.scheduleAnimationLocked();
-        }
+        return scheduleAnim;
     }
 
-    private SurfaceControl createAnimationLeash(SurfaceControl surface, Transaction t, int width,
-            int height, boolean hidden) {
+    static SurfaceControl createAnimationLeash(Animatable animatable, SurfaceControl surface,
+            Transaction t, int width, int height, int x, int y, boolean hidden) {
         if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to leash");
-        final SurfaceControl.Builder builder = mAnimatable.makeAnimationLeash()
-                .setParent(mAnimatable.getAnimationLeashParent())
+        final SurfaceControl.Builder builder = animatable.makeAnimationLeash()
+                .setParent(animatable.getAnimationLeashParent())
                 .setHidden(hidden)
                 .setName(surface + " - animation-leash");
         final SurfaceControl leash = builder.build();
         t.setWindowCrop(leash, width, height);
-
-        // TODO: rely on builder.setHidden(hidden) instead of show and setAlpha when b/138459974 is
-        //       fixed.
+        t.setPosition(leash, x, y);
         t.show(leash);
         t.setAlpha(leash, hidden ? 0 : 1);
 
@@ -489,12 +507,21 @@ class SurfaceAnimator {
         void commitPendingTransaction();
 
         /**
-         * Called when the was created.
+         * Called when the animation leash is created. Note that this is also called by
+         * {@link SurfaceFreezer}, so this doesn't mean we're about to start animating.
          *
          * @param t The transaction to use to apply any necessary changes.
          * @param leash The leash that was created.
          */
         void onAnimationLeashCreated(Transaction t, SurfaceControl leash);
+
+        /**
+         * Called when the animator is about to start animating the leash.
+         *
+         * @param t The transaction to use to apply any necessary changes.
+         * @param leash The leash that was created.
+         */
+        default void onLeashAnimationStarting(Transaction t, SurfaceControl leash) { }
 
         /**
          * Called when the leash is being destroyed, or when the leash is being transferred to
