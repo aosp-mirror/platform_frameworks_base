@@ -86,7 +86,9 @@ public abstract class SysuiTestCase {
     public void SysuiTeardown() {
         InstrumentationRegistry.registerInstance(mRealInstrumentation,
                 InstrumentationRegistry.getArguments());
-        // Reset the assert's testable looper to null.
+        if (TestableLooper.get(this) != null) {
+            TestableLooper.get(this).processAllMessages();
+        }
         disallowTestableLooperAsMainThread();
         SystemUIFactory.cleanup();
     }
