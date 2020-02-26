@@ -492,9 +492,10 @@ public class BubbleStackView extends FrameLayout {
                 .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
         mFlyoutTransitionSpring.addEndListener(mAfterFlyoutTransitionSpring);
 
+        final int targetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
         final View targetView = new DismissCircleView(context);
         final FrameLayout.LayoutParams newParams =
-                new FrameLayout.LayoutParams(targetView.getLayoutParams());
+                new FrameLayout.LayoutParams(targetSize, targetSize);
         newParams.gravity = Gravity.CENTER;
         targetView.setLayoutParams(newParams);
         mDismissTargetAnimator = PhysicsAnimator.getInstance(targetView);
