@@ -514,12 +514,17 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                         1, cornerScale, mFastOutSlowIn.getInterpolation(t / scalePct));
                 mScreenshotView.setScaleX(scale);
                 mScreenshotView.setScaleY(scale);
+            } else {
+                mScreenshotView.setScaleX(cornerScale);
+                mScreenshotView.setScaleY(cornerScale);
             }
 
             if (t < xPositionPct) {
                 float xCenter = MathUtils.lerp(startPos.x, finalPos.x,
                         mFastOutSlowIn.getInterpolation(t / xPositionPct));
                 mScreenshotView.setX(xCenter - width * mScreenshotView.getScaleX() / 2f);
+            } else {
+                mScreenshotView.setX(finalPos.x - width * mScreenshotView.getScaleX() / 2f);
             }
             float yCenter = MathUtils.lerp(startPos.y, finalPos.y,
                     mFastOutSlowIn.getInterpolation(t));
@@ -544,6 +549,10 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                mScreenshotView.setScaleX(cornerScale);
+                mScreenshotView.setScaleY(cornerScale);
+                mScreenshotView.setX(finalPos.x - height * cornerScale / 2f);
+                mScreenshotView.setY(finalPos.y - height * cornerScale / 2f);
                 Rect bounds = new Rect();
                 mScreenshotView.getBoundsOnScreen(bounds);
                 mDismissButton.setX(bounds.right - mDismissButtonSize / 2f);
