@@ -315,7 +315,7 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
         generateBuilderMethod(
                 name = setterName,
                 defVisibility = visibility,
-                paramAnnotations = annotationsNoInternal.joinToString(" "),
+                paramAnnotations = annotationsForSetterParam,
                 paramTypes = listOf(SetterParamType),
                 genJavadoc = { generateFieldJavadoc() }) {
             +"checkNotUsed();"

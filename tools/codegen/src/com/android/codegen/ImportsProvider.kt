@@ -39,6 +39,7 @@ interface ImportsProvider {
     val ParcelWith: String get() { return classRef("com.android.internal.util.DataClass.ParcelWith") }
     val PluralOf: String get() { return classRef("com.android.internal.util.DataClass.PluralOf") }
     val Each: String get() { return classRef("com.android.internal.util.DataClass.Each") }
+    val MaySetToNull: String get() { return classRef("com.android.internal.util.DataClass.MaySetToNull") }
     val DataClassGenerated: String get() { return classRef("com.android.internal.util.DataClass.Generated") }
     val DataClassSuppressConstDefs: String get() { return classRef("com.android.internal.util.DataClass.SuppressConstDefsGeneration") }
     val DataClassSuppress: String get() { return classRef("com.android.internal.util.DataClass.Suppress") }
