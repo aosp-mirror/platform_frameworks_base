@@ -246,7 +246,7 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
                     permissionState.isGranted() && (permissionState.getFlags()
                             & PackageManager.FLAG_PERMISSION_ONE_TIME) == 0));
             serializer.attribute(null, ATTRIBUTE_FLAGS, Integer.toHexString(
-                    permissionState.getFlags() & ~PackageManager.FLAG_PERMISSION_ONE_TIME));
+                    permissionState.getFlags()));
             serializer.endTag(null, TAG_PERMISSION);
         }
     }
