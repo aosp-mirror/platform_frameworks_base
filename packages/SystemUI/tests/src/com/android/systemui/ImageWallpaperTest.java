@@ -34,6 +34,7 @@ import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Handler;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -72,6 +73,8 @@ public class ImageWallpaperTest extends SysuiTestCase {
     private Bitmap mWallpaperBitmap;
     @Mock
     private DozeParameters mDozeParam;
+    @Mock
+    private Handler mHandler;
 
     private CountDownLatch mEventCountdown;
 
@@ -104,7 +107,7 @@ public class ImageWallpaperTest extends SysuiTestCase {
         return new ImageWallpaper(mDozeParam) {
             @Override
             public Engine onCreateEngine() {
-                return new GLEngine(mMockContext, mDozeParam) {
+                return new GLEngine(mDozeParam, mHandler) {
                     @Override
                     public Context getDisplayContext() {
                         return mMockContext;
@@ -196,5 +199,6 @@ public class ImageWallpaperTest extends SysuiTestCase {
         when(mSurfaceHolder.getSurfaceFrame()).thenReturn(frame);
 
         assertThat(engineSpy.checkIfShouldStopTransition()).isEqualTo(assertion);
+        // destroy
     }
 }
