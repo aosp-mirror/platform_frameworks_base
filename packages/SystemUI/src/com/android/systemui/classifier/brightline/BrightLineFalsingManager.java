@@ -32,6 +32,8 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ProximitySensor;
 
@@ -59,6 +61,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ProximitySensor mProximitySensor;
     private final DockManager mDockManager;
+    private final StatusBarStateController mStatusBarStateController;
     private boolean mSessionStarted;
     private MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
@@ -88,15 +91,29 @@ public class BrightLineFalsingManager implements FalsingManager {
             };
     private boolean mPreviousResult = false;
 
+    private StatusBarStateController.StateListener mStatusBarStateListener =
+            new StatusBarStateController.StateListener() {
+        @Override
+        public void onStateChanged(int newState) {
+            logDebug("StatusBarState=" + StatusBarState.toShortString(newState));
+            mState = newState;
+            updateSessionActive();
+        }
+    };
+    private int mState;
+
     public BrightLineFalsingManager(FalsingDataProvider falsingDataProvider,
             KeyguardUpdateMonitor keyguardUpdateMonitor, ProximitySensor proximitySensor,
             DeviceConfigProxy deviceConfigProxy,
-            DockManager dockManager) {
+            DockManager dockManager, StatusBarStateController statusBarStateController) {
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDataProvider = falsingDataProvider;
         mProximitySensor = proximitySensor;
         mDockManager = dockManager;
+        mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
+        mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mState = mStatusBarStateController.getState();
 
         mMetricsLogger = new MetricsLogger();
         mClassifiers = new ArrayList<>();
@@ -116,13 +133,12 @@ public class BrightLineFalsingManager implements FalsingManager {
         mProximitySensor.register(mSensorEventListener);
     }
 
-
     private void unregisterSensors() {
         mProximitySensor.unregister(mSensorEventListener);
     }
 
     private void sessionStart() {
-        if (!mSessionStarted && !mShowingAod && mScreenOn) {
+        if (!mSessionStarted && shouldSessionBeActive()) {
             logDebug("Starting Session");
             mSessionStarted = true;
             mJustUnlockedWithFace = false;
@@ -143,6 +159,19 @@ public class BrightLineFalsingManager implements FalsingManager {
                 mIsFalseTouchCalls = 0;
             }
         }
+    }
+
+
+    private void updateSessionActive() {
+        if (shouldSessionBeActive()) {
+            sessionStart();
+        } else {
+            sessionEnd();
+        }
+    }
+
+    private boolean shouldSessionBeActive() {
+        return mScreenOn && (mState == StatusBarState.KEYGUARD) && !mShowingAod;
     }
 
     private void updateInteractionType(@Classifier.InteractionType int type) {
@@ -232,11 +261,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     @Override
     public void setShowingAod(boolean showingAod) {
         mShowingAod = showingAod;
-        if (showingAod) {
-            sessionEnd();
-        } else {
-            sessionStart();
-        }
+        updateSessionActive();
     }
 
     @Override
@@ -343,13 +368,13 @@ public class BrightLineFalsingManager implements FalsingManager {
     @Override
     public void onScreenTurningOn() {
         mScreenOn = true;
-        sessionStart();
+        updateSessionActive();
     }
 
     @Override
     public void onScreenOff() {
         mScreenOn = false;
-        sessionEnd();
+        updateSessionActive();
     }
 
 
@@ -421,6 +446,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     public void cleanup() {
         unregisterSensors();
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
+        mStatusBarStateController.removeCallback(mStatusBarStateListener);
     }
 
     static void logDebug(String msg) {
