@@ -116,6 +116,10 @@ class FavoritesRenderer(
 
     fun renderFavoritesForComponent(component: ComponentName): String {
         val qty = favoriteFunction(component)
-        return resources.getQuantityString(R.plurals.controls_number_of_favorites, qty, qty)
+        if (qty != 0) {
+            return resources.getQuantityString(R.plurals.controls_number_of_favorites, qty, qty)
+        } else {
+            return ""
+        }
     }
 }
