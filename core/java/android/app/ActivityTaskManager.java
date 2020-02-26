@@ -215,8 +215,7 @@ public class ActivityTaskManager {
     public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
             boolean animate, Rect initialBounds, boolean showRecents) throws SecurityException {
         try {
-            return getService().setTaskWindowingModeSplitScreenPrimary(taskId, createMode, toTop,
-                    animate, initialBounds, showRecents);
+            return getService().setTaskWindowingModeSplitScreenPrimary(taskId, toTop);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

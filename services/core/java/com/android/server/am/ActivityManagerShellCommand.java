@@ -2581,8 +2581,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         switch (op) {
             case "move-task":
                 return runStackMoveTask(pw);
-            case "resize-docked-stack":
-                return runStackResizeDocked(pw);
             case "positiontask":
                 return runStackPositionTask(pw);
             case "list":
@@ -2654,17 +2652,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         mTaskInterface.moveTaskToStack(taskId, stackId, toTop);
-        return 0;
-    }
-
-    int runStackResizeDocked(PrintWriter pw) throws RemoteException {
-        final Rect bounds = getBounds();
-        final Rect taskBounds = getBounds();
-        if (bounds == null || taskBounds == null) {
-            getErrPrintWriter().println("Error: invalid input bounds");
-            return -1;
-        }
-        mTaskInterface.resizeDockedStack(bounds, taskBounds, null, null, null);
         return 0;
     }
 

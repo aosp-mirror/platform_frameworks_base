@@ -167,7 +167,7 @@ message DisplayContentProto {
     optional WindowContainerProto window_container = 1;
     optional int32 id = 2;
     reserved 3; // stacks
-    optional DockedStackDividerControllerProto docked_stack_divider_controller = 4;
+    optional DockedStackDividerControllerProto docked_stack_divider_controller = 4 [deprecated=true];
     // Will be removed soon.
     optional PinnedStackControllerProto pinned_stack_controller = 5 [deprecated=true];
     /* non app windows */
@@ -229,7 +229,7 @@ message DisplayFramesProto {
 message DockedStackDividerControllerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional bool minimized_dock = 1;
+    optional bool minimized_dock = 1 [deprecated=true];
 }
 
 /* represents PinnedStackController */

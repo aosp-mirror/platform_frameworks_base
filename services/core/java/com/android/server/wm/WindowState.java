@@ -1128,7 +1128,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
         } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            dc.getDockedDividerController().positionDockedStackedDivider(windowFrames.mFrame);
             windowFrames.mContentFrame.set(windowFrames.mFrame);
             if (!windowFrames.mFrame.equals(windowFrames.mLastFrame)) {
                 mMovedByResize = true;
@@ -1937,13 +1936,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // animating... let's do something.
         final int left = mWindowFrames.mFrame.left;
         final int top = mWindowFrames.mFrame.top;
-        final Task task = getTask();
-        final boolean adjustedForMinimizedDockOrIme = task != null
-                && (task.getStack().isAdjustedForMinimizedDockedStack()
-                || task.getStack().isAdjustedForIme());
         if (mToken.okToAnimate()
                 && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
-                && !isDragResizing() && !adjustedForMinimizedDockOrIme
+                && !isDragResizing()
                 && getWindowConfiguration().hasMovementAnimations()
                 && !mWinAnimator.mLastHidden
                 && !mSeamlesslyRotated) {
@@ -2409,13 +2404,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final DisplayContent dc = getDisplayContent();
         if (dc != null) {
             dc.setLayoutNeeded();
-        }
-    }
-
-    void applyAdjustForImeIfNeeded() {
-        final Task task = getTask();
-        if (task != null && task.getStack() != null && task.getStack().isAdjustedForIme()) {
-            task.getStack().applyAdjustForImeIfNeeded(task);
         }
     }
 
@@ -4306,10 +4294,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     }
                 }
             }
-        }
-
-        if (mAttrs.type == TYPE_INPUT_METHOD) {
-            getDisplayContent().mDividerControllerLocked.resetImeHideRequested();
         }
 
         return true;
