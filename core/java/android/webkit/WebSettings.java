@@ -369,10 +369,22 @@ public abstract class WebSettings {
     public abstract boolean getDisplayZoomControls();
 
     /**
-     * Enables or disables file access within WebView. File access is enabled by
-     * default.  Note that this enables or disables file system access only.
-     * Assets and resources are still accessible using file:///android_asset and
-     * file:///android_res.
+     * Enables or disables file access within WebView.
+     * Note that this enables or disables file system access only. Assets and resources
+     * are still accessible using file:///android_asset and file:///android_res.
+     * <p class="note">
+     * <b>Note:</b> Apps should not open {@code file://} URLs from any external source in
+     * WebView, don't enable this if your app accepts arbitrary URLs from external sources.
+     * It's recommended to always use
+     * <a href="{@docRoot}reference/androidx/webkit/WebViewAssetLoader">
+     * androidx.webkit.WebViewAssetLoader</a> to access files including assets and resources over
+     * {@code http(s)://} schemes, instead of {@code file://} URLs. To prevent possible security
+     * issues targeting {@link android.os.Build.VERSION_CODES#Q} and earlier, you should explicitly
+     * set this value to {@code false}.
+     * <p>
+     * The default value is {@code true} for apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q} and below, and {@code false} when targeting
+     * {@link android.os.Build.VERSION_CODES#R} and above.
      */
     public abstract void setAllowFileAccess(boolean allow);
 
