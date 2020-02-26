@@ -4944,8 +4944,24 @@ package android.media.tv.tuner {
 
 package android.media.tv.tuner.dvr {
 
-  public class Dvr implements java.lang.AutoCloseable {
-    ctor protected Dvr(int);
+  public class DvrPlayback implements java.lang.AutoCloseable {
+    method public int attachFilter(@NonNull android.media.tv.tuner.filter.Filter);
+    method public void close();
+    method public int configure(@NonNull android.media.tv.tuner.dvr.DvrSettings);
+    method public int detachFilter(@NonNull android.media.tv.tuner.filter.Filter);
+    method public int flush();
+    method public long read(long);
+    method public long read(@NonNull byte[], long, long);
+    method public void setFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
+    method public int start();
+    method public int stop();
+    field public static final int PLAYBACK_STATUS_ALMOST_EMPTY = 2; // 0x2
+    field public static final int PLAYBACK_STATUS_ALMOST_FULL = 4; // 0x4
+    field public static final int PLAYBACK_STATUS_EMPTY = 1; // 0x1
+    field public static final int PLAYBACK_STATUS_FULL = 8; // 0x8
+  }
+
+  public class DvrRecorder implements java.lang.AutoCloseable {
     method public int attachFilter(@NonNull android.media.tv.tuner.filter.Filter);
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.dvr.DvrSettings);
@@ -4954,20 +4970,6 @@ package android.media.tv.tuner.dvr {
     method public void setFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
     method public int start();
     method public int stop();
-    field public static final int TYPE_PLAYBACK = 1; // 0x1
-    field public static final int TYPE_RECORD = 0; // 0x0
-  }
-
-  public class DvrPlayback extends android.media.tv.tuner.dvr.Dvr {
-    method public long read(long);
-    method public long read(@NonNull byte[], long, long);
-    field public static final int PLAYBACK_STATUS_ALMOST_EMPTY = 2; // 0x2
-    field public static final int PLAYBACK_STATUS_ALMOST_FULL = 4; // 0x4
-    field public static final int PLAYBACK_STATUS_EMPTY = 1; // 0x1
-    field public static final int PLAYBACK_STATUS_FULL = 8; // 0x8
-  }
-
-  public class DvrRecorder extends android.media.tv.tuner.dvr.Dvr {
     method public long write(long);
     method public long write(@NonNull byte[], long, long);
   }
