@@ -22,11 +22,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.SystemProperties;
-import android.security.Credentials;
 import android.security.IFileIntegrityService;
-import android.security.KeyStore;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -114,9 +111,6 @@ public class FileIntegrityService extends SystemService {
 
         // Load certificates trusted by the device manufacturer.
         loadCertificatesFromDirectory("/product/etc/security/fsverity");
-
-        // Load certificates trusted by the device owner.
-        loadCertificatesFromKeystore(KeyStore.getInstance());
     }
 
     private void loadCertificatesFromDirectory(String path) {
@@ -136,19 +130,6 @@ public class FileIntegrityService extends SystemService {
             }
         } catch (IOException e) {
             Slog.wtf(TAG, "Failed to load fs-verity certificate from " + path, e);
-        }
-    }
-
-    private void loadCertificatesFromKeystore(KeyStore keystore) {
-        for (final String alias : keystore.list(Credentials.APP_SOURCE_CERTIFICATE,
-                    Process.FSVERITY_CERT_UID)) {
-            byte[] certificateBytes = keystore.get(Credentials.APP_SOURCE_CERTIFICATE + alias,
-                    Process.FSVERITY_CERT_UID, false /* suppressKeyNotFoundWarning */);
-            if (certificateBytes == null) {
-                Slog.w(TAG, "The retrieved fs-verity certificate is null, ignored " + alias);
-                continue;
-            }
-            collectCertificate(certificateBytes);
         }
     }
 
