@@ -79,7 +79,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -117,7 +117,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationActivityStarter mNotificationActivityStarter;
-    @Mock private NotificationStackScrollLayout mStackScroller;
+    @Mock private NotificationListContainer mNotificationListContainer;
     @Mock private NotificationInfo.CheckSaveListener mCheckSaveListener;
     @Mock private OnSettingsClickListener mOnSettingsClickListener;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
@@ -156,7 +156,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mChannelEditorDialogController, mContextTracker, mProvider,
                 mAssistantFeedbackController, mBubbleController,
                 new UiEventLoggerFake());
-        mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
+        mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
     }
