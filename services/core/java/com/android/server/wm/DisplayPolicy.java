@@ -1178,8 +1178,6 @@ public class DisplayPolicy {
                     return R.anim.dock_left_enter;
                 }
             }
-        } else if (win.getAttrs().type == TYPE_DOCK_DIVIDER) {
-            return selectDockedDividerAnimation(win, transit);
         }
 
         if (transit == TRANSIT_PREVIEW_DONE) {
@@ -1202,36 +1200,6 @@ public class DisplayPolicy {
         }
 
         return ANIMATION_STYLEABLE;
-    }
-
-    private int selectDockedDividerAnimation(WindowState win, int transit) {
-        int insets = mDisplayContent.getDockedDividerController().getContentInsets();
-
-        // If the divider is behind the navigation bar, don't animate.
-        final Rect frame = win.getFrameLw();
-        final boolean behindNavBar = mNavigationBar != null
-                && ((mNavigationBarPosition == NAV_BAR_BOTTOM
-                && frame.top + insets >= mNavigationBar.getFrameLw().top)
-                || (mNavigationBarPosition == NAV_BAR_RIGHT
-                && frame.left + insets >= mNavigationBar.getFrameLw().left)
-                || (mNavigationBarPosition == NAV_BAR_LEFT
-                && frame.right - insets <= mNavigationBar.getFrameLw().right));
-        final boolean landscape = frame.height() > frame.width();
-        final boolean offscreenLandscape = landscape && (frame.right - insets <= 0
-                || frame.left + insets >= win.getDisplayFrameLw().right);
-        final boolean offscreenPortrait = !landscape && (frame.top - insets <= 0
-                || frame.bottom + insets >= win.getDisplayFrameLw().bottom);
-        final boolean offscreen = offscreenLandscape || offscreenPortrait;
-        if (behindNavBar || offscreen) {
-            return ANIMATION_STYLEABLE;
-        }
-        if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
-            return R.anim.fade_in;
-        } else if (transit == TRANSIT_EXIT) {
-            return R.anim.fade_out;
-        } else {
-            return ANIMATION_STYLEABLE;
-        }
     }
 
     /**

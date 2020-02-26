@@ -94,7 +94,6 @@ import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
 import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
-import static com.android.server.wm.DisplayContentProto.DOCKED_STACK_DIVIDER_CONTROLLER;
 import static com.android.server.wm.DisplayContentProto.DPI;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
@@ -131,7 +130,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.REPORT_FOCUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.REPORT_HARD_KEYBOARD_STATUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
-import static com.android.server.wm.WindowManagerService.H.UPDATE_DOCKED_STACK_DIVIDER;
+import static com.android.server.wm.WindowManagerService.H.UPDATE_MULTI_WINDOW_STACKS;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 import static com.android.server.wm.WindowManagerService.SEAMLESS_ROTATION_TIMEOUT_DURATION;
@@ -1005,7 +1004,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mDisplayPolicy.systemReady();
         }
         mWindowCornerRadius = mDisplayPolicy.getWindowCornerRadius();
-        mDividerControllerLocked = new DockedStackDividerController(mWmService, this);
+        mDividerControllerLocked = new DockedStackDividerController(this);
         mPinnedStackControllerLocked = new PinnedStackController(mWmService, this);
 
         final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession)
@@ -2232,12 +2231,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * for bounds calculations.
      */
     void preOnConfigurationChanged() {
-        final DockedStackDividerController dividerController = getDockedDividerController();
-
-        if (dividerController != null) {
-            getDockedDividerController().onConfigurationChanged();
-        }
-
         final PinnedStackController pinnedStackController = getPinnedStackController();
 
         if (pinnedStackController != null) {
@@ -2621,10 +2614,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // We also remove the outside touch area for resizing for all freeform
         // tasks (including the focused).
         // We save the focused task region once we find it, and add it back at the end.
-        // If the task is home stack and it is resizable in the minimized state, we want to
-        // exclude the docked stack from touch so we need the entire screen area and not just a
+        // If the task is home stack and it is resizable and visible (top of its root task), we want
+        // to exclude the docked stack from touch so we need the entire screen area and not just a
         // small portion which the home stack currently is resized to.
-        if (task.isActivityTypeHome() && task.getStack().isMinimizedDockAndHomeStackResizable()) {
+        if (task.isActivityTypeHome() && task.isVisible() && task.getStack().getTile() != null
+                && task.isResizeable()) {
             mDisplayContent.getBounds(mTmpRect);
         } else {
             task.getDimBounds(mTmpRect);
@@ -2633,6 +2627,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (task == focusedTask) {
             // Add the focused task rect back into the exclude region once we are done
             // processing stacks.
+            // NOTE: this *looks* like a no-op, but this usage of mTmpRect2 is expected by
+            //       updateTouchExcludeRegion.
             mTmpRect2.set(mTmpRect);
         }
 
@@ -2746,58 +2742,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDeferredRemoval;
     }
 
-    boolean animateForIme(float interpolatedValue, float animationTarget,
-            float dividerAnimationTarget) {
-        boolean updated = false;
-
-        for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
-            final ActivityStack stack = mTaskContainers.getChildAt(i);
-            if (stack == null || !stack.isAdjustedForIme()) {
-                continue;
-            }
-
-            if (interpolatedValue >= 1f && animationTarget == 0f && dividerAnimationTarget == 0f) {
-                stack.resetAdjustedForIme(true /* adjustBoundsNow */);
-                updated = true;
-            } else {
-                mDividerControllerLocked.mLastAnimationProgress =
-                        mDividerControllerLocked.getInterpolatedAnimationValue(interpolatedValue);
-                mDividerControllerLocked.mLastDividerProgress =
-                        mDividerControllerLocked.getInterpolatedDividerValue(interpolatedValue);
-                updated |= stack.updateAdjustForIme(
-                        mDividerControllerLocked.mLastAnimationProgress,
-                        mDividerControllerLocked.mLastDividerProgress,
-                        false /* force */);
-            }
-            if (interpolatedValue >= 1f) {
-                stack.endImeAdjustAnimation();
-            }
-        }
-
-        return updated;
-    }
-
-    boolean clearImeAdjustAnimation() {
-        boolean changed = false;
-        for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
-            final ActivityStack stack = mTaskContainers.getChildAt(i);
-            if (stack != null && stack.isAdjustedForIme()) {
-                stack.resetAdjustedForIme(true /* adjustBoundsNow */);
-                changed  = true;
-            }
-        }
-        return changed;
-    }
-
-    void beginImeAdjustAnimation() {
-        for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
-            final ActivityStack stack = mTaskContainers.getChildAt(i);
-            if (stack.isVisible() && stack.isAdjustedForIme()) {
-                stack.beginImeAdjustAnimation();
-            }
-        }
-    }
-
     void adjustForImeIfNeeded() {
         final WindowState imeWin = mInputMethodWindow;
         final boolean imeVisible = imeWin != null && imeWin.isVisibleLw()
@@ -2892,7 +2836,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             final ActivityStack stack = mTaskContainers.getChildAt(i);
             stack.dumpDebug(proto, TASKS, logLevel);
         }
-        mDividerControllerLocked.dumpDebug(proto, DOCKED_STACK_DIVIDER_CONTROLLER);
         for (int i = mOverlayContainers.getChildCount() - 1; i >= 0; --i) {
             final WindowToken windowToken = mOverlayContainers.getChildAt(i);
             windowToken.dumpDebug(proto, OVERLAY_WINDOWS, logLevel);
@@ -3061,8 +3004,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             pw.println(prefix + "recentsStack=" + recentsStack.getName());
         }
 
-        pw.println();
-        mDividerControllerLocked.dump(prefix, pw);
         pw.println();
         mPinnedStackControllerLocked.dump(prefix, pw);
 
@@ -4084,7 +4025,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
 
-        mWmService.mH.sendEmptyMessage(UPDATE_DOCKED_STACK_DIVIDER);
+        mWmService.mH.sendEmptyMessage(UPDATE_MULTI_WINDOW_STACKS);
     }
 
     /**
@@ -4692,17 +4633,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         @Override
         int getOrientation(int candidate) {
             if (isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
-                // Apps and their containers are not allowed to specify an orientation while the
-                // docked stack is visible...except for the home stack if the docked stack is
-                // minimized and it actually set something and the bounds is different from  the
-                // display.
+                // Apps and their containers are not allowed to specify an orientation while using
+                // root tasks...except for the home stack if it is not resizable and currently
+                // visible (top of) its root task.
                 if (mRootHomeTask != null && mRootHomeTask.isVisible()
-                        && mDividerControllerLocked.isMinimizedDock()
-                        && !(mDividerControllerLocked.isHomeStackResizable()
-                        && mRootHomeTask.matchParentBounds())) {
-                    final int orientation = mRootHomeTask.getOrientation();
-                    if (orientation != SCREEN_ORIENTATION_UNSET) {
-                        return orientation;
+                        && mRootHomeTask.getTile() != null) {
+                    final Task topMost = mRootHomeTask.getTopMostTask();
+                    final boolean resizable = topMost == null && topMost.isResizeable();
+                    if (!(resizable && mRootHomeTask.matchParentBounds())) {
+                        final int orientation = mRootHomeTask.getOrientation();
+                        if (orientation != SCREEN_ORIENTATION_UNSET) {
+                            return orientation;
+                        }
                     }
                 }
                 return SCREEN_ORIENTATION_UNSPECIFIED;
@@ -6167,8 +6109,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     t.removeAllChildren();
                 }
             }
-            mDividerControllerLocked.setMinimizedDockedStack(false /* minimized */,
-                    false /* animate */);
         } finally {
             final ActivityStack topFullscreenStack =
                     getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);

@@ -2108,18 +2108,6 @@ class Task extends WindowContainer<WindowContainer> {
         intersectWithInsetsIfFits(outStableBounds, mTmpBounds, mTmpInsets);
     }
 
-    /**
-     * Asks docked-divider controller for the smallestwidthdp given bounds.
-     * @param bounds bounds to calculate smallestwidthdp for.
-     */
-    private int getSmallestScreenWidthDpForDockedBounds(Rect bounds) {
-        DisplayContent dc = getDisplayContent();
-        if (dc != null) {
-            return dc.getDockedDividerController().getSmallestWidthDpForBounds(bounds);
-        }
-        return Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
-    }
-
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig) {
         computeConfigResourceOverrides(inOutConfig, parentConfig, null /* compatInsets */);
