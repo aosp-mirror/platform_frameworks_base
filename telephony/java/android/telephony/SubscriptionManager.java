@@ -2680,8 +2680,8 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi
-    public boolean canManageSubscription(@Nullable SubscriptionInfo info,
-            @Nullable String packageName) {
+    public boolean canManageSubscription(@NonNull SubscriptionInfo info,
+            @NonNull String packageName) {
         if (info == null || info.getAllAccessRules() == null || packageName == null) {
             return false;
         }
