@@ -1917,7 +1917,19 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     return;
                 }
                 try {
-                    // Adbd will be started by AdbService once Global.ADB_ENABLED is set.
+                    if ((config & UsbManager.FUNCTION_ADB) != 0) {
+                        /**
+                         * Start adbd if ADB function is included in the configuration.
+                         */
+                        LocalServices.getService(AdbManagerInternal.class)
+                                .startAdbdForTransport(AdbTransportType.USB);
+                    } else {
+                        /**
+                         * Stop adbd otherwise
+                         */
+                        LocalServices.getService(AdbManagerInternal.class)
+                                .stopAdbdForTransport(AdbTransportType.USB);
+                    }
                     UsbGadgetCallback usbGadgetCallback = new UsbGadgetCallback(mCurrentRequest,
                             config, chargingFunctions);
                     mGadgetProxy.setCurrentUsbFunctions(config, usbGadgetCallback,
