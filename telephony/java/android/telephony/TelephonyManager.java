@@ -11157,7 +11157,6 @@ public class TelephonyManager {
      * @param isEnabled {@code true} for enabling; {@code false} for disabling.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setAlwaysReportSignalStrength(boolean isEnabled) {
         try {
