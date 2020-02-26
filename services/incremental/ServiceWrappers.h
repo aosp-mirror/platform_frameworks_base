@@ -75,7 +75,7 @@ public:
     virtual ErrorCode link(Control control, std::string_view from, std::string_view to) const = 0;
     virtual ErrorCode unlink(Control control, std::string_view path) const = 0;
     virtual base::unique_fd openWrite(Control control, FileId id) const = 0;
-    virtual ErrorCode writeBlocks(std::span<const DataBlock> blocks) const = 0;
+    virtual ErrorCode writeBlocks(Span<const DataBlock> blocks) const = 0;
 };
 
 class ServiceManagerWrapper {
@@ -177,7 +177,7 @@ public:
     base::unique_fd openWrite(Control control, FileId id) const override {
         return base::unique_fd{incfs::openWrite(control, id)};
     }
-    ErrorCode writeBlocks(std::span<const DataBlock> blocks) const override {
+    ErrorCode writeBlocks(Span<const DataBlock> blocks) const override {
         return incfs::writeBlocks(blocks);
     }
 };
