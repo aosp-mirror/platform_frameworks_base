@@ -2250,7 +2250,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final ActivityStack stack = getRootTask();
-        if (stack != null && stack.shouldIgnoreInput()) {
+        if (stack != null && !stack.isFocusable()) {
             // Ignore when the stack shouldn't receive input event.
             // (i.e. the minimized stack in split screen mode.)
             return false;

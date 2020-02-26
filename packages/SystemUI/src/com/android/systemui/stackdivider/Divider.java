@@ -401,6 +401,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 return;
             }
             mMinimized = minimized;
+            WindowManagerProxy.applyPrimaryFocusable(mSplits, !mMinimized);
             mView.setMinimizedDockStack(minimized, getAnimDuration(), mHomeStackResizable);
             updateTouchable();
         });
@@ -504,6 +505,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         final boolean wasMinimized = mMinimized;
         mMinimized = true;
         setHomeStackResizable(mSplits.mSecondary.isResizable());
+        WindowManagerProxy.applyPrimaryFocusable(mSplits, false /* focusable */);
         if (!inSplitMode()) {
             // Wasn't in split-mode yet, so enter now.
             if (DEBUG) {
@@ -521,6 +523,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     void ensureNormalSplit() {
+        if (mMinimized) {
+            WindowManagerProxy.applyPrimaryFocusable(mSplits, true /* focusable */);
+        }
         if (!inSplitMode()) {
             // Wasn't in split-mode, so enter now.
             if (DEBUG) {
