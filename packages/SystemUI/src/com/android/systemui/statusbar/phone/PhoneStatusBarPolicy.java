@@ -16,15 +16,18 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.ActivityManager;
+import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
+import android.app.IActivityManager;
 import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -33,13 +36,13 @@ import android.os.UserManager;
 import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
-import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.DisplayId;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
@@ -61,9 +64,12 @@ import com.android.systemui.statusbar.policy.RotationLockController.RotationLock
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.time.DateFormatUtil;
 
 import java.util.Locale;
 import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 /**
  * This class contains all of the policy about which icons are installed in the status bar at boot
@@ -82,7 +88,7 @@ public class PhoneStatusBarPolicy
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    public static final int LOCATION_STATUS_ICON_ID =
+    static final int LOCATION_STATUS_ICON_ID =
             com.android.internal.R.drawable.perm_group_location;
 
     private final String mSlotCast;
@@ -97,20 +103,26 @@ public class PhoneStatusBarPolicy
     private final String mSlotHeadset;
     private final String mSlotDataSaver;
     private final String mSlotLocation;
-    private final String mSlotMicrophone;
-    private final String mSlotCamera;
     private final String mSlotSensorsOff;
     private final String mSlotScreenRecord;
+    private final int mDisplayId;
+    private final SharedPreferences mSharedPreferences;
+    private final DateFormatUtil mDateFormatUtil;
+    private final TelecomManager mTelecomManager;
+    private final AudioManager mAudioManager;
 
-    private final Context mContext;
     private final Handler mHandler = new Handler();
     private final CastController mCast;
     private final HotspotController mHotspot;
     private final NextAlarmController mNextAlarmController;
     private final AlarmManager mAlarmManager;
     private final UserInfoController mUserInfoController;
+    private final IActivityManager mIActivityManager;
     private final UserManager mUserManager;
     private final StatusBarIconController mIconController;
+    private final CommandQueue mCommandQueue;
+    private final BroadcastDispatcher mBroadcastDispatcher;
+    private final Resources mResources;
     private final RotationLockController mRotationLockController;
     private final DataSaverController mDataSaver;
     private final ZenModeController mZenController;
@@ -121,10 +133,6 @@ public class PhoneStatusBarPolicy
     private final SensorPrivacyController mSensorPrivacyController;
     private final RecordingController mRecordingController;
 
-    // Assume it's all good unless we hear otherwise.  We don't always seem
-    // to get broadcasts that it *is* there.
-    int mSimState = TelephonyManager.SIM_STATE_READY;
-
     private boolean mZenVisible;
     private boolean mVolumeVisible;
     private boolean mCurrentUserSetup;
@@ -134,47 +142,70 @@ public class PhoneStatusBarPolicy
     private BluetoothController mBluetooth;
     private AlarmManager.AlarmClockInfo mNextAlarm;
 
-    public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController,
+    @Inject
+    public PhoneStatusBarPolicy(StatusBarIconController iconController,
             CommandQueue commandQueue, BroadcastDispatcher broadcastDispatcher,
-            @UiBackground Executor uiBgExecutor) {
-        mContext = context;
+            @UiBackground Executor uiBgExecutor, @Main Resources resources,
+            CastController castController, HotspotController hotspotController,
+            BluetoothController bluetoothController, NextAlarmController nextAlarmController,
+            UserInfoController userInfoController, RotationLockController rotationLockController,
+            DataSaverController dataSaverController, ZenModeController zenModeController,
+            DeviceProvisionedController deviceProvisionedController,
+            KeyguardStateController keyguardStateController,
+            LocationController locationController,
+            SensorPrivacyController sensorPrivacyController, IActivityManager iActivityManager,
+            AlarmManager alarmManager, UserManager userManager, AudioManager audioManager,
+            RecordingController recordingController,
+            @Nullable TelecomManager telecomManager, @DisplayId int displayId,
+            @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil) {
         mIconController = iconController;
-        mCast = Dependency.get(CastController.class);
-        mHotspot = Dependency.get(HotspotController.class);
-        mBluetooth = Dependency.get(BluetoothController.class);
-        mNextAlarmController = Dependency.get(NextAlarmController.class);
-        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        mUserInfoController = Dependency.get(UserInfoController.class);
-        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        mRotationLockController = Dependency.get(RotationLockController.class);
-        mDataSaver = Dependency.get(DataSaverController.class);
-        mZenController = Dependency.get(ZenModeController.class);
-        mProvisionedController = Dependency.get(DeviceProvisionedController.class);
-        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
-        mLocationController = Dependency.get(LocationController.class);
-        mSensorPrivacyController = Dependency.get(SensorPrivacyController.class);
-        mRecordingController = Dependency.get(RecordingController.class);
+        mCommandQueue = commandQueue;
+        mBroadcastDispatcher = broadcastDispatcher;
+        mResources = resources;
+        mCast = castController;
+        mHotspot = hotspotController;
+        mBluetooth = bluetoothController;
+        mNextAlarmController = nextAlarmController;
+        mAlarmManager = alarmManager;
+        mUserInfoController = userInfoController;
+        mIActivityManager = iActivityManager;
+        mUserManager = userManager;
+        mRotationLockController = rotationLockController;
+        mDataSaver = dataSaverController;
+        mZenController = zenModeController;
+        mProvisionedController = deviceProvisionedController;
+        mKeyguardStateController = keyguardStateController;
+        mLocationController = locationController;
+        mSensorPrivacyController = sensorPrivacyController;
+        mRecordingController = recordingController;
         mUiBgExecutor = uiBgExecutor;
+        mAudioManager = audioManager;
+        mTelecomManager = telecomManager;
 
-        mSlotCast = context.getString(com.android.internal.R.string.status_bar_cast);
-        mSlotHotspot = context.getString(com.android.internal.R.string.status_bar_hotspot);
-        mSlotBluetooth = context.getString(com.android.internal.R.string.status_bar_bluetooth);
-        mSlotTty = context.getString(com.android.internal.R.string.status_bar_tty);
-        mSlotZen = context.getString(com.android.internal.R.string.status_bar_zen);
-        mSlotVolume = context.getString(com.android.internal.R.string.status_bar_volume);
-        mSlotAlarmClock = context.getString(com.android.internal.R.string.status_bar_alarm_clock);
-        mSlotManagedProfile = context.getString(
+        mSlotCast = resources.getString(com.android.internal.R.string.status_bar_cast);
+        mSlotHotspot = resources.getString(com.android.internal.R.string.status_bar_hotspot);
+        mSlotBluetooth = resources.getString(com.android.internal.R.string.status_bar_bluetooth);
+        mSlotTty = resources.getString(com.android.internal.R.string.status_bar_tty);
+        mSlotZen = resources.getString(com.android.internal.R.string.status_bar_zen);
+        mSlotVolume = resources.getString(com.android.internal.R.string.status_bar_volume);
+        mSlotAlarmClock = resources.getString(com.android.internal.R.string.status_bar_alarm_clock);
+        mSlotManagedProfile = resources.getString(
                 com.android.internal.R.string.status_bar_managed_profile);
-        mSlotRotate = context.getString(com.android.internal.R.string.status_bar_rotate);
-        mSlotHeadset = context.getString(com.android.internal.R.string.status_bar_headset);
-        mSlotDataSaver = context.getString(com.android.internal.R.string.status_bar_data_saver);
-        mSlotLocation = context.getString(com.android.internal.R.string.status_bar_location);
-        mSlotMicrophone = context.getString(com.android.internal.R.string.status_bar_microphone);
-        mSlotCamera = context.getString(com.android.internal.R.string.status_bar_camera);
-        mSlotSensorsOff = context.getString(com.android.internal.R.string.status_bar_sensors_off);
-        mSlotScreenRecord = context.getString(
+        mSlotRotate = resources.getString(com.android.internal.R.string.status_bar_rotate);
+        mSlotHeadset = resources.getString(com.android.internal.R.string.status_bar_headset);
+        mSlotDataSaver = resources.getString(com.android.internal.R.string.status_bar_data_saver);
+        mSlotLocation = resources.getString(com.android.internal.R.string.status_bar_location);
+        mSlotSensorsOff = resources.getString(com.android.internal.R.string.status_bar_sensors_off);
+        mSlotScreenRecord = resources.getString(
                 com.android.internal.R.string.status_bar_screen_record);
 
+        mDisplayId = displayId;
+        mSharedPreferences = sharedPreferences;
+        mDateFormatUtil = dateFormatUtil;
+    }
+
+    /** Initialize the object after construction. */
+    public void init() {
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
@@ -185,11 +216,11 @@ public class PhoneStatusBarPolicy
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-        broadcastDispatcher.registerReceiverWithHandler(mIntentReceiver, filter, mHandler);
+        mBroadcastDispatcher.registerReceiverWithHandler(mIntentReceiver, filter, mHandler);
 
         // listen for user / profile change.
         try {
-            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchListener, TAG);
+            mIActivityManager.registerUserSwitchObserver(mUserSwitchListener, TAG);
         } catch (RemoteException e) {
             // Ignore
         }
@@ -219,26 +250,26 @@ public class PhoneStatusBarPolicy
 
         // hotspot
         mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_hotspot,
-                mContext.getString(R.string.accessibility_status_bar_hotspot));
+                mResources.getString(R.string.accessibility_status_bar_hotspot));
         mIconController.setIconVisibility(mSlotHotspot, mHotspot.isHotspotEnabled());
 
         // managed profile
         mIconController.setIcon(mSlotManagedProfile, R.drawable.stat_sys_managed_profile_status,
-                mContext.getString(R.string.accessibility_managed_profile));
+                mResources.getString(R.string.accessibility_managed_profile));
         mIconController.setIconVisibility(mSlotManagedProfile, mManagedProfileIconVisible);
 
         // data saver
         mIconController.setIcon(mSlotDataSaver, R.drawable.stat_sys_data_saver,
-                context.getString(R.string.accessibility_data_saver_on));
+                mResources.getString(R.string.accessibility_data_saver_on));
         mIconController.setIconVisibility(mSlotDataSaver, false);
 
         mIconController.setIcon(mSlotLocation, LOCATION_STATUS_ICON_ID,
-                mContext.getString(R.string.accessibility_location_active));
+                mResources.getString(R.string.accessibility_location_active));
         mIconController.setIconVisibility(mSlotLocation, false);
 
         // sensors off
         mIconController.setIcon(mSlotSensorsOff, R.drawable.stat_sys_sensors_off,
-                mContext.getString(R.string.accessibility_sensors_off_active));
+                mResources.getString(R.string.accessibility_sensors_off_active));
         mIconController.setIconVisibility(mSlotSensorsOff,
                 mSensorPrivacyController.isSensorPrivacyEnabled());
 
@@ -259,7 +290,7 @@ public class PhoneStatusBarPolicy
         mLocationController.addCallback(this);
         mRecordingController.addCallback(this);
 
-        commandQueue.addCallback(this);
+        mCommandQueue.addCallback(this);
     }
 
     @Override
@@ -284,51 +315,17 @@ public class PhoneStatusBarPolicy
 
     private String buildAlarmContentDescription() {
         if (mNextAlarm == null) {
-            return mContext.getString(R.string.status_bar_alarm);
+            return mResources.getString(R.string.status_bar_alarm);
         }
-        return formatNextAlarm(mNextAlarm, mContext);
-    }
 
-    private static String formatNextAlarm(AlarmManager.AlarmClockInfo info, Context context) {
-        if (info == null) {
-            return "";
-        }
-        String skeleton = DateFormat.is24HourFormat(
-                context, ActivityManager.getCurrentUser()) ? "EHm" : "Ehma";
+        String skeleton = mDateFormatUtil.is24HourFormat() ? "EHm" : "Ehma";
         String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
-        String dateString = DateFormat.format(pattern, info.getTriggerTime()).toString();
+        String dateString = DateFormat.format(pattern, mNextAlarm.getTriggerTime()).toString();
 
-        return context.getString(R.string.accessibility_quick_settings_alarm, dateString);
-    }
-
-    private final void updateSimState(Intent intent) {
-        String stateExtra = intent.getStringExtra(Intent.EXTRA_SIM_STATE);
-        if (Intent.SIM_STATE_ABSENT.equals(stateExtra)) {
-            mSimState = TelephonyManager.SIM_STATE_READY;
-        } else if (Intent.SIM_STATE_CARD_IO_ERROR.equals(stateExtra)) {
-            mSimState = TelephonyManager.SIM_STATE_CARD_IO_ERROR;
-        } else if (Intent.SIM_STATE_CARD_RESTRICTED.equals(stateExtra)) {
-            mSimState = TelephonyManager.SIM_STATE_CARD_RESTRICTED;
-        } else if (Intent.SIM_STATE_READY.equals(stateExtra)) {
-            mSimState = TelephonyManager.SIM_STATE_READY;
-        } else if (Intent.SIM_STATE_LOCKED.equals(stateExtra)) {
-            final String lockedReason =
-                    intent.getStringExtra(Intent.EXTRA_SIM_LOCKED_REASON);
-            if (Intent.SIM_LOCKED_ON_PIN.equals(lockedReason)) {
-                mSimState = TelephonyManager.SIM_STATE_PIN_REQUIRED;
-            } else if (Intent.SIM_LOCKED_ON_PUK.equals(lockedReason)) {
-                mSimState = TelephonyManager.SIM_STATE_PUK_REQUIRED;
-            } else {
-                mSimState = TelephonyManager.SIM_STATE_NETWORK_LOCKED;
-            }
-        } else {
-            mSimState = TelephonyManager.SIM_STATE_UNKNOWN;
-        }
+        return mResources.getString(R.string.accessibility_quick_settings_alarm, dateString);
     }
 
     private final void updateVolumeZen() {
-        AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-
         boolean zenVisible = false;
         int zenIconId = 0;
         String zenDescription = null;
@@ -338,29 +335,29 @@ public class PhoneStatusBarPolicy
         String volumeDescription = null;
         int zen = mZenController.getZen();
 
-        if (DndTile.isVisible(mContext) || DndTile.isCombinedIcon(mContext)) {
+        if (DndTile.isVisible(mSharedPreferences) || DndTile.isCombinedIcon(mSharedPreferences)) {
             zenVisible = zen != Global.ZEN_MODE_OFF;
             zenIconId = R.drawable.stat_sys_dnd;
-            zenDescription = mContext.getString(R.string.quick_settings_dnd_label);
+            zenDescription = mResources.getString(R.string.quick_settings_dnd_label);
         } else if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
             zenIconId = R.drawable.stat_sys_dnd;
-            zenDescription = mContext.getString(R.string.interruption_level_none);
+            zenDescription = mResources.getString(R.string.interruption_level_none);
         } else if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             zenVisible = true;
             zenIconId = R.drawable.stat_sys_dnd;
-            zenDescription = mContext.getString(R.string.interruption_level_priority);
+            zenDescription = mResources.getString(R.string.interruption_level_priority);
         }
 
         if (!ZenModeConfig.isZenOverridingRinger(zen, mZenController.getConsolidatedPolicy())) {
-            if (audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
+            if (mAudioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
                 volumeVisible = true;
                 volumeIconId = R.drawable.stat_sys_ringer_vibrate;
-                volumeDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
-            } else if (audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT) {
+                volumeDescription = mResources.getString(R.string.accessibility_ringer_vibrate);
+            } else if (mAudioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT) {
                 volumeVisible = true;
                 volumeIconId = R.drawable.stat_sys_ringer_silent;
-                volumeDescription = mContext.getString(R.string.accessibility_ringer_silent);
+                volumeDescription = mResources.getString(R.string.accessibility_ringer_silent);
             }
         }
 
@@ -395,13 +392,13 @@ public class PhoneStatusBarPolicy
     private final void updateBluetooth() {
         int iconId = R.drawable.stat_sys_data_bluetooth_connected;
         String contentDescription =
-                mContext.getString(R.string.accessibility_quick_settings_bluetooth_on);
+                mResources.getString(R.string.accessibility_quick_settings_bluetooth_on);
         boolean bluetoothVisible = false;
         if (mBluetooth != null) {
             if (mBluetooth.isBluetoothConnected()
                     && (mBluetooth.isBluetoothAudioActive()
                     || !mBluetooth.isBluetoothAudioProfileOnly())) {
-                contentDescription = mContext.getString(
+                contentDescription = mResources.getString(
                         R.string.accessibility_bluetooth_connected);
                 bluetoothVisible = mBluetooth.isBluetoothEnabled();
             }
@@ -412,12 +409,10 @@ public class PhoneStatusBarPolicy
     }
 
     private final void updateTTY() {
-        TelecomManager telecomManager =
-                (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
-        if (telecomManager == null) {
+        if (mTelecomManager == null) {
             updateTTY(TelecomManager.TTY_MODE_OFF);
         } else {
-            updateTTY(telecomManager.getCurrentTtyMode());
+            updateTTY(mTelecomManager.getCurrentTtyMode());
         }
     }
 
@@ -430,7 +425,7 @@ public class PhoneStatusBarPolicy
             // TTY is on
             if (DEBUG) Log.v(TAG, "updateTTY: set TTY on");
             mIconController.setIcon(mSlotTty, R.drawable.stat_sys_tty_mode,
-                    mContext.getString(R.string.accessibility_tty_enabled));
+                    mResources.getString(R.string.accessibility_tty_enabled));
             mIconController.setIconVisibility(mSlotTty, true);
         } else {
             // TTY is off
@@ -452,7 +447,7 @@ public class PhoneStatusBarPolicy
         mHandler.removeCallbacks(mRemoveCastIconRunnable);
         if (isCasting && !mRecordingController.isRecording()) { // screen record has its own icon
             mIconController.setIcon(mSlotCast, R.drawable.stat_sys_cast,
-                    mContext.getString(R.string.accessibility_casting));
+                    mResources.getString(R.string.accessibility_casting));
             mIconController.setIconVisibility(mSlotCast, true);
         } else {
             // don't turn off the screen-record icon for a few seconds, just to make sure the user
@@ -478,7 +473,7 @@ public class PhoneStatusBarPolicy
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
                                 R.drawable.stat_sys_managed_profile_status,
-                                mContext.getString(R.string.accessibility_managed_profile));
+                                mResources.getString(R.string.accessibility_managed_profile));
                     } else {
                         showIcon = false;
                     }
@@ -545,7 +540,7 @@ public class PhoneStatusBarPolicy
     @Override
     public void appTransitionStarting(int displayId, long startTime, long duration,
             boolean forced) {
-        if (mContext.getDisplayId() == displayId) {
+        if (mDisplayId == displayId) {
             updateManagedProfile();
         }
     }
@@ -567,14 +562,14 @@ public class PhoneStatusBarPolicy
     @Override
     public void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible) {
         boolean portrait = RotationLockTile.isCurrentOrientationLockPortrait(
-                mRotationLockController, mContext);
+                mRotationLockController, mResources);
         if (rotationLocked) {
             if (portrait) {
                 mIconController.setIcon(mSlotRotate, R.drawable.stat_sys_rotate_portrait,
-                        mContext.getString(R.string.accessibility_rotation_lock_on_portrait));
+                        mResources.getString(R.string.accessibility_rotation_lock_on_portrait));
             } else {
                 mIconController.setIcon(mSlotRotate, R.drawable.stat_sys_rotate_landscape,
-                        mContext.getString(R.string.accessibility_rotation_lock_on_landscape));
+                        mResources.getString(R.string.accessibility_rotation_lock_on_landscape));
             }
             mIconController.setIconVisibility(mSlotRotate, true);
         } else {
@@ -586,7 +581,7 @@ public class PhoneStatusBarPolicy
         boolean connected = intent.getIntExtra("state", 0) != 0;
         boolean hasMic = intent.getIntExtra("microphone", 0) != 0;
         if (connected) {
-            String contentDescription = mContext.getString(hasMic
+            String contentDescription = mResources.getString(hasMic
                     ? R.string.accessibility_status_bar_headset
                     : R.string.accessibility_status_bar_headphones);
             mIconController.setIcon(mSlotHeadset, hasMic ? R.drawable.stat_sys_headset_mic
@@ -630,7 +625,6 @@ public class PhoneStatusBarPolicy
                     if (intent.getBooleanExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
                         break;
                     }
-                    updateSimState(intent);
                     break;
                 case TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED:
                     updateTTY(intent.getIntExtra(TelecomManager.EXTRA_CURRENT_TTY_MODE,
