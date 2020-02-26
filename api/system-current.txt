@@ -9939,6 +9939,7 @@ package android.service.autofill.augmented {
     method @NonNull public android.service.autofill.augmented.FillResponse build();
     method @NonNull public android.service.autofill.augmented.FillResponse.Builder setClientState(@Nullable android.os.Bundle);
     method @NonNull public android.service.autofill.augmented.FillResponse.Builder setFillWindow(@Nullable android.service.autofill.augmented.FillWindow);
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineActions(@Nullable java.util.List<android.service.autofill.InlinePresentation>);
     method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineSuggestions(@Nullable java.util.List<android.service.autofill.Dataset>);
   }
 

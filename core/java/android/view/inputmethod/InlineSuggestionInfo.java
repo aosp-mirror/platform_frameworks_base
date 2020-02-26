@@ -69,6 +69,9 @@ public final class InlineSuggestionInfo implements Parcelable {
     /** The type of the UI. */
     private final @NonNull @Type String mType;
 
+    /** Whether the suggestion should be pinned or not. */
+    private final boolean mPinned;
+
     /**
      * Creates a new {@link InlineSuggestionInfo}, for testing purpose.
      *
@@ -79,8 +82,8 @@ public final class InlineSuggestionInfo implements Parcelable {
     public static InlineSuggestionInfo newInlineSuggestionInfo(
             @NonNull InlinePresentationSpec presentationSpec,
             @NonNull @Source String source,
-            @Nullable String[] autofillHints) {
-        return new InlineSuggestionInfo(presentationSpec, source, autofillHints, TYPE_SUGGESTION);
+            @Nullable String[] autofillHints, @NonNull @Type String type, boolean isPinned) {
+        return new InlineSuggestionInfo(presentationSpec, source, autofillHints, type, isPinned);
     }
 
 
@@ -127,6 +130,8 @@ public final class InlineSuggestionInfo implements Parcelable {
      *   Hints for the type of data being suggested.
      * @param type
      *   The type of the UI.
+     * @param pinned
+     *   Whether the suggestion should be pinned or not.
      * @hide
      */
     @DataClass.Generated.Member
@@ -134,7 +139,8 @@ public final class InlineSuggestionInfo implements Parcelable {
             @NonNull InlinePresentationSpec presentationSpec,
             @NonNull @Source String source,
             @Nullable String[] autofillHints,
-            @NonNull @Type String type) {
+            @NonNull @Type String type,
+            boolean pinned) {
         this.mPresentationSpec = presentationSpec;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPresentationSpec);
@@ -163,6 +169,7 @@ public final class InlineSuggestionInfo implements Parcelable {
 
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mType);
+        this.mPinned = pinned;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -199,6 +206,14 @@ public final class InlineSuggestionInfo implements Parcelable {
         return mType;
     }
 
+    /**
+     * Whether the suggestion should be pinned or not.
+     */
+    @DataClass.Generated.Member
+    public boolean isPinned() {
+        return mPinned;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -209,7 +224,8 @@ public final class InlineSuggestionInfo implements Parcelable {
                 "presentationSpec = " + mPresentationSpec + ", " +
                 "source = " + mSource + ", " +
                 "autofillHints = " + java.util.Arrays.toString(mAutofillHints) + ", " +
-                "type = " + mType +
+                "type = " + mType + ", " +
+                "pinned = " + mPinned +
         " }";
     }
 
@@ -229,7 +245,8 @@ public final class InlineSuggestionInfo implements Parcelable {
                 && java.util.Objects.equals(mPresentationSpec, that.mPresentationSpec)
                 && java.util.Objects.equals(mSource, that.mSource)
                 && java.util.Arrays.equals(mAutofillHints, that.mAutofillHints)
-                && java.util.Objects.equals(mType, that.mType);
+                && java.util.Objects.equals(mType, that.mType)
+                && mPinned == that.mPinned;
     }
 
     @Override
@@ -243,6 +260,7 @@ public final class InlineSuggestionInfo implements Parcelable {
         _hash = 31 * _hash + java.util.Objects.hashCode(mSource);
         _hash = 31 * _hash + java.util.Arrays.hashCode(mAutofillHints);
         _hash = 31 * _hash + java.util.Objects.hashCode(mType);
+        _hash = 31 * _hash + Boolean.hashCode(mPinned);
         return _hash;
     }
 
@@ -253,6 +271,7 @@ public final class InlineSuggestionInfo implements Parcelable {
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         byte flg = 0;
+        if (mPinned) flg |= 0x10;
         if (mAutofillHints != null) flg |= 0x4;
         dest.writeByte(flg);
         dest.writeTypedObject(mPresentationSpec, flags);
@@ -273,6 +292,7 @@ public final class InlineSuggestionInfo implements Parcelable {
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         byte flg = in.readByte();
+        boolean pinned = (flg & 0x10) != 0;
         InlinePresentationSpec presentationSpec = (InlinePresentationSpec) in.readTypedObject(InlinePresentationSpec.CREATOR);
         String source = in.readString();
         String[] autofillHints = (flg & 0x4) == 0 ? null : in.createStringArray();
@@ -306,6 +326,7 @@ public final class InlineSuggestionInfo implements Parcelable {
 
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mType);
+        this.mPinned = pinned;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -325,10 +346,10 @@ public final class InlineSuggestionInfo implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1579806757327L,
+            time = 1582753084046L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestionInfo.java",
-            inputSignatures = "public static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_AUTOFILL\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_PLATFORM\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String TYPE_SUGGESTION\npublic static final @android.annotation.SuppressLint({\"IntentName\"}) @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String TYPE_ACTION\nprivate final @android.annotation.NonNull android.view.inline.InlinePresentationSpec mPresentationSpec\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String mSource\nprivate final @android.annotation.Nullable java.lang.String[] mAutofillHints\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String mType\npublic static @android.annotation.TestApi @android.annotation.NonNull android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(android.view.inline.InlinePresentationSpec,java.lang.String,java.lang.String[])\nclass InlineSuggestionInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")
+            inputSignatures = "public static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_AUTOFILL\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_PLATFORM\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String TYPE_SUGGESTION\npublic static final @android.annotation.SuppressLint({\"IntentName\"}) @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String TYPE_ACTION\nprivate final @android.annotation.NonNull android.view.inline.InlinePresentationSpec mPresentationSpec\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String mSource\nprivate final @android.annotation.Nullable java.lang.String[] mAutofillHints\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String mType\nprivate final  boolean mPinned\npublic static @android.annotation.TestApi @android.annotation.NonNull android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(android.view.inline.InlinePresentationSpec,java.lang.String,java.lang.String[],java.lang.String,boolean)\nclass InlineSuggestionInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 
