@@ -4178,13 +4178,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final DisplayContent displayContent = getDisplayContent();
         if (!displayContent.mClosingApps.contains(this)
                 && !displayContent.mOpeningApps.contains(this)) {
-            // The token is not closing nor opening, so even if there is an animation set, that
-            // doesn't mean that it goes through the normal app transition cycle so we have
-            // to inform the docked controller about visibility change.
-            // TODO(multi-display): notify docked divider on all displays where visibility was
-            // affected.
-            displayContent.getDockedDividerController().notifyAppVisibilityChanged();
-
             // Take the screenshot before possibly hiding the WSA, otherwise the screenshot
             // will not be taken.
             mWmService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
