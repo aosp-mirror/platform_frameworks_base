@@ -1370,10 +1370,14 @@ public final class WindowInsets {
         }
 
         /**
-         * @return An insets type representing the area that avoids the display cutout.
+         * Returns an insets type representing the area that used by {@link DisplayCutout}.
          *
-         * @see DisplayCutout#getSafeInsetTop
-         * @hide
+         * <p>This is equivalent to the safe insets on {@link #getDisplayCutout()}.</p>
+         *
+         * @see DisplayCutout#getSafeInsetLeft()
+         * @see DisplayCutout#getSafeInsetTop()
+         * @see DisplayCutout#getSafeInsetRight()
+         * @see DisplayCutout#getSafeInsetBottom()
          */
         public static @InsetsType int displayCutout() {
             return DISPLAY_CUTOUT;
