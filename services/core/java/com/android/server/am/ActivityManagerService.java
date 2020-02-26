@@ -6515,14 +6515,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void resizeDockedStack(Rect dockedBounds, Rect tempDockedTaskBounds,
-            Rect tempDockedTaskInsetBounds,
-            Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds) {
-        mActivityTaskManager.resizeDockedStack(dockedBounds, tempDockedTaskBounds,
-                tempDockedTaskInsetBounds, tempOtherTaskBounds, tempOtherTaskInsetBounds);
-    }
-
-    @Override
     public void positionTaskInStack(int taskId, int stackId, int position) {
         mActivityTaskManager.positionTaskInStack(taskId, stackId, position);
     }
