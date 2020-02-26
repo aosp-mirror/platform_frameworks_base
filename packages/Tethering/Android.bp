@@ -95,11 +95,7 @@ java_defaults {
     // TODO (b/148190005): change to module-libs-api-stubs-current once it is ready.
     sdk_version: "core_platform",
     privileged: true,
-    // Build system doesn't track transitive dependeicies for jni_libs, list all the dependencies
-    // explicitly.
     jni_libs: [
-        "liblog",
-        "libnativehelper_compat_libc++",
         "libtetherutilsjni",
     ],
     resource_dirs: [
