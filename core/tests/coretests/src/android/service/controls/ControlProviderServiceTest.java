@@ -284,7 +284,7 @@ public class ControlProviderServiceTest {
         }
 
         @Override
-        public Publisher<Control> publisherForAllAvailable() {
+        public Publisher<Control> createPublisherForAllAvailable() {
             return new Publisher<Control>() {
                 public void subscribe(final Subscriber s) {
                     s.onSubscribe(createSubscription(s, mControls));
@@ -293,7 +293,7 @@ public class ControlProviderServiceTest {
         }
 
         @Override
-        public Publisher<Control> publisherFor(List<String> ids) {
+        public Publisher<Control> createPublisherFor(List<String> ids) {
             return new Publisher<Control>() {
                 public void subscribe(final Subscriber s) {
                     s.onSubscribe(createSubscription(s, mControls));
@@ -302,7 +302,7 @@ public class ControlProviderServiceTest {
         }
 
         @Override
-        public Publisher<Control> publisherForSuggested() {
+        public Publisher<Control> createPublisherForSuggested() {
             return new Publisher<Control>() {
                 public void subscribe(final Subscriber s) {
                     s.onSubscribe(createSubscription(s, mControls));

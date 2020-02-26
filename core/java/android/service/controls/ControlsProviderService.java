@@ -91,7 +91,7 @@ public abstract class ControlsProviderService extends Service {
      * replace the original.
      */
     @NonNull
-    public abstract Publisher<Control> publisherForAllAvailable();
+    public abstract Publisher<Control> createPublisherForAllAvailable();
 
     /**
      * (Optional) Publisher for suggested controls
@@ -103,7 +103,7 @@ public abstract class ControlsProviderService extends Service {
      * when done, or {@link Subscriber#onError} for error scenarios.
      */
     @Nullable
-    public Publisher<Control> publisherForSuggested() {
+    public Publisher<Control> createPublisherForSuggested() {
         return null;
     }
 
@@ -111,10 +111,11 @@ public abstract class ControlsProviderService extends Service {
      * Return a valid Publisher for the given controlIds. This publisher will be asked to provide
      * updates for the given list of controlIds as long as the {@link Subscription} is valid.
      * Calls to {@link Subscriber#onComplete} will not be expected. Instead, wait for the call from
-     * {@link Subscription#cancel} to indicate that updates are no longer required.
+     * {@link Subscription#cancel} to indicate that updates are no longer required. It is expected
+     * that controls provided by this publisher were created using {@link Control.StatefulBuilder}.
      */
     @NonNull
-    public abstract Publisher<Control> publisherFor(@NonNull List<String> controlIds);
+    public abstract Publisher<Control> createPublisherFor(@NonNull List<String> controlIds);
 
     /**
      * The user has interacted with a Control. The action is dictated by the type of
@@ -160,7 +161,7 @@ public abstract class ControlsProviderService extends Service {
     }
 
     @Override
-    public boolean onUnbind(@NonNull Intent intent) {
+    public final boolean onUnbind(@NonNull Intent intent) {
         mHandler = null;
         return true;
     }
@@ -181,7 +182,7 @@ public abstract class ControlsProviderService extends Service {
                     final IControlsSubscriber cs = (IControlsSubscriber) msg.obj;
                     final SubscriberProxy proxy = new SubscriberProxy(true, mToken, cs);
 
-                    ControlsProviderService.this.publisherForAllAvailable().subscribe(proxy);
+                    ControlsProviderService.this.createPublisherForAllAvailable().subscribe(proxy);
                     break;
                 }
 
@@ -190,7 +191,7 @@ public abstract class ControlsProviderService extends Service {
                     final SubscriberProxy proxy = new SubscriberProxy(true, mToken, cs);
 
                     Publisher<Control> publisher =
-                            ControlsProviderService.this.publisherForSuggested();
+                            ControlsProviderService.this.createPublisherForSuggested();
                     if (publisher == null) {
                         Log.i(TAG, "No publisher provided for suggested controls");
                         proxy.onComplete();
@@ -205,7 +206,8 @@ public abstract class ControlsProviderService extends Service {
                     final SubscriberProxy proxy = new SubscriberProxy(false, mToken,
                             sMsg.mSubscriber);
 
-                    ControlsProviderService.this.publisherFor(sMsg.mControlIds).subscribe(proxy);
+                    ControlsProviderService.this.createPublisherFor(sMsg.mControlIds)
+                            .subscribe(proxy);
                     break;
                 }
 
