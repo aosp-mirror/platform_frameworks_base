@@ -42,8 +42,7 @@ private typealias ModelFavoriteChanger = (String, Boolean) -> Unit
  * @param onlyFavorites set to true to only display favorites instead of all controls
  */
 class ControlAdapter(
-    private val layoutInflater: LayoutInflater,
-    private val onlyFavorites: Boolean = false
+    private val layoutInflater: LayoutInflater
 ) : RecyclerView.Adapter<Holder>() {
 
     companion object {
@@ -57,22 +56,21 @@ class ControlAdapter(
         }
     }
 
-    var modelList: List<ElementWrapper> = emptyList()
-    private var favoritesModel: FavoriteModel? = null
+    private var model: ControlsModel? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         return when (viewType) {
             TYPE_CONTROL -> {
                 ControlHolder(
-                        layoutInflater.inflate(R.layout.controls_base_item, parent, false).apply {
-                            layoutParams.apply {
-                                width = ViewGroup.LayoutParams.MATCH_PARENT
-                            }
-                            elevation = 15f
-                        },
-                        { id, favorite ->
-                            favoritesModel?.changeFavoriteStatus(id, favorite)
-                        })
+                    layoutInflater.inflate(R.layout.controls_base_item, parent, false).apply {
+                        layoutParams.apply {
+                            width = ViewGroup.LayoutParams.MATCH_PARENT
+                        }
+                        elevation = 15f
+                    }
+                ) { id, favorite ->
+                    model?.changeFavoriteStatus(id, favorite)
+                }
             }
             TYPE_ZONE -> {
                 ZoneHolder(layoutInflater.inflate(R.layout.controls_zone_header, parent, false))
@@ -81,27 +79,26 @@ class ControlAdapter(
         }
     }
 
-    fun changeFavoritesModel(favoritesModel: FavoriteModel) {
-        this.favoritesModel = favoritesModel
-        if (onlyFavorites) {
-            modelList = favoritesModel.favorites
-        } else {
-            modelList = favoritesModel.all
-        }
+    fun changeModel(model: ControlsModel) {
+        this.model = model
         notifyDataSetChanged()
     }
 
-    override fun getItemCount() = modelList.size
+    override fun getItemCount() = model?.elements?.size ?: 0
 
     override fun onBindViewHolder(holder: Holder, index: Int) {
-        holder.bindData(modelList[index])
+        model?.let {
+            holder.bindData(it.elements[index])
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when (modelList[position]) {
-            is ZoneNameWrapper -> TYPE_ZONE
-            is ControlWrapper -> TYPE_CONTROL
-        }
+        model?.let {
+            return when (it.elements.get(position)) {
+                is ZoneNameWrapper -> TYPE_ZONE
+                is ControlWrapper -> TYPE_CONTROL
+            }
+        } ?: throw IllegalStateException("Getting item type for null model")
     }
 }
 

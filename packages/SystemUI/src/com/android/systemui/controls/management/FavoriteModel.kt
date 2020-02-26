@@ -143,11 +143,3 @@ class CharSequenceComparator : Comparator<CharSequence> {
         return p0.toString().compareTo(p1.toString())
     }
 }
-
-/**
- * Wrapper classes for the different types of elements shown in the [RecyclerView]s in
- * [ControlsFavoritingActivity].
- */
-sealed class ElementWrapper
-data class ZoneNameWrapper(val zoneName: CharSequence) : ElementWrapper()
-data class ControlWrapper(val controlStatus: ControlStatus) : ElementWrapper()
