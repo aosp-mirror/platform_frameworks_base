@@ -40,7 +40,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.activityTypeToString;
@@ -106,7 +105,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
-import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_UNSET;
@@ -284,7 +282,6 @@ import android.view.DisplayInfo;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
 import android.view.InputApplicationHandle;
-import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -576,12 +573,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @see #currentLaunchCanTurnScreenOn()
      */
     private boolean mCurrentLaunchCanTurnScreenOn = true;
-
-    /**
-     * This leash is used to "freeze" the app surface in place after the state change, but before
-     * the animation is ready to start.
-     */
-    private SurfaceControl mTransitChangeLeash = null;
 
     /** Whether our surface was set to be showing in the last call to {@link #prepareSurfaces} */
     private boolean mLastSurfaceShowing = true;
@@ -1329,15 +1320,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mDisplayContent.executeAppTransition();
         }
 
-        if (prevDc.mChangingApps.remove(this)) {
-            // This gets called *after* the ActivityRecord has been reparented to the new display.
-            // That reparenting resulted in this window changing modes (eg. FREEFORM -> FULLSCREEN),
-            // so this token is now "frozen" while waiting for the animation to start on prevDc
-            // (which will be cancelled since the window is no-longer a child). However, since this
-            // is no longer a child of prevDc, this won't be notified of the cancelled animation,
-            // so we need to cancel the change transition here.
-            clearChangeLeash(getPendingTransaction(), true /* cancel */);
-        }
         prevDc.mClosingApps.remove(this);
 
         if (prevDc.mFocusedApp == this) {
@@ -3092,7 +3074,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         commitVisibility(false /* visible */, true /* performLayout */);
 
         getDisplayContent().mOpeningApps.remove(this);
-        getDisplayContent().mChangingApps.remove(this);
+        getDisplayContent().mChangingContainers.remove(this);
         getDisplayContent().mUnknownAppVisibilityController.appRemovedOrHidden(this);
         mWmService.mTaskSnapshotController.onAppRemoved(this);
         mStackSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
@@ -3995,13 +3977,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 appToken, visible, appTransition, isVisible(), mVisibleRequested,
                 Debug.getCallers(6));
 
+        onChildVisibilityRequested(visible);
+
         final DisplayContent displayContent = getDisplayContent();
         displayContent.mOpeningApps.remove(this);
         displayContent.mClosingApps.remove(this);
-        if (isInChangeTransition()) {
-            clearChangeLeash(getPendingTransaction(), true /* cancel */);
-        }
-        displayContent.mChangingApps.remove(this);
         waitingToShow = false;
         mVisibleRequested = visible;
         mLastDeferHidingClient = deferHidingClient;
@@ -5805,11 +5785,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return !isSplitScreenPrimary || allowSplitScreenPrimaryAnimation;
     }
 
-    @Override
-    boolean isChangingAppTransition() {
-        return task != null ? task.isChangingAppTransition() : super.isChangingAppTransition();
-    }
-
     /**
      * Creates a layer to apply crop to an animation.
      */
@@ -5830,84 +5805,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 this, endDeferFinishCallback);
     }
 
-    private boolean shouldStartChangeTransition(int prevWinMode, int newWinMode) {
-        if (mWmService.mDisableTransitionAnimation
-                || !isVisible()
-                || getDisplayContent().mAppTransition.isTransitionSet()
-                || getSurfaceControl() == null) {
-            return false;
-        }
-        // Only do an animation into and out-of freeform mode for now. Other mode
-        // transition animations are currently handled by system-ui.
-        return (prevWinMode == WINDOWING_MODE_FREEFORM) != (newWinMode == WINDOWING_MODE_FREEFORM);
-    }
-
     @Override
     boolean isWaitingForTransitionStart() {
         final DisplayContent dc = getDisplayContent();
         return dc != null && dc.mAppTransition.isTransitionSet()
                 && (dc.mOpeningApps.contains(this)
                 || dc.mClosingApps.contains(this)
-                || dc.mChangingApps.contains(this));
+                || dc.mChangingContainers.contains(this));
     }
 
-    /**
-     * Initializes a change transition. Because the app is visible already, there is a small period
-     * of time where the user can see the app content/window update before the transition starts.
-     * To prevent this, we immediately take a snapshot and place the app/snapshot into a leash which
-     * "freezes" the location/crop until the transition starts.
-     * <p>
-     * Here's a walk-through of the process:
-     * 1. Create a temporary leash ("interim-change-leash") and reparent the app to it.
-     * 2. Set the temporary leash's position/crop to the current state.
-     * 3. Create a snapshot and place that at the top of the leash to cover up content changes.
-     * 4. Once the transition is ready, it will reparent the app to the animation leash.
-     * 5. Detach the interim-change-leash.
-     */
-    private void initializeChangeTransition(Rect startBounds) {
-        mDisplayContent.prepareAppTransition(TRANSIT_TASK_CHANGE_WINDOWING_MODE,
-                false /* alwaysKeepCurrent */, 0, false /* forceOverride */);
-        mDisplayContent.mChangingApps.add(this);
-        mTransitStartRect.set(startBounds);
-
-        final SurfaceControl.Builder builder = makeAnimationLeash()
-                .setParent(getAnimationLeashParent())
-                .setName(getSurfaceControl() + " - interim-change-leash");
-        mTransitChangeLeash = builder.build();
-        Transaction t = getPendingTransaction();
-        t.setWindowCrop(mTransitChangeLeash, startBounds.width(), startBounds.height());
-        t.setPosition(mTransitChangeLeash, startBounds.left, startBounds.top);
-        t.show(mTransitChangeLeash);
-        t.reparent(getSurfaceControl(), mTransitChangeLeash);
-        onAnimationLeashCreated(t, mTransitChangeLeash);
-
-        // Skip creating snapshot if this transition is controlled by a remote animator which
-        // doesn't need it.
-        ArraySet<Integer> activityTypes = new ArraySet<>();
-        activityTypes.add(getActivityType());
-        RemoteAnimationAdapter adapter =
-                mDisplayContent.mAppTransitionController.getRemoteAnimationOverride(
-                        this, TRANSIT_TASK_CHANGE_WINDOWING_MODE, activityTypes);
-        if (adapter != null && !adapter.getChangeNeedsSnapshot()) {
-            return;
-        }
-
-        if (mThumbnail == null && task != null && !hasCommittedReparentToAnimationLeash()) {
-            SurfaceControl.ScreenshotGraphicBuffer snapshot =
-                    mWmService.mTaskSnapshotController.createTaskSnapshot(
-                            task, 1 /* scaleFraction */);
-            if (snapshot != null) {
-                mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory, t, this,
-                        snapshot.getGraphicBuffer(), true /* relative */);
-            }
-        }
-    }
-
-    @Override
-    public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
+    private int getAnimationLayer() {
         // The leash is parented to the animation layer. We need to preserve the z-order by using
         // the prefix order index, but we boost if necessary.
-        int layer = 0;
+        int layer;
         if (!inPinnedWindowingMode()) {
             layer = getPrefixOrderIndex();
         } else {
@@ -5920,21 +5830,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mNeedsZBoost) {
             layer += Z_BOOST_BASE;
         }
-        if (!mNeedsAnimationBoundsLayer) {
-            t.setLayer(leash, layer);
-        }
+        return layer;
+    }
 
-        final DisplayContent dc = getDisplayContent();
-        dc.assignStackOrdering();
+    @Override
+    public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
+        t.setLayer(leash, getAnimationLayer());
+        getDisplayContent().assignStackOrdering();
+    }
 
-        if (leash == mTransitChangeLeash) {
-            // This is a temporary state so skip any animation notifications
-            return;
-        } else if (mTransitChangeLeash != null) {
-            // unparent mTransitChangeLeash for clean-up
-            clearChangeLeash(t, false /* cancel */);
-        }
-
+    @Override
+    public void onLeashAnimationStarting(Transaction t, SurfaceControl leash) {
         if (mAnimatingActivityRegistry != null) {
             mAnimatingActivityRegistry.notifyStarting(this);
         }
@@ -5962,7 +5868,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // surface size has already same as the animating container.
                 t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);
             }
-            t.setLayer(mAnimationBoundsLayer, layer);
+            t.setLayer(leash, 0);
+            t.setLayer(mAnimationBoundsLayer, getAnimationLayer());
 
             // Reparent leash to animation bounds layer.
             t.reparent(leash, mAnimationBoundsLayer);
@@ -5992,10 +5899,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     boolean isSurfaceShowing() {
         return mLastSurfaceShowing;
-    }
-
-    boolean isInChangeTransition() {
-        return mTransitChangeLeash != null || AppTransition.isChangeTransit(mTransit);
     }
 
     void attachThumbnailAnimation() {
@@ -6134,31 +6037,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    /**
-     * @param cancel {@code true} if clearing the leash due to cancelling instead of transferring
-     *                            to another leash.
-     */
-    private void clearChangeLeash(Transaction t, boolean cancel) {
-        if (mTransitChangeLeash == null) {
-            return;
-        }
-        if (cancel) {
-            clearThumbnail();
-            SurfaceControl sc = getSurfaceControl();
-            SurfaceControl parentSc = getParentSurfaceControl();
-            // Don't reparent if surface is getting destroyed
-            if (parentSc != null && sc != null) {
-                t.reparent(sc, getParentSurfaceControl());
-            }
-        }
-        t.hide(mTransitChangeLeash);
-        t.remove(mTransitChangeLeash);
-        mTransitChangeLeash = null;
-        if (cancel) {
-            onAnimationLeashLost(t);
-        }
-    }
-
     void clearAnimatingFlags() {
         boolean wallpaperMightChange = false;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
@@ -6174,7 +6052,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void cancelAnimation() {
         cancelAnimationOnly();
         clearThumbnail();
-        clearChangeLeash(getPendingTransaction(), true /* cancel */);
+        mSurfaceFreezer.unfreeze(getPendingTransaction());
     }
 
     /**
@@ -6219,6 +6097,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mRemoteAnimationDefinition = null;
     }
 
+    @Override
     RemoteAnimationDefinition getRemoteAnimationDefinition() {
         return mRemoteAnimationDefinition;
     }
@@ -6679,8 +6558,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return;
             }
         }
-        final int prevWinMode = getWindowingMode();
-        mTmpPrevBounds.set(getBounds());
         super.onConfigurationChanged(newParentConfig);
 
         if (shouldUseSizeCompatMode()) {
@@ -6703,12 +6580,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mSizeCompatScale = 1f;
                 updateSurfacePosition();
             }
-        }
-
-        final int newWinMode = getWindowingMode();
-        if ((prevWinMode != newWinMode) && (mDisplayContent != null)
-                && shouldStartChangeTransition(prevWinMode, newWinMode)) {
-            initializeChangeTransition(mTmpPrevBounds);
         }
 
         // Configuration's equality doesn't consider seq so if only seq number changes in resolved
@@ -7595,6 +7466,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    @Override
     void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(HASH_CODE, System.identityHashCode(this));
