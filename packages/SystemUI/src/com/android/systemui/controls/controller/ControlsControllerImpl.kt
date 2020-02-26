@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.controller
 
+import android.app.ActivityManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -78,15 +79,15 @@ class ControlsControllerImpl @Inject constructor (
 
     private var userChanging: Boolean = true
 
-    private val contentResolver: ContentResolver
-        get() = context.contentResolver
-    override var available = Settings.Secure.getInt(
-            contentResolver, CONTROLS_AVAILABLE, DEFAULT_ENABLED) != 0
-        private set
-
-    private var currentUser = context.user
+    private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
     override val currentUserId
         get() = currentUser.identifier
+
+    private val contentResolver: ContentResolver
+        get() = context.contentResolver
+    override var available = Settings.Secure.getIntForUser(
+            contentResolver, CONTROLS_AVAILABLE, DEFAULT_ENABLED, currentUserId) != 0
+        private set
 
     private val persistenceWrapper = optionalWrapper.orElseGet {
         ControlsFavoritePersistenceWrapper(
@@ -106,7 +107,7 @@ class ControlsControllerImpl @Inject constructor (
                 userContext.filesDir, ControlsFavoritePersistenceWrapper.FILE_NAME)
         persistenceWrapper.changeFile(fileName)
         available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
-                /* default */ DEFAULT_ENABLED, newUser.identifier) != 0
+                DEFAULT_ENABLED, newUser.identifier) != 0
         synchronized(currentFavorites) {
             currentFavorites.clear()
         }
@@ -142,7 +143,7 @@ class ControlsControllerImpl @Inject constructor (
                 return
             }
             available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
-                    /* default */ DEFAULT_ENABLED, currentUserId) != 0
+                    DEFAULT_ENABLED, currentUserId) != 0
             synchronized(currentFavorites) {
                 currentFavorites.clear()
             }
