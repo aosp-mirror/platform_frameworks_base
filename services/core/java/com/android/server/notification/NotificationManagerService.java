@@ -51,6 +51,7 @@ import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.BIND_NOT_PERCEPTIBLE;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_CACHED;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
@@ -3448,16 +3449,10 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ConversationChannelWrapper> conversations =
                     mPreferencesHelper.getConversations(onlyImportant);
             for (ConversationChannelWrapper conversation : conversations) {
-                LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery()
-                        .setPackage(conversation.getPkg())
-                        .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED)
-                        .setShortcutIds(Arrays.asList(
-                                conversation.getNotificationChannel().getConversationId()));
-                List<ShortcutInfo> shortcuts = mLauncherAppsService.getShortcuts(
-                        query, UserHandle.of(UserHandle.getUserId(conversation.getUid())));
-                if (shortcuts != null && !shortcuts.isEmpty()) {
-                    conversation.setShortcutInfo(shortcuts.get(0));
-                }
+                conversation.setShortcutInfo(getShortcutInfo(
+                        conversation.getNotificationChannel().getConversationId(),
+                        conversation.getPkg(),
+                        UserHandle.of(UserHandle.getUserId(conversation.getUid()))));
             }
             return new ParceledListSlice<>(conversations);
         }
@@ -3477,16 +3472,10 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ConversationChannelWrapper> conversations =
                     mPreferencesHelper.getConversations(pkg, uid);
             for (ConversationChannelWrapper conversation : conversations) {
-                LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery()
-                        .setPackage(pkg)
-                        .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED)
-                        .setShortcutIds(Arrays.asList(
-                                conversation.getNotificationChannel().getConversationId()));
-                List<ShortcutInfo> shortcuts = mLauncherAppsService.getShortcuts(
-                        query, UserHandle.of(UserHandle.getUserId(uid)));
-                if (shortcuts != null && !shortcuts.isEmpty()) {
-                    conversation.setShortcutInfo(shortcuts.get(0));
-                }
+                conversation.setShortcutInfo(getShortcutInfo(
+                        conversation.getNotificationChannel().getConversationId(),
+                        pkg,
+                        UserHandle.of(UserHandle.getUserId(uid))));
             }
             return new ParceledListSlice<>(conversations);
         }
@@ -5646,6 +5635,8 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        r.setShortcutInfo(getShortcutInfo(notification.getShortcutId(), pkg, user));
+
         if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
                 r.getSbn().getOverrideGroupKey() != null)) {
             return;
@@ -5959,20 +5950,33 @@ public class NotificationManagerService extends SystemService {
         return false;
     }
 
+    private ShortcutInfo getShortcutInfo(String shortcutId, String packageName, UserHandle user) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (shortcutId == null || packageName == null || user == null) {
+                return null;
+            }
+            LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
+            if (packageName != null) {
+                query.setPackage(packageName);
+            }
+            if (shortcutId != null) {
+                query.setShortcutIds(Arrays.asList(shortcutId));
+            }
+            query.setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_CACHED);
+            List<ShortcutInfo> shortcuts = mLauncherAppsService.getShortcuts(query, user);
+            ShortcutInfo shortcutInfo = shortcuts != null && shortcuts.size() > 0
+                    ? shortcuts.get(0)
+                    : null;
+            return shortcutInfo;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     private boolean hasValidShortcutInfo(String shortcutId, String packageName, UserHandle user) {
-        LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
-        if (packageName != null) {
-            query.setPackage(packageName);
-        }
-        if (shortcutId != null) {
-            query.setShortcutIds(Arrays.asList(shortcutId));
-        }
-        query.setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED);
-        List<ShortcutInfo> shortcuts = mLauncherAppsService.getShortcuts(query, user);
-        ShortcutInfo shortcutInfo = shortcuts != null && shortcuts.size() > 0
-                ? shortcuts.get(0)
-                : null;
-        return shortcutInfo != null;
+        ShortcutInfo shortcutInfo = getShortcutInfo(shortcutId, packageName, user);
+        return shortcutInfo != null && shortcutInfo.isLongLived();
     }
 
     private void logBubbleError(String key, String failureMessage) {
