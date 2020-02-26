@@ -153,7 +153,6 @@ import android.widget.RemoteViews;
 import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 
-import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
@@ -360,7 +359,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         // Shell permisssions will override permissions of our app, so add all necessary permissions
-        // fo this test here:
+        // for this test here:
         InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
                 "android.permission.WRITE_DEVICE_CONFIG",
                 "android.permission.READ_DEVICE_CONFIG",
