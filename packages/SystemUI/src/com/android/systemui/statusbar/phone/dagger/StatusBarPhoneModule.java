@@ -79,6 +79,7 @@ import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -193,6 +194,7 @@ public interface StatusBarPhoneModule {
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
+            PhoneStatusBarPolicy phoneStatusBarPolicy,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
         return new StatusBar(
@@ -269,6 +271,7 @@ public interface StatusBarPhoneModule {
                 keyguardDismissUtil,
                 extensionController,
                 userInfoControllerImpl,
+                phoneStatusBarPolicy,
                 dismissCallbackRegistry,
                 statusBarTouchableRegionManager);
     }
