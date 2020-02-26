@@ -23,16 +23,13 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Service;
 import android.app.slice.Slice;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceControl;
@@ -76,35 +73,41 @@ public abstract class InlineSuggestionRenderService extends Service {
             return;
         }
 
-        final DisplayManager displayManager = getSystemService(DisplayManager.class);
-        final Display targetDisplay = displayManager.getDisplay(displayId);
-        if (targetDisplay == null) {
-            sendResult(callback, /*surface*/ null);
-            return;
-        }
-        final Context displayContext = createDisplayContext(targetDisplay);
-
-        final SurfaceControlViewHost host = new SurfaceControlViewHost(displayContext,
-                displayContext.getDisplay(), hostInputToken);
-        final SurfaceControl surface = host.getSurfacePackage().getSurfaceControl();
-
-        final View suggestionView = onRenderSuggestion(presentation, width, height);
-
-        final InlineSuggestionRoot suggestionRoot = new InlineSuggestionRoot(this, callback);
-        suggestionRoot.addView(suggestionView);
-        suggestionRoot.setOnClickListener((v) -> {
-            try {
-                callback.onAutofill();
-            } catch (RemoteException e) {
-                Log.w(TAG, "RemoteException calling onAutofill()");
+        // When we create the UI it should be for the IME display
+        updateDisplay(displayId);
+        try {
+            final View suggestionView = onRenderSuggestion(presentation, width, height);
+            if (suggestionView == null) {
+                try {
+                    callback.onError();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Null suggestion view returned by renderer");
+                }
+                return;
             }
-        });
 
-        WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(width, height,
-                        WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSPARENT);
-        host.addView(suggestionRoot, lp);
-        sendResult(callback, surface);
+            final InlineSuggestionRoot suggestionRoot = new InlineSuggestionRoot(this, callback);
+            suggestionRoot.addView(suggestionView);
+            WindowManager.LayoutParams lp =
+                    new WindowManager.LayoutParams(width, height,
+                            WindowManager.LayoutParams.TYPE_APPLICATION, 0,
+                            PixelFormat.TRANSPARENT);
+
+            final SurfaceControlViewHost host = new SurfaceControlViewHost(this, getDisplay(),
+                    hostInputToken);
+            host.addView(suggestionRoot, lp);
+            suggestionRoot.setOnClickListener((v) -> {
+                try {
+                    callback.onAutofill();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException calling onAutofill()");
+                }
+            });
+
+            sendResult(callback, host.getSurfacePackage().getSurfaceControl());
+        } finally {
+            updateDisplay(Display.DEFAULT_DISPLAY);
+        }
     }
 
     private void sendResult(@NonNull IInlineSuggestionUiCallback callback,
