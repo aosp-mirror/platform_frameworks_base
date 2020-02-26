@@ -1202,8 +1202,8 @@ class ActivityStack extends Task {
 
     @Override
     boolean isFocusable() {
-        return super.isFocusable() && !(inSplitScreenPrimaryWindowingMode()
-                && mRootWindowContainer.mIsDockMinimized);
+        // Special check for tile which isn't really in the hierarchy
+        return mTile != null ? mTile.isFocusable() : super.isFocusable();
     }
 
     boolean isTopActivityFocusable() {
