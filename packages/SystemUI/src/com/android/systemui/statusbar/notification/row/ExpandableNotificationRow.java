@@ -807,7 +807,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // TODO: Move inflation logic out of this call
         if (mIsChildInGroup != isChildInGroup) {
             mIsChildInGroup = isChildInGroup;
-            if (mIsLowPriority) {
+            if (!isRemoved() && mIsLowPriority) {
                 RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
                 params.setUseLowPriority(mIsLowPriority);
                 mRowContentBindStage.requestRebind(mEntry, null /* callback */);
@@ -1576,13 +1576,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // TODO: Move inflation logic out of this call and remove this method
         if (mNeedsRedaction != needsRedaction) {
             mNeedsRedaction = needsRedaction;
-            RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-            if (needsRedaction) {
-                params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
-            } else {
-                params.freeContentViews(FLAG_CONTENT_VIEW_PUBLIC);
+            if (!isRemoved()) {
+                RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
+                if (needsRedaction) {
+                    params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
+                } else {
+                    params.freeContentViews(FLAG_CONTENT_VIEW_PUBLIC);
+                }
+                mRowContentBindStage.requestRebind(mEntry, null /* callback */);
             }
-            mRowContentBindStage.requestRebind(mEntry, null /* callback */);
         }
     }
 
