@@ -21,7 +21,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:clickable="true"
-    android:background="@color/notification_guts_bg_color"
+    android:background="@color/notification_material_background_color"
     android:theme="@style/Theme.SystemUI">
 
     <RelativeLayout
