@@ -144,4 +144,49 @@ public class DisplayModeDirectorTest {
         Truth.assertThat(desiredSpecs.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
         Truth.assertThat(desiredSpecs.baseModeId).isEqualTo(60);
     }
+
+    @Test
+    public void testBrightnessHasLowerPriorityThanUser() {
+        assertTrue(Vote.PRIORITY_LOW_BRIGHTNESS < Vote.PRIORITY_APP_REQUEST_REFRESH_RATE);
+        assertTrue(Vote.PRIORITY_LOW_BRIGHTNESS < Vote.PRIORITY_APP_REQUEST_SIZE);
+
+        int displayId = 0;
+        DisplayModeDirector director = createDisplayModeDirectorWithDisplayFpsRange(60, 90);
+        SparseArray<Vote> votes = new SparseArray<>();
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(displayId, votes);
+        votes.put(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE, Vote.forRefreshRates(60, 90));
+        votes.put(Vote.PRIORITY_LOW_BRIGHTNESS, Vote.forRefreshRates(60, 60));
+        director.injectVotesByDisplay(votesByDisplay);
+        DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
+        Truth.assertThat(desiredSpecs.refreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
+        Truth.assertThat(desiredSpecs.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+
+        votes.clear();
+        votes.put(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE, Vote.forRefreshRates(60, 90));
+        votes.put(Vote.PRIORITY_LOW_BRIGHTNESS, Vote.forRefreshRates(90, 90));
+        director.injectVotesByDisplay(votesByDisplay);
+        desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
+        Truth.assertThat(desiredSpecs.refreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
+        Truth.assertThat(desiredSpecs.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+
+
+        votes.clear();
+        votes.put(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE, Vote.forRefreshRates(90, 90));
+        votes.put(Vote.PRIORITY_LOW_BRIGHTNESS, Vote.forRefreshRates(60, 60));
+        director.injectVotesByDisplay(votesByDisplay);
+        desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
+        Truth.assertThat(desiredSpecs.refreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
+        Truth.assertThat(desiredSpecs.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+
+        votes.clear();
+        votes.put(Vote.PRIORITY_APP_REQUEST_REFRESH_RATE, Vote.forRefreshRates(60, 60));
+        votes.put(Vote.PRIORITY_LOW_BRIGHTNESS, Vote.forRefreshRates(90, 90));
+        director.injectVotesByDisplay(votesByDisplay);
+        desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
+        Truth.assertThat(desiredSpecs.refreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(60);
+        Truth.assertThat(desiredSpecs.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
+
+
+    }
 }
