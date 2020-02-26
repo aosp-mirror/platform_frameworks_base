@@ -53,4 +53,14 @@ public abstract class AdbManagerInternal {
      * Returns the file that contains all of the ADB keys and their last used time.
      */
     public abstract File getAdbTempKeysFile();
+
+    /**
+     * Starts adbd for a transport.
+     */
+    public abstract void startAdbdForTransport(byte transportType);
+
+    /**
+     * Stops adbd for a transport.
+     */
+    public abstract void stopAdbdForTransport(byte transportType);
 }
