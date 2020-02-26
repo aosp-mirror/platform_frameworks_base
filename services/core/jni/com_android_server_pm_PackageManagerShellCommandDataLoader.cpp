@@ -16,21 +16,16 @@
 
 #define ATRACE_TAG ATRACE_TAG_ADB
 #define LOG_TAG "PackageManagerShellCommandDataLoader-jni"
-#include <android-base/logging.h>
-
 #include <android-base/file.h>
+#include <android-base/logging.h>
 #include <android-base/stringprintf.h>
 #include <android-base/unique_fd.h>
+#include <core_jni_helpers.h>
 #include <cutils/trace.h>
+#include <endian.h>
+#include <nativehelper/JNIHelp.h>
 #include <sys/eventfd.h>
 #include <sys/poll.h>
-
-#include <nativehelper/JNIHelp.h>
-
-#include <core_jni_helpers.h>
-#include <endian.h>
-
-#include "dataloader.h"
 
 #include <charconv>
 #include <chrono>
@@ -39,6 +34,8 @@
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
+
+#include "dataloader.h"
 
 namespace android {
 
@@ -681,7 +678,7 @@ private:
 
                 auto& writeFd = writeFds[fileIdx];
                 if (writeFd < 0) {
-                    writeFd = this->mIfs->openWrite(fileId);
+                    writeFd.reset(this->mIfs->openWrite(fileId));
                     if (writeFd < 0) {
                         ALOGE("Failed to open file %d for writing (%d). Aboring.", header.fileIdx,
                               -writeFd);
