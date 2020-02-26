@@ -4869,6 +4869,19 @@ public final class ActiveServices {
             return true;
         }
 
+        if (r.app != null) {
+            ActiveInstrumentation instr = r.app.getActiveInstrumentation();
+            if (instr != null && instr.mHasBackgroundActivityStartsPermission) {
+                return true;
+            }
+        }
+
+        final boolean hasAllowBackgroundActivityStartsToken = r.app != null
+                ? !r.app.mAllowBackgroundActivityStartsTokens.isEmpty() : false;
+        if (hasAllowBackgroundActivityStartsToken) {
+            return true;
+        }
+
         if (mAm.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
                 == PERMISSION_GRANTED) {
             return true;
