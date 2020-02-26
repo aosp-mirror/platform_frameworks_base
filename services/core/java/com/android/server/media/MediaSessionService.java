@@ -774,7 +774,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 Constructor constructor = customDispatcherClass.getDeclaredConstructor();
                 mCustomMediaKeyDispatcher = (MediaKeyDispatcher) constructor.newInstance();
                 mGetSessionForKeyEventMethod = customDispatcherClass.getDeclaredMethod(
-                        "getSessionForKeyEvent", KeyEvent.class, boolean.class);
+                        "getSessionForKeyEvent", KeyEvent.class, int.class, boolean.class);
             }
         } catch (ClassNotFoundException | InstantiationException | InvocationTargetException
                 | IllegalAccessException | NoSuchMethodException e) {
@@ -2124,7 +2124,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             if (mCustomMediaKeyDispatcher != null && mGetSessionForKeyEventMethod != null) {
                 try {
                     Object tokenObject = mGetSessionForKeyEventMethod.invoke(
-                            mCustomMediaKeyDispatcher, keyEvent, asSystemService);
+                            mCustomMediaKeyDispatcher, keyEvent, uid, asSystemService);
                     if (tokenObject != null) {
                         session = getMediaSessionRecordLocked((MediaSession.Token) tokenObject);
                     }
