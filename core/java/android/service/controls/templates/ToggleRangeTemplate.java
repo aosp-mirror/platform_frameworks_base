@@ -18,9 +18,16 @@ package android.service.controls.templates;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
+import android.service.controls.Control;
 
 import com.android.internal.util.Preconditions;
 
+/**
+ * A template for a {@link Control} supporting toggling and a range.
+ *
+ * @see ToggleTemplate
+ * @see RangeTemplate
+ */
 public final class ToggleRangeTemplate extends ControlTemplate {
 
     private static final @TemplateType int TYPE = TYPE_TOGGLE_RANGE;
@@ -40,6 +47,12 @@ public final class ToggleRangeTemplate extends ControlTemplate {
         mRangeTemplate = new RangeTemplate(b.getBundle(KEY_RANGE));
     }
 
+    /**
+     * Constructs a new {@link ToggleRangeTemplate}.
+     * @param templateId the identifier for this template.
+     * @param button a {@link ControlButton} to use for the toggle interface
+     * @param range a {@link RangeTemplate} to use for the range interface
+     */
     public ToggleRangeTemplate(@NonNull String templateId,
             @NonNull ControlButton button,
             @NonNull RangeTemplate range) {
@@ -50,6 +63,14 @@ public final class ToggleRangeTemplate extends ControlTemplate {
         mRangeTemplate = range;
     }
 
+    /**
+     * Constructs a new {@link ToggleRangeTemplate}.
+     * @param templateId the identifier for this template.
+     * @param checked true if the toggle should be rendered as active.
+     * @param actionDescription action description for the button.
+     * @param range  {@link RangeTemplate} to use for the range interface
+     * @see ControlButton
+     */
     public ToggleRangeTemplate(@NonNull String templateId,
             boolean checked,
             @NonNull CharSequence actionDescription,
@@ -86,6 +107,9 @@ public final class ToggleRangeTemplate extends ControlTemplate {
         return mControlButton.getActionDescription();
     }
 
+    /**
+     * @return {@link ControlTemplate#TYPE_TOGGLE_RANGE}
+     */
     @Override
     public int getTemplateType() {
         return TYPE;
