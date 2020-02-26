@@ -883,7 +883,7 @@ public class DreamService extends Service implements Window.Callback {
      * </p>
      */
     public void onWakeUp() {
-        mActivity.finishAndRemoveTask();
+        finish();
     }
 
     /** {@inheritDoc} */
@@ -904,13 +904,14 @@ public class DreamService extends Service implements Window.Callback {
     public final void finish() {
         if (mDebug) Slog.v(TAG, "finish(): mFinished=" + mFinished);
 
-        if (mActivity == null) {
+        if (mActivity != null) {
+            if (!mActivity.isFinishing()) {
+                // In case the activity is not finished yet, do it now.
+                mActivity.finishAndRemoveTask();
+                return;
+            }
+        } else if (!mWindowless) {
             Slog.w(TAG, "Finish was called before the dream was attached.");
-        } else if (!mActivity.isFinishing()) {
-            // In case the activity is not finished yet, do it now. This can happen if someone calls
-            // finish() directly, without going through wakeUp().
-            mActivity.finishAndRemoveTask();
-            return;
         }
 
         if (!mFinished) {
@@ -1010,7 +1011,7 @@ public class DreamService extends Service implements Window.Callback {
      * @param started A callback that will be invoked once onDreamingStarted has completed.
      */
     private void attach(IBinder dreamToken, boolean canDoze, IRemoteCallback started) {
-        if (mActivity != null) {
+        if (mDreamToken != null) {
             Slog.e(TAG, "attach() called when dream with token=" + mDreamToken
                     + " already attached");
             return;
