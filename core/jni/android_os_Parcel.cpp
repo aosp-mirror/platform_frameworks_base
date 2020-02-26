@@ -625,8 +625,8 @@ static void android_os_Parcel_enforceInterface(JNIEnv* env, jclass clazz, jlong 
             IPCThreadState* threadState = IPCThreadState::self();
             const int32_t oldPolicy = threadState->getStrictModePolicy();
             const bool isValid = parcel->enforceInterface(
-                String16(reinterpret_cast<const char16_t*>(str),
-                         env->GetStringLength(name)),
+                reinterpret_cast<const char16_t*>(str),
+                env->GetStringLength(name),
                 threadState);
             env->ReleaseStringCritical(name, str);
             if (isValid) {
