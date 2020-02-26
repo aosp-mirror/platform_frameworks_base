@@ -275,8 +275,9 @@ class ActivityMetricsLogger {
         }
 
         /** @return {@code true} if the activity matches a launched activity in this transition. */
-        boolean contains(ActivityRecord r) {
-            return r == mLastLaunchedActivity || mPendingDrawActivities.contains(r);
+        boolean contains(WindowContainer wc) {
+            final ActivityRecord r = AppTransitionController.getAppFromContainer(wc);
+            return r != null && (r == mLastLaunchedActivity || mPendingDrawActivities.contains(r));
         }
 
         /** Called when the activity is drawn or won't be drawn. */
@@ -435,10 +436,10 @@ class ActivityMetricsLogger {
 
     /** @return Non-null {@link TransitionInfo} if the activity is found in an active transition. */
     @Nullable
-    private TransitionInfo getActiveTransitionInfo(ActivityRecord r) {
+    private TransitionInfo getActiveTransitionInfo(WindowContainer wc) {
         for (int i = mTransitionInfoList.size() - 1; i >= 0; i--) {
             final TransitionInfo info = mTransitionInfoList.get(i);
-            if (info.contains(r)) {
+            if (info.contains(wc)) {
                 return info;
             }
         }
@@ -623,19 +624,19 @@ class ActivityMetricsLogger {
      * @param activityToReason A map from activity to a reason integer, which must be on of
      *                         ActivityTaskManagerInternal.APP_TRANSITION_* reasons.
      */
-    void notifyTransitionStarting(ArrayMap<ActivityRecord, Integer> activityToReason) {
+    void notifyTransitionStarting(ArrayMap<WindowContainer, Integer> activityToReason) {
         if (DEBUG_METRICS) Slog.i(TAG, "notifyTransitionStarting");
 
         final long timestampNs = SystemClock.elapsedRealtimeNanos();
         for (int index = activityToReason.size() - 1; index >= 0; index--) {
-            final ActivityRecord r = activityToReason.keyAt(index);
-            final TransitionInfo info = getActiveTransitionInfo(r);
+            final WindowContainer wc = activityToReason.keyAt(index);
+            final TransitionInfo info = getActiveTransitionInfo(wc);
             if (info == null || info.mLoggedTransitionStarting) {
                 // Ignore any subsequent notifyTransitionStarting.
                 continue;
             }
             if (DEBUG_METRICS) {
-                Slog.i(TAG, "notifyTransitionStarting activity=" + r + " info=" + info);
+                Slog.i(TAG, "notifyTransitionStarting activity=" + wc + " info=" + info);
             }
 
             info.mCurrentTransitionDelayMs = info.calculateDelay(timestampNs);
