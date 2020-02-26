@@ -50,7 +50,6 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DeviceStateCache;
 import android.app.admin.PasswordMetrics;
-import android.app.backup.BackupManager;
 import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
@@ -112,10 +111,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
@@ -701,7 +698,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         // Serial number is never reusued, so we can use it as a distinguisher for user Id reuse.
         int serialNumber = mUserManager.getUserSerialNumber(userId);
 
-        int storedSerialNumber = getIntUnchecked(USER_SERIAL_NUMBER_KEY, -1, userId);
+        int storedSerialNumber = mStorage.getInt(USER_SERIAL_NUMBER_KEY, -1, userId);
         if (storedSerialNumber != serialNumber) {
             // If LockSettingsStorage does not have a copy of the serial number, it could be either
             // this is a user created before the serial number recording logic is introduced, or
@@ -710,7 +707,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (storedSerialNumber != -1) {
                 removeUser(userId, /* unknownUser */ true);
             }
-            setIntUnchecked(USER_SERIAL_NUMBER_KEY, serialNumber, userId);
+            mStorage.setInt(USER_SERIAL_NUMBER_KEY, serialNumber, userId);
         }
     }
 
@@ -1069,7 +1066,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private boolean getSeparateProfileChallengeEnabledInternal(int userId) {
         synchronized (mSeparateChallengeLock) {
-            return getBooleanUnchecked(SEPARATE_PROFILE_CHALLENGE_KEY, false, userId);
+            return mStorage.getBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, false, userId);
         }
     }
 
@@ -1122,94 +1119,49 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public void setBoolean(String key, boolean value, int userId) {
         checkWritePermission(userId);
-        setStringUnchecked(key, userId, value ? "1" : "0");
+        mStorage.setBoolean(key, value, userId);
     }
 
     @Override
     public void setLong(String key, long value, int userId) {
         checkWritePermission(userId);
-        setLongUnchecked(key, value, userId);
-    }
-
-    private void setLongUnchecked(String key, long value, int userId) {
-        setStringUnchecked(key, userId, Long.toString(value));
-    }
-
-    private void setIntUnchecked(String key, int value, int userId) {
-        setStringUnchecked(key, userId, Integer.toString(value));
+        mStorage.setLong(key, value, userId);
     }
 
     @Override
     public void setString(String key, String value, int userId) {
         checkWritePermission(userId);
-        setStringUnchecked(key, userId, value);
-    }
-
-    private void setStringUnchecked(String key, int userId, String value) {
-        Preconditions.checkArgument(userId != USER_FRP, "cannot store lock settings for FRP user");
-
-        mStorage.writeKeyValue(key, value, userId);
-        if (ArrayUtils.contains(SETTINGS_TO_BACKUP, key)) {
-            BackupManager.dataChanged("com.android.providers.settings");
-        }
+        mStorage.setString(key, value, userId);
     }
 
     @Override
     public boolean getBoolean(String key, boolean defaultValue, int userId) {
         checkReadPermission(key, userId);
-        return getBooleanUnchecked(key, defaultValue, userId);
-    }
-
-    private boolean getBooleanUnchecked(String key, boolean defaultValue, int userId) {
-        String value = getStringUnchecked(key, null, userId);
-        return TextUtils.isEmpty(value) ?
-                defaultValue : (value.equals("1") || value.equals("true"));
+        if (Settings.Secure.LOCK_PATTERN_ENABLED.equals(key)) {
+            return getCredentialTypeInternal(userId) == CREDENTIAL_TYPE_PATTERN;
+        }
+        return mStorage.getBoolean(key, defaultValue, userId);
     }
 
     @Override
     public long getLong(String key, long defaultValue, int userId) {
         checkReadPermission(key, userId);
-        return getLongUnchecked(key, defaultValue, userId);
-    }
-
-    private long getLongUnchecked(String key, long defaultValue, int userId) {
-        String value = getStringUnchecked(key, null, userId);
-        return TextUtils.isEmpty(value) ? defaultValue : Long.parseLong(value);
-    }
-
-    private int getIntUnchecked(String key, int defaultValue, int userId) {
-        String value = getStringUnchecked(key, null, userId);
-        return TextUtils.isEmpty(value) ? defaultValue : Integer.parseInt(value);
+        return mStorage.getLong(key, defaultValue, userId);
     }
 
     @Override
     public String getString(String key, String defaultValue, int userId) {
         checkReadPermission(key, userId);
-        return getStringUnchecked(key, defaultValue, userId);
-    }
-
-    private String getStringUnchecked(String key, String defaultValue, int userId) {
-        if (Settings.Secure.LOCK_PATTERN_ENABLED.equals(key)) {
-            return getCredentialTypeInternal(userId) == CREDENTIAL_TYPE_PATTERN ? "1" : "0";
-        }
-        if (userId == USER_FRP) {
-            return null;
-        }
-
-        if (LockPatternUtils.LEGACY_LOCK_PATTERN_ENABLED.equals(key)) {
-            key = Settings.Secure.LOCK_PATTERN_ENABLED;
-        }
-
-        return mStorage.readKeyValue(key, defaultValue, userId);
+        return mStorage.getString(key, defaultValue, userId);
     }
 
     private void setKeyguardStoredQuality(int quality, int userId) {
         if (DEBUG) Slog.d(TAG, "setKeyguardStoredQuality: user=" + userId + " quality=" + quality);
-        setLongUnchecked(LockPatternUtils.PASSWORD_TYPE_KEY, quality, userId);
+        mStorage.setLong(LockPatternUtils.PASSWORD_TYPE_KEY, quality, userId);
     }
 
     private int getKeyguardStoredQuality(int userId) {
-        return (int) getLongUnchecked(LockPatternUtils.PASSWORD_TYPE_KEY,
+        return (int) mStorage.getLong(LockPatternUtils.PASSWORD_TYPE_KEY,
                 DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userId);
     }
 
@@ -2491,13 +2443,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             LockPatternUtils.PASSWORD_HISTORY_KEY,
             LockPatternUtils.PASSWORD_TYPE_KEY,
             SEPARATE_PROFILE_CHALLENGE_KEY
-    };
-
-    private static final String[] SETTINGS_TO_BACKUP = new String[] {
-            Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
-            Secure.LOCK_SCREEN_OWNER_INFO,
-            Secure.LOCK_PATTERN_VISIBLE,
-            LockPatternUtils.LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS
     };
 
     private class GateKeeperDiedRecipient implements IBinder.DeathRecipient {
