@@ -164,7 +164,7 @@ public final class Prefs {
         get(context).unregisterOnSharedPreferenceChangeListener(listener);
     }
 
-    private static SharedPreferences get(Context context) {
+    public static SharedPreferences get(Context context) {
         return context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
     }
 }
