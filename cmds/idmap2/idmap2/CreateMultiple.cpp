@@ -31,6 +31,7 @@
 #include "idmap2/Idmap.h"
 #include "idmap2/Policies.h"
 #include "idmap2/SysTrace.h"
+#include "Commands.h"
 
 using android::ApkAssets;
 using android::base::StringPrintf;
@@ -105,32 +106,34 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
       continue;
     }
 
-    const std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
-    if (!overlay_apk) {
-      LOG(WARNING) << "failed to load apk " << overlay_apk_path.c_str();
-      continue;
-    }
+    if (!Verify(std::vector<std::string>({"--idmap-path", idmap_path}))) {
+      const std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
+      if (!overlay_apk) {
+        LOG(WARNING) << "failed to load apk " << overlay_apk_path.c_str();
+        continue;
+      }
 
-    const auto idmap =
-        Idmap::FromApkAssets(*target_apk, *overlay_apk, fulfilled_policies, !ignore_overlayable);
-    if (!idmap) {
-      LOG(WARNING) << "failed to create idmap";
-      continue;
-    }
+      const auto idmap =
+          Idmap::FromApkAssets(*target_apk, *overlay_apk, fulfilled_policies, !ignore_overlayable);
+      if (!idmap) {
+        LOG(WARNING) << "failed to create idmap";
+        continue;
+      }
 
-    umask(kIdmapFilePermissionMask);
-    std::ofstream fout(idmap_path);
-    if (fout.fail()) {
-      LOG(WARNING) << "failed to open idmap path " << idmap_path.c_str();
-      continue;
-    }
+      umask(kIdmapFilePermissionMask);
+      std::ofstream fout(idmap_path);
+      if (fout.fail()) {
+        LOG(WARNING) << "failed to open idmap path " << idmap_path.c_str();
+        continue;
+      }
 
-    BinaryStreamVisitor visitor(fout);
-    (*idmap)->accept(&visitor);
-    fout.close();
-    if (fout.fail()) {
-      LOG(WARNING) << "failed to write to idmap path %s" << idmap_path.c_str();
-      continue;
+      BinaryStreamVisitor visitor(fout);
+      (*idmap)->accept(&visitor);
+      fout.close();
+      if (fout.fail()) {
+        LOG(WARNING) << "failed to write to idmap path %s" << idmap_path.c_str();
+        continue;
+      }
     }
 
     idmap_paths.emplace_back(idmap_path);
