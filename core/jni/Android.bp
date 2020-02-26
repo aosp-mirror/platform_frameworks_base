@@ -241,7 +241,6 @@ cc_library_shared {
         "libseccomp_policy",
         "libgrallocusage",
         "libscrypt_static",
-        "libstatssocket",
     ],
 
     shared_libs: [
@@ -305,6 +304,7 @@ cc_library_shared {
         "libdl",
         "libdl_android",
         "libstatslog",
+        "libstatssocket",
         "libtimeinstate",
         "server_configurable_flags",
     ],
