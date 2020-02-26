@@ -57,6 +57,9 @@ public abstract class ControlTemplate {
         }
     };
 
+    /**
+     * Object returned when there is an unparcelling error.
+     */
     public static final @NonNull ControlTemplate ERROR_TEMPLATE = new ControlTemplate("") {
         @Override
         public int getTemplateType() {
@@ -80,6 +83,9 @@ public abstract class ControlTemplate {
     })
     public @interface TemplateType {}
 
+    /**
+     * Type identifier of {@link #ERROR_TEMPLATE}.
+     */
     public static final @TemplateType int TYPE_ERROR = -1;
 
     /**
@@ -102,10 +108,19 @@ public abstract class ControlTemplate {
      */
     public static final @TemplateType int TYPE_THUMBNAIL = 3;
 
+    /**
+     * Type identifier of {@link ToggleRangeTemplate}.
+     */
     public static final @TemplateType int TYPE_TOGGLE_RANGE = 6;
 
+    /**
+     * Type identifier of {@link TemperatureControlTemplate}.
+     */
     public static final @TemplateType int TYPE_TEMPERATURE = 7;
 
+    /**
+     * Type identifier of {@link StatelessTemplate}.
+     */
     public static final @TemplateType int TYPE_STATELESS = 8;
 
     private @NonNull final String mTemplateId;
