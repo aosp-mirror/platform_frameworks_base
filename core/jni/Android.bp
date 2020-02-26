@@ -312,5 +312,8 @@ cc_library_shared {
                 "android_util_FileObserver.cpp",
             ],
         },
+        windows: {
+            enabled: true,
+        },
     },
 }
