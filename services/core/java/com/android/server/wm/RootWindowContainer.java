@@ -2149,19 +2149,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mService.continueWindowLayout();
         }
 
-        // TODO(b/146594635): Remove all PIP animation code from WM once SysUI handles animation.
-        // Notify the pinned stack controller to prepare the PiP animation, expect callback
-        // delivered from SystemUI to WM to start the animation. Unless we are using
-        // the TaskOrganizer in which case the animation will be entirely handled
-        // on that side.
-        if (mService.mTaskOrganizerController.getTaskOrganizer(WINDOWING_MODE_PINNED)
-                == null) {
-            final PinnedStackController pinnedStackController =
-                display.mDisplayContent.getPinnedStackController();
-            pinnedStackController.prepareAnimation(sourceHintBounds, aspectRatio,
-                    null /* stackBounds */);
-        }
-
         // TODO: revisit the following statement after the animation is moved from WM to SysUI.
         // Update the visibility of all activities after the they have been reparented to the new
         // stack.  This MUST run after the animation above is scheduled to ensure that the windows

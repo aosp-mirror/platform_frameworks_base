@@ -403,7 +403,7 @@ class InstantAppRegistry {
 
     @GuardedBy("mService.mLock")
     public void grantInstantAccessLPw(@UserIdInt int userId, @Nullable Intent intent,
-            int instantAppId, int targetAppId) {
+            int recipientUid, int instantAppId) {
         if (mInstalledInstantAppUids == null) {
             return;     // no instant apps installed; no need to grant
         }
@@ -411,7 +411,7 @@ class InstantAppRegistry {
         if (instantAppList == null || !instantAppList.get(instantAppId)) {
             return;     // instant app id isn't installed; no need to grant
         }
-        if (instantAppList.get(targetAppId)) {
+        if (instantAppList.get(recipientUid)) {
             return;     // target app id is an instant app; no need to grant
         }
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
@@ -428,10 +428,10 @@ class InstantAppRegistry {
             targetAppList = new SparseArray<>();
             mInstantGrants.put(userId, targetAppList);
         }
-        SparseBooleanArray instantGrantList = targetAppList.get(targetAppId);
+        SparseBooleanArray instantGrantList = targetAppList.get(recipientUid);
         if (instantGrantList == null) {
             instantGrantList = new SparseBooleanArray();
-            targetAppList.put(targetAppId, instantGrantList);
+            targetAppList.put(recipientUid, instantGrantList);
         }
         instantGrantList.put(instantAppId, true /*granted*/);
     }

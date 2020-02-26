@@ -3845,13 +3845,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mDisplayContent.setLayoutNeeded();
                 }
                 mWmService.mH.obtainMessage(H.NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
-
-                // Notify the pinned stack upon all windows drawn. If there was an animation in
-                // progress then this signal will resume that animation.
-                final ActivityStack pinnedStack = mDisplayContent.getRootPinnedTask();
-                if (pinnedStack != null) {
-                    pinnedStack.onAllWindowsDrawn();
-                }
             }
         }
     }
@@ -6755,18 +6748,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
         final ActivityStack pinnedStack = mDisplayContent.getRootPinnedTask();
         if (pinnedStack == null) return;
-        final Rect stackBounds;
-        if (pinnedStack.lastAnimatingBoundsWasToFullscreen()) {
-            // We are animating the bounds, use the pre-animation bounds to save the snap
-            // fraction
-            stackBounds = pinnedStack.mPreAnimationBounds;
-        } else {
-            // We skip the animation if the fullscreen configuration is not compatible, so
-            // use the current bounds to calculate the saved snap fraction instead
-            // (see PinnedActivityStack.skipResizeAnimation())
-            stackBounds = mTmpRect;
-            pinnedStack.getBounds(stackBounds);
-        }
+        final Rect stackBounds = mTmpRect;
+        pinnedStack.getBounds(stackBounds);
         mDisplayContent.mPinnedStackControllerLocked.saveReentryBounds(
                 mActivityComponent, stackBounds);
     }

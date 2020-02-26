@@ -41,8 +41,7 @@ aidl_interface {
 
 java_library {
     name: "framework-tethering",
-    // TODO (b/146757305): change to module_app_current once available
-    sdk_version: "core_platform",
+    sdk_version: "module_current",
     srcs: [
         "src/android/net/TetheredClient.java",
         "src/android/net/TetheringManager.java",
@@ -56,7 +55,6 @@ java_library {
 
     libs: [
         "framework-annotations-lib",
-        "android_system_stubs_current",
     ],
 
     hostdex: true, // for hiddenapi check

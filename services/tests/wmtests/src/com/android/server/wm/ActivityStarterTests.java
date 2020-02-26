@@ -31,7 +31,6 @@ import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
@@ -50,7 +49,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -136,39 +134,6 @@ public class ActivityStarterTests extends ActivityTestsBase {
         clearInvocations(mActivityMetricsLogger);
         mStarter = new ActivityStarter(mController, mService, mService.mStackSupervisor,
                 mock(ActivityStartInterceptor.class));
-    }
-
-    @Test
-    public void testUpdateLaunchBounds() {
-        // When in a non-resizeable stack, the task bounds should be updated.
-        final Task task = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(mService.mRootWindowContainer.getDefaultDisplay().createStack(
-                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
-                .build();
-        final Rect bounds = new Rect(10, 10, 100, 100);
-
-        mStarter.updateBounds(task, bounds);
-        assertEquals(bounds, task.getRequestedOverrideBounds());
-        assertEquals(new Rect(), task.getStack().getRequestedOverrideBounds());
-
-        // When in a resizeable stack, the stack bounds should be updated as well.
-        final Task task2 = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(mService.mRootWindowContainer.getDefaultDisplay().createStack(
-                        WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */))
-                .build();
-        assertThat((Object) task2.getStack()).isInstanceOf(ActivityStack.class);
-        mStarter.updateBounds(task2, bounds);
-
-        verify(mService, times(1)).animateResizePinnedStack(eq(task2.getRootTaskId()),
-                eq(bounds), anyInt());
-
-        // In the case of no animation, the stack and task bounds should be set immediately.
-        if (!ANIMATE) {
-            assertEquals(bounds, task2.getStack().getRequestedOverrideBounds());
-            assertEquals(bounds, task2.getRequestedOverrideBounds());
-        } else {
-            assertEquals(new Rect(), task2.getRequestedOverrideBounds());
-        }
     }
 
     @Test
@@ -383,7 +348,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // Never review permissions
         doReturn(false).when(mMockPackageManager).isPermissionsReviewRequired(any(), anyInt());
         doNothing().when(mMockPackageManager).grantImplicitAccess(
-                anyInt(), any(), anyInt(), anyInt());
+                anyInt(), any(), anyInt(), anyInt(), anyBoolean());
         doNothing().when(mMockPackageManager).notifyPackageUse(anyString(), anyInt());
 
         final Intent intent = new Intent();

@@ -1114,20 +1114,22 @@ public final class MediaParser {
     static {
         // Using a LinkedHashMap to keep the insertion order when iterating over the keys.
         LinkedHashMap<String, ExtractorFactory> extractorFactoriesByName = new LinkedHashMap<>();
-        extractorFactoriesByName.put("exo.Ac3Parser", Ac3Extractor::new);
-        extractorFactoriesByName.put("exo.Ac4Parser", Ac4Extractor::new);
-        extractorFactoriesByName.put("exo.AdtsParser", AdtsExtractor::new);
-        extractorFactoriesByName.put("exo.AmrParser", AmrExtractor::new);
-        extractorFactoriesByName.put("exo.FlacParser", FlacExtractor::new);
-        extractorFactoriesByName.put("exo.FlvParser", FlvExtractor::new);
-        extractorFactoriesByName.put("exo.FragmentedMp4Parser", FragmentedMp4Extractor::new);
+        // Parsers are ordered to match ExoPlayer's DefaultExtractorsFactory extractor ordering,
+        // which in turn aims to minimize the chances of incorrect extractor selections.
         extractorFactoriesByName.put("exo.MatroskaParser", MatroskaExtractor::new);
-        extractorFactoriesByName.put("exo.Mp3Parser", Mp3Extractor::new);
+        extractorFactoriesByName.put("exo.FragmentedMp4Parser", FragmentedMp4Extractor::new);
         extractorFactoriesByName.put("exo.Mp4Parser", Mp4Extractor::new);
+        extractorFactoriesByName.put("exo.Mp3Parser", Mp3Extractor::new);
+        extractorFactoriesByName.put("exo.AdtsParser", AdtsExtractor::new);
+        extractorFactoriesByName.put("exo.Ac3Parser", Ac3Extractor::new);
+        extractorFactoriesByName.put("exo.TsParser", TsExtractor::new);
+        extractorFactoriesByName.put("exo.FlvParser", FlvExtractor::new);
         extractorFactoriesByName.put("exo.OggParser", OggExtractor::new);
         extractorFactoriesByName.put("exo.PsParser", PsExtractor::new);
-        extractorFactoriesByName.put("exo.TsParser", TsExtractor::new);
         extractorFactoriesByName.put("exo.WavParser", WavExtractor::new);
+        extractorFactoriesByName.put("exo.AmrParser", AmrExtractor::new);
+        extractorFactoriesByName.put("exo.Ac4Parser", Ac4Extractor::new);
+        extractorFactoriesByName.put("exo.FlacParser", FlacExtractor::new);
         EXTRACTOR_FACTORIES_BY_NAME = Collections.unmodifiableMap(extractorFactoriesByName);
 
         HashMap<String, Class> expectedTypeByParameterName = new HashMap<>();

@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.PackageManager;
@@ -272,6 +273,9 @@ public class ComponentResolver {
             return null;
         }
         List<ProviderInfo> providerList = null;
+
+        // Map from a package name to the corresponding app info.
+        ArrayMap<String, ApplicationInfo> appInfos = null;
         synchronized (mLock) {
             for (int i = mProviders.mProviders.size() - 1; i >= 0; --i) {
                 final ParsedProvider p = mProviders.mProviders.valueAt(i);
@@ -300,8 +304,29 @@ public class ComponentResolver {
                         && (p.getMetaData() == null || !p.getMetaData().containsKey(metaDataKey))) {
                     continue;
                 }
+
+                // Make sure we have AppInfo for this provider.
+                final PackageUserState state = ps.readUserState(userId);
+                ApplicationInfo appInfo =
+                        (appInfos == null) ? null : appInfos.get(pkg.getPackageName());
+                if (appInfo == null) {
+                    appInfo = PackageInfoUtils.generateApplicationInfo(
+                            pkg, flags, state, userId, ps);
+                    if (appInfo == null) {
+                        // In this case, we should avoid calling generateApplicationInfo() for
+                        // the same package in subsequent iterations, but appInfo shouldn't be null
+                        // here, so we don't bother.
+                        continue;
+                    }
+                    if (appInfos == null) {
+                        appInfos = new ArrayMap<>(4);
+                    }
+                    appInfos.put(pkg.getPackageName(), appInfo);
+                }
+                // At this point, appInfo != null.
+
                 final ProviderInfo info = PackageInfoUtils.generateProviderInfo(
-                        pkg, p, flags, ps.readUserState(userId), userId, ps);
+                        pkg, p, flags, state, appInfo, userId, ps);
                 if (info == null) {
                     continue;
                 }

@@ -27,8 +27,6 @@
         android:gravity="center_vertical"
         android:clickable="true"
         android:background="@drawable/ripple_drawable"
-        android:clipChildren="false"
-        android:clipToPadding="false"
         sysui:regularTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher"
         sysui:activatedTextAppearance="@style/TextAppearance.StatusBar.Expanded.UserSwitcher.Activated">
     <TextView android:id="@+id/user_name"
