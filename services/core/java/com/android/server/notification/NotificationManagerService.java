@@ -8575,7 +8575,8 @@ public class NotificationManagerService extends SystemService {
                     record.getSmartReplies(),
                     record.canBubble(),
                     record.isInterruptive(),
-                    record.isConversation()
+                    record.isConversation(),
+                    record.getShortcutInfo()
             );
             rankings.add(ranking);
         }

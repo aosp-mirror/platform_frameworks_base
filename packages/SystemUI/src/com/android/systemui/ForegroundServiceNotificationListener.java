@@ -71,7 +71,8 @@ public class ForegroundServiceNotificationListener {
             public void onEntryRemoved(
                     NotificationEntry entry,
                     NotificationVisibility visibility,
-                    boolean removedByUser) {
+                    boolean removedByUser,
+                    int reason) {
                 removeNotification(entry.getSbn());
             }
         });
