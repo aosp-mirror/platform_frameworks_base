@@ -388,11 +388,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     // surfaces needs to be done immediately.
                     mWindowManager.executeAppTransition();
 
-                    if (targetStack.getTile() != null) {
+                    final Task rootTask = targetStack.getRootTask();
+                    if (rootTask.isOrganized()) {
                         // Client state may have changed during the recents animation, so force
                         // send task info so the client can synchronize its state.
                         mService.mTaskOrganizerController.dispatchTaskInfoChanged(
-                                targetStack.mTile, true /* force */);
+                                rootTask, true /* force */);
                     }
                 } catch (Exception e) {
                     Slog.e(TAG, "Failed to clean up recents activity", e);
