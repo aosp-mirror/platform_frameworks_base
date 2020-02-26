@@ -178,6 +178,8 @@ public class DisplayModeDirector {
             float maxRefreshRate = Float.POSITIVE_INFINITY;
             int lowestConsideredPriority = Vote.MIN_PRIORITY;
             while (lowestConsideredPriority <= Vote.MAX_PRIORITY) {
+                minRefreshRate = 0f;
+                maxRefreshRate = Float.POSITIVE_INFINITY;
                 int height = Vote.INVALID_SIZE;
                 int width = Vote.INVALID_SIZE;
 
