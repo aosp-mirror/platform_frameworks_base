@@ -51,6 +51,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
@@ -203,16 +204,13 @@ public class NotificationRecordTest extends UiServiceTestCase {
         return new StatusBarNotification(pkg, pkg, id1, tag1, uid, uid, n, mUser, null, uid);
     }
 
-    private StatusBarNotification getMessagingStyleNotification(@Nullable String shortcutId) {
+    private StatusBarNotification getMessagingStyleNotification() {
         final Builder builder = new Builder(mMockContext)
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
 
         Person person = new Person.Builder().setName("Bob").build();
         builder.setStyle(new Notification.MessagingStyle(person));
-        if (shortcutId != null) {
-            builder.setShortcutId(shortcutId);
-        }
 
         Notification n = builder.build();
         return new StatusBarNotification(pkg, pkg, id1, tag1, uid, uid, n, mUser, null, uid);
@@ -1122,16 +1120,18 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
     @Test
     public void testIsConversation() {
-        StatusBarNotification sbn = getMessagingStyleNotification("test_shortcut_id");
+        StatusBarNotification sbn = getMessagingStyleNotification();
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setShortcutInfo(mock(ShortcutInfo.class));
 
         assertTrue(record.isConversation());
     }
 
     @Test
-    public void testIsConversation_nullShortcutId() {
-        StatusBarNotification sbn = getMessagingStyleNotification(null);
+    public void testIsConversation_nullShortcut() {
+        StatusBarNotification sbn = getMessagingStyleNotification();
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setShortcutInfo(null);
 
         assertFalse(record.isConversation());
     }
@@ -1140,25 +1140,28 @@ public class NotificationRecordTest extends UiServiceTestCase {
     public void testIsConversation_bypassShortcutFlagEnabled() {
         Settings.Global.putString(mContentResolver,
                 FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
-        StatusBarNotification sbn = getMessagingStyleNotification(null);
+        StatusBarNotification sbn = getMessagingStyleNotification();
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setShortcutInfo(null);
 
         assertTrue(record.isConversation());
     }
 
     @Test
     public void testIsConversation_channelDemoted() {
-        StatusBarNotification sbn = getMessagingStyleNotification("test_shortcut_id");
+        StatusBarNotification sbn = getMessagingStyleNotification();
         channel.setDemoted(true);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setShortcutInfo(mock(ShortcutInfo.class));
 
         assertFalse(record.isConversation());
     }
 
     @Test
     public void testIsConversation_withAdjustmentOverride() {
-        StatusBarNotification sbn = getMessagingStyleNotification("test_shortcut_id");
+        StatusBarNotification sbn = getMessagingStyleNotification();
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setShortcutInfo(mock(ShortcutInfo.class));
 
         Bundle bundle = new Bundle();
         bundle.putBoolean(KEY_NOT_CONVERSATION, true);
