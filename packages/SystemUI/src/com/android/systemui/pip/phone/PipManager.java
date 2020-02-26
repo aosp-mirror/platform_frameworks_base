@@ -339,7 +339,10 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     private void updateMovementBounds(Rect animatingBounds, boolean fromImeAdjustment,
             boolean fromShelfAdjustment) {
-        // Populate inset / normal bounds and DisplayInfo from mPipBoundsHandler first.
+        mPipTaskOrganizer.onDisplayInfoChanged(mTmpDisplayInfo);
+        // Populate inset / normal bounds and DisplayInfo from mPipBoundsHandler before
+        // passing to mTouchHandler, mTouchHandler would rely on the bounds calculated by
+        // mPipBoundsHandler with up-to-dated information
         mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 animatingBounds, mTmpDisplayInfo);
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
