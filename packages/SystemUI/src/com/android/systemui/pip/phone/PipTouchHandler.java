@@ -67,6 +67,8 @@ public class PipTouchHandler {
 
     // Allow dragging the PIP to a location to close it
     private final boolean mEnableDismissDragToEdge;
+    // Allow PIP to resize to a slightly bigger state upon touch
+    private final boolean mEnableResize;
     private final Context mContext;
     private final IActivityManager mActivityManager;
     private final PipBoundsHandler mPipBoundsHandler;
@@ -188,6 +190,7 @@ public class PipTouchHandler {
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
 
         mEnableDismissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
+        mEnableResize = res.getBoolean(R.bool.config_pipEnableResizeForMenu);
 
         // Register the listener for input consumer touch events
         inputConsumerController.setInputListener(this::handleTouchEvent);
@@ -297,7 +300,7 @@ public class PipTouchHandler {
             } else {
                 final float offsetBufferPx = BOTTOM_OFFSET_BUFFER_DP
                         * mContext.getResources().getDisplayMetrics().density;
-                final Rect toMovementBounds = mMenuState == MENU_STATE_FULL
+                final Rect toMovementBounds = mMenuState == MENU_STATE_FULL && willResizeMenu()
                         ? new Rect(expandedMovementBounds)
                         : new Rect(normalMovementBounds);
                 final int prevBottom = mMovementBounds.bottom - mMovementBoundsExtraOffsets;
@@ -691,11 +694,12 @@ public class PipTouchHandler {
     };
 
     /**
-     * Updates the current movement bounds based on whether the menu is currently visible.
+     * Updates the current movement bounds based on whether the menu is currently visible and
+     * resized.
      */
     private void updateMovementBounds(int menuState) {
         boolean isMenuExpanded = menuState == MENU_STATE_FULL;
-        mMovementBounds = isMenuExpanded
+        mMovementBounds = isMenuExpanded && willResizeMenu()
                 ? mExpandedMovementBounds
                 : mNormalMovementBounds;
         mPipBoundsHandler.setMinEdgeSize(
@@ -715,8 +719,11 @@ public class PipTouchHandler {
      * @return whether the menu will resize as a part of showing the full menu.
      */
     private boolean willResizeMenu() {
-        return mExpandedBounds.width() != mNormalBounds.width() ||
-                mExpandedBounds.height() != mNormalBounds.height();
+        if (!mEnableResize) {
+            return false;
+        }
+        return mExpandedBounds.width() != mNormalBounds.width()
+                || mExpandedBounds.height() != mNormalBounds.height();
     }
 
     public void dump(PrintWriter pw, String prefix) {
