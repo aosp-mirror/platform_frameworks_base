@@ -296,11 +296,13 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         for (;;) {
             if (currentNonce == NONCE_DISABLED || currentNonce == NONCE_UNSET) {
                 if (DEBUG) {
-                    Log.d(TAG,
-                            String.format("cache %s %s for %s",
-                                cacheName(),
-                                currentNonce == NONCE_DISABLED ? "disabled" : "unset",
-                                queryToString(query)));
+                    if (!mDisabled) {
+                        Log.d(TAG, String.format(
+                            "cache %s %s for %s",
+                            cacheName(),
+                            currentNonce == NONCE_DISABLED ? "disabled" : "unset",
+                            queryToString(query)));
+                    }
                 }
                 return recompute(query);
             }
@@ -450,8 +452,12 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             Result resultToCompare = recompute(query);
             boolean nonceChanged = (getCurrentNonce() != mLastSeenNonce);
             if (!nonceChanged && !debugCompareQueryResults(proposedResult, resultToCompare)) {
-                throw new AssertionError("cache returned out of date response for " + query);
+                Log.e(TAG, String.format(
+                    "cache %s inconsistent for %s",
+                    cacheName(), queryToString(query)));
             }
+            // Always return the "true" result in verification mode.
+            return resultToCompare;
         }
         return proposedResult;
     }
