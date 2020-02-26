@@ -17,7 +17,7 @@
 package com.android.internal.logging;
 
 /**
- * A fake implementation of InstanceIdSequence that returns 0, 1, 2, ...
+ * A fake implementation of InstanceIdSequence that returns 1, 2, ...
  */
 public class InstanceIdSequenceFake extends InstanceIdSequence {
 
@@ -25,13 +25,13 @@ public class InstanceIdSequenceFake extends InstanceIdSequence {
         super(instanceIdMax);
     }
 
-    private int mNextId = 0;
+    private int mNextId = 1;
 
     @Override
     public InstanceId newInstanceId() {
         synchronized (this) {
             if (mNextId >= mInstanceIdMax) {
-                mNextId = 0;
+                mNextId = 1;
             }
             return newInstanceIdInternal(mNextId++);
         }
