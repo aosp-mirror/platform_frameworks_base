@@ -411,11 +411,9 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
     }
 
     private void adjustAndAnimatePipOffset(Rect originalBounds, int offset, int duration) {
-        if (offset == 0) {
-            return;
-        }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = originalBounds;
+        // offset would be zero if triggered from screen rotation.
         args.argi1 = offset;
         args.argi2 = duration;
         mHandler.sendMessage(mHandler.obtainMessage(MSG_OFFSET_ANIMATE, args));

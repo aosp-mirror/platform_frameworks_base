@@ -266,6 +266,10 @@ public class PipTouchHandler {
     public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect curBounds,
             boolean fromImeAdjustment, boolean fromShelfAdjustment, int displayRotation) {
         final int bottomOffset = mIsImeShowing ? mImeHeight : 0;
+        final boolean fromDisplayRotationChanged = (mDisplayRotation != displayRotation);
+        if (fromDisplayRotationChanged) {
+            mTouchState.reset();
+        }
 
         // Re-calculate the expanded bounds
         mNormalBounds = normalBounds;
@@ -293,7 +297,7 @@ public class PipTouchHandler {
 
         // If this is from an IME or shelf adjustment, then we should move the PiP so that it is not
         // occluded by the IME or shelf.
-        if (fromImeAdjustment || fromShelfAdjustment) {
+        if (fromImeAdjustment || fromShelfAdjustment || fromDisplayRotationChanged) {
             if (mTouchState.isUserInteracting()) {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
