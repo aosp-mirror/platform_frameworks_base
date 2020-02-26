@@ -612,13 +612,16 @@ public class BugreportProgressService extends Service {
                     + " bugreport parcel file descriptor is null.");
             return;
         }
-        ParcelFileDescriptor screenshotFd = info.getDefaultScreenshotFd();
-        if (screenshotFd == null) {
-            Log.e(TAG, "Failed to start bugreport generation as"
-                    + " screenshot parcel file descriptor is null. Deleting bugreport file");
-            FileUtils.closeQuietly(bugreportFd);
-            info.bugreportFile.delete();
-            return;
+        ParcelFileDescriptor screenshotFd = null;
+        if (isDefaultScreenshotRequired(bugreportType)) {
+            screenshotFd = info.getDefaultScreenshotFd();
+            if (screenshotFd == null) {
+                Log.e(TAG, "Failed to start bugreport generation as"
+                        + " screenshot parcel file descriptor is null. Deleting bugreport file");
+                FileUtils.closeQuietly(bugreportFd);
+                info.bugreportFile.delete();
+                return;
+            }
         }
 
         mBugreportManager = (BugreportManager) mContext.getSystemService(
@@ -638,8 +641,18 @@ public class BugreportProgressService extends Service {
             // The binder call didn't go through successfully, so need to close the fds.
             // If the calls went through API takes ownership.
             FileUtils.closeQuietly(bugreportFd);
-            FileUtils.closeQuietly(screenshotFd);
+            if (screenshotFd != null) {
+                FileUtils.closeQuietly(screenshotFd);
+            }
         }
+    }
+
+    private static boolean isDefaultScreenshotRequired(
+            @BugreportParams.BugreportMode int bugreportType) {
+        // Modify dumpstate#SetOptionsFromMode as well for default system screenshots.
+        // We override dumpstate for interactive bugreports.
+        return bugreportType == BugreportParams.BUGREPORT_MODE_FULL
+                || bugreportType == BugreportParams.BUGREPORT_MODE_WEAR;
     }
 
     private static ParcelFileDescriptor getFd(File file) {
