@@ -18,7 +18,6 @@ package com.android.server.location;
 
 import static com.android.server.LocationManagerService.TAG;
 
-import android.app.ActivityManager;
 import android.location.Geofence;
 import android.location.LocationManager;
 import android.location.LocationRequest;
@@ -52,7 +51,7 @@ public class LocationUsageLogger {
     public void logLocationApiUsage(int usageType, int apiInUse,
             String packageName, LocationRequest locationRequest,
             boolean hasListener, boolean hasIntent,
-            Geofence geofence, int activityImportance) {
+            Geofence geofence, boolean foreground) {
         try {
             if (hitApiUsageLogCap()) {
                 return;
@@ -85,7 +84,7 @@ public class LocationUsageLogger {
                     isGeofenceNull
                         ? LocationStatsEnums.RADIUS_UNKNOWN
                         : bucketizeRadius(geofence.getRadius()),
-                    categorizeActivityImportance(activityImportance));
+                    categorizeActivityImportance(foreground));
         } catch (Exception e) {
             // Swallow exceptions to avoid crashing LMS.
             Log.w(TAG, "Failed to log API usage to statsd.", e);
@@ -197,13 +196,9 @@ public class LocationUsageLogger {
         }
     }
 
-    private static int categorizeActivityImportance(int importance) {
-        if (importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+    private static int categorizeActivityImportance(boolean foreground) {
+        if (foreground) {
             return LocationStatsEnums.IMPORTANCE_TOP;
-        } else if (importance == ActivityManager
-                .RunningAppProcessInfo
-                .IMPORTANCE_FOREGROUND_SERVICE) {
-            return LocationStatsEnums.IMPORTANCE_FORGROUND_SERVICE;
         } else {
             return LocationStatsEnums.IMPORTANCE_BACKGROUND;
         }

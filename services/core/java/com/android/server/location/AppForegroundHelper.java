@@ -106,24 +106,13 @@ public class AppForegroundHelper {
      * Whether the given uid is currently foreground.
      */
     public boolean isAppForeground(int uid) {
-        return isForeground(getImportance(uid));
-    }
-
-    /**
-     * Retrieves the current importance of the given uid.
-     *
-     * @deprecated Prefer {@link #isAppForeground(int)}.
-     */
-    @Deprecated
-    @Importance
-    public int getImportance(int uid) {
         synchronized (this) {
             Preconditions.checkState(mActivityManager != null);
         }
 
         long identity = Binder.clearCallingIdentity();
         try {
-            return mActivityManager.getUidImportance(uid);
+            return isForeground(mActivityManager.getUidImportance(uid));
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
