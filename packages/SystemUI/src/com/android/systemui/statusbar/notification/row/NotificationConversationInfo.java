@@ -20,6 +20,7 @@ import static android.app.Notification.EXTRA_IS_GROUP_CONVERSATION;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_CACHED;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 import static android.provider.Settings.Secure.BUBBLE_IMPORTANT_CONVERSATIONS;
@@ -218,7 +219,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         // TODO: consider querying this earlier in the notification pipeline and passing it in
         LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery()
                 .setPackage(mPackageName)
-                .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED)
+                .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_CACHED)
                 .setShortcutIds(Arrays.asList(mConversationId));
         List<ShortcutInfo> shortcuts = mLauncherApps.getShortcuts(query, mSbn.getUser());
         if (shortcuts != null && !shortcuts.isEmpty()) {
