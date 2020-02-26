@@ -16345,7 +16345,27 @@ public class PackageManagerService extends IPackageManager.Stub
                         REASON_INSTALL,
                         DexoptOptions.DEXOPT_BOOT_COMPLETE
                                 | DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE);
-                mPackageDexOptimizer.performDexOpt(pkg, reconciledPkg.pkgSetting,
+                ScanResult result = reconciledPkg.scanResult;
+
+                // This mirrors logic from commitReconciledScanResultLocked, where the library files
+                // needed for dexopt are assigned.
+                // TODO: Fix this to have 1 mutable PackageSetting for scan/install. If the previous
+                //  setting needs to be passed to have a comparison, hide it behind an immutable
+                //  interface. There's no good reason to have 3 different ways to access the real
+                //  PackageSetting object, only one of which is actually correct.
+                PackageSetting realPkgSetting = result.existingSettingCopied
+                        ? result.request.pkgSetting : result.pkgSetting;
+                if (realPkgSetting == null) {
+                    realPkgSetting = reconciledPkg.pkgSetting;
+                }
+
+                // Unfortunately, the updated system app flag is only tracked on this PackageSetting
+                boolean isUpdatedSystemApp = reconciledPkg.pkgSetting.getPkgState()
+                        .isUpdatedSystemApp();
+
+                realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
+
+                mPackageDexOptimizer.performDexOpt(pkg, realPkgSetting,
                         null /* instructionSets */,
                         getOrCreateCompilerPackageStats(pkg),
                         mDexManager.getPackageUseInfoOrDefault(packageName),
@@ -23569,22 +23589,27 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public void grantImplicitAccess(int userId, Intent intent,
-                int callingUid, int targetAppId) {
+                int recipientAppId, int visibleUid, boolean direct) {
             synchronized (mLock) {
-                final AndroidPackage callingPackage = getPackage(callingUid);
-                final int targetUid = UserHandle.getUid(userId, targetAppId);
-                final AndroidPackage targetPackage = getPackage(targetUid);
-                if (callingPackage == null || targetPackage == null) {
+                final AndroidPackage visiblePackage = getPackage(visibleUid);
+                final int recipientUid = UserHandle.getUid(userId, recipientAppId);
+                if (visiblePackage == null || getPackage(recipientUid) == null) {
                     return;
                 }
 
-                final boolean instantApp = isInstantAppInternal(callingPackage.getPackageName(),
-                        userId, callingUid);
+                final boolean instantApp =
+                        isInstantAppInternal(visiblePackage.getPackageName(), userId, visibleUid);
                 if (instantApp) {
+                    if (!direct) {
+                        // if the interaction that lead to this granting access to an instant app
+                        // was indirect (i.e.: URI permission grant), do not actually execute the
+                        // grant.
+                        return;
+                    }
                     mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
-                            UserHandle.getAppId(callingUid), targetAppId);
+                            recipientAppId, UserHandle.getAppId(visibleUid) /*instantAppId*/);
                 } else {
-                    mAppsFilter.grantImplicitAccess(callingUid, targetUid);
+                    mAppsFilter.grantImplicitAccess(recipientUid, visibleUid);
                 }
             }
         }

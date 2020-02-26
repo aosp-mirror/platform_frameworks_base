@@ -25,7 +25,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.IActivityManager;
-import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.WallpaperManager;
@@ -93,6 +92,7 @@ import com.android.systemui.MultiListLayout;
 import com.android.systemui.MultiListLayout.MultiListAdapter;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.controls.ui.ControlsUiController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -152,7 +152,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final IDreamManager mDreamManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final LockPatternUtils mLockPatternUtils;
-    private final KeyguardManager mKeyguardManager;
+    private final KeyguardStateController mKeyguardStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ContentResolver mContentResolver;
     private final Resources mResources;
@@ -190,6 +190,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private ControlsUiController mControlsUiController;
     private final IWindowManager mIWindowManager;
     private final Executor mBackgroundExecutor;
+    private final ControlsListingController mControlsListingController;
+    private boolean mAnyControlsProviders = false;
 
     /**
      * @param context everything needs a context :(
@@ -198,7 +200,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     public GlobalActionsDialog(Context context, GlobalActionsManager windowManagerFuncs,
             AudioManager audioManager, IDreamManager iDreamManager,
             DevicePolicyManager devicePolicyManager, LockPatternUtils lockPatternUtils,
-            KeyguardManager keyguardManager, BroadcastDispatcher broadcastDispatcher,
+            BroadcastDispatcher broadcastDispatcher,
             ConnectivityManager connectivityManager, TelephonyManager telephonyManager,
             ContentResolver contentResolver, @Nullable Vibrator vibrator, @Main Resources resources,
             ConfigurationController configurationController, ActivityStarter activityStarter,
@@ -209,14 +211,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             IStatusBarService statusBarService,
             NotificationShadeWindowController notificationShadeWindowController,
             ControlsUiController controlsUiController, IWindowManager iWindowManager,
-            @Background Executor backgroundExecutor) {
+            @Background Executor backgroundExecutor,
+            ControlsListingController controlsListingController) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
         mDreamManager = iDreamManager;
         mDevicePolicyManager = devicePolicyManager;
         mLockPatternUtils = lockPatternUtils;
-        mKeyguardManager = keyguardManager;
+        mKeyguardStateController = keyguardStateController;
         mBroadcastDispatcher = broadcastDispatcher;
         mContentResolver = contentResolver;
         mResources = resources;
@@ -233,6 +236,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mControlsUiController = controlsUiController;
         mIWindowManager = iWindowManager;
         mBackgroundExecutor = backgroundExecutor;
+        mControlsListingController = controlsListingController;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -269,6 +273,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 }
             }
         });
+
+        mControlsListingController.addCallback(list -> mAnyControlsProviders = !list.isEmpty());
     }
 
     /**
@@ -427,7 +433,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                                 .startPendingIntentDismissingKeyguard(intent);
                                     }
                                 },
-                                mKeyguardManager.isDeviceLocked())
+                                !mKeyguardStateController.isUnlocked())
                         : null;
 
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController,
@@ -444,12 +450,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private boolean shouldDisplayLockdown() {
-        int userId = getCurrentUser().id;
         // Lockdown is meaningless without a place to go.
-        if (!mKeyguardManager.isDeviceSecure(userId)) {
+        if (!mKeyguardStateController.isMethodSecure()) {
             return false;
         }
 
+        int userId = getCurrentUser().id;
         // Only show the lockdown button if the device isn't locked down (for whatever reason).
         int state = mLockPatternUtils.getStrongAuthForUser(userId);
         return (state == STRONG_AUTH_NOT_REQUIRED
@@ -1914,7 +1920,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private boolean shouldShowControls() {
-        return !mKeyguardManager.isDeviceLocked()
-                && mControlsUiController.getAvailable();
+        return mKeyguardStateController.isUnlocked()
+                && mControlsUiController.getAvailable()
+                && mAnyControlsProviders;
     }
 }

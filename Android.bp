@@ -496,7 +496,6 @@ java_library {
         "//frameworks/base/apex/appsearch/framework",
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
-        "//frameworks/base/apex/statsd/service",
         "//frameworks/base/packages/Tethering/tests/unit",
     ],
 }

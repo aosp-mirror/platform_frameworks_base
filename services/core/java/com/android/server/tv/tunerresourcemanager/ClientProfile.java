@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.server.tv.tunerresourcemanager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
   * A client profile object used by the Tuner Resource Manager to record the registered clients'
@@ -23,12 +25,14 @@ package com.android.server.tv.tunerresourcemanager;
   * @hide
   */
 public final class ClientProfile {
+
     public static final int INVALID_GROUP_ID = -1;
+
     /**
      * Client id sent to the client when registering with
      * {@link #registerClientProfile(ResourceClientProfile, TunerResourceManagerCallback, int[])}
      */
-    private final int mClientId;
+    private final int mId;
 
     /**
      * see {@link ResourceClientProfile}
@@ -41,7 +45,7 @@ public final class ClientProfile {
     private final int mUseCase;
 
     /**
-     * Process id queried from {@link TvInputManager#}
+     * Process id queried from {@link TvInputManager#getPid(String)}.
      */
     private final int mProcessId;
 
@@ -59,6 +63,11 @@ public final class ClientProfile {
     private int mNiceValue;
 
     /**
+     * List of the frontend ids that are used by the current client.
+     */
+    private List<Integer> mUsingFrontendIds = new ArrayList<>();
+
+    /**
      * Optional arbitrary priority value given by the client.
      *
      * <p>This value can override the default priorotiy calculated from
@@ -66,18 +75,15 @@ public final class ClientProfile {
      */
     private int mPriority;
 
-    private ClientProfile(ClientProfileBuilder builder) {
-        this.mClientId = builder.mClientId;
+    private ClientProfile(Builder builder) {
+        this.mId = builder.mId;
         this.mTvInputSessionId = builder.mTvInputSessionId;
         this.mUseCase = builder.mUseCase;
         this.mProcessId = builder.mProcessId;
-        this.mGroupId = builder.mGroupId;
-        this.mNiceValue = builder.mNiceValue;
-        this.mPriority = builder.mPriority;
     }
 
-    public int getClientId() {
-        return mClientId;
+    public int getId() {
+        return mId;
     }
 
     public String getTvInputSessionId() {
@@ -116,26 +122,47 @@ public final class ClientProfile {
         mNiceValue = niceValue;
     }
 
+    /**
+     * Set when the client starts to use a frontend.
+     *
+     * @param frontendId being used.
+     */
+    public void useFrontend(int frontendId) {
+        mUsingFrontendIds.add(frontendId);
+    }
+
+    public List<Integer> getInUseFrontendIds() {
+        return mUsingFrontendIds;
+    }
+
+    /**
+     * Called when the client released a frontend.
+     *
+     * <p>This could happen when client resource reclaimed.
+     *
+     * @param frontendId being released.
+     */
+    public void releaseFrontend(int frontendId) {
+        mUsingFrontendIds.remove(frontendId);
+    }
+
     @Override
     public String toString() {
-        return "ClientProfile: " + this.mClientId + ", " + this.mTvInputSessionId + ", "
-                + this.mUseCase + ", " + this.mProcessId;
+        return "ClientProfile[id=" + this.mId + ", tvInputSessionId=" + this.mTvInputSessionId
+                + ", useCase=" + this.mUseCase + ", processId=" + this.mProcessId + "]";
     }
 
     /**
     * Builder class for {@link ClientProfile}.
     */
-    public static class ClientProfileBuilder {
-        private final int mClientId;
+    public static class Builder {
+        private final int mId;
         private String mTvInputSessionId;
         private int mUseCase;
         private int mProcessId;
-        private int mGroupId;
-        private int mNiceValue;
-        private int mPriority;
 
-        ClientProfileBuilder(int clientId) {
-            this.mClientId = clientId;
+        Builder(int id) {
+            this.mId = id;
         }
 
         /**
@@ -143,7 +170,7 @@ public final class ClientProfile {
           *
           * @param useCase the useCase of the client.
           */
-        public ClientProfileBuilder useCase(int useCase) {
+        public Builder useCase(int useCase) {
             this.mUseCase = useCase;
             return this;
         }
@@ -153,7 +180,7 @@ public final class ClientProfile {
           *
           * @param tvInputSessionId the id of the tv input session.
           */
-        public ClientProfileBuilder tvInputSessionId(String tvInputSessionId) {
+        public Builder tvInputSessionId(String tvInputSessionId) {
             this.mTvInputSessionId = tvInputSessionId;
             return this;
         }
@@ -163,39 +190,8 @@ public final class ClientProfile {
           *
           * @param processId the id of process.
           */
-        public ClientProfileBuilder processId(int processId) {
+        public Builder processId(int processId) {
             this.mProcessId = processId;
-            return this;
-        }
-
-
-        /**
-          * Builder for {@link ClientProfile}.
-          *
-          * @param groupId the id of the group that shares the same resource.
-          */
-        public ClientProfileBuilder groupId(int groupId) {
-            this.mGroupId = groupId;
-            return this;
-        }
-
-        /**
-          * Builder for {@link ClientProfile}.
-          *
-          * @param niceValue the nice value of the client.
-          */
-        public ClientProfileBuilder niceValue(int niceValue) {
-            this.mNiceValue = niceValue;
-            return this;
-        }
-
-        /**
-          * Builder for {@link ClientProfile}.
-          *
-          * @param priority the priority value of the client.
-          */
-        public ClientProfileBuilder priority(int priority) {
-            this.mPriority = priority;
             return this;
         }
 

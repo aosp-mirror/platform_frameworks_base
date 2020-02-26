@@ -240,7 +240,7 @@ public abstract class TvInputService extends Service {
      * @param inputId The ID of the TV input associated with the session.
      */
     @Nullable
-    public abstract Session onCreateSession(String inputId);
+    public abstract Session onCreateSession(@NonNull String inputId);
 
     /**
      * Returns a concrete implementation of {@link RecordingSession}.
@@ -251,7 +251,7 @@ public abstract class TvInputService extends Service {
      * @param inputId The ID of the TV input associated with the recording session.
      */
     @Nullable
-    public RecordingSession onCreateRecordingSession(String inputId) {
+    public RecordingSession onCreateRecordingSession(@NonNull String inputId) {
         return null;
     }
 

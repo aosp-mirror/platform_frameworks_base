@@ -393,6 +393,8 @@ message Atom {
         WifiConnectionResultReported wifi_connection_result_reported = 253 [(module) = "wifi"];
         AppFreezeChanged app_freeze_changed = 254 [(module) = "framework"];
         SnapshotMergeReported snapshot_merge_reported = 255;
+        ForegroundServiceAppOpSessionEnded foreground_service_app_op_session_ended =
+            256  [(module) = "framework"];
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
@@ -3285,12 +3287,12 @@ message OverlayStateChanged {
     ];
 }
 
-/*
+/**
  * Logs foreground service starts and stops.
  * Note that this is not when a service starts or stops, but when it is
  * considered foreground.
  * Logged from
- *     //frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
+ *     frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
  */
 message ForegroundServiceStateChanged {
     optional int32 uid = 1 [(is_uid) = true];
@@ -3302,6 +3304,49 @@ message ForegroundServiceStateChanged {
         EXIT = 2;
     }
     optional State state = 3;
+
+    // Whether the fgs is allowed while-in-use permissions, i.e. is considered 'in-use' to the user.
+    // (If the fgs was started while the app wasn't TOP it usually will be denied these permissions)
+    optional bool allow_while_in_use_permission = 4;
+}
+
+/**
+ * Logs the number of times a uid accesses a sensitive AppOp during a foreground service session.
+ * A foreground service session is any continuous period during which the uid holds at least one
+ * foreground service; the atom will be pushed when the uid no longer holds any foreground services.
+ * Accesses initiated while the uid is in the TOP state are ignored.
+ * Sessions with no attempted accesses are not logged.
+ * Logged from
+ *     frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
+ */
+message ForegroundServiceAppOpSessionEnded {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The operation's name.
+    // To the extent possible, preserve the mapping from AppOpsManager.OP_ constants.
+    // Only these named ops are actually logged.
+    enum AppOpName {
+        OP_NONE = -1; // Also represents UNKNOWN.
+        OP_COARSE_LOCATION = 0;
+        OP_FINE_LOCATION = 1;
+        OP_CAMERA = 26;
+        OP_RECORD_AUDIO = 27;
+    }
+    optional AppOpName app_op_name = 2 [default = OP_NONE];
+
+    // The uid's permission mode for accessing the AppOp during this fgs session.
+    enum Mode {
+        MODE_UNKNOWN = 0;
+        MODE_ALLOWED = 1; // Always allowed
+        MODE_IGNORED = 2; // Denied
+        MODE_FOREGROUND = 3; // Allow-while-in-use (or allowed-one-time)
+    }
+    optional Mode app_op_mode = 3;
+
+    // Number of times this AppOp was requested and allowed.
+    optional int32 count_ops_accepted = 4;
+    // Number of times this AppOp was requested but denied.
+    optional int32 count_ops_rejected = 5;
 }
 
 /**
@@ -8189,7 +8234,7 @@ message FrameTimingHistogram {
  */
 message CameraActionEvent {
     // Camera session duration
-    optional int64 duration = 1;
+    optional int64 duration_millis = 1;
 
     // Camera API level used
     optional int32 api_level = 2;

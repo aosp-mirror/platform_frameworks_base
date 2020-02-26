@@ -380,7 +380,7 @@ public class NotificationManagerService extends SystemService {
     private static final int EVENTLOG_ENQUEUE_STATUS_IGNORED = 2;
     private static final long MIN_PACKAGE_OVERRATE_LOG_INTERVAL = 5000; // milliseconds
 
-    private static final long DELAY_FOR_ASSISTANT_TIME = 100;
+    private static final long DELAY_FOR_ASSISTANT_TIME = 200;
 
     private static final String ACTION_NOTIFICATION_TIMEOUT =
             NotificationManagerService.class.getSimpleName() + ".TIMEOUT";
