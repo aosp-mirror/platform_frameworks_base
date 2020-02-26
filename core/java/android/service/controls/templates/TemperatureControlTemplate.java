@@ -19,6 +19,7 @@ package android.service.controls.templates;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Bundle;
+import android.service.controls.Control;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -26,6 +27,13 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * A template for a temperature related {@link Control} that supports multiple modes.
+ *
+ * Both the current mode and the active mode for the control can be specified. The combination of
+ * the {@link Control#getDeviceType} and the current and active mode will determine colors and
+ * transitions for the UI element.
+ */
 public final class TemperatureControlTemplate extends ControlTemplate {
 
     private static final String TAG = "ThermostatTemplate";
@@ -51,6 +59,7 @@ public final class TemperatureControlTemplate extends ControlTemplate {
     public @interface Mode {}
 
     private static final int NUM_MODES = 6;
+
     public static final @Mode int MODE_UNKNOWN = 0;
 
     public static final @Mode int MODE_OFF = 1;
@@ -102,6 +111,18 @@ public final class TemperatureControlTemplate extends ControlTemplate {
     private final @Mode int mCurrentActiveMode;
     private final @ModeFlag int mModes;
 
+    /**
+     * Construct a new {@link TemperatureControlTemplate}.
+     *
+     * The current and active mode have to be among the ones supported by the flags.
+     *
+     * @param templateId the identifier for this template object
+     * @param controlTemplate a template to use for interaction with the user
+     * @param currentMode the current mode for the {@link Control}
+     * @param currentActiveMode the current active mode for the {@link Control}
+     * @param modesFlag a flag representing the available modes for the {@link Control}
+     * @throws IllegalArgumentException if the parameters passed do not make a valid template.
+     */
     public TemperatureControlTemplate(@NonNull String templateId,
             @NonNull ControlTemplate controlTemplate,
             @Mode int currentMode,
@@ -179,6 +200,9 @@ public final class TemperatureControlTemplate extends ControlTemplate {
         return mModes;
     }
 
+    /**
+     * @return {@link ControlTemplate#TYPE_TEMPERATURE}
+     */
     @Override
     public int getTemplateType() {
         return TYPE;
