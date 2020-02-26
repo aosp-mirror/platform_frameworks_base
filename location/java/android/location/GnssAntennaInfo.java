@@ -95,31 +95,55 @@ public final class GnssAntennaInfo implements Parcelable {
                     }
                 };
 
+        /**
+         * Returns the x-axis offset of the phase center from the origin of the Android sensor
+         * coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getXOffsetMm() {
             return mOffsetXMm;
         }
 
+        /**
+         * Returns the 1-sigma uncertainty of the x-axis offset of the phase center from the origin
+         * of the Android sensor coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getXOffsetUncertaintyMm() {
             return mOffsetXUncertaintyMm;
         }
 
+        /**
+         * Returns the y-axis offset of the phase center from the origin of the Android sensor
+         * coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getYOffsetMm() {
             return mOffsetYMm;
         }
 
+        /**
+         * Returns the 1-sigma uncertainty of the y-axis offset of the phase center from the origin
+         * of the Android sensor coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getYOffsetUncertaintyMm() {
             return mOffsetYUncertaintyMm;
         }
 
+        /**
+         * Returns the z-axis offset of the phase center from the origin of the Android sensor
+         * coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getZOffsetMm() {
             return mOffsetZMm;
         }
 
+        /**
+         * Returns the 1-sigma uncertainty of the z-axis offset of the phase center from the origin
+         * of the Android sensor coordinate system, in millimeters.
+         */
         @FloatRange()
         public double getZOffsetUncertaintyMm() {
             return mOffsetZUncertaintyMm;
@@ -154,7 +178,8 @@ public final class GnssAntennaInfo implements Parcelable {
      * Represents corrections on a spherical mapping. Corrections are added to measurements to
      * obtain the corrected values.
      *
-     * The corrections and associated (1-sigma) uncertainties are represented by respect 2D arrays.
+     * The corrections and associated (1-sigma) uncertainties are represented by respective 2D
+     * matrices.
      *
      * Each row (major indices) represents a fixed theta. The first row corresponds to a
      * theta angle of 0 degrees. The last row corresponds to a theta angle of (360 - deltaTheta)
@@ -177,18 +202,18 @@ public final class GnssAntennaInfo implements Parcelable {
                 @NonNull double[][] correctionUncertainties) {
             if (corrections.length != correctionUncertainties.length
                     || corrections[0].length != correctionUncertainties[0].length) {
-                throw new IllegalArgumentException("Correction and correction uncertainty arrays "
+                throw new IllegalArgumentException("Correction and correction uncertainty matrices "
                         + "must have the same dimensions.");
             }
 
             mNumRows = corrections.length;
             if (mNumRows < 1) {
-                throw new IllegalArgumentException("Arrays must have at least one row.");
+                throw new IllegalArgumentException("Matrix must have at least one row.");
             }
 
             mNumColumns = corrections[0].length;
             if (mNumColumns < 2) {
-                throw new IllegalArgumentException("Arrays must have at least two columns.");
+                throw new IllegalArgumentException("Matrix must have at least two columns.");
             }
 
             mCorrections = corrections;
@@ -223,7 +248,7 @@ public final class GnssAntennaInfo implements Parcelable {
         }
 
         /**
-         * Array representing corrections on a spherical mapping. Corrections are added to
+         * Matrix representing corrections on a spherical mapping. Corrections are added to
          * measurements to obtain the corrected values.
          *
          * Each row (major indices) represents a fixed theta. The first row corresponds to a
@@ -236,12 +261,12 @@ public final class GnssAntennaInfo implements Parcelable {
          * angles, i.e., deltaPhi = 180 / (number of columns - 1).
          */
         @NonNull
-        public double[][] getCorrectionsArray() {
+        public double[][] getCorrectionsMatrix() {
             return mCorrections;
         }
 
         /**
-         * Array representing uncertainty on corrections on a spherical mapping.
+         * Matrix representing uncertainty on corrections on a spherical mapping.
          *
          * Each row (major indices) represents a fixed theta. The first row corresponds to a
          * theta angle of 0 degrees. The last row corresponds to a theta angle of (360 - deltaTheta)
@@ -253,7 +278,7 @@ public final class GnssAntennaInfo implements Parcelable {
          * angles, i.e., deltaPhi = 180 / (number of columns - 1).
          */
         @NonNull
-        public double[][] getCorrectionUncertaintiesArray() {
+        public double[][] getCorrectionUncertaintiesMatrix() {
             return mCorrectionUncertainties;
         }
 
