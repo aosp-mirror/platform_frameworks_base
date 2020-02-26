@@ -255,7 +255,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     private void notifyTransitionStarting(ActivityRecord activity) {
-        final ArrayMap<ActivityRecord, Integer> reasons = new ArrayMap<>();
+        final ArrayMap<WindowContainer, Integer> reasons = new ArrayMap<>();
         reasons.put(activity, ActivityTaskManagerInternal.APP_TRANSITION_SPLASH_SCREEN);
         mActivityMetricsLogger.notifyTransitionStarting(reasons);
     }
