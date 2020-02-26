@@ -48,6 +48,9 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityShortcutInfoTest {
+    private static final String SETTINGS_ACTIVITY_NAME =
+            "com.example.shortcut.target.SettingsActivity";
+
     private Context mTargetContext;
     private PackageManager mPackageManager;
     private ComponentName mComponentName;
@@ -103,6 +106,12 @@ public class AccessibilityShortcutInfoTest {
         assertNotNull("Can't find html description string", htmlDescription);
         assertThat("Html description is not correct",
                 mShortcutInfo.loadHtmlDescription(mPackageManager), is(htmlDescription));
+    }
+
+    @Test
+    public void testSettingsActivity() {
+        assertThat("Settings Activity is not correct",
+                mShortcutInfo.getSettingsActivityName(), is(SETTINGS_ACTIVITY_NAME));
     }
 
     @Test

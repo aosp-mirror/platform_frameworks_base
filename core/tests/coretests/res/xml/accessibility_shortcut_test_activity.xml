@@ -21,4 +21,5 @@
                         android:summary="@string/accessibility_shortcut_summary"
                         android:animatedImageDrawable="@drawable/bitmap_drawable"
                         android:htmlDescription="@string/accessibility_shortcut_html_description"
+                        android:settingsActivity="com.example.shortcut.target.SettingsActivity"
 />
