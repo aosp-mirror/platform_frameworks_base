@@ -20,13 +20,19 @@
 #include <sstream>
 #include <string>
 
+#include "TestConstants.h"
 #include "TestHelpers.h"
+#include "android-base/stringprintf.h"
+#include "androidfw/ResourceTypes.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/RawPrintVisitor.h"
 
+using android::base::StringPrintf;
 using ::testing::NotNull;
+
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace android::idmap2 {
 
@@ -48,7 +54,7 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  const auto idmap = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+  const auto idmap = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ true);
   ASSERT_TRUE(idmap);
 
@@ -59,8 +65,12 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
 #define ADDRESS "[0-9a-f]{8}: "
   ASSERT_CONTAINS_REGEX(ADDRESS "504d4449  magic\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "00000003  version\n", stream.str());
-  ASSERT_CONTAINS_REGEX(ADDRESS "76a20829  target crc\n", stream.str());
-  ASSERT_CONTAINS_REGEX(ADDRESS "c054fb26  overlay crc\n", stream.str());
+  ASSERT_CONTAINS_REGEX(
+      StringPrintf(ADDRESS "%s  target crc\n", android::idmap2::TestConstants::TARGET_CRC_STRING),
+      stream.str());
+  ASSERT_CONTAINS_REGEX(
+      StringPrintf(ADDRESS "%s  overlay crc\n", android::idmap2::TestConstants::OVERLAY_CRC_STRING),
+      stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "      7f  target package id\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "      7f  overlay package id\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "00000004  target entry count\n", stream.str());

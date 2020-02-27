@@ -191,4 +191,3 @@ cc_benchmark {
     shared_libs: common_test_libs,
     data: ["tests/data/**/*.apk"],
 }
-

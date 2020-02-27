@@ -33,7 +33,6 @@
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
-#include "idmap2/Policies.h"
 #include "idmap2/SysTrace.h"
 #include "utils/String8.h"
 
@@ -42,10 +41,11 @@ using android::binder::Status;
 using android::idmap2::BinaryStreamVisitor;
 using android::idmap2::Idmap;
 using android::idmap2::IdmapHeader;
-using android::idmap2::PolicyBitmask;
 using android::idmap2::utils::kIdmapCacheDir;
 using android::idmap2::utils::kIdmapFilePermissionMask;
 using android::idmap2::utils::UidHasWriteAccessToPath;
+
+using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
 
 namespace {
 
