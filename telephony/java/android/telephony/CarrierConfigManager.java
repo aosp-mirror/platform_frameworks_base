@@ -4110,6 +4110,7 @@ public class CarrierConfigManager {
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getDefaultCarrierServicePackageName ICarrierConfigLoader is null"
                     + ex.toString());
+            ex.rethrowAsRuntimeException();
         }
         return "";
     }
