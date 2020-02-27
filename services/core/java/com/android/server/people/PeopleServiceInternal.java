@@ -17,6 +17,7 @@
 package com.android.server.people;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.os.CancellationSignal;
 import android.service.appprediction.IPredictionService;
@@ -34,16 +35,17 @@ public abstract class PeopleServiceInternal extends IPredictionService.Stub {
             @NonNull CancellationSignal signal);
 
     /**
-     * The number conversation infos will be dynamic, based on the currently installed apps on the
-     * device. All of which should be combined into a single blob to be backed up.
+     * Returns a backup payload that contains conversation infos. The number conversation infos will
+     * be dynamic, based on the currently installed apps on the device. All of which should be
+     * combined into a single blob to be backed up.
      */
-    public abstract byte[] backupConversationInfos(@UserIdInt int userId);
+    @Nullable
+    public abstract byte[] getBackupPayload(@UserIdInt int userId);
 
     /**
-     * Multiple conversation infos may exist in the restore payload, child classes are required to
-     * manage the restoration based on how individual conversation infos were originally combined
-     * during backup.
+     * Restores conversation infos stored in payload blob. Multiple conversation infos may exist in
+     * the restore payload, child classes are required to manage the restoration based on how
+     * individual conversation infos were originally combined during backup.
      */
-    public abstract void restoreConversationInfos(@UserIdInt int userId, @NonNull String key,
-            @NonNull byte[] payload);
+    public abstract void restore(@UserIdInt int userId, @NonNull byte[] payload);
 }
