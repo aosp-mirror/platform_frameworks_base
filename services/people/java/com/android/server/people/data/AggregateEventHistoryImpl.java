@@ -42,14 +42,16 @@ class AggregateEventHistoryImpl implements EventHistory {
     @NonNull
     @Override
     public EventIndex getEventIndex(Set<Integer> eventTypes) {
-        EventIndex merged = new EventIndex();
+        EventIndex merged = null;
         for (EventHistory eventHistory : mEventHistoryList) {
             EventIndex eventIndex = eventHistory.getEventIndex(eventTypes);
-            if (!eventIndex.isEmpty()) {
+            if (merged == null) {
+                merged = eventIndex;
+            } else if (!eventIndex.isEmpty()) {
                 merged = EventIndex.combine(merged, eventIndex);
             }
         }
-        return merged;
+        return merged != null ? merged : EventIndex.EMPTY;
     }
 
     @NonNull
