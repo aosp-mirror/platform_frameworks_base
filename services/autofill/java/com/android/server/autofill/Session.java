@@ -2686,6 +2686,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                 requestHideFillUi(mCurrentViewId);
                             }
                         }, mService.getRemoteInlineSuggestionRenderServiceLocked());
+
+        if (inlineSuggestionsResponse == null) {
+            Slog.w(TAG, "InlineSuggestionFactory created null response");
+            return false;
+        }
+
         try {
             imeResponse.getCallback().onInlineSuggestionsResponse(inlineSuggestionsResponse);
         } catch (RemoteException e) {
