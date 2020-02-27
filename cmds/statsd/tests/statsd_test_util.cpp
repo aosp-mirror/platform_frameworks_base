@@ -15,6 +15,7 @@
 #include "statsd_test_util.h"
 
 #include <aidl/android/util/StatsEventParcel.h>
+#include "stats_event.h"
 
 using aidl::android::util::StatsEventParcel;
 using std::shared_ptr;
