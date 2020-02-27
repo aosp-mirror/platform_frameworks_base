@@ -40,6 +40,7 @@ import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -103,12 +104,12 @@ import java.util.Set;
  *
  * {@hide}
  */
-public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddlewareService {
+public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddlewareService, Dumpable {
     private static final String TAG = "SoundTriggerMiddlewareValidation";
 
     private final @NonNull ISoundTriggerMiddlewareService mDelegate;
     private final @NonNull Context mContext;
-    private Set<Integer> mModuleHandles;
+    private Map<Integer, Set<ModuleService>> mModules;
 
     public SoundTriggerMiddlewareValidation(
             @NonNull ISoundTriggerMiddlewareService delegate, @NonNull Context context) {
@@ -154,9 +155,9 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             // From here on, every exception isn't client's fault.
             try {
                 SoundTriggerModuleDescriptor[] result = mDelegate.listModules();
-                mModuleHandles = new HashSet<Integer>(result.length);
+                mModules = new HashMap<>(result.length);
                 for (SoundTriggerModuleDescriptor desc : result) {
-                    mModuleHandles.add(desc.handle);
+                    mModules.put(desc.handle, new HashSet<>());
                 }
                 return result;
             } catch (Exception e) {
@@ -176,18 +177,18 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         synchronized (this) {
             // State validation.
-            if (mModuleHandles == null) {
+            if (mModules == null) {
                 throw new IllegalStateException(
                         "Client must call listModules() prior to attaching.");
             }
-            if (!mModuleHandles.contains(handle)) {
+            if (!mModules.containsKey(handle)) {
                 throw new IllegalArgumentException("Invalid handle: " + handle);
             }
 
             // From here on, every exception isn't client's fault.
             try {
                 ModuleService moduleService =
-                        new ModuleService(callback);
+                        new ModuleService(handle, callback);
                 moduleService.attach(mDelegate.attach(handle, moduleService));
                 return moduleService;
             } catch (Exception e) {
@@ -271,6 +272,28 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 "This implementation is not inteded to be used directly with Binder.");
     }
 
+    @Override public void dump(PrintWriter pw) {
+        synchronized (this) {
+            if (mModules != null) {
+                for (int handle : mModules.keySet()) {
+                    pw.println("=========================================");
+                    pw.printf("Active sessions for module %d", handle);
+                    pw.println();
+                    pw.println("=========================================");
+                    for (ModuleService session : mModules.get(handle)) {
+                        session.dump(pw);
+                    }
+                }
+            }
+        }
+        pw.println();
+
+        if (mDelegate instanceof Dumpable) {
+            ((Dumpable) mDelegate).dump(pw);
+        }
+
+    }
+
     /** State of a sound model. */
     static class ModelState {
         /** Activity state of a sound model. */
@@ -345,9 +368,11 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         private final ISoundTriggerCallback mCallback;
         private ISoundTriggerModule mDelegate;
         private @NonNull Map<Integer, ModelState> mLoadedModels = new HashMap<>();
+        private final int mHandle;
 
-        ModuleService(@NonNull ISoundTriggerCallback callback) {
+        ModuleService(int handle, @NonNull ISoundTriggerCallback callback) {
             mCallback = callback;
+            mHandle = handle;
             try {
                 mCallback.asBinder().linkToDeath(null, 0);
             } catch (RemoteException e) {
@@ -357,6 +382,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         void attach(@NonNull ISoundTriggerModule delegate) {
             mDelegate = delegate;
+            mModules.get(mHandle).add(this);
         }
 
         @Override
@@ -652,8 +678,21 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 mDelegate.detach();
                 mDelegate = null;
                 mCallback.asBinder().unlinkToDeath(null, 0);
+                mModules.get(mHandle).remove(this);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
+            }
+        }
+
+        void dump(PrintWriter pw) {
+            pw.printf("Loaded models for session %s (handle, active)", toString());
+            pw.println();
+            pw.println("-------------------------------");
+            for (Map.Entry<Integer, ModelState> entry : mLoadedModels.entrySet()) {
+                pw.print(entry.getKey());
+                pw.print('\t');
+                pw.print(entry.getValue().activityState.name());
+                pw.println();
             }
         }
 
