@@ -44,6 +44,8 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -69,6 +71,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock DumpManager mDumpManager;
     private @Mock PowerManager mPowerManager;
     private @Mock TrustManager mTrustManager;
+    private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     private FalsingManagerFake mFalsingManager;
@@ -85,7 +88,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
                 mNotificationShadeWindowController, () -> mStatusBarKeyguardViewManager,
                 mDismissCallbackRegistry, mUpdateMonitor, mDumpManager, mUiBgExecutor,
-                mPowerManager, mTrustManager);
+                mPowerManager, mTrustManager, mDeviceConfig);
         mViewMediator.start();
     }
 
