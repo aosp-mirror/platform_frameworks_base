@@ -144,6 +144,19 @@ public class ChangeAppRotationTest extends FlickerTestBase {
         );
     }
 
+    @Test
+    public void checkVisibility_screenshotLayerBecomesInvisible() {
+        checkResults(result -> LayersTraceSubject.assertThat(result)
+                .showsLayer(mTestApp.getPackage())
+                .then()
+                .replaceVisibleLayer(mTestApp.getPackage(), "Screenshot")
+                .then()
+                .showsLayer(mTestApp.getPackage()).and().showsLayer("Screenshot")
+                .then()
+                .replaceVisibleLayer("Screenshot", mTestApp.getPackage())
+                .forAllEntries());
+    }
+
     @FlakyTest(bugId = 140855415)
     @Ignore("Waiting bug feedback")
     @Test
