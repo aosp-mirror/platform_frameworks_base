@@ -838,7 +838,8 @@ public final class OomAdjuster {
                     // definition not re-use the same process again, and it is
                     // good to avoid having whatever code was running in them
                     // left sitting around after no longer needed.
-                    app.kill("isolated not needed", ApplicationExitInfo.REASON_OTHER, true);
+                    app.kill("isolated not needed", ApplicationExitInfo.REASON_OTHER,
+                            ApplicationExitInfo.SUBREASON_ISOLATED_NOT_NEEDED, true);
                 } else {
                     // Keeping this process, update its uid.
                     updateAppUidRecLocked(app);
@@ -2156,7 +2157,8 @@ public final class OomAdjuster {
             }
             if (app.waitingToKill != null && app.curReceivers.isEmpty()
                     && app.setSchedGroup == ProcessList.SCHED_GROUP_BACKGROUND) {
-                app.kill(app.waitingToKill, ApplicationExitInfo.REASON_OTHER, true);
+                app.kill(app.waitingToKill, ApplicationExitInfo.REASON_USER_REQUESTED,
+                        ApplicationExitInfo.SUBREASON_UNKNOWN, true);
                 success = false;
             } else {
                 int processGroup;
