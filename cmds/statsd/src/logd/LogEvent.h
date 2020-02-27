@@ -20,7 +20,6 @@
 
 #include <android/util/ProtoOutputStream.h>
 #include <private/android_logger.h>
-#include <stats_event.h>
 
 #include <string>
 #include <vector>
@@ -61,22 +60,37 @@ struct InstallTrainInfo {
 };
 
 /**
- * Wrapper for the log_msg structure.
+ * This class decodes the structured, serialized encoding of an atom into a
+ * vector of FieldValues.
  */
 class LogEvent {
 public:
     /**
-     * Read a LogEvent from the socket
+     * \param uid user id of the logging caller
+     * \param pid process id of the logging caller
      */
-    explicit LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid);
+    explicit LogEvent(int32_t uid, int32_t pid);
+
+    /**
+     * Parses the atomId, timestamp, and vector of values from a buffer
+     * containing the StatsEvent/AStatsEvent encoding of an atom.
+     *
+     * \param buf a buffer that begins at the start of the serialized atom (it
+     * should not include the android_log_header_t or the StatsEventTag)
+     * \param len size of the buffer
+     *
+     * \return success of the initialization
+     */
+    bool parseBuffer(uint8_t* buf, size_t len);
+
+    // TODO(b/149590301): delete unused functions below once LogEvent uses the
+    // new socket schema within test code. Really we would like the only entry
+    // points into LogEvent to be the above constructor and parseBuffer functions.
 
     /**
      * Constructs a LogEvent with synthetic data for testing. Must call init() before reading.
      */
     explicit LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs);
-
-    // For testing. The timestamp is used as both elapsed real time and logd timestamp.
-    explicit LogEvent(int32_t tagId, int64_t timestampNs);
 
     // For testing. The timestamp is used as both elapsed real time and logd timestamp.
     explicit LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid);
@@ -192,10 +206,6 @@ public:
         return &mValues;
     }
 
-    bool isValid() {
-          return mValid;
-    }
-
     inline LogEvent makeCopy() {
         return LogEvent(*this);
     }
@@ -222,12 +232,6 @@ private:
      */
     LogEvent(const LogEvent&);
 
-
-    /**
-     * Parsing function for new encoding scheme.
-     */
-    void initNew();
-
     void parseInt32(int32_t* pos, int32_t depth, bool* last);
     void parseInt64(int32_t* pos, int32_t depth, bool* last);
     void parseString(int32_t* pos, int32_t depth, bool* last);
@@ -238,13 +242,14 @@ private:
     void parseAttributionChain(int32_t* pos, int32_t depth, bool* last);
 
     /**
-     * mBuf is a pointer to the current location in the buffer being parsed.
-     * Because the buffer lives  on the StatsSocketListener stack, this pointer
-     * is only valid during the LogEvent constructor. It will be set to null at
-     * the end of initNew.
+     * The below three variables are only valid during the execution of
+     * parseBuffer. There are no guarantees about the state of these variables
+     * before/after.
+     *
+     * TODO (b/150312423): These shouldn't be member variables. We should pass
+     * them around as parameters.
      */
     uint8_t* mBuf;
-
     uint32_t mRemainingLen; // number of valid bytes left in the buffer being parsed
     bool mValid = true; // stores whether the event we received from the socket is valid
 
