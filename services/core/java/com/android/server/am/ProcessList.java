@@ -80,13 +80,11 @@ import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IVold;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -2331,6 +2329,19 @@ public final class ProcessList {
         if (app.startSeq > expectedStartSeq) {
             if (sb == null) sb = new StringBuilder();
             sb.append("seq=" + app.startSeq + ",expected=" + expectedStartSeq + ";");
+        }
+        try {
+            AppGlobals.getPackageManager().checkPackageStartable(app.info.packageName, app.userId);
+        } catch (RemoteException e) {
+            // unexpected; ignore
+        } catch (SecurityException e) {
+            if (mService.mConstants.FLAG_PROCESS_START_ASYNC) {
+                if (sb == null) sb = new StringBuilder();
+                sb.append("Package is frozen;");
+            } else {
+                // we're not being started async and so should throw to the caller.
+                throw e;
+            }
         }
         return sb == null ? null : sb.toString();
     }
