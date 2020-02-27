@@ -32,6 +32,8 @@ import android.util.Log;
 
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Objects;
 
 /**
@@ -87,6 +89,12 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
     @Override
     public void setExternalCaptureState(boolean active) throws RemoteException {
         mDelegate.setExternalCaptureState(active);
+    }
+
+    @Override protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        if (mDelegate instanceof Dumpable) {
+            ((Dumpable) mDelegate).dump(fout);
+        }
     }
 
     private final static class ModuleService extends ISoundTriggerModule.Stub {
