@@ -150,13 +150,13 @@ public final class InlineSuggestionFactory {
             final int fieldIndex = dataset.getFieldIds().indexOf(autofillId);
             if (fieldIndex < 0) {
                 Slog.w(TAG, "AutofillId=" + autofillId + " not found in dataset");
-                return null;
+                continue;
             }
             final InlinePresentation inlinePresentation = dataset.getFieldInlinePresentation(
                     fieldIndex);
             if (inlinePresentation == null) {
                 Slog.w(TAG, "InlinePresentation not found in dataset");
-                return null;
+                continue;
             }
             if (!includeDataset(dataset, fieldIndex, filterText)) {
                 continue;
