@@ -73,7 +73,6 @@
 #include "androidfw/ApkAssets.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
-#include "idmap2/Policies.h"
 #include "idmap2/ResourceMapping.h"
 
 namespace android::idmap2 {

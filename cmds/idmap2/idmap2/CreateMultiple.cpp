@@ -20,8 +20,6 @@
 #include <fstream>
 #include <memory>
 #include <ostream>
-#include <sstream>
-#include <string>
 #include <vector>
 
 #include "android-base/stringprintf.h"
@@ -30,6 +28,7 @@
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Policies.h"
+#include "idmap2/PolicyUtils.h"
 #include "idmap2/SysTrace.h"
 #include "Commands.h"
 
@@ -39,13 +38,11 @@ using android::idmap2::BinaryStreamVisitor;
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Error;
 using android::idmap2::Idmap;
-using android::idmap2::PoliciesToBitmask;
-using android::idmap2::PolicyBitmask;
-using android::idmap2::PolicyFlags;
 using android::idmap2::Result;
 using android::idmap2::Unit;
 using android::idmap2::utils::kIdmapCacheDir;
 using android::idmap2::utils::kIdmapFilePermissionMask;
+using android::idmap2::utils::PoliciesToBitmaskResult;
 using android::idmap2::utils::UidHasWriteAccessToPath;
 
 Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
@@ -81,7 +78,7 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
   }
 
   PolicyBitmask fulfilled_policies = 0;
-  auto conv_result = PoliciesToBitmask(policies);
+  auto conv_result = PoliciesToBitmaskResult(policies);
   if (conv_result) {
     fulfilled_policies |= *conv_result;
   } else {
@@ -89,7 +86,7 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
   }
 
   if (fulfilled_policies == 0) {
-    fulfilled_policies |= PolicyFlags::POLICY_PUBLIC;
+    fulfilled_policies |= PolicyFlags::PUBLIC;
   }
 
   const std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
