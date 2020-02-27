@@ -981,6 +981,17 @@ message ScheduledJobStateChanged {
 
     // The job id (as assigned by the app).
     optional int32 job_id = 6;
+
+    // One flag for each of the API constraints defined by Jobscheduler. Does not include implcit
+    // constraints as they are always assumed to be set.
+    optional bool has_charging_constraint = 7;
+    optional bool has_battery_not_low_constraint = 8;
+    optional bool has_storage_not_low_constraint = 9;
+    optional bool has_timing_delay_constraint = 10;
+    optional bool has_deadline_constraint = 11;
+    optional bool has_idle_constraint = 12;
+    optional bool has_connectivity_constraint = 13;
+    optional bool has_content_trigger_constraint = 14;
 }
 
 /**
