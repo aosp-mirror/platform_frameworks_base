@@ -66,8 +66,14 @@ public class ViewHierarchyEncoder {
     private short mPropertyId = 1;
     private Charset mCharset = Charset.forName("utf-8");
 
+    private boolean mUserPropertiesEnabled = true;
+
     public ViewHierarchyEncoder(@NonNull ByteArrayOutputStream stream) {
         mStream = new DataOutputStream(stream);
+    }
+
+    public void setUserPropertiesEnabled(boolean enabled) {
+        mUserPropertiesEnabled = enabled;
     }
 
     public void beginObject(@NonNull Object o) {
@@ -118,6 +124,17 @@ public class ViewHierarchyEncoder {
     public void addProperty(@NonNull String name, @Nullable String s) {
         writeShort(createPropertyIndex(name));
         writeString(s);
+    }
+
+    /**
+     * Encodes a user defined property if they are allowed to be encoded
+     *
+     * @see #setUserPropertiesEnabled(boolean)
+     */
+    public void addUserProperty(@NonNull String name, @Nullable String s) {
+        if (mUserPropertiesEnabled) {
+            addProperty(name, s);
+        }
     }
 
     /**

@@ -153,7 +153,6 @@ import android.widget.RemoteViews;
 import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 
-import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
@@ -360,7 +359,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         // Shell permisssions will override permissions of our app, so add all necessary permissions
-        // fo this test here:
+        // for this test here:
         InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
                 "android.permission.WRITE_DEVICE_CONFIG",
                 "android.permission.READ_DEVICE_CONFIG",
@@ -1164,7 +1163,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(PKG, call.r.getSbn().getPackageName());
         assertEquals(0, call.r.getSbn().getId());
         assertEquals(tag, call.r.getSbn().getTag());
-        assertEquals(0, call.getInstanceId());  // Fake instance IDs are assigned in order
+        assertEquals(1, call.getInstanceId());  // Fake instance IDs are assigned in order
     }
 
     @Test
@@ -1186,14 +1185,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(
                 NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED,
                 mNotificationRecordLogger.get(0).event);
-        assertEquals(0, mNotificationRecordLogger.get(0).getInstanceId());
+        assertEquals(1, mNotificationRecordLogger.get(0).getInstanceId());
 
         assertTrue(mNotificationRecordLogger.get(1).shouldLogReported);
         assertEquals(
                 NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED,
                 mNotificationRecordLogger.get(1).event);
         // Instance ID doesn't change on update of an active notification
-        assertEquals(0, mNotificationRecordLogger.get(1).getInstanceId());
+        assertEquals(1, mNotificationRecordLogger.get(1).getInstanceId());
     }
 
     @Test
@@ -1248,19 +1247,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED,
                 mNotificationRecordLogger.get(0).event);
         assertTrue(mNotificationRecordLogger.get(0).shouldLogReported);
-        assertEquals(0, mNotificationRecordLogger.get(0).getInstanceId());
+        assertEquals(1, mNotificationRecordLogger.get(0).getInstanceId());
 
         assertEquals(
                 NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_APP_CANCEL,
                 mNotificationRecordLogger.get(1).event);
-        assertEquals(0, mNotificationRecordLogger.get(1).getInstanceId());
+        assertEquals(1, mNotificationRecordLogger.get(1).getInstanceId());
 
         assertEquals(
                 NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED,
                 mNotificationRecordLogger.get(2).event);
         assertTrue(mNotificationRecordLogger.get(2).shouldLogReported);
         // New instance ID because notification was canceled before re-post
-        assertEquals(1, mNotificationRecordLogger.get(2).getInstanceId());
+        assertEquals(2, mNotificationRecordLogger.get(2).getInstanceId());
     }
 
     @Test
@@ -3453,6 +3452,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testStats_dismissalSurface() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        r.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
         mService.addNotification(r);
 
         final NotificationVisibility nv = NotificationVisibility.obtain(r.getKey(), 0, 1, true);
@@ -3470,7 +3470,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(
                 NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_USER_AOD,
                 mNotificationRecordLogger.get(0).event);
-        assertEquals(0, mNotificationRecordLogger.get(0).getInstanceId());
+        assertEquals(1, mNotificationRecordLogger.get(0).getInstanceId());
     }
 
     @Test
@@ -4344,6 +4344,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationRecord r = generateNotificationRecord(
                 mTestNotificationChannel, 1, null, true);
         r.setTextChanged(true);
+        r.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
         mService.addNotification(r);
 
         mService.mNotificationDelegate.onNotificationVisibilityChanged(new NotificationVisibility[]
@@ -4353,7 +4354,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(1, mNotificationRecordLogger.getCalls().size());
         assertEquals(NotificationRecordLogger.NotificationEvent.NOTIFICATION_OPEN,
                 mNotificationRecordLogger.get(0).event);
-        assertEquals(0, mNotificationRecordLogger.get(0).getInstanceId());
+        assertEquals(1, mNotificationRecordLogger.get(0).getInstanceId());
 
         mService.mNotificationDelegate.onNotificationVisibilityChanged(
                 new NotificationVisibility[]{},
@@ -4364,7 +4365,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(2, mNotificationRecordLogger.getCalls().size());
         assertEquals(NotificationRecordLogger.NotificationEvent.NOTIFICATION_CLOSE,
                 mNotificationRecordLogger.get(1).event);
-        assertEquals(0, mNotificationRecordLogger.get(1).getInstanceId());
+        assertEquals(1, mNotificationRecordLogger.get(1).getInstanceId());
     }
 
     @Test
@@ -6089,7 +6090,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Pretend the shortcut exists
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
-        shortcutInfos.add(mock(ShortcutInfo.class));
+        ShortcutInfo info = mock(ShortcutInfo.class);
+        when(info.isLongLived()).thenReturn(true);
+        shortcutInfos.add(info);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
 
         // Test: Send the bubble notification
@@ -6116,7 +6119,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mLauncherApps, times(1)).unregisterCallback(launcherAppsCallback.getValue());
 
         // We're no longer a bubble
-        Notification notif2 = mService.getNotificationRecord(nr.getSbn().getKey()).getNotification();
+        Notification notif2 = mService.getNotificationRecord(
+                nr.getSbn().getKey()).getNotification();
         assertFalse(notif2.isBubbleNotification());
     }
 
@@ -6409,11 +6413,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         convos.add(convo2);
         when(mPreferencesHelper.getConversations(anyString(), anyInt())).thenReturn(convos);
 
-        // only one valid shortcut
-        LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery()
-                .setPackage(PKG_P)
-                .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED)
-                .setShortcutIds(Arrays.asList(channel1.getConversationId()));
         ShortcutInfo si = mock(ShortcutInfo.class);
         when(si.getShortLabel()).thenReturn("Hello");
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(Arrays.asList(si));

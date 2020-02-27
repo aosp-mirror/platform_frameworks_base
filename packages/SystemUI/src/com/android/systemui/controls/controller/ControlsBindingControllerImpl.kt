@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.controller
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.os.IBinder
@@ -50,7 +51,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
     private val refreshing = AtomicBoolean(false)
 
-    private var currentUser = context.user
+    private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
 
     override val currentUserId: Int
         get() = currentUser.identifier

@@ -70,12 +70,14 @@
             android:layout_height="match_parent"
             android:padding="4dp">
 
-            <TextView
+            <Button
+                android:id="@+id/other_apps"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:gravity="center_vertical"
                 android:text="See other apps"
-                android:textAppearance="@style/TextAppearance.Control.Title"
-                android:textColor="?android:attr/colorPrimary"
+                style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
@@ -85,6 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="Done"
+                style="@*android:style/Widget.DeviceDefault.Button.Colored"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>

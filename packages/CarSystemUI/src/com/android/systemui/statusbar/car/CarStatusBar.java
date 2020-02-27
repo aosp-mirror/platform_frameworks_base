@@ -122,6 +122,7 @@ import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -324,6 +325,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
+            PhoneStatusBarPolicy phoneStatusBarPolicy,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             /* Car Settings injected components. */
@@ -407,6 +409,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 keyguardDismissUtil,
                 extensionController,
                 userInfoControllerImpl,
+                phoneStatusBarPolicy,
                 dismissCallbackRegistry,
                 statusBarTouchableRegionManager);
         mUserSwitcherController = userSwitcherController;

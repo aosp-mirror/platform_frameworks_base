@@ -44,8 +44,9 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.NotificationShadeWindowBlurController;
+import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -91,6 +92,7 @@ public class NotificationShadeWindowViewController {
     private boolean mExpandAnimationRunning;
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarView mStatusBarView;
+    private PhoneStatusBarTransitions mBarTransitions;
     private StatusBar mService;
     private DragDownHelper mDragDownHelper;
     private boolean mDoubleTapEnabled;
@@ -98,6 +100,7 @@ public class NotificationShadeWindowViewController {
     private boolean mExpandingBelowNotch;
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
+    private final SuperStatusBarViewFactory mStatusBarViewFactory;
 
     // Used for determining view / touch intersection
     private int[] mTempLocation = new int[2];
@@ -124,8 +127,9 @@ public class NotificationShadeWindowViewController {
             ShadeController shadeController,
             DockManager dockManager,
             @Nullable NotificationShadeWindowBlurController blurController,
-            NotificationShadeWindowView statusBarWindowView,
-            NotificationPanelViewController notificationPanelViewController) {
+            NotificationShadeWindowView notificationShadeWindowView,
+            NotificationPanelViewController notificationPanelViewController,
+            SuperStatusBarViewFactory statusBarViewFactory) {
         mInjectionInflationController = injectionInflationController;
         mCoordinator = coordinator;
         mPulseExpansionHandler = pulseExpansionHandler;
@@ -141,11 +145,12 @@ public class NotificationShadeWindowViewController {
         mDozeLog = dozeLog;
         mDozeParameters = dozeParameters;
         mCommandQueue = commandQueue;
-        mView = statusBarWindowView;
+        mView = notificationShadeWindowView;
         mShadeController = shadeController;
         mDockManager = dockManager;
         mNotificationPanelViewController = notificationPanelViewController;
         mBlurController = blurController;
+        mStatusBarViewFactory = statusBarViewFactory;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror);
@@ -440,8 +445,18 @@ public class NotificationShadeWindowViewController {
         }
     }
 
+    public PhoneStatusBarTransitions getBarTransitions() {
+        return mBarTransitions;
+    }
+
     public void setStatusBarView(PhoneStatusBarView statusBarView) {
         mStatusBarView = statusBarView;
+        if (statusBarView != null && mStatusBarViewFactory != null) {
+            mBarTransitions = new PhoneStatusBarTransitions(
+                    statusBarView,
+                    mStatusBarViewFactory.getStatusBarWindowView()
+                            .findViewById(R.id.status_bar_container));
+        }
     }
 
     public void setService(StatusBar statusBar) {

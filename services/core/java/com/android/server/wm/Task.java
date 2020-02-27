@@ -58,6 +58,7 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
+import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
@@ -78,6 +79,9 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_STACK;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.IdentifierProto.HASH_CODE;
+import static com.android.server.wm.IdentifierProto.TITLE;
+import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -119,10 +123,13 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.ITaskOrganizer;
+import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -1884,11 +1891,19 @@ class Task extends WindowContainer<WindowContainer> {
                     .setBounds(mLastNonFullscreenBounds);
         }
 
+        final int prevWinMode = getWindowingMode();
+        mTmpPrevBounds.set(getBounds());
         final boolean wasInMultiWindowMode = inMultiWindowMode();
         super.onConfigurationChanged(newParentConfig);
         if (wasInMultiWindowMode != inMultiWindowMode()) {
             mStackSupervisor.scheduleUpdateMultiWindowMode(this);
             updateShadowsRadius(isFocused(), getPendingTransaction());
+        }
+
+        final int newWinMode = getWindowingMode();
+        if ((prevWinMode != newWinMode) && (mDisplayContent != null)
+                && shouldStartChangeTransition(prevWinMode, newWinMode)) {
+            initializeChangeTransition(mTmpPrevBounds);
         }
 
         // If the configuration supports persistent bounds (eg. Freeform), keep track of the
@@ -1902,6 +1917,63 @@ class Task extends WindowContainer<WindowContainer> {
         // TODO: Should also take care of Pip mode changes here.
 
         saveLaunchingStateIfNeeded();
+    }
+
+    /**
+     * Initializes a change transition. See {@link SurfaceFreezer} for more information.
+     */
+    private void initializeChangeTransition(Rect startBounds) {
+        mDisplayContent.prepareAppTransition(TRANSIT_TASK_CHANGE_WINDOWING_MODE,
+                false /* alwaysKeepCurrent */, 0, false /* forceOverride */);
+        mDisplayContent.mChangingContainers.add(this);
+
+        mSurfaceFreezer.freeze(getPendingTransaction(), startBounds);
+    }
+
+    private boolean shouldStartChangeTransition(int prevWinMode, int newWinMode) {
+        if (mWmService.mDisableTransitionAnimation
+                || !isVisible()
+                || getDisplayContent().mAppTransition.isTransitionSet()
+                || getSurfaceControl() == null) {
+            return false;
+        }
+        // Only do an animation into and out-of freeform mode for now. Other mode
+        // transition animations are currently handled by system-ui.
+        return (prevWinMode == WINDOWING_MODE_FREEFORM) != (newWinMode == WINDOWING_MODE_FREEFORM);
+    }
+
+    @VisibleForTesting
+    boolean isInChangeTransition() {
+        return mSurfaceFreezer.hasLeash() || AppTransition.isChangeTransit(mTransit);
+    }
+
+    @Override
+    public SurfaceControl getFreezeSnapshotTarget() {
+        final int transit = mDisplayContent.mAppTransition.getAppTransition();
+        if (!AppTransition.isChangeTransit(transit)) {
+            return null;
+        }
+        // Skip creating snapshot if this transition is controlled by a remote animator which
+        // doesn't need it.
+        final ArraySet<Integer> activityTypes = new ArraySet<>();
+        activityTypes.add(getActivityType());
+        final RemoteAnimationAdapter adapter =
+                mDisplayContent.mAppTransitionController.getRemoteAnimationOverride(
+                        this, transit, activityTypes);
+        if (adapter != null && !adapter.getChangeNeedsSnapshot()) {
+            return null;
+        }
+        return getSurfaceControl();
+    }
+
+    @Override
+    void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(HASH_CODE, System.identityHashCode(this));
+        proto.write(USER_ID, mUserId);
+        proto.write(TITLE, intent != null && intent.getComponent() != null
+                ? intent.getComponent().flattenToShortString() : "Task");
+        proto.end(token);
     }
 
     /**
@@ -2614,11 +2686,21 @@ class Task extends WindowContainer<WindowContainer> {
         if (!isRootTask) {
             adjustBoundsForDisplayChangeIfNeeded(dc);
         }
+        final DisplayContent prevDc = mDisplayContent;
         super.onDisplayChanged(dc);
         if (!isRootTask) {
             final int displayId = (dc != null) ? dc.getDisplayId() : INVALID_DISPLAY;
             mWmService.mAtmService.getTaskChangeNotificationController().notifyTaskDisplayChanged(
                     mTaskId, displayId);
+        }
+        if (prevDc != null && prevDc.mChangingContainers.remove(this)) {
+            // This gets called *after* this has been reparented to the new display.
+            // That reparenting resulted in this window changing modes (eg. FREEFORM -> FULLSCREEN),
+            // so this token is now "frozen" while waiting for the animation to start on prevDc
+            // (which will be cancelled since the window is no-longer a child). However, since this
+            // is no longer a child of prevDc, this won't be notified of the cancelled animation,
+            // so we need to cancel the change transition here.
+            mSurfaceFreezer.unfreeze(getPendingTransaction());
         }
     }
 
@@ -3008,15 +3090,6 @@ class Task extends WindowContainer<WindowContainer> {
             }
         }
         return forAllTasks((t) -> { return t != this && t.isTaskAnimating(); });
-    }
-
-    /**
-     * @return {@code true} if changing app transition is running.
-     */
-    @Override
-    boolean isChangingAppTransition() {
-        final ActivityRecord activity = getTopVisibleActivity();
-        return activity != null && getDisplayContent().mChangingApps.contains(activity);
     }
 
     @Override

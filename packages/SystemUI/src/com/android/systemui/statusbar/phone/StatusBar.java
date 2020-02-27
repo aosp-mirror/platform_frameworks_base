@@ -676,6 +676,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
+            PhoneStatusBarPolicy phoneStatusBarPolicy,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
         super(context);
@@ -751,6 +752,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardDismissUtil = keyguardDismissUtil;
         mExtensionController = extensionController;
         mUserInfoControllerImpl = userInfoControllerImpl;
+        mIconPolicy = phoneStatusBarPolicy;
         mDismissCallbackRegistry = dismissCallbackRegistry;
 
         mBubbleExpandListener =
@@ -875,8 +877,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // end old BaseStatusBar.start().
 
         // Lastly, call to the icon policy to install/update all the icons.
-        mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController, mCommandQueue,
-                mBroadcastDispatcher, mUiBgExecutor);
+        mIconPolicy.init();
         mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconController);
 
         mKeyguardStateController.addCallback(this);
@@ -2305,13 +2306,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected BarTransitions getStatusBarTransitions() {
-        return mStatusBarView.getBarTransitions();
+        return mNotificationShadeWindowViewController.getBarTransitions();
     }
 
     void checkBarModes() {
         if (mDemoMode) return;
-        if (mStatusBarView != null) checkBarMode(mStatusBarMode, mStatusBarWindowState,
-                getStatusBarTransitions());
+        if (mNotificationShadeWindowViewController != null) {
+            checkBarMode(mStatusBarMode, mStatusBarWindowState, getStatusBarTransitions());
+        }
         mNavigationBarController.checkNavBarModes(mDisplayId);
         mNoAnimationOnNextBarModeChange = false;
     }
@@ -2329,8 +2331,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void finishBarAnimations() {
-        if (mStatusBarView != null) {
-            mStatusBarView.getBarTransitions().finishAnimations();
+        if (mNotificationShadeWindowController != null
+                && mNotificationShadeWindowViewController.getBarTransitions() != null) {
+            mNotificationShadeWindowViewController.getBarTransitions().finishAnimations();
         }
         mNavigationBarController.finishBarAnimations(mDisplayId);
     }
@@ -2396,12 +2399,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         pw.print("  mDozing="); pw.println(mDozing);
         pw.print("  mWallpaperSupported= "); pw.println(mWallpaperSupported);
 
-        if (mStatusBarView != null) {
-            dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
-        }
         pw.println("  StatusBarWindowView: ");
         if (mNotificationShadeWindowViewController != null) {
             mNotificationShadeWindowViewController.dump(fd, pw, args);
+            dumpBarTransitions(pw, "PhoneStatusBarTransitions",
+                    mNotificationShadeWindowViewController.getBarTransitions());
         }
 
         pw.println("  mMediaManager: ");
@@ -3004,8 +3006,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                     -1;
             if (barMode != -1) {
                 boolean animate = true;
-                if (mStatusBarView != null) {
-                    mStatusBarView.getBarTransitions().transitionTo(barMode, animate);
+                if (mNotificationShadeWindowController != null
+                        && mNotificationShadeWindowViewController.getBarTransitions() != null) {
+                    mNotificationShadeWindowViewController.getBarTransitions().transitionTo(
+                            barMode, animate);
                 }
                 mNavigationBarController.transitionTo(mDisplayId, barMode, animate);
             }

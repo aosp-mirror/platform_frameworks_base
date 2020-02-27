@@ -30,7 +30,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * DVR settings used to configure {@link Dvr}.
+ * DVR settings used to configure {@link DvrPlayback} and {@link DvrRecorder}.
  *
  * @hide
  */

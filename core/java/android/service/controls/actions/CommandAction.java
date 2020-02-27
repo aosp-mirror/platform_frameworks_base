@@ -19,15 +19,32 @@ package android.service.controls.actions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
+import android.service.controls.Control;
+import android.service.controls.templates.StatelessTemplate;
 
+/**
+ * A simple {@link ControlAction} indicating that the user has interacted with a {@link Control}
+ * created using a {@link StatelessTemplate}.
+ */
 public final class CommandAction extends ControlAction {
 
     private static final @ActionType int TYPE = TYPE_COMMAND;
 
+    /**
+     * @param templateId the identifier of the {@link StatelessTemplate} that originated this
+     *                   action.
+     * @param challengeValue a value sent by the user along with the action to authenticate. {@code}
+     *                       null is sent when no authentication is needed or has not been
+     *                       requested.
+     */
     public CommandAction(@NonNull String templateId, @Nullable String challengeValue) {
         super(templateId, challengeValue);
     }
 
+    /**
+     * @param templateId the identifier of the {@link StatelessTemplate} that originated this
+     *                   action.
+     */
     public CommandAction(@NonNull String templateId) {
         this(templateId, null);
     }
@@ -40,6 +57,9 @@ public final class CommandAction extends ControlAction {
         super(b);
     }
 
+    /**
+     * @return {@link ControlAction#TYPE_COMMAND}
+     */
     @Override
     public int getActionType() {
         return TYPE;

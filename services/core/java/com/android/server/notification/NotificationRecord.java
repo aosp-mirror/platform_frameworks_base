@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.media.AudioAttributes;
 import android.media.AudioSystem;
@@ -166,6 +167,7 @@ public final class NotificationRecord {
     private boolean mAllowBubble;
     private Light mLight;
     private boolean mIsNotConversationOverride;
+    private ShortcutInfo mShortcutInfo;
     /**
      * This list contains system generated smart actions from NAS, app-generated smart actions are
      * stored in Notification.actions with isContextual() set to true.
@@ -1338,14 +1340,20 @@ public final class NotificationRecord {
         return hasCustomRemoteView && !hasDecoratedStyle;
     }
 
-    /** Whether this notification is a conversation notification. */
+    public void setShortcutInfo(ShortcutInfo shortcutInfo) {
+        mShortcutInfo = shortcutInfo;
+    }
+
+    /**
+     * Whether this notification is a conversation notification.
+     */
     public boolean isConversation() {
         Notification notification = getNotification();
         if (mChannel.isDemoted()
                 || !Notification.MessagingStyle.class.equals(notification.getNotificationStyle())) {
             return false;
         }
-        if (notification.getShortcutId() == null
+        if (mShortcutInfo == null
                 && !FeatureFlagUtils.isEnabled(
                         mContext, FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ)) {
             return false;
@@ -1353,7 +1361,6 @@ public final class NotificationRecord {
         if (mIsNotConversationOverride) {
             return false;
         }
-        // STOPSHIP b/137397357: Check shortcut to make a further decision
         return true;
     }
 
