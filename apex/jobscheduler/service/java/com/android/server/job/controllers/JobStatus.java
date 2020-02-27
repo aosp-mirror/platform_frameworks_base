@@ -1293,6 +1293,11 @@ public final class JobStatus {
             CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW | CONSTRAINT_STORAGE_NOT_LOW
                     | CONSTRAINT_TIMING_DELAY | CONSTRAINT_IDLE;
 
+    /** Returns true whenever all dynamically set constraints are satisfied. */
+    public boolean areDynamicConstraintsSatisfied() {
+        return mReadyDynamicSatisfied;
+    }
+
     /**
      * @return Whether the constraints set on this job are satisfied.
      */
