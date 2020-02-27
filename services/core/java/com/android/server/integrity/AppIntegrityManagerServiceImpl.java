@@ -79,8 +79,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
 public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
@@ -101,11 +103,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private static final String TAG = "AppIntegrityManagerServiceImpl";
 
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
-    private static final String PACKAGE_INSTALLER = "com.google.android.packageinstaller";
     private static final String BASE_APK_FILE = "base.apk";
     private static final String ALLOWED_INSTALLERS_METADATA_NAME = "allowed-installers";
     private static final String ALLOWED_INSTALLER_DELIMITER = ",";
     private static final String INSTALLER_PACKAGE_CERT_DELIMITER = "\\|";
+
+    private static final Set<String> PACKAGE_INSTALLER = new HashSet<>(
+            Arrays.asList("com.google.android.packageinstaller", "com.android.packageinstaller"));
 
     // Access to files inside mRulesDir is protected by mRulesLock;
     private final Context mContext;
@@ -376,7 +380,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         // A common way for apps to install packages is to send an intent to PackageInstaller. In
         // that case, the installer will always show up as PackageInstaller which is not what we
         // want.
-        if (installer.equals(PACKAGE_INSTALLER)) {
+        if (PACKAGE_INSTALLER.contains(installer)) {
             int originatingUid = intent.getIntExtra(EXTRA_ORIGINATING_UID, -1);
             if (originatingUid < 0) {
                 Slog.e(TAG, "Installer is package installer but originating UID not found.");
