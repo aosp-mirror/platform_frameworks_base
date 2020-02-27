@@ -53,8 +53,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     static final int NUMBER_OF_CHILDREN_WHEN_COLLAPSED = 2;
     @VisibleForTesting
     static final int NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED = 5;
-    @VisibleForTesting
-    static final int NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED = 8;
+    public static final int NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED = 8;
     private static final AnimationProperties ALPHA_FADE_IN = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
 
