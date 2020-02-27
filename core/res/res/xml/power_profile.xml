@@ -51,6 +51,12 @@
       <value>0.1</value> <!-- ~1mA -->
   </array>
 
+  <!-- Additional power consumption by CPU excluding cluster and core when
+       running -->
+  <array name="cpu.active">
+      <value>0.1</value>
+  </array>
+
   <!-- A list of heterogeneous CPU clusters, where the value for each cluster represents the
        number of CPU cores for that cluster.
 

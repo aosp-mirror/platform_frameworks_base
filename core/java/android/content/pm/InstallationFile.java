@@ -16,82 +16,59 @@
 
 package android.content.pm;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 /**
  * Defines the properties of a file in an installation session.
- * TODO(b/136132412): update with new APIs.
- *
  * @hide
  */
 @SystemApi
 public final class InstallationFile implements Parcelable {
-    public static final int FILE_TYPE_UNKNOWN = -1;
-    public static final int FILE_TYPE_APK = 0;
-    public static final int FILE_TYPE_LIB = 1;
-    public static final int FILE_TYPE_OBB = 2;
+    private final @PackageInstaller.FileLocation int mLocation;
+    private final @NonNull String mName;
+    private final long mLengthBytes;
+    private final @Nullable byte[] mMetadata;
+    private final @Nullable byte[] mSignature;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"FILE_TYPE_"}, value = {
-            FILE_TYPE_APK,
-            FILE_TYPE_LIB,
-            FILE_TYPE_OBB,
-    })
-    public @interface FileType {
-    }
-
-    private String mFileName;
-    private @FileType int mFileType;
-    private long mFileSize;
-    private byte[] mMetadata;
-
-    public InstallationFile(@NonNull String fileName, long fileSize,
-            @Nullable byte[] metadata) {
-        mFileName = fileName;
-        mFileSize = fileSize;
+    public InstallationFile(@PackageInstaller.FileLocation int location, @NonNull String name,
+            long lengthBytes, @Nullable byte[] metadata, @Nullable byte[] signature) {
+        mLocation = location;
+        mName = name;
+        mLengthBytes = lengthBytes;
         mMetadata = metadata;
-        if (fileName.toLowerCase().endsWith(".apk")) {
-            mFileType = FILE_TYPE_APK;
-        } else if (fileName.toLowerCase().endsWith(".obb")) {
-            mFileType = FILE_TYPE_OBB;
-        } else if (fileName.toLowerCase().endsWith(".so") && fileName.toLowerCase().startsWith(
-                "lib/")) {
-            mFileType = FILE_TYPE_LIB;
-        } else {
-            mFileType = FILE_TYPE_UNKNOWN;
-        }
+        mSignature = signature;
     }
 
-    public @FileType int getFileType() {
-        return mFileType;
+    public @PackageInstaller.FileLocation int getLocation() {
+        return mLocation;
     }
 
     public @NonNull String getName() {
-        return mFileName;
+        return mName;
     }
 
-    public long getSize() {
-        return mFileSize;
+    public long getLengthBytes() {
+        return mLengthBytes;
     }
 
     public @Nullable byte[] getMetadata() {
         return mMetadata;
     }
 
+    public @Nullable byte[] getSignature() {
+        return mSignature;
+    }
+
     private InstallationFile(Parcel source) {
-        mFileName = source.readString();
-        mFileType = source.readInt();
-        mFileSize = source.readLong();
+        mLocation = source.readInt();
+        mName = source.readString();
+        mLengthBytes = source.readLong();
         mMetadata = source.createByteArray();
+        mSignature = source.createByteArray();
     }
 
     @Override
@@ -101,10 +78,11 @@ public final class InstallationFile implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(mFileName);
-        dest.writeInt(mFileType);
-        dest.writeLong(mFileSize);
+        dest.writeInt(mLocation);
+        dest.writeString(mName);
+        dest.writeLong(mLengthBytes);
         dest.writeByteArray(mMetadata);
+        dest.writeByteArray(mSignature);
     }
 
     public static final @NonNull Creator<InstallationFile> CREATOR =

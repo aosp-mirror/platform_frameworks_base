@@ -26,26 +26,23 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.PixelFormat
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.Window
-import android.view.WindowInsets.Type
 import android.view.WindowInsets.Type.statusBars
 import android.view.WindowManager
 import android.widget.TextView
 import com.android.internal.annotations.VisibleForTesting
-
 import com.android.systemui.R
-
 import javax.inject.Inject
 import javax.inject.Singleton
 
-const val TAG = "ChannelDialogController"
+private const val TAG = "ChannelDialogController"
 
 /**
  * ChannelEditorDialogController is the controller for the dialog half-shelf
@@ -149,9 +146,9 @@ class ChannelEditorDialogController @Inject constructor(
         val channels = groupList
                 .flatMap { group ->
                     group.channels.asSequence().filterNot { channel ->
-                        channel.isImportanceLockedByOEM
-                                || channel.importance == IMPORTANCE_NONE
-                                || channel.isImportanceLockedByCriticalDeviceFunction
+                        channel.isImportanceLockedByOEM ||
+                                channel.importance == IMPORTANCE_NONE ||
+                                channel.isImportanceLockedByCriticalDeviceFunction
                     }
                 }
 

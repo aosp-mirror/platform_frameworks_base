@@ -616,7 +616,7 @@ public final class DisplayManagerGlobal {
      *
      * @hide Requires signature permission.
      */
-    public void setTemporaryBrightness(int brightness) {
+    public void setTemporaryBrightness(float brightness) {
         try {
             mDm.setTemporaryBrightness(brightness);
         } catch (RemoteException ex) {

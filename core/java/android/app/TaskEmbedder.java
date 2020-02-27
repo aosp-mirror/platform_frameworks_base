@@ -597,7 +597,7 @@ public class TaskEmbedder {
         if (mTmpDisplayMetrics == null) {
             mTmpDisplayMetrics = new DisplayMetrics();
         }
-        mContext.getDisplay().getMetrics(mTmpDisplayMetrics);
+        mContext.getDisplayNoVerify().getRealMetrics(mTmpDisplayMetrics);
         return mTmpDisplayMetrics.densityDpi;
     }
 

@@ -17,14 +17,16 @@
 #include <gtest/gtest.h>
 
 using namespace android::os::statsd;
+using std::shared_ptr;
 
 #ifdef __ANDROID__
 TEST(AlarmMonitor, popSoonerThan) {
     std::string emptyMetricId;
     std::string emptyDimensionId;
     unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> set;
-    AlarmMonitor am(2, [](const sp<IStatsCompanionService>&, int64_t){},
-                    [](const sp<IStatsCompanionService>&){});
+    AlarmMonitor am(2,
+                    [](const shared_ptr<IStatsCompanionService>&, int64_t){},
+                    [](const shared_ptr<IStatsCompanionService>&){});
 
     set = am.popSoonerThan(5);
     EXPECT_TRUE(set.empty());

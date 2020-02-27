@@ -129,6 +129,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     /** Upper bound on number of historical sessions for a UID */
     private static final long MAX_HISTORICAL_SESSIONS = 1048576;
 
+    /**
+     * Allow verification-skipping if it's a development app installed through ADB with
+     * disable verification flag specified.
+     */
+    private static final int ADB_DEV_MODE = PackageManager.INSTALL_FROM_ADB
+            | PackageManager.INSTALL_ALLOW_TEST;
+
     private final Context mContext;
     private final PackageManagerService mPm;
     private final ApexManager mApexManager;
@@ -531,8 +538,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
         }
 
-        if (callingUid != Process.SYSTEM_UID) {
-            // Only system_server can use INSTALL_DISABLE_VERIFICATION.
+        if (callingUid != Process.SYSTEM_UID
+                && (params.installFlags & ADB_DEV_MODE) != ADB_DEV_MODE) {
+            // Only system_server or tools under specific conditions (test app installed
+            // through ADB, and verification disabled flag specified) can disable verification.
             params.installFlags &= ~PackageManager.INSTALL_DISABLE_VERIFICATION;
         }
 

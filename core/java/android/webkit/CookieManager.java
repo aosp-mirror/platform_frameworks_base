@@ -102,6 +102,9 @@ public abstract class CookieManager {
      * path and name will be replaced with the new cookie. The cookie being set
      * will be ignored if it is expired.
      *
+     * <p class="note"><b>Note:</b> if specifying a {@code value} containing the {@code "Secure"}
+     * attribute, {@code url} must use the {@code "https://"} scheme.
+     *
      * @param url the URL for which the cookie is to be set
      * @param value the cookie as a string, using the format of the 'Set-Cookie'
      *              HTTP response header
@@ -121,6 +124,9 @@ public abstract class CookieManager {
      * You can pass {@code null} as the callback if you don't need to know when the operation
      * completes or whether it succeeded, and in this case it is safe to call the method from a
      * thread without a Looper.
+     *
+     * <p class="note"><b>Note:</b> if specifying a {@code value} containing the {@code "Secure"}
+     * attribute, {@code url} must use the {@code "https://"} scheme.
      *
      * @param url the URL for which the cookie is to be set
      * @param value the cookie as a string, using the format of the 'Set-Cookie'

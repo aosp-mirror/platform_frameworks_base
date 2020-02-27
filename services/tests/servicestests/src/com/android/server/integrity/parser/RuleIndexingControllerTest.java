@@ -35,6 +35,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(JUnit4.class)
@@ -49,7 +51,7 @@ public class RuleIndexingControllerTest {
         AppInstallMetadata appInstallMetadata =
                 new AppInstallMetadata.Builder()
                         .setPackageName("ddd")
-                        .setAppCertificate("777")
+                        .setAppCertificates(Collections.singletonList("777"))
                         .build();
 
         List<RuleIndexRange> resultingIndexes =
@@ -63,6 +65,29 @@ public class RuleIndexingControllerTest {
     }
 
     @Test
+    public void verifyIndexRangeSearchIsCorrect_multipleAppCertificates() throws IOException {
+        InputStream inputStream = obtainDefaultIndexingMapForTest();
+
+        RuleIndexingController indexingController = new RuleIndexingController(inputStream);
+
+        AppInstallMetadata appInstallMetadata =
+                new AppInstallMetadata.Builder()
+                        .setPackageName("ddd")
+                        .setAppCertificates(Arrays.asList("777", "999"))
+                        .build();
+
+        List<RuleIndexRange> resultingIndexes =
+                indexingController.identifyRulesToEvaluate(appInstallMetadata);
+
+        assertThat(resultingIndexes)
+                .containsExactly(
+                        new RuleIndexRange(200, 300),
+                        new RuleIndexRange(700, 800),
+                        new RuleIndexRange(800, 900),
+                        new RuleIndexRange(900, 945));
+    }
+
+    @Test
     public void verifyIndexRangeSearchIsCorrect_keysInFirstAndLastBlock() throws IOException {
         InputStream inputStream = obtainDefaultIndexingMapForTest();
 
@@ -71,7 +96,7 @@ public class RuleIndexingControllerTest {
         AppInstallMetadata appInstallMetadata =
                 new AppInstallMetadata.Builder()
                         .setPackageName("bbb")
-                        .setAppCertificate("999")
+                        .setAppCertificates(Collections.singletonList("999"))
                         .build();
 
         List<RuleIndexRange> resultingIndexes =
@@ -93,7 +118,7 @@ public class RuleIndexingControllerTest {
         AppInstallMetadata appInstallMetadata =
                 new AppInstallMetadata.Builder()
                         .setPackageName("ccc")
-                        .setAppCertificate("444")
+                        .setAppCertificates(Collections.singletonList("444"))
                         .build();
 
         List<RuleIndexRange> resultingIndexes =
@@ -125,7 +150,7 @@ public class RuleIndexingControllerTest {
         AppInstallMetadata appInstallMetadata =
                 new AppInstallMetadata.Builder()
                         .setPackageName("ccc")
-                        .setAppCertificate("444")
+                        .setAppCertificates(Collections.singletonList("444"))
                         .build();
 
         List<RuleIndexRange> resultingIndexes =

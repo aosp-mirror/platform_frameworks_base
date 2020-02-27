@@ -266,34 +266,12 @@ protected:
     DataLoaderParamsParcel mDataLoaderParcel;
 };
 
-/*
-TEST_F(IncrementalServiceTest, testBootMountExistingImagesSuccess) {
-    TemporaryDir tempDir;
-    setUpExistingMountDir(tempDir.path);
-    mVold->mountIncFsSuccess();
-    mVold->bindMountSuccess();
-    mIncrementalManager->prepareDataLoaderSuccess();
-    ON_CALL(*mIncrementalManager, destroyDataLoader(_)).WillByDefault(Return(binder::Status::ok()));
-
-    EXPECT_CALL(*mVold, mountIncFs(_, _, _, _)).Times(1);
-    EXPECT_CALL(*mIncrementalManager, prepareDataLoader(_, _, _, _, _)).Times(1);
-
-    MockServiceManager serviceManager = MockServiceManager(mVold, mIncrementalManager, mIncFs);
-    std::unique_ptr<IncrementalService> incrementalService =
-            std::make_unique<IncrementalService>(serviceManager, tempDir.path);
-    auto finished = incrementalService->onSystemReady();
-    if (finished) {
-        finished->wait();
-    }
-}
-*/
-
 TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsFails) {
     mVold->mountIncFsFails();
     EXPECT_CALL(*mIncrementalManager, prepareDataLoader(_, _, _, _, _)).Times(0);
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_LT(storageId, 0);
 }
@@ -303,7 +281,7 @@ TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsInvalidControlParcel) 
     EXPECT_CALL(*mIncrementalManager, prepareDataLoader(_, _, _, _, _)).Times(0);
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_LT(storageId, 0);
 }
@@ -316,7 +294,7 @@ TEST_F(IncrementalServiceTest, testCreateStorageMakeFileFails) {
     EXPECT_CALL(*mVold, unmountIncFs(_));
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_LT(storageId, 0);
 }
@@ -330,7 +308,7 @@ TEST_F(IncrementalServiceTest, testCreateStorageBindMountFails) {
     EXPECT_CALL(*mVold, unmountIncFs(_));
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_LT(storageId, 0);
 }
@@ -344,7 +322,7 @@ TEST_F(IncrementalServiceTest, testCreateStoragePrepareDataLoaderFails) {
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_LT(storageId, 0);
 }
@@ -358,7 +336,7 @@ TEST_F(IncrementalServiceTest, testDeleteStorageSuccess) {
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
     mIncrementalService->deleteStorage(storageId);
@@ -373,7 +351,7 @@ TEST_F(IncrementalServiceTest, testOnStatusNotReady) {
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
     mIncrementalManager->setDataLoaderStatusNotReady();
@@ -389,7 +367,7 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderSuccess) {
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
     mIncrementalManager->setDataLoaderStatusReady();
@@ -404,13 +382,13 @@ TEST_F(IncrementalServiceTest, testMakeDirectory) {
     mIncrementalManager->startDataLoaderSuccess();
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     std::string dir_path("test");
 
     std::string tempPath(tempDir.path);
     std::replace(tempPath.begin(), tempPath.end(), '/', '_');
-    std::string mount_dir = std::string(mRootDir.path) + "/" + tempPath.substr(1);
+    std::string mount_dir = std::string(mRootDir.path) + "/MT_" + tempPath.substr(1);
     std::string normalized_dir_path = mount_dir + "/mount/st_1_0/" + dir_path;
 
     // Expecting incfs to call makeDir on a path like:
@@ -428,7 +406,7 @@ TEST_F(IncrementalServiceTest, testMakeDirectories) {
     mIncrementalManager->startDataLoaderSuccess();
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     auto first = "first"sv;
     auto second = "second"sv;
@@ -436,7 +414,7 @@ TEST_F(IncrementalServiceTest, testMakeDirectories) {
 
     std::string tempPath(tempDir.path);
     std::replace(tempPath.begin(), tempPath.end(), '/', '_');
-    std::string mount_dir = std::string(mRootDir.path) + "/" + tempPath.substr(1);
+    std::string mount_dir = std::string(mRootDir.path) + "/MT_" + tempPath.substr(1);
 
     InSequence seq;
     auto parent_path = std::string(first) + "/" + std::string(second);

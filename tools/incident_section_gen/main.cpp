@@ -415,7 +415,7 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
         }
 
         const SectionFlags s = getSectionFlags(field);
-        if (s.userdebug_and_eng_only()) {
+        if (s.userdebug_and_eng_only() || s.type() == SECTION_TEXT_DUMPSYS) {
             printf("#if ALLOW_RESTRICTED_SECTIONS\n");
         }
 
@@ -449,8 +449,13 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
                 printf("    new TombstoneSection(%d, \"%s\"),\n", field->number(),
                         s.args().c_str());
                 break;
+            case SECTION_TEXT_DUMPSYS:
+                printf("    new TextDumpsysSection(%d, ", field->number());
+                splitAndPrint(s.args());
+                printf(" NULL),\n");
+                break;
         }
-        if (s.userdebug_and_eng_only()) {
+        if (s.userdebug_and_eng_only() || s.type() == SECTION_TEXT_DUMPSYS) {
             printf("#endif\n");
         }
     }

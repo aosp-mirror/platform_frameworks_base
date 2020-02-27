@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.Activity;
 import android.app.AppOpsManager.Mode;
 import android.content.ComponentName;
 import android.content.Context;
@@ -47,8 +48,15 @@ import java.util.stream.Collectors;
 public class CrossProfileApps {
 
     /**
-     * Broadcast signalling that the receiving app's ability to interact across profiles has
-     * changed, as defined by the return value of {@link #canInteractAcrossProfiles()}.
+     * Broadcast signalling that the receiving app's permission to interact across profiles has
+     * changed. This includes the user, admin, or OEM changing their consent such that the
+     * permission for the app to interact across profiles has changed.
+     *
+     * <p>This broadcast is not sent when other circumstances result in a change to being able to
+     * interact across profiles in practice, such as the profile being turned off or removed, apps
+     * being uninstalled, etc. The methods {@link #canInteractAcrossProfiles()} and {@link
+     * #canRequestInteractAcrossProfiles()} can be used by apps prior to attempting to interact
+     * across profiles or attempting to request user consent to interact across profiles.
      *
      * <p>Apps that have set the {@code android:crossProfile} manifest attribute to {@code true}
      * can receive this broadcast in manifest broadcast receivers. Otherwise, it can only be
@@ -87,6 +95,7 @@ public class CrossProfileApps {
             mService.startActivityAsUser(
                     mContext.getIApplicationThread(),
                     mContext.getPackageName(),
+                    mContext.getFeatureId(),
                     component,
                     targetUser.getIdentifier(),
                     true);
@@ -98,24 +107,35 @@ public class CrossProfileApps {
     /**
      * Starts the specified activity of the caller package in the specified profile.
      *
-     * <p>The caller must have the {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES}
-     * permission and both the caller and target user profiles must be in the same profile group.
+     * <p>The caller must have the {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES},
+     * {@code android.Manifest.permission#INTERACT_ACROSS_USERS}, or {@code
+     * android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission. Both the caller and
+     * target user profiles must be in the same profile group. The target user must be a valid user
+     * returned from {@link #getTargetUserProfiles()}.
      *
      * @param intent The intent to launch. A component in the caller package must be specified.
      * @param targetUser The {@link UserHandle} of the profile; must be one of the users returned by
      *        {@link #getTargetUserProfiles()} if different to the calling user, otherwise a
      *        {@link SecurityException} will be thrown.
+     * @param callingActivity The activity to start the new activity from for the purposes of
+     *        deciding which task the new activity should belong to. If {@code null}, the activity
+     *        will always be started in a new task.
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.INTERACT_ACROSS_PROFILES,
             android.Manifest.permission.INTERACT_ACROSS_USERS})
-    public void startActivity(@NonNull Intent intent, @NonNull UserHandle targetUser) {
+    public void startActivity(
+            @NonNull Intent intent,
+            @NonNull UserHandle targetUser,
+            @Nullable Activity callingActivity) {
         try {
             mService.startActivityAsUserByIntent(
                     mContext.getIApplicationThread(),
                     mContext.getPackageName(),
+                    mContext.getFeatureId(),
                     intent,
-                    targetUser.getIdentifier());
+                    targetUser.getIdentifier(),
+                    callingActivity != null ? callingActivity.getActivityToken() : null);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -139,7 +159,8 @@ public class CrossProfileApps {
     public void startActivity(@NonNull ComponentName component, @NonNull UserHandle targetUser) {
         try {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(), component, targetUser.getIdentifier(), false);
+                    mContext.getPackageName(), mContext.getFeatureId(), component,
+                    targetUser.getIdentifier(), false);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -216,10 +237,11 @@ public class CrossProfileApps {
     }
 
     /**
-     * Returns whether the calling package can request to interact across profiles.
+     * Returns whether the calling package can request user consent to interact across profiles.
      *
-     * <p>The package's current ability to interact across profiles can be checked with
-     * {@link #canInteractAcrossProfiles()}.
+     * <p>If {@code true}, user consent can be obtained via {@link
+     * #createRequestInteractAcrossProfilesIntent()}. The package can then listen to {@link
+     * #ACTION_CAN_INTERACT_ACROSS_PROFILES_CHANGED} broadcasts.
      *
      * <p>Specifically, returns whether the following are all true:
      * <ul>
@@ -231,6 +253,10 @@ public class CrossProfileApps {
      * {@link android.app.admin.DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)}.
      * </li>
      * </ul>
+     *
+     * <p>Note that user consent could already be granted if given a return value of {@code true}.
+     * The package's current ability to interact across profiles can be checked with {@link
+     * #canInteractAcrossProfiles()}.
      *
      * @return true if the calling package can request to interact across profiles.
      */
@@ -244,10 +270,7 @@ public class CrossProfileApps {
 
     /**
      * Returns whether the calling package can interact across profiles.
-     *
-     * <p>The package's current ability to request to interact across profiles can be checked with
-     * {@link #canRequestInteractAcrossProfiles()}.
-     *
+
      * <p>Specifically, returns whether the following are all true:
      * <ul>
      * <li>{@link #getTargetUserProfiles()} returns a non-empty list for the calling user.</li>
@@ -258,6 +281,11 @@ public class CrossProfileApps {
      * {@link android.app.admin.DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)}.
      * </li>
      * </ul>
+     *
+     * <p>If {@code false}, the package's current ability to request user consent to interact across
+     * profiles can be checked with {@link #canRequestInteractAcrossProfiles()}. If {@code true},
+     * user consent can be obtained via {@link #createRequestInteractAcrossProfilesIntent()}. The
+     * package can then listen to {@link #ACTION_CAN_INTERACT_ACROSS_PROFILES_CHANGED} broadcasts.
      *
      * @return true if the calling package can interact across profiles.
      * @throws SecurityException if {@code mContext.getPackageName()} does not belong to the
@@ -273,10 +301,14 @@ public class CrossProfileApps {
 
     /**
      * Returns an {@link Intent} to open the settings page that allows the user to decide whether
-     * the calling app can interact across profiles. The current state is given by
-     * {@link #canInteractAcrossProfiles()}.
+     * the calling app can interact across profiles.
      *
      * <p>Returns {@code null} if {@link #canRequestInteractAcrossProfiles()} is {@code false}.
+     *
+     * <p>Note that the user may already have given consent and the app may already be able to
+     * interact across profiles, even if {@link #canRequestInteractAcrossProfiles()} is {@code
+     * true}. The current ability to interact across profiles is given by {@link
+     * #canInteractAcrossProfiles()}.
      *
      * @return an {@link Intent} to open the settings page that allows the user to decide whether
      * the app can interact across profiles
@@ -316,14 +348,21 @@ public class CrossProfileApps {
      *
      * <p>If other changes could have affected the app's ability to interact across profiles, as
      * defined by the return value of {@link #canInteractAcrossProfiles()}, such as changes to the
-     * admin or OEM consent whitelists, then {@link
-     * #resetInteractAcrossProfilesAppOpsIfInvalid(List)} should be used.
+     * admin or OEM consent whitelists, then {@link #resetInteractAcrossProfilesAppOps(Collection,
+     * Set)} should be used.
+     *
+     * <p>If the caller does not have the {@link android.Manifest.permission
+     * #CONFIGURE_INTERACT_ACROSS_PROFILES} permission, then they must have the permissions that
+     * would have been required to call {@link android.app.AppOpsManager#setMode(int, int, String,
+     * int)}, which includes {@link android.Manifest.permission#MANAGE_APP_OPS_MODES}.
+     *
+     * <p>Also requires either {@link android.Manifest.permission#INTERACT_ACROSS_USERS} or {@link
+     * android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
      *
      * @hide
      */
     @RequiresPermission(
-            allOf={android.Manifest.permission.MANAGE_APP_OPS_MODES,
-                    android.Manifest.permission.UPDATE_APP_OPS_STATS,
+            allOf={android.Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
                     android.Manifest.permission.INTERACT_ACROSS_USERS})
     public void setInteractAcrossProfilesAppOp(@NonNull String packageName, @Mode int newMode) {
         try {
@@ -360,11 +399,18 @@ public class CrossProfileApps {
      * have changed as a result of non-user actions, such as changes to admin or OEM consent
      * whitelists.
      *
+     * <p>If the caller does not have the {@link android.Manifest.permission
+     * #CONFIGURE_INTERACT_ACROSS_PROFILES} permission, then they must have the permissions that
+     * would have been required to call {@link android.app.AppOpsManager#setMode(int, int, String,
+     * int)}, which includes {@link android.Manifest.permission#MANAGE_APP_OPS_MODES}.
+     *
+     * <p>Also requires either {@link android.Manifest.permission#INTERACT_ACROSS_USERS} or {@link
+     * android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     *
      * @hide
      */
     @RequiresPermission(
-            allOf={android.Manifest.permission.MANAGE_APP_OPS_MODES,
-                    android.Manifest.permission.UPDATE_APP_OPS_STATS,
+            allOf={android.Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
                     android.Manifest.permission.INTERACT_ACROSS_USERS})
     public void resetInteractAcrossProfilesAppOps(
             @NonNull Collection<String> previousCrossProfilePackages,

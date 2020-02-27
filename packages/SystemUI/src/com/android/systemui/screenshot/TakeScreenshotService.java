@@ -71,7 +71,7 @@ public class TakeScreenshotService extends Service {
 
             // TODO (mkephart): clean up once notifications flow is fully deprecated
             boolean useCornerFlow = DeviceConfig.getBoolean(
-                    NAMESPACE_SYSTEMUI, SCREENSHOT_CORNER_FLOW, false);
+                    NAMESPACE_SYSTEMUI, SCREENSHOT_CORNER_FLOW, true);
             switch (msg.what) {
                 case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
                     if (useCornerFlow) {

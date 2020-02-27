@@ -32,10 +32,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.sysprop.ApexProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -46,6 +46,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.utils.TimingsTraceAndSlog;
 
 import com.google.android.collect.Lists;
 
@@ -375,8 +377,11 @@ public abstract class ApexManager {
 
         @Override
         public List<ActiveApexInfo> getActiveApexInfos() {
+            final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
+                    Trace.TRACE_TAG_APEX_MANAGER);
             synchronized (mLock) {
                 if (mActiveApexInfosCache == null) {
+                    t.traceBegin("getActiveApexInfos_noCache");
                     try {
                         mActiveApexInfosCache = new ArraySet<>();
                         final ApexInfo[] activePackages = mApexService.getActivePackages();
@@ -387,6 +392,7 @@ public abstract class ApexManager {
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Unable to retrieve packages from apexservice", e);
                     }
+                    t.traceEnd();
                 }
                 if (mActiveApexInfosCache != null) {
                     return new ArrayList<>(mActiveApexInfosCache);

@@ -57,6 +57,12 @@ public interface KeyguardSecurityView {
     int PROMPT_REASON_PREPARE_FOR_UPDATE = 6;
 
     /**
+     * Primary auth is required because the user uses weak/convenience biometrics and hasn't used
+     * primary auth since a while
+     */
+    int PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT = 7;
+
+    /**
      * Interface back to keyguard to tell it when security
      * @param callback
      */

@@ -22,11 +22,8 @@
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alarm
 
-#include <android/os/IStatsCompanionService.h>
 #include <stdlib.h>
 #include <utils/RefBase.h>
-
-using android::os::IStatsCompanionService;
 
 namespace android {
 namespace os {

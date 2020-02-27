@@ -178,8 +178,8 @@ message ApplicationExitInfoProto {
     }
 
     optional Importance importance = 10;
-    optional int32 pss = 11;
-    optional int32 rss = 12;
+    optional int64 pss = 11;
+    optional int64 rss = 12;
     optional int64 timestamp = 13;
     optional string description = 14;
 }

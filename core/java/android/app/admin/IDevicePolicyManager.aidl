@@ -121,8 +121,8 @@ interface IDevicePolicyManager {
     void setCameraDisabled(in ComponentName who, boolean disabled, boolean parent);
     boolean getCameraDisabled(in ComponentName who, int userHandle, boolean parent);
 
-    void setScreenCaptureDisabled(in ComponentName who, boolean disabled);
-    boolean getScreenCaptureDisabled(in ComponentName who, int userHandle);
+    void setScreenCaptureDisabled(in ComponentName who, boolean disabled, boolean parent);
+    boolean getScreenCaptureDisabled(in ComponentName who, int userHandle, boolean parent);
 
     void setKeyguardDisabledFeatures(in ComponentName who, int which, boolean parent);
     int getKeyguardDisabledFeatures(in ComponentName who, int userHandle, boolean parent);
@@ -196,7 +196,9 @@ interface IDevicePolicyManager {
 
     boolean setAlwaysOnVpnPackage(in ComponentName who, String vpnPackage, boolean lockdown, in List<String> lockdownWhitelist);
     String getAlwaysOnVpnPackage(in ComponentName who);
+    String getAlwaysOnVpnPackageForUser(int userHandle);
     boolean isAlwaysOnVpnLockdownEnabled(in ComponentName who);
+    boolean isAlwaysOnVpnLockdownEnabledForUser(int userHandle);
     List<String> getAlwaysOnVpnLockdownWhitelist(in ComponentName who);
 
     void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
@@ -248,9 +250,9 @@ interface IDevicePolicyManager {
     int enableSystemAppWithIntent(in ComponentName admin, in String callerPackage, in Intent intent);
     boolean installExistingPackage(in ComponentName admin, in String callerPackage, in String packageName);
 
-    void setAccountManagementDisabled(in ComponentName who, in String accountType, in boolean disabled);
+    void setAccountManagementDisabled(in ComponentName who, in String accountType, in boolean disabled, in boolean parent);
     String[] getAccountTypesWithManagementDisabled();
-    String[] getAccountTypesWithManagementDisabledAsUser(int userId);
+    String[] getAccountTypesWithManagementDisabledAsUser(int userId, in boolean parent);
 
     void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled);
     boolean isSecondaryLockscreenEnabled(int userId);
@@ -266,11 +268,10 @@ interface IDevicePolicyManager {
     void setSystemSetting(in ComponentName who, in String setting, in String value);
     void setSecureSetting(in ComponentName who, in String setting, in String value);
 
-    void setLockdownAdminConfiguredNetworks(in ComponentName who, boolean lockdown);
-    boolean isLockdownAdminConfiguredNetworks(in ComponentName who);
+    void setConfiguredNetworksLockdownState(in ComponentName who, boolean lockdown);
+    boolean hasLockdownAdminConfiguredNetworks(in ComponentName who);
 
     void setLocationEnabled(in ComponentName who, boolean locationEnabled);
-    void requestSetLocationProviderAllowed(in ComponentName who, in String provider, boolean providerAllowed);
 
     boolean setTime(in ComponentName who, long millis);
     boolean setTimeZone(in ComponentName who, String timeZone);
@@ -478,4 +479,5 @@ interface IDevicePolicyManager {
 
     long getManagedProfileMaximumTimeOff(in ComponentName admin);
     void setManagedProfileMaximumTimeOff(in ComponentName admin, long timeoutMs);
+    boolean canProfileOwnerResetPasswordWhenLocked(in int userId);
 }

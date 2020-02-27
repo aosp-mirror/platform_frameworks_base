@@ -77,11 +77,11 @@ public class JobParameters implements Parcelable {
 
     /**
      * @hide
-     * @deprecated use {@link #getReasonCodeDescription(int)}
      */
-    @Deprecated
-    public static String getReasonName(int reason) {
-        switch (reason) {
+    // TODO(142420609): make it @SystemApi for mainline
+    @NonNull
+    public static String getReasonCodeDescription(int reasonCode) {
+        switch (reasonCode) {
             case REASON_CANCELED: return "canceled";
             case REASON_CONSTRAINTS_NOT_SATISFIED: return "constraints";
             case REASON_PREEMPT: return "preempt";
@@ -89,7 +89,7 @@ public class JobParameters implements Parcelable {
             case REASON_DEVICE_IDLE: return "device_idle";
             case REASON_DEVICE_THERMAL: return "thermal";
             case REASON_RESTRAINED: return "restrained";
-            default: return "unknown:" + reason;
+            default: return "unknown:" + reasonCode;
         }
     }
 
@@ -98,13 +98,6 @@ public class JobParameters implements Parcelable {
     @NonNull
     public static int[] getJobStopReasonCodes() {
         return JOB_STOP_REASON_CODES;
-    }
-
-    /** @hide */
-    // @SystemApi TODO make it a system api for mainline
-    @NonNull
-    public static String getReasonCodeDescription(int reasonCode) {
-        return getReasonName(reasonCode);
     }
 
     @UnsupportedAppUsage

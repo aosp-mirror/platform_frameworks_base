@@ -96,7 +96,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor);
         mDependency.injectTestDependency(KeyguardSecurityModel.class, mKeyguardSecurityModel);

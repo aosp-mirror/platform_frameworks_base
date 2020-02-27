@@ -83,6 +83,27 @@ public final class AudioProductStrategy implements Parcelable {
 
     /**
      * @hide
+     * Return the AudioProductStrategy object for the given strategy ID.
+     * @param id the ID of the strategy to find
+     * @return an AudioProductStrategy on which getId() would return id, null if no such strategy
+     *     exists.
+     */
+    public static @Nullable AudioProductStrategy getAudioProductStrategyWithId(int id) {
+        synchronized (sLock) {
+            if (sAudioProductStrategies == null) {
+                sAudioProductStrategies = initializeAudioProductStrategies();
+            }
+            for (AudioProductStrategy strategy : sAudioProductStrategies) {
+                if (strategy.getId() == id) {
+                    return strategy;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @hide
      * Create an invalid AudioProductStrategy instance for testing
      * @param id the ID for the invalid strategy, always use a different one than in use
      * @return an invalid instance that cannot successfully be used for volume groups or routing

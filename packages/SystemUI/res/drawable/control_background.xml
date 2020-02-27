@@ -19,7 +19,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
   <item>
     <shape>
-      <solid android:color="?android:attr/colorBackgroundFloating"/>
+      <solid android:color="@color/control_default_background" />
       <corners android:radius="@dimen/control_corner_radius" />
     </shape>
   </item>

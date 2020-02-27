@@ -16,6 +16,8 @@
 
 package com.android.server.location.gnss;
 
+import static android.location.LocationManager.GPS_PROVIDER;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -35,12 +37,16 @@ import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.GnssAntennaInfo;
+import android.location.GnssAntennaInfo.SphericalCorrections;
 import android.location.GnssClock;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
+import android.location.GnssRequest;
 import android.location.GnssSingleSatCorrection;
 import android.location.IBatchedLocationCallback;
+import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
 import android.location.IGnssStatusListener;
@@ -55,6 +61,9 @@ import android.os.RemoteException;
 
 import com.android.server.LocalServices;
 import com.android.server.location.AppForegroundHelper;
+import com.android.server.location.AppOpsHelper;
+import com.android.server.location.GnssAntennaInfoProvider;
+import com.android.server.location.GnssAntennaInfoProvider.GnssAntennaInfoProviderNative;
 import com.android.server.location.GnssBatchingProvider;
 import com.android.server.location.GnssCapabilitiesProvider;
 import com.android.server.location.GnssLocationProvider;
@@ -77,7 +86,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -101,8 +110,10 @@ public class GnssManagerServiceTest {
     private GnssMeasurementsProvider mTestGnssMeasurementsProvider;
     private GnssStatusListenerHelper mTestGnssStatusProvider;
     private GnssNavigationMessageProvider mTestGnssNavigationMessageProvider;
+    private GnssAntennaInfoProvider mTestGnssAntennaInfoProvider;
 
-    // Managers and services
+    @Mock
+    private PackageManager mPackageManager;
     @Mock
     private AppOpsManager mAppOpsManager;
     @Mock
@@ -130,6 +141,9 @@ public class GnssManagerServiceTest {
                 Context.APP_OPS_SERVICE);
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(
                 mAppOpsManager);
+        when(mMockContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(
+                new String[]{"com.android.server"});
         enableLocationPermissions();
 
         when(mAppForegroundHelper.isAppForeground(anyInt())).thenReturn(true);
@@ -151,6 +165,8 @@ public class GnssManagerServiceTest {
                 mMockContext, mMockHandler);
         mTestGnssNavigationMessageProvider = createGnssNavigationMessageProvider(
                 mMockContext, mMockHandler);
+        mTestGnssAntennaInfoProvider = createGnssAntennaInfoProvider(
+                mMockContext, mMockHandler);
 
         // Setup GnssLocationProvider to return providers
         when(mMockGnssLocationProvider.getGnssStatusProvider()).thenReturn(
@@ -169,13 +185,18 @@ public class GnssManagerServiceTest {
                 mTestGnssNavigationMessageProvider);
         when(mMockGnssLocationProvider.getNetInitiatedListener()).thenReturn(
                 mNetInitiatedListener);
+        when(mMockGnssLocationProvider.getGnssAntennaInfoProvider()).thenReturn(
+                mTestGnssAntennaInfoProvider);
 
         // Setup GnssBatching provider
         when(mMockGnssBatchingProvider.start(anyLong(), anyBoolean())).thenReturn(true);
         when(mMockGnssBatchingProvider.stop()).thenReturn(true);
 
+        // Managers and services
+        AppOpsHelper appOpsHelper = new AppOpsHelper(mMockContext);
+
         // Create GnssManagerService
-        mGnssManagerService = new GnssManagerService(mMockContext, mSettingsHelper,
+        mGnssManagerService = new GnssManagerService(mMockContext, appOpsHelper, mSettingsHelper,
                 mAppForegroundHelper, new LocationUsageLogger(),
                 mMockGnssLocationProvider);
         mGnssManagerService.onSystemReady();
@@ -204,6 +225,12 @@ public class GnssManagerServiceTest {
         return mockListener;
     }
 
+    private IGnssAntennaInfoListener createMockGnssAntennaInfoListener() {
+        IGnssAntennaInfoListener mockListener = mock(IGnssAntennaInfoListener.class);
+        overrideAsBinder(mockListener);
+        return mockListener;
+    }
+
     private IBatchedLocationCallback createMockBatchedLocationCallback() {
         IBatchedLocationCallback mockedCallback = mock(IBatchedLocationCallback.class);
         overrideAsBinder(mockedCallback);
@@ -221,7 +248,44 @@ public class GnssManagerServiceTest {
                 new GnssSingleSatCorrection.Builder().build();
         return
                 new GnssMeasurementCorrections.Builder().setSingleSatelliteCorrectionList(
-                        Arrays.asList(gnssSingleSatCorrection)).build();
+                        Collections.singletonList(gnssSingleSatCorrection)).build();
+    }
+
+    private static List<GnssAntennaInfo> createDummyGnssAntennaInfos() {
+        double carrierFrequencyMHz = 13758.0;
+
+        GnssAntennaInfo.PhaseCenterOffset phaseCenterOffset = new
+                GnssAntennaInfo.PhaseCenterOffset(
+                4.3d,
+                1.4d,
+                2.10d,
+                2.1d,
+                3.12d,
+                0.5d);
+
+        double[][] phaseCenterVariationCorrectionsMillimeters = new double[10][10];
+        double[][] phaseCenterVariationCorrectionsUncertaintyMillimeters = new double[10][10];
+        SphericalCorrections
+                phaseCenterVariationCorrections =
+                new SphericalCorrections(
+                        phaseCenterVariationCorrectionsMillimeters,
+                        phaseCenterVariationCorrectionsUncertaintyMillimeters);
+
+        double[][] signalGainCorrectionsDbi = new double[10][10];
+        double[][] signalGainCorrectionsUncertaintyDbi = new double[10][10];
+        SphericalCorrections signalGainCorrections = new
+                SphericalCorrections(
+                signalGainCorrectionsDbi,
+                signalGainCorrectionsUncertaintyDbi);
+
+        List<GnssAntennaInfo> gnssAntennaInfos = new ArrayList<>();
+        gnssAntennaInfos.add(new GnssAntennaInfo.Builder()
+                .setCarrierFrequencyMHz(carrierFrequencyMHz)
+                .setPhaseCenterOffset(phaseCenterOffset)
+                .setPhaseCenterVariationCorrections(phaseCenterVariationCorrections)
+                .setSignalGainCorrections(signalGainCorrections)
+                .build());
+        return gnssAntennaInfos;
     }
 
     private void enableLocationPermissions() {
@@ -236,7 +300,7 @@ public class GnssManagerServiceTest {
                 PackageManager.PERMISSION_GRANTED);
 
         // AppOpsManager will return true if OP_FINE_LOCATION is checked
-        when(mAppOpsManager.checkOp(anyInt(), anyInt(), anyString())).thenAnswer(
+        when(mAppOpsManager.checkOpNoThrow(anyInt(), anyInt(), anyString())).thenAnswer(
                 (InvocationOnMock invocation) -> {
                     int code = (int) (invocation.getArguments()[0]);
                     if (code == AppOpsManager.OP_FINE_LOCATION) {
@@ -244,6 +308,9 @@ public class GnssManagerServiceTest {
                     }
                     return AppOpsManager.MODE_ERRORED;
                 });
+
+        when(mLocationManagerInternal.isProviderEnabledForUser(eq(GPS_PROVIDER), anyInt()))
+                .thenReturn(true);
     }
 
     private void disableLocationPermissions() {
@@ -252,8 +319,11 @@ public class GnssManagerServiceTest {
         Mockito.doThrow(new SecurityException()).when(
                 mMockContext).checkPermission(anyString(), anyInt(), anyInt());
 
-        when(mAppOpsManager.checkOp(anyInt(), anyInt(),
+        when(mAppOpsManager.checkOpNoThrow(anyInt(), anyInt(),
                 anyString())).thenReturn(AppOpsManager.MODE_ERRORED);
+
+        when(mLocationManagerInternal.isProviderEnabledForUser(eq(GPS_PROVIDER), anyInt()))
+                .thenReturn(false);
     }
 
     private GnssStatusListenerHelper createGnssStatusListenerHelper(Context context,
@@ -298,6 +368,18 @@ public class GnssManagerServiceTest {
         };
     }
 
+    private GnssAntennaInfoProvider createGnssAntennaInfoProvider(Context context,
+            Handler handler) {
+        GnssAntennaInfoProviderNative mockGnssAntenaInfoProviderNative = mock(
+                GnssAntennaInfoProviderNative.class);
+        return new GnssAntennaInfoProvider(context, handler, mockGnssAntenaInfoProviderNative) {
+            @Override
+            protected boolean isGpsEnabled() {
+                return true;
+            }
+        };
+    }
+
     @Test
     public void getGnssYearOfHardwareTest() {
         final int gnssYearOfHardware = 2012;
@@ -319,21 +401,12 @@ public class GnssManagerServiceTest {
     }
 
     @Test
-    public void getGnssCapabilitiesWithoutPermissionsTest() {
-        disableLocationPermissions();
-
-        assertThrows(SecurityException.class,
-                () -> mGnssManagerService.getGnssCapabilities("com.android.server"));
-    }
-
-    @Test
     public void getGnssCapabilitiesWithPermissionsTest() {
         final long mGnssCapabilities = 23132L;
         when(mMockGnssCapabilitiesProvider.getGnssCapabilities()).thenReturn(mGnssCapabilities);
         enableLocationPermissions();
 
-        assertThat(mGnssManagerService.getGnssCapabilities("com.android.server")).isEqualTo(
-                mGnssCapabilities);
+        assertThat(mGnssManagerService.getGnssCapabilities()).isEqualTo(mGnssCapabilities);
     }
 
     @Test
@@ -363,7 +436,7 @@ public class GnssManagerServiceTest {
 
         assertThrows(SecurityException.class,
                 () -> mGnssManagerService.startGnssBatch(periodNanos, wakeOnFifoFull,
-                        "com.android.server"));
+                        "com.android.server", null));
         verify(mMockGnssBatchingProvider, times(0)).start(periodNanos, wakeOnFifoFull);
     }
 
@@ -375,7 +448,7 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         assertThat(mGnssManagerService.startGnssBatch(periodNanos, wakeOnFifoFull,
-                "com.android.server"))
+                "com.android.server", null))
                 .isEqualTo(
                         true);
         verify(mMockGnssBatchingProvider, times(1)).start(100L, true);
@@ -389,8 +462,7 @@ public class GnssManagerServiceTest {
         disableLocationPermissions();
 
         assertThrows(SecurityException.class, () -> mGnssManagerService.addGnssBatchingCallback(
-                mockBatchedLocationCallback, "com.android.server", "abcd123",
-                "TestBatchedLocationCallback"));
+                mockBatchedLocationCallback, "com.android.server", null));
 
         mGnssManagerService.onReportLocation(mockLocationList);
 
@@ -405,8 +477,8 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         assertThat(mGnssManagerService.addGnssBatchingCallback(
-                mockBatchedLocationCallback, "com.android.server",
-                "abcd123", "TestBatchedLocationCallback")).isEqualTo(true);
+                mockBatchedLocationCallback, "com.android.server", null))
+                .isEqualTo(true);
 
         mGnssManagerService.onReportLocation(mockLocationList);
 
@@ -422,11 +494,11 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         assertThat(mGnssManagerService.addGnssBatchingCallback(
-                mockBatchedLocationCallback1, "com.android.server",
-                "abcd123", "TestBatchedLocationCallback")).isEqualTo(true);
+                mockBatchedLocationCallback1, "com.android.server", null))
+                .isEqualTo(true);
         assertThat(mGnssManagerService.addGnssBatchingCallback(
-                mockBatchedLocationCallback2, "com.android.server",
-                "abcd123", "TestBatchedLocationCallback")).isEqualTo(true);
+                mockBatchedLocationCallback2, "com.android.server", null))
+                .isEqualTo(true);
 
         mGnssManagerService.onReportLocation(mockLocationList);
 
@@ -459,13 +531,14 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         mGnssManagerService.addGnssBatchingCallback(mockBatchedLocationCallback,
-                "com.android.server", "abcd123", "TestBatchedLocationCallback");
+                "com.android.server", null);
 
         disableLocationPermissions();
 
         assertThrows(SecurityException.class,
                 () -> mGnssManagerService.removeGnssBatchingCallback());
 
+        enableLocationPermissions();
         mGnssManagerService.onReportLocation(mockLocationList);
 
         verify(mockBatchedLocationCallback, times(1)).onLocationBatch(mockLocationList);
@@ -479,7 +552,7 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         mGnssManagerService.addGnssBatchingCallback(mockBatchedLocationCallback,
-                "com.android.server", "abcd123", "TestBatchedLocationCallback");
+                "com.android.server", null);
 
         mGnssManagerService.removeGnssBatchingCallback();
 
@@ -563,8 +636,8 @@ public class GnssManagerServiceTest {
 
         assertThrows(SecurityException.class,
                 () -> mGnssManagerService.addGnssMeasurementsListener(
-                        mockGnssMeasurementsListener,
-                        "com.android.server", "abcd123", "TestGnssMeasurementsListener"));
+                        new GnssRequest.Builder().build(), mockGnssMeasurementsListener,
+                        "com.android.server", null));
 
         mTestGnssMeasurementsProvider.onMeasurementsAvailable(gnssMeasurementsEvent);
         verify(mockGnssMeasurementsListener, times(0)).onGnssMeasurementsReceived(
@@ -580,8 +653,10 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        assertThat(mGnssManagerService.addGnssMeasurementsListener(mockGnssMeasurementsListener,
-                "com.android.server", "abcd123", "TestGnssMeasurementsListener")).isEqualTo(true);
+        assertThat(mGnssManagerService.addGnssMeasurementsListener(
+                new GnssRequest.Builder().build(),
+                mockGnssMeasurementsListener,
+                "com.android.server", null)).isEqualTo(true);
 
         mTestGnssMeasurementsProvider.onMeasurementsAvailable(gnssMeasurementsEvent);
         verify(mockGnssMeasurementsListener, times(1)).onGnssMeasurementsReceived(
@@ -626,8 +701,9 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        mGnssManagerService.addGnssMeasurementsListener(mockGnssMeasurementsListener,
-                "com.android.server", "abcd123", "TestGnssMeasurementsListener");
+        mGnssManagerService.addGnssMeasurementsListener(new GnssRequest.Builder().build(),
+                mockGnssMeasurementsListener,
+                "com.android.server", null);
 
         disableLocationPermissions();
 
@@ -648,8 +724,9 @@ public class GnssManagerServiceTest {
 
         enableLocationPermissions();
 
-        mGnssManagerService.addGnssMeasurementsListener(mockGnssMeasurementsListener,
-                "com.android.server", "abcd123", "TestGnssMeasurementsListener");
+        mGnssManagerService.addGnssMeasurementsListener(new GnssRequest.Builder().build(),
+                mockGnssMeasurementsListener,
+                "com.android.server", null);
 
         disableLocationPermissions();
 
@@ -662,6 +739,82 @@ public class GnssManagerServiceTest {
     }
 
     @Test
+    public void addGnssAntennaInfoListenerWithoutPermissionsTest() throws RemoteException {
+        IGnssAntennaInfoListener mockGnssAntennaInfoListener =
+                createMockGnssAntennaInfoListener();
+        List<GnssAntennaInfo> gnssAntennaInfos = createDummyGnssAntennaInfos();
+
+        disableLocationPermissions();
+
+        assertThrows(SecurityException.class,
+                () -> mGnssManagerService.addGnssAntennaInfoListener(
+                        mockGnssAntennaInfoListener,
+                        "com.android.server", null));
+
+        mTestGnssAntennaInfoProvider.onGnssAntennaInfoAvailable(gnssAntennaInfos);
+        verify(mockGnssAntennaInfoListener, times(0))
+                .onGnssAntennaInfoReceived(gnssAntennaInfos);
+    }
+
+    @Test
+    public void addGnssAntennaInfoListenerWithPermissionsTest() throws RemoteException {
+        IGnssAntennaInfoListener mockGnssAntennaInfoListener =
+                createMockGnssAntennaInfoListener();
+        List<GnssAntennaInfo> gnssAntennaInfos = createDummyGnssAntennaInfos();
+
+        enableLocationPermissions();
+
+        assertThat(mGnssManagerService.addGnssAntennaInfoListener(mockGnssAntennaInfoListener,
+                "com.android.server", null)).isEqualTo(true);
+
+        mTestGnssAntennaInfoProvider.onGnssAntennaInfoAvailable(gnssAntennaInfos);
+        verify(mockGnssAntennaInfoListener, times(1))
+                .onGnssAntennaInfoReceived(gnssAntennaInfos);
+    }
+
+    @Test
+    public void removeGnssAntennaInfoListenerWithoutPermissionsTest() throws RemoteException {
+        IGnssAntennaInfoListener mockGnssAntennaInfoListener =
+                createMockGnssAntennaInfoListener();
+        List<GnssAntennaInfo> gnssAntennaInfos = createDummyGnssAntennaInfos();
+
+        enableLocationPermissions();
+
+        mGnssManagerService.addGnssAntennaInfoListener(
+                mockGnssAntennaInfoListener,
+                "com.android.server", null);
+
+        disableLocationPermissions();
+
+        mGnssManagerService.removeGnssAntennaInfoListener(
+                mockGnssAntennaInfoListener);
+
+        mTestGnssAntennaInfoProvider.onGnssAntennaInfoAvailable(gnssAntennaInfos);
+        verify(mockGnssAntennaInfoListener, times(0)).onGnssAntennaInfoReceived(
+                gnssAntennaInfos);
+    }
+
+    @Test
+    public void removeGnssAntennaInfoListenerWithPermissionsTest() throws RemoteException {
+        IGnssAntennaInfoListener mockGnssAntennaInfoListener =
+                createMockGnssAntennaInfoListener();
+        List<GnssAntennaInfo> gnssAntennaInfos = createDummyGnssAntennaInfos();
+
+        enableLocationPermissions();
+
+        mGnssManagerService.addGnssAntennaInfoListener(
+                mockGnssAntennaInfoListener,
+                "com.android.server", null);
+
+        mGnssManagerService.removeGnssAntennaInfoListener(
+                mockGnssAntennaInfoListener);
+
+        mTestGnssAntennaInfoProvider.onGnssAntennaInfoAvailable(gnssAntennaInfos);
+        verify(mockGnssAntennaInfoListener, times(0)).onGnssAntennaInfoReceived(
+                gnssAntennaInfos);
+    }
+
+    @Test
     public void addGnssNavigationMessageListenerWithoutPermissionsTest() throws RemoteException {
         IGnssNavigationMessageListener mockGnssNavigationMessageListener =
                 createMockGnssNavigationMessageListener();
@@ -671,8 +824,7 @@ public class GnssManagerServiceTest {
 
         assertThrows(SecurityException.class,
                 () -> mGnssManagerService.addGnssNavigationMessageListener(
-                        mockGnssNavigationMessageListener, "com.android.server",
-                        "abcd123", "TestGnssNavigationMessageListener"));
+                        mockGnssNavigationMessageListener, "com.android.server", null));
 
         mTestGnssNavigationMessageProvider.onNavigationMessageAvailable(gnssNavigationMessage);
 
@@ -689,8 +841,8 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         assertThat(mGnssManagerService.addGnssNavigationMessageListener(
-                mockGnssNavigationMessageListener, "com.android.server",
-                "abcd123", "TestGnssNavigationMessageListener")).isEqualTo(true);
+                mockGnssNavigationMessageListener, "com.android.server", null))
+                .isEqualTo(true);
 
         mTestGnssNavigationMessageProvider.onNavigationMessageAvailable(gnssNavigationMessage);
 
@@ -707,8 +859,7 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         mGnssManagerService.addGnssNavigationMessageListener(
-                mockGnssNavigationMessageListener, "com.android.server",
-                "abcd123", "TestGnssNavigationMessageListener");
+                mockGnssNavigationMessageListener, "com.android.server", null);
 
         disableLocationPermissions();
 
@@ -730,8 +881,7 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         mGnssManagerService.addGnssNavigationMessageListener(
-                mockGnssNavigationMessageListener, "com.android.server",
-                "abcd123", "TestGnssNavigationMessageListener");
+                mockGnssNavigationMessageListener, "com.android.server", null);
 
         mGnssManagerService.removeGnssNavigationMessageListener(
                 mockGnssNavigationMessageListener);

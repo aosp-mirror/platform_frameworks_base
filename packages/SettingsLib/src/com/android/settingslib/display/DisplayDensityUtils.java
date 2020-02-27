@@ -97,7 +97,7 @@ public class DisplayDensityUtils {
 
         final Resources res = context.getResources();
         final DisplayMetrics metrics = new DisplayMetrics();
-        context.getDisplay().getRealMetrics(metrics);
+        context.getDisplayNoVerify().getRealMetrics(metrics);
 
         final int currentDensity = metrics.densityDpi;
         int currentDensityIndex = -1;

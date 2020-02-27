@@ -32,7 +32,7 @@ import java.io.PrintWriter;
 public interface FalsingManager {
     int VERSION = 3;
 
-    void onSucccessfulUnlock();
+    void onSuccessfulUnlock();
 
     void onNotificationActive();
 

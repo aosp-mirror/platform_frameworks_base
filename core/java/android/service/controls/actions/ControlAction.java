@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
+import android.service.controls.Control;
 import android.service.controls.IControlsActionCallback;
 import android.service.controls.templates.ControlTemplate;
 import android.util.Log;
@@ -31,7 +32,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * An abstract action that is executed from a {@link ControlTemplate}.
+ * An abstract action indicating a user interaction with a {@link Control}.
  *
  * The action may have a value to authenticate the input, when the provider has requested it to
  * complete the action.
@@ -58,6 +59,9 @@ public abstract class ControlAction {
     })
     public @interface ActionType {};
 
+    /**
+     * Object returned when there is an unparcelling error.
+     */
     public static final @NonNull ControlAction ERROR_ACTION = new ControlAction() {
         @Override
         public int getActionType() {
@@ -65,6 +69,9 @@ public abstract class ControlAction {
         }
     };
 
+    /**
+     * The identifier of {@link #ERROR_ACTION}
+     */
     public static final @ActionType int TYPE_ERROR = -1;
 
     /**
@@ -77,10 +84,19 @@ public abstract class ControlAction {
      */
     public static final @ActionType int TYPE_FLOAT = 2;
 
+    /**
+     * The identifier of {@link MultiFloatAction}.
+     */
     public static final @ActionType int TYPE_MULTI_FLOAT = 3;
 
+    /**
+     * The identifier of {@link ModeAction}.
+     */
     public static final @ActionType int TYPE_MODE = 4;
 
+    /**
+     * The identifier of {@link CommandAction}.
+     */
     public static final @ActionType int TYPE_COMMAND = 5;
 
 

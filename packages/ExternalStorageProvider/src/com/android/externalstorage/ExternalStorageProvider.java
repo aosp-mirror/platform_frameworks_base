@@ -38,7 +38,6 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -100,7 +99,6 @@ public class ExternalStorageProvider extends FileSystemProvider {
 
     private static final String ROOT_ID_PRIMARY_EMULATED =
             DocumentsContract.EXTERNAL_STORAGE_PRIMARY_EMULATED_ROOT_ID;
-    private static final String ROOT_ID_HOME = "home";
 
     private static final String GET_DOCUMENT_URI_CALL = "get_document_uri";
     private static final String GET_MEDIA_URI_CALL = "get_media_uri";
@@ -156,7 +154,6 @@ public class ExternalStorageProvider extends FileSystemProvider {
     private void updateVolumesLocked() {
         mRoots.clear();
 
-        VolumeInfo primaryVolume = null;
         final int userId = UserHandle.myUserId();
         final List<VolumeInfo> volumes = mStorageManager.getVolumes();
         for (VolumeInfo volume : volumes) {
@@ -234,8 +231,6 @@ public class ExternalStorageProvider extends FileSystemProvider {
             }
 
             if (volume.isPrimary()) {
-                // save off the primary volume for subsequent "Home" dir initialization.
-                primaryVolume = volume;
                 root.flags |= Root.FLAG_ADVANCED;
             }
             // Dunno when this would NOT be the case, but never hurts to be correct.
@@ -252,37 +247,6 @@ public class ExternalStorageProvider extends FileSystemProvider {
                 root.visiblePath = null;
             }
             root.path = volume.getInternalPathForUser(userId);
-            try {
-                root.docId = getDocIdForFile(root.path);
-            } catch (FileNotFoundException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        // Finally, if primary storage is available we add the "Documents" directory.
-        // If I recall correctly the actual directory is created on demand
-        // by calling either getPathForUser, or getInternalPathForUser.
-        if (primaryVolume != null && primaryVolume.isVisible()) {
-            final RootInfo root = new RootInfo();
-            root.rootId = ROOT_ID_HOME;
-            mRoots.put(root.rootId, root);
-            root.title = getContext().getString(R.string.root_documents);
-
-            // Only report bytes on *volumes*...as a matter of policy.
-            root.reportAvailableBytes = false;
-            root.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_SEARCH
-                    | Root.FLAG_SUPPORTS_IS_CHILD;
-
-            // Dunno when this would NOT be the case, but never hurts to be correct.
-            if (primaryVolume.isMountedWritable()) {
-                root.flags |= Root.FLAG_SUPPORTS_CREATE;
-            }
-
-            // Create the "Documents" directory on disk (don't use the localized title).
-            root.visiblePath = new File(
-                    primaryVolume.getPathForUser(userId), Environment.DIRECTORY_DOCUMENTS);
-            root.path = new File(
-                    primaryVolume.getInternalPathForUser(userId), Environment.DIRECTORY_DOCUMENTS);
             try {
                 root.docId = getDocIdForFile(root.path);
             } catch (FileNotFoundException e) {

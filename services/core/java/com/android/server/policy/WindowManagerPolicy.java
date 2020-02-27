@@ -75,7 +75,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -83,7 +82,6 @@ import android.view.Display;
 import android.view.IApplicationToken;
 import android.view.IDisplayFoldListener;
 import android.view.IWindowManager;
-import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -471,6 +469,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Remove the input consumer from the window manager.
          */
         void dismiss();
+        /**
+         * Dispose the input consumer and input receiver from UI thread.
+         */
+        void dispose();
     }
 
     /**
@@ -503,12 +505,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public static final int CAMERA_LENS_COVER_ABSENT = -1;
         public static final int CAMERA_LENS_UNCOVERED = 0;
         public static final int CAMERA_LENS_COVERED = 1;
-
-        /**
-         * Add a input consumer which will consume all input events going to any window below it.
-         */
-        public InputConsumer createInputConsumer(Looper looper, String name,
-                InputEventReceiver.Factory inputEventReceiverFactory, int displayId);
 
         /**
          * Returns a code that describes the current state of the lid switch.
@@ -690,17 +686,25 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
             WindowManagerFuncs windowManagerFuncs);
 
     /**
-     * Check permissions when adding a window.
+     * Check permissions when adding a window or a window token from
+     * {@link android.app.WindowContext}.
      *
-     * @param attrs The window's LayoutParams.
+     * @param type The window type
+     * @param isRoundedCornerOverlay {@code true} to indicate the adding window is
+     *                                           round corner overlay.
+     * @param packageName package name
      * @param outAppOp First element will be filled with the app op corresponding to
      *                 this window, or OP_NONE.
      *
      * @return {@link WindowManagerGlobal#ADD_OKAY} if the add can proceed;
      *      else an error code, usually
      *      {@link WindowManagerGlobal#ADD_PERMISSION_DENIED}, to abort the add.
+     *
+     * @see IWindowManager#addWindowTokenWithOptions(IBinder, int, int, Bundle, String)
+     * @see WindowManager.LayoutParams#PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY
      */
-    public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp);
+    int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
+            int[] outAppOp);
 
     /**
      * After the window manager has computed the current configuration based
@@ -868,6 +872,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 Slog.e("WindowManager", "Unknown window type: " + type);
                 return APPLICATION_LAYER;
         }
+    }
+
+    default int getMaxWindowLayer() {
+        return 35;
     }
 
     /**

@@ -53,17 +53,17 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
 
     private static final String KEY_FACTORY_RESET_PROTECTION_ACCOUNT =
             "factory_reset_protection_account";
-    private static final String KEY_FACTORY_RESET_PROTECTION_DISABLED =
-            "factory_reset_protection_disabled";
+    private static final String KEY_FACTORY_RESET_PROTECTION_ENABLED =
+            "factory_reset_protection_enabled";
     private static final String ATTR_VALUE = "value";
 
     private final List<String> mFactoryResetProtectionAccounts;
-    private final boolean mFactoryResetProtectionDisabled;
+    private final boolean mFactoryResetProtectionEnabled;
 
     private FactoryResetProtectionPolicy(List<String> factoryResetProtectionAccounts,
-            boolean factoryResetProtectionDisabled) {
+            boolean factoryResetProtectionEnabled) {
         mFactoryResetProtectionAccounts = factoryResetProtectionAccounts;
-        mFactoryResetProtectionDisabled = factoryResetProtectionDisabled;
+        mFactoryResetProtectionEnabled = factoryResetProtectionEnabled;
     }
 
     /**
@@ -74,10 +74,10 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
     }
 
     /**
-     * Return whether factory reset protection for the device is disabled or not.
+     * Return whether factory reset protection for the device is enabled or not.
      */
-    public boolean isFactoryResetProtectionDisabled() {
-        return mFactoryResetProtectionDisabled;
+    public boolean isFactoryResetProtectionEnabled() {
+        return mFactoryResetProtectionEnabled;
     }
 
     /**
@@ -85,12 +85,13 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
      */
     public static class Builder {
         private List<String> mFactoryResetProtectionAccounts;
-        private boolean mFactoryResetProtectionDisabled;
+        private boolean mFactoryResetProtectionEnabled;
 
         /**
          * Initialize a new Builder to construct a {@link FactoryResetProtectionPolicy}.
          */
         public Builder() {
+            mFactoryResetProtectionEnabled = true;
         };
 
         /**
@@ -113,18 +114,19 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
         }
 
         /**
-         * Sets whether factory reset protection is disabled or not.
+         * Sets whether factory reset protection is enabled or not.
          * <p>
          * Once disabled, factory reset protection will not kick in all together when the device
          * goes through untrusted factory reset. This applies to both the consumer unlock flow and
-         * the admin account overrides via {@link #setFactoryResetProtectionAccounts}
+         * the admin account overrides via {@link #setFactoryResetProtectionAccounts}. By default,
+         * factory reset protection is enabled.
          *
-         * @param factoryResetProtectionDisabled Whether the policy is disabled or not.
+         * @param factoryResetProtectionEnabled Whether the policy is enabled or not.
          * @return the same Builder instance.
          */
         @NonNull
-        public Builder setFactoryResetProtectionDisabled(boolean factoryResetProtectionDisabled) {
-            mFactoryResetProtectionDisabled = factoryResetProtectionDisabled;
+        public Builder setFactoryResetProtectionEnabled(boolean factoryResetProtectionEnabled) {
+            mFactoryResetProtectionEnabled = factoryResetProtectionEnabled;
             return this;
         }
 
@@ -136,7 +138,7 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
         @NonNull
         public FactoryResetProtectionPolicy build() {
             return new FactoryResetProtectionPolicy(mFactoryResetProtectionAccounts,
-                    mFactoryResetProtectionDisabled);
+                    mFactoryResetProtectionEnabled);
         }
     }
 
@@ -144,7 +146,7 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
     public String toString() {
         return "FactoryResetProtectionPolicy{"
                 + "mFactoryResetProtectionAccounts=" + mFactoryResetProtectionAccounts
-                + ", mFactoryResetProtectionDisabled=" + mFactoryResetProtectionDisabled
+                + ", mFactoryResetProtectionEnabled=" + mFactoryResetProtectionEnabled
                 + '}';
     }
 
@@ -155,7 +157,7 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
         for (String account: mFactoryResetProtectionAccounts) {
             dest.writeString(account);
         }
-        dest.writeBoolean(mFactoryResetProtectionDisabled);
+        dest.writeBoolean(mFactoryResetProtectionEnabled);
     }
 
     @Override
@@ -173,10 +175,10 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
                     for (int i = 0; i < accountsCount; i++) {
                         factoryResetProtectionAccounts.add(in.readString());
                     }
-                    boolean factoryResetProtectionDisabled = in.readBoolean();
+                    boolean factoryResetProtectionEnabled = in.readBoolean();
 
                     return new FactoryResetProtectionPolicy(factoryResetProtectionAccounts,
-                            factoryResetProtectionDisabled);
+                            factoryResetProtectionEnabled);
                 }
 
                 @Override
@@ -195,8 +197,8 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
     @Nullable
     public static FactoryResetProtectionPolicy readFromXml(@NonNull XmlPullParser parser) {
         try {
-            boolean factoryResetProtectionDisabled = Boolean.parseBoolean(
-                    parser.getAttributeValue(null, KEY_FACTORY_RESET_PROTECTION_DISABLED));
+            boolean factoryResetProtectionEnabled = Boolean.parseBoolean(
+                    parser.getAttributeValue(null, KEY_FACTORY_RESET_PROTECTION_ENABLED));
 
             List<String> factoryResetProtectionAccounts = new ArrayList<>();
             int outerDepth = parser.getDepth();
@@ -214,7 +216,7 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
             }
 
             return new FactoryResetProtectionPolicy(factoryResetProtectionAccounts,
-                    factoryResetProtectionDisabled);
+                    factoryResetProtectionEnabled);
         } catch (XmlPullParserException | IOException e) {
             Log.w(LOG_TAG, "Reading from xml failed", e);
         }
@@ -225,8 +227,8 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
      * @hide
      */
     public void writeToXml(@NonNull XmlSerializer out) throws IOException {
-        out.attribute(null, KEY_FACTORY_RESET_PROTECTION_DISABLED,
-                Boolean.toString(mFactoryResetProtectionDisabled));
+        out.attribute(null, KEY_FACTORY_RESET_PROTECTION_ENABLED,
+                Boolean.toString(mFactoryResetProtectionEnabled));
         for (String account : mFactoryResetProtectionAccounts) {
             out.startTag(null, KEY_FACTORY_RESET_PROTECTION_ACCOUNT);
             out.attribute(null, ATTR_VALUE, account);

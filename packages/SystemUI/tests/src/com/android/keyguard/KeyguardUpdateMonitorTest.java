@@ -22,6 +22,7 @@ import static android.telephony.SubscriptionManager.NAME_SOURCE_DEFAULT;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -61,9 +62,9 @@ import android.testing.TestableContext;
 import android.testing.TestableLooper;
 
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import org.junit.Assert;
@@ -75,6 +76,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
@@ -94,7 +96,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", true, TEST_GROUP_UUID,
             TEST_CARRIER_ID, 0);
     @Mock
-    private DumpController mDumpController;
+    private DumpManager mDumpManager;
     @Mock
     private KeyguardUpdateMonitor.StrongAuthTracker mStrongAuthTracker;
     @Mock
@@ -117,6 +119,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private SubscriptionManager mSubscriptionManager;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private Executor mBackgroundExecutor;
     private TestableLooper mTestableLooper;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
@@ -137,7 +141,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
         when(mUserManager.isPrimaryUser()).thenReturn(true);
-        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed()).thenReturn(true);
+        when(mStrongAuthTracker
+                .isUnlockingWithBiometricAllowed(anyBoolean() /* isStrongBiometric */))
+                .thenReturn(true);
         context.addMockSystemService(TrustManager.class, mTrustManager);
         context.addMockSystemService(FingerprintManager.class, mFingerprintManager);
         context.addMockSystemService(BiometricManager.class, mBiometricManager);
@@ -147,6 +153,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         context.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
 
         mTestableLooper = TestableLooper.get(this);
+        allowTestableLooperAsMainThread();
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(context);
     }
 
@@ -449,7 +456,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testOnFaceAuthenticated_skipsFaceWhenAuthenticated() {
-        mKeyguardUpdateMonitor.onFaceAuthenticated(KeyguardUpdateMonitor.getCurrentUser());
+        // test whether face will be skipped if authenticated, so the value of isStrongBiometric
+        // doesn't matter here
+        mKeyguardUpdateMonitor.onFaceAuthenticated(KeyguardUpdateMonitor.getCurrentUser(),
+                true /* isStrongBiometric */);
         mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
         mTestableLooper.processAllMessages();
 
@@ -459,15 +469,33 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testGetUserCanSkipBouncer_whenFace() {
         int user = KeyguardUpdateMonitor.getCurrentUser();
-        mKeyguardUpdateMonitor.onFaceAuthenticated(user);
+        mKeyguardUpdateMonitor.onFaceAuthenticated(user, true /* isStrongBiometric */);
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
+    }
+
+    @Test
+    public void testGetUserCanSkipBouncer_whenFace_nonStrongAndDisallowed() {
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(false /* isStrongBiometric */))
+                .thenReturn(false);
+        int user = KeyguardUpdateMonitor.getCurrentUser();
+        mKeyguardUpdateMonitor.onFaceAuthenticated(user, false /* isStrongBiometric */);
+        assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isFalse();
     }
 
     @Test
     public void testGetUserCanSkipBouncer_whenFingerprint() {
         int user = KeyguardUpdateMonitor.getCurrentUser();
-        mKeyguardUpdateMonitor.onFingerprintAuthenticated(user);
+        mKeyguardUpdateMonitor.onFingerprintAuthenticated(user, true /* isStrongBiometric */);
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
+    }
+
+    @Test
+    public void testGetUserCanSkipBouncer_whenFingerprint_nonStrongAndDisallowed() {
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(false /* isStrongBiometric */))
+                .thenReturn(false);
+        int user = KeyguardUpdateMonitor.getCurrentUser();
+        mKeyguardUpdateMonitor.onFingerprintAuthenticated(user, false /* isStrongBiometric */);
+        assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isFalse();
     }
 
     @Test
@@ -584,7 +612,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         protected TestableKeyguardUpdateMonitor(Context context) {
             super(context,
                     TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
-                    mBroadcastDispatcher, mDumpController);
+                    mBroadcastDispatcher, mDumpManager, mBackgroundExecutor);
             mStrongAuthTracker = KeyguardUpdateMonitorTest.this.mStrongAuthTracker;
         }
 

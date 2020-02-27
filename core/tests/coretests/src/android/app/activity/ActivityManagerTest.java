@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.test.AndroidTestCase;
@@ -122,9 +123,7 @@ public class ActivityManagerTest extends AndroidTestCase {
     public void testTaskDescriptionCopyFrom() {
         TaskDescription td1 = new TaskDescription(
                 "test label",            // label
-                null,                    // bitmap
-                21,                      // iconRes
-                "dummy file",            // iconFilename
+                Icon.createWithResource(mContext.getPackageName(), 21), // icon
                 0x111111,                // colorPrimary
                 0x222222,                // colorBackground
                 0x333333,                // statusBarColor
@@ -147,9 +146,7 @@ public class ActivityManagerTest extends AndroidTestCase {
     public void testTaskDescriptionCopyFromPreserveHiddenFields() {
         TaskDescription td1 = new TaskDescription(
                 "test label",              // label
-                null,                      // bitmap
-                21,                        // iconRes
-                "dummy file",              // iconFilename
+                Icon.createWithResource(mContext.getPackageName(), 21), // icon
                 0x111111,                  // colorPrimary
                 0x222222,                  // colorBackground
                 0x333333,                  // statusBarColor
@@ -163,9 +160,7 @@ public class ActivityManagerTest extends AndroidTestCase {
 
         TaskDescription td2 = new TaskDescription(
                 "test label2",           // label
-                null,                    // bitmap
-                212,                     // iconRes
-                "dummy file2",           // iconFilename
+                Icon.createWithResource(mContext.getPackageName(), 212), // icon
                 0x1111112,               // colorPrimary
                 0x2222222,               // colorBackground
                 0x3333332,               // statusBarColor
@@ -194,9 +189,7 @@ public class ActivityManagerTest extends AndroidTestCase {
     public void testTaskDescriptionParceling() throws Exception {
         TaskDescription tdBitmapNull = new TaskDescription(
                 "test label",              // label
-                null,                      // bitmap
-                21,                        // iconRes
-                "dummy file",              // iconFilename
+                Icon.createWithResource(mContext.getPackageName(), 21), // icon
                 0x111111,                  // colorPrimary
                 0x222222,                  // colorBackground
                 0x333333,                  // statusBarColor
@@ -217,9 +210,7 @@ public class ActivityManagerTest extends AndroidTestCase {
         assertTrue(recycledBitmap.isRecycled());
         TaskDescription tdBitmapRecycled = new TaskDescription(
                 "test label",              // label
-                recycledBitmap,                      // bitmap
-                21,                        // iconRes
-                "dummy file",              // iconFilename
+                Icon.createWithBitmap(recycledBitmap), // icon
                 0x111111,                  // colorPrimary
                 0x222222,                  // colorBackground
                 0x333333,                  // statusBarColor
@@ -242,6 +233,7 @@ public class ActivityManagerTest extends AndroidTestCase {
             assertEquals(td1.getLabel(), td2.getLabel());
             assertEquals(td1.getInMemoryIcon(), td2.getInMemoryIcon());
             assertEquals(td1.getIconFilename(), td2.getIconFilename());
+            assertEquals(td1.getIconResourcePackage(), td2.getIconResourcePackage());
             assertEquals(td1.getIconResource(), td2.getIconResource());
             assertEquals(td1.getPrimaryColor(), td2.getPrimaryColor());
             assertEquals(td1.getEnsureStatusBarContrastWhenTransparent(),

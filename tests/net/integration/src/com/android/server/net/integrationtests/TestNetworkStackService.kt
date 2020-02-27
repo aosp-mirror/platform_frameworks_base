@@ -26,6 +26,7 @@ import android.net.util.SharedLog
 import android.os.IBinder
 import com.android.networkstack.metrics.DataStallStatsUtils
 import com.android.networkstack.netlink.TcpSocketTracker
+import com.android.server.NetworkStackService
 import com.android.server.NetworkStackService.NetworkMonitorConnector
 import com.android.server.NetworkStackService.NetworkStackConnector
 import com.android.server.connectivity.NetworkMonitor
@@ -88,6 +89,7 @@ class TestNetworkStackService : Service() {
             val nm = NetworkMonitor(this@TestNetworkStackService, cb,
                     this.network,
                     mock(IpConnectivityLog::class.java), mock(SharedLog::class.java),
+                    mock(NetworkStackService.NetworkStackServiceManager::class.java),
                     NetworkMonitorDeps(privateDnsBypassNetwork),
                     mock(DataStallStatsUtils::class.java),
                     mock(TcpSocketTracker::class.java))

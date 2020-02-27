@@ -20,7 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"Сховішча налад"</string>
-    <string name="wifi_softap_config_change" msgid="5338670993556993667">"Змяненні ў наладах хот-спота"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"Частата хот-спота змянілася."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"Прылада не можа працаваць толькі на частаце 5 ГГц. Гэта частата будзе выкарыстоўвацца, калі гэта магчыма."</string>
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"Налады хот-спота змяніліся"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"Дакраніцеся, каб убачыць падрабязныя звесткі"</string>
 </resources>

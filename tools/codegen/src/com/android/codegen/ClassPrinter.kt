@@ -100,7 +100,7 @@ class ClassPrinter(
             ?: emptyMap()
 
     val internalAnnotations = setOf(ParcelWith, DataClassEnum, PluralOf, UnsupportedAppUsage,
-            DataClassSuppressConstDefs)
+            DataClassSuppressConstDefs, MaySetToNull, Each, DataClass)
     val knownNonValidationAnnotations = internalAnnotations + Each + Nullable
 
     /**

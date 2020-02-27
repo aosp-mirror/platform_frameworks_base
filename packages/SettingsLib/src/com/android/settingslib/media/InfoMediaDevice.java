@@ -30,16 +30,9 @@ public class InfoMediaDevice extends MediaDevice {
 
     private static final String TAG = "InfoMediaDevice";
 
-    private final MediaRoute2Info mRouteInfo;
-    private final MediaRouter2Manager mRouterManager;
-    private final String mPackageName;
-
     InfoMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
             String packageName) {
-        super(context, MediaDeviceType.TYPE_CAST_DEVICE);
-        mRouterManager = routerManager;
-        mRouteInfo = info;
-        mPackageName = packageName;
+        super(context, MediaDeviceType.TYPE_CAST_DEVICE, routerManager, info, packageName);
         initDeviceRecord();
     }
 
@@ -66,34 +59,6 @@ public class InfoMediaDevice extends MediaDevice {
         return MediaDeviceUtils.getId(mRouteInfo);
     }
 
-    @Override
-    public boolean connect() {
-        setConnectedRecord();
-        mRouterManager.selectRoute(mPackageName, mRouteInfo);
-        return true;
-    }
-
-    @Override
-    public void requestSetVolume(int volume) {
-        mRouterManager.requestSetVolume(mRouteInfo, volume);
-    }
-
-    @Override
-    public int getMaxVolume() {
-        return mRouteInfo.getVolumeMax();
-    }
-
-    @Override
-    public int getCurrentVolume() {
-        return mRouteInfo.getVolume();
-    }
-
-    @Override
-    public void disconnect() {
-        //TODO(b/144535188): disconnected last select device
-    }
-
-    @Override
     public boolean isConnected() {
         return true;
     }

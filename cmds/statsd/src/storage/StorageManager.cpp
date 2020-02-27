@@ -44,7 +44,7 @@ using std::map;
 #define TRAIN_INFO_PATH "/data/misc/train-info/train-info.bin"
 
 // Magic word at the start of the train info file, change this if changing the file format
-const uint32_t TRAIN_INFO_FILE_MAGIC = 0xff7447ff;
+const uint32_t TRAIN_INFO_FILE_MAGIC = 0xfb7447bf;
 
 // for ConfigMetricsReportList
 const int FIELD_ID_REPORTS = 2;
@@ -73,6 +73,29 @@ string StorageManager::getDataFileName(long wallClockSec, int uid, int64_t id) {
 string StorageManager::getDataHistoryFileName(long wallClockSec, int uid, int64_t id) {
     return StringPrintf("%s/%ld_%d_%lld_history", STATS_DATA_DIR, wallClockSec, uid,
                         (long long)id);
+}
+
+static string findTrainInfoFileNameLocked(const string& trainName) {
+    unique_ptr<DIR, decltype(&closedir)> dir(opendir(TRAIN_INFO_DIR), closedir);
+    if (dir == NULL) {
+        VLOG("Path %s does not exist", TRAIN_INFO_DIR);
+        return "";
+    }
+    dirent* de;
+    while ((de = readdir(dir.get()))) {
+        char* fileName = de->d_name;
+        if (fileName[0] == '.') continue;
+
+        size_t fileNameLength = strlen(fileName);
+        if (fileNameLength >= trainName.length()) {
+            if (0 == strncmp(fileName + fileNameLength - trainName.length(), trainName.c_str(),
+                             trainName.length())) {
+              return string(fileName);
+            }
+        }
+    }
+
+    return "";
 }
 
 // Returns array of int64_t which contains timestamp in seconds, uid,
@@ -123,20 +146,25 @@ void StorageManager::writeFile(const char* file, const void* buffer, int numByte
     close(fd);
 }
 
-bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string& trainName,
-                                    int32_t status, const std::vector<int64_t>& experimentIds) {
+bool StorageManager::writeTrainInfo(const InstallTrainInfo& trainInfo) {
     std::lock_guard<std::mutex> lock(sTrainInfoMutex);
 
-    deleteAllFiles(TRAIN_INFO_DIR);
+    if (trainInfo.trainName.empty()) {
+      return false;
+    }
+    deleteSuffixedFiles(TRAIN_INFO_DIR, trainInfo.trainName.c_str());
 
-    int fd = open(TRAIN_INFO_PATH, O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR);
+    std::string fileName =
+            StringPrintf("%s/%ld_%s", TRAIN_INFO_DIR, (long) getWallClockSec(),
+                         trainInfo.trainName.c_str());
+
+    int fd = open(fileName.c_str(), O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR);
     if (fd == -1) {
-        VLOG("Attempt to access %s but failed", TRAIN_INFO_PATH);
+        VLOG("Attempt to access %s but failed", fileName.c_str());
         return false;
     }
 
     size_t result;
-
     // Write the magic word
     result = write(fd, &TRAIN_INFO_FILE_MAGIC, sizeof(TRAIN_INFO_FILE_MAGIC));
     if (result != sizeof(TRAIN_INFO_FILE_MAGIC)) {
@@ -146,8 +174,8 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string&
     }
 
     // Write the train version
-    const size_t trainVersionCodeByteCount = sizeof(trainVersionCode);
-    result = write(fd, &trainVersionCode, trainVersionCodeByteCount);
+    const size_t trainVersionCodeByteCount = sizeof(trainInfo.trainVersionCode);
+    result = write(fd, &trainInfo.trainVersionCode, trainVersionCodeByteCount);
     if (result != trainVersionCodeByteCount) {
         VLOG("Failed to wrtie train version code");
         close(fd);
@@ -155,7 +183,7 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string&
     }
 
     // Write # of bytes in trainName to file
-    const size_t trainNameSize = trainName.size();
+    const size_t trainNameSize = trainInfo.trainName.size();
     const size_t trainNameSizeByteCount = sizeof(trainNameSize);
     result = write(fd, (uint8_t*)&trainNameSize, trainNameSizeByteCount);
     if (result != trainNameSizeByteCount) {
@@ -165,7 +193,7 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string&
     }
 
     // Write trainName to file
-    result = write(fd, trainName.c_str(), trainNameSize);
+    result = write(fd, trainInfo.trainName.c_str(), trainNameSize);
     if (result != trainNameSize) {
         VLOG("Failed to write train name");
         close(fd);
@@ -173,8 +201,8 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string&
     }
 
     // Write status to file
-    const size_t statusByteCount = sizeof(status);
-    result = write(fd, (uint8_t*)&status, statusByteCount);
+    const size_t statusByteCount = sizeof(trainInfo.status);
+    result = write(fd, (uint8_t*)&trainInfo.status, statusByteCount);
     if (result != statusByteCount) {
         VLOG("Failed to write status");
         close(fd);
@@ -182,7 +210,7 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string&
     }
 
     // Write experiment id count to file.
-    const size_t experimentIdsCount = experimentIds.size();
+    const size_t experimentIdsCount = trainInfo.experimentIds.size();
     const size_t experimentIdsCountByteCount = sizeof(experimentIdsCount);
     result = write(fd, (uint8_t*) &experimentIdsCount, experimentIdsCountByteCount);
     if (result != experimentIdsCountByteCount) {
@@ -193,7 +221,7 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string&
 
     // Write experimentIds to file
     for (size_t i = 0; i < experimentIdsCount; i++) {
-        const int64_t experimentId = experimentIds[i];
+        const int64_t experimentId = trainInfo.experimentIds[i];
         const size_t experimentIdByteCount = sizeof(experimentId);
         result = write(fd, &experimentId, experimentIdByteCount);
         if (result == experimentIdByteCount) {
@@ -205,23 +233,47 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string&
         }
     }
 
-    result = fchown(fd, AID_STATSD, AID_STATSD);
-    if (result) {
-        VLOG("Failed to chown train info file to statsd");
-        close(fd);
-        return false;
+    // Write bools to file
+    const size_t boolByteCount = sizeof(trainInfo.requiresStaging);
+    result = write(fd, (uint8_t*)&trainInfo.requiresStaging, boolByteCount);
+    if (result != boolByteCount) {
+      VLOG("Failed to write requires staging");
+      close(fd);
+      return false;
+    }
+
+    result = write(fd, (uint8_t*)&trainInfo.rollbackEnabled, boolByteCount);
+    if (result != boolByteCount) {
+      VLOG("Failed to write rollback enabled");
+      close(fd);
+      return false;
+    }
+
+    result = write(fd, (uint8_t*)&trainInfo.requiresLowLatencyMonitor, boolByteCount);
+    if (result != boolByteCount) {
+      VLOG("Failed to write requires log latency monitor");
+      close(fd);
+      return false;
     }
 
     close(fd);
     return true;
 }
 
-bool StorageManager::readTrainInfo(InstallTrainInfo& trainInfo) {
+bool StorageManager::readTrainInfo(const std::string& trainName, InstallTrainInfo& trainInfo) {
     std::lock_guard<std::mutex> lock(sTrainInfoMutex);
+    return readTrainInfoLocked(trainName, trainInfo);
+}
 
-    int fd = open(TRAIN_INFO_PATH, O_RDONLY | O_CLOEXEC);
+bool StorageManager::readTrainInfoLocked(const std::string& trainName, InstallTrainInfo& trainInfo) {
+    trimToFit(TRAIN_INFO_DIR, /*parseTimestampOnly=*/ true);
+    string fileName = findTrainInfoFileNameLocked(trainName);
+    if (fileName.empty()) {
+        return false;
+    }
+    int fd = open(StringPrintf("%s/%s", TRAIN_INFO_DIR, fileName.c_str()).c_str(), O_RDONLY | O_CLOEXEC);
     if (fd == -1) {
-        VLOG("Failed to open train-info.bin");
+        VLOG("Failed to open %s", fileName.c_str());
         return false;
     }
 
@@ -297,6 +349,29 @@ bool StorageManager::readTrainInfo(InstallTrainInfo& trainInfo) {
         trainInfo.experimentIds.push_back(experimentId);
     }
 
+    // Read bools
+    const size_t boolByteCount = sizeof(trainInfo.requiresStaging);
+    result = read(fd, &trainInfo.requiresStaging, boolByteCount);
+    if (result != boolByteCount) {
+        VLOG("Failed to read requires requires staging from train info file");
+        close(fd);
+        return false;
+    }
+
+    result = read(fd, &trainInfo.rollbackEnabled, boolByteCount);
+    if (result != boolByteCount) {
+        VLOG("Failed to read requires rollback enabled from train info file");
+        close(fd);
+        return false;
+    }
+
+    result = read(fd, &trainInfo.requiresLowLatencyMonitor, boolByteCount);
+    if (result != boolByteCount) {
+        VLOG("Failed to read requires requires low latency monitor from train info file");
+        close(fd);
+        return false;
+    }
+
     // Expect to be at EOF.
     char c;
     result = read(fd, &c, 1);
@@ -309,6 +384,32 @@ bool StorageManager::readTrainInfo(InstallTrainInfo& trainInfo) {
     VLOG("Read train info file successful");
     close(fd);
     return true;
+}
+
+vector<InstallTrainInfo> StorageManager::readAllTrainInfo() {
+    std::lock_guard<std::mutex> lock(sTrainInfoMutex);
+    vector<InstallTrainInfo> trainInfoList;
+    unique_ptr<DIR, decltype(&closedir)> dir(opendir(TRAIN_INFO_DIR), closedir);
+    if (dir == NULL) {
+        VLOG("Directory does not exist: %s", TRAIN_INFO_DIR);
+        return trainInfoList;
+    }
+
+    dirent* de;
+    while ((de = readdir(dir.get()))) {
+        char* name = de->d_name;
+        if (name[0] == '.') {
+            continue;
+        }
+
+        InstallTrainInfo trainInfo;
+        bool readSuccess = StorageManager::readTrainInfoLocked(name, trainInfo);
+        if (!readSuccess) {
+            continue;
+        }
+        trainInfoList.push_back(trainInfo);
+    }
+    return trainInfoList;
 }
 
 void StorageManager::deleteFile(const char* file) {
@@ -574,7 +675,7 @@ void StorageManager::sortFiles(vector<FileInfo>* fileNames) {
     });
 }
 
-void StorageManager::trimToFit(const char* path) {
+void StorageManager::trimToFit(const char* path, bool parseTimestampOnly) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(path), closedir);
     if (dir == NULL) {
         VLOG("Path %s does not exist", path);
@@ -589,9 +690,16 @@ void StorageManager::trimToFit(const char* path) {
         if (name[0] == '.') continue;
 
         FileName output;
-        parseFileName(name, &output);
+        string file_name;
+        if (parseTimestampOnly) {
+            file_name = StringPrintf("%s/%s", path, name);
+            output.mTimestampSec = StrToInt64(strtok(name, "_"));
+            output.mIsHistory = false;
+        } else {
+            parseFileName(name, &output);
+            file_name = output.getFullFileName(path);
+        }
         if (output.mTimestampSec == -1) continue;
-        string file_name = output.getFullFileName(path);
 
         // Check for timestamp and delete if it's too old.
         long fileAge = nowSec - output.mTimestampSec;

@@ -41,6 +41,7 @@ import android.util.TimeUtils;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -58,6 +59,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Keeps track of recent active state changes in apps.
@@ -721,7 +723,7 @@ public class AppIdleHistory {
         }
     }
 
-    public void dump(IndentingPrintWriter idpw, int userId, String pkg) {
+    public void dump(IndentingPrintWriter idpw, int userId, List<String> pkgs) {
         idpw.println("App Standby States:");
         idpw.increaseIndent();
         ArrayMap<String, AppUsageHistory> userHistory = mIdleHistory.get(userId);
@@ -733,7 +735,7 @@ public class AppIdleHistory {
         for (int p = 0; p < P; p++) {
             final String packageName = userHistory.keyAt(p);
             final AppUsageHistory appUsageHistory = userHistory.valueAt(p);
-            if (pkg != null && !pkg.equals(packageName)) {
+            if (!CollectionUtils.isEmpty(pkgs) && !pkgs.contains(packageName)) {
                 continue;
             }
             idpw.print("package=" + packageName);

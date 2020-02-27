@@ -90,7 +90,7 @@ interface IFaceService {
     // long getHardwareDevice(int i);
 
     // Gets the authenticator ID for face
-    long getAuthenticatorId(String opPackageName);
+    long getAuthenticatorId();
 
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
     void resetLockout(in byte [] token);
@@ -110,4 +110,7 @@ interface IFaceService {
     void getFeature(int userId, int feature, IFaceServiceReceiver receiver, String opPackageName);
 
     void userActivity();
+
+    // Initialize the OEM configured biometric strength
+    void initConfiguredStrength(int strength);
 }

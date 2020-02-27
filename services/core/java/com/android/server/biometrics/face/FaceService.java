@@ -611,24 +611,9 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public long getAuthenticatorId(String opPackageName) {
-            // In this method, we're not checking whether the caller is permitted to use face
-            // API because current authenticator ID is leaked (in a more contrived way) via Android
-            // Keystore (android.security.keystore package): the user of that API can create a key
-            // which requires face authentication for its use, and then query the key's
-            // characteristics (hidden API) which returns, among other things, face
-            // authenticator ID which was active at key creation time.
-            //
-            // Reason: The part of Android Keystore which runs inside an app's process invokes this
-            // method in certain cases. Those cases are not always where the developer demonstrates
-            // explicit intent to use face functionality. Thus, to avoiding throwing an
-            // unexpected SecurityException this method does not check whether its caller is
-            // permitted to use face API.
-            //
-            // The permission check should be restored once Android Keystore no longer invokes this
-            // method from inside app processes.
-
-            return FaceService.this.getAuthenticatorId(opPackageName);
+        public long getAuthenticatorId() {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            return FaceService.this.getAuthenticatorId();
         }
 
         @Override // Binder call
@@ -740,6 +725,12 @@ public class FaceService extends BiometricServiceBase {
             }
             return 0;
         }
+
+        @Override // Binder call
+        public void initConfiguredStrength(int strength) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            initConfiguredStrengthInternal(strength);
+        }
     }
 
     /**
@@ -809,7 +800,7 @@ public class FaceService extends BiometricServiceBase {
             if (mFaceServiceReceiver != null) {
                 if (biometric == null || biometric instanceof Face) {
                     mFaceServiceReceiver.onAuthenticationSucceeded(deviceId, (Face) biometric,
-                            userId);
+                            userId, isStrongBiometric());
                 } else {
                     Slog.e(TAG, "onAuthenticationSucceeded received non-face biometric");
                 }

@@ -45,8 +45,9 @@ import android.util.Log;
  *   android.permission.BIND_NFC_SERVICE permission.
  *   <li>The user explicitly selected the application as the default payment application in
  *   the Tap &amp; pay settings screen.
- *   <li>The application requires the {@code android.permission.BIND_QUICK_ACCESS_WALLET_SERVICE}
- *   permission in its manifest.
+ *   <li>The QuickAccessWalletService requires that the binding application hold the
+ *   {@code android.permission.BIND_QUICK_ACCESS_WALLET_SERVICE} permission, which only the System
+ *   Service can hold.
  *   <li>The user explicitly enables it using Android Settings (the
  *       {@link Settings#ACTION_QUICK_ACCESS_WALLET_SETTINGS} intent can be used to launch it).
  * </ol>
@@ -73,6 +74,11 @@ import android.util.Log;
  *   a new card is selected, the Android System will notify the service through
  *   {@link #onWalletCardSelected} and will provide the {@link WalletCard#getCardId() cardId} of the
  *   card that is now selected.
+ *   <li>If the user commences an NFC payment, the service may send a {@link WalletServiceEvent}
+ *   to the System indicating that the wallet application now needs to show the activity associated
+ *   with making a payment. Sending a {@link WalletServiceEvent} of type
+ *   {@link WalletServiceEvent#TYPE_NFC_PAYMENT_STARTED} should cause the quick access wallet UI
+ *   to be dismissed.
  *   <li>When the wallet is dismissed, the Android System will notify the service through
  *   {@link #onWalletDismissed}.
  * </ol>
@@ -110,6 +116,7 @@ import android.util.Log;
  *     android:permission="android.permission.BIND_QUICK_ACCESS_WALLET_SERVICE">
  *     <intent-filter>
  *         <action android:name="android.service.quickaccesswallet.QuickAccessWalletService" />
+ *         <category android:name="android.intent.category.DEFAULT"/>
  *     </intent-filter>
  *     <meta-data android:name="android.quickaccesswallet"
  *          android:resource="@xml/quickaccesswallet_configuration" />;
@@ -166,29 +173,6 @@ public abstract class QuickAccessWalletService extends Service {
             "android.service.quickaccesswallet.action.VIEW_WALLET_SETTINGS";
 
     /**
-     * Broadcast Action: Sent by the wallet application to dismiss the Quick Access Wallet.
-     * <p>
-     * The Quick Access Wallet may be shown in a system window on top of other Activities. If the
-     * user selects a payment card from the Quick Access Wallet and then holds their phone to an NFC
-     * terminal, the wallet application will need to show a payment Activity. But if the Quick
-     * Access Wallet is still being shown, it may obscure the payment Activity. To avoid this, the
-     * wallet application can send a broadcast to the Android System with this action to request
-     * that the Quick Access Wallet be dismissed.
-     * <p>
-     * This broadcast must use the {@code android.permission.BIND_QUICK_ACCESS_WALLET_SERVICE}
-     * permission to ensure that it is only delivered to System UI. Furthermore, your application
-     * must require the {@code android.permission.DISMISS_QUICK_ACCESS_WALLET}
-     * <p>
-     * <pre class="prettyprint">
-     * context.sendBroadcast(
-     *     new Intent(ACTION_DISMISS_WALLET), Manifest.permission.BIND_QUICK_ACCESS_WALLET_SERVICE);
-     * </pre>
-     */
-    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_DISMISS_WALLET =
-            "android.service.quickaccesswallet.action.DISMISS_WALLET";
-
-    /**
      * Name under which a QuickAccessWalletService component publishes information about itself.
      * This meta-data should reference an XML resource containing a
      * <code>&lt;{@link
@@ -202,8 +186,20 @@ public abstract class QuickAccessWalletService extends Service {
     public static final String SERVICE_META_DATA = "android.quickaccesswallet";
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
+
+    /**
+     * The service currently only supports one listener at a time. Multiple connections that
+     * register different listeners will clobber the listener. This field may only be accessed from
+     * the main thread.
+     */
     @Nullable
     private String mEventListenerId;
+
+    /**
+     * The service currently only supports one listener at a time. Multiple connections that
+     * register different listeners will clobber the listener. This field may only be accessed from
+     * the main thread.
+     */
     @Nullable
     private IQuickAccessWalletServiceCallbacks mEventListener;
 
@@ -240,7 +236,8 @@ public abstract class QuickAccessWalletService extends Service {
     private void onWalletCardsRequestedInternal(
             GetWalletCardsRequest request,
             IQuickAccessWalletServiceCallbacks callback) {
-        onWalletCardsRequested(request, new GetWalletCardsCallback(callback, mHandler));
+        onWalletCardsRequested(request,
+                new GetWalletCardsCallbackImpl(request, callback, mHandler));
     }
 
     @Override
@@ -250,14 +247,14 @@ public abstract class QuickAccessWalletService extends Service {
             // Binding to the QuickAccessWalletService is protected by the
             // android.permission.BIND_QUICK_ACCESS_WALLET_SERVICE permission, which is defined in
             // R. Pre-R devices can have other side-loaded applications that claim this permission.
-            // This ensures that the service is only available when properly permission protected.
+            // Ensures that the service is only enabled when properly permission protected.
             Log.w(TAG, "Warning: binding on pre-R device");
         }
-        if (SERVICE_INTERFACE.equals(intent.getAction())) {
-            return mInterface.asBinder();
+        if (!SERVICE_INTERFACE.equals(intent.getAction())) {
+            Log.w(TAG, "Wrong action");
+            return null;
         }
-        Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
-        return null;
+        return mInterface.asBinder();
     }
 
     /**

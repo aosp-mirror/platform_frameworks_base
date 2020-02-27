@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -29,8 +30,7 @@ import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.ComponentInfoFlags;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils;
+import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
@@ -38,6 +38,8 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.server.pm.PackageList;
+import com.android.server.pm.PackageSetting;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -68,6 +70,25 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_WIFI = 13;
     public static final int PACKAGE_COMPANION = 14;
     public static final int PACKAGE_RETAIL_DEMO = 15;
+
+    @IntDef(flag = true, prefix = "RESOLVE_", value = {
+            RESOLVE_NON_BROWSER_ONLY,
+            RESOLVE_NON_RESOLVER_ONLY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PrivateResolveFlags {}
+
+    /**
+     * Internal {@link #resolveIntent(Intent, String, int, int, int, boolean, int)} flag:
+     * only match components that contain a generic web intent filter.
+     */
+    public static final int RESOLVE_NON_BROWSER_ONLY = 0x00000001;
+
+    /**
+     * Internal {@link #resolveIntent(Intent, String, int, int, int, boolean, int)} flag: do not
+     * match to the resolver.
+     */
+    public static final int RESOLVE_NON_RESOLVER_ONLY = 0x00000002;
 
     @IntDef(value = {
             INTEGRITY_VERIFICATION_ALLOW,
@@ -215,6 +236,34 @@ public abstract class PackageManagerInternal {
      * @see PackageManager#isPackageSuspended(String)
      */
     public abstract boolean isPackageSuspended(String packageName, int userId);
+
+    /**
+     * Removes all package suspensions imposed by any non-system packages.
+     */
+    public abstract void removeAllNonSystemPackageSuspensions(int userId);
+
+    /**
+     * Removes all suspensions imposed on the given package by non-system packages.
+     */
+    public abstract void removeNonSystemPackageSuspensions(String packageName, int userId);
+
+    /**
+     * Removes all {@link PackageManager.DistractionRestriction restrictions} set on the given
+     * package
+     */
+    public abstract void removeDistractingPackageRestrictions(String packageName, int userId);
+
+    /**
+     * Removes all {@link PackageManager.DistractionRestriction restrictions} set on all the
+     * packages.
+     */
+    public abstract void removeAllDistractingPackageRestrictions(int userId);
+
+    /**
+     * Flushes package restrictions for the given user immediately to disk.
+     */
+    @WorkerThread
+    public abstract void flushPackageRestrictions(int userId);
 
     /**
      * Get the name of the package that suspended the given package. Packages can be suspended by
@@ -396,6 +445,7 @@ public abstract class PackageManagerInternal {
      * @param origIntent The original intent that triggered ephemeral resolution
      * @param resolvedType The resolved type of the intent
      * @param callingPkg The app requesting the ephemeral application
+     * @param callingFeatureId The feature in the package
      * @param isRequesterInstantApp Whether or not the app requesting the ephemeral application
      *                              is an instant app
      * @param verificationBundle Optional bundle to pass to the installer for additional
@@ -404,11 +454,12 @@ public abstract class PackageManagerInternal {
      */
     public abstract void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
             Intent origIntent, String resolvedType, String callingPkg,
-            boolean isRequesterInstantApp, Bundle verificationBundle, int userId);
+            @Nullable String callingFeatureId, boolean isRequesterInstantApp,
+            Bundle verificationBundle, int userId);
 
     /**
-     * Grants implicit access based on an interaction between two apps. This grants the target app
-     * access to the calling application's package metadata.
+     * Grants implicit access based on an interaction between two apps. This grants access to the
+     * from one application to the other's package metadata.
      * <p>
      * When an application explicitly tries to interact with another application [via an
      * activity, service or provider that is either declared in the caller's
@@ -417,14 +468,22 @@ public abstract class PackageManagerInternal {
      * metadata about the calling app. If the calling application uses an implicit intent [ie
      * action VIEW, category BROWSABLE], it remains hidden from the launched app.
      * <p>
+     * If an interaction is not explicit, the {@code direct} argument should be set to false as
+     * visibility should not be granted in some cases. This method handles that logic.
+     * <p>
      * @param userId the user
      * @param intent the intent that triggered the grant
-     * @param callingUid The uid of the calling application
-     * @param targetAppId The app ID of the target application
+     * @param recipientAppId The app ID of the application that is being given access to {@code
+     *                       visibleUid}
+     * @param visibleUid The uid of the application that is becoming accessible to {@code
+     *                   recipientAppId}
+     * @param direct true if the access is being made due to direct interaction between visibleUid
+     *               and recipientAppId.
      */
     public abstract void grantImplicitAccess(
-            @UserIdInt int userId, Intent intent, int callingUid,
-            @AppIdInt int targetAppId);
+            @UserIdInt int userId, Intent intent,
+            @AppIdInt int recipientAppId, int visibleUid,
+            boolean direct);
 
     public abstract boolean isInstantAppInstallerComponent(ComponentName component);
     /**
@@ -505,7 +564,8 @@ public abstract class PackageManagerInternal {
      * Resolves an activity intent, allowing instant apps to be resolved.
      */
     public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
-            int flags, int userId, boolean resolveForStart, int filterCallingUid);
+            int flags, @PrivateResolveFlags int privateResolveFlags, int userId,
+            boolean resolveForStart, int filterCallingUid);
 
     /**
     * Resolves a service intent, allowing instant apps to be resolved.
@@ -564,9 +624,7 @@ public abstract class PackageManagerInternal {
      */
     public abstract @Nullable AndroidPackage getPackage(@NonNull String packageName);
 
-    // TODO(b/135203078): PackageSetting can't be referenced directly. Should move to a server side
-    //  internal PM which is aware of PS.
-    public abstract @Nullable Object getPackageSetting(String packageName);
+    public abstract @Nullable PackageSetting getPackageSetting(String packageName);
 
     /**
      * Returns a package for the given UID. If the UID is part of a shared user ID, one
@@ -603,18 +661,17 @@ public abstract class PackageManagerInternal {
      */
     public abstract void removePackageListObserver(@NonNull PackageListObserver observer);
 
-    // TODO(b/135203078): PackageSetting can't be referenced directly
     /**
      * Returns a package object for the disabled system package name.
      */
-    public abstract @Nullable Object getDisabledSystemPackage(@NonNull String packageName);
+    public abstract @Nullable PackageSetting getDisabledSystemPackage(@NonNull String packageName);
 
     /**
      * Returns the package name for the disabled system package.
      *
      * This is equivalent to
      * {@link #getDisabledSystemPackage(String)}
-     *     .{@link com.android.server.pm.PackageSetting#pkg}
+     *     .{@link PackageSetting#pkg}
      *     .{@link AndroidPackage#getPackageName()}
      */
     public abstract @Nullable String getDisabledSystemPackageName(@NonNull String packageName);
@@ -655,7 +712,7 @@ public abstract class PackageManagerInternal {
     /**
      * Returns whether or not access to the application should be filtered.
      *
-     * @see #filterAppAccess(android.content.pm.PackageParser.Package, int, int)
+     * @see #filterAppAccess(AndroidPackage, int, int)
      */
     public abstract boolean filterAppAccess(
             @NonNull String packageName, int callingUid, int userId);
@@ -741,23 +798,31 @@ public abstract class PackageManagerInternal {
             throws IOException;
 
     /** Returns {@code true} if the specified component is enabled and matches the given flags. */
-    public abstract boolean isEnabledAndMatches(
-            @NonNull ComponentParseUtils.ParsedComponent component, int flags, int userId);
+    public abstract boolean isEnabledAndMatches(@NonNull ParsedMainComponent component, int flags,
+            int userId);
 
     /** Returns {@code true} if the given user requires extra badging for icons. */
     public abstract boolean userNeedsBadging(int userId);
 
     /**
      * Perform the given action for each package.
-     * Note that packages lock will be held while performin the actions.
+     * Note that packages lock will be held while performing the actions.
      *
      * @param actionLocked action to be performed
      */
     public abstract void forEachPackage(Consumer<AndroidPackage> actionLocked);
 
     /**
+     * Perform the given action for each {@link PackageSetting}.
+     * Note that packages lock will be held while performing the actions.
+     *
+     * @param actionLocked action to be performed
+     */
+    public abstract void forEachPackageSetting(Consumer<PackageSetting> actionLocked);
+
+    /**
      * Perform the given action for each installed package for a user.
-     * Note that packages lock will be held while performin the actions.
+     * Note that packages lock will be held while performing the actions.
      */
     public abstract void forEachInstalledPackage(
             @NonNull Consumer<AndroidPackage> actionLocked, @UserIdInt int userId);
@@ -923,4 +988,9 @@ public abstract class PackageManagerInternal {
      */
     public abstract void setIntegrityVerificationResult(int verificationId,
             @IntegrityVerificationResult int verificationResult);
+
+    /**
+     * Returns MIME types contained in {@code mimeGroup} from {@code packageName} package
+     */
+    public abstract List<String> getMimeGroup(String packageName, String mimeGroup);
 }

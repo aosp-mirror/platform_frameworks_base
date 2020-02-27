@@ -163,7 +163,7 @@ public class TiledImageRenderer {
 
     private static boolean isHighResolution(Context context) {
         DisplayMetrics metrics = new DisplayMetrics();
-        context.getDisplay().getMetrics(metrics);
+        context.getDisplayNoVerify().getMetrics(metrics);
         return metrics.heightPixels > 2048 ||  metrics.widthPixels > 2048;
     }
 

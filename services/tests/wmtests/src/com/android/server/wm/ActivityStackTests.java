@@ -54,8 +54,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 
+import android.app.ActivityManager;
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
@@ -1106,6 +1110,37 @@ public class ActivityStackTests extends ActivityTestsBase {
             mDefaultDisplay.unregisterStackOrderChangedListener(listener);
         }
         assertTrue(listener.mChanged);
+    }
+
+    @Test
+    public void testNavigateUpTo() {
+        final ActivityStartController controller = mock(ActivityStartController.class);
+        final ActivityStarter starter = new ActivityStarter(controller,
+                mService, mService.mStackSupervisor, mock(ActivityStartInterceptor.class));
+        doReturn(controller).when(mService).getActivityStartController();
+        spyOn(starter);
+        doReturn(ActivityManager.START_SUCCESS).when(starter).execute();
+
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(mTask)
+                .setUid(firstActivity.getUid() + 1).build();
+        doReturn(starter).when(controller).obtainStarter(eq(firstActivity.intent), anyString());
+
+        final IApplicationThread thread = secondActivity.app.getThread();
+        secondActivity.app.setThread(null);
+        // This should do nothing from a non-attached caller.
+        assertFalse(mStack.navigateUpTo(secondActivity /* source record */,
+                firstActivity.intent /* destIntent */, 0 /* resultCode */, null /* resultData */));
+
+        secondActivity.app.setThread(thread);
+        assertTrue(mStack.navigateUpTo(secondActivity /* source record */,
+                firstActivity.intent /* destIntent */, 0 /* resultCode */, null /* resultData */));
+        // The firstActivity uses default launch mode, so the activities between it and itself will
+        // be finished.
+        assertTrue(secondActivity.finishing);
+        assertTrue(firstActivity.finishing);
+        // The caller uid of the new activity should be the current real caller.
+        assertEquals(starter.mRequest.callingUid, secondActivity.getUid());
     }
 
     @Test

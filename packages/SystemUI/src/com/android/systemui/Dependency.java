@@ -42,13 +42,13 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -61,6 +61,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
+import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
@@ -128,8 +129,6 @@ import com.android.systemui.wm.DisplayController;
 import com.android.systemui.wm.DisplayImeController;
 import com.android.systemui.wm.SystemWindows;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -210,6 +209,8 @@ public class Dependency {
 
     private final ArrayMap<Object, Object> mDependencies = new ArrayMap<>();
     private final ArrayMap<Object, LazyDependencyCreator> mProviders = new ArrayMap<>();
+
+    @Inject DumpManager mDumpManager;
 
     @Inject Lazy<ActivityStarter> mActivityStarter;
     @Inject Lazy<BroadcastDispatcher> mBroadcastDispatcher;
@@ -311,11 +312,9 @@ public class Dependency {
     @Inject Lazy<DevicePolicyManagerWrapper> mDevicePolicyManagerWrapper;
     @Inject Lazy<PackageManagerWrapper> mPackageManagerWrapper;
     @Inject Lazy<SensorPrivacyController> mSensorPrivacyController;
-    @Inject Lazy<DumpController> mDumpController;
     @Inject Lazy<DockManager> mDockManager;
     @Inject Lazy<ChannelEditorDialogController> mChannelEditorDialogController;
     @Inject Lazy<INotificationManager> mINotificationManager;
-    @Inject Lazy<FalsingManager> mFalsingManager;
     @Inject Lazy<SysUiState> mSysUiStateFlagsContainer;
     @Inject Lazy<AlarmManager> mAlarmManager;
     @Inject Lazy<KeyguardSecurityModel> mKeyguardSecurityModel;
@@ -329,6 +328,7 @@ public class Dependency {
     @Inject Lazy<DisplayImeController> mDisplayImeController;
     @Inject Lazy<RecordingController> mRecordingController;
     @Inject Lazy<ProtoTracer> mProtoTracer;
+    @Inject Lazy<Divider> mDivider;
 
     @Inject
     public Dependency() {
@@ -505,11 +505,9 @@ public class Dependency {
         mProviders.put(DevicePolicyManagerWrapper.class, mDevicePolicyManagerWrapper::get);
         mProviders.put(PackageManagerWrapper.class, mPackageManagerWrapper::get);
         mProviders.put(SensorPrivacyController.class, mSensorPrivacyController::get);
-        mProviders.put(DumpController.class, mDumpController::get);
         mProviders.put(DockManager.class, mDockManager::get);
         mProviders.put(ChannelEditorDialogController.class, mChannelEditorDialogController::get);
         mProviders.put(INotificationManager.class, mINotificationManager::get);
-        mProviders.put(FalsingManager.class, mFalsingManager::get);
         mProviders.put(SysUiState.class, mSysUiStateFlagsContainer::get);
         mProviders.put(AlarmManager.class, mAlarmManager::get);
         mProviders.put(KeyguardSecurityModel.class, mKeyguardSecurityModel::get);
@@ -530,36 +528,9 @@ public class Dependency {
         mProviders.put(AutoHideController.class, mAutoHideController::get);
 
         mProviders.put(RecordingController.class, mRecordingController::get);
+        mProviders.put(Divider.class, mDivider::get);
 
         sDependency = this;
-    }
-
-    static void staticDump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        sDependency.dump(fd, pw, args);
-    }
-
-    /**
-     * {@see SystemUI.dump}
-     */
-    public synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        // Make sure that the DumpController gets added to mDependencies, as they are only added
-        // with Dependency#get.
-        getDependency(DumpController.class);
-        getDependency(BroadcastDispatcher.class);
-
-        // If an arg is specified, try to dump the dependency
-        String controller = args != null && args.length > 1
-                ? args[1].toLowerCase()
-                : null;
-        if (controller != null) {
-            pw.println("Dumping controller=" + controller + ":");
-        } else {
-            pw.println("Dumping existing controllers:");
-        }
-        mDependencies.values().stream()
-                .filter(obj -> obj instanceof Dumpable && (controller == null
-                        || obj.getClass().getName().toLowerCase().endsWith(controller)))
-                .forEach(o -> ((Dumpable) o).dump(fd, pw, args));
     }
 
     protected final <T> T getDependency(Class<T> cls) {
@@ -576,6 +547,11 @@ public class Dependency {
         if (obj == null) {
             obj = createDependency(key);
             mDependencies.put(key, obj);
+
+            // TODO: Get dependencies to register themselves instead
+            if (autoRegisterModulesForDump() && obj instanceof Dumpable) {
+                mDumpManager.registerDumpable(obj.getClass().getName(), (Dumpable) obj);
+            }
         }
         return obj;
     }
@@ -593,6 +569,17 @@ public class Dependency {
         return provider.createDependency();
     }
 
+    // Currently, there are situations in tests where we might create more than one instance of a
+    // thing that should be a singleton: the "real" one (created by Dagger, usually as a result of
+    // inflating a view), and a mocked one (injected into Dependency). If we register the mocked
+    // one, the DumpManager will throw an exception complaining (rightly) that we have too many
+    // things registered with that name. So in tests, we disable the auto-registration until the
+    // root cause is fixed, i.e. inflated views in tests with Dagger dependencies.
+    @VisibleForTesting
+    protected boolean autoRegisterModulesForDump() {
+        return true;
+    }
+
     private static Dependency sDependency;
 
     /**
@@ -605,6 +592,9 @@ public class Dependency {
 
     private <T> void destroyDependency(Class<T> cls, Consumer<T> destroy) {
         T dep = (T) mDependencies.remove(cls);
+        if (dep instanceof Dumpable) {
+            mDumpManager.unregisterDumpable(dep.getClass().getName());
+        }
         if (dep != null && destroy != null) {
             destroy.accept(dep);
         }

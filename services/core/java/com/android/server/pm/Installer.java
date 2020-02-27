@@ -234,11 +234,11 @@ public class Installer extends SystemService {
     }
 
     public void moveCompleteApp(String fromUuid, String toUuid, String packageName,
-            String dataAppName, int appId, String seInfo, int targetSdkVersion,
+            int appId, String seInfo, int targetSdkVersion,
             String fromCodePath) throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.moveCompleteApp(fromUuid, toUuid, packageName, dataAppName, appId, seInfo,
+            mInstalld.moveCompleteApp(fromUuid, toUuid, packageName, appId, seInfo,
                     targetSdkVersion, fromCodePath);
         } catch (Exception e) {
             throw InstallerException.from(e);
@@ -611,10 +611,10 @@ public class Installer extends SystemService {
     /**
      * Bind mount private volume CE and DE mirror storage.
      */
-    public void onPrivateVolumeMounted(String volumeUuid) throws InstallerException {
+    public void tryMountDataMirror(String volumeUuid) throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.onPrivateVolumeMounted(volumeUuid);
+            mInstalld.tryMountDataMirror(volumeUuid);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

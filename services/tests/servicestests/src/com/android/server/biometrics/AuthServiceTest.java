@@ -38,6 +38,7 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.iris.IIrisService;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.UserHandle;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -110,6 +111,29 @@ public class AuthServiceTest {
                 any());
     }
 
+    @Test
+    public void testRegisterAuthenticator_callsInitConfiguredStrength() throws Exception {
+
+        final String[] config = {
+                "0:2:15", // ID0:Fingerprint:Strong
+                "1:4:255", // ID1:Iris:Weak
+                "2:8:4095", // ID2:Face:Convenience
+        };
+
+        when(mInjector.getConfiguration(any())).thenReturn(config);
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final int fingerprintStrength = 15;
+        final int irisStrength = 255;
+        final int faceStrength = 4095;
+
+        verify(mFingerprintService).initConfiguredStrength(eq(fingerprintStrength));
+        verify(mIrisService).initConfiguredStrength(eq(irisStrength));
+        verify(mFaceService).initConfiguredStrength(eq(faceStrength));
+    }
+
 
     // TODO(b/141025588): Check that an exception is thrown when the userId != callingUserId
     @Test
@@ -136,7 +160,10 @@ public class AuthServiceTest {
                 eq(userId),
                 eq(mReceiver),
                 eq(TEST_OP_PACKAGE_NAME),
-                eq(bundle));
+                eq(bundle),
+                eq(Binder.getCallingUid()),
+                eq(Binder.getCallingPid()),
+                eq(UserHandle.getCallingUserId()));
     }
 
     @Test
@@ -147,7 +174,7 @@ public class AuthServiceTest {
         final int userId = 0;
         final int expectedResult = BIOMETRIC_SUCCESS;
         final int authenticators = 0;
-        when(mBiometricService.canAuthenticate(anyString(), anyInt(), anyInt()))
+        when(mBiometricService.canAuthenticate(anyString(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(expectedResult);
 
         final int result = mAuthService.mImpl
@@ -158,6 +185,7 @@ public class AuthServiceTest {
         verify(mBiometricService).canAuthenticate(
                 eq(TEST_OP_PACKAGE_NAME),
                 eq(userId),
+                eq(UserHandle.getCallingUserId()),
                 eq(authenticators));
     }
 
@@ -196,7 +224,8 @@ public class AuthServiceTest {
         mAuthService.mImpl.registerEnabledOnKeyguardCallback(callback);
 
         waitForIdle();
-        verify(mBiometricService).registerEnabledOnKeyguardCallback(eq(callback));
+        verify(mBiometricService).registerEnabledOnKeyguardCallback(
+                eq(callback), eq(UserHandle.getCallingUserId()));
     }
 
     @Test

@@ -20,18 +20,22 @@ import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.app.INotificationManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
-import android.view.IWindowManager;
+import android.view.Choreographer;
 import android.view.LayoutInflater;
+import android.view.WindowManager;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.Prefs;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
@@ -43,8 +47,6 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -79,6 +81,13 @@ public class DependencyProvider {
 
     /** */
     @Provides
+    @Main
+    public SharedPreferences provideSharePreferences(Context context) {
+        return Prefs.get(context);
+    }
+
+    /** */
+    @Provides
     public AmbientDisplayConfiguration provideAmbientDispalyConfiguration(Context context) {
         return new AmbientDisplayConfiguration(context);
     }
@@ -97,10 +106,10 @@ public class DependencyProvider {
 
     @Singleton
     @Provides
-    // Single instance of DisplayMetrics, gets updated by StatusBar, but can be used
-    // anywhere it is needed.
-    public DisplayMetrics provideDisplayMetrics() {
-        return new DisplayMetrics();
+    public DisplayMetrics provideDisplayMetrics(Context context, WindowManager windowManager) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        context.getDisplay().getMetrics(displayMetrics);
+        return displayMetrics;
     }
 
     /** */
@@ -159,16 +168,6 @@ public class DependencyProvider {
 
     @Singleton
     @Provides
-    public AutoHideController provideAutoHideController(Context context,
-            @Main Handler mainHandler,
-            NotificationRemoteInputManager notificationRemoteInputManager,
-            IWindowManager iWindowManager) {
-        return new AutoHideController(context, mainHandler, notificationRemoteInputManager,
-                iWindowManager);
-    }
-
-    @Singleton
-    @Provides
     public ActivityManagerWrapper provideActivityManagerWrapper() {
         return ActivityManagerWrapper.getInstance();
     }
@@ -191,9 +190,22 @@ public class DependencyProvider {
         return new AlwaysOnDisplayPolicy(context);
     }
 
+    /***/
+    @Provides
+    public NotificationMessagingUtil provideNotificationMessagingUtil(Context context) {
+        return new NotificationMessagingUtil(context);
+    }
+
     /** */
     @Provides
     public ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
         return viewMediator.getViewMediatorCallback();
+    }
+
+    /** */
+    @Singleton
+    @Provides
+    public Choreographer providesChoreographer() {
+        return Choreographer.getInstance();
     }
 }

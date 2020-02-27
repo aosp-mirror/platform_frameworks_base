@@ -41,6 +41,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.os.Build;
@@ -213,7 +214,7 @@ public final class SurfaceControl implements Parcelable {
             @Size(4) float[] spotColor, float lightPosY, float lightPosZ, float lightRadius);
 
     private static native void nativeSetFrameRate(
-            long transactionObj, long nativeObject, float frameRate);
+            long transactionObj, long nativeObject, float frameRate, int compatibility);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -321,14 +322,12 @@ public final class SurfaceControl implements Parcelable {
     public static final int FX_SURFACE_NORMAL   = 0x00000000;
 
     /**
-     * Surface creation flag: Creates a Dim surface.
-     * Everything behind this surface is dimmed by the amount specified
-     * in {@link Transaction#setAlpha(SurfaceControl, float)}.  It is an error to lock a Dim
-     * surface, since it doesn't have a backing store.
+     * Surface creation flag: Creates a effect surface which
+     * represents a solid color and or shadows.
      *
      * @hide
      */
-    public static final int FX_SURFACE_DIM = 0x00020000;
+    public static final int FX_SURFACE_EFFECT = 0x00020000;
 
     /**
      * Surface creation flag: Creates a container surface.
@@ -739,11 +738,11 @@ public final class SurfaceControl implements Parcelable {
          */
         public Builder setColorLayer() {
             unsetBufferSize();
-            return setFlags(FX_SURFACE_DIM, FX_SURFACE_MASK);
+            return setFlags(FX_SURFACE_EFFECT, FX_SURFACE_MASK);
         }
 
         private boolean isColorLayerSet() {
-            return  (mFlags & FX_SURFACE_DIM) == FX_SURFACE_DIM;
+            return  (mFlags & FX_SURFACE_EFFECT) == FX_SURFACE_EFFECT;
         }
 
         /**
@@ -1285,12 +1284,17 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final class DisplayInfo {
+        public boolean isInternal;
         public float density;
         public boolean secure;
+        public DeviceProductInfo deviceProductInfo;
 
         @Override
         public String toString() {
-            return "DisplayInfo{density=" + density + ", secure=" + secure + "}";
+            return "DisplayInfo{isInternal=" + isInternal
+                    + ", density=" + density
+                    + ", secure=" + secure
+                    + ", deviceProductInfo=" + deviceProductInfo + "}";
         }
     }
 
@@ -2075,6 +2079,7 @@ public final class SurfaceControl implements Parcelable {
 
         private final ArrayMap<SurfaceControl, Point> mResizedSurfaces = new ArrayMap<>();
         Runnable mFreeNativeResources;
+        private static final float[] INVALID_COLOR = {-1, -1, -1};
 
         /**
          * @hide
@@ -2530,14 +2535,25 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Sets a color for the Surface.
-         * @param color A float array with three values to represent r, g, b in range [0..1]
+         * Fills the surface with the specified color.
+         * @param color A float array with three values to represent r, g, b in range [0..1]. An
+         * invalid color will remove the color fill.
          * @hide
          */
         @UnsupportedAppUsage
         public Transaction setColor(SurfaceControl sc, @Size(3) float[] color) {
             checkPreconditions(sc);
             nativeSetColor(mNativeObject, sc.mNativeObject, color);
+            return this;
+        }
+
+        /**
+         * Removes color fill.
+        * @hide
+        */
+        public Transaction unsetColor(SurfaceControl sc) {
+            checkPreconditions(sc);
+            nativeSetColor(mNativeObject, sc.mNativeObject, INVALID_COLOR);
             return this;
         }
 
@@ -2722,13 +2738,17 @@ public final class SurfaceControl implements Parcelable {
          *                  isn't called. The frameRate param does *not* need to be a valid refresh
          *                  rate for this device's display - e.g., it's fine to pass 30fps to a
          *                  device that can only run the display at 60fps.
+         * @param compatibility The frame rate compatibility of this surface. The compatibility
+         *                      value may influence the system's choice of display frame rate. See
+         *                      the Surface.FRAME_RATE_COMPATIBILITY_* values for more info.
          * @return This transaction object.
          */
         @NonNull
-        public Transaction setFrameRate(
-                @NonNull SurfaceControl sc, @FloatRange(from = 0.0) float frameRate) {
+        public Transaction setFrameRate(@NonNull SurfaceControl sc,
+                @FloatRange(from = 0.0) float frameRate,
+                @Surface.FrameRateCompatibility int compatibility) {
             checkPreconditions(sc);
-            nativeSetFrameRate(mNativeObject, sc.mNativeObject, frameRate);
+            nativeSetFrameRate(mNativeObject, sc.mNativeObject, frameRate, compatibility);
             return this;
         }
 

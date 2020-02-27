@@ -39,7 +39,7 @@ message SensorServiceProto {
         OP_MODE_RESTRICTED = 2;
         OP_MODE_DATA_INJECTION = 3;
     }
-
+    optional sint32 init_status = 16;
     optional int64 current_time_ms = 1;
     optional SensorDeviceProto sensor_device = 2;
     optional SensorListProto sensors = 3;
@@ -56,6 +56,8 @@ message SensorServiceProto {
     repeated SensorEventConnectionProto active_connections = 13;
     repeated SensorDirectConnectionProto direct_connections = 14;
     repeated SensorRegistrationInfoProto previous_registrations = 15;
+
+    // Next tag: 17
 }
 
 // Proto dump of android::SensorDevice

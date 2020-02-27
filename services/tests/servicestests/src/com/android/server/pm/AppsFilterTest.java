@@ -29,21 +29,22 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
-import android.content.pm.parsing.PackageImpl;
 import android.content.pm.parsing.ParsingPackage;
-import android.net.Uri;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedProvider;
 import android.os.Build;
 import android.os.Process;
+import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import androidx.annotation.NonNull;
 
 import com.android.server.om.OverlayReferenceMapper;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,6 +59,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+@Presubmit
 @RunWith(JUnit4.class)
 public class AppsFilterTest {
 
@@ -73,7 +75,7 @@ public class AppsFilterTest {
     private ArrayMap<String, PackageSetting> mExisting = new ArrayMap<>();
 
     private static ParsingPackage pkg(String packageName) {
-        return PackageImpl.forParsing(packageName)
+        return PackageImpl.forTesting(packageName)
                 .setTargetSdkVersion(Build.VERSION_CODES.R);
     }
 
@@ -82,6 +84,17 @@ public class AppsFilterTest {
         if (queries != null) {
             for (Intent intent : queries) {
                 pkg.addQueriesIntent(intent);
+            }
+        }
+        return pkg;
+    }
+
+    private static ParsingPackage pkgQueriesProvider(String packageName,
+            String... queriesAuthorities) {
+        ParsingPackage pkg = pkg(packageName);
+        if (queriesAuthorities != null) {
+            for (String authority : queriesAuthorities) {
+                pkg.addQueriesProvider(authority);
             }
         }
         return pkg;
@@ -101,7 +114,7 @@ public class AppsFilterTest {
         ParsedActivity activity = new ParsedActivity();
         activity.setPackageName(packageName);
         for (IntentFilter filter : filters) {
-            final ParsedActivityIntentInfo info = new ParsedActivityIntentInfo(packageName, null);
+            final ParsedIntentInfo info = new ParsedIntentInfo();
             if (filter.countActions() > 0) {
                 filter.actionsIterator().forEachRemaining(info::addAction);
             }
@@ -115,7 +128,7 @@ public class AppsFilterTest {
                 filter.schemesIterator().forEachRemaining(info::addDataScheme);
             }
             activity.addIntent(info);
-            activity.exported = true;
+            activity.setExported(true);
         }
 
         return pkg(packageName)
@@ -123,7 +136,7 @@ public class AppsFilterTest {
     }
 
     private static ParsingPackage pkgWithProvider(String packageName, String authority) {
-        ComponentParseUtils.ParsedProvider provider = new ComponentParseUtils.ParsedProvider();
+        ParsedProvider provider = new ParsedProvider();
         provider.setPackageName(packageName);
         provider.setExported(true);
         provider.setAuthority(authority);
@@ -172,8 +185,7 @@ public class AppsFilterTest {
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_UID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package",
-                        new Intent().setData(Uri.parse("content://com.some.authority"))),
+                pkgQueriesProvider("com.some.other.package", "com.some.authority"),
                 DUMMY_CALLING_UID);
 
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
@@ -188,8 +200,7 @@ public class AppsFilterTest {
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_UID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package",
-                        new Intent().setData(Uri.parse("content://com.some.other.authority"))),
+                pkgQueriesProvider("com.some.other.package", "com.some.other.authority"),
                 DUMMY_CALLING_UID);
 
         assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
@@ -205,8 +216,7 @@ public class AppsFilterTest {
                 pkgWithProvider("com.some.package", "com.some.authority;com.some.other.authority"),
                 DUMMY_TARGET_UID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package",
-                        new Intent().setData(Uri.parse("content://com.some.authority"))),
+                pkgQueriesProvider("com.some.other.package", "com.some.authority"),
                 DUMMY_CALLING_UID);
 
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
@@ -266,7 +276,7 @@ public class AppsFilterTest {
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                        pkg("com.some.package").setForceQueryable(true), DUMMY_TARGET_UID);
+                pkg("com.some.package").setForceQueryable(true), DUMMY_TARGET_UID);
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkg("com.some.other.package"), DUMMY_CALLING_UID);
 
@@ -307,7 +317,8 @@ public class AppsFilterTest {
                 b -> b.setSigningDetails(frameworkSigningDetails));
         PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
                 DUMMY_TARGET_UID,
-                b -> b.setSigningDetails(frameworkSigningDetails));
+                b -> b.setSigningDetails(frameworkSigningDetails)
+                        .setPkgFlags(ApplicationInfo.FLAG_SYSTEM));
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkg("com.some.other.package"), DUMMY_CALLING_UID,
                 b -> b.setSigningDetails(otherSigningDetails));
@@ -427,7 +438,7 @@ public class AppsFilterTest {
         ParsingPackage target = pkg("com.some.package.target")
                 .addOverlayable("overlayableName", actorName);
         ParsingPackage overlay = pkg("com.some.package.overlay")
-                .setIsOverlay(true)
+                .setOverlay(true)
                 .setOverlayTarget(target.getPackageName())
                 .setOverlayTargetName("overlayableName");
         ParsingPackage actor = pkg("com.some.package.actor");
@@ -489,7 +500,7 @@ public class AppsFilterTest {
         ParsingPackage target = pkg("com.some.package.target")
                 .addOverlayable("overlayableName", actorName);
         ParsingPackage overlay = pkg("com.some.package.overlay")
-                .setIsOverlay(true)
+                .setOverlay(true)
                 .setOverlayTarget(target.getPackageName())
                 .setOverlayTargetName("overlayableName");
         ParsingPackage actorOne = pkg("com.some.package.actor.one");
@@ -608,7 +619,7 @@ public class AppsFilterTest {
 
     private PackageSetting simulateAddPackage(AppsFilter filter,
             ParsingPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action) {
-        AndroidPackage newPkg = newPkgBuilder.hideAsParsed().hideAsFinal();
+        AndroidPackage newPkg = ((ParsedPackage) newPkgBuilder.hideAsParsed()).hideAsFinal();
 
         final PackageSettingBuilder settingBuilder = new PackageSettingBuilder()
                 .setPackage(newPkg)

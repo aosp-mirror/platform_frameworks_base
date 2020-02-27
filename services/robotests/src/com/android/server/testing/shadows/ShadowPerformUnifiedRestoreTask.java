@@ -67,8 +67,7 @@ public class ShadowPerformUnifiedRestoreTask {
             int pmToken,
             boolean isFullSystemRestore,
             @Nullable String[] filterSet,
-            OnTaskFinishedListener listener,
-            Map<String, Set<String>> excludedKeys) {
+            OnTaskFinishedListener listener) {
         mBackupManagerService = backupManagerService;
         mPackage = targetPackage;
         mIsFullSystemRestore = isFullSystemRestore;

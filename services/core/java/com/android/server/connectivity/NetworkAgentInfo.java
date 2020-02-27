@@ -16,8 +16,12 @@
 
 package com.android.server.connectivity;
 
+import static android.net.NetworkCapabilities.transportNamesOf;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
+import android.net.CaptivePortalData;
 import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.INetworkMonitor;
@@ -163,6 +167,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     // Set to true when partial connectivity was detected.
     public boolean partialConnectivity;
+
+    // Captive portal info of the network, if any.
+    // Obtained by ConnectivityService and merged into NetworkAgent-provided information.
+    public CaptivePortalData captivePortalData;
 
     // Networks are lingered when they become unneeded as a result of their NetworkRequests being
     // satisfied by a higher-scoring network. so as to allow communication to wrap up before the
@@ -372,7 +380,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             // Should only happen if the requestId wraps. If that happens lots of other things will
             // be broken as well.
             Log.wtf(TAG, String.format("Duplicate requestId for %s and %s on %s",
-                    networkRequest, existing, name()));
+                    networkRequest, existing, toShortString()));
             updateRequestCounts(REMOVE, existing);
         }
         mNetworkRequests.put(networkRequest.requestId, networkRequest);
@@ -542,11 +550,11 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             // Cannot happen. Once a request is lingering on a particular network, we cannot
             // re-linger it unless that network becomes the best for that request again, in which
             // case we should have unlingered it.
-            Log.wtf(TAG, this.name() + ": request " + request.requestId + " already lingered");
+            Log.wtf(TAG, toShortString() + ": request " + request.requestId + " already lingered");
         }
         final long expiryMs = now + duration;
         LingerTimer timer = new LingerTimer(request, expiryMs);
-        if (VDBG) Log.d(TAG, "Adding LingerTimer " + timer + " to " + this.name());
+        if (VDBG) Log.d(TAG, "Adding LingerTimer " + timer + " to " + toShortString());
         mLingerTimers.add(timer);
         mLingerTimerForRequest.put(request.requestId, timer);
     }
@@ -558,7 +566,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public boolean unlingerRequest(NetworkRequest request) {
         LingerTimer timer = mLingerTimerForRequest.get(request.requestId);
         if (timer != null) {
-            if (VDBG) Log.d(TAG, "Removing LingerTimer " + timer + " from " + this.name());
+            if (VDBG) Log.d(TAG, "Removing LingerTimer " + timer + " from " + toShortString());
             mLingerTimers.remove(timer);
             mLingerTimerForRequest.remove(request.requestId);
             return true;
@@ -645,14 +653,29 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 + "}";
     }
 
-    public String name() {
-        return "NetworkAgentInfo [" + networkInfo.getTypeName() + " (" +
-                networkInfo.getSubtypeName() + ") - " + Objects.toString(network) + "]";
+    /**
+     * Show a short string representing a Network.
+     *
+     * This is often not enough for debugging purposes for anything complex, but the full form
+     * is very long and hard to read, so this is useful when there isn't a lot of ambiguity.
+     * This represents the network with something like "[100 WIFI|VPN]" or "[108 MOBILE]".
+     */
+    public String toShortString() {
+        return "[" + network.netId + " "
+                + transportNamesOf(networkCapabilities.getTransportTypes()) + "]";
     }
 
     // Enables sorting in descending order of score.
     @Override
     public int compareTo(NetworkAgentInfo other) {
         return other.getCurrentScore() - getCurrentScore();
+    }
+
+    /**
+     * Null-guarding version of NetworkAgentInfo#toShortString()
+     */
+    @NonNull
+    public static String toShortString(@Nullable final NetworkAgentInfo nai) {
+        return null != nai ? nai.toShortString() : "[null]";
     }
 }

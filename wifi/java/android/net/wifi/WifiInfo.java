@@ -291,6 +291,11 @@ public class WifiInfo implements Parcelable {
      */
     private boolean mMeteredHint;
 
+    /**
+     * Passpoint unique key
+     */
+    private String mPasspointUniqueId;
+
     /** @hide */
     @UnsupportedAppUsage
     public WifiInfo() {
@@ -322,6 +327,7 @@ public class WifiInfo implements Parcelable {
         setRequestingPackageName(null);
         setFQDN(null);
         setProviderFriendlyName(null);
+        setPasspointUniqueId(null);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
@@ -370,6 +376,7 @@ public class WifiInfo implements Parcelable {
             mWifiStandard = source.mWifiStandard;
             mMaxSupportedTxLinkSpeed = source.mMaxSupportedTxLinkSpeed;
             mMaxSupportedRxLinkSpeed = source.mMaxSupportedRxLinkSpeed;
+            mPasspointUniqueId = source.mPasspointUniqueId;
         }
     }
 
@@ -977,6 +984,7 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mWifiStandard);
         dest.writeInt(mMaxSupportedTxLinkSpeed);
         dest.writeInt(mMaxSupportedRxLinkSpeed);
+        dest.writeString(mPasspointUniqueId);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1021,6 +1029,7 @@ public class WifiInfo implements Parcelable {
                 info.mWifiStandard = in.readInt();
                 info.mMaxSupportedTxLinkSpeed = in.readInt();
                 info.mMaxSupportedRxLinkSpeed = in.readInt();
+                info.mPasspointUniqueId = in.readString();
                 return info;
             }
 
@@ -1028,4 +1037,24 @@ public class WifiInfo implements Parcelable {
                 return new WifiInfo[size];
             }
         };
+
+    /**
+     * Set the Passpoint unique identifier for the current connection
+     *
+     * @param passpointUniqueId Unique identifier
+     * @hide
+     */
+    public void setPasspointUniqueId(@Nullable String passpointUniqueId) {
+        mPasspointUniqueId = passpointUniqueId;
+    }
+
+    /**
+     * Get the Passpoint unique identifier for the current connection
+     *
+     * @return Passpoint unique identifier
+     * @hide
+     */
+    public @Nullable String getPasspointUniqueId() {
+        return mPasspointUniqueId;
+    }
 }

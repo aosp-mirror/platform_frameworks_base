@@ -363,7 +363,7 @@ public class WifiConfigurationTest {
         assertTrue(config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.SAE));
         assertTrue(config.allowedPairwiseCiphers.get(WifiConfiguration.PairwiseCipher.CCMP));
         assertTrue(config.allowedGroupCiphers.get(WifiConfiguration.GroupCipher.CCMP));
-        assertTrue(config.requirePMF);
+        assertTrue(config.requirePmf);
     }
 
     /**
@@ -380,7 +380,7 @@ public class WifiConfigurationTest {
         assertTrue(config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.OWE));
         assertTrue(config.allowedPairwiseCiphers.get(WifiConfiguration.PairwiseCipher.CCMP));
         assertTrue(config.allowedGroupCiphers.get(WifiConfiguration.GroupCipher.CCMP));
-        assertTrue(config.requirePMF);
+        assertTrue(config.requirePmf);
     }
 
     /**
@@ -399,7 +399,7 @@ public class WifiConfigurationTest {
         assertTrue(config.allowedGroupCiphers.get(WifiConfiguration.GroupCipher.GCMP_256));
         assertTrue(config.allowedGroupManagementCiphers
                 .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
-        assertTrue(config.requirePMF);
+        assertTrue(config.requirePmf);
     }
 
     /**

@@ -17,7 +17,9 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.SystemApi;
+import android.media.tv.tuner.TunerConstants;
 import android.media.tv.tuner.TunerConstants.Result;
+import android.media.tv.tuner.TunerUtils;
 
 /**
  *  A timer filter is used to filter data based on timestamps.
@@ -50,6 +52,8 @@ public class TimeFilter implements AutoCloseable {
     private native Long nativeGetTimestamp();
     private native Long nativeGetSourceTime();
     private native int nativeClose();
+
+    private long mNativeContext;
 
     private boolean mEnable = false;
 
@@ -139,6 +143,9 @@ public class TimeFilter implements AutoCloseable {
      */
     @Override
     public void close() {
-        nativeClose();
+        int res = nativeClose();
+        if (res != TunerConstants.RESULT_SUCCESS) {
+            TunerUtils.throwExceptionForResult(res, "Failed to close time filter.");
+        }
     }
 }

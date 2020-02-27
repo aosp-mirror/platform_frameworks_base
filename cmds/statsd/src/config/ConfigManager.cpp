@@ -42,42 +42,67 @@ using std::vector;
 using android::base::StringPrintf;
 using std::unique_ptr;
 
-class ConfigReceiverDeathRecipient : public android::IBinder::DeathRecipient {
-    public:
-        ConfigReceiverDeathRecipient(sp<ConfigManager> configManager, const ConfigKey& configKey):
-            mConfigManager(configManager),
-            mConfigKey(configKey) {}
-        ~ConfigReceiverDeathRecipient() override = default;
-    private:
-        sp<ConfigManager> mConfigManager;
-        ConfigKey mConfigKey;
+struct ConfigReceiverDeathCookie {
+    ConfigReceiverDeathCookie(sp<ConfigManager> configManager, const ConfigKey& configKey,
+                              const shared_ptr<IPendingIntentRef>& pir):
+        mConfigManager(configManager),
+        mConfigKey(configKey),
+        mPir(pir) {}
 
-    void binderDied(const android::wp<android::IBinder>& who) override {
-        if (IInterface::asBinder(mConfigManager->GetConfigReceiver(mConfigKey)) == who.promote()) {
-             mConfigManager->RemoveConfigReceiver(mConfigKey);
-        }
-    }
+    sp<ConfigManager> mConfigManager;
+    ConfigKey mConfigKey;
+    shared_ptr<IPendingIntentRef> mPir;
 };
 
-class ActiveConfigChangedReceiverDeathRecipient : public android::IBinder::DeathRecipient {
-    public:
-        ActiveConfigChangedReceiverDeathRecipient(sp<ConfigManager> configManager, const int uid):
-            mConfigManager(configManager),
-            mUid(uid) {}
-        ~ActiveConfigChangedReceiverDeathRecipient() override = default;
-    private:
-        sp<ConfigManager> mConfigManager;
-        int mUid;
+static void configReceiverDied(void* cookie) {
+    auto cookie_ = static_cast<ConfigReceiverDeathCookie*>(cookie);
+    sp<ConfigManager> configManager = cookie_->mConfigManager;
+    ConfigKey configKey = cookie_->mConfigKey;
+    shared_ptr<IPendingIntentRef> pir = cookie_->mPir;
 
-    void binderDied(const android::wp<android::IBinder>& who) override {
-        if (IInterface::asBinder(mConfigManager->GetActiveConfigsChangedReceiver(mUid))
-              == who.promote()) {
-            mConfigManager->RemoveActiveConfigsChangedReceiver(mUid);
-        }
+    // TODO(b/149254662): Fix threading. This currently fails if a new
+    // pir gets set between the get and the remove.
+    if (configManager->GetConfigReceiver(configKey) == pir) {
+        configManager->RemoveConfigReceiver(configKey);
     }
+    // The death recipient corresponding to this specific pir can never
+    // be triggered again, so free up resources.
+    // TODO(b/149254662): Investigate other options to manage the memory.
+    delete cookie_;
+}
+
+struct ActiveConfigChangedReceiverDeathCookie {
+    ActiveConfigChangedReceiverDeathCookie(sp<ConfigManager> configManager, const int uid,
+                                           const shared_ptr<IPendingIntentRef>& pir):
+        mConfigManager(configManager),
+        mUid(uid),
+        mPir(pir) {}
+
+    sp<ConfigManager> mConfigManager;
+    int mUid;
+    shared_ptr<IPendingIntentRef> mPir;
 };
 
-ConfigManager::ConfigManager() {
+static void activeConfigChangedReceiverDied(void* cookie) {
+    auto cookie_ = static_cast<ActiveConfigChangedReceiverDeathCookie*>(cookie);
+    sp<ConfigManager> configManager = cookie_->mConfigManager;
+    int uid = cookie_->mUid;
+    shared_ptr<IPendingIntentRef> pir = cookie_->mPir;
+
+    // TODO(b/149254662): Fix threading. This currently fails if a new
+    // pir gets set between the get and the remove.
+    if (configManager->GetActiveConfigsChangedReceiver(uid) == pir) {
+        configManager->RemoveActiveConfigsChangedReceiver(uid);
+    }
+    // The death recipient corresponding to this specific pir can never
+    // be triggered again, so free up resources.
+    delete cookie_;
+}
+
+ConfigManager::ConfigManager():
+    mConfigReceiverDeathRecipient(AIBinder_DeathRecipient_new(configReceiverDied)),
+    mActiveConfigChangedReceiverDeathRecipient(
+        AIBinder_DeathRecipient_new(activeConfigChangedReceiverDied)) {
 }
 
 ConfigManager::~ConfigManager() {
@@ -150,10 +175,11 @@ void ConfigManager::UpdateConfig(const ConfigKey& key, const StatsdConfig& confi
 }
 
 void ConfigManager::SetConfigReceiver(const ConfigKey& key,
-                                      const sp<IPendingIntentRef>& pir) {
+                                      const shared_ptr<IPendingIntentRef>& pir) {
     lock_guard<mutex> lock(mMutex);
     mConfigReceivers[key] = pir;
-    IInterface::asBinder(pir)->linkToDeath(new ConfigReceiverDeathRecipient(this, key));
+    AIBinder_linkToDeath(pir->asBinder().get(), mConfigReceiverDeathRecipient.get(),
+                         new ConfigReceiverDeathCookie(this, key, pir));
 }
 
 void ConfigManager::RemoveConfigReceiver(const ConfigKey& key) {
@@ -162,11 +188,11 @@ void ConfigManager::RemoveConfigReceiver(const ConfigKey& key) {
 }
 
 void ConfigManager::SetActiveConfigsChangedReceiver(const int uid,
-                                                    const sp<IPendingIntentRef>& pir) {
+                                                    const shared_ptr<IPendingIntentRef>& pir) {
     lock_guard<mutex> lock(mMutex);
     mActiveConfigsChangedReceivers[uid] = pir;
-    IInterface::asBinder(pir)->linkToDeath(
-        new ActiveConfigChangedReceiverDeathRecipient(this, uid));
+    AIBinder_linkToDeath(pir->asBinder().get(), mActiveConfigChangedReceiverDeathRecipient.get(),
+                         new ActiveConfigChangedReceiverDeathCookie(this, uid, pir));
 }
 
 void ConfigManager::RemoveActiveConfigsChangedReceiver(const int uid) {
@@ -279,7 +305,7 @@ vector<ConfigKey> ConfigManager::GetAllConfigKeys() const {
     return ret;
 }
 
-const sp<IPendingIntentRef> ConfigManager::GetConfigReceiver(const ConfigKey& key) const {
+const shared_ptr<IPendingIntentRef> ConfigManager::GetConfigReceiver(const ConfigKey& key) const {
     lock_guard<mutex> lock(mMutex);
 
     auto it = mConfigReceivers.find(key);
@@ -290,7 +316,8 @@ const sp<IPendingIntentRef> ConfigManager::GetConfigReceiver(const ConfigKey& ke
     }
 }
 
-const sp<IPendingIntentRef> ConfigManager::GetActiveConfigsChangedReceiver(const int uid) const {
+const shared_ptr<IPendingIntentRef> ConfigManager::GetActiveConfigsChangedReceiver(const int uid)
+        const {
     lock_guard<mutex> lock(mMutex);
 
     auto it = mActiveConfigsChangedReceivers.find(uid);

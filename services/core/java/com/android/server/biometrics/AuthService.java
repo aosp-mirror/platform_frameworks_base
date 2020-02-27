@@ -30,6 +30,7 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IAuthService;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
@@ -38,6 +39,7 @@ import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.face.IFaceService;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.iris.IIrisService;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -133,14 +135,12 @@ public class AuthService extends SystemService {
         public void authenticate(IBinder token, long sessionId, int userId,
                 IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle)
                 throws RemoteException {
-            final int callingUserId = UserHandle.getCallingUserId();
 
-            // In the BiometricServiceBase, do the AppOps and foreground check.
+            // Only allow internal clients to authenticate with a different userId.
+            final int callingUserId = UserHandle.getCallingUserId();
             if (userId == callingUserId) {
-                // Check the USE_BIOMETRIC permission here.
                 checkPermission();
             } else {
-                // Only allow internal clients to authenticate with a different userId
                 Slog.w(TAG, "User " + callingUserId + " is requesting authentication of userid: "
                         + userId);
                 checkInternalPermission();
@@ -151,13 +151,56 @@ public class AuthService extends SystemService {
                 return;
             }
 
-            mBiometricService.authenticate(token, sessionId, userId, receiver, opPackageName,
-                    bundle);
+            // Only allow internal clients to enable non-public options.
+            if (bundle.getBoolean(BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS)
+                    || bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false)
+                    || bundle.getCharSequence(BiometricPrompt.KEY_DEVICE_CREDENTIAL_TITLE) != null
+                    || bundle.getCharSequence(
+                            BiometricPrompt.KEY_DEVICE_CREDENTIAL_SUBTITLE) != null
+                    || bundle.getCharSequence(
+                            BiometricPrompt.KEY_DEVICE_CREDENTIAL_DESCRIPTION) != null) {
+                checkInternalPermission();
+            }
+
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mBiometricService.authenticate(
+                        token, sessionId, userId, receiver, opPackageName, bundle, callingUid,
+                        callingPid, callingUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void cancelAuthentication(IBinder token, String opPackageName)
+                throws RemoteException {
+            checkPermission();
+
+            if (token == null || opPackageName == null) {
+                Slog.e(TAG, "Unable to authenticate, one or more null arguments");
+                return;
+            }
+
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int callingUserId = UserHandle.getCallingUserId();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mBiometricService.cancelAuthentication(token, opPackageName, callingUid,
+                        callingPid, callingUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
         public int canAuthenticate(String opPackageName, int userId,
                 @Authenticators.Types int authenticators) throws RemoteException {
+
+            // Only allow internal clients to call canAuthenticate with a different userId.
             final int callingUserId = UserHandle.getCallingUserId();
             Slog.d(TAG, "canAuthenticate, userId: " + userId + ", callingUserId: " + callingUserId
                     + ", authenticators: " + authenticators);
@@ -166,33 +209,87 @@ public class AuthService extends SystemService {
             } else {
                 checkPermission();
             }
-            return mBiometricService.canAuthenticate(opPackageName, userId, authenticators);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mBiometricService.canAuthenticate(
+                        opPackageName, userId, callingUserId, authenticators);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
         public boolean hasEnrolledBiometrics(int userId, String opPackageName)
                 throws RemoteException {
             checkInternalPermission();
-            return mBiometricService.hasEnrolledBiometrics(userId, opPackageName);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mBiometricService.hasEnrolledBiometrics(userId, opPackageName);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
-        public void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback)
-                throws RemoteException {
+        public void registerEnabledOnKeyguardCallback(
+                IBiometricEnabledOnKeyguardCallback callback) throws RemoteException {
             checkInternalPermission();
-            mBiometricService.registerEnabledOnKeyguardCallback(callback);
+            final int callingUserId = UserHandle.getCallingUserId();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mBiometricService.registerEnabledOnKeyguardCallback(callback, callingUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
         public void setActiveUser(int userId) throws RemoteException {
             checkInternalPermission();
-            mBiometricService.setActiveUser(userId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mBiometricService.setActiveUser(userId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
         public void resetLockout(byte[] token) throws RemoteException {
             checkInternalPermission();
-            mBiometricService.resetLockout(token);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mBiometricService.resetLockout(token);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public long[] getAuthenticatorIds() throws RemoteException {
+            // In this method, we're not checking whether the caller is permitted to use face
+            // API because current authenticator ID is leaked (in a more contrived way) via Android
+            // Keystore (android.security.keystore package): the user of that API can create a key
+            // which requires face authentication for its use, and then query the key's
+            // characteristics (hidden API) which returns, among other things, face
+            // authenticator ID which was active at key creation time.
+            //
+            // Reason: The part of Android Keystore which runs inside an app's process invokes this
+            // method in certain cases. Those cases are not always where the developer demonstrates
+            // explicit intent to use biometric functionality. Thus, to avoiding throwing an
+            // unexpected SecurityException this method does not check whether its caller is
+            // permitted to use face API.
+            //
+            // The permission check should be restored once Android Keystore no longer invokes this
+            // method from inside app processes.
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mBiometricService.getAuthenticatorIds();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -207,8 +304,23 @@ public class AuthService extends SystemService {
         mImpl = new AuthServiceImpl();
     }
 
-    private void registerAuthenticator(SensorConfig config) throws RemoteException {
+    @Override
+    public void onStart() {
+        mBiometricService = mInjector.getBiometricService();
 
+        final String[] configs = mInjector.getConfiguration(getContext());
+        for (String config : configs) {
+            try {
+                registerAuthenticator(new SensorConfig(config));
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+            }
+        }
+
+        mInjector.publishBinderService(this, mImpl);
+    }
+
+    private void registerAuthenticator(SensorConfig config) throws RemoteException {
         Slog.d(TAG, "Registering ID: " + config.mId
                 + " Modality: " + config.mModality
                 + " Strength: " + config.mStrength);
@@ -219,34 +331,37 @@ public class AuthService extends SystemService {
             case TYPE_FINGERPRINT:
                 final IFingerprintService fingerprintService = mInjector.getFingerprintService();
                 if (fingerprintService == null) {
-                    Slog.e(TAG, "Attempting to register with null FingerprintService. Please check"
-                            + " your device configuration.");
+                    Slog.e(TAG, "Attempting to register with null FingerprintService."
+                            + " Please check your device configuration.");
                     return;
                 }
 
                 authenticator = new FingerprintAuthenticator(fingerprintService);
+                fingerprintService.initConfiguredStrength(config.mStrength);
                 break;
 
             case TYPE_FACE:
                 final IFaceService faceService = mInjector.getFaceService();
                 if (faceService == null) {
-                    Slog.e(TAG, "Attempting to register with null FaceService. Please check your"
-                            + " device configuration.");
+                    Slog.e(TAG, "Attempting to register with null FaceService. Please check "
+                            + " your device configuration.");
                     return;
                 }
 
                 authenticator = new FaceAuthenticator(faceService);
+                faceService.initConfiguredStrength(config.mStrength);
                 break;
 
             case TYPE_IRIS:
                 final IIrisService irisService = mInjector.getIrisService();
                 if (irisService == null) {
-                    Slog.e(TAG, "Attempting to register with null IrisService. Please check your"
-                            + " device configuration.");
+                    Slog.e(TAG, "Attempting to register with null IrisService. Please check"
+                            + " your device configuration.");
                     return;
                 }
 
                 authenticator = new IrisAuthenticator(irisService);
+                irisService.initConfiguredStrength(config.mStrength);
                 break;
 
             default:
@@ -256,24 +371,6 @@ public class AuthService extends SystemService {
 
         mBiometricService.registerAuthenticator(config.mId, config.mModality, config.mStrength,
                 authenticator);
-    }
-
-    @Override
-    public void onStart() {
-        mBiometricService = mInjector.getBiometricService();
-
-        final String[] configs = mInjector.getConfiguration(getContext());
-
-        for (int i = 0; i < configs.length; i++) {
-            try {
-                registerAuthenticator(new SensorConfig(configs[i]));
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-            }
-
-        }
-
-        mInjector.publishBinderService(this, mImpl);
     }
 
     private void checkInternalPermission() {

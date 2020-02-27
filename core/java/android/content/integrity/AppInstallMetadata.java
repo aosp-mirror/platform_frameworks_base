@@ -18,6 +18,9 @@ package android.content.integrity;
 
 import android.annotation.NonNull;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -33,20 +36,27 @@ import java.util.Objects;
 public final class AppInstallMetadata {
     private final String mPackageName;
     // Raw string encoding for the SHA-256 hash of the certificate of the app.
-    private final String mAppCertificate;
+    private final List<String> mAppCertificates;
     private final String mInstallerName;
     // Raw string encoding for the SHA-256 hash of the certificate of the installer.
-    private final String mInstallerCertificate;
+    private final List<String> mInstallerCertificates;
     private final long mVersionCode;
     private final boolean mIsPreInstalled;
+    private final boolean mIsStampTrusted;
+    // Raw string encoding for the SHA-256 hash of the certificate of the stamp.
+    private final String mStampCertificateHash;
+    private final Map<String, String> mAllowedInstallersAndCertificates;
 
     private AppInstallMetadata(Builder builder) {
         this.mPackageName = builder.mPackageName;
-        this.mAppCertificate = builder.mAppCertificate;
+        this.mAppCertificates = builder.mAppCertificates;
         this.mInstallerName = builder.mInstallerName;
-        this.mInstallerCertificate = builder.mInstallerCertificate;
+        this.mInstallerCertificates = builder.mInstallerCertificates;
         this.mVersionCode = builder.mVersionCode;
         this.mIsPreInstalled = builder.mIsPreInstalled;
+        this.mIsStampTrusted = builder.mIsStampTrusted;
+        this.mStampCertificateHash = builder.mStampCertificateHash;
+        this.mAllowedInstallersAndCertificates = builder.mAllowedInstallersAndCertificates;
     }
 
     @NonNull
@@ -55,8 +65,8 @@ public final class AppInstallMetadata {
     }
 
     @NonNull
-    public String getAppCertificate() {
-        return mAppCertificate;
+    public List<String> getAppCertificates() {
+        return mAppCertificates;
     }
 
     @NonNull
@@ -65,8 +75,8 @@ public final class AppInstallMetadata {
     }
 
     @NonNull
-    public String getInstallerCertificate() {
-        return mInstallerCertificate;
+    public List<String> getInstallerCertificates() {
+        return mInstallerCertificates;
     }
 
     /** @see AppInstallMetadata.Builder#setVersionCode(long) */
@@ -79,27 +89,64 @@ public final class AppInstallMetadata {
         return mIsPreInstalled;
     }
 
+    /** @see AppInstallMetadata.Builder#setIsStampTrusted(boolean) */
+    public boolean isStampTrusted() {
+        return mIsStampTrusted;
+    }
+
+    /** @see AppInstallMetadata.Builder#setStampCertificateHash(String) */
+    public String getStampCertificateHash() {
+        return mStampCertificateHash;
+    }
+
+    /** Get the allowed installers and their corresponding cert. */
+    public Map<String, String> getAllowedInstallersAndCertificates() {
+        return mAllowedInstallersAndCertificates;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "AppInstallMetadata { PackageName = %s, AppCert = %s, InstallerName = %s,"
-                    + " InstallerCert = %s, VersionCode = %d, PreInstalled = %b }",
+                "AppInstallMetadata { PackageName = %s, AppCerts = %s, InstallerName = %s,"
+                        + " InstallerCerts = %s, VersionCode = %d, PreInstalled = %b, "
+                        + "StampTrusted = %b, StampCert = %s }",
                 mPackageName,
-                mAppCertificate,
+                mAppCertificates,
                 mInstallerName == null ? "null" : mInstallerName,
-                mInstallerCertificate == null ? "null" : mInstallerCertificate,
+                mInstallerCertificates == null ? "null" : mInstallerCertificates,
                 mVersionCode,
-                mIsPreInstalled);
+                mIsPreInstalled,
+                mIsStampTrusted,
+                mStampCertificateHash == null ? "null" : mStampCertificateHash);
     }
 
     /** Builder class for constructing {@link AppInstallMetadata} objects. */
     public static final class Builder {
         private String mPackageName;
-        private String mAppCertificate;
+        private List<String> mAppCertificates;
         private String mInstallerName;
-        private String mInstallerCertificate;
+        private List<String> mInstallerCertificates;
         private long mVersionCode;
         private boolean mIsPreInstalled;
+        private boolean mIsStampTrusted;
+        private String mStampCertificateHash;
+        private Map<String, String> mAllowedInstallersAndCertificates;
+
+        public Builder() {
+            mAllowedInstallersAndCertificates = new HashMap<>();
+        }
+
+        /**
+         * Add allowed installers and cert.
+         *
+         * @see AppInstallMetadata#getAllowedInstallersAndCertificates()
+         */
+        @NonNull
+        public Builder setAllowedInstallersAndCert(
+                @NonNull Map<String, String> allowedInstallersAndCertificates) {
+            this.mAllowedInstallersAndCertificates = allowedInstallersAndCertificates;
+            return this;
+        }
 
         /**
          * Set package name of the app to be installed.
@@ -118,11 +165,11 @@ public final class AppInstallMetadata {
          * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
          * of the app.
          *
-         * @see AppInstallMetadata#getAppCertificate()
+         * @see AppInstallMetadata#getAppCertificates()
          */
         @NonNull
-        public Builder setAppCertificate(@NonNull String appCertificate) {
-            this.mAppCertificate = Objects.requireNonNull(appCertificate);
+        public Builder setAppCertificates(@NonNull List<String> appCertificates) {
+            this.mAppCertificates = Objects.requireNonNull(appCertificates);
             return this;
         }
 
@@ -143,11 +190,11 @@ public final class AppInstallMetadata {
          * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
          * of the installer.
          *
-         * @see AppInstallMetadata#getInstallerCertificate()
+         * @see AppInstallMetadata#getInstallerCertificates()
          */
         @NonNull
-        public Builder setInstallerCertificate(@NonNull String installerCertificate) {
-            this.mInstallerCertificate = Objects.requireNonNull(installerCertificate);
+        public Builder setInstallerCertificates(@NonNull List<String> installerCertificates) {
+            this.mInstallerCertificates = Objects.requireNonNull(installerCertificates);
             return this;
         }
 
@@ -174,6 +221,31 @@ public final class AppInstallMetadata {
         }
 
         /**
+         * Set certificate hash of the stamp embedded in the APK.
+         *
+         * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
+         * of the stamp.
+         *
+         * @see AppInstallMetadata#getStampCertificateHash()
+         */
+        @NonNull
+        public Builder setStampCertificateHash(@NonNull String stampCertificateHash) {
+            this.mStampCertificateHash = Objects.requireNonNull(stampCertificateHash);
+            return this;
+        }
+
+        /**
+         * Set whether the stamp embedded in the APK is trusted or not.
+         *
+         * @see AppInstallMetadata#isStampTrusted()
+         */
+        @NonNull
+        public Builder setIsStampTrusted(boolean isStampTrusted) {
+            this.mIsStampTrusted = isStampTrusted;
+            return this;
+        }
+
+        /**
          * Build {@link AppInstallMetadata}.
          *
          * @throws IllegalArgumentException if package name or app certificate is null
@@ -181,7 +253,7 @@ public final class AppInstallMetadata {
         @NonNull
         public AppInstallMetadata build() {
             Objects.requireNonNull(mPackageName);
-            Objects.requireNonNull(mAppCertificate);
+            Objects.requireNonNull(mAppCertificates);
             return new AppInstallMetadata(this);
         }
     }

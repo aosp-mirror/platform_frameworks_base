@@ -1,2 +1,1 @@
-rule android.annotation.** com.android.networkstack.tethering.annotation.@1
-rule com.android.internal.annotations.** com.android.networkstack.tethering.annotation.@1
+# jarjar rules for the bootclasspath tethering framework library here

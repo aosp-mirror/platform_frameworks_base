@@ -244,7 +244,10 @@ public class QSMediaPlayer {
         ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
         mSeamless.setOnClickListener(v -> {
             final Intent intent = new Intent()
-                    .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT);
+                    .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
+                    .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,
+                        mController.getPackageName())
+                    .putExtra(MediaOutputSliceConstants.KEY_MEDIA_SESSION_TOKEN, token);
             mActivityStarter.startActivity(intent, false, true /* dismissShade */,
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         });

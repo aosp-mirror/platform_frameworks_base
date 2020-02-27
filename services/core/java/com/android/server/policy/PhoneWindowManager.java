@@ -45,7 +45,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SYSTEM_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -187,6 +186,7 @@ import android.view.autofill.AutofillManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.RoSystemProperties;
@@ -483,6 +483,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     MetricsLogger mLogger;
     boolean mWakeOnDpadKeyPress;
     boolean mWakeOnAssistKeyPress;
+    boolean mWakeOnBackKeyPress;
 
     private boolean mHandleVolumeKeysInWM;
 
@@ -1106,7 +1107,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                     LocalServices.getService(InputMethodManagerInternal.class);
                         }
                         if (mInputMethodManagerInternal != null) {
-                            mInputMethodManagerInternal.hideCurrentInputMethod();
+                            mInputMethodManagerInternal.hideCurrentInputMethod(
+                                    SoftInputShowHideReason.HIDE_POWER_BUTTON_GO_HOME);
                         }
                     } else {
                         shortPressPowerGoHome();
@@ -1737,6 +1739,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 res.getBoolean(com.android.internal.R.bool.config_wakeOnDpadKeyPress);
         mWakeOnAssistKeyPress =
                 res.getBoolean(com.android.internal.R.bool.config_wakeOnAssistKeyPress);
+        mWakeOnBackKeyPress =
+                res.getBoolean(com.android.internal.R.bool.config_wakeOnBackKeyPress);
 
         // Init display burn-in protection
         boolean burnInProtectionEnabled = context.getResources().getBoolean(
@@ -2058,11 +2062,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp) {
-        final int type = attrs.type;
-        final boolean isRoundedCornerOverlay =
-                (attrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
-
+    public int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
+            int[] outAppOp) {
         if (isRoundedCornerOverlay && mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW)
                 != PERMISSION_GRANTED) {
             return ADD_PERMISSION_DENIED;
@@ -2119,7 +2120,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         ApplicationInfo appInfo;
         try {
             appInfo = mPackageManager.getApplicationInfoAsUser(
-                            attrs.packageName,
+                            packageName,
                             0 /* flags */,
                             UserHandle.getUserId(callingUid));
         } catch (PackageManager.NameNotFoundException e) {
@@ -2139,7 +2140,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // check if user has enabled this operation. SecurityException will be thrown if this app
         // has not been allowed by the user
-        final int mode = mAppOpsManager.noteOpNoThrow(outAppOp[0], callingUid, attrs.packageName);
+        final int mode = mAppOpsManager.noteOpNoThrow(outAppOp[0], callingUid, packageName);
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
             case AppOpsManager.MODE_IGNORED:
@@ -2729,21 +2730,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
                             UserHandle.USER_CURRENT_OR_SELF);
                 }
-
-                int min = mPowerManager.getMinimumScreenBrightnessSetting();
-                int max = mPowerManager.getMaximumScreenBrightnessSetting();
-                int step = (max - min + BRIGHTNESS_STEPS - 1) / BRIGHTNESS_STEPS * direction;
-                int brightness = Settings.System.getIntForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS,
-                        mPowerManager.getDefaultScreenBrightnessSetting(),
+                float minFloat = mPowerManager.getBrightnessConstraint(
+                        PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+                float maxFloat = mPowerManager.getBrightnessConstraint(
+                        PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+                float stepFloat = (maxFloat - minFloat) / BRIGHTNESS_STEPS * direction;
+                float brightnessFloat = Settings.System.getFloatForUser(
+                        mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_FLOAT,
+                        mPowerManager.getBrightnessConstraint(
+                                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT),
                         UserHandle.USER_CURRENT_OR_SELF);
-                brightness += step;
+                brightnessFloat += stepFloat;
                 // Make sure we don't go beyond the limits.
-                brightness = Math.min(max, brightness);
-                brightness = Math.max(min, brightness);
+                brightnessFloat = Math.min(maxFloat, brightnessFloat);
+                brightnessFloat = Math.max(minFloat, brightnessFloat);
 
-                Settings.System.putIntForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS, brightness,
+                Settings.System.putFloatForUser(mContext.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS_FLOAT, brightnessFloat,
                         UserHandle.USER_CURRENT_OR_SELF);
                 startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
                         UserHandle.CURRENT_OR_SELF);
@@ -3087,7 +3090,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         event.getAction(), fallbackAction.keyCode,
                         event.getRepeatCount(), fallbackAction.metaState,
                         event.getDeviceId(), event.getScanCode(),
-                        flags, event.getSource(), event.getDisplayId(), null /* hmac */, null);
+                        flags, event.getSource(), event.getDisplayId(), null);
 
                 if (!interceptFallback(focusedToken, fallbackEvent, policyFlags)) {
                     fallbackEvent.recycle();
@@ -4109,6 +4112,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             case KeyEvent.KEYCODE_ASSIST:
                 return mWakeOnAssistKeyPress;
+
+            case KeyEvent.KEYCODE_BACK:
+                return mWakeOnBackKeyPress;
         }
 
         return true;
@@ -5195,7 +5201,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     final Intent dock = createHomeDockIntent();
                     if (dock != null) {
                         int result = ActivityTaskManager.getService()
-                                .startActivityAsUser(null, mContext.getBasePackageName(), dock,
+                                .startActivityAsUser(null, mContext.getBasePackageName(),
+                                        mContext.getFeatureId(), dock,
                                         dock.resolveTypeIfNeeded(mContext.getContentResolver()),
                                         null, null, 0,
                                         ActivityManager.START_FLAG_ONLY_IF_NEEDED,
@@ -5206,7 +5213,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 int result = ActivityTaskManager.getService()
-                        .startActivityAsUser(null, mContext.getBasePackageName(), mHomeIntent,
+                        .startActivityAsUser(null, mContext.getBasePackageName(),
+                                mContext.getFeatureId(), mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                                 null, null, 0,
                                 ActivityManager.START_FLAG_ONLY_IF_NEEDED,

@@ -102,6 +102,9 @@ public class KeyguardStatusBarView extends RelativeLayout
      */
     private int mCutoutSideNudge = 0;
 
+    private DisplayCutout mDisplayCutout;
+    private int mRoundedCornerPadding = 0;
+
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -159,9 +162,15 @@ public class KeyguardStatusBarView extends RelativeLayout
                 getResources().getDimensionPixelSize(R.dimen.keyguard_carrier_text_margin));
         mCarrierLabel.setLayoutParams(lp);
 
-        lp = (MarginLayoutParams) getLayoutParams();
+        updateKeyguardStatusBarHeight();
+    }
+
+    private void updateKeyguardStatusBarHeight() {
+        final int waterfallTop =
+                mDisplayCutout == null ? 0 : mDisplayCutout.getWaterfallInsets().top;
+        MarginLayoutParams lp =  (MarginLayoutParams) getLayoutParams();
         lp.height =  getResources().getDimensionPixelSize(
-                R.dimen.status_bar_header_height_keyguard);
+                R.dimen.status_bar_header_height_keyguard) + waterfallTop;
         setLayoutParams(lp);
     }
 
@@ -175,6 +184,8 @@ public class KeyguardStatusBarView extends RelativeLayout
                 R.dimen.display_cutout_margin_consumption);
         mShowPercentAvailable = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
+        mRoundedCornerPadding = res.getDimensionPixelSize(
+                R.dimen.rounded_corner_content_padding);
     }
 
     private void updateVisibilities() {
@@ -225,23 +236,26 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     private boolean updateLayoutConsideringCutout() {
-        DisplayCutout dc = getRootWindowInsets().getDisplayCutout();
+        mDisplayCutout = getRootWindowInsets().getDisplayCutout();
+        updateKeyguardStatusBarHeight();
+
         Pair<Integer, Integer> cornerCutoutMargins =
-                PhoneStatusBarView.cornerCutoutMargins(dc, getDisplay());
-        updateCornerCutoutPadding(cornerCutoutMargins);
-        if (dc == null || cornerCutoutMargins != null) {
+                StatusBarWindowView.cornerCutoutMargins(mDisplayCutout, getDisplay());
+        updatePadding(cornerCutoutMargins);
+        if (mDisplayCutout == null || cornerCutoutMargins != null) {
             return updateLayoutParamsNoCutout();
         } else {
-            return updateLayoutParamsForCutout(dc);
+            return updateLayoutParamsForCutout();
         }
     }
 
-    private void updateCornerCutoutPadding(Pair<Integer, Integer> cornerCutoutMargins) {
-        if (cornerCutoutMargins != null) {
-            setPadding(cornerCutoutMargins.first, 0, cornerCutoutMargins.second, 0);
-        } else {
-            setPadding(0, 0, 0, 0);
-        }
+    private void updatePadding(Pair<Integer, Integer> cornerCutoutMargins) {
+        final int waterfallTop =
+                mDisplayCutout == null ? 0 : mDisplayCutout.getWaterfallInsets().top;
+        Pair<Integer, Integer> padding =
+                StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
+                        mDisplayCutout, cornerCutoutMargins, mRoundedCornerPadding);
+        setPadding(padding.first, waterfallTop, padding.second, 0);
     }
 
     private boolean updateLayoutParamsNoCutout() {
@@ -268,7 +282,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         return true;
     }
 
-    private boolean updateLayoutParamsForCutout(DisplayCutout dc) {
+    private boolean updateLayoutParamsForCutout() {
         if (mLayoutState == LAYOUT_CUTOUT) {
             return false;
         }
@@ -279,7 +293,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         }
 
         Rect bounds = new Rect();
-        boundsFromDirection(dc, Gravity.TOP, bounds);
+        boundsFromDirection(mDisplayCutout, Gravity.TOP, bounds);
 
         mCutoutSpace.setVisibility(View.VISIBLE);
         RelativeLayout.LayoutParams lp = (LayoutParams) mCutoutSpace.getLayoutParams();

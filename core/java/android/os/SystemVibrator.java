@@ -16,11 +16,17 @@
 
 package android.os;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.AudioAttributes;
+import android.os.IVibratorStateListener;
+import android.util.ArrayMap;
 import android.util.Log;
+import com.android.internal.annotations.GuardedBy;
+import java.util.concurrent.Executor;
+import java.util.Objects;
 
 /**
  * Vibrator implementation that controls the main system vibrator.
@@ -32,15 +38,22 @@ public class SystemVibrator extends Vibrator {
 
     private final IVibratorService mService;
     private final Binder mToken = new Binder();
+    private final Context mContext;
+
+    @GuardedBy("mDelegates")
+    private final ArrayMap<OnVibratorStateChangedListener,
+            OnVibratorStateChangedListenerDelegate> mDelegates = new ArrayMap<>();
 
     @UnsupportedAppUsage
     public SystemVibrator() {
+        mContext = null;
         mService = IVibratorService.Stub.asInterface(ServiceManager.getService("vibrator"));
     }
 
     @UnsupportedAppUsage
     public SystemVibrator(Context context) {
         super(context);
+        mContext = context;
         mService = IVibratorService.Stub.asInterface(ServiceManager.getService("vibrator"));
     }
 
@@ -55,6 +68,126 @@ public class SystemVibrator extends Vibrator {
         } catch (RemoteException e) {
         }
         return false;
+    }
+
+    /**
+     * Check whether the vibrator is vibrating.
+     *
+     * @return True if the hardware is vibrating, otherwise false.
+     */
+    @Override
+    public boolean isVibrating() {
+        if (mService == null) {
+            Log.w(TAG, "Failed to vibrate; no vibrator service.");
+            return false;
+        }
+        try {
+            return mService.isVibrating();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    private class OnVibratorStateChangedListenerDelegate extends
+            IVibratorStateListener.Stub {
+        private final Executor mExecutor;
+        private final OnVibratorStateChangedListener mListener;
+
+        OnVibratorStateChangedListenerDelegate(@NonNull OnVibratorStateChangedListener listener,
+                @NonNull Executor executor) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onVibrating(boolean isVibrating) {
+            mExecutor.execute(() -> mListener.onVibratorStateChanged(isVibrating));
+        }
+    }
+
+    /**
+     * Adds a listener for vibrator state change. If the listener was previously added and not
+     * removed, this call will be ignored.
+     *
+     * @param listener Listener to be added.
+     * @param executor The {@link Executor} on which the listener's callbacks will be executed on.
+     */
+    @Override
+    public void addVibratorStateListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnVibratorStateChangedListener listener) {
+        Objects.requireNonNull(listener);
+        Objects.requireNonNull(executor);
+        if (mService == null) {
+            Log.w(TAG, "Failed to add vibrate state listener; no vibrator service.");
+            return;
+        }
+
+        synchronized (mDelegates) {
+            // If listener is already registered, reject and return.
+            if (mDelegates.containsKey(listener)) {
+                Log.w(TAG, "Listener already registered.");
+                return;
+            }
+            try {
+                final OnVibratorStateChangedListenerDelegate delegate =
+                        new OnVibratorStateChangedListenerDelegate(listener, executor);
+                if (!mService.registerVibratorStateListener(delegate)) {
+                    Log.w(TAG, "Failed to register vibrate state listener");
+                    return;
+                }
+                mDelegates.put(listener, delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Adds a listener for vibrator state changes. Callbacks will be executed on the main thread.
+     * If the listener was previously added and not removed, this call will be ignored.
+     *
+     * @param listener listener to be added
+     */
+    @Override
+    public void addVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+        Objects.requireNonNull(listener);
+        if (mContext == null) {
+            Log.w(TAG, "Failed to add vibrate state listener; no vibrator context.");
+            return;
+        }
+        addVibratorStateListener(mContext.getMainExecutor(), listener);
+    }
+
+    /**
+     * Removes the listener for vibrator state changes. If the listener was not previously
+     * registered, this call will do nothing.
+     *
+     * @param listener Listener to be removed.
+     */
+    @Override
+    public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+        Objects.requireNonNull(listener);
+        if (mService == null) {
+            Log.w(TAG, "Failed to remove vibrate state listener; no vibrator service.");
+            return;
+        }
+        synchronized (mDelegates) {
+            // Check if the listener is registered, otherwise will return.
+            if (mDelegates.containsKey(listener)) {
+                final OnVibratorStateChangedListenerDelegate delegate = mDelegates.get(listener);
+                try {
+                    if (!mService.unregisterVibratorStateListener(delegate)) {
+                        Log.w(TAG, "Failed to unregister vibrate state listener");
+                        return;
+                    }
+                    mDelegates.remove(listener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
     }
 
     @Override

@@ -37,8 +37,6 @@ import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -57,7 +55,6 @@ import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -80,6 +77,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
@@ -90,7 +88,6 @@ import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.compat.PlatformCompat;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
 import com.android.server.job.controllers.BackgroundJobsController;
@@ -154,16 +151,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     private static final boolean ENFORCE_MAX_JOBS = true;
     /** The maximum number of jobs that we allow an unprivileged app to schedule */
     private static final int MAX_JOBS_PER_APP = 100;
-
-    /**
-     * {@link #schedule(JobInfo)}, {@link #scheduleAsPackage(JobInfo, String, int, String)}, and
-     * {@link #enqueue(JobInfo, JobWorkItem)} will throw a {@link IllegalStateException} if the app
-     * calls the APIs too frequently.
-     */
-    @ChangeId
-    // This means the change will be enabled for target SDK larger than 29 (Q), meaning R and up.
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
-    protected static final long CRASH_ON_EXCEEDED_LIMIT = 144363383L;
 
     @VisibleForTesting
     public static Clock sSystemClock = Clock.systemUTC();
@@ -262,9 +249,11 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     private final List<JobRestriction> mJobRestrictions;
 
+    @NonNull
+    private final String mSystemGalleryPackage;
+
     private final CountQuotaTracker mQuotaTracker;
     private static final String QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG = ".schedulePersisted()";
-    private final PlatformCompat mPlatformCompat;
 
     /**
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
@@ -473,13 +462,17 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     public static class Constants {
         // Key names stored in the settings value.
-        private static final String KEY_MIN_IDLE_COUNT = "min_idle_count";
-        private static final String KEY_MIN_CHARGING_COUNT = "min_charging_count";
-        private static final String KEY_MIN_BATTERY_NOT_LOW_COUNT = "min_battery_not_low_count";
-        private static final String KEY_MIN_STORAGE_NOT_LOW_COUNT = "min_storage_not_low_count";
-        private static final String KEY_MIN_CONNECTIVITY_COUNT = "min_connectivity_count";
-        private static final String KEY_MIN_CONTENT_COUNT = "min_content_count";
-        private static final String KEY_MIN_READY_JOBS_COUNT = "min_ready_jobs_count";
+        // TODO(124466289): remove deprecated flags when we migrate to DeviceConfig
+        private static final String DEPRECATED_KEY_MIN_IDLE_COUNT = "min_idle_count";
+        private static final String DEPRECATED_KEY_MIN_CHARGING_COUNT = "min_charging_count";
+        private static final String DEPRECATED_KEY_MIN_BATTERY_NOT_LOW_COUNT =
+                "min_battery_not_low_count";
+        private static final String DEPRECATED_KEY_MIN_STORAGE_NOT_LOW_COUNT =
+                "min_storage_not_low_count";
+        private static final String DEPRECATED_KEY_MIN_CONNECTIVITY_COUNT =
+                "min_connectivity_count";
+        private static final String DEPRECATED_KEY_MIN_CONTENT_COUNT = "min_content_count";
+        private static final String DEPRECATED_KEY_MIN_READY_JOBS_COUNT = "min_ready_jobs_count";
         private static final String KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT =
                 "min_ready_non_active_jobs_count";
         private static final String KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS =
@@ -494,9 +487,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String DEPRECATED_KEY_BG_LOW_JOB_COUNT = "bg_low_job_count";
         private static final String DEPRECATED_KEY_BG_CRITICAL_JOB_COUNT = "bg_critical_job_count";
 
-        private static final String KEY_MAX_STANDARD_RESCHEDULE_COUNT
+        private static final String DEPRECATED_KEY_MAX_STANDARD_RESCHEDULE_COUNT
                 = "max_standard_reschedule_count";
-        private static final String KEY_MAX_WORK_RESCHEDULE_COUNT = "max_work_reschedule_count";
+        private static final String DEPRECATED_KEY_MAX_WORK_RESCHEDULE_COUNT =
+                "max_work_reschedule_count";
         private static final String KEY_MIN_LINEAR_BACKOFF_TIME = "min_linear_backoff_time";
         private static final String KEY_MIN_EXP_BACKOFF_TIME = "min_exp_backoff_time";
         private static final String DEPRECATED_KEY_STANDBY_HEARTBEAT_TIME =
@@ -514,19 +508,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_API_QUOTA_SCHEDULE_THROW_EXCEPTION =
                 "aq_schedule_throw_exception";
 
-        private static final int DEFAULT_MIN_IDLE_COUNT = 1;
-        private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
-        private static final int DEFAULT_MIN_BATTERY_NOT_LOW_COUNT = 1;
-        private static final int DEFAULT_MIN_STORAGE_NOT_LOW_COUNT = 1;
-        private static final int DEFAULT_MIN_CONNECTIVITY_COUNT = 1;
-        private static final int DEFAULT_MIN_CONTENT_COUNT = 1;
-        private static final int DEFAULT_MIN_READY_JOBS_COUNT = 1;
         private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
         private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
         private static final float DEFAULT_MODERATE_USE_FACTOR = .5f;
-        private static final int DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT = Integer.MAX_VALUE;
-        private static final int DEFAULT_MAX_WORK_RESCHEDULE_COUNT = Integer.MAX_VALUE;
         private static final long DEFAULT_MIN_LINEAR_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
         private static final long DEFAULT_MIN_EXP_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
@@ -535,44 +520,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final int DEFAULT_API_QUOTA_SCHEDULE_COUNT = 250;
         private static final long DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS = MINUTE_IN_MILLIS;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION = true;
-
-        /**
-         * Minimum # of idle jobs that must be ready in order to force the JMS to schedule things
-         * early.
-         */
-        int MIN_IDLE_COUNT = DEFAULT_MIN_IDLE_COUNT;
-        /**
-         * Minimum # of charging jobs that must be ready in order to force the JMS to schedule
-         * things early.
-         */
-        int MIN_CHARGING_COUNT = DEFAULT_MIN_CHARGING_COUNT;
-        /**
-         * Minimum # of "battery not low" jobs that must be ready in order to force the JMS to
-         * schedule things early.
-         */
-        int MIN_BATTERY_NOT_LOW_COUNT = DEFAULT_MIN_BATTERY_NOT_LOW_COUNT;
-        /**
-         * Minimum # of "storage not low" jobs that must be ready in order to force the JMS to
-         * schedule things early.
-         */
-        int MIN_STORAGE_NOT_LOW_COUNT = DEFAULT_MIN_STORAGE_NOT_LOW_COUNT;
-        /**
-         * Minimum # of connectivity jobs that must be ready in order to force the JMS to schedule
-         * things early.  1 == Run connectivity jobs as soon as ready.
-         */
-        int MIN_CONNECTIVITY_COUNT = DEFAULT_MIN_CONNECTIVITY_COUNT;
-        /**
-         * Minimum # of content trigger jobs that must be ready in order to force the JMS to
-         * schedule things early.
-         */
-        int MIN_CONTENT_COUNT = DEFAULT_MIN_CONTENT_COUNT;
-        /**
-         * Minimum # of jobs (with no particular constraints) for which the JMS will be happy
-         * running some work early.  This (and thus the other min counts) is now set to 1, to
-         * prevent any batching at this level.  Since we now do batching through doze, that is
-         * a much better mechanism.
-         */
-        int MIN_READY_JOBS_COUNT = DEFAULT_MIN_READY_JOBS_COUNT;
 
         /**
          * Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
@@ -640,16 +587,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                         "screen_off_job_concurrency_increase_delay_ms", 30_000);
 
         /**
-         * The maximum number of times we allow a job to have itself rescheduled before
-         * giving up on it, for standard jobs.
-         */
-        int MAX_STANDARD_RESCHEDULE_COUNT = DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT;
-        /**
-         * The maximum number of times we allow a job to have itself rescheduled before
-         * giving up on it, for jobs that are executing work.
-         */
-        int MAX_WORK_RESCHEDULE_COUNT = DEFAULT_MAX_WORK_RESCHEDULE_COUNT;
-        /**
          * The minimum backoff time to allow for linear backoff.
          */
         long MIN_LINEAR_BACKOFF_TIME = DEFAULT_MIN_LINEAR_BACKOFF_TIME;
@@ -698,20 +635,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 Slog.e(TAG, "Bad jobscheduler settings", e);
             }
 
-            MIN_IDLE_COUNT = mParser.getInt(KEY_MIN_IDLE_COUNT,
-                    DEFAULT_MIN_IDLE_COUNT);
-            MIN_CHARGING_COUNT = mParser.getInt(KEY_MIN_CHARGING_COUNT,
-                    DEFAULT_MIN_CHARGING_COUNT);
-            MIN_BATTERY_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_BATTERY_NOT_LOW_COUNT,
-                    DEFAULT_MIN_BATTERY_NOT_LOW_COUNT);
-            MIN_STORAGE_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_STORAGE_NOT_LOW_COUNT,
-                    DEFAULT_MIN_STORAGE_NOT_LOW_COUNT);
-            MIN_CONNECTIVITY_COUNT = mParser.getInt(KEY_MIN_CONNECTIVITY_COUNT,
-                    DEFAULT_MIN_CONNECTIVITY_COUNT);
-            MIN_CONTENT_COUNT = mParser.getInt(KEY_MIN_CONTENT_COUNT,
-                    DEFAULT_MIN_CONTENT_COUNT);
-            MIN_READY_JOBS_COUNT = mParser.getInt(KEY_MIN_READY_JOBS_COUNT,
-                    DEFAULT_MIN_READY_JOBS_COUNT);
             MIN_READY_NON_ACTIVE_JOBS_COUNT = mParser.getInt(
                     KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT,
                     DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT);
@@ -735,10 +658,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.parse(mParser);
 
-            MAX_STANDARD_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_STANDARD_RESCHEDULE_COUNT,
-                    DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT);
-            MAX_WORK_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_WORK_RESCHEDULE_COUNT,
-                    DEFAULT_MAX_WORK_RESCHEDULE_COUNT);
             MIN_LINEAR_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_LINEAR_BACKOFF_TIME,
                     DEFAULT_MIN_LINEAR_BACKOFF_TIME);
             MIN_EXP_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_EXP_BACKOFF_TIME,
@@ -764,13 +683,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         void dump(IndentingPrintWriter pw) {
             pw.println("Settings:");
             pw.increaseIndent();
-            pw.printPair(KEY_MIN_IDLE_COUNT, MIN_IDLE_COUNT).println();
-            pw.printPair(KEY_MIN_CHARGING_COUNT, MIN_CHARGING_COUNT).println();
-            pw.printPair(KEY_MIN_BATTERY_NOT_LOW_COUNT, MIN_BATTERY_NOT_LOW_COUNT).println();
-            pw.printPair(KEY_MIN_STORAGE_NOT_LOW_COUNT, MIN_STORAGE_NOT_LOW_COUNT).println();
-            pw.printPair(KEY_MIN_CONNECTIVITY_COUNT, MIN_CONNECTIVITY_COUNT).println();
-            pw.printPair(KEY_MIN_CONTENT_COUNT, MIN_CONTENT_COUNT).println();
-            pw.printPair(KEY_MIN_READY_JOBS_COUNT, MIN_READY_JOBS_COUNT).println();
             pw.printPair(KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT,
                     MIN_READY_NON_ACTIVE_JOBS_COUNT).println();
             pw.printPair(KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS,
@@ -790,8 +702,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.dump(pw, "");
 
-            pw.printPair(KEY_MAX_STANDARD_RESCHEDULE_COUNT, MAX_STANDARD_RESCHEDULE_COUNT).println();
-            pw.printPair(KEY_MAX_WORK_RESCHEDULE_COUNT, MAX_WORK_RESCHEDULE_COUNT).println();
             pw.printPair(KEY_MIN_LINEAR_BACKOFF_TIME, MIN_LINEAR_BACKOFF_TIME).println();
             pw.printPair(KEY_MIN_EXP_BACKOFF_TIME, MIN_EXP_BACKOFF_TIME).println();
             pw.printPair(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
@@ -807,13 +717,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         void dump(ProtoOutputStream proto) {
-            proto.write(ConstantsProto.MIN_IDLE_COUNT, MIN_IDLE_COUNT);
-            proto.write(ConstantsProto.MIN_CHARGING_COUNT, MIN_CHARGING_COUNT);
-            proto.write(ConstantsProto.MIN_BATTERY_NOT_LOW_COUNT, MIN_BATTERY_NOT_LOW_COUNT);
-            proto.write(ConstantsProto.MIN_STORAGE_NOT_LOW_COUNT, MIN_STORAGE_NOT_LOW_COUNT);
-            proto.write(ConstantsProto.MIN_CONNECTIVITY_COUNT, MIN_CONNECTIVITY_COUNT);
-            proto.write(ConstantsProto.MIN_CONTENT_COUNT, MIN_CONTENT_COUNT);
-            proto.write(ConstantsProto.MIN_READY_JOBS_COUNT, MIN_READY_JOBS_COUNT);
             proto.write(ConstantsProto.MIN_READY_NON_ACTIVE_JOBS_COUNT,
                     MIN_READY_NON_ACTIVE_JOBS_COUNT);
             proto.write(ConstantsProto.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS,
@@ -827,8 +730,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.dumpProto(proto,
                     ConstantsProto.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS);
 
-            proto.write(ConstantsProto.MAX_STANDARD_RESCHEDULE_COUNT, MAX_STANDARD_RESCHEDULE_COUNT);
-            proto.write(ConstantsProto.MAX_WORK_RESCHEDULE_COUNT, MAX_WORK_RESCHEDULE_COUNT);
             proto.write(ConstantsProto.MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME);
             proto.write(ConstantsProto.MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME);
             proto.write(ConstantsProto.CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC);
@@ -1074,9 +975,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 Slog.e(TAG, userId + "-" + pkg + " has called schedule() too many times");
                 mAppStandbyInternal.restrictApp(
                         pkg, userId, UsageStatsManager.REASON_SUB_RESTRICT_BUGGY);
-                if (mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION
-                        && mPlatformCompat.isChangeEnabledByPackageName(
-                                CRASH_ON_EXCEEDED_LIMIT, pkg, userId)) {
+                if (mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION) {
                     final boolean isDebuggable;
                     synchronized (mLock) {
                         if (!mDebuggableApps.containsKey(packageName)) {
@@ -1390,18 +1289,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // Effective standby bucket can change after this in some situations so use
                     // the real bucket so that the job is tracked by the controllers.
                     if (js.getStandbyBucket() == RESTRICTED_INDEX) {
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_BATTERY_NOT_LOW);
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_CHARGING);
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_CONNECTIVITY);
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_IDLE);
-
                         mRestrictiveControllers.get(j).startTrackingRestrictedJobLocked(js);
                     } else {
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_BATTERY_NOT_LOW);
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_CHARGING);
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_CONNECTIVITY);
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_IDLE);
-
                         mRestrictiveControllers.get(j).stopTrackingRestrictedJobLocked(js);
                     }
                 }
@@ -1468,8 +1357,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Set up the app standby bucketing tracker
         mStandbyTracker = new StandbyTracker();
         mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
-        mPlatformCompat =
-                (PlatformCompat) ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
         mQuotaTracker = new CountQuotaTracker(context, Categorizer.SINGLE_CATEGORIZER);
         mQuotaTracker.setCountLimit(Category.SINGLE_CATEGORY,
                 mConstants.API_QUOTA_SCHEDULE_COUNT,
@@ -1510,6 +1397,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Create restrictions
         mJobRestrictions = new ArrayList<>();
         mJobRestrictions.add(new ThermalStatusRestriction(this));
+
+        mSystemGalleryPackage = Objects.requireNonNull(
+                context.getString(R.string.config_systemGallery));
 
         // If the job store determined that it can't yet reschedule persisted jobs,
         // we need to start watching the clock.
@@ -1737,19 +1627,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         final long initialBackoffMillis = job.getInitialBackoffMillis();
         final int backoffAttempts = failureToReschedule.getNumFailures() + 1;
         long delayMillis;
-
-        if (failureToReschedule.hasWorkLocked()) {
-            if (backoffAttempts > mConstants.MAX_WORK_RESCHEDULE_COUNT) {
-                Slog.w(TAG, "Not rescheduling " + failureToReschedule + ": attempt #"
-                        + backoffAttempts + " > work limit "
-                        + mConstants.MAX_STANDARD_RESCHEDULE_COUNT);
-                return null;
-            }
-        } else if (backoffAttempts > mConstants.MAX_STANDARD_RESCHEDULE_COUNT) {
-            Slog.w(TAG, "Not rescheduling " + failureToReschedule + ": attempt #"
-                    + backoffAttempts + " > std limit " + mConstants.MAX_STANDARD_RESCHEDULE_COUNT);
-            return null;
-        }
 
         switch (job.getBackoffPolicy()) {
             case JobInfo.BACKOFF_POLICY_LINEAR: {
@@ -2086,7 +1963,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (restriction != null) {
                     final int reason = restriction.getReason();
                     serviceContext.cancelExecutingJobLocked(reason,
-                            "restricted due to " + JobParameters.getReasonName(reason));
+                            "restricted due to " + JobParameters.getReasonCodeDescription(reason));
                 }
             }
         }
@@ -2148,13 +2025,6 @@ public class JobSchedulerService extends com.android.server.SystemService
      * policies on when we want to execute jobs.
      */
     final class MaybeReadyJobQueueFunctor implements Consumer<JobStatus> {
-        int chargingCount;
-        int batteryNotLowCount;
-        int storageNotLowCount;
-        int idleCount;
-        int backoffCount;
-        int connectivityCount;
-        int contentCount;
         int forceBatchedCount;
         int unbatchedCount;
         final List<JobStatus> runnableJobs = new ArrayList<>();
@@ -2177,13 +2047,25 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 } catch (RemoteException e) {
                 }
+
+                final boolean shouldForceBatchJob;
                 // Restricted jobs must always be batched
-                if (job.getEffectiveStandbyBucket() == RESTRICTED_INDEX
-                        || (mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
-                        && job.getEffectiveStandbyBucket() != ACTIVE_INDEX
-                        && (job.getFirstForceBatchedTimeElapsed() == 0
-                        || sElapsedRealtimeClock.millis() - job.getFirstForceBatchedTimeElapsed()
-                                < mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS))) {
+                if (job.getEffectiveStandbyBucket() == RESTRICTED_INDEX) {
+                    shouldForceBatchJob = true;
+                } else if (job.getNumFailures() > 0) {
+                    shouldForceBatchJob = false;
+                } else {
+                    final long nowElapsed = sElapsedRealtimeClock.millis();
+                    final boolean batchDelayExpired = job.getFirstForceBatchedTimeElapsed() > 0
+                            && nowElapsed - job.getFirstForceBatchedTimeElapsed()
+                            >= mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS;
+                    shouldForceBatchJob =
+                            mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
+                                    && job.getEffectiveStandbyBucket() != ACTIVE_INDEX
+                                    && !batchDelayExpired;
+                }
+
+                if (shouldForceBatchJob) {
                     // Force batching non-ACTIVE jobs. Don't include them in the other counts.
                     forceBatchedCount++;
                     if (job.getFirstForceBatchedTimeElapsed() == 0) {
@@ -2191,27 +2073,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 } else {
                     unbatchedCount++;
-                    if (job.getNumFailures() > 0) {
-                        backoffCount++;
-                    }
-                    if (job.hasIdleConstraint()) {
-                        idleCount++;
-                    }
-                    if (job.hasConnectivityConstraint()) {
-                        connectivityCount++;
-                    }
-                    if (job.hasChargingConstraint()) {
-                        chargingCount++;
-                    }
-                    if (job.hasBatteryNotLowConstraint()) {
-                        batteryNotLowCount++;
-                    }
-                    if (job.hasStorageNotLowConstraint()) {
-                        storageNotLowCount++;
-                    }
-                    if (job.hasContentTriggerConstraint()) {
-                        contentCount++;
-                    }
                 }
                 runnableJobs.add(job);
             } else {
@@ -2220,16 +2081,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         public void postProcess() {
-            if (backoffCount > 0 ||
-                    idleCount >= mConstants.MIN_IDLE_COUNT ||
-                    connectivityCount >= mConstants.MIN_CONNECTIVITY_COUNT ||
-                    chargingCount >= mConstants.MIN_CHARGING_COUNT ||
-                    batteryNotLowCount >= mConstants.MIN_BATTERY_NOT_LOW_COUNT ||
-                    storageNotLowCount >= mConstants.MIN_STORAGE_NOT_LOW_COUNT ||
-                    contentCount >= mConstants.MIN_CONTENT_COUNT ||
-                    forceBatchedCount >= mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT ||
-                    (unbatchedCount > 0 && (unbatchedCount + forceBatchedCount)
-                            >= mConstants.MIN_READY_JOBS_COUNT)) {
+            if (unbatchedCount > 0
+                    || forceBatchedCount >= mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT) {
                 if (DEBUG) {
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: Running jobs.");
                 }
@@ -2250,13 +2103,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @VisibleForTesting
         void reset() {
-            chargingCount = 0;
-            idleCount =  0;
-            backoffCount = 0;
-            connectivityCount = 0;
-            batteryNotLowCount = 0;
-            storageNotLowCount = 0;
-            contentCount = 0;
             forceBatchedCount = 0;
             unbatchedCount = 0;
             runnableJobs.clear();
@@ -2517,6 +2363,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                     mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
                 }
             }
+        }
+
+        @Override
+        public String getMediaBackupPackage() {
+            return mSystemGalleryPackage;
         }
 
         @Override
@@ -3259,7 +3110,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                             final JobRestriction restriction = mJobRestrictions.get(i);
                             if (restriction.isJobRestricted(job)) {
                                 final int reason = restriction.getReason();
-                                pw.write(" " + JobParameters.getReasonName(reason) + "[" + reason + "]");
+                                pw.print(" " + JobParameters.getReasonCodeDescription(reason));
                             }
                         }
                     } else {

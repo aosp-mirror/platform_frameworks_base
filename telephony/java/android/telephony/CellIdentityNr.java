@@ -22,11 +22,14 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.AccessNetworkConstants.NgranBands.NgranBand;
 import android.telephony.gsm.GsmCellLocation;
+import android.util.ArraySet;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Information to represent a unique NR(New Radio 5G) cell.
@@ -46,7 +49,7 @@ public final class CellIdentityNr extends CellIdentity {
     private final List<Integer> mBands;
 
     // a list of additional PLMN-IDs reported for this cell
-    private final List<String> mAdditionalPlmns;
+    private final ArraySet<String> mAdditionalPlmns;
 
     /**
      *
@@ -66,14 +69,14 @@ public final class CellIdentityNr extends CellIdentity {
     public CellIdentityNr(int pci, int tac, int nrArfcn, @NgranBand List<Integer> bands,
                           @Nullable String mccStr, @Nullable String mncStr, long nci,
                           @Nullable String alphal, @Nullable String alphas,
-                          @NonNull List<String> additionalPlmns) {
+                          @NonNull Collection<String> additionalPlmns) {
         super(TAG, CellInfo.TYPE_NR, mccStr, mncStr, alphal, alphas);
         mPci = inRangeOrUnavailable(pci, 0, MAX_PCI);
         mTac = inRangeOrUnavailable(tac, 0, MAX_TAC);
         mNrArfcn = inRangeOrUnavailable(nrArfcn, 0, MAX_NRARFCN);
         mBands = new ArrayList<>(bands);
         mNci = inRangeOrUnavailable(nci, 0, MAX_NCI);
-        mAdditionalPlmns = new ArrayList<>(additionalPlmns.size());
+        mAdditionalPlmns = new ArraySet<>(additionalPlmns.size());
         for (String plmn : additionalPlmns) {
             if (isValidPlmn(plmn)) {
                 mAdditionalPlmns.add(plmn);
@@ -85,7 +88,7 @@ public final class CellIdentityNr extends CellIdentity {
     public CellIdentityNr(@NonNull android.hardware.radio.V1_4.CellIdentityNr cid) {
         this(cid.pci, cid.tac, cid.nrarfcn, Collections.emptyList(), cid.mcc, cid.mnc, cid.nci,
                 cid.operatorNames.alphaLong, cid.operatorNames.alphaShort,
-                Collections.emptyList());
+                new ArraySet<>());
     }
 
     /** @hide */
@@ -212,8 +215,8 @@ public final class CellIdentityNr extends CellIdentity {
      * @return a list of additional PLMN IDs supported by this cell.
      */
     @NonNull
-    public List<String> getAdditionalPlmns() {
-        return Collections.unmodifiableList(mAdditionalPlmns);
+    public Set<String> getAdditionalPlmns() {
+        return Collections.unmodifiableSet(mAdditionalPlmns);
     }
 
     @Override
@@ -241,7 +244,7 @@ public final class CellIdentityNr extends CellIdentity {
         dest.writeInt(mNrArfcn);
         dest.writeList(mBands);
         dest.writeLong(mNci);
-        dest.writeList(mAdditionalPlmns);
+        dest.writeArraySet(mAdditionalPlmns);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -252,7 +255,7 @@ public final class CellIdentityNr extends CellIdentity {
         mNrArfcn = in.readInt();
         mBands = in.readArrayList(null);
         mNci = in.readLong();
-        mAdditionalPlmns = in.readArrayList(null);
+        mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
     }
 
     /** Implement the Parcelable interface */

@@ -20,7 +20,7 @@
 #include <android/bitmap.h>
 #include <android/data_space.h>
 #include <android/imagedecoder.h>
-#include <android/graphics/MimeType.h>
+#include <MimeType.h>
 #include <android/rect.h>
 #include <hwui/ImageDecoder.h>
 #include <log/log.h>
@@ -28,6 +28,7 @@
 #include <utils/Color.h>
 
 #include <fcntl.h>
+#include <limits>
 #include <optional>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -68,6 +69,14 @@ static int createFromStream(std::unique_ptr<SkStreamRewindable> stream, AImageDe
             SkAndroidCodec::ExifOrientationBehavior::kRespect);
     if (!androidCodec) {
         return ResultToErrorCode(result);
+    }
+
+    // AImageDecoderHeaderInfo_getWidth/Height return an int32_t. Ensure that
+    // the conversion is safe.
+    const auto& info = androidCodec->getInfo();
+    if (info.width() > std::numeric_limits<int32_t>::max()
+        || info.height() > std::numeric_limits<int32_t>::max()) {
+        return ANDROID_IMAGE_DECODER_INVALID_INPUT;
     }
 
     *outDecoder = reinterpret_cast<AImageDecoder*>(new ImageDecoder(std::move(androidCodec)));
@@ -213,12 +222,12 @@ int32_t AImageDecoderHeaderInfo_getDataSpace(const AImageDecoderHeaderInfo* info
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
-    // Note: This recomputes the data space because it's possible the client has
-    // changed the output color space, so we cannot rely on it. Alternatively,
+    // Note: This recomputes the color type because it's possible the client has
+    // changed the output color type, so we cannot rely on it. Alternatively,
     // we could store the ADataSpace in the ImageDecoder.
     const ImageDecoder* imageDecoder = toDecoder(info);
     SkColorType colorType = imageDecoder->mCodec->computeOutputColorType(kN32_SkColorType);
-    sk_sp<SkColorSpace> colorSpace = imageDecoder->mCodec->computeOutputColorSpace(colorType);
+    sk_sp<SkColorSpace> colorSpace = imageDecoder->getDefaultColorSpace();
     return uirenderer::ColorSpaceToADataSpace(colorSpace.get(), colorType);
 }
 

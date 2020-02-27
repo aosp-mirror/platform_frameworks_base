@@ -97,6 +97,8 @@ interface IWindowManager
 
     IWindowSession openSession(in IWindowSessionCallback callback);
 
+    boolean useBLAST();
+
     @UnsupportedAppUsage
     void getInitialDisplaySize(int displayId, out Point size);
     @UnsupportedAppUsage

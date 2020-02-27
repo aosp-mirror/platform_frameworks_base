@@ -27,38 +27,52 @@ namespace statsd {
 
 using std::vector;
 
-class BroadcastSubscriberDeathRecipient : public android::IBinder::DeathRecipient {
-    public:
-        BroadcastSubscriberDeathRecipient(const ConfigKey& configKey, int64_t subscriberId):
-            mConfigKey(configKey),
-            mSubscriberId(subscriberId) {}
-        ~BroadcastSubscriberDeathRecipient() override = default;
-    private:
-        ConfigKey mConfigKey;
-        int64_t mSubscriberId;
+struct BroadcastSubscriberDeathCookie {
+    BroadcastSubscriberDeathCookie(const ConfigKey& configKey, int64_t subscriberId,
+                                   const shared_ptr<IPendingIntentRef>& pir):
+        mConfigKey(configKey),
+        mSubscriberId(subscriberId),
+        mPir(pir) {}
 
-    void binderDied(const android::wp<android::IBinder>& who) override {
-        if (IInterface::asBinder(SubscriberReporter::getInstance().getBroadcastSubscriber(
-              mConfigKey, mSubscriberId)) == who.promote()) {
-            SubscriberReporter::getInstance().unsetBroadcastSubscriber(mConfigKey, mSubscriberId);
-        }
-    }
+    ConfigKey mConfigKey;
+    int64_t mSubscriberId;
+    shared_ptr<IPendingIntentRef> mPir;
 };
+
+static void broadcastSubscriberDied(void* cookie) {
+    BroadcastSubscriberDeathCookie* cookie_ = (BroadcastSubscriberDeathCookie*)cookie;
+    ConfigKey configKey = cookie_->mConfigKey;
+    int64_t subscriberId = cookie_->mSubscriberId;
+    shared_ptr<IPendingIntentRef> pir = cookie_->mPir;
+
+    // TODO(b/149254662): Fix threading. This currently fails if a new pir gets
+    // set between the get and the unset.
+    if (SubscriberReporter::getInstance().getBroadcastSubscriber(configKey, subscriberId) == pir) {
+        SubscriberReporter::getInstance().unsetBroadcastSubscriber(configKey, subscriberId);
+    }
+    // The death recipient corresponding to this specific pir can never be
+    // triggered again, so free up resources.
+    delete cookie_;
+}
+
+static ::ndk::ScopedAIBinder_DeathRecipient sBroadcastSubscriberDeathRecipient(
+        AIBinder_DeathRecipient_new(broadcastSubscriberDied));
 
 void SubscriberReporter::setBroadcastSubscriber(const ConfigKey& configKey,
                                                 int64_t subscriberId,
-                                                const sp<IPendingIntentRef>& pir) {
+                                                const shared_ptr<IPendingIntentRef>& pir) {
     VLOG("SubscriberReporter::setBroadcastSubscriber called.");
-    lock_guard<std::mutex> lock(mLock);
+    lock_guard<mutex> lock(mLock);
     mIntentMap[configKey][subscriberId] = pir;
-    IInterface::asBinder(pir)->linkToDeath(
-        new BroadcastSubscriberDeathRecipient(configKey, subscriberId));
+    // TODO(b/149254662): Is it ok to call linkToDeath while holding a lock?
+    AIBinder_linkToDeath(pir->asBinder().get(), sBroadcastSubscriberDeathRecipient.get(),
+                         new BroadcastSubscriberDeathCookie(configKey, subscriberId, pir));
 }
 
 void SubscriberReporter::unsetBroadcastSubscriber(const ConfigKey& configKey,
                                                   int64_t subscriberId) {
     VLOG("SubscriberReporter::unsetBroadcastSubscriber called.");
-    lock_guard<std::mutex> lock(mLock);
+    lock_guard<mutex> lock(mLock);
     auto subscriberMapIt = mIntentMap.find(configKey);
     if (subscriberMapIt != mIntentMap.end()) {
         subscriberMapIt->second.erase(subscriberId);
@@ -80,7 +94,7 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
     //  config id - the name of this config (for this particular uid)
 
     VLOG("SubscriberReporter::alertBroadcastSubscriber called.");
-    lock_guard<std::mutex> lock(mLock);
+    lock_guard<mutex> lock(mLock);
 
     if (!subscription.has_broadcast_subscriber_details()
             || !subscription.broadcast_subscriber_details().has_subscriber_id()) {
@@ -89,10 +103,12 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
     }
     int64_t subscriberId = subscription.broadcast_subscriber_details().subscriber_id();
 
-    vector<String16> cookies;
+    // TODO(b/149254662): Is there a way to convert a RepeatedPtrField into a
+    // vector without copying?
+    vector<string> cookies;
     cookies.reserve(subscription.broadcast_subscriber_details().cookie_size());
     for (auto& cookie : subscription.broadcast_subscriber_details().cookie()) {
-        cookies.push_back(String16(cookie.c_str()));
+        cookies.push_back(cookie);
     }
 
     auto it1 = mIntentMap.find(configKey);
@@ -109,10 +125,10 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
     sendBroadcastLocked(it2->second, configKey, subscription, cookies, dimKey);
 }
 
-void SubscriberReporter::sendBroadcastLocked(const sp<IPendingIntentRef>& pir,
+void SubscriberReporter::sendBroadcastLocked(const shared_ptr<IPendingIntentRef>& pir,
                                              const ConfigKey& configKey,
                                              const Subscription& subscription,
-                                             const vector<String16>& cookies,
+                                             const vector<string>& cookies,
                                              const MetricDimensionKey& dimKey) const {
     VLOG("SubscriberReporter::sendBroadcastLocked called.");
     pir->sendSubscriberBroadcast(
@@ -121,12 +137,12 @@ void SubscriberReporter::sendBroadcastLocked(const sp<IPendingIntentRef>& pir,
             subscription.id(),
             subscription.rule_id(),
             cookies,
-            getStatsDimensionsValue(dimKey.getDimensionKeyInWhat()));
+            dimKey.getDimensionKeyInWhat().toStatsDimensionsValueParcel());
 }
 
-sp<IPendingIntentRef> SubscriberReporter::getBroadcastSubscriber(const ConfigKey& configKey,
-                                                                 int64_t subscriberId) {
-    lock_guard<std::mutex> lock(mLock);
+shared_ptr<IPendingIntentRef> SubscriberReporter::getBroadcastSubscriber(const ConfigKey& configKey,
+                                                                         int64_t subscriberId) {
+    lock_guard<mutex> lock(mLock);
     auto subscriberMapIt = mIntentMap.find(configKey);
     if (subscriberMapIt == mIntentMap.end()) {
         return nullptr;
@@ -136,61 +152,6 @@ sp<IPendingIntentRef> SubscriberReporter::getBroadcastSubscriber(const ConfigKey
         return nullptr;
     }
     return pirMapIt->second;
-}
-
-void getStatsDimensionsValueHelper(const vector<FieldValue>& dims, size_t* index, int depth,
-                                   int prefix, vector<StatsDimensionsValue>* output) {
-    size_t count = dims.size();
-    while (*index < count) {
-        const auto& dim = dims[*index];
-        const int valueDepth = dim.mField.getDepth();
-        const int valuePrefix = dim.mField.getPrefix(depth);
-        if (valueDepth > 2) {
-            ALOGE("Depth > 2 not supported");
-            return;
-        }
-        if (depth == valueDepth && valuePrefix == prefix) {
-            switch (dim.mValue.getType()) {
-                case INT:
-                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
-                                                           dim.mValue.int_value));
-                    break;
-                case LONG:
-                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
-                                                           dim.mValue.long_value));
-                    break;
-                case FLOAT:
-                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
-                                                           dim.mValue.float_value));
-                    break;
-                case STRING:
-                    output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth),
-                                                           String16(dim.mValue.str_value.c_str())));
-                    break;
-                default:
-                    break;
-            }
-            (*index)++;
-        } else if (valueDepth > depth && valuePrefix == prefix) {
-            vector<StatsDimensionsValue> childOutput;
-            getStatsDimensionsValueHelper(dims, index, depth + 1, dim.mField.getPrefix(depth + 1),
-                                          &childOutput);
-            output->push_back(StatsDimensionsValue(dim.mField.getPosAtDepth(depth), childOutput));
-        } else {
-            return;
-        }
-    }
-}
-
-StatsDimensionsValue SubscriberReporter::getStatsDimensionsValue(const HashableDimensionKey& dim) {
-    if (dim.getValues().size() == 0) {
-        return StatsDimensionsValue();
-    }
-
-    vector<StatsDimensionsValue> fields;
-    size_t index = 0;
-    getStatsDimensionsValueHelper(dim.getValues(), &index, 0, 0, &fields);
-    return StatsDimensionsValue(dim.getValues()[0].mField.getTag(), fields);
 }
 
 }  // namespace statsd

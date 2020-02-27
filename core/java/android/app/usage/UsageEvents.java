@@ -41,6 +41,43 @@ public final class UsageEvents implements Parcelable {
     /** @hide */
     public static final String INSTANT_APP_CLASS_NAME = "android.instant_class";
 
+    /** @hide */
+    public static final String OBFUSCATED_NOTIFICATION_CHANNEL_ID = "unknown_channel_id";
+
+    /**
+     * Flag: indicates to not obfuscate or hide any usage event data when being queried.
+     * @hide
+     */
+    public static final int SHOW_ALL_EVENT_DATA = 0x00000000;
+
+    /**
+     * Flag: indicates to obfuscate package and class names for instant apps when querying usage
+     * events.
+     * @hide
+     */
+    public static final int OBFUSCATE_INSTANT_APPS = 0x00000001;
+
+    /**
+     * Flag: indicates to hide all {@link Event#SHORTCUT_INVOCATION} events when querying usage
+     * events.
+     * @hide
+     */
+    public static final int HIDE_SHORTCUT_EVENTS = 0x00000002;
+
+    /**
+     * Flag: indicates to obfuscate the notification channel id for all notification events,
+     * such as {@link Event#NOTIFICATION_SEEN} and {@link Event#NOTIFICATION_INTERRUPTION} events,
+     * when querying usage events.
+     * @hide
+     */
+    public static final int OBFUSCATE_NOTIFICATION_EVENTS = 0x00000004;
+
+    /**
+     * Flag: indicates to hide all {@link Event#LOCUS_ID_SET} events when querying usage events.
+     * @hide
+     */
+    public static final int HIDE_LOCUS_EVENTS = 0x00000008;
+
     /**
      * An event representing a state change for a component.
      */
@@ -624,6 +661,13 @@ public final class UsageEvents implements Parcelable {
 
             // Note there are other string fields too, but they're for app shortcuts and choosers,
             // which instant apps can't use anyway, so there's no need to hide them.
+            return ret;
+        }
+
+        /** @hide */
+        public Event getObfuscatedNotificationEvent() {
+            final Event ret = new Event(this);
+            ret.mNotificationChannelId = OBFUSCATED_NOTIFICATION_CHANNEL_ID;
             return ret;
         }
 

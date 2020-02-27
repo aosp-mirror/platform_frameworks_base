@@ -30,4 +30,5 @@ oneway interface IMediaRouter2Manager {
     void notifyRoutesAdded(in List<MediaRoute2Info> routes);
     void notifyRoutesRemoved(in List<MediaRoute2Info> routes);
     void notifyRoutesChanged(in List<MediaRoute2Info> routes);
+    void notifyRequestFailed(int requestId, int reason);
 }

@@ -35,13 +35,16 @@ import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyEventLogger;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
@@ -258,6 +261,10 @@ public class UserManagerService extends IUserManager.Stub {
     /** Installs system packages based on user-type. */
     private final UserSystemPackageInstaller mSystemPackageInstaller;
 
+    private PackageManagerInternal mPmInternal;
+    private CrossProfileAppsInternal mCrossProfileAppsInternal;
+    private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
+
     /**
      * Internal non-parcelable wrapper for UserInfo that is not exposed to other system apps.
      */
@@ -430,7 +437,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Start an {@link IntentSender} when user is unlocked after disabling quiet mode.
      *
-     * @see {@link #requestQuietModeEnabled(String, boolean, int, IntentSender)}
+     * @see #requestQuietModeEnabled(String, boolean, int, IntentSender, int)
      */
     private class DisableQuietModeUserUnlockedCallback extends IProgressListener.Stub {
         private final IntentSender mTarget;
@@ -462,8 +469,42 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUsersLock")
     private boolean mForceEphemeralUsers;
 
+    /**
+     * The member mUserStates affects the return value of isUserUnlocked.
+     * If any value in mUserStates changes, then the binder cache for
+     * isUserUnlocked must be invalidated.  When adding mutating methods to
+     * WatchedUserStates, be sure to invalidate the cache in the new
+     * methods.
+     */
+    private class WatchedUserStates {
+        final SparseIntArray states;
+        public WatchedUserStates() {
+            states = new SparseIntArray();
+        }
+        public int get(int userId) {
+            return states.get(userId);
+        }
+        public int get(int userId, int fallback) {
+            return states.indexOfKey(userId) >= 0 ? states.get(userId) : fallback;
+        }
+        public void put(int userId, int state) {
+            states.put(userId, state);
+            invalidateIsUserUnlockedCache();
+        }
+        public void delete(int userId) {
+            states.delete(userId);
+            invalidateIsUserUnlockedCache();
+        }
+        @Override
+        public String toString() {
+            return states.toString();
+        }
+        private void invalidateIsUserUnlockedCache() {
+            UserManager.invalidateIsUserUnlockedCache();
+        }
+    }
     @GuardedBy("mUserStates")
-    private final SparseIntArray mUserStates = new SparseIntArray();
+    private final WatchedUserStates mUserStates = new WatchedUserStates();
 
     private static UserManagerService sInstance;
 
@@ -910,6 +951,8 @@ public class UserManagerService extends IUserManager.Stub {
         intent.putExtra(Intent.EXTRA_QUIET_MODE, inQuietMode);
         intent.putExtra(Intent.EXTRA_USER, profileHandle);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
+        getDevicePolicyManagerInternal().broadcastIntentToCrossProfileManifestReceiversAsUser(
+                intent, parentHandle, /* requiresPermission= */ true);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcastAsUser(intent, parentHandle);
     }
@@ -924,7 +967,16 @@ public class UserManagerService extends IUserManager.Stub {
                     "target should only be specified when we are disabling quiet mode.");
         }
 
-        ensureCanModifyQuietMode(callingPackage, Binder.getCallingUid(), userId, target != null);
+        final boolean dontAskCredential =
+                (flags & UserManager.QUIET_MODE_DISABLE_DONT_ASK_CREDENTIAL) != 0;
+        final boolean onlyIfCredentialNotRequired =
+                (flags & UserManager.QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED) != 0;
+        if (dontAskCredential && onlyIfCredentialNotRequired) {
+            throw new IllegalArgumentException("invalid flags: " + flags);
+        }
+
+        ensureCanModifyQuietMode(
+                callingPackage, Binder.getCallingUid(), userId, target != null, dontAskCredential);
         final long identity = Binder.clearCallingIdentity();
         try {
             if (enableQuietMode) {
@@ -933,11 +985,11 @@ public class UserManagerService extends IUserManager.Stub {
                 return true;
             }
             mLockPatternUtils.tryUnlockWithCachedUnifiedChallenge(userId);
-            boolean needToShowConfirmCredential =
-                    mLockPatternUtils.isSecure(userId)
-                            && !StorageManager.isUserKeyUnlocked(userId);
+            final boolean needToShowConfirmCredential = !dontAskCredential
+                    && mLockPatternUtils.isSecure(userId)
+                    && !StorageManager.isUserKeyUnlocked(userId);
             if (needToShowConfirmCredential) {
-                if ((flags & UserManager.QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED) != 0) {
+                if (onlyIfCredentialNotRequired) {
                     return false;
                 }
                 showConfirmCredentialToDisableQuietMode(userId, target);
@@ -964,13 +1016,17 @@ public class UserManagerService extends IUserManager.Stub {
      * {@link Manifest.permission#MANAGE_USERS}.
      */
     private void ensureCanModifyQuietMode(String callingPackage, int callingUid,
-            @UserIdInt int targetUserId, boolean startIntent) {
+            @UserIdInt int targetUserId, boolean startIntent, boolean dontAskCredential) {
         if (hasManageUsersPermission()) {
             return;
         }
         if (startIntent) {
             throw new SecurityException("MANAGE_USERS permission is required to start intent "
                     + "after disabling quiet mode.");
+        }
+        if (dontAskCredential) {
+            throw new SecurityException("MANAGE_USERS permission is required to disable quiet "
+                    + "mode without credentials.");
         }
         if (!isSameProfileGroupNoChecks(UserHandle.getUserId(callingUid), targetUserId)) {
             throw new SecurityException("MANAGE_USERS permission is required to modify quiet mode "
@@ -1901,7 +1957,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean hasBaseUserRestriction(String restrictionKey, @UserIdInt int userId) {
-        checkManageUsersPermission("hasBaseUserRestriction");
+        checkManageOrCreateUsersPermission("hasBaseUserRestriction");
         if (!UserRestrictionsUtils.isValidRestriction(restrictionKey)) {
             return false;
         }
@@ -3811,11 +3867,15 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void sendProfileRemovedBroadcast(int parentUserId, int removedUserId) {
         Intent managedProfileIntent = new Intent(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-        managedProfileIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
-                Intent.FLAG_RECEIVER_FOREGROUND);
         managedProfileIntent.putExtra(Intent.EXTRA_USER, new UserHandle(removedUserId));
         managedProfileIntent.putExtra(Intent.EXTRA_USER_HANDLE, removedUserId);
-        mContext.sendBroadcastAsUser(managedProfileIntent, new UserHandle(parentUserId), null);
+        final UserHandle parentHandle = new UserHandle(parentUserId);
+        getDevicePolicyManagerInternal().broadcastIntentToCrossProfileManifestReceiversAsUser(
+                managedProfileIntent, parentHandle, /* requiresPermission= */ false);
+        managedProfileIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                | Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(managedProfileIntent, parentHandle,
+                /* receiverPermission= */null);
     }
 
     @Override
@@ -4801,6 +4861,11 @@ public class UserManagerService extends IUserManager.Stub {
                     || (state == UserState.STATE_RUNNING_UNLOCKED);
         }
 
+        /**
+         * The return values of this method are cached in clients.  If the
+         * logic in this function changes then the cache invalidation code
+         * may need to be revisited.
+         */
         @Override
         public boolean isUserUnlocked(@UserIdInt int userId) {
             int state;
@@ -5056,7 +5121,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Check if the calling package name matches with the calling UID, throw
+     * Checks if the calling package name matches with the calling UID, throw
      * {@link SecurityException} if not.
      */
     private void verifyCallingPackage(String callingPackage, int callingUid) {
@@ -5065,5 +5130,31 @@ public class UserManagerService extends IUserManager.Stub {
             throw new SecurityException("Specified package " + callingPackage
                     + " does not match the calling uid " + callingUid);
         }
+    }
+
+    /** Retrieves the internal package manager interface. */
+    private PackageManagerInternal getPackageManagerInternal() {
+        // Don't need to synchonize; worst-case scenario LocalServices will be called twice.
+        if (mPmInternal == null) {
+            mPmInternal = LocalServices.getService(PackageManagerInternal.class);
+        }
+        return mPmInternal;
+    }
+
+    /** Retrieve the internal cross profile apps interface. */
+    private CrossProfileAppsInternal getCrossProfileAppsInternal() {
+        if (mCrossProfileAppsInternal == null) {
+            mCrossProfileAppsInternal = LocalServices.getService(CrossProfileAppsInternal.class);
+        }
+        return mCrossProfileAppsInternal;
+    }
+
+    /** Returns the internal device policy manager interface. */
+    private DevicePolicyManagerInternal getDevicePolicyManagerInternal() {
+        if (mDevicePolicyManagerInternal == null) {
+            mDevicePolicyManagerInternal =
+                    LocalServices.getService(DevicePolicyManagerInternal.class);
+        }
+        return mDevicePolicyManagerInternal;
     }
 }

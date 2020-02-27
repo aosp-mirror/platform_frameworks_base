@@ -16,18 +16,24 @@
 
 #pragma once
 
-#include <android/os/IPendingIntentRef.h>
-#include <android/os/IStatsCompanionService.h>
+#include <aidl/android/os/IPendingIntentRef.h>
 #include <utils/RefBase.h>
+#include <utils/String16.h>
 
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // subscription
-#include "android/os/StatsDimensionsValue.h"
 #include "HashableDimensionKey.h"
 
 #include <mutex>
 #include <unordered_map>
 #include <vector>
+
+using aidl::android::os::IPendingIntentRef;
+using std::mutex;
+using std::shared_ptr;
+using std::string;
+using std::unordered_map;
+using std::vector;
 
 namespace android {
 namespace os {
@@ -52,7 +58,7 @@ public:
      */
     void setBroadcastSubscriber(const ConfigKey& configKey,
                                 int64_t subscriberId,
-                                const sp<IPendingIntentRef>& pir);
+                                const shared_ptr<IPendingIntentRef>& pir);
 
     /**
      * Erases any intentSender information from the given (configKey, subscriberId) pair.
@@ -68,30 +74,25 @@ public:
                                   const Subscription& subscription,
                                   const MetricDimensionKey& dimKey) const;
 
-    sp<IPendingIntentRef> getBroadcastSubscriber(const ConfigKey& configKey, int64_t subscriberId);
-
-    static StatsDimensionsValue getStatsDimensionsValue(const HashableDimensionKey& dim);
+    shared_ptr<IPendingIntentRef> getBroadcastSubscriber(const ConfigKey& configKey,
+                                                         int64_t subscriberId);
 
 private:
     SubscriberReporter() {};
 
-    mutable std::mutex mLock;
-
-    /** Binder interface for communicating with StatsCompanionService. */
-    sp<IStatsCompanionService> mStatsCompanionService = nullptr;
+    mutable mutex mLock;
 
     /** Maps <ConfigKey, SubscriberId> -> IPendingIntentRef (which represents a PendingIntent). */
-    std::unordered_map<ConfigKey,
-            std::unordered_map<int64_t, sp<IPendingIntentRef>>> mIntentMap;
+    unordered_map<ConfigKey, unordered_map<int64_t, shared_ptr<IPendingIntentRef>>> mIntentMap;
 
     /**
      * Sends a broadcast via the given intentSender (using mStatsCompanionService), along
      * with the information in the other parameters.
      */
-    void sendBroadcastLocked(const sp<IPendingIntentRef>& pir,
+    void sendBroadcastLocked(const shared_ptr<IPendingIntentRef>& pir,
                              const ConfigKey& configKey,
                              const Subscription& subscription,
-                             const std::vector<String16>& cookies,
+                             const vector<string>& cookies,
                              const MetricDimensionKey& dimKey) const;
 };
 

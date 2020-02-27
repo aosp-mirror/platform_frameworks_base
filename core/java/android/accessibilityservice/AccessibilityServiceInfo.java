@@ -16,6 +16,8 @@
 
 package android.accessibilityservice;
 
+import static android.accessibilityservice.util.AccessibilityUtils.getFilteredHtmlText;
+import static android.accessibilityservice.util.AccessibilityUtils.loadSafeAnimatedImage;
 import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
 
 import android.annotation.IntDef;
@@ -34,6 +36,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Drawable;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Parcel;
@@ -551,11 +554,6 @@ public class AccessibilityServiceInfo implements Parcelable {
     private int mHtmlDescriptionRes;
 
     /**
-     * Non localized html description of the accessibility service.
-     */
-    private String mNonLocalizedHtmlDescription;
-
-    /**
      * Creates a new instance.
      */
     public AccessibilityServiceInfo() {
@@ -683,10 +681,6 @@ public class AccessibilityServiceInfo implements Parcelable {
                     com.android.internal.R.styleable.AccessibilityService_htmlDescription);
             if (peekedValue != null) {
                 mHtmlDescriptionRes = peekedValue.resourceId;
-                final CharSequence nonLocalizedHtmlDescription = peekedValue.coerceToString();
-                if (nonLocalizedHtmlDescription != null) {
-                    mNonLocalizedHtmlDescription = nonLocalizedHtmlDescription.toString().trim();
-                }
             }
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
@@ -789,15 +783,36 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
-     * The animated image resource id.
-     * <p>
-     *    <strong>Statically set from
-     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
-     * </p>
+     * Gets the animated image resource id.
+     *
      * @return The animated image resource id.
+     *
+     * @hide
      */
     public int getAnimatedImageRes() {
         return mAnimatedImageRes;
+    }
+
+    /**
+     * The animated image drawable.
+     * <p>
+     *    Image can not exceed the screen size.
+     *    <strong>Statically set from
+     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     * @return The animated image drawable, or null if the resource is invalid or the image
+     * exceed the screen size.
+     *
+     * @hide
+     */
+    @Nullable
+    public Drawable loadAnimatedImage(@NonNull Context context)  {
+        if (mAnimatedImageRes == /* invalid */ 0) {
+            return null;
+        }
+
+        return loadSafeAnimatedImage(context, mResolveInfo.serviceInfo.applicationInfo,
+                mAnimatedImageRes);
     }
 
     /**
@@ -909,24 +924,27 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
-     * The localized html description of the accessibility service.
+     * The localized and restricted html description of the accessibility service.
      * <p>
+     *    Filters the <img> tag which do not meet the custom specification and the <a> tag.
      *    <strong>Statically set from
      *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
      * </p>
-     * @return The localized html description.
+     * @return The localized and restricted html description.
+     *
+     * @hide
      */
     @Nullable
     public String loadHtmlDescription(@NonNull PackageManager packageManager) {
-        if (mHtmlDescriptionRes == 0) {
-            return mNonLocalizedHtmlDescription;
+        if (mHtmlDescriptionRes == /* invalid */ 0) {
+            return null;
         }
 
         final ServiceInfo serviceInfo = mResolveInfo.serviceInfo;
         final CharSequence htmlDescription = packageManager.getText(serviceInfo.packageName,
                 mHtmlDescriptionRes, serviceInfo.applicationInfo);
         if (htmlDescription != null) {
-            return htmlDescription.toString().trim();
+            return getFilteredHtmlText(htmlDescription.toString().trim());
         }
         return null;
     }
@@ -1017,7 +1035,6 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeInt(mAnimatedImageRes);
         parcel.writeInt(mHtmlDescriptionRes);
         parcel.writeString(mNonLocalizedDescription);
-        parcel.writeString(mNonLocalizedHtmlDescription);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -1039,7 +1056,6 @@ public class AccessibilityServiceInfo implements Parcelable {
         mAnimatedImageRes = parcel.readInt();
         mHtmlDescriptionRes = parcel.readInt();
         mNonLocalizedDescription = parcel.readString();
-        mNonLocalizedHtmlDescription = parcel.readString();
     }
 
     @Override

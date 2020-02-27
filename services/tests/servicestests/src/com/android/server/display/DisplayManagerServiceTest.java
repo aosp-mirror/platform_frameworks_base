@@ -202,7 +202,7 @@ public class DisplayManagerServiceTest {
         assertEquals(1, displayIds.length);
         final int displayId = displayIds[0];
         DisplayInfo info = bs.getDisplayInfo(displayId);
-        assertEquals(info.type, Display.TYPE_BUILT_IN);
+        assertEquals(info.type, Display.TYPE_INTERNAL);
 
         displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 

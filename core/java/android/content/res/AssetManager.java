@@ -38,6 +38,7 @@ import android.util.TypedValue;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.content.om.OverlayConfig;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -242,14 +243,11 @@ public final class AssetManager implements AutoCloseable {
         try {
             final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
             apkAssets.add(ApkAssets.loadFromPath(frameworkPath, true /*system*/));
-            final String[] systemIdmapPaths = nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
-            if (systemIdmapPaths != null) {
-                for (String idmapPath : systemIdmapPaths) {
-                    apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, true /*system*/));
-                }
-            } else {
-                Log.w(TAG, "'idmap2 --scan' failed: no static=\"true\" overlays targeting "
-                        + "\"android\" will be loaded");
+
+            final String[] systemIdmapPaths =
+                    OverlayConfig.getZygoteInstance().createImmutableFrameworkIdmapsInZygote();
+            for (String idmapPath : systemIdmapPaths) {
+                apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, true /*system*/));
             }
 
             sSystemApkAssetsSet = new ArraySet<>(apkAssets);

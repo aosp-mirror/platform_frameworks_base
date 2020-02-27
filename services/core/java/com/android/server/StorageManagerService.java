@@ -28,6 +28,10 @@ import static android.app.AppOpsManager.OP_MANAGE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_REQUEST_INSTALL_PACKAGES;
 import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
@@ -136,6 +140,7 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.AppFuseMount;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.FuseUnavailableMountException;
@@ -149,6 +154,7 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.Installer;
 import com.android.server.storage.AppFuseBridge;
 import com.android.server.storage.StorageSessionController;
@@ -184,6 +190,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -224,6 +231,7 @@ class StorageManagerService extends IStorageManager.Stub
      * disables FuseDaemon. If {@code 0}, uses the default value from the build system.
      */
     private static final String FUSE_ENABLED = "fuse_enabled";
+    private static final boolean DEFAULT_FUSE_ENABLED = true;
 
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
@@ -268,6 +276,11 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public void onStopUser(int userHandle) {
             mStorageManagerService.onStopUser(userHandle);
+        }
+
+        @Override
+        public void onUserStarting(TargetUser user) {
+            mStorageManagerService.snapshotAndMonitorLegacyStorageAppOp(user.getUserHandle());
         }
     }
 
@@ -342,9 +355,43 @@ class StorageManagerService extends IStorageManager.Stub
      */
     private final Object mPackagesLock = new Object();
 
+    /**
+     * mLocalUnlockedUsers affects the return value of isUserUnlocked.  If
+     * any value in the array changes, then the binder cache for
+     * isUserUnlocked must be invalidated.  When adding mutating methods to
+     * WatchedLockedUsers, be sure to invalidate the cache in the new
+     * methods.
+     */
+    private class WatchedLockedUsers {
+        private int[] users = EmptyArray.INT;
+        public WatchedLockedUsers() {
+        }
+        public void append(int userId) {
+            users = ArrayUtils.appendInt(users, userId);
+            invalidateIsUserUnlockedCache();
+        }
+        public void remove(int userId) {
+            users = ArrayUtils.removeInt(users, userId);
+            invalidateIsUserUnlockedCache();
+        }
+        public boolean contains(int userId) {
+            return ArrayUtils.contains(users, userId);
+        }
+        public int[] all() {
+            return users;
+        }
+        @Override
+        public String toString() {
+            return Arrays.toString(users);
+        }
+        private void invalidateIsUserUnlockedCache() {
+            UserManager.invalidateIsUserUnlockedCache();
+        }
+    }
+
     /** Set of users that we know are unlocked. */
     @GuardedBy("mLock")
-    private int[] mLocalUnlockedUsers = EmptyArray.INT;
+    private WatchedLockedUsers mLocalUnlockedUsers = new WatchedLockedUsers();
     /** Set of users that system knows are unlocked. */
     @GuardedBy("mLock")
     private int[] mSystemUnlockedUsers = EmptyArray.INT;
@@ -542,6 +589,12 @@ class StorageManagerService extends IStorageManager.Stub
     private final StorageSessionController mStorageSessionController;
 
     private final boolean mIsFuseEnabled;
+
+    @GuardedBy("mLock")
+    private final Set<Integer> mUidsWithLegacyExternalStorage = new ArraySet<>();
+    // Not guarded by lock, always used on the ActivityManager thread
+    private final Map<Integer, PackageMonitor> mPackageMonitorsForUser = new ArrayMap<>();
+
 
     class ObbState implements IBinder.DeathRecipient {
         public ObbState(String rawPath, String canonicalPath, int callingUid,
@@ -1110,6 +1163,10 @@ class StorageManagerService extends IStorageManager.Stub
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
+        PackageMonitor monitor = mPackageMonitorsForUser.remove(userId);
+        if (monitor != null) {
+            monitor.unregister();
+        }
     }
 
     private boolean supportsBlockCheckpoint() throws RemoteException {
@@ -1264,13 +1321,6 @@ class StorageManagerService extends IStorageManager.Stub
                     final int newState = state;
                     vol.state = newState;
                     onVolumeStateChangedLocked(vol, oldState, newState);
-                }
-                try {
-                    if (vol.type == VolumeInfo.TYPE_PRIVATE && state == VolumeInfo.STATE_MOUNTED) {
-                        mInstaller.onPrivateVolumeMounted(vol.getFsUuid());
-                    }
-                } catch (Installer.InstallerException e) {
-                    Slog.i(TAG, "Failed when private volume mounted " + vol, e);
                 }
             }
         }
@@ -1623,7 +1673,7 @@ class StorageManagerService extends IStorageManager.Stub
         // If there is no value in the property yet (first boot after data wipe), this value may be
         // incorrect until #updateFusePropFromSettings where we set the correct value and reboot if
         // different
-        mIsFuseEnabled = SystemProperties.getBoolean(PROP_FUSE, false);
+        mIsFuseEnabled = SystemProperties.getBoolean(PROP_FUSE, DEFAULT_FUSE_ENABLED);
         mContext = context;
         mResolver = mContext.getContentResolver();
         mCallbacks = new Callbacks(FgThread.get().getLooper());
@@ -1686,23 +1736,17 @@ class StorageManagerService extends IStorageManager.Stub
      *  and updates PROP_FUSE (reboots if changed).
      */
     private void updateFusePropFromSettings() {
-        boolean defaultFuseFlag = false;
-        boolean settingsFuseFlag = SystemProperties.getBoolean(PROP_SETTINGS_FUSE, defaultFuseFlag);
-        Slog.d(TAG, "FUSE flags. Settings: " + settingsFuseFlag + ". Default: " + defaultFuseFlag);
-
-        if (TextUtils.isEmpty(SystemProperties.get(PROP_SETTINGS_FUSE))) {
-            // Set default value of PROP_SETTINGS_FUSE and PROP_FUSE if it
-            // is unset (neither true nor false).
-            // This happens only on the first boot after wiping data partition
-            SystemProperties.set(PROP_SETTINGS_FUSE, Boolean.toString(defaultFuseFlag));
-            SystemProperties.set(PROP_FUSE, Boolean.toString(defaultFuseFlag));
-            return;
-        }
+        boolean settingsFuseFlag = SystemProperties.getBoolean(PROP_SETTINGS_FUSE,
+                DEFAULT_FUSE_ENABLED);
+        Slog.d(TAG, "FUSE flags. Settings: " + settingsFuseFlag
+                + ". Default: " + DEFAULT_FUSE_ENABLED);
 
         if (mIsFuseEnabled != settingsFuseFlag) {
             Slog.i(TAG, "Toggling persist.sys.fuse to " + settingsFuseFlag);
+            // Set prop_fuse to match prop_settings_fuse because it is used by native daemons like
+            // init, zygote, installd and vold
             SystemProperties.set(PROP_FUSE, Boolean.toString(settingsFuseFlag));
-            // Perform hard reboot to kick policy into place
+            // Then perform hard reboot to kick policy into place
             mContext.getSystemService(PowerManager.class).reboot("fuse_prop");
         }
     }
@@ -1812,6 +1856,49 @@ class StorageManagerService extends IStorageManager.Stub
             mIAppOpsService.startWatchingMode(OP_LEGACY_STORAGE, null, mAppOpsCallback);
         } catch (RemoteException e) {
         }
+    }
+
+    private void updateLegacyStorageApps(String packageName, int uid, boolean hasLegacy) {
+        synchronized (mLock) {
+            if (hasLegacy) {
+                Slog.v(TAG, "Package " + packageName + " has legacy storage");
+                mUidsWithLegacyExternalStorage.add(uid);
+            } else {
+                // TODO(b/149391976): Handle shared user id. Check if there's any other
+                // installed app with legacy external storage before removing
+                Slog.v(TAG, "Package " + packageName + " does not have legacy storage");
+                mUidsWithLegacyExternalStorage.remove(uid);
+            }
+        }
+    }
+
+    private void snapshotAndMonitorLegacyStorageAppOp(UserHandle user) {
+        int userId = user.getIdentifier();
+
+        // TODO(b/149391976): Use mIAppOpsService.getPackagesForOps instead of iterating below
+        // It should improve performance but the AppOps method doesn't return any app here :(
+        // This operation currently takes about ~20ms on a freshly flashed device
+        for (ApplicationInfo ai : mPmInternal.getInstalledApplications(MATCH_DIRECT_BOOT_AWARE
+                        | MATCH_DIRECT_BOOT_UNAWARE | MATCH_UNINSTALLED_PACKAGES | MATCH_ANY_USER,
+                        userId, Process.myUid())) {
+            try {
+                boolean hasLegacy = mIAppOpsService.checkOperation(OP_LEGACY_STORAGE, ai.uid,
+                        ai.packageName) == MODE_ALLOWED;
+                updateLegacyStorageApps(ai.packageName, ai.uid, hasLegacy);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to check legacy op for package " + ai.packageName, e);
+            }
+        }
+
+        PackageMonitor monitor = new PackageMonitor() {
+                @Override
+                public void onPackageRemoved(String packageName, int uid) {
+                    updateLegacyStorageApps(packageName, uid, false);
+                }
+            };
+        // TODO(b/149391976): Use different handler?
+        monitor.register(mContext, user, true, mHandler);
+        mPackageMonitorsForUser.put(userId, monitor);
     }
 
     private static long getLastAccessTime(AppOpsManager manager,
@@ -2033,8 +2120,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void unmount(VolumeInfo vol) {
         try {
-            mVold.unmount(vol.id);
-            mStorageSessionController.onVolumeUnmount(vol);
             try {
                 if (vol.type == VolumeInfo.TYPE_PRIVATE) {
                     mInstaller.onPrivateVolumeRemoved(vol.getFsUuid());
@@ -2042,6 +2127,8 @@ class StorageManagerService extends IStorageManager.Stub
             } catch (Installer.InstallerException e) {
                 Slog.e(TAG, "Failed unmount mirror data", e);
             }
+            mVold.unmount(vol.id);
+            mStorageSessionController.onVolumeUnmount(vol);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -3042,7 +3129,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         synchronized (mLock) {
-            mLocalUnlockedUsers = ArrayUtils.appendInt(mLocalUnlockedUsers, userId);
+            mLocalUnlockedUsers.append(userId);
         }
     }
 
@@ -3058,14 +3145,14 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         synchronized (mLock) {
-            mLocalUnlockedUsers = ArrayUtils.removeInt(mLocalUnlockedUsers, userId);
+            mLocalUnlockedUsers.remove(userId);
         }
     }
 
     @Override
     public boolean isUserKeyUnlocked(int userId) {
         synchronized (mLock) {
-            return ArrayUtils.contains(mLocalUnlockedUsers, userId);
+            return mLocalUnlockedUsers.contains(userId);
         }
     }
 
@@ -3081,6 +3168,15 @@ class StorageManagerService extends IStorageManager.Stub
 
         try {
             mVold.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
+            // After preparing user storage, we should check if we should mount data mirror again,
+            // and we do it for user 0 only as we only need to do once for all users.
+            if (volumeUuid != null) {
+                final StorageManager storage = mContext.getSystemService(StorageManager.class);
+                VolumeInfo info = storage.findVolumeByUuid(volumeUuid);
+                if (info != null && userId == 0 && info.type == VolumeInfo.TYPE_PRIVATE) {
+                    mInstaller.tryMountDataMirror(volumeUuid);
+                }
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -3242,7 +3338,7 @@ class StorageManagerService extends IStorageManager.Stub
                         + " does not match calling user id " + userId);
             }
             try {
-                mVold.setupAppDir(appPath, matcher.group(1), callingUid);
+                mVold.setupAppDir(appPath, callingUid);
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed to prepare " + appPath + ": " + e);
             }
@@ -3944,7 +4040,7 @@ class StorageManagerService extends IStorageManager.Stub
             if (mIsFuseEnabled && hasMtp) {
                 ApplicationInfo ai = mIPackageManager.getApplicationInfo(packageName,
                         0, UserHandle.getUserId(uid));
-                if (ai.isSignedWithPlatformKey()) {
+                if (ai != null && ai.isSignedWithPlatformKey()) {
                     // Platform processes hosting the MTP server should be able to write in Android/
                     return Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE;
                 }
@@ -3999,7 +4095,7 @@ class StorageManagerService extends IStorageManager.Stub
             if (!hasLegacy && !mIsFuseEnabled) {
                 ApplicationInfo ai = mIPackageManager.getApplicationInfo(packageName,
                         0, UserHandle.getUserId(uid));
-                hasLegacy = ai.hasRequestedLegacyExternalStorage();
+                hasLegacy = (ai != null && ai.hasRequestedLegacyExternalStorage());
             }
 
             if (hasLegacy && hasWrite) {
@@ -4177,7 +4273,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             pw.println();
-            pw.println("Local unlocked users: " + Arrays.toString(mLocalUnlockedUsers));
+            pw.println("Local unlocked users: " + mLocalUnlockedUsers);
             pw.println("System unlocked users: " + Arrays.toString(mSystemUnlockedUsers));
 
             final ContentResolver cr = mContext.getContentResolver();
@@ -4250,6 +4346,42 @@ class StorageManagerService extends IStorageManager.Stub
             mPolicies.add(policy);
         }
 
+        /**
+         * Check if fuse is running in target user, if it's running then setup its obb directories.
+         * TODO: System server should store a list of active pids that obb is not mounted and use it.
+         */
+        @Override
+        public void prepareObbDirs(int userId, Set<String> packageList, String processName) {
+            String fuseRunningUsersList = SystemProperties.get("vold.fuse_running_users", "");
+            String[] fuseRunningUsers = fuseRunningUsersList.split(",");
+            boolean fuseReady = false;
+            String targetUserId = String.valueOf(userId);
+            for (String user : fuseRunningUsers) {
+                if (targetUserId.equals(user)) {
+                    fuseReady = true;
+                }
+            }
+            if (fuseReady) {
+                try {
+                    final IVold vold = IVold.Stub.asInterface(
+                            ServiceManager.getServiceOrThrow("vold"));
+                    for (String pkg : packageList) {
+                        final String obbDir =
+                                String.format("/storage/emulated/%d/Android/obb", userId);
+                        final String packageObbDir = String.format("%s/%s/", obbDir, pkg);
+
+                        // Create package obb dir if it doesn't exist.
+                        File file = new File(packageObbDir);
+                        if (!file.exists()) {
+                            vold.setupAppDir(packageObbDir, mPmInternal.getPackage(pkg).getUid());
+                        }
+                    }
+                } catch (ServiceManager.ServiceNotFoundException | RemoteException e) {
+                    Slog.e(TAG, "Unable to create obb directories for " + processName, e);
+                }
+            }
+        }
+
         @Override
         public void onExternalStoragePolicyChanged(int uid, String packageName) {
             final int mountMode = getExternalStorageMountMode(uid, packageName);
@@ -4306,6 +4438,35 @@ class StorageManagerService extends IStorageManager.Stub
             mHandler.obtainMessage(H_RESET).sendToTarget();
         }
 
+        @Override
+        public boolean hasLegacyExternalStorage(int uid) {
+            synchronized (mLock) {
+                return mUidsWithLegacyExternalStorage.contains(uid);
+            }
+        }
+
+        @Override
+        public void prepareAppDataAfterInstall(String packageName, int uid) {
+            int userId = UserHandle.getUserId(uid);
+            final Environment.UserEnvironment userEnv = new Environment.UserEnvironment(userId);
+
+            // The installer may have downloaded OBBs for this newly installed application;
+            // make sure the OBB dir for the application is setup correctly, if it exists.
+            File[] packageObbDirs = userEnv.buildExternalStorageAppObbDirs(packageName);
+            for (File packageObbDir : packageObbDirs) {
+                try {
+                    mVold.fixupAppDir(packageObbDir.getCanonicalPath() + "/", uid);
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to get canonical path for " + packageName);
+                } catch (RemoteException | ServiceSpecificException e) {
+                    // TODO(b/149975102) there is a known case where this fails, when a new
+                    // user is setup and we try to fixup app dirs for some existing apps.
+                    // For now catch the exception and don't crash.
+                    Log.e(TAG, "Failed to fixup app dir for " + packageName, e);
+                }
+            }
+        }
+
         public boolean hasExternalStorage(int uid, String packageName) {
             // No need to check for system uid. This avoids a deadlock between
             // PackageManagerService and AppOpsService.
@@ -4351,8 +4512,11 @@ class StorageManagerService extends IStorageManager.Stub
                             // volumes, USB OTGs that are rarely mounted. The app will get the
                             // external_storage gid on next organic restart.
                             killAppForOpChange(code, uid, packageName);
-                            return;
                         }
+                        return;
+                    case OP_LEGACY_STORAGE:
+                        updateLegacyStorageApps(packageName, uid, mode == MODE_ALLOWED);
+                        return;
                 }
             }
 

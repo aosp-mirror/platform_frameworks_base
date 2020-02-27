@@ -17,12 +17,15 @@
 package android.media.tv.tuner;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.filter.Filter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * This class is used to interact with descramblers.
@@ -75,6 +78,7 @@ public class Descrambler implements AutoCloseable {
      * @param filter an optional filter instance to identify upper stream.
      * @return result status of the operation.
      */
+    @Result
     public int addPid(@PidType int pidType, int pid, @Nullable Filter filter) {
         return nativeAddPid(pidType, pid, filter);
     }
@@ -89,6 +93,7 @@ public class Descrambler implements AutoCloseable {
      * @param filter an optional filter instance to identify upper stream.
      * @return result status of the operation.
      */
+    @Result
     public int removePid(@PidType int pidType, int pid, @Nullable Filter filter) {
         return nativeRemovePid(pidType, pid, filter);
     }
@@ -102,7 +107,9 @@ public class Descrambler implements AutoCloseable {
      * @param keyToken the token to be used to link the key slot.
      * @return result status of the operation.
      */
-    public int setKeyToken(@Nullable byte[] keyToken) {
+    @Result
+    public int setKeyToken(@NonNull byte[] keyToken) {
+        Objects.requireNonNull(keyToken, "key token must not be null");
         return nativeSetKeyToken(keyToken);
     }
 

@@ -266,6 +266,15 @@ public final class ProcessStats implements Parcelable {
         readFromParcel(in);
     }
 
+    /**
+     * No-arg constructor is for use in AIDL-derived stubs.
+     *
+     * <p>This defaults to the non-running state, so is equivalent to ProcessStats(false).
+     */
+    public ProcessStats() {
+        this(false);
+    }
+
     public void add(ProcessStats other) {
         ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
                 other.mPackages.getMap();

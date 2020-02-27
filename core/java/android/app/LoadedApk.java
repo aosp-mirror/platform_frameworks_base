@@ -46,6 +46,7 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.security.net.config.NetworkSecurityConfigProvider;
 import android.sysprop.VndkProperties;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
@@ -1001,17 +1002,11 @@ public final class LoadedApk {
      */
     private void initializeJavaContextClassLoader() {
         IPackageManager pm = ActivityThread.getPackageManager();
-        android.content.pm.PackageInfo pi;
-        try {
-            pi = pm.getPackageInfo(mPackageName, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                    UserHandle.myUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        if (pi == null) {
-            throw new IllegalStateException("Unable to get package info for "
-                    + mPackageName + "; is package not installed?");
-        }
+        android.content.pm.PackageInfo pi =
+                PackageManager.getPackageInfoAsUserCached(
+                        mPackageName,
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                        UserHandle.myUserId());
         /*
          * Two possible indications that this package could be
          * sharing its virtual machine with other packages:
@@ -1202,6 +1197,9 @@ public final class LoadedApk {
             }
 
             ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
+            // The network security config needs to be aware of multiple
+            // applications in the same process to handle discrepancies
+            NetworkSecurityConfigProvider.handleNewApplication(appContext);
             app = mActivityThread.mInstrumentation.newApplication(
                     cl, appClass, appContext);
             appContext.setOuterContext(app);

@@ -28,25 +28,35 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
+import android.app.PictureInPictureParams;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArrayMap;
+import android.util.Rational;
 import android.view.Display;
 import android.view.ITaskOrganizer;
 import android.view.IWindowContainer;
@@ -291,6 +301,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         Rect newSize = new Rect(10, 10, 300, 300);
         Configuration c = new Configuration(tile1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(newSize);
+        doNothing().when(stack).adjustForMinimalTaskDimensions(any(), any());
         tile1.onRequestedOverrideConfigurationChanged(c);
         assertEquals(newSize, stack.getBounds());
 
@@ -357,12 +368,99 @@ public class TaskOrganizerTests extends WindowTestsBase {
         assertEquals(ACTIVITY_TYPE_UNDEFINED, lastReportedTiles.get(0).topActivityType);
     }
 
+    @Test
+    public void testHierarchyTransaction() {
+        final ArrayMap<IBinder, RunningTaskInfo> lastReportedTiles = new ArrayMap<>();
+        ITaskOrganizer listener = new ITaskOrganizer.Stub() {
+            @Override
+            public void taskAppeared(RunningTaskInfo taskInfo) { }
+
+            @Override
+            public void taskVanished(IWindowContainer container) { }
+
+            @Override
+            public void transactionReady(int id, SurfaceControl.Transaction t) { }
+
+            @Override
+            public void onTaskInfoChanged(RunningTaskInfo info) {
+                lastReportedTiles.put(info.token.asBinder(), info);
+            }
+        };
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(
+                listener, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        RunningTaskInfo info2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+
+        final int initialRootTaskCount = mWm.mAtmService.mTaskOrganizerController.getRootTasks(
+                mDisplayContent.mDisplayId, null /* activityTypes */).size();
+
+        final ActivityStack stack = createTaskStackOnDisplay(
+                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final ActivityStack stack2 = createTaskStackOnDisplay(
+                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, mDisplayContent);
+
+        // Check getRootTasks works
+        List<RunningTaskInfo> roots = mWm.mAtmService.mTaskOrganizerController.getRootTasks(
+                mDisplayContent.mDisplayId, null /* activityTypes */);
+        assertEquals(initialRootTaskCount + 2, roots.size());
+
+        lastReportedTiles.clear();
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reparent(stack.mRemoteToken, info1.token, true /* onTop */);
+        wct.reparent(stack2.mRemoteToken, info2.token, true /* onTop */);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(wct,
+                null /* organizer */);
+        assertFalse(lastReportedTiles.isEmpty());
+        assertEquals(ACTIVITY_TYPE_STANDARD,
+                lastReportedTiles.get(info1.token.asBinder()).topActivityType);
+        assertEquals(ACTIVITY_TYPE_HOME,
+                lastReportedTiles.get(info2.token.asBinder()).topActivityType);
+
+        lastReportedTiles.clear();
+        wct = new WindowContainerTransaction();
+        wct.reparent(stack2.mRemoteToken, info1.token, false /* onTop */);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(wct,
+                null /* organizer */);
+        assertFalse(lastReportedTiles.isEmpty());
+        // Standard should still be on top of tile 1, so no change there
+        assertFalse(lastReportedTiles.containsKey(info1.token.asBinder()));
+        // But tile 2 has no children, so should become undefined
+        assertEquals(ACTIVITY_TYPE_UNDEFINED,
+                lastReportedTiles.get(info2.token.asBinder()).topActivityType);
+
+        // Check the getChildren call
+        List<RunningTaskInfo> children =
+                mWm.mAtmService.mTaskOrganizerController.getChildTasks(info1.token,
+                        null /* activityTypes */);
+        assertEquals(2, children.size());
+        children = mWm.mAtmService.mTaskOrganizerController.getChildTasks(info2.token,
+                null /* activityTypes */);
+        assertEquals(0, children.size());
+
+        // Check that getRootTasks doesn't include children of tiles
+        roots = mWm.mAtmService.mTaskOrganizerController.getRootTasks(mDisplayContent.mDisplayId,
+                null /* activityTypes */);
+        assertEquals(initialRootTaskCount, roots.size());
+
+        lastReportedTiles.clear();
+        wct = new WindowContainerTransaction();
+        wct.reorder(stack2.mRemoteToken, true /* onTop */);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(wct,
+                null /* organizer */);
+        // Home should now be on top. No change occurs in second tile, so not reported
+        assertEquals(1, lastReportedTiles.size());
+        assertEquals(ACTIVITY_TYPE_HOME,
+                lastReportedTiles.get(info1.token.asBinder()).topActivityType);
+    }
+
     private List<TaskTile> getTaskTiles(DisplayContent dc) {
         ArrayList<TaskTile> out = new ArrayList<>();
         for (int i = dc.getStackCount() - 1; i >= 0; --i) {
-            final Task t = dc.getStackAt(i);
-            if (t instanceof TaskTile) {
-                out.add((TaskTile) t);
+            final TaskTile t = dc.getStackAt(i).asTile();
+            if (t != null) {
+                out.add(t);
             }
         }
         return out;
@@ -408,5 +506,77 @@ public class TaskOrganizerTests extends WindowTestsBase {
         w.finishDrawing(null);
         verify(transactionListener)
             .transactionReady(anyInt(), any());
+    }
+
+    class StubOrganizer extends ITaskOrganizer.Stub {
+        RunningTaskInfo mInfo;
+
+        @Override
+        public void taskAppeared(RunningTaskInfo info) {
+            mInfo = info;
+        }
+        @Override
+        public void taskVanished(IWindowContainer wc) {
+        }
+        @Override
+        public void transactionReady(int id, SurfaceControl.Transaction t) {
+        }
+        @Override
+        public void onTaskInfoChanged(RunningTaskInfo info) {
+        }
+    };
+
+    private ActivityRecord makePipableActivity() {
+        final ActivityRecord record = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        record.info.flags |= ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+        spyOn(record);
+        doReturn(true).when(record).checkEnterPictureInPictureState(any(), anyBoolean());
+        return record;
+    }
+
+    @Test
+    public void testEnterPipParams() {
+        final StubOrganizer o = new StubOrganizer();
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(o, WINDOWING_MODE_PINNED);
+        final ActivityRecord record = makePipableActivity();
+
+        final PictureInPictureParams p =
+            new PictureInPictureParams.Builder().setAspectRatio(new Rational(1, 2)).build();
+        assertTrue(mWm.mAtmService.enterPictureInPictureMode(record.token, p));
+        waitUntilHandlersIdle();
+        assertNotNull(o.mInfo);
+        assertNotNull(o.mInfo.pictureInPictureParams);
+    }
+
+    @Test
+    public void testChangePipParams() {
+        class ChangeSavingOrganizer extends StubOrganizer {
+            RunningTaskInfo mChangedInfo;
+            @Override
+            public void onTaskInfoChanged(RunningTaskInfo info) {
+                mChangedInfo = info;
+            }
+        }
+        ChangeSavingOrganizer o = new ChangeSavingOrganizer();
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(o, WINDOWING_MODE_PINNED);
+
+        final ActivityRecord record = makePipableActivity();
+        final PictureInPictureParams p =
+            new PictureInPictureParams.Builder().setAspectRatio(new Rational(1, 2)).build();
+        assertTrue(mWm.mAtmService.enterPictureInPictureMode(record.token, p));
+        waitUntilHandlersIdle();
+        assertNotNull(o.mInfo);
+        assertNotNull(o.mInfo.pictureInPictureParams);
+
+        final PictureInPictureParams p2 =
+            new PictureInPictureParams.Builder().setAspectRatio(new Rational(3, 4)).build();
+        mWm.mAtmService.setPictureInPictureParams(record.token, p2);
+        waitUntilHandlersIdle();
+        assertNotNull(o.mChangedInfo);
+        assertNotNull(o.mChangedInfo.pictureInPictureParams);
+        final Rational ratio = o.mChangedInfo.pictureInPictureParams.getAspectRatioRational();
+        assertEquals(3, ratio.getNumerator());
+        assertEquals(4, ratio.getDenominator());
     }
 }

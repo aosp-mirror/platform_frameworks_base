@@ -71,7 +71,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zooma för att fylla skärm"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Dra för att fylla skärmen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skärmdump"</string>
-    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"Bilden har infogats"</string>
+    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har skickat en bild"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skärmdumpen sparas ..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skärmdumpen sparas ..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Skärmdumpen har sparats"</string>
@@ -80,11 +80,19 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Testa att ta en skärmdump igen"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Det går inte att spara skärmdumpen eftersom lagringsutrymmet inte räcker"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisationen tillåter inte att du tar skärmdumpar"</string>
-    <string name="screenrecord_name" msgid="6286499308042305686">"Skärminspelning"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Skärminspelare"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Avisering om att skärminspelning pågår"</string>
-    <string name="screenrecord_start_label" msgid="1539048263178882562">"Börja spela in"</string>
-    <string name="screenrecord_mic_label" msgid="6134198080740031632">"Spela in med mikrofondubbning"</string>
-    <string name="screenrecord_taps_label" msgid="2518244240225925076">"Visa tryck"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Vill du starta inspelningen?"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"När du spelar kan Android-systemet registrera alla känsliga uppgifter som visas på skärmen eller spelas upp på enheten. Detta omfattar lösenord, betalningsuppgifter, foton, meddelanden och ljud."</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Spela in ljud"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Ljud på enheten"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Ljud från enheten, till exempel musik, samtal och ringsignaler"</string>
+    <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Ljud på enheten och från mikrofonen"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Start"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Skärminspelning pågår"</string>
+    <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Skärm- och ljudinspelning pågår"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Visa tryck på skärmen"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Tryck för att stoppa"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Stoppa"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Pausa"</string>
@@ -97,6 +105,7 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"Skärminspelningen har raderats"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Det gick inte att radera skärminspelningen"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Behörighet saknas"</string>
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"Det gick inte att starta skärminspelningen"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Överföringsalternativ"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"Montera som mediaspelare (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Montera som kamera (PTP)"</string>
@@ -477,6 +486,7 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Visa inte igen"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Rensa alla"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Hantera"</string>
+    <string name="manage_notifications_history_text" msgid="57055985396576230">"Historik"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Ljudlösa aviseringar"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konversationer"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Rensa alla ljudlösa aviseringar"</string>
@@ -676,6 +686,10 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Inga ljud eller vibrationer som stör koncentrationen."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Påkallar uppmärksamhet med ljud eller vibrationer."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Behåller din uppmärksamhet med en flytande genväg till innehållet."</string>
+    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
+    <skip />
+    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Det går inte att ändra de här aviseringarna."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Den här aviseringsgruppen kan inte konfigureras här"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Avisering via proxy"</string>
@@ -698,17 +712,18 @@
     <string name="notification_done" msgid="6215117625922713976">"Klar"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Ångra"</string>
     <string name="demote" msgid="6225813324237153980">"Markera aviseringen som icke-konversation"</string>
-    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Favorit"</string>
-    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Ta bort från favoriter"</string>
-    <string name="notification_conversation_mute" msgid="477431709687199671">"Dölj"</string>
-    <string name="notification_conversation_unmute" msgid="410885000669775294">"Visa"</string>
-    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Visa som bubbla"</string>
-    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Inaktivera bubblor"</string>
+    <string name="notification_conversation_favorite" msgid="1905240206975921907">"Viktig konversation"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Inte en viktig konversation"</string>
+    <string name="notification_conversation_mute" msgid="268951550222925548">"Utan ljud"</string>
+    <string name="notification_conversation_unmute" msgid="2692255619510896710">"Påkallar uppmärksamhet"</string>
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"Visa bubbla"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Ta bort bubblor"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Lägg till på startskärmen"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"inställningar för aviseringar"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"alternativ för att snooza aviseringar"</string>
-    <string name="notification_menu_snooze_action" msgid="8411152711279433989">"Pausa"</string>
+    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Påminn mig"</string>
+    <string name="notification_menu_settings_action" msgid="7085494017202764285">"Inställningar"</string>
     <string name="snooze_undo" msgid="60890935148417175">"ÅNGRA"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Snoozad i <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
@@ -780,6 +795,7 @@
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Databesparing är inaktiverat"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"På"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Inaktiverat"</string>
+    <string name="tile_unavailable" msgid="3095879009136616920">"Inte tillgängligt"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigeringsfält"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Knapptyp för extra vänster"</string>
@@ -965,4 +981,18 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Förstoringsfönster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Inställningar för förstoringsfönster"</string>
     <string name="quick_controls_title" msgid="525285759614231333">"Snabbinställningar"</string>
+    <string name="controls_providers_title" msgid="8844124515157926071">"Lägg till kontroller"</string>
+    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Välj den app du vill lägga till kontroller från"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> nuvarande favoriter.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> nuvarande favorit.</item>
+    </plurals>
+    <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
+    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Välj kontroller för snabb åtkomst"</string>
+    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
+    <skip />
+    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <skip />
 </resources>

@@ -21,6 +21,7 @@ import com.android.systemui.dagger.DependencyProvider;
 import com.android.systemui.dagger.SystemServicesModule;
 import com.android.systemui.dagger.SystemUIModule;
 import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.pip.phone.dagger.PipModule;
 
 import javax.inject.Singleton;
 
@@ -32,6 +33,7 @@ import dagger.Component;
                 CarComponentBinder.class,
                 DependencyProvider.class,
                 DependencyBinder.class,
+                PipModule.class,
                 SystemUIFactory.ContextHolder.class,
                 SystemServicesModule.class,
                 SystemUIModule.class,

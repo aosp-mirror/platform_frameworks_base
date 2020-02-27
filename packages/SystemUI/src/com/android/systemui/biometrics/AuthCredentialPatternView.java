@@ -95,12 +95,12 @@ public class AuthCredentialPatternView extends AuthCredentialView {
     }
 
     @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
         mLockPatternView = findViewById(R.id.lockPattern);
         mLockPatternView.setOnPatternListener(new UnlockPatternListener());
         mLockPatternView.setInStealthMode(
-                !mLockPatternUtils.isVisiblePatternEnabled(mEffectiveUserId));
+                !mLockPatternUtils.isVisiblePatternEnabled(mUserId));
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
     }
 }

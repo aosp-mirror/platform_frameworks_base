@@ -244,6 +244,28 @@ public class PowerManagerTest extends AndroidTestCase {
     }
 
     @Test
+    public void testGetThermalHeadroom() throws Exception {
+        float headroom = mPm.getThermalHeadroom(0);
+        // If the device doesn't support thermal headroom, return early
+        if (Float.isNaN(headroom)) {
+            return;
+        }
+        assertTrue("Expected non-negative headroom", headroom >= 0.0f);
+        assertTrue("Expected reasonably small headroom", headroom < 10.0f);
+
+        // Call again immediately to ensure rate limiting works
+        headroom = mPm.getThermalHeadroom(0);
+        assertTrue("Expected NaN because of rate limiting", Float.isNaN(headroom));
+
+        // Sleep for a second before attempting to call again so as to not get rate limited
+        Thread.sleep(1000);
+        headroom = mPm.getThermalHeadroom(5);
+        assertFalse("Expected data to still be available", Float.isNaN(headroom));
+        assertTrue("Expected non-negative headroom", headroom >= 0.0f);
+        assertTrue("Expected reasonably small headroom", headroom < 10.0f);
+    }
+
+    @Test
     public void testUserspaceRebootNotSupported_throwsUnsupportedOperationException() {
         // Can't use assumption framework with AndroidTestCase :(
         if (mPm.isRebootingUserspaceSupported()) {

@@ -18,16 +18,24 @@ package com.android.systemui.accessibility;
 
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
+import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Region;
 import android.os.Binder;
-import android.os.Handler;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.IWindow;
+import android.view.IWindowSession;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -37,6 +45,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
 import com.android.systemui.R;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -44,16 +53,16 @@ import com.android.systemui.shared.system.WindowManagerWrapper;
 /**
  * Class to handle adding and removing a window magnification.
  */
-public class WindowMagnificationController implements View.OnClickListener,
-        View.OnLongClickListener, View.OnTouchListener, SurfaceHolder.Callback {
-    private final int mBorderSize;
-    private final int mMoveFrameAmountShort;
-    private final int mMoveFrameAmountLong;
+public class WindowMagnificationController implements View.OnTouchListener, SurfaceHolder.Callback,
+        MirrorWindowControl.MirrorWindowDelegate {
 
+    private static final String TAG = "WindowMagnificationController";
     private final Context mContext;
+    private final Resources mResources;
     private final Point mDisplaySize = new Point();
     private final int mDisplayId;
-    private final Handler mHandler;
+    @Surface.Rotation
+    private int mRotation;
     private final Rect mMagnificationFrame = new Rect();
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
@@ -66,13 +75,6 @@ public class WindowMagnificationController implements View.OnClickListener,
     // The root of the mirrored content
     private SurfaceControl mMirrorSurface;
 
-    private boolean mIsPressedDown;
-
-    private View mLeftControl;
-    private View mUpControl;
-    private View mRightControl;
-    private View mBottomControl;
-
     private View mDragView;
     private View mLeftDrag;
     private View mTopDrag;
@@ -80,32 +82,45 @@ public class WindowMagnificationController implements View.OnClickListener,
     private View mBottomDrag;
 
     private final PointF mLastDrag = new PointF();
-    private final Point mMoveWindowOffset = new Point();
 
     private View mMirrorView;
     private SurfaceView mMirrorSurfaceView;
-    private View mControlsView;
+    private int mMirrorSurfaceMargin;
+    private int mBorderDragSize;
+    private int mOuterBorderSize;
     private View mOverlayView;
     // The boundary of magnification frame.
     private final Rect mMagnificationFrameBoundary = new Rect();
 
-    private MoveMirrorRunnable mMoveMirrorRunnable = new MoveMirrorRunnable();
+    @Nullable
+    private MirrorWindowControl mMirrorWindowControl;
 
-    WindowMagnificationController(Context context, Handler handler) {
+    WindowMagnificationController(Context context, MirrorWindowControl mirrorWindowControl) {
         mContext = context;
-        mHandler = handler;
         Display display = mContext.getDisplay();
         display.getRealSize(mDisplaySize);
         mDisplayId = mContext.getDisplayId();
+        mRotation = display.getRotation();
 
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 
-        Resources r = context.getResources();
-        mBorderSize = (int) r.getDimension(R.dimen.magnification_border_size);
-        mMoveFrameAmountShort = (int) r.getDimension(R.dimen.magnification_frame_move_short);
-        mMoveFrameAmountLong = (int) r.getDimension(R.dimen.magnification_frame_move_long);
+        mResources = mContext.getResources();
+        mScale = mResources.getInteger(R.integer.magnification_default_scale);
+        updateDimensions();
 
-        mScale = r.getInteger(R.integer.magnification_default_scale);
+        mMirrorWindowControl = mirrorWindowControl;
+        if (mMirrorWindowControl != null) {
+            mMirrorWindowControl.setWindowDelegate(this);
+        }
+    }
+
+    private void updateDimensions() {
+        mMirrorSurfaceMargin = mResources.getDimensionPixelSize(
+                R.dimen.magnification_mirror_surface_margin);
+        mBorderDragSize = mResources.getDimensionPixelSize(
+                R.dimen.magnification_border_drag_size);
+        mOuterBorderSize = mResources.getDimensionPixelSize(
+                R.dimen.magnification_outer_border_margin);
     }
 
     /**
@@ -176,9 +191,8 @@ public class WindowMagnificationController implements View.OnClickListener,
             mMirrorView = null;
         }
 
-        if (mControlsView != null) {
-            mWm.removeView(mControlsView);
-            mControlsView = null;
+        if (mMirrorWindowControl != null) {
+            mMirrorWindowControl.destroyControl();
         }
     }
 
@@ -188,20 +202,62 @@ public class WindowMagnificationController implements View.OnClickListener,
      * @param configDiff a bit mask of the differences between the configurations
      */
     void onConfigurationChanged(int configDiff) {
-        // TODO(b/145780606): update toggle button UI.
-        if (mMirrorView != null) {
-            mWm.removeView(mMirrorView);
-            createMirrorWindow();
+        if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
+            updateDimensions();
+            // TODO(b/145780606): update toggle button UI.
+            if (mMirrorView != null) {
+                mWm.removeView(mMirrorView);
+                createMirrorWindow();
+            }
+        } else if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
+            onRotate();
         }
+    }
+
+    /** Handles MirrorWindow position when the device rotation changed. */
+    private void onRotate() {
+        Display display = mContext.getDisplay();
+        display.getRealSize(mDisplaySize);
+        setMagnificationFrameBoundary();
+
+        // Keep MirrorWindow position on the screen unchanged when device rotates 90°
+        // clockwise or anti-clockwise.
+        final int rotationDegree = getDegreeFromRotation(display.getRotation(), mRotation);
+        final Matrix matrix = new Matrix();
+        matrix.setRotate(rotationDegree);
+        mRotation = display.getRotation();
+        if (rotationDegree == 90) {
+            matrix.postTranslate(mDisplaySize.x, 0);
+        } else if (rotationDegree == 270) {
+            matrix.postTranslate(0, mDisplaySize.y);
+        } else {
+            Log.w(TAG, "Invalid rotation change. " + rotationDegree);
+            return;
+        }
+        // The rect of MirrorView is going to be transformed.
+        WindowManager.LayoutParams params =
+                (WindowManager.LayoutParams) mMirrorView.getLayoutParams();
+        mTmpRect.set(params.x, params.y, params.x + params.width, params.y + params.height);
+        final RectF transformedRect = new RectF(mTmpRect);
+        matrix.mapRect(transformedRect);
+        final int offsetX = (int) transformedRect.left - mTmpRect.left;
+        final int offsetY = (int) transformedRect.top - mTmpRect.top;
+        moveMirrorWindow(offsetX, offsetY);
+    }
+
+    /** Returns the rotation degree change of two {@link Surface.Rotation} */
+    private int getDegreeFromRotation(@Surface.Rotation int newRotation,
+            @Surface.Rotation int oldRotation) {
+        final int rotationDiff = oldRotation - newRotation;
+        final int degree = (rotationDiff + 4) % 4 * 90;
+        return degree;
     }
 
     private void createMirrorWindow() {
         // The window should be the size the mirrored surface will be but also add room for the
         // border and the drag handle.
-        int dragViewHeight = (int) mContext.getResources().getDimension(
-                R.dimen.magnification_drag_view_height);
-        int windowWidth = mMagnificationFrame.width() + 2 * mBorderSize;
-        int windowHeight = mMagnificationFrame.height() + dragViewHeight + 2 * mBorderSize;
+        int windowWidth = mMagnificationFrame.width() + 2 * mMirrorSurfaceMargin;
+        int windowHeight = mMagnificationFrame.height() + 2 * mMirrorSurfaceMargin;
 
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 windowWidth, windowHeight,
@@ -218,9 +274,14 @@ public class WindowMagnificationController implements View.OnClickListener,
 
         mMirrorView = LayoutInflater.from(mContext).inflate(R.layout.window_magnifier_view, null);
         mMirrorSurfaceView = mMirrorView.findViewById(R.id.surface_view);
-        // This places the SurfaceView's SurfaceControl above the ViewRootImpl's SurfaceControl to
-        // ensure the mirrored area can get touch instead of going to the window
-        mMirrorSurfaceView.setZOrderOnTop(true);
+
+        // Allow taps to go through to the mirror SurfaceView below.
+        mMirrorSurfaceView.addOnLayoutChangeListener(
+                (View v, int left, int top, int right, int bottom, int oldLeft, int oldTop,
+                        int oldRight, int oldBottom)
+                        -> {
+                    applyTapExcludeRegion();
+                });
 
         mMirrorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -237,48 +298,34 @@ public class WindowMagnificationController implements View.OnClickListener,
         addDragTouchListeners();
     }
 
+    private void applyTapExcludeRegion() {
+        final Region tapExcludeRegion = calculateTapExclude();
+        final IWindow window = IWindow.Stub.asInterface(mMirrorView.getWindowToken());
+        try {
+            IWindowSession session = WindowManagerGlobal.getWindowSession();
+            session.updateTapExcludeRegion(window, tapExcludeRegion);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private Region calculateTapExclude() {
+        Region regionInsideDragBorder = new Region(mBorderDragSize, mBorderDragSize,
+                mMirrorView.getWidth() - mBorderDragSize,
+                mMirrorView.getHeight() - mBorderDragSize);
+        return regionInsideDragBorder;
+    }
+
     private void createControls() {
-        int controlsSize = (int) mContext.getResources().getDimension(
-                R.dimen.magnification_controls_size);
-
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(controlsSize, controlsSize,
-                WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.RGBA_8888);
-        lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-        lp.token = mOverlayView.getWindowToken();
-        lp.setTitle(mContext.getString(R.string.magnification_controls_title));
-
-        mControlsView = LayoutInflater.from(mContext).inflate(R.layout.magnifier_controllers, null);
-        mWm.addView(mControlsView, lp);
-
-        mLeftControl = mControlsView.findViewById(R.id.left_control);
-        mUpControl = mControlsView.findViewById(R.id.up_control);
-        mRightControl = mControlsView.findViewById(R.id.right_control);
-        mBottomControl = mControlsView.findViewById(R.id.down_control);
-
-        mLeftControl.setOnClickListener(this);
-        mUpControl.setOnClickListener(this);
-        mRightControl.setOnClickListener(this);
-        mBottomControl.setOnClickListener(this);
-
-        mLeftControl.setOnLongClickListener(this);
-        mUpControl.setOnLongClickListener(this);
-        mRightControl.setOnLongClickListener(this);
-        mBottomControl.setOnLongClickListener(this);
-
-        mLeftControl.setOnTouchListener(this);
-        mUpControl.setOnTouchListener(this);
-        mRightControl.setOnTouchListener(this);
-        mBottomControl.setOnTouchListener(this);
+        if (mMirrorWindowControl != null) {
+            mMirrorWindowControl.showControl(mOverlayView.getWindowToken());
+        }
     }
 
     private void setInitialStartBounds() {
         // Sets the initial frame area for the mirror and places it in the center of the display.
-        int initSize = Math.min(mDisplaySize.x, mDisplaySize.y) / 2;
-        int initX = mDisplaySize.x / 2 - initSize / 2;
-        int initY = mDisplaySize.y / 2 - initSize / 2;
+        int initSize = Math.min(mDisplaySize.x, mDisplaySize.y) / 2 + 2 * mMirrorSurfaceMargin;
+        int initX = mDisplaySize.x / 2 - initSize / 2 - mMirrorSurfaceMargin;
+        int initY = mDisplaySize.y / 2 - initSize / 2 - mMirrorSurfaceMargin;
         mMagnificationFrame.set(initX, initY, initX + initSize, initY + initSize);
     }
 
@@ -313,7 +360,7 @@ public class WindowMagnificationController implements View.OnClickListener,
     }
 
     /**
-     * Modifies the placement of the mirrored content.
+     * Modifies the placement of the mirrored content when the position of mMirrorView is updated.
      */
     private void modifyWindowMagnification(SurfaceControl.Transaction t) {
         Rect sourceBounds = getSourceBounds(mMagnificationFrame, mScale);
@@ -321,46 +368,50 @@ public class WindowMagnificationController implements View.OnClickListener,
         // ViewRootImpl's position will change
         mTmpRect.set(0, 0, mMagnificationFrame.width(), mMagnificationFrame.height());
 
-        WindowManager.LayoutParams params =
-                (WindowManager.LayoutParams) mMirrorView.getLayoutParams();
-        params.x = mMagnificationFrame.left;
-        params.y = mMagnificationFrame.top;
-        mWm.updateViewLayout(mMirrorView, params);
+        updateMirrorViewLayout();
 
         t.setGeometry(mMirrorSurface, sourceBounds, mTmpRect, Surface.ROTATION_0);
     }
 
-    @Override
-    public void onClick(View v) {
-        setMoveOffset(v, mMoveFrameAmountShort);
-        moveMirrorWindow(mMoveWindowOffset.x, mMoveWindowOffset.y);
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        mIsPressedDown = true;
-        setMoveOffset(v, mMoveFrameAmountLong);
-        mHandler.post(mMoveMirrorRunnable);
-        return true;
+    /**
+     * Updates the layout params of MirrorView and translates MirrorView position when the view is
+     * moved close to the screen edges.
+     */
+    private void updateMirrorViewLayout() {
+        WindowManager.LayoutParams params =
+                (WindowManager.LayoutParams) mMirrorView.getLayoutParams();
+        params.x = mMagnificationFrame.left;
+        params.y = mMagnificationFrame.top;
+        // Translates MirrorView position to make MirrorSurfaceView that is inside MirrorView
+        // able to move close to the screen edges.
+        final int maxMirrorViewX = mDisplaySize.x - mMirrorView.getWidth();
+        final int maxMirrorViewY = mDisplaySize.y - mMirrorView.getHeight();
+        final float translationX;
+        final float translationY;
+        if (params.x < 0) {
+            translationX = Math.max(params.x, -mOuterBorderSize);
+        } else if (params.x > maxMirrorViewX) {
+            translationX = Math.min(params.x - maxMirrorViewX, mOuterBorderSize);
+        } else {
+            translationX = 0;
+        }
+        if (params.y < 0) {
+            translationY = Math.max(params.y, -mOuterBorderSize);
+        } else if (params.y > maxMirrorViewY) {
+            translationY = Math.min(params.y - maxMirrorViewY, mOuterBorderSize);
+        } else {
+            translationY = 0;
+        }
+        mMirrorView.setTranslationX(translationX);
+        mMirrorView.setTranslationY(translationY);
+        mWm.updateViewLayout(mMirrorView, params);
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (v == mLeftControl || v == mUpControl || v == mRightControl || v == mBottomControl) {
-            return handleControlTouchEvent(event);
-        } else if (v == mDragView || v == mLeftDrag || v == mTopDrag || v == mRightDrag
+        if (v == mDragView || v == mLeftDrag || v == mTopDrag || v == mRightDrag
                 || v == mBottomDrag) {
             return handleDragTouchEvent(event);
-        }
-        return false;
-    }
-
-    private boolean handleControlTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                mIsPressedDown = false;
-                break;
         }
         return false;
     }
@@ -378,20 +429,6 @@ public class WindowMagnificationController implements View.OnClickListener,
                 return true;
         }
         return false;
-    }
-
-    private void setMoveOffset(View v, int moveFrameAmount) {
-        mMoveWindowOffset.set(0, 0);
-
-        if (v == mLeftControl) {
-            mMoveWindowOffset.x = -moveFrameAmount;
-        } else if (v == mUpControl) {
-            mMoveWindowOffset.y = -moveFrameAmount;
-        } else if (v == mRightControl) {
-            mMoveWindowOffset.x = moveFrameAmount;
-        } else if (v == mBottomControl) {
-            mMoveWindowOffset.y = moveFrameAmount;
-        }
     }
 
     private void moveMirrorWindow(int xOffset, int yOffset) {
@@ -461,6 +498,7 @@ public class WindowMagnificationController implements View.OnClickListener,
         }
         return false;
     }
+
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         createMirror();
@@ -474,13 +512,13 @@ public class WindowMagnificationController implements View.OnClickListener,
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
 
-    class MoveMirrorRunnable implements Runnable {
-        @Override
-        public void run() {
-            if (mIsPressedDown) {
-                moveMirrorWindow(mMoveWindowOffset.x, mMoveWindowOffset.y);
-                mHandler.postDelayed(mMoveMirrorRunnable, 100);
-            }
+    @Override
+    public void move(int xOffset, int yOffset) {
+        if (mMirrorSurfaceView == null) {
+            return;
         }
+        mMagnificationFrame.offset(xOffset, yOffset);
+        modifyWindowMagnification(mTransaction);
+        mTransaction.apply();
     }
 }

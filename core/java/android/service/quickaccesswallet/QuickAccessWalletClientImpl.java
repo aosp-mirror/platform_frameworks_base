@@ -20,6 +20,7 @@ import static android.service.quickaccesswallet.QuickAccessWalletService.SERVICE
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,10 +28,13 @@ import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.internal.widget.LockPatternUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,68 +42,211 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 /**
+ * Implements {@link QuickAccessWalletClient}. The client connects, performs requests, waits for
+ * responses, and disconnects automatically after a short period of time. The client may
  * @hide
  */
-@SuppressWarnings("AndroidJdkLibsChecker")
-class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Handler.Callback,
-        ServiceConnection {
+public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, ServiceConnection {
 
     private static final String TAG = "QAWalletSClient";
     private final Handler mHandler;
     private final Context mContext;
     private final Queue<ApiCaller> mRequestQueue;
-    private final Map<Consumer<WalletServiceEvent>, String> mEventListeners;
+    private final Map<WalletServiceEventListener, String> mEventListeners;
     private boolean mIsConnected;
+    /**
+     * Timeout for active service connections (1 minute)
+     */
+    private static final long SERVICE_CONNECTION_TIMEOUT_MS = 60 * 1000;
     @Nullable
     private IQuickAccessWalletService mService;
-
 
     @Nullable
     private final QuickAccessWalletServiceInfo mServiceInfo;
 
-    private static final int MSG_CONNECT = 1;
-    private static final int MSG_CONNECTED = 2;
-    private static final int MSG_EXECUTE = 3;
-    private static final int MSG_DISCONNECT = 4;
+    private static final int MSG_TIMEOUT_SERVICE = 5;
 
     QuickAccessWalletClientImpl(@NonNull Context context) {
         mContext = context.getApplicationContext();
         mServiceInfo = QuickAccessWalletServiceInfo.tryCreate(context);
-        mHandler = new Handler(Looper.getMainLooper(), this);
+        mHandler = new Handler(Looper.getMainLooper());
         mRequestQueue = new LinkedList<>();
         mEventListeners = new HashMap<>(1);
     }
 
     @Override
-    public boolean handleMessage(Message msg) {
-        switch (msg.what) {
-            case MSG_CONNECT:
-                connectInternal();
-                break;
-            case MSG_CONNECTED:
-                onConnectedInternal((IQuickAccessWalletService) msg.obj);
-                break;
-            case MSG_EXECUTE:
-                executeInternal((ApiCaller) msg.obj);
-                break;
-            case MSG_DISCONNECT:
-                disconnectInternal();
-                break;
-            default:
-                Log.w(TAG, "Unknown what: " + msg.what);
-                return false;
+    public boolean isWalletServiceAvailable() {
+        boolean available = mServiceInfo != null;
+        Log.i(TAG, "isWalletServiceAvailable: " + available);
+        return available;
+    }
+
+    @Override
+    public boolean isWalletFeatureAvailable() {
+        int currentUser = ActivityManager.getCurrentUser();
+        return checkUserSetupComplete()
+                && checkSecureSetting(Settings.Secure.GLOBAL_ACTIONS_PANEL_ENABLED)
+                && !new LockPatternUtils(mContext).isUserInLockdown(currentUser);
+    }
+
+    @Override
+    public boolean isWalletFeatureAvailableWhenDeviceLocked() {
+        return checkSecureSetting(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS)
+                && checkSecureSetting(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+    }
+
+    @Override
+    public void getWalletCards(
+            @NonNull GetWalletCardsRequest request,
+            @NonNull OnWalletCardsRetrievedCallback callback) {
+
+        Log.i(TAG, "getWalletCards");
+
+        if (!isWalletServiceAvailable()) {
+            callback.onWalletCardRetrievalError(new GetWalletCardsError(null, null));
+            return;
         }
-        return true;
+
+        BaseCallbacks serviceCallback = new BaseCallbacks() {
+            @Override
+            public void onGetWalletCardsSuccess(GetWalletCardsResponse response) {
+                mHandler.post(() -> callback.onWalletCardsRetrieved(response));
+            }
+
+            @Override
+            public void onGetWalletCardsFailure(GetWalletCardsError error) {
+                mHandler.post(() -> callback.onWalletCardRetrievalError(error));
+            }
+        };
+
+        executeApiCall(new ApiCaller("onWalletCardsRequested") {
+            @Override
+            public void performApiCall(IQuickAccessWalletService service) throws RemoteException {
+                service.onWalletCardsRequested(request, serviceCallback);
+            }
+
+            @Override
+            public void onApiError() {
+                serviceCallback.onGetWalletCardsFailure(new GetWalletCardsError(null, null));
+            }
+        });
+    }
+
+    @Override
+    public void selectWalletCard(@NonNull SelectWalletCardRequest request) {
+        Log.i(TAG, "selectWalletCard");
+        if (!isWalletServiceAvailable()) {
+            return;
+        }
+        executeApiCall(new ApiCaller("onWalletCardSelected") {
+            @Override
+            public void performApiCall(IQuickAccessWalletService service) throws RemoteException {
+                service.onWalletCardSelected(request);
+            }
+        });
+    }
+
+    @Override
+    public void notifyWalletDismissed() {
+        if (!isWalletServiceAvailable()) {
+            return;
+        }
+        Log.i(TAG, "notifyWalletDismissed");
+        executeApiCall(new ApiCaller("onWalletDismissed") {
+            @Override
+            public void performApiCall(IQuickAccessWalletService service) throws RemoteException {
+                service.onWalletDismissed();
+            }
+        });
+    }
+
+    @Override
+    public void addWalletServiceEventListener(WalletServiceEventListener listener) {
+        if (!isWalletServiceAvailable()) {
+            return;
+        }
+        Log.i(TAG, "registerWalletServiceEventListener");
+        BaseCallbacks callback = new BaseCallbacks() {
+            @Override
+            public void onWalletServiceEvent(WalletServiceEvent event) {
+                Log.i(TAG, "onWalletServiceEvent");
+                mHandler.post(() -> listener.onWalletServiceEvent(event));
+            }
+        };
+
+        executeApiCall(new ApiCaller("registerListener") {
+            @Override
+            public void performApiCall(IQuickAccessWalletService service) throws RemoteException {
+                String listenerId = UUID.randomUUID().toString();
+                WalletServiceEventListenerRequest request =
+                        new WalletServiceEventListenerRequest(listenerId);
+                mEventListeners.put(listener, listenerId);
+                service.registerWalletServiceEventListener(request, callback);
+            }
+        });
+    }
+
+    @Override
+    public void removeWalletServiceEventListener(WalletServiceEventListener listener) {
+        if (!isWalletServiceAvailable()) {
+            return;
+        }
+        Log.i(TAG, "unregisterWalletServiceEventListener");
+        executeApiCall(new ApiCaller("unregisterListener") {
+            @Override
+            public void performApiCall(IQuickAccessWalletService service) throws RemoteException {
+                String listenerId = mEventListeners.remove(listener);
+                if (listenerId == null) {
+                    return;
+                }
+                WalletServiceEventListenerRequest request =
+                        new WalletServiceEventListenerRequest(listenerId);
+                service.unregisterWalletServiceEventListener(request);
+            }
+        });
+    }
+
+    @Override
+    public void disconnect() {
+        Log.i(TAG, "disconnect");
+        mHandler.post(() -> disconnectInternal(true));
+    }
+
+    @Override
+    @Nullable
+    public Intent createWalletIntent() {
+        if (mServiceInfo == null || TextUtils.isEmpty(mServiceInfo.getWalletActivity())) {
+            return null;
+        }
+        return new Intent(QuickAccessWalletService.ACTION_VIEW_WALLET)
+                .setComponent(
+                        new ComponentName(
+                                mServiceInfo.getComponentName().getPackageName(),
+                                mServiceInfo.getWalletActivity()));
+    }
+
+    @Override
+    @Nullable
+    public Intent createWalletSettingsIntent() {
+        if (mServiceInfo == null || TextUtils.isEmpty(mServiceInfo.getSettingsActivity())) {
+            return null;
+        }
+        return new Intent(QuickAccessWalletService.ACTION_VIEW_WALLET_SETTINGS)
+                .setComponent(
+                        new ComponentName(
+                                mServiceInfo.getComponentName().getPackageName(),
+                                mServiceInfo.getSettingsActivity()));
     }
 
     private void connect() {
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_CONNECT));
+        Log.i(TAG, "connect");
+        mHandler.post(this::connectInternal);
     }
 
     private void connectInternal() {
+        Log.i(TAG, "connectInternal");
         if (mServiceInfo == null) {
             Log.w(TAG, "Wallet service unavailable");
             return;
@@ -113,15 +260,18 @@ class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Handler.Ca
         intent.setComponent(mServiceInfo.getComponentName());
         int flags = Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY;
         mContext.bindService(intent, this, flags);
+        resetServiceConnectionTimeout();
     }
 
     private void onConnectedInternal(IQuickAccessWalletService service) {
+        Log.i(TAG, "onConnectedInternal");
         if (!mIsConnected) {
             Log.w(TAG, "onConnectInternal but connection closed");
             mService = null;
             return;
         }
         mService = service;
+        Log.i(TAG, "onConnectedInternal success: request queue size " + mRequestQueue.size());
         for (ApiCaller apiCaller : new ArrayList<>(mRequestQueue)) {
             try {
                 apiCaller.performApiCall(mService);
@@ -135,13 +285,31 @@ class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Handler.Ca
         }
     }
 
-    private void disconnect() {
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_DISCONNECT));
+    /**
+     * Resets the idle timeout for this connection by removing any pending timeout messages and
+     * posting a new delayed message.
+     */
+    private void resetServiceConnectionTimeout() {
+        Log.i(TAG, "resetServiceConnectionTimeout");
+        mHandler.removeMessages(MSG_TIMEOUT_SERVICE);
+        mHandler.postDelayed(
+                () -> disconnectInternal(true),
+                MSG_TIMEOUT_SERVICE,
+                SERVICE_CONNECTION_TIMEOUT_MS);
     }
 
-    private void disconnectInternal() {
+    private void disconnectInternal(boolean clearEventListeners) {
+        Log.i(TAG, "disconnectInternal: " + clearEventListeners);
         if (!mIsConnected) {
             Log.w(TAG, "already disconnected");
+            return;
+        }
+        if (clearEventListeners && !mEventListeners.isEmpty()) {
+            Log.i(TAG, "disconnectInternal: clear event listeners");
+            for (WalletServiceEventListener listener : mEventListeners.keySet()) {
+                removeWalletServiceEventListener(listener);
+            }
+            mHandler.post(() -> disconnectInternal(false));
             return;
         }
         mIsConnected = false;
@@ -151,179 +319,79 @@ class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Handler.Ca
         mRequestQueue.clear();
     }
 
-    private void execute(ApiCaller apiCaller) {
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_EXECUTE, apiCaller));
+    private void executeApiCall(ApiCaller apiCaller) {
+        Log.i(TAG, "execute: " + apiCaller.mDesc);
+        mHandler.post(() -> executeInternal(apiCaller));
     }
 
     private void executeInternal(ApiCaller apiCall) {
+        Log.i(TAG, "executeInternal: " + apiCall.mDesc);
         if (mIsConnected && mService != null) {
             try {
                 apiCall.performApiCall(mService);
+                Log.i(TAG, "executeInternal success: " + apiCall.mDesc);
+                resetServiceConnectionTimeout();
             } catch (RemoteException e) {
-                Log.w(TAG, "executeInternal error", e);
+                Log.w(TAG, "executeInternal error: " + apiCall.mDesc, e);
                 apiCall.onApiError();
                 disconnect();
             }
         } else {
+            Log.i(TAG, "executeInternal: queued" + apiCall.mDesc);
             mRequestQueue.add(apiCall);
             connect();
         }
     }
 
-    public boolean isWalletServiceAvailable() {
-        return mServiceInfo != null;
-    }
-
     private abstract static class ApiCaller {
+        private final String mDesc;
+
+        private ApiCaller(String desc) {
+            this.mDesc = desc;
+        }
+
         abstract void performApiCall(IQuickAccessWalletService service) throws RemoteException;
 
         void onApiError() {
-            Log.w(TAG, "api error");
+            Log.w(TAG, "api error: " + mDesc);
         }
     }
 
-    public void getWalletCards(
-            @NonNull GetWalletCardsRequest request,
-            @NonNull Consumer<GetWalletCardsResponse> onSuccessListener,
-            @NonNull Consumer<GetWalletCardsError> onFailureListener) {
-
-        BaseCallbacks callback = new BaseCallbacks() {
-            @Override
-            public void onGetWalletCardsSuccess(GetWalletCardsResponse response) {
-                mHandler.post(() -> onSuccessListener.accept(response));
-            }
-
-            @Override
-            public void onGetWalletCardsFailure(GetWalletCardsError error) {
-                mHandler.post(() -> onFailureListener.accept(error));
-            }
-        };
-
-        execute(new ApiCaller() {
-            @Override
-            public void performApiCall(IQuickAccessWalletService service) throws RemoteException {
-                service.onWalletCardsRequested(request, callback);
-            }
-
-            @Override
-            public void onApiError() {
-                callback.onGetWalletCardsFailure(new GetWalletCardsError(null, null));
-            }
-        });
-    }
-
-    public void selectWalletCard(@NonNull SelectWalletCardRequest request) {
-        execute(new ApiCaller() {
-            @Override
-            public void performApiCall(IQuickAccessWalletService service) throws RemoteException {
-                service.onWalletCardSelected(request);
-            }
-        });
-    }
-
-    public void notifyWalletDismissed() {
-        execute(new ApiCaller() {
-            @Override
-            public void performApiCall(IQuickAccessWalletService service) throws RemoteException {
-                service.onWalletDismissed();
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_DISCONNECT));
-            }
-        });
-    }
-
-    @Override
-    public void registerWalletServiceEventListener(Consumer<WalletServiceEvent> listener) {
-
-        BaseCallbacks callback = new BaseCallbacks() {
-            @Override
-            public void onWalletServiceEvent(WalletServiceEvent event) {
-                Log.i(TAG, "onWalletServiceEvent");
-                mHandler.post(() -> listener.accept(event));
-            }
-        };
-
-        execute(new ApiCaller() {
-            @Override
-            public void performApiCall(IQuickAccessWalletService service) throws RemoteException {
-                String listenerId = UUID.randomUUID().toString();
-                WalletServiceEventListenerRequest request =
-                        new WalletServiceEventListenerRequest(listenerId);
-                mEventListeners.put(listener, listenerId);
-                service.registerWalletServiceEventListener(request, callback);
-            }
-        });
-    }
-
-    @Override
-    public void unregisterWalletServiceEventListener(Consumer<WalletServiceEvent> listener) {
-        execute(new ApiCaller() {
-            @Override
-            public void performApiCall(IQuickAccessWalletService service) throws RemoteException {
-                String listenerId = mEventListeners.get(listener);
-                if (listenerId == null) {
-                    return;
-                }
-                WalletServiceEventListenerRequest request =
-                        new WalletServiceEventListenerRequest(listenerId);
-                service.unregisterWalletServiceEventListener(request);
-            }
-        });
-    }
-
-    @Override
-    @Nullable
-    public Intent getWalletActivity() {
-        if (mServiceInfo == null || TextUtils.isEmpty(mServiceInfo.getWalletActivity())) {
-            return null;
-        }
-        return new Intent(QuickAccessWalletService.ACTION_VIEW_WALLET)
-                .setComponent(
-                        new ComponentName(
-                                mServiceInfo.getComponentName().getPackageName(),
-                                mServiceInfo.getWalletActivity()));
-    }
-
-    @Override
-    @Nullable
-    public Intent getSettingsActivity() {
-        if (mServiceInfo == null || TextUtils.isEmpty(mServiceInfo.getSettingsActivity())) {
-            return null;
-        }
-        return new Intent(QuickAccessWalletService.ACTION_VIEW_WALLET_SETTINGS)
-                .setComponent(
-                        new ComponentName(
-                                mServiceInfo.getComponentName().getPackageName(),
-                                mServiceInfo.getSettingsActivity()));
-    }
-
-    /**
-     * Connection to the {@link QuickAccessWalletService}
-     */
-
-
-    @Override
+    @Override // ServiceConnection
     public void onServiceConnected(ComponentName name, IBinder binder) {
+        Log.i(TAG, "onServiceConnected: " + name);
         IQuickAccessWalletService service = IQuickAccessWalletService.Stub.asInterface(binder);
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_CONNECTED, service));
+        mHandler.post(() -> onConnectedInternal(service));
     }
 
-    @Override
+    @Override // ServiceConnection
     public void onServiceDisconnected(ComponentName name) {
         // Do not disconnect, as we may later be re-connected
         Log.w(TAG, "onServiceDisconnected");
     }
 
-    @Override
+    @Override // ServiceConnection
     public void onBindingDied(ComponentName name) {
         // This is a recoverable error but the client will need to reconnect.
         Log.w(TAG, "onBindingDied");
         disconnect();
     }
 
-    @Override
+    @Override // ServiceConnection
     public void onNullBinding(ComponentName name) {
         Log.w(TAG, "onNullBinding");
         disconnect();
+    }
+
+    private boolean checkSecureSetting(String name) {
+        return Settings.Secure.getInt(mContext.getContentResolver(), name, 0) == 1;
+    }
+
+    private boolean checkUserSetupComplete() {
+        return Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0,
+                UserHandle.USER_CURRENT) == 1;
     }
 
     private static class BaseCallbacks extends IQuickAccessWalletServiceCallbacks.Stub {

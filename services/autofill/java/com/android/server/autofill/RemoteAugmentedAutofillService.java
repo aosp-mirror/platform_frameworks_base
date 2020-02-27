@@ -146,7 +146,8 @@ final class RemoteAugmentedAutofillService
             @Nullable AutofillValue focusedValue,
             @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
             @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback,
-            @NonNull Runnable onErrorCallback) {
+            @NonNull Runnable onErrorCallback,
+            @NonNull RemoteInlineSuggestionRenderService remoteRenderService) {
         long requestTime = SystemClock.elapsedRealtime();
         AtomicReference<ICancellationSignal> cancellationRef = new AtomicReference<>();
 
@@ -166,9 +167,9 @@ final class RemoteAugmentedAutofillService
                                 public void onSuccess(@Nullable Dataset[] inlineSuggestionsData) {
                                     mCallbacks.resetLastResponse();
                                     maybeRequestShowInlineSuggestions(sessionId,
-                                            inlineSuggestionsData, focusedId,
-                                            inlineSuggestionsCallback, client,
-                                            onErrorCallback);
+                                            inlineSuggestionsRequest, inlineSuggestionsData,
+                                            focusedId, inlineSuggestionsCallback, client,
+                                            onErrorCallback, remoteRenderService);
                                     requestAutofill.complete(null);
                                 }
 
@@ -231,10 +232,13 @@ final class RemoteAugmentedAutofillService
     }
 
     private void maybeRequestShowInlineSuggestions(int sessionId,
-            @Nullable Dataset[] inlineSuggestionsData, @NonNull AutofillId focusedId,
+            @Nullable InlineSuggestionsRequest request, @Nullable Dataset[] inlineSuggestionsData,
+            @NonNull AutofillId focusedId,
             @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback,
-            @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback) {
-        if (ArrayUtils.isEmpty(inlineSuggestionsData) || inlineSuggestionsCallback == null) {
+            @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback,
+            @NonNull RemoteInlineSuggestionRenderService remoteRenderService) {
+        if (ArrayUtils.isEmpty(inlineSuggestionsData) || inlineSuggestionsCallback == null
+                || request == null) {
             return;
         }
         mCallbacks.setLastResponse(sessionId);
@@ -242,7 +246,7 @@ final class RemoteAugmentedAutofillService
         try {
             inlineSuggestionsCallback.onInlineSuggestionsResponse(
                     InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
-                            inlineSuggestionsData, focusedId, mContext,
+                            request, inlineSuggestionsData, focusedId, mContext,
                             dataset -> {
                                 mCallbacks.logAugmentedAutofillSelected(sessionId,
                                         dataset.getId());
@@ -252,7 +256,7 @@ final class RemoteAugmentedAutofillService
                                 } catch (RemoteException e) {
                                     Slog.w(TAG, "Encounter exception autofilling the values");
                                 }
-                            }, onErrorCallback));
+                            }, onErrorCallback, remoteRenderService));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception sending inline suggestions response back to IME.");
         }

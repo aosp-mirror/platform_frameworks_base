@@ -127,7 +127,7 @@ message Atom {
         WallClockTimeShifted wall_clock_time_shifted = 45 [(module) = "framework"];
         AnomalyDetected anomaly_detected = 46;
         AppBreadcrumbReported app_breadcrumb_reported =
-                47 [(allow_from_any_uid) = true, (module) = "framework"];
+                47 [(allow_from_any_uid) = true, (module) = "statsd"];
         AppStartOccurred app_start_occurred = 48 [(module) = "framework"];
         AppStartCanceled app_start_canceled = 49 [(module) = "framework"];
         AppStartFullyDrawn app_start_fully_drawn = 50 [(module) = "framework"];
@@ -188,7 +188,7 @@ message Atom {
         ServiceStateChanged service_state_changed = 99 [(module) = "framework"];
         ServiceLaunchReported service_launch_reported = 100 [(module) = "framework"];
         FlagFlipUpdateOccurred flag_flip_update_occurred = 101 [(module) = "framework"];
-        BinaryPushStateChanged binary_push_state_changed = 102 [(module) = "framework"];
+        BinaryPushStateChanged binary_push_state_changed = 102 [(module) = "statsd"];
         DevicePolicyEvent device_policy_event = 103 [(module) = "framework"];
         DocsUIFileOperationCanceledReported docs_ui_file_op_canceled = 104 [(module) = "docsui"];
         DocsUIFileOperationCopyMoveModeReported docs_ui_file_op_copy_move_mode_reported =
@@ -378,10 +378,10 @@ message Atom {
                 240 [(module) = "framework"];
         BootTimeEventUtcTime boot_time_event_utc_time_reported = 241;
         BootTimeEventErrorCode boot_time_event_error_code_reported = 242 [(module) = "framework"];
-        UserspaceRebootReported userspace_reboot_reported = 243;
+        UserspaceRebootReported userspace_reboot_reported = 243 [(module) = "framework"];
         NotificationReported notification_reported = 244 [(module) = "framework"];
         NotificationPanelReported notification_panel_reported = 245;
-        NotificationChannelModified notification_panel_modified = 246;
+        NotificationChannelModified notification_channel_modified = 246;
         IntegrityCheckResultReported integrity_check_result_reported = 247 [(module) = "framework"];
         IntegrityRulesPushed integrity_rules_pushed = 248 [(module) = "framework"];
         CellBroadcastMessageReported cb_message_reported =
@@ -391,11 +391,16 @@ message Atom {
         WifiHealthStatReported wifi_health_stat_reported = 251 [(module) = "wifi"];
         WifiFailureStatReported wifi_failure_stat_reported = 252 [(module) = "wifi"];
         WifiConnectionResultReported wifi_connection_result_reported = 253 [(module) = "wifi"];
+        AppFreezeChanged app_freeze_changed = 254 [(module) = "framework"];
+        SnapshotMergeReported snapshot_merge_reported = 255;
+        ForegroundServiceAppOpSessionEnded foreground_service_app_op_session_ended =
+            256  [(module) = "framework"];
+        DisplayJankReported display_jank_reported = 257;
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10071
+    // Next: 10076
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -470,6 +475,14 @@ message Atom {
         GraphicsStats graphics_stats = 10068;
         RuntimeAppOpAccess runtime_app_op_access = 10069 [(module) = "framework"];
         IonHeapSize ion_heap_size = 10070 [(module) = "framework"];
+        PackageNotificationPreferences package_notification_preferences =
+                10071 [(module) = "framework"];
+        PackageNotificationChannelPreferences package_notification_channel_preferences =
+                10072 [(module) = "framework"];
+        PackageNotificationChannelGroupPreferences package_notification_channel_group_preferences =
+                10073 [(module) = "framework"];
+        GnssStats gnss_stats = 10074 [(module) = "framework"];
+        AppFeaturesOps app_features_ops = 10075 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -671,17 +684,32 @@ message CachedKillReported {
  *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiDataStall.java
  */
 message WifiHealthStatReported {
+    enum Band {
+        UNKNOWN = 0;
+        // All of 2.4GHz band
+        BAND_2G = 1;
+        // Frequencies in the range of [5150, 5250) GHz
+        BAND_5G_LOW = 2;
+        // Frequencies in the range of [5250, 5725) GHz
+        BAND_5G_MIDDLE = 3;
+        // Frequencies in the range of [5725, 5850) GHz
+        BAND_5G_HIGH = 4;
+        // Frequencies in the range of [5925, 6425) GHz
+        BAND_6G_LOW = 5;
+        // Frequencies in the range of [6425, 6875) GHz
+        BAND_6G_MIDDLE = 6;
+        // Frequencies in the range of [6875, 7125) GHz
+        BAND_6G_HIGH = 7;
+    }
     // duration this stat is obtained over in milliseconds
     optional int32 duration_millis = 1;
     // whether wifi is classified as sufficient for the user's data traffic, determined
     // by whether the calculated throughput exceeds the average demand within |duration_millis|
     optional bool is_sufficient = 2;
-    // whether the calculated throughput is exceeds the minimum required for typical usage
-    optional bool is_throughput_good = 3;
     // whether cellular data is available
-    optional bool is_cell_data_available = 4;
-    // the WLAN channel the connected network is on (ie. 2412)
-    optional int32 frequency = 5;
+    optional bool is_cell_data_available = 3;
+    // the Band bucket the connected network is on
+    optional Band band = 4;
 }
 
 /**
@@ -1874,6 +1902,8 @@ message WatchdogRollbackOccurred {
     // Set by RollbackPackageHealthObserver to be the package that is failing when a rollback
     // is initiated. Empty if the package is unknown.
     optional string failing_package_name = 5;
+
+    optional TrainExperimentIds experiment_ids = 6 [(log_mode) = MODE_BYTES];
 }
 
 /**
@@ -3258,12 +3288,12 @@ message OverlayStateChanged {
     ];
 }
 
-/*
+/**
  * Logs foreground service starts and stops.
  * Note that this is not when a service starts or stops, but when it is
  * considered foreground.
  * Logged from
- *     //frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
+ *     frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
  */
 message ForegroundServiceStateChanged {
     optional int32 uid = 1 [(is_uid) = true];
@@ -3275,6 +3305,49 @@ message ForegroundServiceStateChanged {
         EXIT = 2;
     }
     optional State state = 3;
+
+    // Whether the fgs is allowed while-in-use permissions, i.e. is considered 'in-use' to the user.
+    // (If the fgs was started while the app wasn't TOP it usually will be denied these permissions)
+    optional bool allow_while_in_use_permission = 4;
+}
+
+/**
+ * Logs the number of times a uid accesses a sensitive AppOp during a foreground service session.
+ * A foreground service session is any continuous period during which the uid holds at least one
+ * foreground service; the atom will be pushed when the uid no longer holds any foreground services.
+ * Accesses initiated while the uid is in the TOP state are ignored.
+ * Sessions with no attempted accesses are not logged.
+ * Logged from
+ *     frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
+ */
+message ForegroundServiceAppOpSessionEnded {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The operation's name.
+    // To the extent possible, preserve the mapping from AppOpsManager.OP_ constants.
+    // Only these named ops are actually logged.
+    enum AppOpName {
+        OP_NONE = -1; // Also represents UNKNOWN.
+        OP_COARSE_LOCATION = 0;
+        OP_FINE_LOCATION = 1;
+        OP_CAMERA = 26;
+        OP_RECORD_AUDIO = 27;
+    }
+    optional AppOpName app_op_name = 2 [default = OP_NONE];
+
+    // The uid's permission mode for accessing the AppOp during this fgs session.
+    enum Mode {
+        MODE_UNKNOWN = 0;
+        MODE_ALLOWED = 1; // Always allowed
+        MODE_IGNORED = 2; // Denied
+        MODE_FOREGROUND = 3; // Allow-while-in-use (or allowed-one-time)
+    }
+    optional Mode app_op_mode = 3;
+
+    // Number of times this AppOp was requested and allowed.
+    optional int32 count_ops_accepted = 4;
+    // Number of times this AppOp was requested but denied.
+    optional int32 count_ops_rejected = 5;
 }
 
 /**
@@ -3472,27 +3545,25 @@ message NotificationReported {
     // A small system-assigned identifier for the notification.
     // Locally probably-unique, but expect collisions across users and/or days.
     optional int32 instance_id = 4;
-    // The app-assigned notification ID and tag
-    optional int32 notification_id = 5;
-    optional string notification_tag = 6;
-    optional string channel_id = 7;  // App-assigned channel ID
+    optional int32 notification_id_hash = 5;  // Small hash of the app-assigned notif ID + tag
+    optional int32 channel_id_hash = 6;  // Small hash of app-assigned channel ID
 
     // Grouping information
-    optional string group_id = 8;  // Group the notification currently belongs to
-    optional int32 group_instance_id = 9;  // Instance_id of the group-summary notification
-    optional bool is_group_summary = 10;  // Tags the group-summary notification
+    optional int32 group_id_hash = 7;  // Small hash of the group ID of the notification
+    optional int32 group_instance_id = 8;  // Instance_id of the group-summary notification
+    optional bool is_group_summary = 9;  // Tags the group-summary notification
 
     // Attributes
-    optional string category = 11;   // App-assigned notification category (API-defined strings)
-    optional int32 style = 12;       // App-assigned notification style
-    optional int32 num_people = 13;  // Number of Person records attached to the notification
+    optional string category = 10;   // App-assigned notification category (API-defined strings)
+    optional int32 style = 11;       // App-assigned notification style
+    optional int32 num_people = 12;  // Number of Person records attached to the notification
 
     // Ordering, importance and interruptiveness
 
-    optional int32 position = 14;    // Position in NotificationManager's list
+    optional int32 position = 13;    // Position in NotificationManager's list
 
-    optional android.stats.sysui.NotificationImportance importance = 15;
-    optional int32 alerting = 16;    // Bitfield, 1=buzz 2=beep 4=blink
+    optional android.stats.sysui.NotificationImportance importance = 14;
+    optional int32 alerting = 15;    // Bitfield, 1=buzz 2=beep 4=blink
 
     enum NotificationImportanceExplanation {
         IMPORTANCE_EXPLANATION_UNKNOWN = 0;
@@ -3504,12 +3575,12 @@ message NotificationReported {
         IMPORTANCE_EXPLANATION_APP_PRE_CHANNELS = 5;
     }
 
-    optional NotificationImportanceExplanation importance_source = 17;
-    optional android.stats.sysui.NotificationImportance importance_initial = 18;
-    optional NotificationImportanceExplanation importance_initial_source = 19;
-    optional android.stats.sysui.NotificationImportance importance_asst = 20;
-    optional int32 assistant_hash = 21;
-    optional float assistant_ranking_score = 22;
+    optional NotificationImportanceExplanation importance_source = 16;
+    optional android.stats.sysui.NotificationImportance importance_initial = 17;
+    optional NotificationImportanceExplanation importance_initial_source = 18;
+    optional android.stats.sysui.NotificationImportance importance_asst = 19;
+    optional int32 assistant_hash = 20;
+    optional float assistant_ranking_score = 21;
 }
 
 message Notification {
@@ -3770,6 +3841,8 @@ message BinaryPushStateChanged {
     // user id
     optional int32 user_id = 8;
     optional int32 reason = 9;
+    // Whether or not this is a rollback event
+    optional bool is_rollback = 10;
 }
 
 /* Test atom, is not logged anywhere */
@@ -4392,6 +4465,52 @@ message BootTimeEventErrorCode {
     // For example, this can have a value of FsStatFlags.FS_STAT_FULL_MOUNT_FAILED for the event of
     // FS_MGR_FS_STAT.
     optional int32 error_code = 2;
+}
+
+/**
+ * Collects Virtual A/B statistics related to the use of dm-snapshot performed
+ * after an OTA.
+ *
+ * Logged from:
+ *  - system/core/fs_mgr/libsnapshot/snapshot.cpp
+ *  - system/core/fs_mgr/libsnapshot/snapshotctl.cpp
+ */
+message SnapshotMergeReported {
+    // Keep in sync with
+    // system/core/fs_mgr/libsnapshot/android/snapshot/snapshot.proto
+    enum UpdateState {
+        // No update or merge is in progress.
+        NONE = 0;
+        // An update is applying; snapshots may already exist.
+        INITIATED = 1;
+        // An update is pending, but has not been successfully booted yet.
+        UNVERIFIED = 2;
+        // The kernel is merging in the background.
+        MERGING = 3;
+        // Post-merge cleanup steps could not be completed due to a transient
+        // error, but the next reboot will finish any pending operations.
+        MERGE_NEEDS_REBOOT = 4;
+        // Merging is complete, and needs to be acknowledged.
+        MERGE_COMPLETED = 5;
+        // Merging failed due to an unrecoverable error.
+        MERGE_FAILED = 6;
+        // The update was implicitly cancelled, either by a rollback or a flash
+        // operation via fastboot. This state can only be returned by WaitForMerge.
+        CANCELLED = 7;
+    };
+
+    // Status of the update after the merge attempts.
+    optional UpdateState final_state = 1;
+
+    // Time to complete a merge operation in milliseconds.
+    // A negative value corresponds to the case in which the merge operation
+    // was interrupted and resumed (e.g. in case of a system reboot during the
+    // merge).
+    optional int64 duration_millis = 2;
+
+    // Number of reboots that occurred after issuing and before completing the
+    // merge of all the snapshot devices.
+    optional int32 intermediate_reboots = 3;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -5462,6 +5581,65 @@ message NotificationRemoteViewsProto {
  */
 message NotificationRemoteViews {
     optional NotificationRemoteViewsProto notification_remote_views = 1;
+}
+
+/**
+ * Atom that contains a list of a package's preferences, pulled from NotificationManagerService.java
+ */
+message PackageNotificationPreferences {
+    // Uid under which the package is installed.
+    optional int32 uid = 1;
+    // Notification importance, which specifies when and how a notification is displayed.
+    // Specified under core/java/android/app/NotificationManager.java.
+    optional int32 importance = 2;
+    // Lockscreen visibility as set by the user.
+    optional int32 visibility = 3;
+    // Bitfield mask indicating what fields were locked by the user (see LockableAppfields in
+    // PreferencesHelper.java)
+    optional int32 user_locked_fields = 4;
+}
+
+/**
+ * Atom that contains a list of a package's channel preferences, pulled from
+ * NotificationManagerService.java.
+ */
+message PackageNotificationChannelPreferences {
+    // Uid under which the package is installed.
+    optional int32 uid = 1;
+    // Channel's ID. Should always be available.
+    optional string channel_id = 2;
+    // Channel's name. Should always be available.
+    optional string channel_name = 3;
+    // Channel's description. Optionally set by the channel creator.
+    optional string description = 4;
+    // Notification importance, which specifies when and how a notification is displayed. Specified
+    // under core/java/android/app/NotificationManager.java.
+    optional int32 importance = 5;
+    // Bitmask representing which fields have been set by the user. See field bitmask descriptions
+    // at core/java/android/app/NotificationChannel.java
+    optional int32 user_locked_fields = 6;
+    // Indicates if the channel was deleted by the app.
+    optional bool is_deleted = 7;
+}
+
+/**
+ * Atom that contains a list of a package's channel group preferences, pulled from
+ * NotificationManagerService.java.
+ */
+message PackageNotificationChannelGroupPreferences {
+    // Uid under which the package is installed.
+    optional int32 uid = 1;
+    // Channel Group's ID. Should always be available.
+    optional string group_id = 2;
+    // Channel Group's name. Should always be available.
+    optional string group_name = 3;
+    // Channel Group's description. Optionally set by group creator.
+    optional string description = 4;
+    // Indicates if notifications from this channel group are blocked.
+    optional bool is_blocked = 5;
+    // Bitmask representing which fields have been set by the user. See field bitmask descriptions
+    // at core/java/android/app/NotificationChannelGroup.java
+    optional int32 user_locked_fields = 6;
 }
 
 message PowerProfileProto {
@@ -6981,6 +7159,20 @@ message MediametricsDrmManagerReported {
     optional string description = 6;
     optional Method method = 7;
     optional string mime_types = 8;
+
+    optional int64 get_constraints_count =  9;
+    optional int64 get_metadata_count = 10;
+    optional int64 can_handle_count = 11;
+    optional int64 process_drm_info_count = 12;
+    optional int64 acquire_drm_info_count = 13;
+    optional int64 save_rights_count = 14;
+    optional int64 get_original_mime_type_count = 15;
+    optional int64 get_drm_object_type_count = 16;
+    optional int64 check_rights_status_count = 17;
+    optional int64 remove_rights_count = 18;
+    optional int64 remove_all_rights_count = 19;
+    optional int64 open_convert_session_count = 20;
+    optional int64 open_decrypt_session_count = 21;
 }
 
 /**
@@ -7403,6 +7595,51 @@ message AppOps {
 }
 
 /**
+ * Historical app ops data per package and features.
+ */
+message AppFeaturesOps {
+    // Uid of the package requesting the op
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Name of the package performing the op
+    optional string package_name = 2;
+
+    // feature id; provided by developer when accessing related API, limited at 50 chars by API.
+    // Features must be provided through manifest using <feature> tag available in R and above.
+    optional string feature_id = 3;
+
+    // operation id; maps to the OPSTR_* constants in AppOpsManager.java
+    optional string op = 4;
+
+    // The number of times the op was granted while the app was in the
+    // foreground (only for trusted requests)
+    optional int64 trusted_foreground_granted_count = 5;
+
+    // The number of times the op was granted while the app was in the
+    // background (only for trusted requests)
+    optional int64 trusted_background_granted_count = 6;
+
+    // The number of times the op was rejected while the app was in the
+    // foreground (only for trusted requests)
+    optional int64 trusted_foreground_rejected_count = 7;
+
+    // The number of times the op was rejected while the app was in the
+    // background (only for trusted requests)
+    optional int64 trusted_background_rejected_count = 8;
+
+    // For long-running operations, total duration of the operation
+    // while the app was in the foreground (only for trusted requests)
+    optional int64 trusted_foreground_duration_millis = 9;
+
+    // For long-running operations, total duration of the operation
+    // while the app was in the background (only for trusted requests)
+    optional int64 trusted_background_duration_millis = 10;
+
+    // Whether AppOps is guarded by Runtime permission
+    optional bool is_runtime_permission = 11;
+}
+
+/**
  * Location Manager API Usage information(e.g. API under usage,
  * API call's parameters).
  * Logged from:
@@ -7514,6 +7751,9 @@ message GrantPermissionsActivityButtonActions {
 
     // Button clicked by user - same as bit flags in buttons_presented with only single bit set
     optional int32 button_clicked = 5;
+
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 6;
 }
 
 /**
@@ -7911,6 +8151,22 @@ message SurfaceflingerStatsGlobalInfo {
     // Total time that was spent performing animations.
     // This is derived from the present-to-present layer histogram
     optional int64 animation_millis = 5;
+    // Total number of event connections tracked by SurfaceFlinger at the time
+    // of this pull. If this number grows prohibitively large, then this can
+    // cause jank due to resource contention.
+    optional int32 event_connection_count = 6;
+    // Set of timings measured from when SurfaceFlinger began compositing a
+    // frame, until the frame was requested to be presented to the display. This
+    // measures SurfaceFlinger's total CPU walltime on the critical path per
+    // frame.
+    optional FrameTimingHistogram frame_duration = 7
+        [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Set of timings measured from when SurfaceFlinger first began using the
+    // GPU to composite a frame, until the GPU has finished compositing that
+    // frame. This measures the total additional time SurfaceFlinger needed to
+    // perform due to falling back into GPU composition.
+    optional FrameTimingHistogram render_engine_timing = 8
+        [(android.os.statsd.log_mode) = MODE_BYTES];
 }
 
 /**
@@ -7952,6 +8208,10 @@ message SurfaceflingerStatsLayerInfo {
     // presentation, until the buffer was ready to be presented.
     optional FrameTimingHistogram post_to_acquire = 9
         [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Frames missed latch because the acquire fence didn't fire
+    optional int64 late_acquire_frames = 10;
+    // Frames latched early because the desired present time was bad
+    optional int64 bad_desired_present_frames = 11;
 }
 
 /**
@@ -7969,13 +8229,29 @@ message FrameTimingHistogram {
 }
 
 /**
+ * Janky event as reported by SurfaceFlinger.
+ * This event is intended to be consumed by a Perfetto subscriber for
+ * automated trace collection.
+ *
+ * Logged from:
+ *    frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp
+ */
+message DisplayJankReported {
+    // Informational field for how long the janky event lasted in milliseconds
+    optional int64 event_duration_millis = 1;
+    // Number of frame deadlines missed, where SurfaceFlinger failed to update
+    // the display on time.
+    optional int32 present_deadlines_missed = 2;
+}
+
+/**
  * Information about camera facing and API level usage.
  * Logged from:
  *   frameworks/base/services/core/java/com/android/server/camera/CameraServiceProxy.java
  */
 message CameraActionEvent {
     // Camera session duration
-    optional int64 duration = 1;
+    optional int64 duration_millis = 1;
 
     // Camera API level used
     optional int32 api_level = 2;
@@ -8111,14 +8387,6 @@ message DangerousPermissionStateSampled {
 }
 
 /**
- * HWUI renders pipeline type: GL (0) or Vulkan (1).
- */
-enum PipelineType {
-    GL = 0;
-    VULKAN = 1;
-}
-
-/**
  * HWUI stats for a given app.
  */
 message GraphicsStats {
@@ -8131,9 +8399,16 @@ message GraphicsStats {
     // The start & end timestamps in UTC as
     // milliseconds since January 1, 1970
     // Compatible with java.util.Date#setTime()
-    optional int64 stats_start = 3;
+    optional int64 start_millis = 3;
 
-    optional int64 stats_end = 4;
+    optional int64 end_millis = 4;
+
+    // HWUI renders pipeline type: GL (1) or Vulkan (2).
+    enum PipelineType {
+        UNKNOWN = 0;
+        GL = 1;
+        VULKAN = 2;
+    }
 
     // HWUI renders pipeline type: GL or Vulkan.
     optional PipelineType pipeline = 5;
@@ -8361,4 +8636,80 @@ message SdkExtensionStatus {
     // A number identifying which particular symbol's call failed, if any. 0 means no missing symbol.
     // "Failed" here can mean a symbol that wasn't meant to be visible was, or the other way around.
     optional int32 failed_call_symbol = 3;
+}
+
+/**
+ * Logs when an app is frozen or unfrozen.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/CachedAppOptimizer.java
+ */
+message AppFreezeChanged {
+    // The type of event.
+    enum Action {
+        UNKNOWN = 0;
+        FREEZE_APP = 1;
+        UNFREEZE_APP = 2;
+    }
+    optional Action action = 1;
+
+    // Pid of the process being frozen.
+    optional int32 pid = 2;
+
+    // Name of the process being frozen.
+    optional string process_name = 3;
+
+    // Time since last unfrozen.
+    optional int64 time_unfrozen_millis = 4;
+}
+
+/**
+ * Logs gnss stats from location service provider
+ *
+ * Pulled from:
+ *  frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
+ */
+
+message GnssStats {
+    // Number of location reports since boot
+    optional int64 location_reports = 1;
+
+    // Total pulled reports of Location failures since boot
+    optional int64 location_failure_reports = 2;
+
+    // Number of time to first fix reports since boot
+    optional int64 time_to_first_fix_reports = 3;
+
+    // Total pulled reported time to first fix (in milli-seconds) since boot
+    optional int64 time_to_first_fix_milli_s = 4;
+
+    // Number of position accuracy reports since boot
+    optional int64 position_accuracy_reports = 5;
+
+    // Total pulled reported position accuracy (in meters) since boot
+    optional int64 position_accuracy_meters = 6;
+
+    // Number of top 4 average CN0 reports since boot
+    optional int64 top_four_average_cn0_reports = 7;
+
+    // Total pulled reported of top 4 average CN0 (dB-mHz) since boot
+    optional int64 top_four_average_cn0_db_mhz = 8;
+
+    // Number of l5 top 4 average CN0 reports since boot
+    optional int64 l5_top_four_average_cn0_reports = 9;
+
+    // Total pulled reported of l5 top 4 average CN0 (dB-mHz) since boot
+    optional int64 l5_top_four_average_cn0_db_mhz = 10;
+
+    // Total number of sv status messages reports since boot
+    optional int64 sv_status_reports = 11;
+
+    // Total number of sv status messages reports, where sv is used in fix since boot
+    optional int64 sv_status_reports_used_in_fix = 12;
+
+    // Total number of L5 sv status messages reports since boot
+    optional int64 l5_sv_status_reports = 13;
+
+    // Total number of L5 sv status messages reports, where sv is used in fix since boot
+    optional int64 l5_sv_status_reports_used_in_fix = 14;
 }

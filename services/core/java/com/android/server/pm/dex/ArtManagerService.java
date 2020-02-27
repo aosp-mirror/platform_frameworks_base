@@ -31,7 +31,7 @@ import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.pm.dex.PackageOptimizationInfo;
-import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -54,6 +54,7 @@ import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
@@ -482,8 +483,10 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         try {
             final String packageName = pkg.getPackageName();
             final String apkPath = pkg.getBaseCodePath();
-            final String outDexFile = pkg.getDataDir() + "/code_cache/compiled_view.dex";
-            if (pkg.isPrivileged() || pkg.isEmbeddedDexUsed()
+            // TODO(b/143971007): Use a cross-user directory
+            File dataDir = PackageInfoWithoutStateUtils.getDataDir(pkg, UserHandle.myUserId());
+            final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
+            if (pkg.isPrivileged() || pkg.isUseEmbeddedDex()
                     || pkg.isDefaultToDeviceProtectedStorage()) {
                 // Privileged apps prefer to load trusted code so they don't use compiled views.
                 // If the app is not privileged but prefers code integrity, also avoid compiling
@@ -516,7 +519,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      */
     private ArrayMap<String, String> getPackageProfileNames(AndroidPackage pkg) {
         ArrayMap<String, String> result = new ArrayMap<>();
-        if ((pkg.getFlags() & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+        if (pkg.isHasCode()) {
             result.put(pkg.getBaseCodePath(), ArtManager.getProfileName(null));
         }
 

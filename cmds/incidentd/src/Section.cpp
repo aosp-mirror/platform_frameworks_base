@@ -20,9 +20,9 @@
 
 #include <dirent.h>
 #include <errno.h>
-
 #include <mutex>
 #include <set>
+#include <thread>
 
 #include <android-base/file.h>
 #include <android-base/properties.h>
@@ -42,6 +42,7 @@
 #include "frameworks/base/core/proto/android/os/backtrace.proto.h"
 #include "frameworks/base/core/proto/android/os/data.proto.h"
 #include "frameworks/base/core/proto/android/util/log.proto.h"
+#include "frameworks/base/core/proto/android/util/textdump.proto.h"
 #include "incidentd_util.h"
 
 namespace android {
@@ -135,7 +136,7 @@ status_t FileSection::Execute(ReportWriter* writer) const {
     status_t ihStatus = wait_child(pid);
     if (ihStatus != NO_ERROR) {
         ALOGW("[%s] abnormal child process: %s", this->name.string(), strerror(-ihStatus));
-        return ihStatus;
+        return OK; // Not a fatal error.
     }
 
     return writer->writeSection(buffer);
@@ -234,7 +235,7 @@ struct WorkerThreadData : public virtual RefBase {
     Fpipe pipe;
 
     // Lock protects these fields
-    mutex lock;
+    std::mutex lock;
     bool workerDone;
     status_t workerError;
 
@@ -261,83 +262,47 @@ void sigpipe_handler(int signum) {
     }
 }
 
-static void* worker_thread_func(void* cookie) {
-    // Don't crash the service if we write to a closed pipe (which can happen if
-    // dumping times out).
-    signal(SIGPIPE, sigpipe_handler);
-
-    WorkerThreadData* data = (WorkerThreadData*)cookie;
-    status_t err = data->section->BlockingCall(data->pipe.writeFd());
-
-    {
-        unique_lock<mutex> lock(data->lock);
-        data->workerDone = true;
-        data->workerError = err;
-    }
-
-    data->pipe.writeFd().reset();
-    data->decStrong(data->section);
-    // data might be gone now. don't use it after this point in this thread.
-    return NULL;
-}
-
 status_t WorkerThreadSection::Execute(ReportWriter* writer) const {
     status_t err = NO_ERROR;
-    pthread_t thread;
-    pthread_attr_t attr;
     bool workerDone = false;
     FdBuffer buffer;
 
-    // Data shared between this thread and the worker thread.
-    sp<WorkerThreadData> data = new WorkerThreadData(this);
-
-    // Create the pipe
-    if (!data->pipe.init()) {
+    // Create shared data and pipe
+    WorkerThreadData data(this);
+    if (!data.pipe.init()) {
         return -errno;
     }
 
-    // Create the thread
-    err = pthread_attr_init(&attr);
-    if (err != 0) {
-        return -err;
-    }
-    // TODO: Do we need to tweak thread priority?
-    err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    if (err != 0) {
-        pthread_attr_destroy(&attr);
-        return -err;
-    }
-
-    // The worker thread needs a reference and we can't let the count go to zero
-    // if that thread is slow to start.
-    data->incStrong(this);
-
-    err = pthread_create(&thread, &attr, worker_thread_func, (void*)data.get());
-    pthread_attr_destroy(&attr);
-    if (err != 0) {
-        data->decStrong(this);
-        return -err;
-    }
+    std::thread([&]() {
+        // Don't crash the service if writing to a closed pipe (may happen if dumping times out)
+        signal(SIGPIPE, sigpipe_handler);
+        status_t err = data.section->BlockingCall(data.pipe.writeFd());
+        {
+            std::unique_lock<std::mutex> lock(data.lock);
+            data.workerDone = true;
+            data.workerError = err;
+            // unique_fd is not thread safe. If we don't lock it, reset() may pause half way while
+            // the other thread executes to the end, calling ~Fpipe, which is a race condition.
+            data.pipe.writeFd().reset();
+        }
+    }).detach();
 
     // Loop reading until either the timeout or the worker side is done (i.e. eof).
-    err = buffer.read(data->pipe.readFd().get(), this->timeoutMs);
+    err = buffer.read(data.pipe.readFd().get(), this->timeoutMs);
     if (err != NO_ERROR) {
         ALOGE("[%s] reader failed with error '%s'", this->name.string(), strerror(-err));
     }
 
-    // Done with the read fd. The worker thread closes the write one so
-    // we never race and get here first.
-    data->pipe.readFd().reset();
-
     // If the worker side is finished, then return its error (which may overwrite
     // our possible error -- but it's more interesting anyway). If not, then we timed out.
     {
-        unique_lock<mutex> lock(data->lock);
-        if (data->workerError != NO_ERROR) {
-            err = data->workerError;
+        std::unique_lock<std::mutex> lock(data.lock);
+        data.pipe.close();
+        if (data.workerError != NO_ERROR) {
+            err = data.workerError;
             ALOGE("[%s] worker failed with error '%s'", this->name.string(), strerror(-err));
         }
-        workerDone = data->workerDone;
+        workerDone = data.workerDone;
     }
 
     writer->setSectionStats(buffer);
@@ -470,6 +435,77 @@ status_t DumpsysSection::BlockingCall(unique_fd& pipeWriteFd) const {
     service->dump(pipeWriteFd.get(), mArgs);
 
     return NO_ERROR;
+}
+
+// ================================================================================
+TextDumpsysSection::TextDumpsysSection(int id, const char* service, ...)
+    : WorkerThreadSection(id, REMOTE_CALL_TIMEOUT_MS), mService(service) {
+    name = "dumpsys ";
+    name += service;
+
+    va_list args;
+    va_start(args, service);
+    while (true) {
+        const char* arg = va_arg(args, const char*);
+        if (arg == NULL) {
+            break;
+        }
+        mArgs.add(String16(arg));
+        name += " ";
+        name += arg;
+    }
+    va_end(args);
+}
+
+TextDumpsysSection::~TextDumpsysSection() {}
+
+status_t TextDumpsysSection::BlockingCall(unique_fd& pipeWriteFd) const {
+    // checkService won't wait for the service to show up like getService will.
+    sp<IBinder> service = defaultServiceManager()->checkService(mService);
+    if (service == NULL) {
+        ALOGW("TextDumpsysSection: Can't lookup service: %s", String8(mService).string());
+        return NAME_NOT_FOUND;
+    }
+
+    // Create pipe
+    Fpipe dumpPipe;
+    if (!dumpPipe.init()) {
+        ALOGW("[%s] failed to setup pipe", this->name.string());
+        return -errno;
+    }
+
+    // Run dumping thread
+    const uint64_t start = Nanotime();
+    std::thread worker([&]() {
+        // Don't crash the service if writing to a closed pipe (may happen if dumping times out)
+        signal(SIGPIPE, sigpipe_handler);
+        status_t err = service->dump(dumpPipe.writeFd().get(), mArgs);
+        if (err != OK) {
+            ALOGW("[%s] dump thread failed. Error: %s", this->name.string(), strerror(-err));
+        }
+        dumpPipe.writeFd().reset();
+    });
+
+    // Collect dump content
+    std::string content;
+    bool success = ReadFdToString(dumpPipe.readFd(), &content);
+    worker.join(); // Wait for worker to finish
+    dumpPipe.readFd().reset();
+    if (!success) {
+        ALOGW("[%s] failed to read data from pipe", this->name.string());
+        return -1;
+    }
+
+    ProtoOutputStream proto;
+    proto.write(util::TextDumpProto::COMMAND, std::string(name.string()));
+    proto.write(util::TextDumpProto::CONTENT, content);
+    proto.write(util::TextDumpProto::DUMP_DURATION_NS, int64_t(Nanotime() - start));
+
+    if (!proto.flush(pipeWriteFd.get()) && errno == EPIPE) {
+        ALOGE("[%s] wrote to a broken pipe\n", this->name.string());
+        return EPIPE;
+    }
+    return OK;
 }
 
 // ================================================================================

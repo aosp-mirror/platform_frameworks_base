@@ -24,10 +24,10 @@ import android.view.View;
 import com.android.internal.widget.ViewPager;
 
 /**
- * A {@link ViewPager} which wraps around its first child's height and has swiping disabled.
+ * A {@link ViewPager} which wraps around its first child's height.
  * <p>Normally {@link ViewPager} instances expand their height to cover all remaining space in
  * the layout.
- * <p>This class is used for the intent resolver and share sheet's tabbed view.
+ * <p>This class is used for the intent resolver's tabbed view.
  */
 public class ResolverViewPager extends ViewPager {
 
@@ -57,22 +57,17 @@ public class ResolverViewPager extends ViewPager {
         widthMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY);
         int height = getMeasuredHeight();
         if (getChildCount() > 0) {
-            View firstChild = getChildAt(0);
-            firstChild.measure(widthMeasureSpec,
+            View child = getChildAt(0);
+            child.measure(widthMeasureSpec,
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
-            height = firstChild.getMeasuredHeight();
+            if (height > child.getMeasuredHeight()) {
+                height = child.getMeasuredHeight();
+            }
+        }
+        if (height < getMinimumHeight()) {
+            height = getMinimumHeight();
         }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        return false;
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return false;
     }
 }

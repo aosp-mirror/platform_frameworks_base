@@ -28,7 +28,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
@@ -238,20 +237,15 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     @Override
     public void start() {
-        final PackageManager pm = mContext.getPackageManager();
-        if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)
-                || pm.hasSystemFeature(PackageManager.FEATURE_FACE)
-                || pm.hasSystemFeature(PackageManager.FEATURE_IRIS)) {
-            mCommandQueue.addCallback(this);
-            mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-            mActivityTaskManager = mInjector.getActivityTaskManager();
+        mCommandQueue.addCallback(this);
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        mActivityTaskManager = mInjector.getActivityTaskManager();
 
-            try {
-                mTaskStackListener = new BiometricTaskStackListener();
-                mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Unable to register task stack listener", e);
-            }
+        try {
+            mTaskStackListener = new BiometricTaskStackListener();
+            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Unable to register task stack listener", e);
         }
     }
 
@@ -376,7 +370,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
 
         if (DEBUG) {
-            Log.d(TAG, "showDialog: " + args
+            Log.d(TAG, "userId: " + userId
                     + " savedState: " + savedState
                     + " mCurrentDialog: " + mCurrentDialog
                     + " newDialog: " + newDialog

@@ -997,8 +997,9 @@ public final class Settings {
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
      * <p>
-     * Input: Optionally, in versions of Android prior to 11, the Intent's data URI can specify the
-     * application package name to directly invoke the management GUI specific to the package name.
+     * Input: Optionally, in versions of Android prior to {@link android.os.Build.VERSION_CODES#R},
+     * the Intent's data URI can specify the application package name to directly invoke the
+     * management GUI specific to the package name.
      * For example "package:com.my.app".
      * <p>
      * Output: Nothing.
@@ -1011,9 +1012,10 @@ public final class Settings {
      * Activity Action: Show screen for controlling if the app specified in the data URI of the
      * intent can draw on top of other apps.
      * <p>
-     * Unlike {@link #ACTION_MANAGE_OVERLAY_PERMISSION}, which in Android 11 can't be used to show
-     * a GUI for a specific package, permission {@code android.permission.INTERNAL_SYSTEM_WINDOW} is
-     * needed to start an activity with this intent.
+     * Unlike {@link #ACTION_MANAGE_OVERLAY_PERMISSION}, which in Android {@link
+     * android.os.Build.VERSION_CODES#R} can't be used to show a GUI for a specific package,
+     * permission {@code android.permission.INTERNAL_SYSTEM_WINDOW} is needed to start an activity
+     * with this intent.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
@@ -1771,6 +1773,15 @@ public final class Settings {
             = "android.settings.NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show notification history screen.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_HISTORY
+            = "android.settings.NOTIFICATION_HISTORY";
+
+    /**
      * Activity Action: Show app listing settings, filtered by those that send notifications.
      *
      * @hide
@@ -1828,6 +1839,17 @@ public final class Settings {
      * This must be passed as an extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}.
      */
     public static final String EXTRA_CHANNEL_ID = "android.provider.extra.CHANNEL_ID";
+
+    /**
+     * Activity Extra: The {@link NotificationChannel#getConversationId()} of the notification
+     * conversation settings to display.
+     * <p>
+     * This is an optional extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}. If
+     * included the system will first look up notification settings by channel and conversation id,
+     * and will fall back to channel id if a specialized channel for this conversation doesn't
+     * exist, similar to {@link NotificationManager#getNotificationChannel(String, String)}.
+     */
+    public static final String EXTRA_CONVERSATION_ID = "android.provider.extra.CONVERSATION_ID";
 
     /**
      * Activity Action: Show notification redaction settings.
@@ -2031,6 +2053,19 @@ public final class Settings {
     @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_DOMAIN_URLS = "android.settings.MANAGE_DOMAIN_URLS";
+
+    /**
+     * Activity Action: Show screen that let user select enable (or disable) tethering.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
 
     /**
      * Broadcast to trigger notification of asking user to enable MMS.
@@ -2986,6 +3021,7 @@ public final class Settings {
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
             MOVED_TO_SECURE = new HashSet<>(30);
+            MOVED_TO_SECURE.add(Secure.ADAPTIVE_SLEEP);
             MOVED_TO_SECURE.add(Secure.ANDROID_ID);
             MOVED_TO_SECURE.add(Secure.HTTP_PROXY);
             MOVED_TO_SECURE.add(Secure.LOCATION_PROVIDERS_ALLOWED);
@@ -3904,6 +3940,19 @@ public final class Settings {
         public static final String SCREEN_BRIGHTNESS_FOR_VR = "screen_brightness_for_vr";
 
         /**
+         * The screen backlight brightness between 0.0f and 1.0f.
+         * @hide
+         */
+        public static final String SCREEN_BRIGHTNESS_FOR_VR_FLOAT =
+                "screen_brightness_for_vr_float";
+
+        /**
+         * The screen backlight brightness between 0.0f and 1.0f.
+         * @hide
+         */
+        public static final String SCREEN_BRIGHTNESS_FLOAT = "screen_brightness_float";
+
+        /**
          * Control whether to enable automatic brightness mode.
          */
         public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
@@ -3928,6 +3977,7 @@ public final class Settings {
 
         /**
          * Control whether to enable adaptive sleep mode.
+         * @deprecated Use {@link android.provider.Settings.Secure#ADAPTIVE_SLEEP} instead.
          * @hide
          */
         public static final String ADAPTIVE_SLEEP = "adaptive_sleep";
@@ -4716,9 +4766,10 @@ public final class Settings {
             PUBLIC_SETTINGS.add(DIM_SCREEN);
             PUBLIC_SETTINGS.add(SCREEN_OFF_TIMEOUT);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS);
+            PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_FLOAT);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_FOR_VR);
+            PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_FOR_VR_FLOAT);
             PUBLIC_SETTINGS.add(SCREEN_BRIGHTNESS_MODE);
-            PUBLIC_SETTINGS.add(ADAPTIVE_SLEEP);
             PUBLIC_SETTINGS.add(MODE_RINGER_STREAMS_AFFECTED);
             PUBLIC_SETTINGS.add(MUTE_STREAMS_AFFECTED);
             PUBLIC_SETTINGS.add(VIBRATE_ON);
@@ -5772,6 +5823,12 @@ public final class Settings {
         }
 
         /**
+         * Control whether to enable adaptive sleep mode.
+         * @hide
+         */
+        public static final String ADAPTIVE_SLEEP = "adaptive_sleep";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}
          * instead
          */
@@ -6231,16 +6288,19 @@ public final class Settings {
          * @hide
          */
         public static final String LOCATION_CHANGER = "location_changer";
+
         /**
          * The location changer is unknown or unable to detect.
          * @hide
          */
         public static final int LOCATION_CHANGER_UNKNOWN = 0;
+
         /**
          * Location settings in system settings.
          * @hide
          */
         public static final int LOCATION_CHANGER_SYSTEM_SETTINGS = 1;
+
         /**
          * The location icon in drop down notification drawer.
          * @hide
@@ -6286,6 +6346,14 @@ public final class Settings {
          */
         @SystemApi
         public static final int LOCATION_MODE_ON = LOCATION_MODE_HIGH_ACCURACY;
+
+        /**
+         * The accuracy in meters used for coarsening location for clients with only the coarse
+         * location permission.
+         *
+         * @hide
+         */
+        public static final String LOCATION_COARSE_ACCURACY_M = "locationCoarseAccuracy";
 
         /**
          * A flag containing settings used for biometric weak
@@ -6394,6 +6462,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS =
                 "lock_screen_allow_private_notifications";
 
@@ -7812,6 +7881,7 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
         public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
 
         /**
@@ -8014,6 +8084,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS =
                 "lock_screen_show_notifications";
 
@@ -8524,6 +8595,15 @@ public final class Settings {
         public static final String NOTIFICATION_HISTORY_ENABLED = "notification_history_enabled";
 
         /**
+         * When enabled conversations marked as favorites will be set to bubble.
+         *
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String BUBBLE_IMPORTANT_CONVERSATIONS
+                = "bubble_important_conversations";
+
+        /**
          * Whether notifications are dismissed by a right-to-left swipe (instead of a left-to-right
          * swipe).
          *
@@ -8678,6 +8758,13 @@ public final class Settings {
         @Deprecated
         public static final String LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE =
                 "location_permissions_upgrade_to_q_mode";
+
+        /**
+         * Whether or not the system Auto Revoke feature is disabled.
+         * @hide
+         */
+        @SystemApi
+        public static final String AUTO_REVOKE_DISABLED = "auto_revoke_disabled";
 
         /**
          * Map of android.theme.customization.* categories to the enabled overlay package for that
@@ -9013,26 +9100,34 @@ public final class Settings {
          * Set to one of {@link #WIFI_SLEEP_POLICY_DEFAULT},
          * {@link #WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED}, or
          * {@link #WIFI_SLEEP_POLICY_NEVER}.
+         * @deprecated This is no longer used or set by the platform.
          */
+        @Deprecated
         public static final String WIFI_SLEEP_POLICY = "wifi_sleep_policy";
 
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to use the default Wi-Fi sleep
          * policy, which is to sleep shortly after the turning off
          * according to the {@link #STAY_ON_WHILE_PLUGGED_IN} setting.
+         * @deprecated This is no longer used by the platform.
          */
+        @Deprecated
         public static final int WIFI_SLEEP_POLICY_DEFAULT = 0;
 
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to use the default policy when
          * the device is on battery, and never go to sleep when the device is
          * plugged in.
+         * @deprecated This is no longer used by the platform.
          */
+        @Deprecated
         public static final int WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED = 1;
 
         /**
          * Value for {@link #WIFI_SLEEP_POLICY} to never go to sleep.
+         * @deprecated This is no longer used by the platform.
          */
+        @Deprecated
         public static final int WIFI_SLEEP_POLICY_NEVER = 2;
 
         /**
@@ -9180,9 +9275,15 @@ public final class Settings {
         public static final String CUSTOM_BUGREPORT_HANDLER_USER = "custom_bugreport_handler_user";
 
         /**
-         * Whether ADB is enabled.
+         * Whether ADB over USB is enabled.
          */
         public static final String ADB_ENABLED = "adb_enabled";
+
+        /**
+         * Whether ADB over Wifi is enabled.
+         * @hide
+         */
+        public static final String ADB_WIFI_ENABLED = "adb_wifi_enabled";
 
         /**
          * Whether Views are allowed to save their attribute data.
@@ -9522,14 +9623,6 @@ public final class Settings {
         @TestApi
         public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST =
                 "location_ignore_settings_package_whitelist";
-
-        /**
-         * Maximum staleness allowed for last location when returned to clients with only foreground
-         * location permissions.
-         * @hide
-         */
-        public static final String LOCATION_LAST_LOCATION_MAX_AGE_MILLIS =
-                "location_last_location_max_age_millis";
 
         /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.
@@ -10126,7 +10219,9 @@ public final class Settings {
        /**
         * Delay (in seconds) before repeating the Wi-Fi networks available notification.
         * Connecting to a network will reset the timer.
+        * @deprecated This is no longer used or set by the platform.
         */
+       @Deprecated
        public static final String WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY =
                "wifi_networks_available_repeat_delay";
 
@@ -10156,7 +10251,9 @@ public final class Settings {
        /**
         * When the number of open networks exceeds this number, the
         * least-recently-used excess networks will be removed.
+        * @deprecated This is no longer used or set by the platform.
         */
+       @Deprecated
        public static final String WIFI_NUM_OPEN_NETWORKS_KEPT = "wifi_num_open_networks_kept";
 
        /**
@@ -10167,8 +10264,8 @@ public final class Settings {
        /**
         * Setting to allow scans to be enabled even wifi is turned off for connectivity.
         * @hide
+        * @deprecated To be removed.
         */
-       @SystemApi
        public static final String WIFI_SCAN_ALWAYS_AVAILABLE =
                 "wifi_scan_always_enabled";
 
@@ -10177,8 +10274,8 @@ public final class Settings {
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated To be removed.
          */
-        @SystemApi
         public static final String WIFI_P2P_PENDING_FACTORY_RESET =
                 "wifi_p2p_pending_factory_reset";
 
@@ -10187,8 +10284,8 @@ public final class Settings {
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated To be removed.
          */
-        @SystemApi
         public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
 
         /**
@@ -10196,7 +10293,9 @@ public final class Settings {
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated Use {@link WifiManager#isAutoWakeupEnabled()} instead.
          */
+        @Deprecated
         @SystemApi
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
 
@@ -10231,8 +10330,8 @@ public final class Settings {
          * Most readers of this setting should simply check if value == 1 to determined the
          * enabled state.
          * @hide
+         * @deprecated To be removed.
          */
-        @SystemApi
         public static final String NETWORK_RECOMMENDATIONS_ENABLED =
                 "network_recommendations_enabled";
 
@@ -10271,13 +10370,11 @@ public final class Settings {
 
         /**
          * Whether wifi scan throttle is enabled or not.
-         * This is intended to be used via adb commands or a menu in developer option to turn off
-         * the default wifi scan throttling mechanism for apps.
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated To be removed.
          */
-        @SystemApi
         public static final String WIFI_SCAN_THROTTLE_ENABLED = "wifi_scan_throttle_enabled";
 
         /**
@@ -10379,8 +10476,8 @@ public final class Settings {
         * Setting to enable verbose logging in Wi-Fi; disabled by default, and setting to 1
         * will enable it. In the future, additional values may be supported.
         * @hide
+        * @deprecated To be removed.
         */
-       @SystemApi
        public static final String WIFI_VERBOSE_LOGGING_ENABLED =
                "wifi_verbose_logging_enabled";
 
@@ -10405,8 +10502,8 @@ public final class Settings {
          * Default values are provided by code or device configurations.
          * Errors in the parameters will cause the entire setting to be ignored.
          * @hide
+         * @deprecated This is no longer used or set by the platform.
          */
-        @SystemApi
         public static final String WIFI_SCORE_PARAMS =
                 "wifi_score_params";
 
@@ -10448,8 +10545,8 @@ public final class Settings {
        /**
         * The Wi-Fi peer-to-peer device name
         * @hide
+        * @deprecated To be removed.
         */
-       @SystemApi
        public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
 
        /**
@@ -10508,6 +10605,17 @@ public final class Settings {
         * change the ringer mode. See AudioManager.
         */
        public static final String MODE_RINGER = "mode_ringer";
+
+        /**
+         * Specifies whether Enhanced Connectivity is enabled or not. This setting allows the
+         * Connectivity Thermal Power Manager to actively help the device to save power in 5G
+         * scenarios
+         * Type: int 1 is enabled, 0 is disabled
+         *
+         * @hide
+         */
+        public static final String ENHANCED_CONNECTIVITY_ENABLED =
+                "enhanced_connectivity_enable";
 
         /**
          * Overlay display devices setting.
@@ -11410,6 +11518,7 @@ public final class Settings {
          * exempted_sync_duration           (long)
          * system_interaction_duration      (long)
          * initial_foreground_service_start_duration (long)
+         * cross_profile_apps_share_standby_buckets  (boolean)
          * </pre>
          *
          * <p>
@@ -14057,6 +14166,13 @@ public final class Settings {
          */
         @SystemApi
         public static final String COMMON_CRITERIA_MODE = "common_criteria_mode";
+
+        /**
+         * The usage amount of advanced battery. The value is 0~100.
+         *
+         * @hide
+         */
+        public static final String ADVANCED_BATTERY_USAGE_AMOUNT = "advanced_battery_usage_amount";
     }
 
     /**
@@ -14219,7 +14335,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
         @RequiresPermission(Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS)
         public static void registerMonitorCallback(@NonNull ContentResolver resolver,
                 @NonNull RemoteCallback callback) {

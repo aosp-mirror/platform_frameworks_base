@@ -16,8 +16,6 @@
 
 #include "RenderProxy.h"
 
-#include <gui/Surface.h>
-
 #include "DeferredLayerUpdater.h"
 #include "DisplayList.h"
 #include "Properties.h"
@@ -78,9 +76,11 @@ void RenderProxy::setName(const char* name) {
     mRenderThread.queue().runSync([this, name]() { mContext->setName(std::string(name)); });
 }
 
-void RenderProxy::setSurface(const sp<Surface>& surface, bool enableTimeout) {
-    mRenderThread.queue().post([this, surf = surface, enableTimeout]() mutable {
-        mContext->setSurface(std::move(surf), enableTimeout);
+void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
+    ANativeWindow_acquire(window);
+    mRenderThread.queue().post([this, win = window, enableTimeout]() mutable {
+        mContext->setSurface(win, enableTimeout);
+        ANativeWindow_release(win);
     });
 }
 
@@ -314,11 +314,11 @@ void RenderProxy::setRenderAheadDepth(int renderAhead) {
             [context = mContext, renderAhead] { context->setRenderAheadDepth(renderAhead); });
 }
 
-int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top, int right, int bottom,
+int RenderProxy::copySurfaceInto(ANativeWindow* window, int left, int top, int right, int bottom,
                                  SkBitmap* bitmap) {
     auto& thread = RenderThread::getInstance();
     return static_cast<int>(thread.queue().runSync([&]() -> auto {
-        return thread.readback().copySurfaceInto(*surface, Rect(left, top, right, bottom), bitmap);
+        return thread.readback().copySurfaceInto(window, Rect(left, top, right, bottom), bitmap);
     }));
 }
 

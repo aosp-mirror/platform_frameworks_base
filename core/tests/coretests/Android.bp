@@ -3,6 +3,7 @@ android_test {
 
     srcs: [
         "src/**/*.java",
+        "src/**/*.kt",
         "src/**/I*.aidl",
         "DisabledTestApp/src/**/*.java",
         "EnabledTestApp/src/**/*.java",
@@ -52,9 +53,16 @@ android_test {
         "android.test.base",
         "android.test.mock",
         "framework-atb-backward-compatibility",
+        // TODO(b/149928788): Remove this when statsd tests move into the statsd dir.
+        "framework-statsd",
+        "framework",
+        "icing-java-proto-lite",
+        "ext",
+        "framework-res",
     ],
 
     platform_apis: true,
+    sdk_version: "core_platform",
     test_suites: ["device-tests"],
 
     certificate: "platform",
@@ -82,15 +90,8 @@ java_genrule {
         ":FrameworksCoreTests_install_loc_internal",
         ":FrameworksCoreTests_install_loc_sdcard",
         ":FrameworksCoreTests_install_loc_unspecified",
-        ":FrameworksCoreTests_install_split_base",
-        ":FrameworksCoreTests_install_split_feature_a",
         ":FrameworksCoreTests_install_use_perm_good",
         ":FrameworksCoreTests_install_uses_feature",
-        ":FrameworksCoreTests_install_uses_sdk_0",
-        ":FrameworksCoreTests_install_uses_sdk_q0",
-        ":FrameworksCoreTests_install_uses_sdk_r",
-        ":FrameworksCoreTests_install_uses_sdk_r0",
-        ":FrameworksCoreTests_install_uses_sdk_r5",
         ":FrameworksCoreTests_install_verifier_bad",
         ":FrameworksCoreTests_install_verifier_good",
         ":FrameworksCoreTests_keyset_permdef_sa_unone",
@@ -108,6 +109,7 @@ java_genrule {
         ":FrameworksCoreTests_keyset_splata_api",
         ":FrameworksCoreTests_keyset_splat_api",
         ":FrameworksCoreTests_locales",
+        ":FrameworksCoreTests_overlay_config",
         ":FrameworksCoreTests_version_1",
         ":FrameworksCoreTests_version_1_diff",
         ":FrameworksCoreTests_version_1_nosys",

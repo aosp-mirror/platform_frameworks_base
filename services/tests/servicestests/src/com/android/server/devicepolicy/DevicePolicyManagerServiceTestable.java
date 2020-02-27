@@ -369,6 +369,12 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        PendingIntent pendingIntentGetBroadcast(Context context, int requestCode,
+                Intent intent, int flags) {
+            return null;
+        }
+
+        @Override
         void registerContentObserver(Uri uri, boolean notifyForDescendents,
                 ContentObserver observer, int userHandle) {
             mContentObservers.put(new Pair<Uri, Integer>(uri, userHandle), observer);

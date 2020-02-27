@@ -50,10 +50,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_MANAGED_PROFILE_SETTINGS);
     }
@@ -103,14 +99,11 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
         state.icon = mIcon;
         if (state.value) {
             state.slash.isSlashed = false;
-            state.contentDescription =  mContext.getString(
-                    R.string.accessibility_quick_settings_work_mode_on);
         } else {
             state.slash.isSlashed = true;
-            state.contentDescription =  mContext.getString(
-                    R.string.accessibility_quick_settings_work_mode_off);
         }
         state.label = mContext.getString(R.string.quick_settings_work_mode_label);
+        state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
     }

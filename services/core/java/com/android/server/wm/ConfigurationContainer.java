@@ -113,13 +113,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * @see #mFullConfiguration
      */
     public void onConfigurationChanged(Configuration newParentConfig) {
-        onConfigurationChanged(newParentConfig, true /*forwardToChildren*/);
-    }
-
-    // TODO(root-unify): Consolidate with onConfigurationChanged() method above once unification is
-    //  done. This is only currently need during the process of unification where we don't want
-    //  configuration forwarded to a child from both parents.
-    public void onConfigurationChanged(Configuration newParentConfig, boolean forwardToChildren) {
         mResolvedTmpConfig.setTo(mResolvedOverrideConfiguration);
         resolveOverrideConfiguration(newParentConfig);
         mFullConfiguration.setTo(newParentConfig);
@@ -141,11 +134,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             mChangeListeners.get(i).onMergedOverrideConfigurationChanged(
                     mMergedOverrideConfiguration);
         }
-        if (forwardToChildren) {
-            for (int i = getChildCount() - 1; i >= 0; --i) {
-                final ConfigurationContainer child = getChildAt(i);
-                child.onConfigurationChanged(mFullConfiguration);
-            }
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ConfigurationContainer child = getChildAt(i);
+            child.onConfigurationChanged(mFullConfiguration);
         }
     }
 

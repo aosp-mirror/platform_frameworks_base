@@ -16,6 +16,7 @@
 
 package com.android.server.people;
 
+import android.annotation.UserIdInt;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppTarget;
 import android.app.prediction.IPredictionCallback;
@@ -38,9 +39,10 @@ class SessionInfo {
     private final RemoteCallbackList<IPredictionCallback> mCallbacks =
             new RemoteCallbackList<>();
 
-    SessionInfo(AppPredictionContext predictionContext, DataManager dataManager) {
+    SessionInfo(AppPredictionContext predictionContext, DataManager dataManager,
+            @UserIdInt int callingUserId) {
         mAppTargetPredictor = AppTargetPredictor.create(predictionContext,
-                this::updatePredictions, dataManager);
+                this::updatePredictions, dataManager, callingUserId);
     }
 
     void addCallback(IPredictionCallback callback) {

@@ -18,38 +18,19 @@ package com.android.settingslib.media;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.when;
-
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 
 import com.android.settingslib.R;
-import com.android.settingslib.bluetooth.A2dpProfile;
-import com.android.settingslib.bluetooth.HearingAidProfile;
-import com.android.settingslib.bluetooth.LocalBluetoothManager;
-import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class PhoneMediaDeviceTest {
-
-    @Mock
-    private LocalBluetoothProfileManager mLocalProfileManager;
-    @Mock
-    private LocalBluetoothManager mLocalBluetoothManager;
-    @Mock
-    private HearingAidProfile mHapProfile;
-    @Mock
-    private A2dpProfile mA2dpProfile;
-    @Mock
-    private BluetoothDevice mDevice;
 
     private Context mContext;
     private PhoneMediaDevice mPhoneMediaDevice;
@@ -59,68 +40,8 @@ public class PhoneMediaDeviceTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
 
-        when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalProfileManager);
-        when(mLocalProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
-        when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
-        when(mA2dpProfile.getActiveDevice()).thenReturn(mDevice);
-
-        mPhoneMediaDevice = new PhoneMediaDevice(mContext, mLocalBluetoothManager);
-    }
-
-    @Test
-    public void connect_phoneDeviceSetActiveSuccess_isConnectedReturnTrue() {
-        when(mA2dpProfile.setActiveDevice(null)).thenReturn(true);
-        when(mHapProfile.setActiveDevice(null)).thenReturn(true);
-
-        assertThat(mPhoneMediaDevice.connect()).isTrue();
-    }
-
-    @Test
-    public void connect_a2dpProfileSetActiveFail_isConnectedReturnFalse() {
-        when(mA2dpProfile.setActiveDevice(null)).thenReturn(false);
-        when(mHapProfile.setActiveDevice(null)).thenReturn(true);
-
-        assertThat(mPhoneMediaDevice.connect()).isFalse();
-    }
-
-    @Test
-    public void connect_hearingAidProfileSetActiveFail_isConnectedReturnFalse() {
-        when(mA2dpProfile.setActiveDevice(null)).thenReturn(true);
-        when(mHapProfile.setActiveDevice(null)).thenReturn(false);
-
-        assertThat(mPhoneMediaDevice.connect()).isFalse();
-    }
-
-    @Test
-    public void connect_hearingAidAndA2dpProfileSetActiveFail_isConnectedReturnFalse() {
-        when(mA2dpProfile.setActiveDevice(null)).thenReturn(false);
-        when(mHapProfile.setActiveDevice(null)).thenReturn(false);
-
-        assertThat(mPhoneMediaDevice.connect()).isFalse();
-    }
-
-    @Test
-    public void connect_hearingAidProfileIsNullAndA2dpProfileNotNull_isConnectedReturnTrue() {
-        when(mLocalProfileManager.getHearingAidProfile()).thenReturn(null);
-
-        when(mA2dpProfile.setActiveDevice(null)).thenReturn(true);
-        assertThat(mPhoneMediaDevice.connect()).isTrue();
-    }
-
-    @Test
-    public void connect_hearingAidProfileNotNullAndA2dpProfileIsNull_isConnectedReturnTrue() {
-        when(mLocalProfileManager.getA2dpProfile()).thenReturn(null);
-
-        when(mHapProfile.setActiveDevice(null)).thenReturn(true);
-        assertThat(mPhoneMediaDevice.connect()).isTrue();
-    }
-
-    @Test
-    public void connect_hearingAidProfileAndA2dpProfileIsNull_isConnectedReturnFalse() {
-        when(mLocalProfileManager.getA2dpProfile()).thenReturn(null);
-        when(mLocalProfileManager.getHearingAidProfile()).thenReturn(null);
-
-        assertThat(mPhoneMediaDevice.connect()).isFalse();
+        mPhoneMediaDevice =
+                new PhoneMediaDevice(mContext, null, null, null);
     }
 
     @Test

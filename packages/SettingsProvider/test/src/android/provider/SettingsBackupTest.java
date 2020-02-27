@@ -99,7 +99,9 @@ public class SettingsBackupTest {
                     Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                     Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
                     Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
-                    Settings.System.PEAK_REFRESH_RATE // depends on hardware capabilities
+                    Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
+                    Settings.System.SCREEN_BRIGHTNESS_FLOAT,
+                    Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT
                     );
 
     private static final Set<String> BACKUP_BLACKLISTED_GLOBAL_SETTINGS =
@@ -109,6 +111,7 @@ public class SettingsBackupTest {
                     Settings.Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED,
                     Settings.Global.ADB_ALLOWED_CONNECTION_TIME,
                     Settings.Global.ADB_ENABLED,
+                    Settings.Global.ADB_WIFI_ENABLED,
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                     Settings.Global.AIRPLANE_MODE_ON,
                     Settings.Global.AIRPLANE_MODE_RADIOS,
@@ -265,6 +268,7 @@ public class SettingsBackupTest {
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
+                    Settings.Global.ENHANCED_CONNECTIVITY_ENABLED,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
                     Settings.Global.ERROR_LOGCAT_PREFIX,
@@ -314,7 +318,6 @@ public class SettingsBackupTest {
                     Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
                     Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
                     Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST,
-                    Settings.Global.LOCATION_LAST_LOCATION_MAX_AGE_MILLIS,
                     Settings.Global.LOCATION_GLOBAL_KILL_SWITCH,
                     Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
                     Settings.Global.LOCK_SOUND,
@@ -577,7 +580,8 @@ public class SettingsBackupTest {
                     Settings.Global.MODEM_STACK_ENABLED_FOR_SLOT,
                     Settings.Global.POWER_BUTTON_LONG_PRESS,
                     Settings.Global.POWER_BUTTON_VERY_LONG_PRESS,
-                    Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER);
+                    Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
+                    Settings.Global.ADVANCED_BATTERY_USAGE_AMOUNT);
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(

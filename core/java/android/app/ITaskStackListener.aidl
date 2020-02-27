@@ -46,16 +46,6 @@ oneway interface ITaskStackListener {
     void onPinnedActivityRestartAttempt(boolean clearedTask);
 
     /**
-     * Called whenever the pinned stack is starting animating a resize.
-     */
-    void onPinnedStackAnimationStarted();
-
-    /**
-     * Called whenever the pinned stack is done animating a resize.
-     */
-    void onPinnedStackAnimationEnded();
-
-    /**
      * Called when we launched an activity that we forced to be resizable.
      *
      * @param packageName Package name of the top activity in the task.
@@ -204,4 +194,12 @@ oneway interface ITaskStackListener {
      * @param frozen if true, Recents Tasks list is currently frozen, false otherwise
      */
     void onRecentTaskListFrozenChanged(boolean frozen);
+
+    /**
+     * Called when a task gets or loses focus.
+     *
+     * @param taskId id of the task.
+     * @param {@code true} if the task got focus, {@code false} if it lost it.
+     */
+    void onTaskFocusChanged(int taskId, boolean focused);
 }

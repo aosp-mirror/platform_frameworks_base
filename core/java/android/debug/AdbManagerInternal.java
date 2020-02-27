@@ -42,7 +42,7 @@ public abstract class AdbManagerInternal {
     /**
      * Returns {@code true} if ADB debugging is enabled.
      */
-    public abstract boolean isAdbEnabled();
+    public abstract boolean isAdbEnabled(byte transportType);
 
     /**
      * Returns the file that contains all of the ADB keys used by the device.
@@ -53,4 +53,14 @@ public abstract class AdbManagerInternal {
      * Returns the file that contains all of the ADB keys and their last used time.
      */
     public abstract File getAdbTempKeysFile();
+
+    /**
+     * Starts adbd for a transport.
+     */
+    public abstract void startAdbdForTransport(byte transportType);
+
+    /**
+     * Stops adbd for a transport.
+     */
+    public abstract void stopAdbdForTransport(byte transportType);
 }

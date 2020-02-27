@@ -20,6 +20,8 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.ViewStub
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -63,17 +65,31 @@ class ControlsProviderSelectorActivity @Inject constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.controls_management)
+        requireViewById<ViewStub>(R.id.stub).apply {
+            layoutResource = R.layout.controls_management_apps
+            inflate()
+        }
 
         recyclerView = requireViewById(R.id.list)
-        recyclerView.adapter = AppAdapter(executor, lifecycle, listingController,
-                LayoutInflater.from(this), ::launchFavoritingActivity,
-                FavoritesRenderer(resources, controlsController::countFavoritesForComponent))
+        recyclerView.adapter = AppAdapter(
+                backExecutor,
+                executor,
+                lifecycle,
+                listingController,
+                LayoutInflater.from(this),
+                ::launchFavoritingActivity,
+                FavoritesRenderer(resources, controlsController::countFavoritesForComponent),
+                resources)
         recyclerView.layoutManager = LinearLayoutManager(applicationContext)
 
         requireViewById<TextView>(R.id.title).text =
                 resources.getText(R.string.controls_providers_title)
         requireViewById<TextView>(R.id.subtitle).text =
                 resources.getText(R.string.controls_providers_subtitle)
+
+        requireViewById<Button>(R.id.done).setOnClickListener {
+            this@ControlsProviderSelectorActivity.finishAffinity()
+        }
 
         currentUserTracker.startTracking()
     }
@@ -89,11 +105,16 @@ class ControlsProviderSelectorActivity @Inject constructor(
                         .apply {
                     putExtra(ControlsFavoritingActivity.EXTRA_APP,
                             listingController.getAppLabel(it))
-                    putExtra(ControlsFavoritingActivity.EXTRA_COMPONENT, it)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    putExtra(Intent.EXTRA_COMPONENT_NAME, it)
+                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 }
                 startActivity(intent)
             }
         }
+    }
+
+    override fun onDestroy() {
+        currentUserTracker.stopTracking()
+        super.onDestroy()
     }
 }

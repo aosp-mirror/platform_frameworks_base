@@ -103,7 +103,8 @@
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.0</item>
 
     <dimen name="group_overflow_number_size">@*android:dimen/notification_text_size</dimen>
-    <dimen name="group_overflow_number_padding">@*android:dimen/notification_content_margin_end</dimen>
+    <dimen name="group_overflow_number_padding">@*android:dimen/notification_content_margin_end
+    </dimen>
 
     <!-- max height of a notification such that the content can still fade out when closing -->
     <dimen name="max_notification_fadeout_height">100dp</dimen>
@@ -122,6 +123,9 @@
 
     <!-- Increased height of a collapsed media notification in the status bar -->
     <dimen name="notification_min_height_media">160dp</dimen>
+
+    <!-- Increased height of a collapsed messaging notification in the status bar -->
+    <dimen name="notification_min_height_messaging">118dp</dimen>
 
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>
@@ -267,7 +271,9 @@
     <dimen name="status_bar_icon_drawing_size">15dp</dimen>
 
     <!-- size at which Notification icons will be drawn on Ambient Display -->
-    <dimen name="status_bar_icon_drawing_size_dark">@*android:dimen/notification_header_icon_size_ambient</dimen>
+    <dimen name="status_bar_icon_drawing_size_dark">
+        @*android:dimen/notification_header_icon_size_ambient
+    </dimen>
 
     <!-- size of notification icons when the notifications are hidden -->
     <dimen name="hidden_shelf_icon_size">16dp</dimen>
@@ -299,8 +305,11 @@
     <dimen name="global_screenshot_legacy_bg_padding">20dp</dimen>
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
     <dimen name="global_screenshot_x_scale">80dp</dimen>
+    <dimen name="screenshot_preview_elevation">8dp</dimen>
     <dimen name="screenshot_offset_y">48dp</dimen>
     <dimen name="screenshot_offset_x">16dp</dimen>
+    <dimen name="screenshot_dismiss_button_tappable_size">48dp</dimen>
+    <dimen name="screenshot_dismiss_button_margin">8dp</dimen>
     <dimen name="screenshot_action_container_offset_y">32dp</dimen>
     <dimen name="screenshot_action_container_corner_radius">10dp</dimen>
     <dimen name="screenshot_action_container_padding_vertical">10dp</dimen>
@@ -597,10 +606,14 @@
 
     <!-- The height of the divider between the individual notifications in a notification
          group. -->
-    <dimen name="notification_children_container_divider_height">@dimen/notification_divider_height</dimen>
+    <dimen name="notification_children_container_divider_height">
+        @dimen/notification_divider_height
+    </dimen>
 
     <!-- The top margin for the notification children container in its non-expanded form. -->
-    <dimen name="notification_children_container_margin_top">@*android:dimen/notification_content_margin_top</dimen>
+    <dimen name="notification_children_container_margin_top">
+        @*android:dimen/notification_content_margin_top
+    </dimen>
 
     <!-- The height of a notification header -->
     <dimen name="notification_header_height">53dp</dimen>
@@ -734,7 +747,7 @@
     <!-- The top padding of the clear all button -->
     <dimen name="clear_all_padding_top">12dp</dimen>
 
-    <dimen name="notification_section_header_height">48dp</dimen>
+    <dimen name="notification_section_header_height">56dp</dimen>
     <dimen name="notification_section_header_padding_left">16dp</dimen>
 
     <!-- Largest size an avatar might need to be drawn in the user picker, status bar, or
@@ -967,6 +980,9 @@
          Equal to pip_action_size - pip_action_padding. -->
     <dimen name="pip_expand_container_edge_margin">30dp</dimen>
 
+    <!-- The touchable/draggable edge size for PIP resize. -->
+    <dimen name="pip_resize_edge_size">30dp</dimen>
+
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 
@@ -1061,9 +1077,12 @@
     <integer name="wireless_charging_scale_dots_duration">83</integer>
     <integer name="wireless_charging_num_dots">16</integer>
     <!-- Starting text size in sp of batteryLevel for wireless charging animation -->
-    <item name="wireless_charging_anim_battery_level_text_size_start" format="float" type="dimen">0</item>
+    <item name="wireless_charging_anim_battery_level_text_size_start" format="float" type="dimen">
+        0
+    </item>
     <!-- Ending text size in sp of batteryLevel for wireless charging animation -->
-    <item name="wireless_charging_anim_battery_level_text_size_end" format="float" type="dimen">24</item>
+    <item name="wireless_charging_anim_battery_level_text_size_end" format="float" type="dimen">24
+    </item>
     <!-- time until battery info is at full opacity-->
     <integer name="wireless_charging_anim_opacity_offset">80</integer>
     <!-- duration batteryLevel opacity goes from 0 to 1 duration -->
@@ -1090,7 +1109,7 @@
 
     <!--  Blur radius on status bar window and power menu  -->
     <dimen name="min_window_blur_radius">1px</dimen>
-    <dimen name="max_window_blur_radius">250px</dimen>
+    <dimen name="max_window_blur_radius">150px</dimen>
 
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
@@ -1112,8 +1131,10 @@
     <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Size of individual bubbles. -->
     <dimen name="individual_bubble_size">60dp</dimen>
+    <!-- Size of bubble bitmap. -->
+    <dimen name="bubble_bitmap_size">52dp</dimen>
     <!-- Size of bubble icon bitmap. -->
-    <dimen name="bubble_icon_bitmap_size">52dp</dimen>
+    <dimen name="bubble_overflow_icon_bitmap_size">24dp</dimen>
     <!-- Extra padding added to the touchable rect for bubbles so they are easier to grab. -->
     <dimen name="bubble_touch_padding">12dp</dimen>
     <!-- Size of the circle around the bubbles when they're in the dismiss target. -->
@@ -1125,6 +1146,12 @@
     <dimen name="bubble_expanded_view_slop">8dp</dimen>
     <!-- Default (and minimum) height of the expanded view shown when the bubble is expanded -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
+    <!-- Default height of bubble overflow -->
+    <dimen name="bubble_overflow_height">380dp</dimen>
+    <!-- Bubble overflow padding when there are no bubbles  -->
+    <dimen name="bubble_overflow_empty_state_padding">16dp</dimen>
+    <!-- Margin of overflow bubbles -->
+    <dimen name="bubble_overflow_margin">16dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
     <dimen name="bubble_pointer_height">4dp</dimen>
     <!-- Width of the triangle that points to the expanded bubble -->
@@ -1158,6 +1185,9 @@
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
 
+    <dimen name="dismiss_circle_size">52dp</dimen>
+    <dimen name="dismiss_target_x_size">24dp</dimen>
+
     <!-- Size of the RAT type for CellularTile -->
     <dimen name="celltile_rat_type_size">10sp</dimen>
 
@@ -1171,11 +1201,13 @@
     <dimen name="qs_seamless_icon_size">20dp</dimen>
     <dimen name="qqs_media_spacing">8dp</dimen>
 
-    <dimen name="magnification_border_size">5dp</dimen>
+    <dimen name="magnification_border_drag_size">35dp</dimen>
+    <dimen name="magnification_outer_border_margin">15dp</dimen>
+    <dimen name="magnification_inner_border_margin">17dp</dimen>
+    <dimen name="magnification_mirror_surface_margin">20dp</dimen>
     <dimen name="magnification_frame_move_short">5dp</dimen>
     <dimen name="magnification_frame_move_long">25dp</dimen>
-    <dimen name="magnification_drag_view_width">100dp</dimen>
-    <dimen name="magnification_drag_view_height">35dp</dimen>
+    <dimen name="magnification_drag_view_size">38dp</dimen>
     <dimen name="magnification_controls_size">90dp</dimen>
     <dimen name="magnifier_left_right_controls_width">35dp</dimen>
     <dimen name="magnifier_left_right_controls_height">45dp</dimen>
@@ -1212,4 +1244,8 @@
     <!-- Screen Record -->
     <dimen name="screenrecord_dialog_padding">18dp</dimen>
     <dimen name="screenrecord_logo_size">24dp</dimen>
+    <dimen name="screenrecord_status_text_size">14sp</dimen>
+    <dimen name="screenrecord_status_icon_radius">5dp</dimen>
+
+    <dimen name="kg_user_switcher_text_size">16sp</dimen>
 </resources>

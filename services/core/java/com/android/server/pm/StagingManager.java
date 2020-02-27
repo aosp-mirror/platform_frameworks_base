@@ -29,6 +29,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -39,7 +40,6 @@ import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.parsing.AndroidPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
@@ -57,6 +57,7 @@ import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -67,6 +68,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.rollback.WatchdogRollbackLogger;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,6 +102,10 @@ public class StagingManager {
 
     @GuardedBy("mStagedSessions")
     private final SparseIntArray mSessionRollbackIds = new SparseIntArray();
+
+    @GuardedBy("mFailedPackageNames")
+    private final List<String> mFailedPackageNames = new ArrayList<>();
+    private String mNativeFailureReason;
 
     StagingManager(PackageInstallerService pi, Context context) {
         mPi = pi;
@@ -278,8 +286,10 @@ public class StagingManager {
             throws PackageManagerException {
         final long activeVersion = activePackage.applicationInfo.longVersionCode;
         final long newVersionCode = newPackage.applicationInfo.longVersionCode;
+        boolean isAppDebuggable = (activePackage.applicationInfo.flags
+                & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         final boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
-                session.params.installFlags, activePackage.applicationInfo.flags);
+                session.params.installFlags, isAppDebuggable);
         if (activeVersion > newVersionCode && !allowsDowngrade) {
             if (!mApexManager.abortStagedSession(session.sessionId)) {
                 Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
@@ -420,11 +430,10 @@ public class StagingManager {
                     + "for snapshotting/restoring user data.");
             return;
         }
-        final String seInfo = pkg.getSeInfo();
 
         int appId = -1;
         long ceDataInode = -1;
-        final PackageSetting ps = (PackageSetting) mPmi.getPackageSetting(packageName);
+        final PackageSetting ps = mPmi.getPackageSetting(packageName);
         if (ps != null) {
             appId = ps.appId;
             ceDataInode = ps.getCeDataInode(UserHandle.USER_SYSTEM);
@@ -432,11 +441,28 @@ public class StagingManager {
             // an update, and hence need to restore data for all installed users.
             final int[] installedUsers = ps.queryInstalledUsers(allUsers, true);
 
+            final String seInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
             try {
                 rm.snapshotAndRestoreUserData(packageName, installedUsers, appId, ceDataInode,
                         seInfo, 0 /*token*/);
             } catch (RemoteException re) {
                 Slog.e(TAG, "Error snapshotting/restoring user data: " + re);
+            }
+        }
+    }
+
+    /**
+     *  Prepares for the logging of apexd reverts by storing the native failure reason if necessary,
+     *  and adding the package name of the session which apexd reverted to the list of reverted
+     *  session package names.
+     *  Logging needs to wait until the ACTION_BOOT_COMPLETED broadcast is sent.
+     */
+    private void prepareForLoggingApexdRevert(@NonNull PackageInstallerSession session,
+            @NonNull String nativeFailureReason) {
+        synchronized (mFailedPackageNames) {
+            mNativeFailureReason = nativeFailureReason;
+            if (session.getPackageName() != null) {
+                mFailedPackageNames.add(session.getPackageName());
             }
         }
     }
@@ -449,6 +475,12 @@ public class StagingManager {
         if (hasApex) {
             // Check with apexservice whether the apex packages have been activated.
             apexSessionInfo = mApexManager.getStagedSessionInfo(session.sessionId);
+
+            // Prepare for logging a native crash during boot, if one occurred.
+            if (apexSessionInfo != null && !TextUtils.isEmpty(
+                    apexSessionInfo.crashingNativeProcess)) {
+                prepareForLoggingApexdRevert(session, apexSessionInfo.crashingNativeProcess);
+            }
 
             if (apexSessionInfo != null && apexSessionInfo.isVerified) {
                 // Session has been previously submitted to apexd, but didn't complete all the
@@ -955,12 +987,23 @@ public class StagingManager {
         }
     }
 
+    private void logFailedApexSessionsIfNecessary() {
+        synchronized (mFailedPackageNames) {
+            if (!mFailedPackageNames.isEmpty()) {
+                WatchdogRollbackLogger.logApexdRevert(mContext,
+                        mFailedPackageNames, mNativeFailureReason);
+            }
+        }
+    }
+
     void systemReady() {
         // Register the receiver of boot completed intent for staging manager.
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context ctx, Intent intent) {
                 mPreRebootVerificationHandler.readyToStart();
+                BackgroundThread.getExecutor().execute(
+                        () -> logFailedApexSessionsIfNecessary());
                 ctx.unregisterReceiver(this);
             }
         }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
@@ -1203,7 +1246,7 @@ public class StagingManager {
             try {
                 IStorageManager storageManager = PackageHelper.getStorageManager();
                 if (storageManager.supportsCheckpoint()) {
-                    storageManager.startCheckpoint(1);
+                    storageManager.startCheckpoint(2);
                 }
             } catch (Exception e) {
                 // Failed to get hold of StorageManager

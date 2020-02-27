@@ -18,7 +18,7 @@ package com.android.server.pm.dex;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.SharedLibraryInfo;
-import android.content.pm.parsing.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -77,7 +77,7 @@ public final class DexoptUtils {
         }
 
         String baseApkContextClassLoader = encodeClassLoader(
-                "", pkg.getAppInfoClassLoaderName(), sharedLibrariesContext);
+                "", pkg.getClassLoaderName(), sharedLibrariesContext);
         if (pkg.getSplitCodePaths() == null) {
             // The application has no splits.
             return new String[] {baseApkContextClassLoader};
@@ -101,7 +101,7 @@ public final class DexoptUtils {
 
         SparseArray<int[]> splitDependencies = pkg.getSplitDependencies();
 
-        if (!pkg.requestsIsolatedSplitLoading()
+        if (!pkg.isIsolatedSplitLoading()
                 || splitDependencies == null
                 || splitDependencies.size() == 0) {
             // If the app didn't request for the splits to be loaded in isolation or if it does not
@@ -111,7 +111,7 @@ public final class DexoptUtils {
             for (int i = 1; i < classLoaderContexts.length; i++) {
                 if (pathsWithCode[i]) {
                     classLoaderContexts[i] = encodeClassLoader(
-                            classpath, pkg.getAppInfoClassLoaderName(), sharedLibrariesContext);
+                            classpath, pkg.getClassLoaderName(), sharedLibrariesContext);
                 } else {
                     classLoaderContexts[i] = null;
                 }

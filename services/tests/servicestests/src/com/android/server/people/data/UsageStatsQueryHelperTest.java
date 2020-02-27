@@ -16,12 +16,14 @@
 
 package com.android.server.people.data;
 
+import static com.android.server.people.data.TestUtils.timestamp;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
@@ -29,7 +31,10 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.Context;
 import android.content.LocusId;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
 
@@ -41,10 +46,12 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Predicate;
 
 @RunWith(JUnit4.class)
@@ -54,11 +61,11 @@ public final class UsageStatsQueryHelperTest {
     private static final String PKG_NAME = "pkg";
     private static final String ACTIVITY_NAME = "TestActivity";
     private static final String SHORTCUT_ID = "abc";
-    private static final String NOTIFICATION_CHANNEL_ID = "test : abc";
     private static final LocusId LOCUS_ID_1 = new LocusId("locus_1");
     private static final LocusId LOCUS_ID_2 = new LocusId("locus_2");
 
-    @Mock private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    @Mock
+    private UsageStatsManagerInternal mUsageStatsManagerInternal;
 
     private TestPackageData mPackageData;
     private UsageStatsQueryHelper mHelper;
@@ -69,10 +76,14 @@ public final class UsageStatsQueryHelperTest {
 
         addLocalServiceMock(UsageStatsManagerInternal.class, mUsageStatsManagerInternal);
 
-        mPackageData = new TestPackageData(PKG_NAME, USER_ID_PRIMARY, pkg -> false, pkg -> false);
+        Context ctx = InstrumentationRegistry.getContext();
+        File testDir = new File(ctx.getCacheDir(), "testdir");
+        ScheduledExecutorService scheduledExecutorService = new MockScheduledExecutorService();
+
+        mPackageData = new TestPackageData(PKG_NAME, USER_ID_PRIMARY, pkg -> false, pkg -> false,
+                scheduledExecutorService, testDir);
         mPackageData.mConversationStore.mConversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
-                .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
                 .setLocusId(LOCUS_ID_1)
                 .build();
 
@@ -96,19 +107,6 @@ public final class UsageStatsQueryHelperTest {
         assertTrue(mHelper.querySince(50L));
         assertEquals(100L, mHelper.getLastEventTimestamp());
         Event expectedEvent = new Event(100L, Event.TYPE_SHORTCUT_INVOCATION);
-        List<Event> events = mPackageData.mEventStore.mShortcutEventHistory.queryEvents(
-                Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
-        assertEquals(1, events.size());
-        assertEquals(expectedEvent, events.get(0));
-    }
-
-    @Test
-    public void testQueryNotificationInterruptionEvent() {
-        addUsageEvents(createNotificationInterruptionEvent(100L));
-
-        assertTrue(mHelper.querySince(50L));
-        assertEquals(100L, mHelper.getLastEventTimestamp());
-        Event expectedEvent = new Event(100L, Event.TYPE_NOTIFICATION_POSTED);
         List<Event> events = mPackageData.mEventStore.mShortcutEventHistory.queryEvents(
                 Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
         assertEquals(1, events.size());
@@ -175,10 +173,10 @@ public final class UsageStatsQueryHelperTest {
         assertEquals(createInAppConversationEvent(130_000L, 30), events.get(2));
     }
 
-    private void addUsageEvents(UsageEvents.Event ... events) {
+    private void addUsageEvents(UsageEvents.Event... events) {
         UsageEvents usageEvents = new UsageEvents(Arrays.asList(events), new String[]{});
         when(mUsageStatsManagerInternal.queryEventsForUser(anyInt(), anyLong(), anyLong(),
-                anyBoolean(), anyBoolean())).thenReturn(usageEvents);
+                eq(UsageEvents.SHOW_ALL_EVENT_DATA))).thenReturn(usageEvents);
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
@@ -189,13 +187,6 @@ public final class UsageStatsQueryHelperTest {
     private static UsageEvents.Event createShortcutInvocationEvent(long timestamp) {
         UsageEvents.Event e = createUsageEvent(UsageEvents.Event.SHORTCUT_INVOCATION, timestamp);
         e.mShortcutId = SHORTCUT_ID;
-        return e;
-    }
-
-    private static UsageEvents.Event createNotificationInterruptionEvent(long timestamp) {
-        UsageEvents.Event e = createUsageEvent(UsageEvents.Event.NOTIFICATION_INTERRUPTION,
-                timestamp);
-        e.mNotificationChannelId = NOTIFICATION_CHANNEL_ID;
         return e;
     }
 
@@ -228,6 +219,11 @@ public final class UsageStatsQueryHelperTest {
 
         private ConversationInfo mConversationInfo;
 
+        TestConversationStore(File packageDir,
+                ScheduledExecutorService scheduledExecutorService) {
+            super(packageDir, scheduledExecutorService);
+        }
+
         @Override
         @Nullable
         ConversationInfo getConversation(@Nullable String shortcutId) {
@@ -237,13 +233,17 @@ public final class UsageStatsQueryHelperTest {
 
     private static class TestPackageData extends PackageData {
 
-        private final TestConversationStore mConversationStore = new TestConversationStore();
-        private final TestEventStore mEventStore = new TestEventStore();
+        private final TestConversationStore mConversationStore;
+        private final TestEventStore mEventStore;
 
         TestPackageData(@NonNull String packageName, @UserIdInt int userId,
                 @NonNull Predicate<String> isDefaultDialerPredicate,
-                @NonNull Predicate<String> isDefaultSmsAppPredicate) {
-            super(packageName, userId, isDefaultDialerPredicate, isDefaultSmsAppPredicate);
+                @NonNull Predicate<String> isDefaultSmsAppPredicate,
+                @NonNull ScheduledExecutorService scheduledExecutorService, @NonNull File rootDir) {
+            super(packageName, userId, isDefaultDialerPredicate, isDefaultSmsAppPredicate,
+                    scheduledExecutorService, rootDir);
+            mConversationStore = new TestConversationStore(rootDir, scheduledExecutorService);
+            mEventStore = new TestEventStore(rootDir, scheduledExecutorService);
         }
 
         @Override
@@ -261,25 +261,52 @@ public final class UsageStatsQueryHelperTest {
 
     private static class TestEventStore extends EventStore {
 
-        private final EventHistoryImpl mShortcutEventHistory = new TestEventHistoryImpl();
-        private final EventHistoryImpl mLocusEventHistory = new TestEventHistoryImpl();
+        private static final long CURRENT_TIMESTAMP = timestamp("01-30 18:50");
+        private static final EventIndex.Injector EVENT_INDEX_INJECTOR = new EventIndex.Injector() {
+            @Override
+            long currentTimeMillis() {
+                return CURRENT_TIMESTAMP;
+            }
+        };
+        private static final EventHistoryImpl.Injector EVENT_HISTORY_INJECTOR =
+                new EventHistoryImpl.Injector() {
+                    @Override
+                    EventIndex createEventIndex() {
+                        return new EventIndex(EVENT_INDEX_INJECTOR);
+                    }
+                };
 
-        @Override
-        @NonNull
-        EventHistoryImpl getOrCreateShortcutEventHistory(String shortcutId) {
-            return mShortcutEventHistory;
+        private final EventHistoryImpl mShortcutEventHistory;
+        private final EventHistoryImpl mLocusEventHistory;
+
+        TestEventStore(File rootDir, ScheduledExecutorService scheduledExecutorService) {
+            super(rootDir, scheduledExecutorService);
+            mShortcutEventHistory = new TestEventHistoryImpl(EVENT_HISTORY_INJECTOR, rootDir,
+                    scheduledExecutorService);
+            mLocusEventHistory = new TestEventHistoryImpl(EVENT_HISTORY_INJECTOR, rootDir,
+                    scheduledExecutorService);
         }
 
         @Override
         @NonNull
-        EventHistoryImpl getOrCreateLocusEventHistory(LocusId locusId) {
-            return mLocusEventHistory;
+        EventHistoryImpl getOrCreateEventHistory(@EventCategory int category, String key) {
+            if (category == EventStore.CATEGORY_SHORTCUT_BASED) {
+                return mShortcutEventHistory;
+            } else if (category == EventStore.CATEGORY_LOCUS_ID_BASED) {
+                return mLocusEventHistory;
+            }
+            throw new UnsupportedOperationException();
         }
     }
 
     private static class TestEventHistoryImpl extends EventHistoryImpl {
 
         private final List<Event> mEvents = new ArrayList<>();
+
+        TestEventHistoryImpl(Injector injector, File rootDir,
+                ScheduledExecutorService scheduledExecutorService) {
+            super(injector, rootDir, scheduledExecutorService);
+        }
 
         @Override
         @NonNull

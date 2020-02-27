@@ -257,6 +257,7 @@ public class KeyguardUserSwitcher {
 
         private Context mContext;
         private KeyguardUserSwitcher mKeyguardUserSwitcher;
+        private View mCurrentUserView;
 
         public Adapter(Context context, UserSwitcherController controller,
                 KeyguardUserSwitcher kgu) {
@@ -285,6 +286,9 @@ public class KeyguardUserSwitcher {
             // Disable the icon if switching is disabled
             v.setAvatarEnabled(item.isSwitchToEnabled);
             convertView.setActivated(item.isCurrent);
+            if (item.isCurrent) {
+                mCurrentUserView = convertView;
+            }
             convertView.setTag(item);
             return convertView;
         }
@@ -297,6 +301,12 @@ public class KeyguardUserSwitcher {
                 // tapping the guest user while it's current clears the session.
                 mKeyguardUserSwitcher.hideIfNotSimple(true /* animate */);
             } else if (user.isSwitchToEnabled) {
+                if (!user.isAddUser && !user.isRestricted && !user.isDisabledByAdmin) {
+                    if (mCurrentUserView != null) {
+                        mCurrentUserView.setActivated(false);
+                    }
+                    v.setActivated(true);
+                }
                 switchTo(user);
             }
         }

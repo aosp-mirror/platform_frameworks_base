@@ -47,6 +47,7 @@ public class HdmiCecLocalDevicePlaybackTest {
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPlaybackPhysicalAddress;
+    private boolean mWokenUp;
 
     @Before
     public void setUp() {
@@ -54,6 +55,7 @@ public class HdmiCecLocalDevicePlaybackTest {
             new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
                 @Override
                 void wakeUp() {
+                    mWokenUp = true;
                 }
 
                 @Override
@@ -134,5 +136,19 @@ public class HdmiCecLocalDevicePlaybackTest {
                         Constants.ADDR_AUDIO_SYSTEM, mHdmiCecLocalDevicePlayback.mAddress, true);
         assertThat(mHdmiCecLocalDevicePlayback.handleSystemAudioModeStatus(message)).isTrue();
         assertThat(mHdmiCecLocalDevicePlayback.mService.isSystemAudioActivated()).isTrue();
+    }
+
+    @Test
+    public void doNotWakeUpOnHotPlug_PlugIn() {
+        mWokenUp = false;
+        mHdmiCecLocalDevicePlayback.onHotplug(0, true);
+        assertThat(mWokenUp).isFalse();
+    }
+
+    @Test
+    public void doNotWakeUpOnHotPlug_PlugOut() {
+        mWokenUp = false;
+        mHdmiCecLocalDevicePlayback.onHotplug(0, false);
+        assertThat(mWokenUp).isFalse();
     }
 }

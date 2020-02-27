@@ -22,13 +22,13 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAY
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
@@ -39,12 +39,14 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceControl.Transaction;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.SurfaceControlViewHost;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.IAccessibilityEmbeddedConnection;
 
 import com.android.internal.view.SurfaceCallbackHelper;
 
@@ -204,8 +206,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
     private int mParentSurfaceGenerationId;
 
-    // The token of embedded windowless view hierarchy.
-    private IBinder mEmbeddedViewHierarchy;
+    private RemoteAccessibilityEmbeddedConnection mRemoteAccessibilityEmbeddedConnection;
+
+    private final Matrix mScreenMatrixForEmbeddedHierarchy = new Matrix();
+    private final Matrix mTmpMatrix = new Matrix();
+    private final float[] mMatrixValues = new float[9];
+
     SurfaceControlViewHost.SurfacePackage mSurfacePackage;
 
     public SurfaceView(Context context) {
@@ -386,7 +392,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                  * This gets called on a RenderThread worker thread, so members accessed here must
                  * be protected by a lock.
                  */
-                final boolean useBLAST = WindowManagerGlobal.USE_BLAST_ADAPTER;
+                final boolean useBLAST = viewRoot.useBLAST();
                 viewRoot.registerRtFrameCallback(frame -> {
                     try {
                         final SurfaceControl.Transaction t = useBLAST ?
@@ -782,9 +788,16 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         final boolean sizeChanged = mSurfaceWidth != myWidth || mSurfaceHeight != myHeight;
         final boolean windowVisibleChanged = mWindowVisibility != mLastWindowVisibility;
         boolean redrawNeeded = false;
+        getLocationInSurface(mLocation);
+        final boolean positionChanged = mWindowSpaceLeft != mLocation[0]
+            || mWindowSpaceTop != mLocation[1];
+        final boolean layoutSizeChanged = getWidth() != mScreenRect.width()
+            || getHeight() != mScreenRect.height();
 
-        if (creating || formatChanged || sizeChanged || visibleChanged || (mUseAlpha
-                && alphaChanged) || windowVisibleChanged) {
+
+        if (creating || formatChanged || sizeChanged || visibleChanged ||
+                (mUseAlpha && alphaChanged) || windowVisibleChanged ||
+                positionChanged || layoutSizeChanged) {
             getLocationInWindow(mLocation);
 
             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
@@ -916,6 +929,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             mTmpTransaction.setWindowCrop(mSurfaceControl, mSurfaceWidth,
                                     mSurfaceHeight);
                         }
+                    } else if ((layoutSizeChanged || positionChanged) &&
+                            viewRoot.useBLAST()) {
+                        viewRoot.setUseBLASTSyncTransaction();
                     }
                     mTmpTransaction.setCornerRadius(mSurfaceControl, mCornerRadius);
                     if (sizeChanged && !creating) {
@@ -924,6 +940,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     }
 
                     mTmpTransaction.apply();
+                    updateScreenMatrixForEmbeddedHierarchy();
 
                     if (sizeChanged || creating) {
                         redrawNeeded = true;
@@ -1051,11 +1068,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         } else {
             // Calculate the window position in case RT loses the window
             // and we need to fallback to a UI-thread driven position update
-            getLocationInSurface(mLocation);
-            final boolean positionChanged = mWindowSpaceLeft != mLocation[0]
-                    || mWindowSpaceTop != mLocation[1];
-            final boolean layoutSizeChanged = getWidth() != mScreenRect.width()
-                    || getHeight() != mScreenRect.height();
             if (positionChanged || layoutSizeChanged) { // Only the position has changed
                 mWindowSpaceLeft = mLocation[0];
                 mWindowSpaceTop = mLocation[1];
@@ -1120,9 +1132,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void applySurfaceTransforms(SurfaceControl surface, SurfaceControl.Transaction t,
             Rect position, long frameNumber) {
-        if (frameNumber > 0 && !WindowManagerGlobal.USE_BLAST_ADAPTER) {
-            final ViewRootImpl viewRoot = getViewRootImpl();
-
+        final ViewRootImpl viewRoot = getViewRootImpl();
+        if (frameNumber > 0 && viewRoot != null && !viewRoot.useBLAST()) {
             t.deferTransactionUntil(surface, viewRoot.getRenderSurfaceControl(),
                     frameNumber);
         }
@@ -1138,8 +1149,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private void setParentSpaceRectangle(Rect position, long frameNumber) {
-        final boolean useBLAST = WindowManagerGlobal.USE_BLAST_ADAPTER;
         final ViewRootImpl viewRoot = getViewRootImpl();
+        final boolean useBLAST = viewRoot.useBLAST();
         final SurfaceControl.Transaction t = useBLAST ? viewRoot.getBLASTSyncTransaction() :
             mRtTransaction;
 
@@ -1199,7 +1210,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void positionLost(long frameNumber) {
-            boolean useBLAST = WindowManagerGlobal.USE_BLAST_ADAPTER;
+            final ViewRootImpl viewRoot = getViewRootImpl();
+            boolean useBLAST = viewRoot != null && viewRoot.useBLAST();
             if (DEBUG) {
                 Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
                         System.identityHashCode(this), frameNumber));
@@ -1209,8 +1221,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             if (mSurfaceControl == null) {
                 return;
             }
-
-            final ViewRootImpl viewRoot = getViewRootImpl();
 
             final SurfaceControl.Transaction t = useBLAST ?
                 (viewRoot != null ? viewRoot.getBLASTSyncTransaction() : mRtTransaction) :
@@ -1511,6 +1521,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     @Override
     public void surfaceDestroyed() {
         setWindowStopped(true);
+        setRemoteAccessibilityEmbeddedConnection(null, null);
     }
 
     /**
@@ -1529,21 +1540,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         SurfaceControl viewRoot = getViewRootImpl().getSurfaceControl();
         t.setRelativeLayer(mBackgroundControl, viewRoot, Integer.MIN_VALUE);
         t.setRelativeLayer(mSurfaceControl, viewRoot, mSubLayer);
-    }
-
-    /**
-     * @hide
-     * Note: Base class method is @UnsupportedAppUsage
-     */
-    @Override
-    public void invalidate(boolean invalidateCache) {
-        super.invalidate(invalidateCache);
-        if (!WindowManagerGlobal.USE_BLAST_ADAPTER) {
-            return;
-        }
-        final ViewRootImpl viewRoot = getViewRootImpl();
-        if (viewRoot == null) return;
-        viewRoot.setUseBLASTSyncTransaction();
     }
 
     /**
@@ -1569,31 +1565,147 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void reparentSurfacePackage(SurfaceControl.Transaction t,
             SurfaceControlViewHost.SurfacePackage p) {
-        // TODO: Link accessibility IDs here.
+        initEmbeddedHierarchyForAccessibility(p);
         final SurfaceControl sc = p.getSurfaceControl();
         t.reparent(sc, mSurfaceControl).show(sc);
-    }
-
-    /**
-     * Add the token of embedded view hierarchy. Set {@code null} to clear the embedded view
-     * hierarchy.
-     *
-     * @param token IBinder token.
-     * @hide
-     */
-    public void setEmbeddedViewHierarchy(IBinder token) {
-        mEmbeddedViewHierarchy = token;
     }
 
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        if (mEmbeddedViewHierarchy == null) {
+        final RemoteAccessibilityEmbeddedConnection wrapper =
+                getRemoteAccessibilityEmbeddedConnection();
+        if (wrapper == null) {
             return;
         }
         // Add a leashed child when this SurfaceView embeds another view hierarchy. Getting this
         // leashed child would return the root node in the embedded hierarchy
-        info.addChild(mEmbeddedViewHierarchy);
+        info.addChild(wrapper.getLeashToken());
+    }
+
+    @Override
+    public int getImportantForAccessibility() {
+        final int mode = super.getImportantForAccessibility();
+        // If developers explicitly set the important mode for it, don't change the mode.
+        // Only change the mode to important when this SurfaceView isn't explicitly set and has
+        // an embedded hierarchy.
+        if (mRemoteAccessibilityEmbeddedConnection == null
+                || mode != IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+            return mode;
+        }
+        return IMPORTANT_FOR_ACCESSIBILITY_YES;
+    }
+
+    private void initEmbeddedHierarchyForAccessibility(SurfaceControlViewHost.SurfacePackage p) {
+        final IAccessibilityEmbeddedConnection connection = p.getAccessibilityEmbeddedConnection();
+        final RemoteAccessibilityEmbeddedConnection wrapper =
+                getRemoteAccessibilityEmbeddedConnection();
+
+        // Do nothing if package is embedding the same view hierarchy.
+        if (wrapper != null && wrapper.getConnection().equals(connection)) {
+            return;
+        }
+
+        // If this SurfaceView embeds a different view hierarchy, unlink the previous one first.
+        setRemoteAccessibilityEmbeddedConnection(null, null);
+
+        try {
+            final IBinder leashToken = connection.associateEmbeddedHierarchy(
+                    getViewRootImpl().mLeashToken, getAccessibilityViewId());
+            setRemoteAccessibilityEmbeddedConnection(connection, leashToken);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Error while associateEmbeddedHierarchy " + e);
+        }
+        updateScreenMatrixForEmbeddedHierarchy();
+    }
+
+    private void setRemoteAccessibilityEmbeddedConnection(
+            IAccessibilityEmbeddedConnection connection, IBinder leashToken) {
+        try {
+            if (mRemoteAccessibilityEmbeddedConnection != null) {
+                mRemoteAccessibilityEmbeddedConnection.getConnection()
+                        .disassociateEmbeddedHierarchy();
+                mRemoteAccessibilityEmbeddedConnection.unlinkToDeath();
+                mRemoteAccessibilityEmbeddedConnection = null;
+            }
+            if (connection != null && leashToken != null) {
+                mRemoteAccessibilityEmbeddedConnection =
+                        new RemoteAccessibilityEmbeddedConnection(connection, leashToken);
+                mRemoteAccessibilityEmbeddedConnection.linkToDeath();
+            }
+        } catch (RemoteException e) {
+            Log.d(TAG, "Error while setRemoteEmbeddedConnection " + e);
+        }
+    }
+
+    private RemoteAccessibilityEmbeddedConnection getRemoteAccessibilityEmbeddedConnection() {
+        return mRemoteAccessibilityEmbeddedConnection;
+    }
+
+    private void updateScreenMatrixForEmbeddedHierarchy() {
+        getBoundsOnScreen(mTmpRect);
+        mTmpMatrix.reset();
+        mTmpMatrix.setTranslate(mTmpRect.left, mTmpRect.top);
+        mTmpMatrix.postScale(mScreenRect.width() / (float) mSurfaceWidth,
+                mScreenRect.height() / (float) mSurfaceHeight);
+
+        // If the screen matrix is identity or doesn't change, do nothing.
+        if (mTmpMatrix.isIdentity() || mTmpMatrix.equals(mScreenMatrixForEmbeddedHierarchy)) {
+            return;
+        }
+
+        try {
+            final RemoteAccessibilityEmbeddedConnection wrapper =
+                    getRemoteAccessibilityEmbeddedConnection();
+            if (wrapper == null) {
+                return;
+            }
+            mTmpMatrix.getValues(mMatrixValues);
+            wrapper.getConnection().setScreenMatrix(mMatrixValues);
+            mScreenMatrixForEmbeddedHierarchy.set(mTmpMatrix);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Error while setScreenMatrix " + e);
+        }
+    }
+
+    /**
+     * Wrapper of accessibility embedded connection for embedded view hierarchy.
+     */
+    private final class RemoteAccessibilityEmbeddedConnection implements IBinder.DeathRecipient {
+        private final IAccessibilityEmbeddedConnection mConnection;
+        private final IBinder mLeashToken;
+
+        RemoteAccessibilityEmbeddedConnection(IAccessibilityEmbeddedConnection connection,
+                IBinder leashToken) {
+            mConnection = connection;
+            mLeashToken = leashToken;
+        }
+
+        IAccessibilityEmbeddedConnection getConnection() {
+            return mConnection;
+        }
+
+        IBinder getLeashToken() {
+            return mLeashToken;
+        }
+
+        void linkToDeath() throws RemoteException {
+            mConnection.asBinder().linkToDeath(this, 0);
+        }
+
+        void unlinkToDeath() {
+            mConnection.asBinder().unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public void binderDied() {
+            unlinkToDeath();
+            runOnUiThread(() -> {
+                if (mRemoteAccessibilityEmbeddedConnection == this) {
+                    mRemoteAccessibilityEmbeddedConnection = null;
+                }
+            });
+        }
     }
 }

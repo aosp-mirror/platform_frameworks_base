@@ -48,16 +48,7 @@ public class UserBackupPreferences {
         mEditor.commit();
     }
 
-    Map<String, Set<String>> getExcludedRestoreKeysForPackages(String... packages) {
-        Map<String, Set<String>> excludedKeys = new HashMap<>();
-        for (String packageName : packages) {
-            excludedKeys.put(packageName,
-                    mPreferences.getStringSet(packageName, Collections.emptySet()));
-        }
-        return excludedKeys;
-    }
-
-    Map<String, Set<String>> getAllExcludedRestoreKeys() {
-        return (Map<String, Set<String>>) mPreferences.getAll();
+    Set<String> getExcludedRestoreKeysForPackage(String packageName) {
+        return mPreferences.getStringSet(packageName, Collections.emptySet());
     }
 }

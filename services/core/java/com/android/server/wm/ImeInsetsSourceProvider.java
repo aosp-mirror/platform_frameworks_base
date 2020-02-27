@@ -39,13 +39,6 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     /**
-     * Called when Insets have been dispatched to client. This gets called just after onPostLayout.
-     */
-    void onPostInsetsDispatched() {
-        checkShowImePostLayout();
-    }
-
-    /**
      * Called from {@link WindowManagerInternal#showImePostLayout} when {@link InputMethodService}
      * requests to show IME on {@param imeTarget}.
      *
@@ -80,7 +73,7 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
         };
     }
 
-    private void checkShowImePostLayout() {
+    void checkShowImePostLayout() {
         // check if IME is drawn
         if (mIsImeLayoutDrawn
                 || (mImeTargetFromIme != null
@@ -125,6 +118,7 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
 
         return (!dcTarget.isClosing() && mImeTargetFromIme == dcTarget)
                 || (mImeTargetFromIme != null && dcTarget.getParentWindow() == mImeTargetFromIme
-                && dcTarget.mSubLayer > mImeTargetFromIme.mSubLayer);
+                        && dcTarget.mSubLayer > mImeTargetFromIme.mSubLayer)
+                || mImeTargetFromIme == mDisplayContent.getImeFallback();
     }
 }

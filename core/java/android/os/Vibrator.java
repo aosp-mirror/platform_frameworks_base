@@ -16,11 +16,14 @@
 
 package android.os;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -29,6 +32,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Class that operates the vibrator on the device.
@@ -395,4 +399,78 @@ public abstract class Vibrator {
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public abstract void cancel();
+
+    /**
+     * Check whether the vibrator is vibrating.
+     *
+     * @return True if the hardware is vibrating, otherwise false.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
+    public boolean isVibrating() {
+        return false;
+    }
+
+    /**
+    * Listener for when the vibrator state has changed.
+    *
+    * @see #addVibratorStateListener
+    * @see #removeVibratorStateListener
+    * @hide
+    */
+    @SystemApi
+    @TestApi
+    public interface OnVibratorStateChangedListener  {
+        /**
+         * Called when the vibrator state has changed.
+         *
+         * @param isVibrating If true, the vibrator has started vibrating. If false,
+         *                    it's stopped vibrating.
+         */
+        void onVibratorStateChanged(boolean isVibrating);
+    }
+
+    /**
+     * Adds a listener for vibrator state changes. Callbacks will be executed on the main thread.
+     * If the listener was previously added and not removed, this call will be ignored.
+     *
+     * @param listener listener to be added
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
+    public void addVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+    }
+
+    /**
+     * Adds a listener for vibrator state change. If the listener was previously added and not
+     * removed, this call will be ignored.
+     *
+     * @param listener listener to be added
+     * @param executor executor of listener
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
+    public void addVibratorStateListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnVibratorStateChangedListener listener) {
+    }
+
+    /**
+     * Removes the listener for vibrator state changes. If the listener was not previously
+     * registered, this call will do nothing.
+     *
+     * @param listener listener to be removed
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
+    public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+    }
 }

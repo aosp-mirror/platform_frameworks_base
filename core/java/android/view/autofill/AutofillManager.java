@@ -86,8 +86,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-//TODO: use java.lang.ref.Cleaner once Android supports Java 9
 import sun.misc.Cleaner;
+
+//TODO: use java.lang.ref.Cleaner once Android supports Java 9
 
 /**
  * <p>The {@link AutofillManager} class provides ways for apps and custom views to
@@ -547,7 +548,7 @@ public final class AutofillManager {
          * @param fillInIntent The authentication fill-in intent.
          */
         void autofillClientAuthenticate(int authenticationId, IntentSender intent,
-                Intent fillInIntent);
+                Intent fillInIntent, boolean authenticateInline);
 
         /**
          * Tells the client this manager has state to be reset.
@@ -1793,6 +1794,9 @@ public final class AutofillManager {
             client.autofillClientResetableStateAvailable();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            // no-op, just log the error message.
+            Log.w(TAG, "Exception getting result from SyncResultReceiver: " + e);
         }
     }
 
@@ -2070,7 +2074,7 @@ public final class AutofillManager {
     }
 
     private void authenticate(int sessionId, int authenticationId, IntentSender intent,
-            Intent fillInIntent) {
+            Intent fillInIntent, boolean authenticateInline) {
         synchronized (mLock) {
             if (sessionId == mSessionId) {
                 final AutofillClient client = getClient();
@@ -2078,7 +2082,8 @@ public final class AutofillManager {
                     // clear mOnInvisibleCalled and we will see if receive onInvisibleForAutofill()
                     // before onAuthenticationResult()
                     mOnInvisibleCalled = false;
-                    client.autofillClientAuthenticate(authenticationId, intent, fillInIntent);
+                    client.autofillClientAuthenticate(authenticationId, intent, fillInIntent,
+                            authenticateInline);
                 }
             }
         }
@@ -3250,10 +3255,11 @@ public final class AutofillManager {
 
         @Override
         public void authenticate(int sessionId, int authenticationId, IntentSender intent,
-                Intent fillInIntent) {
+                Intent fillInIntent, boolean authenticateInline) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.post(() -> afm.authenticate(sessionId, authenticationId, intent, fillInIntent));
+                afm.post(() -> afm.authenticate(sessionId, authenticationId, intent, fillInIntent,
+                        authenticateInline));
             }
         }
 
@@ -3363,14 +3369,8 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm == null) return null;
 
-            final AutofillClient client = afm.getClient();
-            if (client == null) {
-                Log.w(TAG, "getViewCoordinates(" + id + "): no autofill client");
-                return null;
-            }
-            final View view = client.autofillClientFindViewByAutofillIdTraversal(id);
+            final View view = getView(afm, id);
             if (view == null) {
-                Log.w(TAG, "getViewCoordinates(" + id + "): could not find view");
                 return null;
             }
             final Rect windowVisibleDisplayFrame = new Rect();
@@ -3410,6 +3410,43 @@ public final class AutofillManager {
             if (afm != null) {
                 afm.post(() -> afm.requestHideFillUi(id, false));
             }
+        }
+
+        @Override
+        public boolean requestAutofill(int sessionId, AutofillId id) {
+            final AutofillManager afm = mAfm.get();
+            if (afm == null || afm.mSessionId != sessionId) {
+                if (sDebug) {
+                    Slog.d(TAG, "Autofill not available or sessionId doesn't match");
+                }
+                return false;
+            }
+            final View view = getView(afm, id);
+            if (view == null || !view.isFocused()) {
+                if (sDebug) {
+                    Slog.d(TAG, "View not available or is not on focus");
+                }
+                return false;
+            }
+            if (sVerbose) {
+                Log.v(TAG, "requestAutofill() by AugmentedAutofillService.");
+            }
+            afm.post(() -> afm.requestAutofill(view));
+            return true;
+        }
+
+        @Nullable
+        private View getView(@NonNull AutofillManager afm, @NonNull AutofillId id) {
+            final AutofillClient client = afm.getClient();
+            if (client == null) {
+                Log.w(TAG, "getView(" + id + "): no autofill client");
+                return null;
+            }
+            View view = client.autofillClientFindViewByAutofillIdTraversal(id);
+            if (view == null) {
+                Log.w(TAG, "getView(" + id + "): could not find view");
+            }
+            return view;
         }
     }
 }

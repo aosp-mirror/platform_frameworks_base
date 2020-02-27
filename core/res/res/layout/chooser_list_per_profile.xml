@@ -13,15 +13,21 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<com.android.internal.widget.RecyclerView
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layoutManager="com.android.internal.widget.GridLayoutManager"
-    android:id="@+id/resolver_list"
-    android:clipToPadding="false"
-    android:background="?attr/colorBackgroundFloating"
-    android:scrollbars="none"
-    android:elevation="1dp"
-    android:nestedScrollingEnabled="true"/>
+    android:layout_marginTop="8dp">
+    <com.android.internal.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layoutManager="com.android.internal.widget.GridLayoutManager"
+        android:id="@+id/resolver_list"
+        android:clipToPadding="false"
+        android:background="?attr/colorBackgroundFloating"
+        android:scrollbars="none"
+        android:elevation="1dp"
+        android:nestedScrollingEnabled="true" />
+
+    <include layout="@layout/resolver_empty_states" />
+</RelativeLayout>

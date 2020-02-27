@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.annotation.UiThreadTest;
@@ -33,7 +32,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
-import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +50,7 @@ public class ExpandHelperTest extends SysuiTestCase {
     public void setUp() throws Exception {
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectMockDependency(NotificationMediaManager.class);
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         Context context = getContext();
         mRow = new NotificationTestHelper(context, mDependency).createRow();
         mCallback = mock(ExpandHelper.Callback.class);

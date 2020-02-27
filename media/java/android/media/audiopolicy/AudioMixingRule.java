@@ -47,10 +47,12 @@ import java.util.Objects;
 public class AudioMixingRule {
 
     private AudioMixingRule(int mixType, ArrayList<AudioMixMatchCriterion> criteria,
-                            boolean allowPrivilegedPlaybackCapture) {
+                            boolean allowPrivilegedPlaybackCapture,
+                            boolean voiceCommunicationCaptureAllowed) {
         mCriteria = criteria;
         mTargetMixType = mixType;
         mAllowPrivilegedPlaybackCapture = allowPrivilegedPlaybackCapture;
+        mVoiceCommunicationCaptureAllowed = voiceCommunicationCaptureAllowed;
     }
 
     /**
@@ -171,6 +173,23 @@ public class AudioMixingRule {
         return false;
     }
 
+    /**
+      * Returns {@code true} if this rule contains a RULE_MATCH_ATTRIBUTE_USAGE criterion for
+      * the given usage
+      *
+      * @hide
+      */
+    boolean containsMatchAttributeRuleForUsage(int usage) {
+        for (AudioMixMatchCriterion criterion : mCriteria) {
+            if (criterion.mRule == RULE_MATCH_ATTRIBUTE_USAGE
+                    && criterion.mAttr != null
+                    && criterion.mAttr.getUsage() == usage) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static boolean areCriteriaEquivalent(ArrayList<AudioMixMatchCriterion> cr1,
             ArrayList<AudioMixMatchCriterion> cr2) {
         if (cr1 == null || cr2 == null) return false;
@@ -188,10 +207,22 @@ public class AudioMixingRule {
     public ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
     @UnsupportedAppUsage
     private boolean mAllowPrivilegedPlaybackCapture = false;
+    @UnsupportedAppUsage
+    private boolean mVoiceCommunicationCaptureAllowed = false;
 
     /** @hide */
     public boolean allowPrivilegedPlaybackCapture() {
         return mAllowPrivilegedPlaybackCapture;
+    }
+
+    /** @hide */
+    public boolean voiceCommunicationCaptureAllowed() {
+        return mVoiceCommunicationCaptureAllowed;
+    }
+
+    /** @hide */
+    public void setVoiceCommunicationCaptureAllowed(boolean allowed) {
+        mVoiceCommunicationCaptureAllowed = allowed;
     }
 
     /** @hide */
@@ -203,12 +234,18 @@ public class AudioMixingRule {
         final AudioMixingRule that = (AudioMixingRule) o;
         return (this.mTargetMixType == that.mTargetMixType)
                 && (areCriteriaEquivalent(this.mCriteria, that.mCriteria)
-                && this.mAllowPrivilegedPlaybackCapture == that.mAllowPrivilegedPlaybackCapture);
+                && this.mAllowPrivilegedPlaybackCapture == that.mAllowPrivilegedPlaybackCapture
+                && this.mVoiceCommunicationCaptureAllowed
+                    == that.mVoiceCommunicationCaptureAllowed);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTargetMixType, mCriteria, mAllowPrivilegedPlaybackCapture);
+        return Objects.hash(
+            mTargetMixType,
+            mCriteria,
+            mAllowPrivilegedPlaybackCapture,
+            mVoiceCommunicationCaptureAllowed);
     }
 
     private static boolean isValidSystemApiRule(int rule) {
@@ -276,6 +313,8 @@ public class AudioMixingRule {
         private ArrayList<AudioMixMatchCriterion> mCriteria;
         private int mTargetMixType = AudioMix.MIX_TYPE_INVALID;
         private boolean mAllowPrivilegedPlaybackCapture = false;
+        // This value should be set internally according to a permission check
+        private boolean mVoiceCommunicationCaptureAllowed = false;
 
         /**
          * Constructs a new Builder with no rules.
@@ -397,6 +436,23 @@ public class AudioMixingRule {
          */
         public @NonNull Builder allowPrivilegedPlaybackCapture(boolean allow) {
             mAllowPrivilegedPlaybackCapture = allow;
+            return this;
+        }
+
+        /**
+         * Set if the caller of the rule is able to capture voice communication output.
+         * A system app can capture voice communication output only if it is granted with the.
+         * CAPTURE_VOICE_COMMUNICATION_OUTPUT permission.
+         *
+         * Note that this method is for internal use only and should not be called by the app that
+         * creates the rule.
+         *
+         * @return the same Builder instance.
+         *
+         * @hide
+         */
+        public @NonNull Builder voiceCommunicationCaptureAllowed(boolean allowed) {
+            mVoiceCommunicationCaptureAllowed = allowed;
             return this;
         }
 
@@ -583,7 +639,8 @@ public class AudioMixingRule {
          * @return a new {@link AudioMixingRule} object
          */
         public AudioMixingRule build() {
-            return new AudioMixingRule(mTargetMixType, mCriteria, mAllowPrivilegedPlaybackCapture);
+            return new AudioMixingRule(mTargetMixType, mCriteria,
+                mAllowPrivilegedPlaybackCapture, mVoiceCommunicationCaptureAllowed);
         }
     }
 }

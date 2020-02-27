@@ -21,12 +21,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
 import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -43,6 +48,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -58,15 +64,24 @@ import java.util.function.Consumer;
 @RunWith(AndroidJUnit4.class)
 public class ControlProviderServiceTest {
 
+    private static final ComponentName TEST_SYSUI_COMPONENT =
+            ComponentName.unflattenFromString("sysui/.test.cls");
+    private static final ComponentName TEST_COMPONENT =
+            ComponentName.unflattenFromString("test.pkg/.test.cls");
+
     private IBinder mToken = new Binder();
     @Mock
     private IControlsActionCallback.Stub mActionCallback;
     @Mock
-    private IControlsLoadCallback.Stub mLoadCallback;
-    @Mock
     private IControlsSubscriber.Stub mSubscriber;
     @Mock
     private IIntentSender mIIntentSender;
+    @Mock
+    private Resources mResources;
+    @Mock
+    private Context mContext;
+    @Captor
+    private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
     private PendingIntent mPendingIntent;
     private FakeControlsProviderService mControlsProviderService;
@@ -79,10 +94,12 @@ public class ControlProviderServiceTest {
 
         when(mActionCallback.asBinder()).thenCallRealMethod();
         when(mActionCallback.queryLocalInterface(any())).thenReturn(mActionCallback);
-        when(mLoadCallback.asBinder()).thenCallRealMethod();
-        when(mLoadCallback.queryLocalInterface(any())).thenReturn(mLoadCallback);
         when(mSubscriber.asBinder()).thenCallRealMethod();
         when(mSubscriber.queryLocalInterface(any())).thenReturn(mSubscriber);
+
+        when(mResources.getString(com.android.internal.R.string.config_systemUIServiceComponent))
+                .thenReturn(TEST_SYSUI_COMPONENT.flattenToString());
+        when(mContext.getResources()).thenReturn(mResources);
 
         Bundle b = new Bundle();
         b.putBinder(ControlsProviderService.CALLBACK_TOKEN, mToken);
@@ -102,22 +119,28 @@ public class ControlProviderServiceTest {
         Control control2 = new Control.StatelessBuilder("TEST_ID_2", mPendingIntent)
                 .setDeviceType(DeviceTypes.TYPE_AIR_FRESHENER).build();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<Control>> captor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<IControlsSubscription.Stub> subscriptionCaptor =
+                ArgumentCaptor.forClass(IControlsSubscription.Stub.class);
+        ArgumentCaptor<Control> controlCaptor =
+                ArgumentCaptor.forClass(Control.class);
 
         ArrayList<Control> list = new ArrayList<>();
         list.add(control1);
         list.add(control2);
 
         mControlsProviderService.setControls(list);
-        mControlsProvider.load(mLoadCallback);
+        mControlsProvider.load(mSubscriber);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-        verify(mLoadCallback).accept(eq(mToken), captor.capture());
-        List<Control> l = captor.getValue();
-        assertEquals(2, l.size());
-        assertTrue(equals(control1, l.get(0)));
-        assertTrue(equals(control2, l.get(1)));
+        verify(mSubscriber).onSubscribe(eq(mToken), subscriptionCaptor.capture());
+        subscriptionCaptor.getValue().request(1000);
+
+        verify(mSubscriber, times(2)).onNext(eq(mToken), controlCaptor.capture());
+        List<Control> values = controlCaptor.getAllValues();
+        assertTrue(equals(values.get(0), list.get(0)));
+        assertTrue(equals(values.get(1), list.get(1)));
+
+        verify(mSubscriber).onComplete(eq(mToken));
     }
 
     @Test
@@ -128,22 +151,57 @@ public class ControlProviderServiceTest {
                 .build();
         Control statelessControl = new Control.StatelessBuilder(control).build();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<Control>> captor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<IControlsSubscription.Stub> subscriptionCaptor =
+                ArgumentCaptor.forClass(IControlsSubscription.Stub.class);
+        ArgumentCaptor<Control> controlCaptor =
+                ArgumentCaptor.forClass(Control.class);
 
         ArrayList<Control> list = new ArrayList<>();
         list.add(control);
 
         mControlsProviderService.setControls(list);
-        mControlsProvider.load(mLoadCallback);
+        mControlsProvider.load(mSubscriber);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-        verify(mLoadCallback).accept(eq(mToken), captor.capture());
-        List<Control> l = captor.getValue();
-        assertEquals(1, l.size());
-        assertFalse(equals(control, l.get(0)));
-        assertTrue(equals(statelessControl, l.get(0)));
-        assertEquals(Control.STATUS_UNKNOWN, l.get(0).getStatus());
+        verify(mSubscriber).onSubscribe(eq(mToken), subscriptionCaptor.capture());
+        subscriptionCaptor.getValue().request(1000);
+
+        verify(mSubscriber).onNext(eq(mToken), controlCaptor.capture());
+        Control c = controlCaptor.getValue();
+        assertFalse(equals(control, c));
+        assertTrue(equals(statelessControl, c));
+        assertEquals(Control.STATUS_UNKNOWN, c.getStatus());
+
+        verify(mSubscriber).onComplete(eq(mToken));
+    }
+
+    @Test
+    public void testOnLoadSuggested_allStateless() throws RemoteException {
+        Control control1 = new Control.StatelessBuilder("TEST_ID", mPendingIntent).build();
+        Control control2 = new Control.StatelessBuilder("TEST_ID_2", mPendingIntent)
+                .setDeviceType(DeviceTypes.TYPE_AIR_FRESHENER).build();
+
+        ArgumentCaptor<IControlsSubscription.Stub> subscriptionCaptor =
+                ArgumentCaptor.forClass(IControlsSubscription.Stub.class);
+        ArgumentCaptor<Control> controlCaptor =
+                ArgumentCaptor.forClass(Control.class);
+
+        ArrayList<Control> list = new ArrayList<>();
+        list.add(control1);
+        list.add(control2);
+
+        mControlsProviderService.setControls(list);
+        mControlsProvider.loadSuggested(mSubscriber);
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        verify(mSubscriber).onSubscribe(eq(mToken), subscriptionCaptor.capture());
+        subscriptionCaptor.getValue().request(1);
+
+        verify(mSubscriber).onNext(eq(mToken), controlCaptor.capture());
+        Control c = controlCaptor.getValue();
+        assertTrue(equals(c, list.get(0)));
+
+        verify(mSubscriber).onComplete(eq(mToken));
     }
 
     @Test
@@ -185,6 +243,21 @@ public class ControlProviderServiceTest {
                 ControlAction.RESPONSE_OK);
     }
 
+    @Test
+    public void testRequestAdd() {
+        Control control = new Control.StatelessBuilder("TEST_ID", mPendingIntent).build();
+        ControlsProviderService.requestAddControl(mContext, TEST_COMPONENT, control);
+
+        verify(mContext).sendBroadcast(mIntentArgumentCaptor.capture(),
+                eq(Manifest.permission.BIND_CONTROLS));
+        Intent intent = mIntentArgumentCaptor.getValue();
+        assertEquals(ControlsProviderService.ACTION_ADD_CONTROL, intent.getAction());
+        assertEquals(TEST_SYSUI_COMPONENT.getPackageName(), intent.getPackage());
+        assertEquals(TEST_COMPONENT, intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME));
+        assertTrue(equals(control,
+                intent.getParcelableExtra(ControlsProviderService.EXTRA_CONTROL)));
+    }
+
     private static boolean equals(Control c1, Control c2) {
         if (c1 == c2) return true;
         if (c1 == null || c2 == null) return false;
@@ -219,14 +292,16 @@ public class ControlProviderServiceTest {
         public Publisher<Control> publisherFor(List<String> ids) {
             return new Publisher<Control>() {
                 public void subscribe(final Subscriber s) {
-                    s.onSubscribe(new Subscription() {
-                            public void request(long n) {
-                                for (Control c : mControls) {
-                                    s.onNext(c);
-                                }
-                            }
-                            public void cancel() {}
-                        });
+                    s.onSubscribe(createSubscription(s, mControls));
+                }
+            };
+        }
+
+        @Override
+        public Publisher<Control> publisherForSuggested() {
+            return new Publisher<Control>() {
+                public void subscribe(final Subscriber s) {
+                    s.onSubscribe(createSubscription(s, mControls));
                 }
             };
         }
@@ -236,7 +311,19 @@ public class ControlProviderServiceTest {
                 Consumer<Integer> cb) {
             cb.accept(ControlAction.RESPONSE_OK);
         }
+
+        private Subscription createSubscription(Subscriber s, List<Control> controls) {
+            return new Subscription() {
+                public void request(long n) {
+                    int i = 0;
+                    for (Control c : mControls) {
+                        if (i++ < n) s.onNext(c);
+                        else break;
+                    }
+                    s.onComplete();
+                }
+                public void cancel() {}
+            };
+        }
     }
 }
-
-

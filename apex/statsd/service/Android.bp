@@ -1,18 +1,36 @@
 // Statsd Service jar, which will eventually be put in the statsd mainline apex.
 // service-statsd needs to be added to PRODUCT_UPDATABLE_SYSTEM_SERVER_JARS.
 // This jar will contain StatsCompanionService
+
+filegroup {
+    name: "service-statsd-sources",
+    srcs: [
+        "java/**/*.java",
+    ],
+}
+
 java_library {
     name: "service-statsd",
     installable: true,
 
     srcs: [
-        "java/**/*.java",
+        ":service-statsd-sources",
     ],
-    // TODO: link against the proper stubs (b/146084685).
+
+    // TODO(b/146757305) should be "module_current" since not allowed to use
+    // @CorePlatformApi's
+    sdk_version: "core_platform",
+
     libs: [
-        "framework-minus-apex",
-        "services.core",
+        "framework-annotations-lib",
+        "services-stubs",
+        "framework-statsd",
+
+        // TODO(b/146757305): should be unnecessary once
+        // sdk_version="module_lib_current" or "module_current"
+        "android_module_lib_stubs_current",
     ],
+
     apex_available: [
         "com.android.os.statsd",
         "test_com.android.os.statsd",

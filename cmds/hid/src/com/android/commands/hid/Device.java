@@ -52,13 +52,13 @@ public class Device {
         System.loadLibrary("hidcommand_jni");
     }
 
-    private static native long nativeOpenDevice(String name, int id, int vid, int pid,
+    private static native long nativeOpenDevice(String name, int id, int vid, int pid, int bus,
             byte[] descriptor, DeviceCallback callback);
     private static native void nativeSendReport(long ptr, byte[] data);
     private static native void nativeSendGetFeatureReportReply(long ptr, int id, byte[] data);
     private static native void nativeCloseDevice(long ptr);
 
-    public Device(int id, String name, int vid, int pid, byte[] descriptor,
+    public Device(int id, String name, int vid, int pid, int bus, byte[] descriptor,
             byte[] report, SparseArray<byte[]> featureReports, Map<ByteBuffer, byte[]> outputs) {
         mId = id;
         mThread = new HandlerThread("HidDeviceHandler");
@@ -70,6 +70,7 @@ public class Device {
         args.argi1 = id;
         args.argi2 = vid;
         args.argi3 = pid;
+        args.argi4 = bus;
         if (name != null) {
             args.arg1 = name;
         } else {
@@ -115,7 +116,7 @@ public class Device {
                 case MSG_OPEN_DEVICE:
                     SomeArgs args = (SomeArgs) msg.obj;
                     mPtr = nativeOpenDevice((String) args.arg1, args.argi1, args.argi2, args.argi3,
-                            (byte[]) args.arg2, new DeviceCallback());
+                            args.argi4, (byte[]) args.arg2, new DeviceCallback());
                     pauseEvents();
                     break;
                 case MSG_SEND_REPORT:

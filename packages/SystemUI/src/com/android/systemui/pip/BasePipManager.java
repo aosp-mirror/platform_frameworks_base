@@ -16,21 +16,20 @@
 
 package com.android.systemui.pip;
 
-import android.content.Context;
 import android.content.res.Configuration;
 
-import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.wm.DisplayController;
+import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 
 import java.io.PrintWriter;
 
+
 public interface BasePipManager {
-    void initialize(Context context, BroadcastDispatcher broadcastDispatcher,
-            DisplayController displayController);
     void showPictureInPictureMenu();
     default void expandPip() {}
     default void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {}
     void onConfigurationChanged(Configuration newConfig);
     default void setShelfHeight(boolean visible, int height) {}
+    default void setPinnedStackAnimationType(int animationType) {}
+    default void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) {}
     default void dump(PrintWriter pw) {}
 }

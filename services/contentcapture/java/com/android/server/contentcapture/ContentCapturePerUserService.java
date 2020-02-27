@@ -426,18 +426,26 @@ final class ContentCapturePerUserService
     public boolean sendActivityAssistDataLocked(@NonNull IBinder activityToken,
             @NonNull Bundle data) {
         final int id = getSessionId(activityToken);
+        final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
+        final AssistStructure assistStructure = data.getParcelable(ASSIST_KEY_STRUCTURE);
+        final AssistContent assistContent = data.getParcelable(ASSIST_KEY_CONTENT);
+        final SnapshotData snapshotData = new SnapshotData(assistData,
+                assistStructure, assistContent);
         if (id != NO_SESSION_ID) {
             final ContentCaptureServerSession session = mSessions.get(id);
-            final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
-            final AssistStructure assistStructure = data.getParcelable(ASSIST_KEY_STRUCTURE);
-            final AssistContent assistContent = data.getParcelable(ASSIST_KEY_CONTENT);
-            final SnapshotData snapshotData = new SnapshotData(assistData,
-                    assistStructure, assistContent);
             session.sendActivitySnapshotLocked(snapshotData);
             return true;
-        } else {
-            Slog.e(TAG, "Failed to notify activity assist data for activity: " + activityToken);
         }
+
+        // We want to send an activity snapshot regardless of whether a content capture session is
+        // present or not since a content capture session is not required for this functionality
+        if (mRemoteService != null) {
+            mRemoteService.onActivitySnapshotRequest(NO_SESSION_ID, snapshotData);
+            Slog.d(TAG, "Notified activity assist data for activity: "
+                    + activityToken + " without a session Id");
+            return true;
+        }
+
         return false;
     }
 

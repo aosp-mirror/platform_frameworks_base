@@ -36,7 +36,6 @@ import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
 import android.app.AlarmManager;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
@@ -90,8 +89,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     private DozeParameters mDozeParamenters;
     @Mock
     LightBarController mLightBarController;
-    @Mock
-    Resources mResources;
     @Mock
     DelayedWakeLock.Builder mDelayedWakeLockBuilder;
     @Mock
@@ -216,8 +213,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mDockManager.isDocked()).thenReturn(false);
 
         mScrimController = new ScrimController(mLightBarController,
-                mDozeParamenters, mAlarmManager, mKeyguardStateController,
-                mResources, mDelayedWakeLockBuilder,
+                mDozeParamenters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor, mSysuiColorExtractor,
                 mDockManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
@@ -521,10 +517,10 @@ public class ScrimControllerTest extends SysuiTestCase {
         Assert.assertEquals(ScrimController.TRANSPARENT,
                 mScrimInFront.getViewAlpha(), 0.0f);
         // Back scrim should be visible
-        Assert.assertEquals(ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
+        Assert.assertEquals(ScrimController.BUSY_SCRIM_ALPHA,
                 mScrimBehind.getViewAlpha(), 0.0f);
         // Bubble scrim should be visible
-        Assert.assertEquals(ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
+        Assert.assertEquals(ScrimController.BUSY_SCRIM_ALPHA,
                 mScrimBehind.getViewAlpha(), 0.0f);
     }
 

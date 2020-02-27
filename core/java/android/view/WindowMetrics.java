@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.graphics.Point;
 import android.util.Size;
 
 /**
@@ -40,6 +41,30 @@ public final class WindowMetrics {
 
     /**
      * Returns the size of the window.
+     * <p>
+     * <b>Note that this reports a different size than {@link Display#getSize(Point)}.</b>
+     * This method reports the window size including all system bars area, while
+     * {@link Display#getSize(Point)} reports the area excluding navigation bars and display cutout
+     * areas. The value reported by {@link Display#getSize(Point)} can be obtained by using:
+     * <pre class="prettyprint">
+     * final WindowMetrics metrics = windowManager.getCurrentMetrics();
+     * // Gets all excluding insets
+     * final WindowInsets windowInsets = metrics.getWindowInsets();
+     * Insets insets = windowInsets.getInsets(WindowInsets.Type.navigationBars());
+     * final DisplayCutout cutout = windowInsets.getCutout();
+     * if (cutout != null) {
+     *     final Insets cutoutSafeInsets = Insets.of(cutout.getSafeInsetsLeft(), ...);
+     *     insets = insets.max(insets, cutoutSafeInsets);
+     * }
+     *
+     * int insetsWidth = insets.right + insets.left;
+     * int insetsHeight = insets.top + insets.bottom;
+     *
+     * // Legacy size that Display#getSize reports
+     * final Size legacySize = new Size(metrics.getWidth() - insetsWidth,
+     *         metrics.getHeight() - insetsHeight);
+     * </pre>
+     * </p>
      *
      * @return window size in pixel.
      */

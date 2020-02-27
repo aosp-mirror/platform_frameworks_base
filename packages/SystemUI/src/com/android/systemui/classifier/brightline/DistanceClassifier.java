@@ -38,10 +38,10 @@ import java.util.Locale;
 class DistanceClassifier extends FalsingClassifier {
 
     private static final float HORIZONTAL_FLING_THRESHOLD_DISTANCE_IN = 1;
-    private static final float VERTICAL_FLING_THRESHOLD_DISTANCE_IN = 1;
+    private static final float VERTICAL_FLING_THRESHOLD_DISTANCE_IN = 1.5f;
     private static final float HORIZONTAL_SWIPE_THRESHOLD_DISTANCE_IN = 3;
     private static final float VERTICAL_SWIPE_THRESHOLD_DISTANCE_IN = 3;
-    private static final float VELOCITY_TO_DISTANCE = 80f;
+    private static final float VELOCITY_TO_DISTANCE = 30f;
     private static final float SCREEN_FRACTION_MAX_DISTANCE = 0.8f;
 
     private final float mVerticalFlingThresholdPx;

@@ -61,7 +61,7 @@ public class ViewRootImplTest {
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mViewRootImpl = new ViewRootImplAccessor(
-                    new ViewRootImpl(mContext, mContext.getDisplay()));
+                    new ViewRootImpl(mContext, mContext.getDisplayNoVerify()));
         });
     }
 

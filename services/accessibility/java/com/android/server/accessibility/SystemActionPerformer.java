@@ -193,7 +193,8 @@ public class SystemActionPerformer {
     /**
      * This method returns the list of available system actions.
      */
-    List<AccessibilityAction> getSystemActions() {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public List<AccessibilityAction> getSystemActions() {
         List<AccessibilityAction> systemActions = new ArrayList<>();
         synchronized (mSystemActionLock) {
             for (Map.Entry<Integer, RemoteAction> entry : mRegisteredSystemActions.entrySet()) {

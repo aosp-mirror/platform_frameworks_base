@@ -33,6 +33,7 @@ import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -62,6 +63,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Manages users and user details on a multi-user system. There are two major categories of
@@ -150,12 +152,23 @@ public class UserManager {
     public static final int QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED = 0x1;
 
     /**
+     * Flag passed to {@link #requestQuietModeEnabled} to request disabling quiet mode without
+     * asking for credentials. This is used when managed profile password is forgotten. It starts
+     * the user in locked state so that a direct boot aware DPC could reset the password.
+     * Should not be used together with
+     * {@link #QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED} or an exception will be thrown.
+     * @hide
+     */
+    public static final int QUIET_MODE_DISABLE_DONT_ASK_CREDENTIAL = 0x2;
+
+    /**
      * List of flags available for the {@link #requestQuietModeEnabled} method.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "QUIET_MODE_" }, value = {
-            QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED })
+            QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED,
+            QUIET_MODE_DISABLE_DONT_ASK_CREDENTIAL})
     public @interface QuietModeFlag {}
 
     /**
@@ -2150,16 +2163,38 @@ public class UserManager {
         return isUserUnlocked(user.getIdentifier());
     }
 
+    private static final String CACHE_KEY_IS_USER_UNLOCKED_PROPERTY =
+            "cache_key.is_user_unlocked";
+
+    private final PropertyInvalidatedCache<Integer, Boolean> mIsUserUnlockedCache =
+            new PropertyInvalidatedCache<Integer, Boolean>(
+                32, CACHE_KEY_IS_USER_UNLOCKED_PROPERTY) {
+                @Override
+                protected Boolean recompute(Integer query) {
+                    try {
+                        return mService.isUserUnlocked(query);
+                    } catch (RemoteException re) {
+                        throw re.rethrowFromSystemServer();
+                    }
+                }
+            };
+
     /** {@hide} */
     @UnsupportedAppUsage
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isUserUnlocked(@UserIdInt int userId) {
-        try {
-            return mService.isUserUnlocked(userId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return mIsUserUnlockedCache.query(userId);
+    }
+
+    /** {@hide} */
+    public void disableIsUserUnlockedCache() {
+        mIsUserUnlockedCache.disableLocal();
+    }
+
+    /** {@hide} */
+    public static final void invalidateIsUserUnlockedCache() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_IS_USER_UNLOCKED_PROPERTY);
     }
 
     /**
@@ -2325,10 +2360,12 @@ public class UserManager {
      * @param restrictionKey the string key representing the restriction
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      */
+    @TestApi
     @UnsupportedAppUsage
-    @RequiresPermission(Manifest.permission.MANAGE_USERS)
-    public boolean hasBaseUserRestriction(@UserRestrictionKey String restrictionKey,
-            UserHandle userHandle) {
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    public boolean hasBaseUserRestriction(@UserRestrictionKey @NonNull String restrictionKey,
+            @NonNull UserHandle userHandle) {
         try {
             return mService.hasBaseUserRestriction(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
@@ -2681,10 +2718,11 @@ public class UserManager {
             Manifest.permission.CREATE_USERS})
     @UserHandleAware
     public @Nullable UserHandle createProfile(@NonNull String name, @NonNull String userType,
-            @Nullable String[] disallowedPackages) throws UserOperationException {
+            @NonNull Set<String> disallowedPackages) throws UserOperationException {
         try {
             return mService.createProfileForUserWithThrow(name, userType, 0,
-                    mUserId, disallowedPackages).getUserHandle();
+                    mUserId, disallowedPackages.toArray(
+                            new String[disallowedPackages.size()])).getUserHandle();
         } catch (ServiceSpecificException e) {
             return returnNullOrThrowUserOperationException(e,
                     mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R);
@@ -3318,19 +3356,46 @@ public class UserManager {
     }
 
     /**
-     * Returns a list of ids for profiles associated with the context user including the user
-     * itself.
+     * Returns a list of ids for enabled profiles associated with the context user including the
+     * user itself.
      *
-     * @param enabledOnly whether to return only {@link UserInfo#isEnabled() enabled} profiles
      * @return A non-empty list of UserHandles associated with the calling user.
-     *
      * @hide
      */
     @SystemApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS}, conditional = true)
     @UserHandleAware
-    public @NonNull List<UserHandle> getUserProfiles(boolean enabledOnly) {
+    public @NonNull List<UserHandle> getEnabledProfiles() {
+        return getProfiles(true);
+    }
+
+    /**
+     * Returns a list of ids for all profiles associated with the context user including the user
+     * itself.
+     *
+     * @return A non-empty list of UserHandles associated with the calling user.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS}, conditional = true)
+    @UserHandleAware
+    public @NonNull List<UserHandle> getAllProfiles() {
+        return getProfiles(false);
+    }
+
+    /**
+     * Returns a list of ids for profiles associated with the context user including the user
+     * itself.
+     *
+     * @param enabledOnly whether to return only {@link UserInfo#isEnabled() enabled} profiles
+     * @return A non-empty list of UserHandles associated with the calling user.
+     */
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS}, conditional = true)
+    @UserHandleAware
+    private @NonNull List<UserHandle> getProfiles(boolean enabledOnly) {
         final int[] userIds = getProfileIds(mUserId, enabledOnly);
         final List<UserHandle> result = new ArrayList<>(userIds.length);
         for (int userId : userIds) {
@@ -3496,12 +3561,13 @@ public class UserManager {
             boolean enableQuietMode, @NonNull UserHandle userHandle, IntentSender target) {
         return requestQuietModeEnabled(enableQuietMode, userHandle, target, 0);
     }
+
     /**
      * Similar to {@link #requestQuietModeEnabled(boolean, UserHandle)}, except you can specify
      * a target to start when user is unlocked. If {@code target} is specified, caller must have
      * the {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
-     * @see {@link #requestQuietModeEnabled(boolean, UserHandle)}
+     * @see #requestQuietModeEnabled(boolean, UserHandle)
      * @hide
      */
     public boolean requestQuietModeEnabled(

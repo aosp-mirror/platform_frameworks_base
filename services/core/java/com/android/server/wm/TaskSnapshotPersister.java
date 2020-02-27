@@ -21,8 +21,8 @@ import static android.graphics.Bitmap.CompressFormat.JPEG;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -51,9 +51,7 @@ class TaskSnapshotPersister {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotPersister" : TAG_WM;
     private static final String SNAPSHOTS_DIRNAME = "snapshots";
-    private static final String REDUCED_POSTFIX = "_reduced";
-    private static final float LOW_RAM_REDUCED_SCALE = .8f;
-    static final boolean DISABLE_FULL_SIZED_BITMAPS = ActivityManager.isLowRamDeviceStatic();
+    private static final String LOW_RES_FILE_POSTFIX = "_reduced";
     private static final long DELAY_MS = 100;
     private static final int QUALITY = 95;
     private static final String PROTO_EXTENSION = ".proto";
@@ -71,7 +69,8 @@ class TaskSnapshotPersister {
     private boolean mStarted;
     private final Object mLock = new Object();
     private final DirectoryResolver mDirectoryResolver;
-    private final float mReducedScale;
+    private final float mLowResScaleFactor;
+    private boolean mEnableLowResSnapshots;
     private final boolean mUse16BitFormat;
 
     /**
@@ -83,13 +82,29 @@ class TaskSnapshotPersister {
 
     TaskSnapshotPersister(WindowManagerService service, DirectoryResolver resolver) {
         mDirectoryResolver = resolver;
+        final float highResTaskSnapshotScale = service.mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_highResTaskSnapshotScale);
+        final float lowResTaskSnapshotScale = service.mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_lowResTaskSnapshotScale);
 
-        if (ActivityManager.isLowRamDeviceStatic()) {
-            mReducedScale = LOW_RAM_REDUCED_SCALE;
-        } else {
-            mReducedScale = service.mContext.getResources().getFloat(
-                    com.android.internal.R.dimen.config_reducedTaskSnapshotScale);
+        if (lowResTaskSnapshotScale < 0 || 1 <= lowResTaskSnapshotScale) {
+            throw new RuntimeException("Low-res scale must be between 0 and 1");
         }
+        if (highResTaskSnapshotScale <= 0 || 1 < highResTaskSnapshotScale) {
+            throw new RuntimeException("High-res scale must be between 0 and 1");
+        }
+        if (highResTaskSnapshotScale <= lowResTaskSnapshotScale) {
+            throw new RuntimeException("High-res scale must be greater than low-res scale");
+        }
+
+        if (lowResTaskSnapshotScale > 0) {
+            mLowResScaleFactor = lowResTaskSnapshotScale / highResTaskSnapshotScale;
+            setEnableLowResSnapshots(true);
+        } else {
+            mLowResScaleFactor = 0;
+            setEnableLowResSnapshots(false);
+        }
+
         mUse16BitFormat = service.mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_use16BitTaskSnapshotPixelFormat);
     }
@@ -155,13 +170,16 @@ class TaskSnapshotPersister {
         }
     }
 
+    boolean enableLowResSnapshots() {
+        return mEnableLowResSnapshots;
+    }
+
     /**
-     * Gets the scaling the persister uses for low resolution task snapshots.
-     *
-     * @return the reduced scale of task snapshots when they are set to be low res
+     * Not to be used. Only here for testing.
      */
-    float getReducedScale() {
-        return mReducedScale;
+    @VisibleForTesting
+    void setEnableLowResSnapshots(boolean enabled) {
+        mEnableLowResSnapshots = enabled;
     }
 
     /**
@@ -212,17 +230,13 @@ class TaskSnapshotPersister {
         return new File(getDirectory(userId), taskId + PROTO_EXTENSION);
     }
 
-    File getBitmapFile(int taskId, int userId) {
-        // Full sized bitmaps are disabled on low ram devices
-        if (DISABLE_FULL_SIZED_BITMAPS) {
-            Slog.wtf(TAG, "This device does not support full sized resolution bitmaps.");
-            return null;
-        }
+    File getHighResolutionBitmapFile(int taskId, int userId) {
         return new File(getDirectory(userId), taskId + BITMAP_EXTENSION);
     }
 
-    File getReducedResolutionBitmapFile(int taskId, int userId) {
-        return new File(getDirectory(userId), taskId + REDUCED_POSTFIX + BITMAP_EXTENSION);
+    @NonNull
+    File getLowResolutionBitmapFile(int taskId, int userId) {
+        return new File(getDirectory(userId), taskId + LOW_RES_FILE_POSTFIX + BITMAP_EXTENSION);
     }
 
     private boolean createDirectory(int userId) {
@@ -232,13 +246,13 @@ class TaskSnapshotPersister {
 
     private void deleteSnapshot(int taskId, int userId) {
         final File protoFile = getProtoFile(taskId, userId);
-        final File bitmapReducedFile = getReducedResolutionBitmapFile(taskId, userId);
+        final File bitmapLowResFile = getLowResolutionBitmapFile(taskId, userId);
         protoFile.delete();
-        bitmapReducedFile.delete();
-
-        // Low ram devices do not have a full sized file to delete
-        if (!DISABLE_FULL_SIZED_BITMAPS) {
-            final File bitmapFile = getBitmapFile(taskId, userId);
+        if (bitmapLowResFile.exists()) {
+            bitmapLowResFile.delete();
+        }
+        final File bitmapFile = getHighResolutionBitmapFile(taskId, userId);
+        if (bitmapFile.exists()) {
             bitmapFile.delete();
         }
     }
@@ -343,6 +357,8 @@ class TaskSnapshotPersister {
             final TaskSnapshotProto proto = new TaskSnapshotProto();
             proto.orientation = mSnapshot.getOrientation();
             proto.rotation = mSnapshot.getRotation();
+            proto.taskWidth = mSnapshot.getTaskSize().x;
+            proto.taskHeight = mSnapshot.getTaskSize().y;
             proto.insetLeft = mSnapshot.getContentInsets().left;
             proto.insetTop = mSnapshot.getContentInsets().top;
             proto.insetRight = mSnapshot.getContentInsets().right;
@@ -352,7 +368,6 @@ class TaskSnapshotPersister {
             proto.systemUiVisibility = mSnapshot.getSystemUiVisibility();
             proto.isTranslucent = mSnapshot.isTranslucent();
             proto.topActivityComponent = mSnapshot.getTopActivityComponent().flattenToString();
-            proto.scale = mSnapshot.getScale();
             proto.id = mSnapshot.getId();
             final byte[] bytes = TaskSnapshotProto.toByteArray(proto);
             final File file = getProtoFile(mTaskId, mUserId);
@@ -379,30 +394,8 @@ class TaskSnapshotPersister {
             }
 
             final Bitmap swBitmap = bitmap.copy(Config.ARGB_8888, false /* isMutable */);
-            final Bitmap reduced = mSnapshot.isReducedResolution()
-                    ? swBitmap
-                    : Bitmap.createScaledBitmap(swBitmap,
-                            (int) (bitmap.getWidth() * mReducedScale),
-                            (int) (bitmap.getHeight() * mReducedScale), true /* filter */);
 
-            final File reducedFile = getReducedResolutionBitmapFile(mTaskId, mUserId);
-            try {
-                FileOutputStream reducedFos = new FileOutputStream(reducedFile);
-                reduced.compress(JPEG, QUALITY, reducedFos);
-                reducedFos.close();
-            } catch (IOException e) {
-                Slog.e(TAG, "Unable to open " + reducedFile +" for persisting.", e);
-                return false;
-            }
-            reduced.recycle();
-
-            // For snapshots with reduced resolution, do not create or save full sized bitmaps
-            if (mSnapshot.isReducedResolution()) {
-                swBitmap.recycle();
-                return true;
-            }
-
-            final File file = getBitmapFile(mTaskId, mUserId);
+            final File file = getHighResolutionBitmapFile(mTaskId, mUserId);
             try {
                 FileOutputStream fos = new FileOutputStream(file);
                 swBitmap.compress(JPEG, QUALITY, fos);
@@ -411,7 +404,28 @@ class TaskSnapshotPersister {
                 Slog.e(TAG, "Unable to open " + file + " for persisting.", e);
                 return false;
             }
+
+            if (!enableLowResSnapshots()) {
+                swBitmap.recycle();
+                return true;
+            }
+
+            final Bitmap lowResBitmap = Bitmap.createScaledBitmap(swBitmap,
+                    (int) (bitmap.getWidth() * mLowResScaleFactor),
+                    (int) (bitmap.getHeight() * mLowResScaleFactor), true /* filter */);
             swBitmap.recycle();
+
+            final File lowResFile = getLowResolutionBitmapFile(mTaskId, mUserId);
+            try {
+                FileOutputStream lowResFos = new FileOutputStream(lowResFile);
+                lowResBitmap.compress(JPEG, QUALITY, lowResFos);
+                lowResFos.close();
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to open " + lowResFile + " for persisting.", e);
+                return false;
+            }
+            lowResBitmap.recycle();
+
             return true;
         }
     }
@@ -475,8 +489,8 @@ class TaskSnapshotPersister {
                 return -1;
             }
             String name = fileName.substring(0, end);
-            if (name.endsWith(REDUCED_POSTFIX)) {
-                name = name.substring(0, name.length() - REDUCED_POSTFIX.length());
+            if (name.endsWith(LOW_RES_FILE_POSTFIX)) {
+                name = name.substring(0, name.length() - LOW_RES_FILE_POSTFIX.length());
             }
             try {
                 return Integer.parseInt(name);

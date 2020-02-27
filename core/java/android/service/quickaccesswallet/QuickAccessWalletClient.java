@@ -18,16 +18,16 @@ package android.service.quickaccesswallet;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
-
-import java.util.function.Consumer;
 
 /**
  * Facilitates accessing cards from the {@link QuickAccessWalletService}.
  *
  * @hide
  */
+@TestApi
 public interface QuickAccessWalletClient {
 
     /**
@@ -40,17 +40,65 @@ public interface QuickAccessWalletClient {
     }
 
     /**
-     * @return true if the {@link QuickAccessWalletService} is available.
+     * @return true if the {@link QuickAccessWalletService} is available. This means that the
+     * default NFC payment application has an exported service that can provide cards to the Quick
+     * Access Wallet. However, it does not mean that (1) the call will necessarily be successful,
+     * nor does it mean that cards may be displayed at this time. Addition checks are required:
+     * <ul>
+     *     <li>If {@link #isWalletFeatureAvailable()} is false, cards should not be displayed
+     *     <li>If the device is locked and {@link #isWalletFeatureAvailableWhenDeviceLocked} is
+     *     false, cards should not be displayed while the device remains locked. (A message
+     *     prompting the user to unlock to view cards may be appropriate).</li>
+     * </ul>
      */
     boolean isWalletServiceAvailable();
+
+    /**
+     * Wallet cards should not be displayed if:
+     * <ul>
+     *     <li>The wallet service is unavailable</li>
+     *     <li>The device is not provisioned, ie user setup is incomplete</li>
+     *     <li>If the wallet feature has been disabled by the user</li>
+     *     <li>If the phone has been put into lockdown mode</li>
+     * </ul>
+     * <p>
+     * Quick Access Wallet implementers should call this method before calling
+     * {@link #getWalletCards} to ensure that cards may be displayed.
+     */
+    boolean isWalletFeatureAvailable();
+
+    /**
+     * Wallet cards may not be displayed on the lock screen if the user has opted to hide
+     * notifications or sensitive content on the lock screen.
+     * <ul>
+     *     <li>The device is not provisioned, ie user setup is incomplete</li>
+     *     <li>If the wallet feature has been disabled by the user</li>
+     *     <li>If the phone has been put into lockdown mode</li>
+     * </ul>
+     *
+     * <p>
+     * Quick Access Wallet implementers should call this method before calling
+     * {@link #getWalletCards} if the device is currently locked.
+     *
+     * @return true if cards may be displayed on the lock screen.
+     */
+    boolean isWalletFeatureAvailableWhenDeviceLocked();
 
     /**
      * Get wallet cards from the {@link QuickAccessWalletService}.
      */
     void getWalletCards(
             @NonNull GetWalletCardsRequest request,
-            @NonNull Consumer<GetWalletCardsResponse> onSuccessListener,
-            @NonNull Consumer<GetWalletCardsError> onFailureListener);
+            @NonNull OnWalletCardsRetrievedCallback callback);
+
+    /**
+     * Callback for getWalletCards
+     */
+    interface OnWalletCardsRetrievedCallback {
+        void onWalletCardsRetrieved(@NonNull GetWalletCardsResponse response);
+
+        void onWalletCardRetrievalError(@NonNull GetWalletCardsError error);
+    }
 
     /**
      * Notify the {@link QuickAccessWalletService} service that a wallet card was selected.
@@ -65,12 +113,24 @@ public interface QuickAccessWalletClient {
     /**
      * Unregister event listener.
      */
-    void registerWalletServiceEventListener(Consumer<WalletServiceEvent> listener);
+    void addWalletServiceEventListener(@NonNull WalletServiceEventListener listener);
 
     /**
      * Unregister event listener
      */
-    void unregisterWalletServiceEventListener(Consumer<WalletServiceEvent> listener);
+    void removeWalletServiceEventListener(@NonNull WalletServiceEventListener listener);
+
+    /**
+     * A listener for {@link WalletServiceEvent walletServiceEvents}
+     */
+    interface WalletServiceEventListener {
+        void onWalletServiceEvent(@NonNull WalletServiceEvent event);
+    }
+
+    /**
+     * Unregister all event listeners and disconnect from the service.
+     */
+    void disconnect();
 
     /**
      * The manifest entry for the QuickAccessWalletService may also publish information about the
@@ -78,12 +138,12 @@ public interface QuickAccessWalletClient {
      * application.
      */
     @Nullable
-    Intent getWalletActivity();
+    Intent createWalletIntent();
 
     /**
      * The manifest entry for the {@link QuickAccessWalletService} may publish the activity that
      * hosts the settings
      */
     @Nullable
-    Intent getSettingsActivity();
+    Intent createWalletSettingsIntent();
 }

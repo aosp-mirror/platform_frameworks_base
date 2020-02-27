@@ -50,11 +50,13 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.ParsableByteArray;
+import com.google.android.exoplayer2.video.ColorInfo;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -374,13 +376,13 @@ public final class MediaParser {
     }
 
     /**
-     * Thrown if all extractors implementations provided to {@link #create} failed to sniff the
-     * input content.
+     * Thrown if all parser implementations provided to {@link #create} failed to sniff the input
+     * content.
      */
     public static final class UnrecognizedInputFormatException extends IOException {
 
         /**
-         * Creates a new instance which signals that the extractors with the given names failed to
+         * Creates a new instance which signals that the parsers with the given names failed to
          * parse the input.
          */
         @NonNull
@@ -388,7 +390,7 @@ public final class MediaParser {
         private static UnrecognizedInputFormatException createForExtractors(
                 @NonNull String... extractorNames) {
             StringBuilder builder = new StringBuilder();
-            builder.append("None of the available extractors ( ");
+            builder.append("None of the available parsers ( ");
             builder.append(extractorNames[0]);
             for (int i = 1; i < extractorNames.length; i++) {
                 builder.append(", ");
@@ -403,17 +405,149 @@ public final class MediaParser {
         }
     }
 
+    // Public constants.
+
+    /**
+     * Sets whether constant bitrate seeking should be enabled for exo.AdtsParser. {@code boolean}
+     * expected. Default value is {@code false}.
+     */
+    public static final String PARAMETER_ADTS_ENABLE_CBR_SEEKING =
+            "exo.AdtsParser.enableCbrSeeking";
+    /**
+     * Sets whether constant bitrate seeking should be enabled for exo.AmrParser. {@code boolean}
+     * expected. Default value is {@code false}.
+     */
+    public static final String PARAMETER_AMR_ENABLE_CBR_SEEKING = "exo.AmrParser.enableCbrSeeking";
+    /**
+     * Sets whether the ID3 track should be disabled for exo.FlacParser. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_FLAC_DISABLE_ID3 = "exo.FlacParser.disableId3";
+    /**
+     * Sets whether exo.FragmentedMp4Parser should ignore edit lists. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_FMP4_IGNORE_EDIT_LISTS =
+            "exo.FragmentedMp4Parser.ignoreEditLists";
+    /**
+     * Sets whether exo.FragmentedMp4Parser should ignore the tfdt box. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_FMP4_IGNORE_TFDT_BOX =
+            "exo.FragmentedMp4Parser.ignoreTfdtBox";
+    /**
+     * Sets whether exo.FragmentedMp4Parser should treat all video frames as key frames. {@code
+     * boolean} expected. Default value is {@code false}.
+     */
+    public static final String PARAMETER_FMP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES =
+            "exo.FragmentedMp4Parser.treatVideoFramesAsKeyframes";
+    /**
+     * Sets whether exo.MatroskaParser should avoid seeking to the cues element. {@code boolean}
+     * expected. Default value is {@code false}.
+     *
+     * <p>If this flag is enabled and the cues element occurs after the first cluster, then the
+     * media is treated as unseekable.
+     */
+    public static final String PARAMETER_MATROSKA_DISABLE_CUES_SEEKING =
+            "exo.MatroskaParser.disableCuesSeeking";
+    /**
+     * Sets whether the ID3 track should be disabled for exo.Mp3Parser. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_MP3_DISABLE_ID3 = "exo.Mp3Parser.disableId3";
+    /**
+     * Sets whether constant bitrate seeking should be enabled for exo.Mp3Parser. {@code boolean}
+     * expected. Default value is {@code false}.
+     */
+    public static final String PARAMETER_MP3_ENABLE_CBR_SEEKING = "exo.Mp3Parser.enableCbrSeeking";
+    /**
+     * Sets whether exo.Mp3Parser should generate a time-to-byte mapping. {@code boolean} expected.
+     * Default value is {@code false}.
+     *
+     * <p>Enabling this flag may require to scan a significant portion of the file to compute a seek
+     * point. Therefore, it should only be used if:
+     *
+     * <ul>
+     *   <li>the file is small, or
+     *   <li>the bitrate is variable (or the type of bitrate is unknown) and the seeking metadata
+     *       provided in the file is not precise enough (or is not present).
+     * </ul>
+     */
+    public static final String PARAMETER_MP3_ENABLE_INDEX_SEEKING =
+            "exo.Mp3Parser.enableIndexSeeking";
+    /**
+     * Sets whether exo.Mp4Parser should ignore edit lists. {@code boolean} expected. Default value
+     * is {@code false}.
+     */
+    public static final String PARAMETER_MP4_IGNORE_EDIT_LISTS = "exo.Mp4Parser.ignoreEditLists";
+    /**
+     * Sets the operation mode for exo.TsParser. {@code String} expected. Valid values are {@code
+     * "single_pmt"}, {@code "multi_pmt"}, and {@code "hls"}. Default value is {@code "single_pmt"}.
+     *
+     * <p>The operation modes alter the way exo.TsParser behaves so that it can handle certain kinds
+     * of commonly-occurring malformed media.
+     *
+     * <ul>
+     *   <li>{@code "single_pmt"}: Only the first found PMT is parsed. Others are ignored, even if
+     *       more PMTs are declared in the PAT.
+     *   <li>{@code "multi_pmt"}: Behave as described in ISO/IEC 13818-1.
+     *   <li>{@code "hls"}: Enable {@code "single_pmt"} mode, and ignore continuity counters.
+     * </ul>
+     */
+    public static final String PARAMETER_TS_MODE = "exo.TsParser.mode";
+    /**
+     * Sets whether exo.TsParser should treat samples consisting of non-IDR I slices as
+     * synchronization samples (key-frames). {@code boolean} expected. Default value is {@code
+     * false}.
+     */
+    public static final String PARAMETER_TS_ALLOW_NON_IDR_AVC_KEYFRAMES =
+            "exo.TsParser.allowNonIdrAvcKeyframes";
+    /**
+     * Sets whether exo.TsParser should ignore AAC elementary streams. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_TS_IGNORE_AAC_STREAM = "exo.TsParser.ignoreAacStream";
+    /**
+     * Sets whether exo.TsParser should ignore AVC elementary streams. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_TS_IGNORE_AVC_STREAM = "exo.TsParser.ignoreAvcStream";
+    /**
+     * Sets whether exo.TsParser should ignore splice information streams. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM =
+            "exo.TsParser.ignoreSpliceInfoStream";
+    /**
+     * Sets whether exo.TsParser should split AVC stream into access units based on slice headers.
+     * {@code boolean} expected. Default value is {@code false}.
+     *
+     * <p>This flag should be left disabled if the stream contains access units delimiters in order
+     * to avoid unnecessary computational costs.
+     */
+    public static final String PARAMETER_TS_DETECT_ACCESS_UNITS =
+            "exo.TsParser.ignoreDetectAccessUnits";
+    /**
+     * Sets whether exo.TsParser should handle HDMV DTS audio streams. {@code boolean} expected.
+     * Default value is {@code false}.
+     *
+     * <p>Enabling this flag will disable the detection of SCTE subtitles.
+     */
+    public static final String PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS =
+            "exo.TsParser.enableHdmvDtsAudioStreams";
+
     // Private constants.
 
     private static final Map<String, ExtractorFactory> EXTRACTOR_FACTORIES_BY_NAME;
+    private static final Map<String, Class> EXPECTED_TYPE_BY_PARAMETER_NAME;
 
     // Instance creation methods.
 
     /**
-     * Creates an instance backed by the extractor with the given {@code name}. The returned
-     * instance will attempt extraction without sniffing the content.
+     * Creates an instance backed by the parser with the given {@code name}. The returned instance
+     * will attempt parsing without sniffing the content.
      *
-     * @param name The name of the extractor that will be associated with the created instance.
+     * @param name The name of the parser that will be associated with the created instance.
      * @param outputConsumer The {@link OutputConsumer} to which track data and samples are pushed.
      * @return A new instance.
      * @throws IllegalArgumentException If an invalid name is provided.
@@ -427,42 +561,43 @@ public final class MediaParser {
     }
 
     /**
-     * Creates an instance whose backing extractor will be selected by sniffing the content during
-     * the first {@link #advance} call. Extractor implementations will sniff the content in order of
-     * appearance in {@code extractorNames}.
+     * Creates an instance whose backing parser will be selected by sniffing the content during the
+     * first {@link #advance} call. Parser implementations will sniff the content in order of
+     * appearance in {@code parserNames}.
      *
      * @param outputConsumer The {@link OutputConsumer} to which extracted data is output.
-     * @param extractorNames The names of the extractors to sniff the content with. If empty, a
-     *     default array of names is used.
+     * @param parserNames The names of the parsers to sniff the content with. If empty, a default
+     *     array of names is used.
      * @return A new instance.
      */
     @NonNull
     public static MediaParser create(
-            @NonNull OutputConsumer outputConsumer, @NonNull String... extractorNames) {
-        assertValidNames(extractorNames);
-        if (extractorNames.length == 0) {
-            extractorNames = EXTRACTOR_FACTORIES_BY_NAME.keySet().toArray(new String[0]);
+            @NonNull OutputConsumer outputConsumer, @NonNull String... parserNames) {
+        assertValidNames(parserNames);
+        if (parserNames.length == 0) {
+            parserNames = EXTRACTOR_FACTORIES_BY_NAME.keySet().toArray(new String[0]);
         }
-        return new MediaParser(outputConsumer, /* sniff= */ true, extractorNames);
+        return new MediaParser(outputConsumer, /* sniff= */ true, parserNames);
     }
 
     // Misc static methods.
 
     /**
-     * Returns an immutable list with the names of the extractors that are suitable for container
+     * Returns an immutable list with the names of the parsers that are suitable for container
      * formats with the given {@link MediaFormat}.
      *
      * <p>TODO: List which properties are taken into account. E.g. MimeType.
      */
     @NonNull
-    public static List<String> getExtractorNames(@NonNull MediaFormat mediaFormat) {
+    public static List<String> getParserNames(@NonNull MediaFormat mediaFormat) {
         throw new UnsupportedOperationException();
     }
 
     // Private fields.
 
+    private final Map<String, Object> mParserParameters;
     private final OutputConsumer mOutputConsumer;
-    private final String[] mExtractorNamesPool;
+    private final String[] mParserNamesPool;
     private final PositionHolder mPositionHolder;
     private final InputReadingDataSource mDataSource;
     private final ExtractorInputAdapter mScratchExtractorInputAdapter;
@@ -476,18 +611,63 @@ public final class MediaParser {
     // Public methods.
 
     /**
-     * Returns the name of the backing extractor implementation.
+     * Sets parser-specific parameters which allow customizing behavior.
+     *
+     * <p>Must be called before the first call to {@link #advance}.
+     *
+     * @param parameterName The name of the parameter to set. See {@code PARAMETER_*} constants for
+     *     documentation on possible values.
+     * @param value The value to set for the given {@code parameterName}. See {@code PARAMETER_*}
+     *     constants for documentation on the expected types.
+     * @return This instance, for convenience.
+     * @throws IllegalStateException If called after calling {@link #advance} on the same instance.
+     */
+    @NonNull
+    public MediaParser setParameter(@NonNull String parameterName, @NonNull Object value) {
+        if (mExtractor != null) {
+            throw new IllegalStateException(
+                    "setParameters() must be called before the first advance() call.");
+        }
+        Class expectedType = EXPECTED_TYPE_BY_PARAMETER_NAME.get(parameterName);
+        // Ignore parameter names that are not contained in the map, in case the client is passing
+        // a parameter that is being added in a future version of this library.
+        if (expectedType != null && !expectedType.isInstance(value)) {
+            throw new IllegalArgumentException(
+                    parameterName
+                            + " expects a "
+                            + expectedType.getSimpleName()
+                            + " but a "
+                            + value.getClass().getSimpleName()
+                            + " was passed.");
+        }
+        mParserParameters.put(parameterName, value);
+        return this;
+    }
+
+    /**
+     * Returns whether the given {@code parameterName} is supported by this parser.
+     *
+     * @param parameterName The parameter name to check support for. One of the {@code PARAMETER_*}
+     *     constants.
+     * @return Whether the given {@code parameterName} is supported.
+     */
+    public boolean supportsParameter(@NonNull String parameterName) {
+        return EXPECTED_TYPE_BY_PARAMETER_NAME.containsKey(parameterName);
+    }
+
+    /**
+     * Returns the name of the backing parser implementation.
      *
      * <p>If this instance was creating using {@link #createByName}, the provided name is returned.
      * If this instance was created using {@link #create}, this method will return null until the
-     * first call to {@link #advance}, after which the name of the backing extractor implementation
-     * is returned.
+     * first call to {@link #advance}, after which the name of the backing parser implementation is
+     * returned.
      *
-     * @return The name of the backing extractor implementation, or null if the backing extractor
+     * @return The name of the backing parser implementation, or null if the backing parser
      *     implementation has not yet been selected.
      */
     @Nullable
-    public String getExtractorName() {
+    public String getParserName() {
         return mExtractorName;
     }
 
@@ -498,7 +678,7 @@ public final class MediaParser {
      * <p>This method will block until some progress has been made.
      *
      * <p>If this instance was created using {@link #create}. the first call to this method will
-     * sniff the content with the extractors with the provided names.
+     * sniff the content with the parsers with the provided names.
      *
      * @param seekableInputReader The {@link SeekableInputReader} from which to obtain the media
      *     container data.
@@ -519,13 +699,15 @@ public final class MediaParser {
         }
         mDataSource.mInputReader = seekableInputReader;
 
-        if (mExtractor == null) {
-            for (String extractorName : mExtractorNamesPool) {
-                Extractor extractor =
-                        EXTRACTOR_FACTORIES_BY_NAME.get(extractorName).createInstance();
+        // TODO: Apply parameters when creating extractor instances.
+        if (mExtractorName != null) {
+            mExtractor = EXTRACTOR_FACTORIES_BY_NAME.get(mExtractorName).createInstance();
+        } else if (mExtractor == null) {
+            for (String parserName : mParserNamesPool) {
+                Extractor extractor = EXTRACTOR_FACTORIES_BY_NAME.get(parserName).createInstance();
                 try {
                     if (extractor.sniff(mExtractorInput)) {
-                        mExtractorName = extractorName;
+                        mExtractorName = parserName;
                         mExtractor = extractor;
                         mExtractor.init(new ExtractorOutputAdapter());
                         break;
@@ -539,7 +721,7 @@ public final class MediaParser {
                 }
             }
             if (mExtractor == null) {
-                throw UnrecognizedInputFormatException.createForExtractors(mExtractorNamesPool);
+                throw UnrecognizedInputFormatException.createForExtractors(mParserNamesPool);
             }
             return true;
         }
@@ -585,22 +767,22 @@ public final class MediaParser {
      * Releases any acquired resources.
      *
      * <p>After calling this method, this instance becomes unusable and no other methods should be
-     * invoked. DESIGN NOTE: Should be removed. There shouldn't be any resource for releasing.
+     * invoked.
      */
     public void release() {
+        // TODO: Dump media metrics here.
         mExtractorInput = null;
         mExtractor = null;
     }
 
     // Private methods.
 
-    private MediaParser(
-            OutputConsumer outputConsumer, boolean sniff, String... extractorNamesPool) {
+    private MediaParser(OutputConsumer outputConsumer, boolean sniff, String... parserNamesPool) {
+        mParserParameters = new HashMap<>();
         mOutputConsumer = outputConsumer;
-        mExtractorNamesPool = extractorNamesPool;
+        mParserNamesPool = parserNamesPool;
         if (!sniff) {
-            mExtractorName = extractorNamesPool[0];
-            mExtractor = EXTRACTOR_FACTORIES_BY_NAME.get(mExtractorName).createInstance();
+            mExtractorName = parserNamesPool[0];
         }
         mPositionHolder = new PositionHolder();
         mDataSource = new InputReadingDataSource();
@@ -810,70 +992,91 @@ public final class MediaParser {
     // Private static methods.
 
     private static MediaFormat toMediaFormat(Format format) {
-
-        // TODO: Add if (value != Format.NO_VALUE);
-
         MediaFormat result = new MediaFormat();
-        result.setInteger(MediaFormat.KEY_BIT_RATE, format.bitrate);
-        result.setInteger(MediaFormat.KEY_CHANNEL_COUNT, format.channelCount);
-        if (format.colorInfo != null) {
-            result.setInteger(MediaFormat.KEY_COLOR_TRANSFER, format.colorInfo.colorTransfer);
-            result.setInteger(MediaFormat.KEY_COLOR_RANGE, format.colorInfo.colorRange);
-            result.setInteger(MediaFormat.KEY_COLOR_STANDARD, format.colorInfo.colorSpace);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_BIT_RATE, format.bitrate);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_CHANNEL_COUNT, format.channelCount);
+
+        ColorInfo colorInfo = format.colorInfo;
+        if (colorInfo != null) {
+            setOptionalMediaFormatInt(
+                    result, MediaFormat.KEY_COLOR_TRANSFER, colorInfo.colorTransfer);
+            setOptionalMediaFormatInt(result, MediaFormat.KEY_COLOR_RANGE, colorInfo.colorRange);
+            setOptionalMediaFormatInt(result, MediaFormat.KEY_COLOR_STANDARD, colorInfo.colorSpace);
+
             if (format.colorInfo.hdrStaticInfo != null) {
                 result.setByteBuffer(
                         MediaFormat.KEY_HDR_STATIC_INFO,
                         ByteBuffer.wrap(format.colorInfo.hdrStaticInfo));
             }
         }
-        result.setString(MediaFormat.KEY_MIME, format.sampleMimeType);
-        result.setFloat(MediaFormat.KEY_FRAME_RATE, format.frameRate);
-        result.setInteger(MediaFormat.KEY_WIDTH, format.width);
-        result.setInteger(MediaFormat.KEY_HEIGHT, format.height);
+
+        setOptionalMediaFormatString(result, MediaFormat.KEY_MIME, format.sampleMimeType);
+        setOptionalMediaFormatString(result, MediaFormat.KEY_CODECS_STRING, format.codecs);
+        if (format.frameRate != Format.NO_VALUE) {
+            result.setFloat(MediaFormat.KEY_FRAME_RATE, format.frameRate);
+        }
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_WIDTH, format.width);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_HEIGHT, format.height);
+
         List<byte[]> initData = format.initializationData;
         if (initData != null) {
             for (int i = 0; i < initData.size(); i++) {
                 result.setByteBuffer("csd-" + i, ByteBuffer.wrap(initData.get(i)));
             }
         }
-        result.setString(MediaFormat.KEY_LANGUAGE, format.language);
-        result.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, format.maxInputSize);
-        result.setInteger(MediaFormat.KEY_PCM_ENCODING, format.pcmEncoding);
-        result.setInteger(MediaFormat.KEY_ROTATION, format.rotationDegrees);
-        result.setInteger(MediaFormat.KEY_SAMPLE_RATE, format.sampleRate);
+        setOptionalMediaFormatString(result, MediaFormat.KEY_LANGUAGE, format.language);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_MAX_INPUT_SIZE, format.maxInputSize);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_PCM_ENCODING, format.pcmEncoding);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_ROTATION, format.rotationDegrees);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_SAMPLE_RATE, format.sampleRate);
 
         int selectionFlags = format.selectionFlags;
-        // We avoid setting selection flags in the MediaFormat, unless explicitly signaled by the
-        // extractor.
-        if ((selectionFlags & C.SELECTION_FLAG_AUTOSELECT) != 0) {
-            result.setInteger(MediaFormat.KEY_IS_AUTOSELECT, 1);
-        }
-        if ((selectionFlags & C.SELECTION_FLAG_DEFAULT) != 0) {
-            result.setInteger(MediaFormat.KEY_IS_DEFAULT, 1);
-        }
-        if ((selectionFlags & C.SELECTION_FLAG_FORCED) != 0) {
-            result.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, 1);
+        result.setInteger(
+                MediaFormat.KEY_IS_AUTOSELECT, selectionFlags & C.SELECTION_FLAG_AUTOSELECT);
+        result.setInteger(MediaFormat.KEY_IS_DEFAULT, selectionFlags & C.SELECTION_FLAG_DEFAULT);
+        result.setInteger(
+                MediaFormat.KEY_IS_FORCED_SUBTITLE, selectionFlags & C.SELECTION_FLAG_FORCED);
+
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_ENCODER_DELAY, format.encoderDelay);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_ENCODER_PADDING, format.encoderPadding);
+
+        if (format.pixelWidthHeightRatio != Format.NO_VALUE && format.pixelWidthHeightRatio != 0) {
+            int parWidth = 1;
+            int parHeight = 1;
+            if (format.pixelWidthHeightRatio < 1.0f) {
+                parHeight = 1 << 30;
+                parWidth = (int) (format.pixelWidthHeightRatio * parHeight);
+            } else if (format.pixelWidthHeightRatio > 1.0f) {
+                parWidth = 1 << 30;
+                parHeight = (int) (parWidth / format.pixelWidthHeightRatio);
+            }
+            result.setInteger(MediaFormat.KEY_PIXEL_ASPECT_RATIO_WIDTH, parWidth);
+            result.setInteger(MediaFormat.KEY_PIXEL_ASPECT_RATIO_HEIGHT, parHeight);
+            result.setFloat("pixel-width-height-ratio-float", format.pixelWidthHeightRatio);
         }
 
         // LACK OF SUPPORT FOR:
         //    format.accessibilityChannel;
-        //    format.codecs;
         //    format.containerMimeType;
-        //    format.drmInitData;
-        //    format.encoderDelay;
-        //    format.encoderPadding;
         //    format.id;
         //    format.metadata;
-        //    format.pixelWidthHeightRatio;
         //    format.roleFlags;
         //    format.stereoMode;
         //    format.subsampleOffsetUs;
         return result;
     }
 
-    private static int toFrameworkFlags(int flags) {
-        // TODO: Implement.
-        return 0;
+    private static void setOptionalMediaFormatInt(MediaFormat mediaFormat, String key, int value) {
+        if (value != Format.NO_VALUE) {
+            mediaFormat.setInteger(key, value);
+        }
+    }
+
+    private static void setOptionalMediaFormatString(
+            MediaFormat mediaFormat, String key, @Nullable String value) {
+        if (value != null) {
+            mediaFormat.setString(key, value);
+        }
     }
 
     private static DrmInitData toFrameworkDrmInitData(
@@ -899,7 +1102,7 @@ public final class MediaParser {
                 throw new IllegalArgumentException(
                         "Invalid extractor name: "
                                 + name
-                                + ". Supported extractors are: "
+                                + ". Supported parsers are: "
                                 + TextUtils.join(", ", EXTRACTOR_FACTORIES_BY_NAME.keySet())
                                 + ".");
             }
@@ -911,20 +1114,44 @@ public final class MediaParser {
     static {
         // Using a LinkedHashMap to keep the insertion order when iterating over the keys.
         LinkedHashMap<String, ExtractorFactory> extractorFactoriesByName = new LinkedHashMap<>();
-        extractorFactoriesByName.put("exo.Ac3Extractor", Ac3Extractor::new);
-        extractorFactoriesByName.put("exo.Ac4Extractor", Ac4Extractor::new);
-        extractorFactoriesByName.put("exo.AdtsExtractor", AdtsExtractor::new);
-        extractorFactoriesByName.put("exo.AmrExtractor", AmrExtractor::new);
-        extractorFactoriesByName.put("exo.FlacExtractor", FlacExtractor::new);
-        extractorFactoriesByName.put("exo.FlvExtractor", FlvExtractor::new);
-        extractorFactoriesByName.put("exo.FragmentedMp4Extractor", FragmentedMp4Extractor::new);
-        extractorFactoriesByName.put("exo.MatroskaExtractor", MatroskaExtractor::new);
-        extractorFactoriesByName.put("exo.Mp3Extractor", Mp3Extractor::new);
-        extractorFactoriesByName.put("exo.Mp4Extractor", Mp4Extractor::new);
-        extractorFactoriesByName.put("exo.OggExtractor", OggExtractor::new);
-        extractorFactoriesByName.put("exo.PsExtractor", PsExtractor::new);
-        extractorFactoriesByName.put("exo.TsExtractor", TsExtractor::new);
-        extractorFactoriesByName.put("exo.WavExtractor", WavExtractor::new);
+        // Parsers are ordered to match ExoPlayer's DefaultExtractorsFactory extractor ordering,
+        // which in turn aims to minimize the chances of incorrect extractor selections.
+        extractorFactoriesByName.put("exo.MatroskaParser", MatroskaExtractor::new);
+        extractorFactoriesByName.put("exo.FragmentedMp4Parser", FragmentedMp4Extractor::new);
+        extractorFactoriesByName.put("exo.Mp4Parser", Mp4Extractor::new);
+        extractorFactoriesByName.put("exo.Mp3Parser", Mp3Extractor::new);
+        extractorFactoriesByName.put("exo.AdtsParser", AdtsExtractor::new);
+        extractorFactoriesByName.put("exo.Ac3Parser", Ac3Extractor::new);
+        extractorFactoriesByName.put("exo.TsParser", TsExtractor::new);
+        extractorFactoriesByName.put("exo.FlvParser", FlvExtractor::new);
+        extractorFactoriesByName.put("exo.OggParser", OggExtractor::new);
+        extractorFactoriesByName.put("exo.PsParser", PsExtractor::new);
+        extractorFactoriesByName.put("exo.WavParser", WavExtractor::new);
+        extractorFactoriesByName.put("exo.AmrParser", AmrExtractor::new);
+        extractorFactoriesByName.put("exo.Ac4Parser", Ac4Extractor::new);
+        extractorFactoriesByName.put("exo.FlacParser", FlacExtractor::new);
         EXTRACTOR_FACTORIES_BY_NAME = Collections.unmodifiableMap(extractorFactoriesByName);
+
+        HashMap<String, Class> expectedTypeByParameterName = new HashMap<>();
+        expectedTypeByParameterName.put(PARAMETER_ADTS_ENABLE_CBR_SEEKING, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_AMR_ENABLE_CBR_SEEKING, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_FLAC_DISABLE_ID3, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_FMP4_IGNORE_EDIT_LISTS, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_FMP4_IGNORE_TFDT_BOX, Boolean.class);
+        expectedTypeByParameterName.put(
+                PARAMETER_FMP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MATROSKA_DISABLE_CUES_SEEKING, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MP3_DISABLE_ID3, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MP3_ENABLE_CBR_SEEKING, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MP3_ENABLE_INDEX_SEEKING, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MP4_IGNORE_EDIT_LISTS, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_MODE, String.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_ALLOW_NON_IDR_AVC_KEYFRAMES, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_IGNORE_AAC_STREAM, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_IGNORE_AVC_STREAM, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_DETECT_ACCESS_UNITS, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS, Boolean.class);
+        EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
     }
 }

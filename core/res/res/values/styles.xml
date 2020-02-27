@@ -1482,22 +1482,6 @@ please see styles_device_defaults.xml.
         <item name="android:windowExitAnimation">@anim/slide_out_down</item>
     </style>
 
-    <!-- The style for the Autofill inline suggestion chip. -->
-    <!-- @hide -->
-    <style name="AutofillInlineSuggestionChip">
-        <item name="background">@drawable/autofill_dataset_picker_background</item>
-    </style>
-
-    <!-- @hide -->
-    <style name="AutofillInlineSuggestionTitle">
-        <item name="android:textAppearance">@style/TextAppearance</item>
-    </style>
-
-    <!-- @hide -->
-    <style name="AutofillInlineSuggestionSubtitle">
-        <item name="android:textAppearance">@style/TextAppearance.Small</item>
-    </style>
-
     <!-- The style for the container of media actions in a notification. -->
     <!-- @hide -->
     <style name="NotificationMediaActionContainer">

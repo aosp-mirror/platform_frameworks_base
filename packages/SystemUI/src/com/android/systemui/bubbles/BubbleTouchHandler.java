@@ -24,53 +24,26 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 
 /**
  * Handles interpreting touches on a {@link BubbleStackView}. This includes expanding, collapsing,
  * dismissing, and flings.
  */
 class BubbleTouchHandler implements View.OnTouchListener {
-    /** Velocity required to dismiss the stack without dragging it into the dismiss target. */
-    private static final float STACK_DISMISS_MIN_VELOCITY = 4000f;
-
-    /**
-     * Velocity required to dismiss an individual bubble without dragging it into the dismiss
-     * target.
-     *
-     * This is higher than the stack dismiss velocity since unlike the stack, a downward fling could
-     * also be an attempted gesture to return the bubble to the row of expanded bubbles, which would
-     * usually be below the dragged bubble. By increasing the required velocity, it's less likely
-     * that the user is trying to drop it back into the row vs. fling it away.
-     */
-    private static final float INDIVIDUAL_BUBBLE_DISMISS_MIN_VELOCITY = 6000f;
-
-    /**
-     * When the stack is flung towards the bottom of the screen, it'll be dismissed if it's flung
-     * towards the center of the screen (where the dismiss target is). This value is the width of
-     * the target area to be considered 'towards the target'. For example 50% means that the stack
-     * needs to be flung towards the middle 50%, and the 25% on the left and right sides won't
-     * count.
-     */
-    private static final float DISMISS_FLING_TARGET_WIDTH_PERCENT = 0.5f;
 
     private final PointF mTouchDown = new PointF();
     private final PointF mViewPositionOnTouchDown = new PointF();
     private final BubbleStackView mStack;
     private final BubbleData mBubbleData;
-    private final Context mContext;
 
     private BubbleController mController = Dependency.get(BubbleController.class);
 
     private boolean mMovedEnough;
     private int mTouchSlopSquared;
     private VelocityTracker mVelocityTracker;
-    private Runnable mShowBubbleMenuRunnable;
 
     /** View that was initially touched, when we received the first ACTION_DOWN event. */
     private View mTouchedView;
-    /** Whether the current touched view is in the dismiss target. */
-    private boolean mInDismissTarget;
 
     BubbleTouchHandler(BubbleStackView stackView,
             BubbleData bubbleData, Context context) {
@@ -78,7 +51,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
         mTouchSlopSquared = touchSlop * touchSlop;
         mBubbleData = bubbleData;
         mStack = stackView;
-        mContext = context;
     }
 
     @Override
@@ -95,15 +67,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
         // anything, collapse the stack.
         if (action == MotionEvent.ACTION_OUTSIDE || mTouchedView == null) {
             mBubbleData.setExpanded(false);
-            mStack.hideBubbleMenu();
             resetForNextGesture();
-            return false;
-        }
-
-        if (mTouchedView instanceof BubbleMenuView) {
-            mStack.hideBubbleMenu();
-            resetForNextGesture();
-            mStack.sendScreenshotToBubble(mBubbleData.getSelectedBubble());
             return false;
         }
 
@@ -111,12 +75,8 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 && !(mTouchedView instanceof BubbleStackView)
                 && !(mTouchedView instanceof BubbleFlyoutView)) {
 
-            if (mTouchedView.getId() == R.id.bubble_overflow_button) {
-                mStack.showOverflow();
-            }
             // Not touching anything touchable, but we shouldn't collapse (e.g. touching edge
             // of expanded view).
-            mStack.hideBubbleMenu();
             resetForNextGesture();
             return false;
         }
@@ -138,27 +98,37 @@ class BubbleTouchHandler implements View.OnTouchListener {
 
                 if (isStack) {
                     mViewPositionOnTouchDown.set(mStack.getStackPosition());
+
+                    // Dismiss the entire stack if it's released in the dismiss target.
+                    mStack.setReleasedInDismissTargetAction(
+                            () -> mController.dismissStack(BubbleController.DISMISS_USER_GESTURE));
                     mStack.onDragStart();
-                    if (!mStack.isShowingBubbleMenu() && !mStack.isExpanded()
-                            && BubbleExperimentConfig.allowBubbleScreenshotMenu(mContext)) {
-                        mShowBubbleMenuRunnable = mStack::showBubbleMenu;
-                        mStack.postDelayed(mShowBubbleMenuRunnable,
-                                ViewConfiguration.getLongPressTimeout());
-                    }
+                    mStack.passEventToMagnetizedObject(event);
                 } else if (isFlyout) {
                     mStack.onFlyoutDragStart();
                 } else {
                     mViewPositionOnTouchDown.set(
                             mTouchedView.getTranslationX(), mTouchedView.getTranslationY());
+
+                    // Dismiss only the dragged-out bubble if it's released in the target.
+                    final String individualBubbleKey = ((BadgedImageView) mTouchedView).getKey();
+                    mStack.setReleasedInDismissTargetAction(() -> {
+                        final Bubble bubble =
+                                mBubbleData.getBubbleWithKey(individualBubbleKey);
+                        // bubble can be null if the user is in the middle of
+                        // dismissing the bubble, but the app also sent a cancel
+                        if (bubble != null) {
+                            mController.removeBubble(bubble.getEntry(),
+                                    BubbleController.DISMISS_USER_GESTURE);
+                        }
+                    });
+
                     mStack.onBubbleDragStart(mTouchedView);
+                    mStack.passEventToMagnetizedObject(event);
                 }
 
                 break;
             case MotionEvent.ACTION_MOVE:
-                // block all further touch inputs once the menu is open
-                if (mStack.isShowingBubbleMenu()) {
-                    return true;
-                }
                 trackMovement(event);
                 final float deltaX = rawX - mTouchDown.x;
                 final float deltaY = rawY - mTouchDown.y;
@@ -168,28 +138,16 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 }
 
                 if (mMovedEnough) {
-                    mStack.removeCallbacks(mShowBubbleMenuRunnable);
-                    if (isStack) {
-                        mStack.onDragged(viewX, viewY);
-                    } else if (isFlyout) {
+                    if (isFlyout) {
                         mStack.onFlyoutDragged(deltaX);
-                    } else {
-                        mStack.onBubbleDragged(mTouchedView, viewX, viewY);
-                    }
-                }
-
-                final boolean currentlyInDismissTarget = mStack.isInDismissTarget(event);
-                if (currentlyInDismissTarget != mInDismissTarget) {
-                    mInDismissTarget = currentlyInDismissTarget;
-
-                    mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);
-                    final float velX = mVelocityTracker.getXVelocity();
-                    final float velY = mVelocityTracker.getYVelocity();
-
-                    // If the touch event is within the dismiss target, magnet the stack to it.
-                    if (!isFlyout) {
-                        mStack.animateMagnetToDismissTarget(
-                                mTouchedView, mInDismissTarget, viewX, viewY, velX, velY);
+                    } else if (!mStack.passEventToMagnetizedObject(event)) {
+                        // If the magnetic target doesn't consume the event, drag the stack or
+                        // bubble.
+                        if (isStack) {
+                            mStack.onDragged(viewX, viewY);
+                        } else {
+                            mStack.onBubbleDragged(mTouchedView, viewX, viewY);
+                        }
                     }
                 }
                 break;
@@ -199,48 +157,26 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 break;
 
             case MotionEvent.ACTION_UP:
-                if (mStack.isShowingBubbleMenu()) {
-                    resetForNextGesture();
-                    return true;
-                } else {
-                    mStack.removeCallbacks(mShowBubbleMenuRunnable);
-                }
                 trackMovement(event);
                 mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);
                 final float velX = mVelocityTracker.getXVelocity();
                 final float velY = mVelocityTracker.getYVelocity();
 
-                final boolean shouldDismiss =
-                        isStack
-                                ? mInDismissTarget
-                                    || isFastFlingTowardsDismissTarget(rawX, rawY, velX, velY)
-                                : mInDismissTarget
-                                        || velY > INDIVIDUAL_BUBBLE_DISMISS_MIN_VELOCITY;
-
                 if (isFlyout && mMovedEnough) {
                     mStack.onFlyoutDragFinished(rawX - mTouchDown.x /* deltaX */, velX);
-                } else if (shouldDismiss) {
-                    final String individualBubbleKey =
-                            isStack ? null : ((BadgedImageView) mTouchedView).getKey();
-                    mStack.magnetToStackIfNeededThenAnimateDismissal(mTouchedView, velX, velY,
-                            () -> {
-                                if (isStack) {
-                                    mController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
-                                } else {
-                                    mController.removeBubble(
-                                            individualBubbleKey,
-                                            BubbleController.DISMISS_USER_GESTURE);
-                                }
-                            });
                 } else if (isFlyout) {
                     if (!mBubbleData.isExpanded() && !mMovedEnough) {
                         mStack.onFlyoutTapped();
                     }
                 } else if (mMovedEnough) {
-                    if (isStack) {
-                        mStack.onDragFinish(viewX, viewY, velX, velY);
-                    } else {
-                        mStack.onBubbleDragFinish(mTouchedView, viewX, viewY, velX, velY);
+                    if (!mStack.passEventToMagnetizedObject(event)) {
+                        // If the magnetic target didn't consume the event, tell the stack to finish
+                        // the drag.
+                        if (isStack) {
+                            mStack.onDragFinish(viewX, viewY, velX, velY);
+                        } else {
+                            mStack.onBubbleDragFinish(mTouchedView, viewX, viewY, velX, velY);
+                        }
                     }
                 } else if (mTouchedView == mStack.getExpandedBubbleView()) {
                     mBubbleData.setExpanded(false);
@@ -249,44 +185,17 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     mBubbleData.setExpanded(!mBubbleData.isExpanded());
                 } else {
                     final String key = ((BadgedImageView) mTouchedView).getKey();
-                    mBubbleData.setSelectedBubble(mBubbleData.getBubbleWithKey(key));
+                    if (key == BubbleOverflow.KEY) {
+                        mStack.showOverflow();
+                    } else {
+                        mBubbleData.setSelectedBubble(mBubbleData.getBubbleWithKey(key));
+                    }
                 }
-
                 resetForNextGesture();
                 break;
         }
 
         return true;
-    }
-
-    /**
-     * Whether the given touch data represents a powerful fling towards the bottom-center of the
-     * screen (the dismiss target).
-     */
-    private boolean isFastFlingTowardsDismissTarget(
-            float rawX, float rawY, float velX, float velY) {
-        // Not a fling downward towards the target if velocity is zero or negative.
-        if (velY <= 0) {
-            return false;
-        }
-
-        float bottomOfScreenInterceptX = rawX;
-
-        // Only do math if the X velocity is non-zero, otherwise X won't change.
-        if (velX != 0) {
-            // Rise over run...
-            final float slope = velY / velX;
-            // ...y = mx + b, b = y / mx...
-            final float yIntercept = rawY - slope * rawX;
-            // ...calculate the x value when y = bottom of the screen.
-            bottomOfScreenInterceptX = (mStack.getHeight() - yIntercept) / slope;
-        }
-
-        final float dismissTargetWidth =
-                mStack.getWidth() * DISMISS_FLING_TARGET_WIDTH_PERCENT;
-        return velY > STACK_DISMISS_MIN_VELOCITY
-                && bottomOfScreenInterceptX > dismissTargetWidth / 2f
-                && bottomOfScreenInterceptX < mStack.getWidth() - dismissTargetWidth / 2f;
     }
 
     /** Clears all touch-related state. */
@@ -295,9 +204,9 @@ class BubbleTouchHandler implements View.OnTouchListener {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
+
         mTouchedView = null;
         mMovedEnough = false;
-        mInDismissTarget = false;
 
         mStack.onGestureFinished();
     }

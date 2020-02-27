@@ -178,8 +178,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                                                 observer,
                                                 monitor,
                                                 token,
-                                                listener,
-                                                mBackupManagerService.getAllExcludedRestoreKeys()),
+                                                listener),
                                 "RestoreSession.restoreAll()");
                     } finally {
                         Binder.restoreCallingIdentity(oldId);
@@ -272,8 +271,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                                                 token,
                                                 packages,
                                                 /* isSystemRestore */ packages.length > 1,
-                                                listener,
-                                                mBackupManagerService.getExcludedRestoreKeys(packages)),
+                                                listener),
                                 "RestoreSession.restorePackages(" + packages.length + " packages)");
                     } finally {
                         Binder.restoreCallingIdentity(oldId);
@@ -365,8 +363,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                                     monitor,
                                     token,
                                     app,
-                                    listener,
-                                    mBackupManagerService.getExcludedRestoreKeys(app.packageName)),
+                                    listener),
                     "RestoreSession.restorePackage(" + packageName + ")");
         } finally {
             Binder.restoreCallingIdentity(oldId);

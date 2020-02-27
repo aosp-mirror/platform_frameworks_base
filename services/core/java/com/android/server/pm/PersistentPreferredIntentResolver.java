@@ -16,6 +16,9 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
+import android.content.IntentFilter;
+
 import com.android.server.IntentResolver;
 
 public class PersistentPreferredIntentResolver
@@ -23,6 +26,11 @@ public class PersistentPreferredIntentResolver
     @Override
     protected PersistentPreferredActivity[] newArray(int size) {
         return new PersistentPreferredActivity[size];
+    }
+
+    @Override
+    protected IntentFilter getIntentFilter(@NonNull PersistentPreferredActivity input) {
+        return input;
     }
 
     @Override

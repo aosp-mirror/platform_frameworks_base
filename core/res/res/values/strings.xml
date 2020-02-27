@@ -414,6 +414,22 @@
          logging. [CHAR LIMIT=NONE]-->
     <string name="network_logging_notification_text">Your organization manages this device and may monitor network traffic. Tap for details.</string>
 
+    <!-- Content title for a notification. This notification indicates that the device owner has
+         changed the location settings. [CHAR LIMIT=NONE] -->
+    <string name="location_changed_notification_title">Location settings changed by your admin</string>
+    <!-- Content text for a notification. Tapping opens device location settings.
+         [CHAR LIMIT=NONE] -->
+    <string name="location_changed_notification_text">Tap to see your location settings.</string>
+
+    <!-- Feature Id for Country Detector. [CHAR LIMIT=NONE]-->
+    <string name="country_detector">Country Detector</string>
+    <!-- Feature Id for Location service. [CHAR LIMIT=NONE]-->
+    <string name="location_service">Location Service</string>
+    <!-- Feature Id for Sensor Notification service. [CHAR LIMIT=NONE]-->
+    <string name="sensor_notification_service">Sensor Notification Service</string>
+    <!-- Feature Id for Twilight service. [CHAR LIMIT=NONE]-->
+    <string name="twilight_service">Twilight Service</string>
+
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
     <string name="factory_reset_warning">Your device will be erased</string>
@@ -1148,6 +1164,8 @@
     <string name="permlab_vibrate">control vibration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_vibrate">Allows the app to control the vibrator.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_vibrator_state">Allows the app to access the vibrator state.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_callPhone">directly call phone numbers</string>
@@ -1473,6 +1491,8 @@
     <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
     <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
     <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor.</string>
+    <!-- Generic error message shown when fingerprint is not available due to a security vulnerability. [CHAR LIMIT=50] -->
+    <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
@@ -1564,6 +1584,8 @@
     <string name="face_error_not_enrolled">You haven\u2019t set up face unlock.</string>
     <!-- Generic error message shown when the app requests face unlock on a device without a sensor. [CHAR LIMIT=61] -->
     <string name="face_error_hw_not_present">Face unlock is not supported on this device.</string>
+    <!-- Generic error message shown when face unlock is not available due to a security vulnerability. [CHAR LIMIT=50] -->
+    <string name="face_error_security_update_required">Sensor temporarily disabled.</string>
 
     <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>
@@ -3513,6 +3535,12 @@
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_message">Tap to turn off USB debugging</string>
     <string name="adb_active_notification_message" product="tv">Select to disable USB debugging.</string>
+    <!-- Title of notification shown when ADB Wireless is actively connected to the phone. [CHAR LIMIT=NONE] -->
+    <string name="adbwifi_active_notification_title">Wireless debugging connected</string>
+    <!-- Message of notification shown when ADB Wireless is actively connected to the phone. [CHAR LIMIT=NONE] -->
+    <string name="adbwifi_active_notification_message">Tap to turn off wireless debugging</string>
+    <!-- Message of notification shown when ADB Wireless is actively connected to the TV. [CHAR LIMIT=NONE] -->
+    <string name="adbwifi_active_notification_message" product="tv">Select to disable wireless debugging.</string>
 
     <!-- Title of notification shown when Test Harness Mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="test_harness_mode_notification_title">Test Harness Mode enabled</string>
@@ -4362,10 +4390,7 @@
     service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_toogle_warning">
         When the shortcut is on, pressing both volume buttons for 3 seconds will start an
-        accessibility feature.\n\n
-        Current accessibility feature:\n
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g>\n\n
-        You can change the feature in Settings > Accessibility.
+        accessibility feature.
     </string>
 
     <!-- Text in button that edit the accessibility shortcut menu, user can delete
@@ -5333,6 +5358,29 @@
         <xliff:g id="package_name" example="com.android.example">%1$s</xliff:g> has been put into the RESTRICTED bucket</string>
 
     <!-- ResolverActivity - profile tabs -->
+    <!-- Label for the perosnal tab of the share sheet and intent resolver [CHAR LIMIT=NONE] -->
     <string name="resolver_personal_tab">Personal</string>
+    <!-- Label for the work tab of the share sheet and intent resolver [CHAR LIMIT=NONE] -->
     <string name="resolver_work_tab">Work</string>
+    <!-- Label to indicate that the user cannot share with work apps [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_with_work_apps">Can\u2019t share with work apps</string>
+    <!-- Label to indicate that the user cannot share with personal apps [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_with_personal_apps">Can\u2019t share with personal apps</string>
+    <!-- Label to explain to the user that sharing between personal and work apps is not enabled by the IT admin [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_cross_profile_explanation">Your IT admin blocked sharing between personal and work apps</string>
+    <!-- Label to indicate that the user has to turn on work apps in order to access work data [CHAR LIMIT=NONE] -->
+    <string name="resolver_turn_on_work_apps">Turn on work apps</string>
+    <!-- Label to explain that the user has to turn on work apps in order to access work data [CHAR LIMIT=NONE] -->
+    <string name="resolver_turn_on_work_apps_explanation">Turn on work apps to access work apps &amp; contacts</string>
+    <!-- Label to indicate that no apps are resolved [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_apps_available">No apps available</string>
+    <!-- Label to explain that no apps are resolved [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_apps_available_explanation">We couldn\u2019t find any apps</string>
+    <!-- Button which switches on the disabled work profile [CHAR LIMIT=NONE] -->
+    <string name="resolver_switch_on_work">Switch on work</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permlab_accessCallAudio">Record or play audio in telephony calls</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_accessCallAudio">Allows this app, when assigned as default dialer application, to record or play audio in telephony calls.</string>
 </resources>

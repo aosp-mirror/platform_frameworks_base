@@ -161,16 +161,17 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     public static final int TELEPHONY_SCORE_USAGE_THRESHOLD = TELEPHONY_SCORE_MEDIUM;
 
     /**
-     * The number of previous telephony suggestions to keep for each ID (for use during debugging).
+     * The number of suggestions to keep. These are logged in bug reports to assist when debugging
+     * issues with detection.
      */
-    private static final int KEEP_TELEPHONY_SUGGESTION_HISTORY_SIZE = 30;
+    private static final int KEEP_SUGGESTION_HISTORY_SIZE = 10;
 
     @NonNull
     private final Callback mCallback;
 
     /**
-     * A log that records the decisions / decision metadata that affected the device's time zone
-     * (for use during debugging).
+     * A log that records the decisions / decision metadata that affected the device's time zone.
+     * This is logged in bug reports to assist with debugging issues with detection.
      */
     @NonNull
     private final LocalLog mTimeZoneChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
@@ -182,8 +183,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      */
     @GuardedBy("this")
     private ArrayMapWithHistory<Integer, QualifiedTelephonyTimeZoneSuggestion>
-            mSuggestionBySlotIndex =
-            new ArrayMapWithHistory<>(KEEP_TELEPHONY_SUGGESTION_HISTORY_SIZE);
+            mSuggestionBySlotIndex = new ArrayMapWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
     /**
      * Creates a new instance of {@link TimeZoneDetectorStrategyImpl}.

@@ -20,6 +20,7 @@ cc_test {
     shared_libs: [
         "libandroid_runtime",
         "libinputservice",
+        "libhwui",
         "libgui",
         "libutils",
     ],

@@ -238,6 +238,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             aInfo.applicationInfo.uid = mUid;
             aInfo.processName = mProcessName;
             aInfo.packageName = mComponent.getPackageName();
+            aInfo.name = mComponent.getClassName();
             if (mTargetActivity != null) {
                 aInfo.targetActivity = mTargetActivity;
             }
@@ -255,10 +256,10 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
             final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
                     mLaunchedFromPid /* launchedFromPid */, mLaunchedFromUid /* launchedFromUid */,
-                    null, intent, null, aInfo /*aInfo*/, new Configuration(), null /* resultTo */,
-                    null /* resultWho */, 0 /* reqCode */, false /*componentSpecified*/,
-                    false /* rootVoiceInteraction */, mService.mStackSupervisor, options,
-                    null /* sourceRecord */);
+                    null, null, intent, null, aInfo /*aInfo*/, new Configuration(),
+                    null /* resultTo */, null /* resultWho */, 0 /* reqCode */,
+                    false /*componentSpecified*/, false /* rootVoiceInteraction */,
+                    mService.mStackSupervisor, options, null /* sourceRecord */);
             spyOn(activity);
             if (mTask != null) {
                 // fullscreen value is normally read from resources in ctor, so for testing we need

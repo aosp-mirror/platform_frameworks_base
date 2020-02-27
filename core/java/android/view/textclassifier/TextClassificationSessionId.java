@@ -17,6 +17,8 @@
 package android.view.textclassifier;
 
 import android.annotation.NonNull;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,7 +30,10 @@ import java.util.UUID;
  * This class represents the id of a text classification session.
  */
 public final class TextClassificationSessionId implements Parcelable {
-    private final @NonNull String mValue;
+    @NonNull
+    private final String mValue;
+    @NonNull
+    private final IBinder mToken;
 
     /**
      * Creates a new instance.
@@ -36,7 +41,7 @@ public final class TextClassificationSessionId implements Parcelable {
      * @hide
      */
     public TextClassificationSessionId() {
-        this(UUID.randomUUID().toString());
+        this(UUID.randomUUID().toString(), new Binder());
     }
 
     /**
@@ -46,34 +51,28 @@ public final class TextClassificationSessionId implements Parcelable {
      *
      * @hide
      */
-    public TextClassificationSessionId(@NonNull String value) {
-        mValue = value;
+    public TextClassificationSessionId(@NonNull String value, @NonNull IBinder token) {
+        mValue = Objects.requireNonNull(value);
+        mToken = Objects.requireNonNull(token);
+    }
+
+    /** @hide */
+    @NonNull
+    public IBinder getToken() {
+        return mToken;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TextClassificationSessionId that = (TextClassificationSessionId) o;
+        return Objects.equals(mValue, that.mValue) && Objects.equals(mToken, that.mToken);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + mValue.hashCode();
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        TextClassificationSessionId other = (TextClassificationSessionId) obj;
-        if (!mValue.equals(other.mValue)) {
-            return false;
-        }
-        return true;
+        return Objects.hash(mValue, mToken);
     }
 
     @Override
@@ -84,6 +83,7 @@ public final class TextClassificationSessionId implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mValue);
+        parcel.writeStrongBinder(mToken);
     }
 
     @Override
@@ -96,28 +96,18 @@ public final class TextClassificationSessionId implements Parcelable {
      *
      * @return The flattened id.
      */
-    public @NonNull String flattenToString() {
+    @NonNull
+    public String flattenToString() {
         return mValue;
     }
 
-    /**
-     * Unflattens a print job id from a string.
-     *
-     * @param string The string.
-     * @return The unflattened id, or null if the string is malformed.
-     *
-     * @hide
-     */
-    public static @NonNull TextClassificationSessionId unflattenFromString(@NonNull String string) {
-        return new TextClassificationSessionId(string);
-    }
-
-    public static final @android.annotation.NonNull Parcelable.Creator<TextClassificationSessionId> CREATOR =
+    @NonNull
+    public static final Parcelable.Creator<TextClassificationSessionId> CREATOR =
             new Parcelable.Creator<TextClassificationSessionId>() {
                 @Override
                 public TextClassificationSessionId createFromParcel(Parcel parcel) {
                     return new TextClassificationSessionId(
-                            Objects.requireNonNull(parcel.readString()));
+                            parcel.readString(), parcel.readStrongBinder());
                 }
 
                 @Override

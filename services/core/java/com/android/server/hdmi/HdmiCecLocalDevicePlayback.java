@@ -45,7 +45,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
 
     private static final boolean WAKE_ON_HOTPLUG =
-            SystemProperties.getBoolean(Constants.PROPERTY_WAKE_ON_HOTPLUG, true);
+            SystemProperties.getBoolean(Constants.PROPERTY_WAKE_ON_HOTPLUG, false);
 
     private static final boolean SET_MENU_LANGUAGE =
             HdmiProperties.set_menu_language().orElse(false);

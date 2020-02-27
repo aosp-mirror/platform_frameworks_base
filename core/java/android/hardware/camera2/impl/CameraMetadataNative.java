@@ -1680,7 +1680,7 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    private long mMetadataPtr; // native CameraMetadata*
+    private long mMetadataPtr; // native std::shared_ptr<CameraMetadata>*
 
     private native long nativeAllocate();
     private native long nativeAllocateCopy(CameraMetadataNative other)

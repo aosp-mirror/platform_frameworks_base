@@ -18,6 +18,10 @@ package com.android.server.usage;
 
 import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.DEVICE_STARTUP;
+import static android.app.usage.UsageEvents.HIDE_LOCUS_EVENTS;
+import static android.app.usage.UsageEvents.HIDE_SHORTCUT_EVENTS;
+import static android.app.usage.UsageEvents.OBFUSCATE_INSTANT_APPS;
+import static android.app.usage.UsageEvents.OBFUSCATE_NOTIFICATION_EVENTS;
 import static android.app.usage.UsageStatsManager.INTERVAL_BEST;
 import static android.app.usage.UsageStatsManager.INTERVAL_COUNT;
 import static android.app.usage.UsageStatsManager.INTERVAL_DAILY;
@@ -44,6 +48,7 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.usage.UsageStatsDatabase.StatCombiner;
 
@@ -481,8 +486,7 @@ class UserUsageStatsService {
         return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner);
     }
 
-    UsageEvents queryEvents(final long beginTime, final long endTime,
-                            boolean obfuscateInstantApps, boolean hideShortcutInvocationEvents) {
+    UsageEvents queryEvents(final long beginTime, final long endTime, int flags) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
@@ -500,11 +504,22 @@ class UserUsageStatsService {
                             }
 
                             Event event = stats.events.get(i);
-                            if (hideShortcutInvocationEvents
-                                    && event.mEventType == Event.SHORTCUT_INVOCATION) {
+                            final int eventType = event.mEventType;
+                            if (eventType == Event.SHORTCUT_INVOCATION
+                                    && (flags & HIDE_SHORTCUT_EVENTS) == HIDE_SHORTCUT_EVENTS) {
                                 continue;
                             }
-                            if (obfuscateInstantApps) {
+                            if (eventType == Event.LOCUS_ID_SET
+                                    && (flags & HIDE_LOCUS_EVENTS) == HIDE_LOCUS_EVENTS) {
+                                continue;
+                            }
+                            if ((eventType == Event.NOTIFICATION_SEEN
+                                    || eventType == Event.NOTIFICATION_INTERRUPTION)
+                                    && (flags & OBFUSCATE_NOTIFICATION_EVENTS)
+                                    == OBFUSCATE_NOTIFICATION_EVENTS) {
+                                event = event.getObfuscatedNotificationEvent();
+                            }
+                            if ((flags & OBFUSCATE_INSTANT_APPS) == OBFUSCATE_INSTANT_APPS) {
                                 event = event.getObfuscatedIfInstantApp();
                             }
                             if (event.mPackage != null) {
@@ -739,18 +754,21 @@ class UserUsageStatsService {
         });
     }
 
-    void dump(IndentingPrintWriter pw, String pkg) {
-        dump(pw, pkg, false);
+    void dump(IndentingPrintWriter pw, List<String> pkgs) {
+        dump(pw, pkgs, false);
     }
-    void dump(IndentingPrintWriter pw, String pkg, boolean compact) {
-        printLast24HrEvents(pw, !compact, pkg);
+
+    void dump(IndentingPrintWriter pw, List<String> pkgs, boolean compact) {
+        printLast24HrEvents(pw, !compact, pkgs);
         for (int interval = 0; interval < mCurrentStats.length; interval++) {
             pw.print("In-memory ");
             pw.print(intervalToString(interval));
             pw.println(" stats");
-            printIntervalStats(pw, mCurrentStats[interval], !compact, true, pkg);
+            printIntervalStats(pw, mCurrentStats[interval], !compact, true, pkgs);
         }
-        mDatabase.dump(pw, compact);
+        if (CollectionUtils.isEmpty(pkgs)) {
+            mDatabase.dump(pw, compact);
+        }
     }
 
     void dumpDatabaseInfo(IndentingPrintWriter ipw) {
@@ -880,7 +898,8 @@ class UserUsageStatsService {
         pw.println();
     }
 
-    void printLast24HrEvents(IndentingPrintWriter pw, boolean prettyDates, final String pkg) {
+    void printLast24HrEvents(IndentingPrintWriter pw, boolean prettyDates,
+            final List<String> pkgs) {
         final long endTime = System.currentTimeMillis();
         UnixCalendar yesterday = new UnixCalendar(endTime);
         yesterday.addDays(-1);
@@ -900,7 +919,7 @@ class UserUsageStatsService {
                             }
 
                             Event event = stats.events.get(i);
-                            if (pkg != null && !pkg.equals(event.mPackage)) {
+                            if (!CollectionUtils.isEmpty(pkgs) && !pkgs.contains(event.mPackage)) {
                                 continue;
                             }
                             accumulatedResult.add(event);
@@ -944,7 +963,7 @@ class UserUsageStatsService {
     }
 
     void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats,
-            boolean prettyDates, boolean skipEvents, String pkg) {
+            boolean prettyDates, boolean skipEvents, List<String> pkgs) {
         if (prettyDates) {
             pw.printPair("timeRange", "\"" + DateUtils.formatDateRange(mContext,
                     stats.beginTime, stats.endTime, sDateFormatFlags) + "\"");
@@ -960,7 +979,7 @@ class UserUsageStatsService {
         final int pkgCount = pkgStats.size();
         for (int i = 0; i < pkgCount; i++) {
             final UsageStats usageStats = pkgStats.valueAt(i);
-            if (pkg != null && !pkg.equals(usageStats.mPackageName)) {
+            if (!CollectionUtils.isEmpty(pkgs) && !pkgs.contains(usageStats.mPackageName)) {
                 continue;
             }
             pw.printPair("package", usageStats.mPackageName);
@@ -984,7 +1003,7 @@ class UserUsageStatsService {
         pw.println("ChooserCounts");
         pw.increaseIndent();
         for (UsageStats usageStats : pkgStats.values()) {
-            if (pkg != null && !pkg.equals(usageStats.mPackageName)) {
+            if (!CollectionUtils.isEmpty(pkgs) && !pkgs.contains(usageStats.mPackageName)) {
                 continue;
             }
             pw.printPair("package", usageStats.mPackageName);
@@ -1009,7 +1028,7 @@ class UserUsageStatsService {
         }
         pw.decreaseIndent();
 
-        if (pkg == null) {
+        if (CollectionUtils.isEmpty(pkgs)) {
             pw.println("configurations");
             pw.increaseIndent();
             final ArrayMap<Configuration, ConfigurationStats> configStats = stats.configurations;
@@ -1046,7 +1065,7 @@ class UserUsageStatsService {
             final int eventCount = events != null ? events.size() : 0;
             for (int i = 0; i < eventCount; i++) {
                 final Event event = events.get(i);
-                if (pkg != null && !pkg.equals(event.mPackage)) {
+                if (!CollectionUtils.isEmpty(pkgs) && !pkgs.contains(event.mPackage)) {
                     continue;
                 }
                 printEvent(pw, event, prettyDates);

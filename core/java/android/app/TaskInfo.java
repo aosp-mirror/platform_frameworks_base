@@ -149,6 +149,13 @@ public class TaskInfo {
     public IWindowContainer token;
 
     /**
+     * The PictureInPictureParams for the Task, if set.
+     * @hide
+     */
+    @Nullable
+    public PictureInPictureParams pictureInPictureParams;
+
+    /**
      * The activity type of the top activity in this task.
      * @hide
      */
@@ -163,13 +170,13 @@ public class TaskInfo {
     }
 
     /**
-     * @param reducedResolution
+     * @param isLowResolution
      * @return
      * @hide
      */
-    public ActivityManager.TaskSnapshot getTaskSnapshot(boolean reducedResolution) {
+    public ActivityManager.TaskSnapshot getTaskSnapshot(boolean isLowResolution) {
         try {
-            return ActivityManager.getService().getTaskSnapshot(taskId, reducedResolution);
+            return ActivityManager.getService().getTaskSnapshot(taskId, isLowResolution);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get task snapshot, taskId=" + taskId, e);
             return null;
@@ -209,6 +216,9 @@ public class TaskInfo {
         configuration.readFromParcel(source);
         token = IWindowContainer.Stub.asInterface(source.readStrongBinder());
         topActivityType = source.readInt();
+        pictureInPictureParams = source.readInt() != 0
+            ? PictureInPictureParams.CREATOR.createFromParcel(source)
+            : null;
     }
 
     /**
@@ -246,6 +256,12 @@ public class TaskInfo {
         configuration.writeToParcel(dest, flags);
         dest.writeStrongInterface(token);
         dest.writeInt(topActivityType);
+        if (pictureInPictureParams == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            pictureInPictureParams.writeToParcel(dest, flags);
+        }
     }
 
     @Override
@@ -261,6 +277,7 @@ public class TaskInfo {
                 + " supportsSplitScreenMultiWindow=" + supportsSplitScreenMultiWindow
                 + " resizeMode=" + resizeMode
                 + " token=" + token
-                + " topActivityType=" + topActivityType;
+                + " topActivityType=" + topActivityType
+                + " pictureInPictureParams=" + pictureInPictureParams;
     }
 }

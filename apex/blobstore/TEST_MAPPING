@@ -4,6 +4,9 @@
       "name": "CtsBlobStoreTestCases"
     },
     {
+      "name": "CtsBlobStoreHostTestCases"
+    },
+    {
       "name": "FrameworksMockingServicesTests",
       "options": [
         {

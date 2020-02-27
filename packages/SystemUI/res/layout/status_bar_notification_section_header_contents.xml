@@ -16,26 +16,30 @@
 
 <!-- Used by both status_bar_notification_header and SectionHeaderView -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android" >
-    <TextView
-        android:id="@+id/header_label"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginStart="@dimen/notification_section_header_padding_left"
-        android:gravity="start"
-        android:textAlignment="gravity"
-        android:text="@string/notification_section_header_gentle"
-        android:textSize="12sp"
-        android:textColor="@color/notification_section_header_label_color"
-        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-    />
+        android:gravity="start|center_vertical"
+        android:layout_weight="1">
+
+        <TextView
+            style="@style/TextAppearance.NotificationSectionHeaderButton"
+            android:id="@+id/header_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/notification_section_header_gentle"
+        />
+
+    </FrameLayout>
     <ImageView
         android:id="@+id/btn_clear_all"
-        android:layout_width="@dimen/notification_section_header_height"
-        android:layout_height="@dimen/notification_section_header_height"
-        android:layout_marginEnd="4dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:src="@drawable/status_bar_notification_section_header_clear_btn"
         android:contentDescription="@string/accessibility_notification_section_header_gentle_clear_all"
         android:scaleType="center"
+        android:tint="?attr/wallpaperTextColor"
+        android:tintMode="src_in"
+        android:visibility="gone"
     />
 </merge>

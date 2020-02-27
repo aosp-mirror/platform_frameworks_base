@@ -18,19 +18,23 @@ package com.android.systemui.controls.controller
 
 import android.service.controls.actions.ControlAction
 import android.service.controls.IControlsActionCallback
-import android.service.controls.IControlsLoadCallback
 import android.service.controls.IControlsProvider
 import android.service.controls.IControlsSubscriber
 import android.service.controls.IControlsSubscription
 import android.service.controls.actions.ControlActionWrapper
 import android.util.Log
 
+/**
+ * Wrapper for the service calls.
+ *
+ * Calling all [IControlsProvider] methods through here will wrap them in a try/catch block.
+ */
 class ServiceWrapper(val service: IControlsProvider) {
     companion object {
         private const val TAG = "ServiceWrapper"
     }
 
-    private fun callThroughService(block: () -> Unit): Boolean {
+    private inline fun callThroughService(block: () -> Unit): Boolean {
         try {
             block()
             return true
@@ -40,9 +44,9 @@ class ServiceWrapper(val service: IControlsProvider) {
         }
     }
 
-    fun load(cb: IControlsLoadCallback): Boolean {
+    fun load(subscriber: IControlsSubscriber): Boolean {
         return callThroughService {
-            service.load(cb)
+            service.load(subscriber)
         }
     }
 

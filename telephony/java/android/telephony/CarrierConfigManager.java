@@ -17,7 +17,6 @@
 package android.telephony;
 
 import android.Manifest;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -28,7 +27,6 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
-import android.net.ipsec.ike.SaProposal;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.service.carrier.CarrierService;
@@ -37,6 +35,8 @@ import android.telephony.ims.ImsReasonInfo;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides access to telephony configuration values that are carrier-specific.
@@ -840,7 +840,8 @@ public class CarrierConfigManager {
     /**
      * The default flag specifying whether ETWS/CMAS test setting is forcibly disabled in
      * Settings->More->Emergency broadcasts menu even though developer options is turned on.
-     * @deprecated moved to cellbroadcastreceiver resource show_test_settings
+     * @deprecated Use {@code com.android.cellbroadcastreceiver.CellBroadcastReceiver} resource
+     * {@code show_test_settings} to control whether to show test alert settings or not.
      */
     @Deprecated
     public static final String KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL =
@@ -1084,9 +1085,18 @@ public class CarrierConfigManager {
     /**
      * Determines whether adhoc conference calls are supported by a carrier.  When {@code true},
      * adhoc conference calling is supported, {@code false otherwise}.
+     * @hide
      */
     public static final String KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL =
             "support_adhoc_conference_calls_bool";
+
+    /**
+     * Determines whether conference participants can be added to existing call.  When {@code true},
+     * adding conference participants to existing call is supported, {@code false otherwise}.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL =
+            "support_add_conference_participants_bool";
 
     /**
      * Determines whether conference calls are supported by a carrier.  When {@code true},
@@ -1980,6 +1990,13 @@ public class CarrierConfigManager {
             "carrier_allow_deflect_ims_call_bool";
 
     /**
+     * Flag indicating whether the carrier supports explicit call transfer for an IMS call.
+     * @hide
+     */
+    public static final String KEY_CARRIER_ALLOW_TRANSFER_IMS_CALL_BOOL =
+            "carrier_allow_transfer_ims_call_bool";
+
+    /**
      * Flag indicating whether the carrier always wants to play an "on-hold" tone when a call has
      * been remotely held.
      * <p>
@@ -2009,10 +2026,15 @@ public class CarrierConfigManager {
             "allow_add_call_during_video_call";
 
     /**
-     * When false, indicates that holding a video call is disabled
+     * When {@code true}, indicates that video calls can be put on hold in order to swap to another
+     * call (e.g. a new outgoing call).
+     * When {@code false}, indicates that video calls will be disconnected when swapping to another
+     * call.
+     * <p>
+     * This is {@code true} by default.
      */
-    public static final String KEY_ALLOW_HOLDING_VIDEO_CALL_BOOL =
-            "allow_holding_video_call";
+    public static final String KEY_ALLOW_HOLD_VIDEO_CALL_BOOL =
+            "allow_hold_video_call_bool";
 
     /**
      * When true, indicates that the HD audio icon in the in-call screen should not be shown for
@@ -2368,7 +2390,7 @@ public class CarrierConfigManager {
      *  {@link CellSignalStrengthLte#USE_RSRQ}, {@link CellSignalStrengthLte#USE_RSSNR}.
      *
      * For example, if both RSRP and RSRQ are used, the value of key is 3 (1 << 0 | 1 << 1).
-     * If the key is invalid or not configured, a default value (RSRP | RSSNR = 1 << 0 | 1 << 2)
+     * If the key is invalid or not configured, a default value (RSRP = 1 << 0)
      * will apply.
      *
      * @hide
@@ -2457,6 +2479,21 @@ public class CarrierConfigManager {
      */
     public static final String KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT =
             "parameters_use_for_5g_nr_signal_bar_int";
+
+    /**
+     * String array of default bandwidth values per network type.
+     * The entries should be of form "network_name:downstream,upstream", with values in Kbps.
+     * @hide
+     */
+    public static final String KEY_BANDWIDTH_STRING_ARRAY = "bandwidth_string_array";
+
+    /**
+     * For NR (non-standalone), whether to use the LTE value instead of NR value as the default for
+     * upstream bandwidth. Downstream bandwidth will still use the NR value as the default.
+     * @hide
+     */
+    public static final String KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL =
+            "bandwidth_nr_nsa_use_lte_value_for_upstream_bool";
 
     /**
      * Key identifying if voice call barring notification is required to be shown to the user.
@@ -2960,6 +2997,33 @@ public class CarrierConfigManager {
             "5g_icon_display_grace_period_sec_int";
 
     /**
+     * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
+     */
+    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG = "5g_watchdog_time_long";
+
+    /**
+     * Whether NR (non-standalone) should be unmetered for all frequencies.
+     * If either {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL} or
+     * {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL} are true, then this value will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_BOOL = "unmetered_nr_nsa_bool";
+
+    /**
+     * Whether NR (non-standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_MMWAVE_BOOL = "unmetered_nr_nsa_mmwave_bool";
+
+    /**
+     * Whether NR (non-standalone) frequencies below 6GHz (sub6) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_SUB6_BOOL = "unmetered_nr_nsa_sub6_bool";
+
+    /**
      * Support ASCII 7-BIT encoding for long SMS. This carrier config is used to enable
      * this feature.
      * @hide
@@ -3030,11 +3094,6 @@ public class CarrierConfigManager {
     public static final String KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL =
             "ping_test_before_data_switch_bool";
 
-    /**
-     * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
-     */
-    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG =
-            "5g_watchdog_time_long";
     /**
      * Controls whether to switch data to primary from opportunistic subscription
      * if primary is out of service. This control only affects system or 1st party app
@@ -3382,6 +3441,25 @@ public class CarrierConfigManager {
             "subscription_group_uuid_string";
 
     /**
+     * Data switch validation minimal gap time, in milliseconds.
+     *
+     * Which means, if the same subscription on the same network (based on MCC+MNC+TAC+subId)
+     * was recently validated (within this time gap), and Telephony receives a request to switch to
+     * it again, Telephony will skip the validation part and switch to it as soon as connection
+     * is setup, as if it's already validated.
+     *
+     * If the network was validated within the gap but the latest validation result is false, the
+     * validation will not be skipped.
+     *
+     * If not set or set to 0, validation will never be skipped.
+     * The max acceptable value of this config is 24 hours.
+     *
+     * @hide
+     */
+    public static final String KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG =
+            "data_switch_validation_min_gap_LONG";
+
+    /**
     * A boolean property indicating whether this subscription should be managed as an opportunistic
     * subscription.
     *
@@ -3472,367 +3550,28 @@ public class CarrierConfigManager {
             "show_forwarded_number_bool";
 
     /**
-     * Configs used for epdg tunnel bring up.
+     * The list of originating address of missed incoming call SMS. If the SMS has originator
+     * matched, the SMS will be treated as special SMS for notifying missed incoming call to the
+     * user.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7296">RFC 7296, Internet Key Exchange
-     *        Protocol Version 2 (IKEv2)</a>
+     * @hide
      */
-    public static final class Iwlan {
-        /** Prefix of all Epdg.KEY_* constants. */
-        public static final String KEY_PREFIX = "iwlan.";
+    public static final String KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY =
+            "missed_incoming_call_sms_originator_string_array";
 
-        /**
-         * Time in seconds after which the child security association session is terminated if
-         * rekey procedure is not successful. If not set or set to <= 0, the default value is
-         * 3600 seconds.
-         */
-        public static final String KEY_CHILD_SA_REKEY_HARD_TIMER_SEC_INT =
-                KEY_PREFIX + "child_sa_rekey_hard_timer_sec_int";
-
-        /**
-         * Time in seconds after which the child session rekey procedure is started. If not set or
-         * set to <= 0, default value is 3000 seconds.
-         */
-        public static final String KEY_CHILD_SA_REKEY_SOFT_TIMER_SEC_INT =
-                KEY_PREFIX + "child_sa_rekey_soft_timer_sec_int";
-
-        /** Supported DH groups for IKE negotiation.
-         * Possible values are {@link #DH_GROUP_NONE}, {@link #DH_GROUP_1024_BIT_MODP},
-         * {@link #DH_GROUP_2048_BIT_MODP}
-         */
-        public static final String KEY_DIFFIE_HELLMAN_GROUPS_INT_ARRAY =
-                KEY_PREFIX + "diffie_hellman_groups_int_array";
-
-        /**
-         * Time in seconds after which a dead peer detection (DPD) request is sent.
-         * If not set or set to <= 0, default value is 120 seconds.
-         */
-        public static final String KEY_DPD_TIMER_SEC_INT = KEY_PREFIX + "dpd_timer_sec_int";
-
-        /**
-         * Method used to authenticate epdg server.
-         * Possible values are {@link #AUTHENTICATION_METHOD_EAP_ONLY},
-         * {@link #AUTHENTICATION_METHOD_CERT}
-         */
-        public static final String KEY_EPDG_AUTHENTICATION_METHOD_INT =
-                KEY_PREFIX + "epdg_authentication_method_int";
-
-        /**
-         * A priority list of ePDG addresses to be used.
-         * Possible values are {@link #EPDG_ADDRESS_STATIC}, {@link #EPDG_ADDRESS_PLMN},
-         * {@link #EPDG_ADDRESS_PCO}
-         */
-        public static final String KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY =
-                KEY_PREFIX + "epdg_address_priority_int_array";
-
-        /** Epdg static IP address or FQDN */
-        public static final String KEY_EPDG_STATIC_ADDRESS_STRING =
-                KEY_PREFIX + "epdg_static_address_string";
-
-        /** Epdg static IP address or FQDN for roaming */
-        public static final String KEY_EPDG_STATIC_ADDRESS_ROAMING_STRING =
-                KEY_PREFIX + "epdg_static_address_roaming_string";
-
-        /**
-         * List of supported key sizes for AES Cipher Block Chaining (CBC) encryption mode of child
-         * session.
-         * Possible values are {@link #KEY_LEN_UNUSED}, {@link #KEY_LEN_AES_128},
-         * {@link #KEY_LEN_AES_192}, {@link #KEY_LEN_AES_256}
-         */
-        public static final String KEY_CHILD_SESSION_AES_CBC_KEY_SIZE_INT_ARRAY =
-                KEY_PREFIX + "child_session_aes_cbc_key_size_int_array";
-
-        /**
-         * List of supported key sizes for AES counter (CTR) encryption mode of child session.
-         * Possible values are {@link #KEY_LEN_UNUSED}, {@link #KEY_LEN_AES_128},
-         * {@link #KEY_LEN_AES_192}, {@link #KEY_LEN_AES_256}
-         */
-        public static final String KEY_CHILD_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY =
-                KEY_PREFIX + "child_encryption_aes_ctr_key_size_int_array";
-
-        /**
-         * List of supported encryption algorithms for child session.
-         * Possible values are {@link #ENCRYPTION_ALGORITHM_3DES},
-         * {@link #ENCRYPTION_ALGORITHM_AES_CBC}, {@link #ENCRYPTION_ALGORITHM_AES_GCM_8},
-         * {@link #ENCRYPTION_ALGORITHM_AES_GCM_12}, {@link #ENCRYPTION_ALGORITHM_AES_GCM_16}
-         */
-        public static final String KEY_SUPPORTED_CHILD_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY =
-                KEY_PREFIX + "supported_child_session_encryption_algorithms_int_array";
-
-        /** Controls if IKE message fragmentation is enabled. */
-        public static final String KEY_IKE_FRAGMENTATION_ENABLED_BOOL =
-                KEY_PREFIX + "ike_fragmentation_enabled_bool";
-
-        /**
-         * Time in seconds after which the IKE session is terminated if rekey procedure is not
-         * successful. If not set or set to <= 0, default value is 3600 seconds.
-         */
-        public static final String KEY_IKE_REKEY_HARD_TIMER_SEC_INT =
-                KEY_PREFIX + "ike_rekey_hard_timer_in_sec";
-
-        /**
-         * Time in seconds after which the IKE session rekey procedure is started. If not set or
-         * set to <= 0, default value is 3000 seconds.
-         */
-        public static final String KEY_IKE_REKEY_SOFT_TIMER_SEC_INT =
-                KEY_PREFIX + "ike_rekey_soft_timer_sec_int";
-
-        /**
-         * List of supported key sizes for AES Cipher Block Chaining (CBC) encryption mode of IKE
-         * session.
-         * Possible values - {@link #KEY_LEN_UNUSED}, {@link #KEY_LEN_AES_128},
-         *         {@link #KEY_LEN_AES_192}, {@link #KEY_LEN_AES_256}
-         */
-        public static final String KEY_IKE_SESSION_AES_CBC_KEY_SIZE_INT_ARRAY =
-                KEY_PREFIX + "ike_session_encryption_aes_cbc_key_size_int_array";
-
-        /**
-         * List of supported key sizes for AES counter (CTR) encryption mode of IKE session.
-         * Possible values - {@link #KEY_LEN_UNUSED}, {@link #KEY_LEN_AES_128},
-         *         {@link #KEY_LEN_AES_192}, {@link #KEY_LEN_AES_256}
-         */
-        public static final String KEY_IKE_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY =
-                KEY_PREFIX + "ike_session_aes_ctr_key_size_int_array";
-
-        /**
-        * List of supported encryption algorithms for IKE session.
-        * Possible values are {@link #ENCRYPTION_ALGORITHM_3DES},
-         * {@link #ENCRYPTION_ALGORITHM_AES_CBC}, {@link #ENCRYPTION_ALGORITHM_AES_GCM_8},
-         * {@link #ENCRYPTION_ALGORITHM_AES_GCM_12}, {@link #ENCRYPTION_ALGORITHM_AES_GCM_16}
-        */
-        public static final String KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY =
-                KEY_PREFIX + "supported_ike_session_encryption_algorithms_int_array";
-
-        /**
-         * List of supported integrity algorithms for IKE session
-         * Possible values are {@link #INTEGRITY_ALGORITHM_NONE},
-         * {@link #INTEGRITY_ALGORITHM_HMAC_SHA1_96}, {@link #INTEGRITY_ALGORITHM_AES_XCBC_96},
-         * {@link #INTEGRITY_ALGORITHM_HMAC_SHA2_256_128},
-         * {@link #INTEGRITY_ALGORITHM_HMAC_SHA2_384_192},
-         * {@link #INTEGRITY_ALGORITHM_HMAC_SHA2_512_256}
-         */
-        public static final String KEY_SUPPORTED_INTEGRITY_ALGORITHMS_INT_ARRAY =
-                KEY_PREFIX + "supported_integrity_algorithms_int_array";
-
-        /** Maximum number of retries for tunnel establishment. */
-        public static final String KEY_MAX_RETRIES_INT = KEY_PREFIX + "max_retries_int";
-
-        /** Controls if nat traversal should be enabled. */
-        public static final String KEY_NATT_ENABLED_BOOL = KEY_PREFIX + "natt_enabled_bool";
-
-        /**
-         * Time in seconds after which a NATT keep alive message is sent. If not set or set to <= 0,
-         * default value is 20 seconds.
-         */
-        public static final String KEY_NATT_KEEP_ALIVE_TIMER_SEC_INT =
-                KEY_PREFIX + "natt_keep_alive_timer_sec_int";
-
-        /** List of comma separated MCC/MNCs used to create ePDG FQDN as per 3GPP TS 23.003 */
-        public static final String KEY_MCC_MNCS_STRING_ARRAY = KEY_PREFIX + "mcc_mncs_string_array";
-
-        /**
-         * List of supported pseudo random function algorithms for IKE session
-         * Possible values are {@link #PSEUDORANDOM_FUNCTION_HMAC_SHA1},
-         * {@link #PSEUDORANDOM_FUNCTION_AES128_XCBC}
-         */
-        public static final String KEY_SUPPORTED_PRF_ALGORITHMS_INT_ARRAY = KEY_PREFIX +
-                "supported_prf_algorithms_int_array";
-
-        /**
-         * Time in seconds after which IKE message is retransmitted. If not set or set to <= 0,
-         * default value is 2 seconds.
-         */
-        public static final String KEY_RETRANSMIT_TIMER_SEC_INT =
-                KEY_PREFIX + "retransmit_timer_sec_int";
-
-        /** @hide */
-        @IntDef({
-                AUTHENTICATION_METHOD_EAP_ONLY,
-                AUTHENTICATION_METHOD_CERT
-        })
-        public @interface AuthenticationMethodType {}
-
-        /**
-         * Certificate sent from the server is ignored. Only Extensible Authentication Protocol
-         * (EAP) is used to authenticate the server.
-         * EAP_ONLY_AUTH payload is added to IKE_AUTH request if supported.
-         * @see <a href="https://tools.ietf.org/html/rfc5998">RFC 5998</a>
-         */
-        public static final int AUTHENTICATION_METHOD_EAP_ONLY = 0;
-        /** Server is authenticated using its certificate. */
-        public static final int AUTHENTICATION_METHOD_CERT = 1;
-
-        /** @hide */
-        @IntDef({
-                EPDG_ADDRESS_STATIC,
-                EPDG_ADDRESS_PLMN,
-                EPDG_ADDRESS_PCO
-        })
-        public @interface EpdgAddressType {}
-
-        /** Use static epdg address. */
-        public static final int EPDG_ADDRESS_STATIC = 0;
-        /** Construct the epdg address using plmn. */
-        public static final int EPDG_ADDRESS_PLMN = 1;
-        /**
-         * Use the epdg address received in protocol configuration options (PCO) from the
-         * network.
-         */
-        public static final int EPDG_ADDRESS_PCO = 2;
-
-        /** @hide */
-        @IntDef({
-                KEY_LEN_UNUSED,
-                KEY_LEN_AES_128,
-                KEY_LEN_AES_192,
-                KEY_LEN_AES_256
-        })
-        public @interface EncrpytionKeyLengthType {}
-
-        public static final int KEY_LEN_UNUSED = SaProposal.KEY_LEN_UNUSED;
-        /** AES Encryption/Ciphering Algorithm key length 128 bits. */
-        public static final int KEY_LEN_AES_128 = SaProposal.KEY_LEN_AES_128;
-        /** AES Encryption/Ciphering Algorithm key length 192 bits. */
-        public static final int KEY_LEN_AES_192 = SaProposal.KEY_LEN_AES_192;
-        /** AES Encryption/Ciphering Algorithm key length 256 bits. */
-        public static final int KEY_LEN_AES_256 = SaProposal.KEY_LEN_AES_256;
-
-        /** @hide */
-        @IntDef({
-                DH_GROUP_NONE,
-                DH_GROUP_1024_BIT_MODP,
-                DH_GROUP_2048_BIT_MODP
-        })
-        public @interface DhGroup {}
-
-        /** None Diffie-Hellman Group. */
-        public static final int DH_GROUP_NONE = SaProposal.DH_GROUP_NONE;
-        /** 1024-bit MODP Diffie-Hellman Group. */
-        public static final int DH_GROUP_1024_BIT_MODP = SaProposal.DH_GROUP_1024_BIT_MODP;
-        /** 2048-bit MODP Diffie-Hellman Group. */
-        public static final int DH_GROUP_2048_BIT_MODP = SaProposal.DH_GROUP_2048_BIT_MODP;
-
-        /** @hide */
-        @IntDef({
-                ENCRYPTION_ALGORITHM_3DES,
-                ENCRYPTION_ALGORITHM_AES_CBC,
-                ENCRYPTION_ALGORITHM_AES_GCM_8,
-                ENCRYPTION_ALGORITHM_AES_GCM_12,
-                ENCRYPTION_ALGORITHM_AES_GCM_16
-        })
-        public @interface EncryptionAlgorithm {}
-
-        /** 3DES Encryption/Ciphering Algorithm. */
-        public static final int ENCRYPTION_ALGORITHM_3DES = SaProposal.ENCRYPTION_ALGORITHM_3DES;
-        /** AES-CBC Encryption/Ciphering Algorithm. */
-        public static final int ENCRYPTION_ALGORITHM_AES_CBC =
-                SaProposal.ENCRYPTION_ALGORITHM_AES_CBC;
-
-        /**
-         * AES-GCM Authentication/Integrity + Encryption/Ciphering Algorithm with 8-octet ICV
-         * (truncation).
-         */
-        public static final int ENCRYPTION_ALGORITHM_AES_GCM_8 =
-                SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_8;
-        /**
-         * AES-GCM Authentication/Integrity + Encryption/Ciphering Algorithm with 12-octet ICV
-         * (truncation).
-         */
-        public static final int ENCRYPTION_ALGORITHM_AES_GCM_12 =
-                SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_12;
-        /**
-         * AES-GCM Authentication/Integrity + Encryption/Ciphering Algorithm with 16-octet ICV
-         * (truncation).
-         */
-        public static final int ENCRYPTION_ALGORITHM_AES_GCM_16 =
-                SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_16;
-
-        /** @hide */
-        @IntDef({
-                INTEGRITY_ALGORITHM_NONE,
-                INTEGRITY_ALGORITHM_HMAC_SHA1_96,
-                INTEGRITY_ALGORITHM_AES_XCBC_96,
-                INTEGRITY_ALGORITHM_HMAC_SHA2_256_128,
-                INTEGRITY_ALGORITHM_HMAC_SHA2_384_192,
-                INTEGRITY_ALGORITHM_HMAC_SHA2_512_256
-        })
-        public @interface IntegrityAlgorithm {}
-
-        /** None Authentication/Integrity Algorithm. */
-        public static final int INTEGRITY_ALGORITHM_NONE = SaProposal.INTEGRITY_ALGORITHM_NONE;
-        /** HMAC-SHA1 Authentication/Integrity Algorithm. */
-        public static final int INTEGRITY_ALGORITHM_HMAC_SHA1_96 =
-                SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA1_96;
-        /** AES-XCBC-96 Authentication/Integrity Algorithm. */
-        public static final int INTEGRITY_ALGORITHM_AES_XCBC_96 =
-                SaProposal.INTEGRITY_ALGORITHM_AES_XCBC_96;
-        /** HMAC-SHA256 Authentication/Integrity Algorithm with 128-bit truncation. */
-        public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_256_128 =
-                SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_256_128;
-        /** HMAC-SHA384 Authentication/Integrity Algorithm with 192-bit truncation. */
-        public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_384_192 =
-                SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_384_192;
-        /** HMAC-SHA512 Authentication/Integrity Algorithm with 256-bit truncation. */
-        public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_512_256 =
-                SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_512_256;
-
-        /** @hide */
-        @IntDef({
-                PSEUDORANDOM_FUNCTION_HMAC_SHA1,
-                PSEUDORANDOM_FUNCTION_AES128_XCBC
-        })
-        public @interface PseudorandomFunction {}
-
-        /** HMAC-SHA1 Pseudorandom Function. */
-        public static final int PSEUDORANDOM_FUNCTION_HMAC_SHA1 =
-                SaProposal.PSEUDORANDOM_FUNCTION_HMAC_SHA1;
-        /** AES128-XCBC Pseudorandom Function. */
-        public static final int PSEUDORANDOM_FUNCTION_AES128_XCBC =
-                SaProposal.PSEUDORANDOM_FUNCTION_AES128_XCBC;
-
-        private Iwlan() {}
-
-        private static PersistableBundle getDefaults() {
-            PersistableBundle defaults = new PersistableBundle();
-            defaults.putInt(KEY_IKE_REKEY_SOFT_TIMER_SEC_INT, 3000);
-            defaults.putInt(KEY_IKE_REKEY_HARD_TIMER_SEC_INT, 3600);
-            defaults.putInt(KEY_CHILD_SA_REKEY_SOFT_TIMER_SEC_INT, 3000);
-            defaults.putInt(KEY_CHILD_SA_REKEY_HARD_TIMER_SEC_INT, 3600);
-            defaults.putInt(KEY_RETRANSMIT_TIMER_SEC_INT, 2);
-            defaults.putInt(KEY_DPD_TIMER_SEC_INT, 120);
-            defaults.putInt(KEY_MAX_RETRIES_INT, 3);
-            defaults.putIntArray(KEY_DIFFIE_HELLMAN_GROUPS_INT_ARRAY,
-                    new int[]{DH_GROUP_1024_BIT_MODP, DH_GROUP_2048_BIT_MODP});
-            defaults.putIntArray(KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY,
-                    new int[]{ENCRYPTION_ALGORITHM_3DES, ENCRYPTION_ALGORITHM_AES_CBC});
-            defaults.putIntArray(KEY_SUPPORTED_CHILD_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY,
-                    new int[]{ENCRYPTION_ALGORITHM_3DES, ENCRYPTION_ALGORITHM_AES_CBC});
-            defaults.putIntArray(KEY_SUPPORTED_INTEGRITY_ALGORITHMS_INT_ARRAY,
-                    new int[]{INTEGRITY_ALGORITHM_AES_XCBC_96, INTEGRITY_ALGORITHM_HMAC_SHA1_96,
-                            INTEGRITY_ALGORITHM_HMAC_SHA2_256_128});
-            defaults.putIntArray(KEY_SUPPORTED_PRF_ALGORITHMS_INT_ARRAY,
-                    new int[]{PSEUDORANDOM_FUNCTION_HMAC_SHA1, PSEUDORANDOM_FUNCTION_AES128_XCBC});
-            defaults.putBoolean(KEY_NATT_ENABLED_BOOL, true);
-            defaults.putInt(KEY_EPDG_AUTHENTICATION_METHOD_INT, AUTHENTICATION_METHOD_CERT);
-            defaults.putString(KEY_EPDG_STATIC_ADDRESS_STRING, "");
-            defaults.putString(KEY_EPDG_STATIC_ADDRESS_ROAMING_STRING, "");
-            defaults.putInt(KEY_NATT_KEEP_ALIVE_TIMER_SEC_INT, 20);
-            defaults.putIntArray(KEY_IKE_SESSION_AES_CBC_KEY_SIZE_INT_ARRAY,
-                    new int[]{KEY_LEN_AES_128, KEY_LEN_AES_256});
-            defaults.putIntArray(KEY_IKE_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY,
-                    new int[]{KEY_LEN_AES_128});
-            defaults.putIntArray(KEY_CHILD_SESSION_AES_CBC_KEY_SIZE_INT_ARRAY,
-                    new int[]{KEY_LEN_AES_128, KEY_LEN_AES_256});
-            defaults.putIntArray(KEY_CHILD_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY,
-                    new int[]{KEY_LEN_AES_128});
-            defaults.putBoolean(KEY_IKE_FRAGMENTATION_ENABLED_BOOL, false);
-            defaults.putIntArray(KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY, new int[]{EPDG_ADDRESS_PLMN,
-                    EPDG_ADDRESS_STATIC});
-            defaults.putStringArray(KEY_MCC_MNCS_STRING_ARRAY, new String[]{});
-
-            return defaults;
-        }
-    }
+    /**
+     * The patterns of missed incoming call sms. This is the regular expression used for
+     * matching the missed incoming call's date, time, and caller id. The pattern should match
+     * fields for at least month, day, hour, and minute. Year is optional although it is encouraged.
+     *
+     * An usable pattern should look like this:
+     * ^(?<month>0[1-9]|1[012])\/(?<day>0[1-9]|1[0-9]|2[0-9]|3[0-1]) (?<hour>[0-1][0-9]|2[0-3]):
+     * (?<minute>[0-5][0-9])\s*(?<callerId>[0-9]+)\s*$
+     *
+     * @hide
+     */
+    public static final String KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY =
+            "missed_incoming_call_sms_pattern_string_array";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -3842,6 +3581,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_CONFIG_VERSION_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_DEFLECT_IMS_CALL_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_ALLOW_TRANSFER_IMS_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_PLAY_REMOTE_HOLD_TONE_BOOL, false);
         sDefaults.putBoolean(KEY_AUTO_RETRY_FAILED_WIFI_EMERGENCY_CALL, false);
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);
@@ -4003,6 +3743,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, false);
         sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
         sDefaults.putBoolean(KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL, true);
@@ -4137,7 +3878,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
-        sDefaults.putBoolean(KEY_ALLOW_HOLDING_VIDEO_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_ALLOW_HOLD_VIDEO_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_WIFI_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_GSM_CDMA_CALLS_CAN_BE_HD_AUDIO, false);
@@ -4253,6 +3994,13 @@ public class CarrierConfigManager {
                 });
         sDefaults.putInt(KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT,
                 CellSignalStrengthNr.USE_SSRSRP);
+        sDefaults.putStringArray(KEY_BANDWIDTH_STRING_ARRAY, new String[]{
+                "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
+                "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
+                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550:", "eHRPD:750,48",
+                "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,15000",
+                "NR_NSA_MMWAVE:145000,15000", "NR_SA:145000,15000"});
+        sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
@@ -4268,6 +4016,11 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:5G,connected:5G");
         sDefaults.putInt(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, 0);
+        /* Default value is 1 hour. */
+        sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT, -108);
@@ -4286,8 +4039,6 @@ public class CarrierConfigManager {
         /* Default value is 3 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 3000);
         sDefaults.putBoolean(KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL, true);
-        /* Default value is 1 hour. */
-        sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putBoolean(KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL, true);
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG, 60000);
@@ -4324,12 +4075,15 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
-                CellSignalStrengthLte.USE_RSRP | CellSignalStrengthLte.USE_RSSNR);
+                CellSignalStrengthLte.USE_RSRP);
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_FORWARDED_NUMBER_BOOL, false);
-        sDefaults.putAll(Iwlan.getDefaults());
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
+        sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
+                new String[0]);
+        sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
     }
 
     /**
@@ -4342,7 +4096,8 @@ public class CarrierConfigManager {
         /** Prefix of all Wifi.KEY_* constants. */
         public static final String KEY_PREFIX = "wifi.";
         /**
-        * It contains the maximum client count definition that the carrier owns.
+        * It contains the maximum client count definition that the carrier sets.
+        * The default is 0, which means that the carrier hasn't set a requirement.
         */
         public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT =
                 KEY_PREFIX + "hotspot_maximum_client_count";

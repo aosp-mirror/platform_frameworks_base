@@ -170,6 +170,16 @@ public class NotificationHistoryDatabase {
         mFileWriteHandler.post(rpr);
     }
 
+    public void deleteNotificationHistoryItem(String pkg, long postedTime) {
+        RemoveNotificationRunnable rnr = new RemoveNotificationRunnable(pkg, postedTime);
+        mFileWriteHandler.post(rnr);
+    }
+
+    public void deleteConversation(String pkg, String conversationId) {
+        RemoveConversationRunnable rcr = new RemoveConversationRunnable(pkg, conversationId);
+        mFileWriteHandler.post(rcr);
+    }
+
     public void addNotification(final HistoricalNotification notification) {
         synchronized (mLock) {
             mBuffer.addNewNotificationToWrite(notification);
@@ -226,6 +236,9 @@ public class NotificationHistoryDatabase {
 
     public void disableHistory() {
         synchronized (mLock) {
+            for (AtomicFile file : mHistoryFiles) {
+                file.delete();
+            }
             mHistoryDir.delete();
             mHistoryFiles.clear();
         }
@@ -244,6 +257,10 @@ public class NotificationHistoryDatabase {
                 final AtomicFile currentOldestFile = mHistoryFiles.get(i);
                 final long creationTime =
                         mFileAttrProvider.getCreationTime(currentOldestFile.getBaseFile());
+                if (DEBUG) {
+                    Slog.d(TAG, "Pruning " + currentOldestFile.getBaseFile().getName()
+                            + " created on " + creationTime);
+                }
                 if (creationTime <= retentionBoundary.getTimeInMillis()) {
                     if (DEBUG) {
                         Slog.d(TAG, "Removed " + currentOldestFile.getBaseFile().getName());
@@ -360,6 +377,92 @@ public class NotificationHistoryDatabase {
                         writeLocked(af, notifications);
                     } catch (Exception e) {
                         Slog.e(TAG, "Cannot clean up file on pkg removal "
+                                + af.getBaseFile().getName(), e);
+                    }
+                }
+            }
+        }
+    }
+
+    final class RemoveNotificationRunnable implements Runnable {
+        private String mPkg;
+        private long mPostedTime;
+        private NotificationHistory mNotificationHistory;
+
+        public RemoveNotificationRunnable(String pkg, long postedTime) {
+            mPkg = pkg;
+            mPostedTime = postedTime;
+        }
+
+        @VisibleForTesting
+        void setNotificationHistory(NotificationHistory nh) {
+            mNotificationHistory = nh;
+        }
+
+        @Override
+        public void run() {
+            if (DEBUG) Slog.d(TAG, "RemoveNotificationRunnable");
+            synchronized (mLock) {
+                // Remove from pending history
+                mBuffer.removeNotificationFromWrite(mPkg, mPostedTime);
+
+                Iterator<AtomicFile> historyFileItr = mHistoryFiles.iterator();
+                while (historyFileItr.hasNext()) {
+                    final AtomicFile af = historyFileItr.next();
+                    try {
+                        NotificationHistory notificationHistory = mNotificationHistory != null
+                                ? mNotificationHistory
+                                : new NotificationHistory();
+                        readLocked(af, notificationHistory,
+                                new NotificationHistoryFilter.Builder().build());
+                        if(notificationHistory.removeNotificationFromWrite(mPkg, mPostedTime)) {
+                            writeLocked(af, notificationHistory);
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Cannot clean up file on notification removal "
+                                + af.getBaseFile().getName(), e);
+                    }
+                }
+            }
+        }
+    }
+
+    final class RemoveConversationRunnable implements Runnable {
+        private String mPkg;
+        private String mConversationId;
+        private NotificationHistory mNotificationHistory;
+
+        public RemoveConversationRunnable(String pkg, String conversationId) {
+            mPkg = pkg;
+            mConversationId = conversationId;
+        }
+
+        @VisibleForTesting
+        void setNotificationHistory(NotificationHistory nh) {
+            mNotificationHistory = nh;
+        }
+
+        @Override
+        public void run() {
+            if (DEBUG) Slog.d(TAG, "RemoveConversationRunnable");
+            synchronized (mLock) {
+                // Remove from pending history
+                mBuffer.removeConversationFromWrite(mPkg, mConversationId);
+
+                Iterator<AtomicFile> historyFileItr = mHistoryFiles.iterator();
+                while (historyFileItr.hasNext()) {
+                    final AtomicFile af = historyFileItr.next();
+                    try {
+                        NotificationHistory notificationHistory = mNotificationHistory != null
+                                ? mNotificationHistory
+                                : new NotificationHistory();
+                        readLocked(af, notificationHistory,
+                                new NotificationHistoryFilter.Builder().build());
+                        if(notificationHistory.removeConversationFromWrite(mPkg, mConversationId)) {
+                            writeLocked(af, notificationHistory);
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Cannot clean up file on conversation removal "
                                 + af.getBaseFile().getName(), e);
                     }
                 }

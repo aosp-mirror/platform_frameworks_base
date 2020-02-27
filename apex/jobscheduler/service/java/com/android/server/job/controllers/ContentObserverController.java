@@ -344,7 +344,7 @@ public final class ContentObserverController extends StateController {
                     mContext.getContentResolver().unregisterContentObserver(obs);
                     ArrayMap<JobInfo.TriggerContentUri, ObserverInstance> observerOfUser =
                             mObservers.get(obs.mUserId);
-                    if (observerOfUser !=  null) {
+                    if (observerOfUser != null) {
                         observerOfUser.remove(obs.mUri);
                     }
                 }

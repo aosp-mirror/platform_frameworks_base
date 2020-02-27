@@ -19,7 +19,12 @@ package android.view.inputmethod;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.LocaleList;
+import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.Display;
 import android.view.inline.InlinePresentationSpec;
 
 import com.android.internal.util.DataClass;
@@ -59,11 +64,56 @@ public final class InlineSuggestionsRequest implements Parcelable {
     private @NonNull String mHostPackageName;
 
     /**
-     * @hide
-     * @see {@link #mHostPackageName}.
+     * The IME provided locales for the request. If non-empty, the inline suggestions should
+     * return languages from the supported locales. If not provided, it'll default to system locale.
      */
-    public void setHostPackageName(@NonNull String hostPackageName) {
-        mHostPackageName = hostPackageName;
+    private @NonNull LocaleList mSupportedLocales;
+
+    /**
+     * The extras state propagated from the IME to pass extra data.
+     */
+    private @Nullable Bundle mExtras;
+
+    /**
+     * The host input token of the IME that made the request. This will be set by the system for
+     * safety reasons.
+     *
+     * @hide
+     */
+    private @Nullable IBinder mHostInputToken;
+
+    /**
+     * The host display id of the IME that made the request. This will be set by the system for
+     * safety reasons.
+     *
+     * @hide
+     */
+    private int mHostDisplayId;
+
+    /**
+     * @hide
+     * @see {@link #mHostInputToken}.
+     */
+    public void setHostInputToken(IBinder hostInputToken) {
+        mHostInputToken = hostInputToken;
+    }
+
+    // TODO(b/149609075): remove once IBinder parcelling is natively supported
+    private void parcelHostInputToken(@NonNull Parcel parcel, int flags) {
+        parcel.writeStrongBinder(mHostInputToken);
+    }
+
+    // TODO(b/149609075): remove once IBinder parcelling is natively supported
+    private @Nullable IBinder unparcelHostInputToken(Parcel parcel) {
+        return parcel.readStrongBinder();
+    }
+
+    /**
+     * @hide
+     * @see {@link #mHostDisplayId}.
+     */
+    public void setHostDisplayId(int hostDisplayId) {
+        mHostDisplayId = hostDisplayId;
     }
 
     private void onConstructed() {
@@ -78,11 +128,36 @@ public final class InlineSuggestionsRequest implements Parcelable {
         return ActivityThread.currentPackageName();
     }
 
+    private static LocaleList defaultSupportedLocales() {
+        return LocaleList.getDefault();
+    }
+
+    @Nullable
+    private static IBinder defaultHostInputToken() {
+        return null;
+    }
+
+    @Nullable
+    private static int defaultHostDisplayId() {
+        return Display.INVALID_DISPLAY;
+    }
+
+    @Nullable
+    private static Bundle defaultExtras() {
+        return null;
+    }
+
+
+
     /** @hide */
     abstract static class BaseBuilder {
         abstract Builder setPresentationSpecs(@NonNull List<InlinePresentationSpec> value);
 
         abstract Builder setHostPackageName(@Nullable String value);
+
+        abstract Builder setHostInputToken(IBinder hostInputToken);
+
+        abstract Builder setHostDisplayId(int value);
     }
 
 
@@ -104,7 +179,11 @@ public final class InlineSuggestionsRequest implements Parcelable {
     /* package-private */ InlineSuggestionsRequest(
             int maxSuggestionCount,
             @NonNull List<InlinePresentationSpec> presentationSpecs,
-            @NonNull String hostPackageName) {
+            @NonNull String hostPackageName,
+            @NonNull LocaleList supportedLocales,
+            @Nullable Bundle extras,
+            @Nullable IBinder hostInputToken,
+            int hostDisplayId) {
         this.mMaxSuggestionCount = maxSuggestionCount;
         this.mPresentationSpecs = presentationSpecs;
         com.android.internal.util.AnnotationValidations.validate(
@@ -112,6 +191,12 @@ public final class InlineSuggestionsRequest implements Parcelable {
         this.mHostPackageName = hostPackageName;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mHostPackageName);
+        this.mSupportedLocales = supportedLocales;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSupportedLocales);
+        this.mExtras = extras;
+        this.mHostInputToken = hostInputToken;
+        this.mHostDisplayId = hostDisplayId;
 
         onConstructed();
     }
@@ -145,6 +230,45 @@ public final class InlineSuggestionsRequest implements Parcelable {
         return mHostPackageName;
     }
 
+    /**
+     * The IME provided locales for the request. If non-empty, the inline suggestions should
+     * return languages from the supported locales. If not provided, it'll default to system locale.
+     */
+    @DataClass.Generated.Member
+    public @NonNull LocaleList getSupportedLocales() {
+        return mSupportedLocales;
+    }
+
+    /**
+     * The extras state propagated from the IME to pass extra data.
+     */
+    @DataClass.Generated.Member
+    public @Nullable Bundle getExtras() {
+        return mExtras;
+    }
+
+    /**
+     * The host input token of the IME that made the request. This will be set by the system for
+     * safety reasons.
+     *
+     * @hide
+     */
+    @DataClass.Generated.Member
+    public @Nullable IBinder getHostInputToken() {
+        return mHostInputToken;
+    }
+
+    /**
+     * The host display id of the IME that made the request. This will be set by the system for
+     * safety reasons.
+     *
+     * @hide
+     */
+    @DataClass.Generated.Member
+    public int getHostDisplayId() {
+        return mHostDisplayId;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -154,7 +278,11 @@ public final class InlineSuggestionsRequest implements Parcelable {
         return "InlineSuggestionsRequest { " +
                 "maxSuggestionCount = " + mMaxSuggestionCount + ", " +
                 "presentationSpecs = " + mPresentationSpecs + ", " +
-                "hostPackageName = " + mHostPackageName +
+                "hostPackageName = " + mHostPackageName + ", " +
+                "supportedLocales = " + mSupportedLocales + ", " +
+                "extras = " + mExtras + ", " +
+                "hostInputToken = " + mHostInputToken + ", " +
+                "hostDisplayId = " + mHostDisplayId +
         " }";
     }
 
@@ -173,7 +301,11 @@ public final class InlineSuggestionsRequest implements Parcelable {
         return true
                 && mMaxSuggestionCount == that.mMaxSuggestionCount
                 && java.util.Objects.equals(mPresentationSpecs, that.mPresentationSpecs)
-                && java.util.Objects.equals(mHostPackageName, that.mHostPackageName);
+                && java.util.Objects.equals(mHostPackageName, that.mHostPackageName)
+                && java.util.Objects.equals(mSupportedLocales, that.mSupportedLocales)
+                && java.util.Objects.equals(mExtras, that.mExtras)
+                && java.util.Objects.equals(mHostInputToken, that.mHostInputToken)
+                && mHostDisplayId == that.mHostDisplayId;
     }
 
     @Override
@@ -186,18 +318,30 @@ public final class InlineSuggestionsRequest implements Parcelable {
         _hash = 31 * _hash + mMaxSuggestionCount;
         _hash = 31 * _hash + java.util.Objects.hashCode(mPresentationSpecs);
         _hash = 31 * _hash + java.util.Objects.hashCode(mHostPackageName);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mSupportedLocales);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mExtras);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mHostInputToken);
+        _hash = 31 * _hash + mHostDisplayId;
         return _hash;
     }
 
     @Override
     @DataClass.Generated.Member
-    public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
+        byte flg = 0;
+        if (mExtras != null) flg |= 0x10;
+        if (mHostInputToken != null) flg |= 0x20;
+        dest.writeByte(flg);
         dest.writeInt(mMaxSuggestionCount);
         dest.writeParcelableList(mPresentationSpecs, flags);
         dest.writeString(mHostPackageName);
+        dest.writeTypedObject(mSupportedLocales, flags);
+        if (mExtras != null) dest.writeBundle(mExtras);
+        parcelHostInputToken(dest, flags);
+        dest.writeInt(mHostDisplayId);
     }
 
     @Override
@@ -207,14 +351,19 @@ public final class InlineSuggestionsRequest implements Parcelable {
     /** @hide */
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @DataClass.Generated.Member
-    /* package-private */ InlineSuggestionsRequest(@NonNull android.os.Parcel in) {
+    /* package-private */ InlineSuggestionsRequest(@NonNull Parcel in) {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
+        byte flg = in.readByte();
         int maxSuggestionCount = in.readInt();
         List<InlinePresentationSpec> presentationSpecs = new ArrayList<>();
         in.readParcelableList(presentationSpecs, InlinePresentationSpec.class.getClassLoader());
         String hostPackageName = in.readString();
+        LocaleList supportedLocales = (LocaleList) in.readTypedObject(LocaleList.CREATOR);
+        Bundle extras = (flg & 0x10) == 0 ? null : in.readBundle();
+        IBinder hostInputToken = unparcelHostInputToken(in);
+        int hostDisplayId = in.readInt();
 
         this.mMaxSuggestionCount = maxSuggestionCount;
         this.mPresentationSpecs = presentationSpecs;
@@ -223,6 +372,12 @@ public final class InlineSuggestionsRequest implements Parcelable {
         this.mHostPackageName = hostPackageName;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mHostPackageName);
+        this.mSupportedLocales = supportedLocales;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSupportedLocales);
+        this.mExtras = extras;
+        this.mHostInputToken = hostInputToken;
+        this.mHostDisplayId = hostDisplayId;
 
         onConstructed();
     }
@@ -236,7 +391,7 @@ public final class InlineSuggestionsRequest implements Parcelable {
         }
 
         @Override
-        public InlineSuggestionsRequest createFromParcel(@NonNull android.os.Parcel in) {
+        public InlineSuggestionsRequest createFromParcel(@NonNull Parcel in) {
             return new InlineSuggestionsRequest(in);
         }
     };
@@ -251,6 +406,10 @@ public final class InlineSuggestionsRequest implements Parcelable {
         private int mMaxSuggestionCount;
         private @NonNull List<InlinePresentationSpec> mPresentationSpecs;
         private @NonNull String mHostPackageName;
+        private @NonNull LocaleList mSupportedLocales;
+        private @Nullable Bundle mExtras;
+        private @Nullable IBinder mHostInputToken;
+        private int mHostDisplayId;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -320,10 +479,63 @@ public final class InlineSuggestionsRequest implements Parcelable {
             return this;
         }
 
+        /**
+         * The IME provided locales for the request. If non-empty, the inline suggestions should
+         * return languages from the supported locales. If not provided, it'll default to system locale.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setSupportedLocales(@NonNull LocaleList value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x8;
+            mSupportedLocales = value;
+            return this;
+        }
+
+        /**
+         * The extras state propagated from the IME to pass extra data.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setExtras(@Nullable Bundle value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x10;
+            mExtras = value;
+            return this;
+        }
+
+        /**
+         * The host input token of the IME that made the request. This will be set by the system for
+         * safety reasons.
+         *
+         * @hide
+         */
+        @DataClass.Generated.Member
+        @Override
+        @NonNull Builder setHostInputToken(@Nullable IBinder value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x20;
+            mHostInputToken = value;
+            return this;
+        }
+
+        /**
+         * The host display id of the IME that made the request. This will be set by the system for
+         * safety reasons.
+         *
+         * @hide
+         */
+        @DataClass.Generated.Member
+        @Override
+        @NonNull Builder setHostDisplayId(int value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x40;
+            mHostDisplayId = value;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull InlineSuggestionsRequest build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x8; // Mark builder used
+            mBuilderFieldsSet |= 0x80; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
                 mMaxSuggestionCount = defaultMaxSuggestionCount();
@@ -331,15 +543,31 @@ public final class InlineSuggestionsRequest implements Parcelable {
             if ((mBuilderFieldsSet & 0x4) == 0) {
                 mHostPackageName = defaultHostPackageName();
             }
+            if ((mBuilderFieldsSet & 0x8) == 0) {
+                mSupportedLocales = defaultSupportedLocales();
+            }
+            if ((mBuilderFieldsSet & 0x10) == 0) {
+                mExtras = defaultExtras();
+            }
+            if ((mBuilderFieldsSet & 0x20) == 0) {
+                mHostInputToken = defaultHostInputToken();
+            }
+            if ((mBuilderFieldsSet & 0x40) == 0) {
+                mHostDisplayId = defaultHostDisplayId();
+            }
             InlineSuggestionsRequest o = new InlineSuggestionsRequest(
                     mMaxSuggestionCount,
                     mPresentationSpecs,
-                    mHostPackageName);
+                    mHostPackageName,
+                    mSupportedLocales,
+                    mExtras,
+                    mHostInputToken,
+                    mHostDisplayId);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x8) != 0) {
+            if ((mBuilderFieldsSet & 0x80) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -347,10 +575,10 @@ public final class InlineSuggestionsRequest implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1578948035951L,
+            time = 1582339908980L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestionsRequest.java",
-            inputSignatures = "public static final  int SUGGESTION_COUNT_UNLIMITED\nprivate final  int mMaxSuggestionCount\nprivate final @android.annotation.NonNull java.util.List<android.view.inline.InlinePresentationSpec> mPresentationSpecs\nprivate @android.annotation.NonNull java.lang.String mHostPackageName\npublic  void setHostPackageName(java.lang.String)\nprivate  void onConstructed()\nprivate static  int defaultMaxSuggestionCount()\nprivate static  java.lang.String defaultHostPackageName()\nclass InlineSuggestionsRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setPresentationSpecs(java.util.List<android.view.inline.InlinePresentationSpec>)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostPackageName(java.lang.String)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "public static final  int SUGGESTION_COUNT_UNLIMITED\nprivate final  int mMaxSuggestionCount\nprivate final @android.annotation.NonNull java.util.List<android.view.inline.InlinePresentationSpec> mPresentationSpecs\nprivate @android.annotation.NonNull java.lang.String mHostPackageName\nprivate @android.annotation.NonNull android.os.LocaleList mSupportedLocales\nprivate @android.annotation.Nullable android.os.Bundle mExtras\nprivate @android.annotation.Nullable android.os.IBinder mHostInputToken\nprivate  int mHostDisplayId\npublic  void setHostInputToken(android.os.IBinder)\nprivate  void parcelHostInputToken(android.os.Parcel,int)\nprivate @android.annotation.Nullable android.os.IBinder unparcelHostInputToken(android.os.Parcel)\npublic  void setHostDisplayId(int)\nprivate  void onConstructed()\nprivate static  int defaultMaxSuggestionCount()\nprivate static  java.lang.String defaultHostPackageName()\nprivate static  android.os.LocaleList defaultSupportedLocales()\nprivate static @android.annotation.Nullable android.os.IBinder defaultHostInputToken()\nprivate static @android.annotation.Nullable int defaultHostDisplayId()\nprivate static @android.annotation.Nullable android.os.Bundle defaultExtras()\nclass InlineSuggestionsRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setPresentationSpecs(java.util.List<android.view.inline.InlinePresentationSpec>)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostPackageName(java.lang.String)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostInputToken(android.os.IBinder)\nabstract  android.view.inputmethod.InlineSuggestionsRequest.Builder setHostDisplayId(int)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

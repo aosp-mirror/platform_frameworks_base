@@ -103,9 +103,17 @@ final class InputMonitor {
         @Override
         public void dismiss() {
             synchronized (mService.mGlobalLock) {
-                if (mInputMonitor.destroyInputConsumer(mWindowHandle.name)) {
-                    mInputEventReceiver.dispose();
-                }
+                mInputMonitor.mInputConsumers.remove(mName);
+                hide(mInputMonitor.mInputTransaction);
+                mInputMonitor.updateInputWindowsLw(true /* force */);
+            }
+        }
+
+        @Override
+        public void dispose() {
+            synchronized (mService.mGlobalLock) {
+                disposeChannelsLw();
+                mInputEventReceiver.dispose();
             }
         }
     }
@@ -415,18 +423,18 @@ final class InputMonitor {
     }
 
     private final class UpdateInputForAllWindowsConsumer implements Consumer<WindowState> {
-        InputConsumerImpl navInputConsumer;
-        InputConsumerImpl pipInputConsumer;
-        InputConsumerImpl wallpaperInputConsumer;
-        InputConsumerImpl recentsAnimationInputConsumer;
+        InputConsumerImpl mNavInputConsumer;
+        InputConsumerImpl mPipInputConsumer;
+        InputConsumerImpl mWallpaperInputConsumer;
+        InputConsumerImpl mRecentsAnimationInputConsumer;
 
-        private boolean mAddInputConsumerHandle;
+        private boolean mAddNavInputConsumerHandle;
         private boolean mAddPipInputConsumerHandle;
         private boolean mAddWallpaperInputConsumerHandle;
         private boolean mAddRecentsAnimationInputConsumerHandle;
 
-        boolean inDrag;
-        WallpaperController wallpaperController;
+        boolean mInDrag;
+        WallpaperController mWallpaperController;
 
         // An invalid window handle that tells SurfaceFlinger not update the input info.
         final InputWindowHandle mInvalidInputWindow = new InputWindowHandle(null, mDisplayId);
@@ -434,20 +442,20 @@ final class InputMonitor {
         private void updateInputWindows(boolean inDrag) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
 
-            navInputConsumer = getInputConsumer(INPUT_CONSUMER_NAVIGATION);
-            pipInputConsumer = getInputConsumer(INPUT_CONSUMER_PIP);
-            wallpaperInputConsumer = getInputConsumer(INPUT_CONSUMER_WALLPAPER);
-            recentsAnimationInputConsumer = getInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+            mNavInputConsumer = getInputConsumer(INPUT_CONSUMER_NAVIGATION);
+            mPipInputConsumer = getInputConsumer(INPUT_CONSUMER_PIP);
+            mWallpaperInputConsumer = getInputConsumer(INPUT_CONSUMER_WALLPAPER);
+            mRecentsAnimationInputConsumer = getInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
 
-            mAddInputConsumerHandle = navInputConsumer != null;
-            mAddPipInputConsumerHandle = pipInputConsumer != null;
-            mAddWallpaperInputConsumerHandle = wallpaperInputConsumer != null;
-            mAddRecentsAnimationInputConsumerHandle = recentsAnimationInputConsumer != null;
+            mAddNavInputConsumerHandle = mNavInputConsumer != null;
+            mAddPipInputConsumerHandle = mPipInputConsumer != null;
+            mAddWallpaperInputConsumerHandle = mWallpaperInputConsumer != null;
+            mAddRecentsAnimationInputConsumerHandle = mRecentsAnimationInputConsumer != null;
 
             mTmpRect.setEmpty();
             mDisableWallpaperTouchEvents = false;
-            this.inDrag = inDrag;
-            wallpaperController = mDisplayContent.mWallpaperController;
+            mInDrag = inDrag;
+            mWallpaperController = mDisplayContent.mWallpaperController;
 
             resetInputConsumers(mInputTransaction);
 
@@ -455,7 +463,7 @@ final class InputMonitor {
                     true /* traverseTopToBottom */);
 
             if (mAddWallpaperInputConsumerHandle) {
-                wallpaperInputConsumer.show(mInputTransaction, 0);
+                mWallpaperInputConsumer.show(mInputTransaction, 0);
             }
 
             if (mApplyImmediately) {
@@ -494,8 +502,8 @@ final class InputMonitor {
                 if (recentsAnimationController != null
                         && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord)) {
                     if (recentsAnimationController.updateInputConsumerForApp(
-                            recentsAnimationInputConsumer.mWindowHandle, hasFocus)) {
-                        recentsAnimationInputConsumer.show(mInputTransaction, w);
+                            mRecentsAnimationInputConsumer.mWindowHandle, hasFocus)) {
+                        mRecentsAnimationInputConsumer.show(mInputTransaction, w);
                         mAddRecentsAnimationInputConsumerHandle = false;
                     }
                 }
@@ -505,25 +513,25 @@ final class InputMonitor {
                 if (mAddPipInputConsumerHandle) {
                     // Update the bounds of the Pip input consumer to match the window bounds.
                     w.getBounds(mTmpRect);
-                    pipInputConsumer.layout(mInputTransaction, mTmpRect);
+                    mPipInputConsumer.layout(mInputTransaction, mTmpRect);
 
                     // The touchable region is relative to the surface top-left
                     mTmpRect.offsetTo(0, 0);
-                    pipInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
-                    pipInputConsumer.show(mInputTransaction, w);
+                    mPipInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
+                    mPipInputConsumer.show(mInputTransaction, w);
                     mAddPipInputConsumerHandle = false;
                 }
             }
 
-            if (mAddInputConsumerHandle) {
-                navInputConsumer.show(mInputTransaction, w);
-                mAddInputConsumerHandle = false;
+            if (mAddNavInputConsumerHandle) {
+                mNavInputConsumer.show(mInputTransaction, w);
+                mAddNavInputConsumerHandle = false;
             }
 
             if (mAddWallpaperInputConsumerHandle) {
                 if (w.mAttrs.type == TYPE_WALLPAPER && w.isVisibleLw()) {
                     // Add the wallpaper input consumer above the first visible wallpaper.
-                    wallpaperInputConsumer.show(mInputTransaction, w);
+                    mWallpaperInputConsumer.show(mInputTransaction, w);
                     mAddWallpaperInputConsumerHandle = false;
                 }
             }
@@ -531,13 +539,13 @@ final class InputMonitor {
             if ((privateFlags & PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS) != 0) {
                 mDisableWallpaperTouchEvents = true;
             }
-            final boolean hasWallpaper = wallpaperController.isWallpaperTarget(w)
+            final boolean hasWallpaper = mWallpaperController.isWallpaperTarget(w)
                     && !mService.mPolicy.isKeyguardShowing()
                     && !mDisableWallpaperTouchEvents;
 
             // If there's a drag in progress and 'child' is a potential drop target,
             // make sure it's been told about the drag
-            if (inDrag && isVisible && w.getDisplayContent().isDefaultDisplay) {
+            if (mInDrag && isVisible && w.getDisplayContent().isDefaultDisplay) {
                 mService.mDragDropController.sendDragStartedIfNeededLocked(w);
             }
 

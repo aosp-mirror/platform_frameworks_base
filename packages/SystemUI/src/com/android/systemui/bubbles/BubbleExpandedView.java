@@ -19,9 +19,9 @@ package com.android.systemui.bubbles;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.view.Display.INVALID_DISPLAY;
-
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.sNewInsetsMode;
+
 import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -56,6 +56,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.AlphaOptimizedButton;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
  * Container for the expanded bubble view, handles rendering the caret and settings icon.
@@ -93,6 +94,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
     private Point mDisplaySize;
     private int mMinHeight;
+    private int mOverflowHeight;
     private int mSettingsIconHeight;
     private int mPointerWidth;
     private int mPointerHeight;
@@ -146,7 +148,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                             // the bubble again so we'll just remove it.
                             Log.w(TAG, "Exception while displaying bubble: " + getBubbleKey()
                                     + ", " + e.getMessage() + "; removing bubble");
-                            mBubbleController.removeBubble(getBubbleKey(),
+                            mBubbleController.removeBubble(getBubbleEntry(),
                                     BubbleController.DISMISS_INVALID_INTENT);
                         }
                     });
@@ -190,7 +192,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             }
             if (mBubble != null && !mBubbleController.isUserCreatedBubble(mBubble.getKey())) {
                 // Must post because this is called from a binder thread.
-                post(() -> mBubbleController.removeBubble(mBubble.getKey(),
+                post(() -> mBubbleController.removeBubble(mBubble.getEntry(),
                         BubbleController.DISMISS_TASK_FINISHED));
             }
         }
@@ -217,6 +219,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mWindowManager.getDefaultDisplay().getRealSize(mDisplaySize);
         Resources res = getResources();
         mMinHeight = res.getDimensionPixelSize(R.dimen.bubble_expanded_default_height);
+        mOverflowHeight = res.getDimensionPixelSize(R.dimen.bubble_overflow_height);
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
         mExpandedViewTouchSlop = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_slop);
     }
@@ -279,6 +282,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         return mBubble != null ? mBubble.getKey() : "null";
     }
 
+    private NotificationEntry getBubbleEntry() {
+        return mBubble != null ? mBubble.getEntry() : null;
+    }
+
     void applyThemeAttrs() {
         final TypedArray ta = mContext.obtainStyledAttributes(
                 new int[] {
@@ -289,7 +296,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         ta.recycle();
 
         mPointerDrawable.setTint(bgColor);
-        if (ScreenDecorationsUtils.supportsRoundedCornersOnWindows(mContext.getResources())) {
+        if (mActivityView != null && ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
+                mContext.getResources())) {
             mActivityView.setCornerRadius(cornerRadius);
         }
     }
@@ -414,20 +422,19 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         return true;
     }
 
-    // TODO(138116789) Fix overflow height.
     void updateHeight() {
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
             Log.d(TAG, "updateHeight: bubble=" + getBubbleKey());
         }
         if (usingActivityView()) {
-            float desiredHeight = mMinHeight;
+            float desiredHeight = mOverflowHeight;
             if (!mIsOverflow) {
                 desiredHeight = Math.max(mBubble.getDesiredHeight(mContext), mMinHeight);
             }
             float height = Math.min(desiredHeight, getMaxExpandedHeight());
-            height = Math.max(height, mMinHeight);
+            height = Math.max(height, mIsOverflow? mOverflowHeight : mMinHeight);
             LayoutParams lp = (LayoutParams) mActivityView.getLayoutParams();
-            mNeedsNewHeight =  lp.height != height;
+            mNeedsNewHeight = lp.height != height;
             if (!mKeyboardVisible) {
                 // If the keyboard is visible... don't adjust the height because that will cause
                 // a configuration change and the keyboard will be lost.

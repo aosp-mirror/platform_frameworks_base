@@ -702,6 +702,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_ODM = 1 << 30;
 
+    /**
+     * Value for {@link #privateFlags}: If {@code true} this app allows heap tagging.
+     * {@link com.android.server.am.ProcessList#NATIVE_HEAP_POINTER_TAGGING}
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING = 1 << 31;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -733,6 +740,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE,
             PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE,
             PRIVATE_FLAG_ODM,
+            PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlags {}
@@ -1389,7 +1397,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 pw.println(prefix + "fullBackupContent="
                         + (fullBackupContent < 0 ? "false" : "true"));
             }
-            pw.println("crossProfile=" + (crossProfile ? "true" : "false"));
+            pw.println(prefix + "crossProfile=" + (crossProfile ? "true" : "false"));
             if (networkSecurityConfigRes != 0) {
                 pw.println(prefix + "networkSecurityConfigRes=0x"
                         + Integer.toHexString(networkSecurityConfigRes));
@@ -1622,6 +1630,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     @SuppressWarnings("unchecked")
     public void writeToParcel(Parcel dest, int parcelableFlags) {
+        if (dest.maybeWriteSquashed(this)) {
+            return;
+        }
         super.writeToParcel(dest, parcelableFlags);
         dest.writeString(taskAffinity);
         dest.writeString(permission);
@@ -1692,9 +1703,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
             = new Parcelable.Creator<ApplicationInfo>() {
+        @Override
         public ApplicationInfo createFromParcel(Parcel source) {
-            return new ApplicationInfo(source);
+            return source.readSquashed(ApplicationInfo::new);
         }
+
+        @Override
         public ApplicationInfo[] newArray(int size) {
             return new ApplicationInfo[size];
         }
@@ -1876,6 +1890,15 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean hasRequestedLegacyExternalStorage() {
         return (privateFlags & PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE) != 0;
+    }
+
+    /**
+     * If {@code true} this app allows heap pointer tagging.
+     *
+     * @hide
+     */
+    public boolean allowsNativeHeapPointerTagging() {
+        return (privateFlags & PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING) != 0;
     }
 
     private boolean isAllowedToUseHiddenApis() {

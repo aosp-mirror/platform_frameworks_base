@@ -18,6 +18,7 @@ package com.android.server.systemconfig;
 
 import static org.junit.Assert.assertEquals;
 
+import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -48,8 +49,9 @@ import java.util.Set;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:SystemConfigTest
  */
-@RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
+@RunWith(AndroidJUnit4.class)
 public class SystemConfigTest {
     private static final String LOG_TAG = "SystemConfigTest";
 
@@ -142,6 +144,40 @@ public class SystemConfigTest {
 
         assertEquals("Incorrect whitelist.", expectedWhite, actualWhite);
         assertEquals("Incorrect blacklist", expectedBlack, actualBlack);
+    }
+
+    @Test
+    public void testComponentOverride() throws Exception {
+        final String contents =
+                "<permissions>"
+                + "    <component-override package=\"com.android.package1\">\n"
+                + "        <component class=\"com.android.package1.Full\" enabled=\"true\"/>"
+                + "        <component class=\".Relative\" enabled=\"false\" />\n"
+                + "    </component-override>"
+                + "    <component-override package=\"com.android.package2\" >\n"
+                + "        <component class=\"com.android.package3.Relative2\" enabled=\"yes\" />\n"
+                + "    </component-override>\n"
+                + "</permissions>";
+
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "component-override.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* No permission needed anyway */ 0);
+
+        final ArrayMap<String, Boolean>  packageOneExpected = new ArrayMap<>();
+        packageOneExpected.put("com.android.package1.Full", true);
+        packageOneExpected.put("com.android.package1.Relative", false);
+
+        final ArrayMap<String, Boolean> packageTwoExpected = new ArrayMap<>();
+        packageTwoExpected.put("com.android.package3.Relative2", true);
+
+        final Map<String, Boolean> packageOne = mSysConfig.getComponentsEnabledStates(
+                "com.android.package1");
+        assertEquals(packageOneExpected, packageOne);
+
+        final Map<String, Boolean> packageTwo = mSysConfig.getComponentsEnabledStates(
+                "com.android.package2");
+        assertEquals(packageTwoExpected, packageTwo);
     }
 
     /**

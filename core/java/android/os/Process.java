@@ -214,6 +214,20 @@ public class Process {
      */
     public static final int FSVERITY_CERT_UID = 1075;
 
+    /**
+     * GID that gives write access to app-private data directories on external
+     * storage (used on devices without sdcardfs only).
+     * @hide
+     */
+    public static final int EXT_DATA_RW_GID = 1078;
+
+    /**
+     * GID that gives write access to app-private OBB directories on external
+     * storage (used on devices without sdcardfs only).
+     * @hide
+     */
+    public static final int EXT_OBB_RW_GID = 1079;
+
     /** {@hide} */
     public static final int NOBODY_UID = 9999;
 

@@ -24,6 +24,7 @@ import android.content.Context;
 import android.net.NetworkPolicyManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 
@@ -58,6 +59,10 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
                     return runAdd();
                 case "remove":
                     return runRemove();
+                case "start-watching":
+                    return runStartWatching();
+                case "stop-watching":
+                    return runStopWatching();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -195,6 +200,22 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         }
         pw.println("Error: unknown remove type '" + type + "'");
         return -1;
+    }
+
+    private int runStartWatching() {
+        final int uid = Integer.parseInt(getNextArgRequired());
+        if (uid < 0) {
+            final PrintWriter pw = getOutPrintWriter();
+            pw.print("Invalid UID: "); pw.println(uid);
+            return -1;
+        }
+        mInterface.setDebugUid(uid);
+        return 0;
+    }
+
+    private int runStopWatching() {
+        mInterface.setDebugUid(Process.INVALID_UID);
+        return 0;
     }
 
     private int listUidPolicies(String msg, int policy) throws RemoteException {

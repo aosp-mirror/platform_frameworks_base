@@ -237,6 +237,16 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
         errorCount++;
         continue;
     }
+
+    if (field->is_repeated() &&
+        !(javaType == JAVA_TYPE_ATTRIBUTION_CHAIN || javaType == JAVA_TYPE_KEY_VALUE_PAIR)) {
+        print_error(field,
+                    "Repeated fields are not supported in atoms. Please make field %s not "
+                    "repeated.\n",
+                    field->name().c_str());
+        errorCount++;
+        continue;
+    }
   }
 
   // Check that if there's an attribution chain, it's at position 1.

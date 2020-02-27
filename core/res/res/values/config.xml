@@ -59,6 +59,7 @@
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
     </string-array>
 
     <string translatable="false" name="status_bar_rotate">rotate</string>
@@ -94,6 +95,7 @@
     <string translatable="false" name="status_bar_camera">camera</string>
     <string translatable="false" name="status_bar_airplane">airplane</string>
     <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
+    <string translatable="false" name="status_bar_screen_record">screen_record</string>
 
     <!-- Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window
@@ -244,7 +246,7 @@
          correctly use them when installed on your device.  Otherwise, keep this disabled
          so that applications can still use their own mechanisms. -->
     <bool name="config_enableAutoPowerModes">false</bool>
-
+ 
     <!-- Whether (if true) this is a kind of device that can be moved around (eg. phone/laptop),
          or (if false) something for which movement is either not measurable or should not count
          toward power states (eg. tv/soundbar). -->
@@ -268,6 +270,11 @@
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
+
+    <!-- When true, Android uses the PAC implementation included in WebView to handle
+         networks with PAC scripts.
+         When false, Android's own implementation of libpac is used.-->
+    <bool name ="config_useWebViewPacProcessor">true</bool>
 
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->
@@ -1258,32 +1265,64 @@
     -->
     <integer name="config_doubleTapOnHomeBehavior">0</integer>
 
-    <!-- Minimum screen brightness setting allowed by the power manager.
-         The user is forbidden from setting the brightness below this level. -->
+    <!-- Note: This setting is deprecated, please use
+    config_screenBrightnessSettingMinimumFloat instead -->
     <integer name="config_screenBrightnessSettingMinimum">10</integer>
 
-    <!-- Maximum screen brightness allowed by the power manager.
-         The user is forbidden from setting the brightness above this level. -->
+    <!-- Note: This setting is deprecated, please use
+    config_screenBrightnessSettingMaximumFloat instead -->
     <integer name="config_screenBrightnessSettingMaximum">255</integer>
 
-    <!-- Default screen brightness setting.
-         Must be in the range specified by minimum and maximum. -->
+    <!-- Note: This setting is deprecated, please use
+    config_screenBrightnessSettingDefaultFloat instead -->
     <integer name="config_screenBrightnessSettingDefault">102</integer>
 
-    <!-- Default screen brightness for VR setting. -->
+    <!-- Minimum screen brightness setting allowed by power manager.
+         -2 is invalid so setting will resort to int value specified above.
+         Set this to 0.0 to allow screen to go to minimal brightness.
+         The user is forbidden from setting the brightness below this level. -->
+    <item name="config_screenBrightnessSettingMinimumFloat" format="float" type="dimen">-2</item>
+
+    <!-- Maximum screen brightness allowed by the power manager.
+         -2 is invalid so setting will resort to int value specified above.
+         Set this to 1.0 for maximum brightness range.
+         The user is forbidden from setting the brightness above this level. -->
+    <item name="config_screenBrightnessSettingMaximumFloat" format="float" type="dimen">-2</item>
+
+    <!-- Default screen brightness setting set.
+         -2 is invalid so setting will resort to int value specified above.
+         Must be in the range specified by minimum and maximum. -->
+    <item name="config_screenBrightnessSettingDefaultFloat" format="float" type="dimen">-2</item>
+
+    <!-- Note: This setting is deprecated, please use
+    config_screenBrightnessSettingForVrDefaultFloat instead -->
     <integer name="config_screenBrightnessForVrSettingDefault">86</integer>
 
-    <!-- Minimum screen brightness setting allowed for VR. Device panels start increasing pulse
-         width as brightness decreases below this theshold. -->
+    <!-- Note: This setting is deprecated, please use
+    config_screenBrightnessSettingForVrMinimumFloat instead -->
     <integer name="config_screenBrightnessForVrSettingMinimum">79</integer>
 
-    <!-- Maximum screen brightness setting allowed for VR. -->
+    <!-- Note: This setting is deprecated, please use
+    config_screenBrightnessSettingForVrMaximumFloat instead -->
     <integer name="config_screenBrightnessForVrSettingMaximum">255</integer>
+
+    <!-- Default screen brightness for VR setting as a float.
+    Equivalent to 86/255-->
+    <item name="config_screenBrightnessSettingForVrDefaultFloat" format="float" type="dimen">0.33464</item>
+
+    <!-- Minimum screen brightness setting allowed for VR. Device panels start increasing pulse
+     width as brightness decreases below this threshold as float.
+     Equivalent to 79/255 -->
+    <item name="config_screenBrightnessSettingForVrMinimumFloat" format="float" type="dimen">0.307087</item>
+
+    <!-- Maximum screen brightness setting allowed for VR as float. -->
+    <item name="config_screenBrightnessSettingForVrMaximumFloat" format="float" type="dimen">1.0</item>
 
     <!-- Screen brightness used to dim the screen while dozing in a very low power state.
          May be less than the minimum allowed brightness setting
          that can be set by the user. -->
     <integer name="config_screenBrightnessDoze">1</integer>
+    <item name="config_screenBrightnessDozeFloat" format="float" type="dimen">0.0</item>
 
     <!-- Delay that allows some content to arrive at the display before switching
          from DOZE to ON. -->
@@ -1339,6 +1378,7 @@
          timeout expires.  May be less than the minimum allowed brightness setting
          that can be set by the user. -->
     <integer name="config_screenBrightnessDim">10</integer>
+    <item name="config_screenBrightnessDimFloat" format="float" type="dimen">0.05</item>
 
     <!-- Minimum allowable screen brightness to use in a very dark room.
          This value sets the floor for the darkest possible auto-brightness
@@ -2351,7 +2391,7 @@
          type. These are flags and can be freely combined.
          0  - disable whitelist (install all system packages; no logging)
          1  - enforce (only install system packages if they are whitelisted)
-         2  - log (log when a non-whitelisted package is run)
+         2  - log (log non-whitelisted packages)
          4  - any package not mentioned in the whitelist file is implicitly whitelisted on all users
          8  - same as 4, but just for the SYSTEM user
          16 - ignore OTAs (don't install system packages during OTAs)
@@ -2420,6 +2460,12 @@
     <!-- Configure ethernet tcp buffersizes in the form:
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
     <string name="config_ethernet_tcp_buffers" translatable="false">524288,1048576,3145728,524288,1048576,2097152</string>
+
+    <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
+         Default is carrier_config, but it should be set to modem if the modem is returning
+         predictive (instead of instantaneous) bandwidth estimate.
+         Values are carrier_config and modem. -->
+    <string name="config_bandwidthEstimateSource">carrier_config</string>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
@@ -2542,6 +2588,18 @@
          Can be customized for other product types -->
     <string name="config_customAdbPublicKeyConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingSecondaryUserActivity</string>
+
+    <!-- Name of the activity or service that prompts the user to reject, accept, or whitelist
+         a wireless network for wireless debugging.
+         Can be customized for other product types -->
+    <string name="config_customAdbWifiNetworkConfirmationComponent"
+            >com.android.systemui/com.android.systemui.wifi.WifiDebuggingActivity</string>
+
+    <!-- Name of the activity that prompts the secondary user to acknowledge she/he needs to
+         switch to the primary user to enable wireless debugging.
+         Can be customized for other product types -->
+    <string name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent"
+            >com.android.systemui/com.android.systemui.wifi.WifiDebuggingSecondaryUserActivity</string>
 
     <!-- Component name of the activity that shows the usb containment status. -->
     <string name="config_usbContaminantActivity" translatable="false"
@@ -2690,12 +2748,14 @@
     <string name="config_defaultNetworkScorerPackageName"></string>
 
     <!-- The amount to scale fullscreen snapshots for Overview and snapshot starting windows. -->
-    <item name="config_fullTaskSnapshotScale" format="float" type="dimen">1.0</item>
+    <item name="config_highResTaskSnapshotScale" format="float" type="dimen">1.0</item>
 
     <!-- The amount to scale reduced scale snapshots for Overview and snapshot starting windows.
          Reduced scale snapshots are loaded before full screen snapshots to improve load times and
-         minimize the chance the user will see an empty task card. -->
-    <item name="config_reducedTaskSnapshotScale" format="float" type="dimen">0.5</item>
+         minimize the chance the user will see an empty task card. If set to 0, reduced scale
+         snapshots are disabled, and snapshots will only be stored at config_highResTaskSnapshotScale
+         -->
+    <item name="config_lowResTaskSnapshotScale" format="float" type="dimen">0.5</item>
 
     <!-- Feature flag to store TaskSnapshot in 16 bit pixel format to save memory. -->
     <bool name="config_use16BitTaskSnapshotPixelFormat">false</bool>
@@ -2793,13 +2853,13 @@
          "logout" =  Logout the current user
          -->
     <string-array translatable="false" name="config_globalActionsList">
+        <item>emergency</item>
         <item>power</item>
         <item>restart</item>
         <item>lockdown</item>
         <item>logout</item>
         <item>bugreport</item>
         <item>screenshot</item>
-        <item>emergency</item>
     </string-array>
 
     <!-- Number of milliseconds to hold a wake lock to ensure that drawing is fully
@@ -3402,8 +3462,8 @@
     <!-- True if assistant app should be pinned via Pinner Service -->
     <bool name="config_pinnerAssistantApp">false</bool>
 
-    <!-- List of files pinned by the Pinner Service with the apex boot image b/119800099 -->
-    <string-array translatable="false" name="config_apexBootImagePinnerServiceFiles">
+    <!-- List of files pinned by the Pinner Service with the JIT Zygote boot image b/119800099 -->
+    <string-array translatable="false" name="config_jitzygoteBootImagePinnerServiceFiles">
     </string-array>
 
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
@@ -3493,10 +3553,9 @@
      mode -->
     <string-array translatable="false" name="config_priorityOnlyDndExemptPackages">
         <item>com.android.dialer</item>
+        <item>com.android.systemui</item>
+        <item>android</item>
     </string-array>
-
-    <!-- An array of packages which can listen for notifications on low ram devices. -->
-    <string-array translatable="false" name="config_allowedManagedServicesOnLowRamDevices" />
 
     <!-- The default value for transition animation scale found in developer settings.
          1.0 corresponds to 1x animator scale, 0 means that there will be no transition
@@ -3792,6 +3851,10 @@
          or empty if the default should be used. -->
     <string translatable="false" name="config_deviceSpecificAudioService"></string>
 
+    <!-- Class name of the device specific implementation of DisplayAreaPolicy.Provider
+         or empty if the default should be used. -->
+    <string translatable="false" name="config_deviceSpecificDisplayAreaPolicyProvider"></string>
+
     <!-- Component name of media projection permission dialog -->
     <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
 
@@ -3896,14 +3959,14 @@
     <!-- Component name for the default module metadata provider on this device -->
     <string name="config_defaultModuleMetadataProvider" translatable="false">com.android.modulemetadata</string>
 
-    <!-- This is the default launcher component to use on secondary displays that support system
-         decorations.
-         This launcher activity must support multiple instances and have corresponding launch mode
-         set in AndroidManifest.
+    <!-- This is the default launcher package with an activity to use on secondary displays that
+         support system decorations.
+         This launcher package must have an activity that supports multiple instances and has
+         corresponding launch mode set in AndroidManifest.
          {@see android.view.Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS} -->
-    <string name="config_secondaryHomeComponent" translatable="false">com.android.launcher3/com.android.launcher3.SecondaryDisplayLauncher</string>
+    <string name="config_secondaryHomePackage" translatable="false">com.android.launcher3</string>
 
-    <!-- Force secondary home launcher specified in config_secondaryHomeComponent always. If this is
+    <!-- Force secondary home launcher specified in config_secondaryHomePackage always. If this is
          not set, secondary home launcher can be replaced by user. -->
     <bool name ="config_useSystemProvidedLauncherForSecondary">false</bool>
 
@@ -4343,6 +4406,7 @@
          Determines whether the specified key groups can be used to wake up the device. -->
     <bool name="config_wakeOnDpadKeyPress">true</bool>
     <bool name="config_wakeOnAssistKeyPress">true</bool>
+    <bool name="config_wakeOnBackKeyPress">true</bool>
 
     <!-- Whether to default to an expanded list of users on the lock screen user switcher. -->
     <bool name="config_expandLockScreenUserSwitcher">false</bool>

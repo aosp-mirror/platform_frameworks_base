@@ -21,8 +21,9 @@
      for different hardware and product builds. -->
 <resources>
     <!-- SystemUIFactory component -->
-    <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.tv.TvSystemUIFactory</string>
-
+    <string name="config_systemUIFactoryComponent" translatable="false">
+        com.android.systemui.tv.TvSystemUIFactory
+    </string>
     <!-- SystemUI Services: The classes of the stuff to start. -->
     <string-array name="config_systemUIServiceComponents" translatable="false">
         <item>com.android.systemui.util.NotificationChannels</item>

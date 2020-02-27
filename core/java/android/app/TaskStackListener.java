@@ -58,16 +58,6 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     @UnsupportedAppUsage
-    public void onPinnedStackAnimationStarted() throws RemoteException {
-    }
-
-    @Override
-    @UnsupportedAppUsage
-    public void onPinnedStackAnimationEnded() throws RemoteException {
-    }
-
-    @Override
-    @UnsupportedAppUsage
     public void onActivityForcedResizable(String packageName, int taskId, int reason)
             throws RemoteException {
     }
@@ -198,5 +188,9 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     public void onRecentTaskListFrozenChanged(boolean frozen) {
+    }
+
+    @Override
+    public void onTaskFocusChanged(int taskId, boolean focused) {
     }
 }

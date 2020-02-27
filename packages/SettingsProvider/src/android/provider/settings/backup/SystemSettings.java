@@ -46,7 +46,7 @@ public class SystemSettings {
         Settings.System.SCREEN_BRIGHTNESS_MODE,
         Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
         Settings.System.SCREEN_BRIGHTNESS_FOR_VR,
-        Settings.System.ADAPTIVE_SLEEP,
+        Settings.System.ADAPTIVE_SLEEP,             // moved to secure
         Settings.System.VIBRATE_INPUT_DEVICES,
         Settings.System.MODE_RINGER_STREAMS_AFFECTED,
         Settings.System.TEXT_AUTO_REPLACE,

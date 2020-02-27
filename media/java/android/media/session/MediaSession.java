@@ -266,8 +266,12 @@ public final class MediaSession {
      * playback after the session has been stopped. If your app is started in
      * this way an {@link Intent#ACTION_MEDIA_BUTTON} intent will be sent via
      * the pending intent.
+     * <p>
+     * The pending intent is recommended to be explicit to follow the security recommendation of
+     * {@link PendingIntent#getActivity}.
      *
      * @param mbr The {@link PendingIntent} to send the media button event to.
+     * @see PendingIntent#getActivity
      */
     public void setMediaButtonReceiver(@Nullable PendingIntent mbr) {
         try {

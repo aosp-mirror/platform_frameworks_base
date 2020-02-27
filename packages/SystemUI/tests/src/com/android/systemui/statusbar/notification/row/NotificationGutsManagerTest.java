@@ -74,7 +74,6 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager.O
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -118,7 +117,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mTestableLooper = TestableLooper.get(this);
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);

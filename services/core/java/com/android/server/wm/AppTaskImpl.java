@@ -111,7 +111,7 @@ class AppTaskImpl extends IAppTask.Stub {
                 final ActivityStarter starter = mService.getActivityStartController().obtainStarter(
                         null /* intent */, "moveToFront");
                 if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid,
-                        callingPackage, -1, -1, callerApp, null, false, null)) {
+                        callingPackage, -1, -1, callerApp, null, false, false, null)) {
                     if (!mService.isBackgroundActivityStartsEnabled()) {
                         return;
                     }
@@ -125,7 +125,7 @@ class AppTaskImpl extends IAppTask.Stub {
     }
 
     @Override
-    public int startActivity(IBinder whoThread, String callingPackage,
+    public int startActivity(IBinder whoThread, String callingPackage, String callingFeatureId,
             Intent intent, String resolvedType, Bundle bOptions) {
         checkCaller();
         mService.assertPackageMatchesCallingUid(callingPackage);
@@ -148,6 +148,7 @@ class AppTaskImpl extends IAppTask.Stub {
         return mService.getActivityStartController().obtainStarter(intent, "AppTaskImpl")
                 .setCaller(appThread)
                 .setCallingPackage(callingPackage)
+                .setCallingFeatureId(callingFeatureId)
                 .setResolvedType(resolvedType)
                 .setActivityOptions(bOptions)
                 .setUserId(callingUser)

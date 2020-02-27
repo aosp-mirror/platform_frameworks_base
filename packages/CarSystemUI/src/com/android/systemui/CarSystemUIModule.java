@@ -43,9 +43,13 @@ import com.android.systemui.statusbar.notification.NotificationInterruptionState
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BatteryControllerImpl;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.volume.CarVolumeDialogComponent;
@@ -74,10 +78,14 @@ abstract class CarSystemUIModule {
 
     @Singleton
     @Provides
-    static HeadsUpManagerPhone provideHeadsUpManagerPhone(Context context,
+    static HeadsUpManagerPhone provideHeadsUpManagerPhone(
+            Context context,
             StatusBarStateController statusBarStateController,
-            KeyguardBypassController bypassController) {
-        return new HeadsUpManagerPhone(context, statusBarStateController, bypassController);
+            KeyguardBypassController bypassController,
+            NotificationGroupManager groupManager,
+            ConfigurationController configurationController) {
+        return new HeadsUpManagerPhone(context, statusBarStateController, bypassController,
+                groupManager, configurationController);
     }
 
     @Binds
@@ -96,6 +104,11 @@ abstract class CarSystemUIModule {
     @Binds
     abstract NotificationLockscreenUserManager bindNotificationLockscreenUserManager(
             NotificationLockscreenUserManagerImpl notificationLockscreenUserManager);
+
+    @Binds
+    @Singleton
+    public abstract BatteryController provideBatteryController(
+            BatteryControllerImpl controllerImpl);
 
     @Binds
     abstract DockManager bindDockManager(DockManagerImpl dockManager);

@@ -24,11 +24,18 @@ import android.annotation.TestApi;
 import android.app.Service;
 import android.app.slice.Slice;
 import android.content.Intent;
+import android.graphics.PixelFormat;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Log;
+import android.view.Display;
+import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.View;
+import android.view.WindowManager;
 
 /**
  * A service that renders an inline presentation given the {@link InlinePresentation} containing
@@ -55,8 +62,61 @@ public abstract class InlineSuggestionRenderService extends Service {
     private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
     private void handleRenderSuggestion(IInlineSuggestionUiCallback callback,
-            InlinePresentation presentation, int width, int height) {
-        //TODO(b/146453086): implementation in ExtService
+            InlinePresentation presentation, int width, int height, IBinder hostInputToken,
+            int displayId) {
+        if (hostInputToken == null) {
+            try {
+                callback.onError();
+            } catch (RemoteException e) {
+                Log.w(TAG, "RemoteException calling onError()");
+            }
+            return;
+        }
+
+        // When we create the UI it should be for the IME display
+        updateDisplay(displayId);
+        try {
+            final View suggestionView = onRenderSuggestion(presentation, width, height);
+            if (suggestionView == null) {
+                try {
+                    callback.onError();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Null suggestion view returned by renderer");
+                }
+                return;
+            }
+
+            final InlineSuggestionRoot suggestionRoot = new InlineSuggestionRoot(this, callback);
+            suggestionRoot.addView(suggestionView);
+            WindowManager.LayoutParams lp =
+                    new WindowManager.LayoutParams(width, height,
+                            WindowManager.LayoutParams.TYPE_APPLICATION, 0,
+                            PixelFormat.TRANSPARENT);
+
+            final SurfaceControlViewHost host = new SurfaceControlViewHost(this, getDisplay(),
+                    hostInputToken);
+            host.addView(suggestionRoot, lp);
+            suggestionRoot.setOnClickListener((v) -> {
+                try {
+                    callback.onAutofill();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException calling onAutofill()");
+                }
+            });
+
+            sendResult(callback, host.getSurfacePackage().getSurfaceControl());
+        } finally {
+            updateDisplay(Display.DEFAULT_DISPLAY);
+        }
+    }
+
+    private void sendResult(@NonNull IInlineSuggestionUiCallback callback,
+            @Nullable SurfaceControl surface) {
+        try {
+            callback.onContent(surface);
+        } catch (RemoteException e) {
+            Log.w(TAG, "RemoteException calling onContent(" + surface + ")");
+        }
     }
 
     @Override
@@ -66,16 +126,25 @@ public abstract class InlineSuggestionRenderService extends Service {
             return new IInlineSuggestionRenderService.Stub() {
                 @Override
                 public void renderSuggestion(@NonNull IInlineSuggestionUiCallback callback,
-                        @NonNull InlinePresentation presentation, int width, int height) {
+                        @NonNull InlinePresentation presentation, int width, int height,
+                        @Nullable IBinder hostInputToken, int displayId) {
                     mHandler.sendMessage(obtainMessage(
                             InlineSuggestionRenderService::handleRenderSuggestion,
                             InlineSuggestionRenderService.this, callback, presentation,
-                            width, height));
+                            width, height, hostInputToken, displayId));
                 }
             }.asBinder();
         }
 
         Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
+        return null;
+    }
+
+    /**
+     *  Returns the metadata about the renderer. Returns {@code null} if no metadata is provided.
+     */
+    @Nullable
+    public Bundle onGetInlineSuggestionsRendererInfo() {
         return null;
     }
 

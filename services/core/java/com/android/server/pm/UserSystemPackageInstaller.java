@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.AndroidPackage;
 import android.content.res.Resources;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -33,6 +32,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -89,7 +89,7 @@ class UserSystemPackageInstaller {
      * <ul>
      * <li> 0  - disable whitelist (install all system packages; no logging)</li>
      * <li> 1  - enforce (only install system packages if they are whitelisted)</li>
-     * <li> 2  - log (log when a non-whitelisted package is run)</li>
+     * <li> 2  - log (log non-whitelisted packages)</li>
      * <li> 4  - for all users: implicitly whitelist any package not mentioned in the whitelist</li>
      * <li> 8  - for SYSTEM: implicitly whitelist any package not mentioned in the whitelist</li>
      * <li> 16 - ignore OTAs (don't install system packages during OTAs)</li>
@@ -190,13 +190,14 @@ class UserSystemPackageInstaller {
         // Install/uninstall system packages per user.
         for (int userId : mUm.getUserIds()) {
             final Set<String> userWhitelist = getInstallablePackagesForUserId(userId);
-            pmInt.forEachPackage(pkg -> {
-                if (!pkg.isSystem()) {
+            pmInt.forEachPackageSetting(pkgSetting -> {
+                AndroidPackage pkg = pkgSetting.pkg;
+                if (pkg == null || !pkg.isSystem()) {
                     return;
                 }
                 final boolean install =
                         (userWhitelist == null || userWhitelist.contains(pkg.getPackageName()))
-                        && !pkg.isHiddenUntilInstalled();
+                                && !pkgSetting.getPkgState().isHiddenUntilInstalled();
                 if (isConsideredUpgrade && !isFirstBoot && !install) {
                     return; // To be careful, we don’t uninstall apps during OTAs
                 }

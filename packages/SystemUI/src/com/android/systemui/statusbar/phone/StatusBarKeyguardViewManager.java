@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.navigationBars;
+
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_UNLOCK_FADING;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
@@ -95,6 +96,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private static String TAG = "StatusBarKeyguardViewManager";
 
     protected final Context mContext;
+    private final ConfigurationController mConfigurationController;
+    private final NavigationModeController mNavigationModeController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
         @Override
@@ -208,21 +211,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
+        mConfigurationController = configurationController;
+        mNavigationModeController = navigationModeController;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mKeyguardStateController = keyguardStateController;
         mMediaManager = notificationMediaManager;
         mKeyguardUpdateManager = keyguardUpdateMonitor;
-        mKeyguardUpdateManager.registerCallback(mUpdateMonitorCallback);
         mStatusBarStateController = sysuiStatusBarStateController;
-        mStatusBarStateController.addCallback(this);
-        configurationController.addCallback(this);
-        mGesturalNav = QuickStepContract.isGesturalMode(
-                navigationModeController.addListener(this));
         mDockManager = dockManager;
-        if (mDockManager != null) {
-            mDockManager.addListener(mDockEventListener);
-            mIsDocked = mDockManager.isDocked();
-        }
     }
 
     public void registerStatusBar(StatusBar statusBar,
@@ -246,6 +242,20 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         notificationPanelViewController.addExpansionListener(this);
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
+
+        registerListeners();
+    }
+
+    private void registerListeners() {
+        mKeyguardUpdateManager.registerCallback(mUpdateMonitorCallback);
+        mStatusBarStateController.addCallback(this);
+        mConfigurationController.addCallback(this);
+        mGesturalNav = QuickStepContract.isGesturalMode(
+                mNavigationModeController.addListener(this));
+        if (mDockManager != null) {
+            mDockManager.addListener(mDockEventListener);
+            mIsDocked = mDockManager.isDocked();
+        }
     }
 
     @Override

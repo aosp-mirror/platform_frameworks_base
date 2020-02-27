@@ -285,6 +285,27 @@ TEST_F(AssetManager2Test, FindsBagResourceFromSharedLibrary) {
   EXPECT_EQ(0x03, get_package_id(bag->entries[1].key));
 }
 
+TEST_F(AssetManager2Test, FindsBagResourceFromMultipleSharedLibraries) {
+  AssetManager2 assetmanager;
+
+  // libclient is built with lib_one and then lib_two in order.
+  // Reverse the order to test that proper package ID re-assignment is happening.
+  assetmanager.SetApkAssets(
+      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
+
+  const ResolvedBag* bag = assetmanager.GetBag(libclient::R::style::ThemeMultiLib);
+  ASSERT_NE(nullptr, bag);
+  ASSERT_EQ(bag->entry_count, 2u);
+
+  // First attribute comes from lib_two.
+  EXPECT_EQ(2, bag->entries[0].cookie);
+  EXPECT_EQ(0x02, get_package_id(bag->entries[0].key));
+
+  // The next two attributes come from lib_one.
+  EXPECT_EQ(2, bag->entries[1].cookie);
+  EXPECT_EQ(0x03, get_package_id(bag->entries[1].key));
+}
+
 TEST_F(AssetManager2Test, FindsStyleResourceWithParentFromSharedLibrary) {
   AssetManager2 assetmanager;
 

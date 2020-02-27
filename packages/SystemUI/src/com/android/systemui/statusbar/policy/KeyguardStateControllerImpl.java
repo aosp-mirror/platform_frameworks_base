@@ -293,13 +293,12 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         }
 
         @Override
-        public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) {
+        public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
+                boolean isStrongBiometric) {
             Trace.beginSection("KeyguardUpdateMonitorCallback#onBiometricAuthenticated");
-            if (!mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed()) {
-                Trace.endSection();
-                return;
+            if (mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(isStrongBiometric)) {
+                update(false /* updateAlways */);
             }
-            update(false /* updateAlways */);
             Trace.endSection();
         }
 

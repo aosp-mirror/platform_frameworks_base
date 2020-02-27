@@ -569,6 +569,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         private WifiConfiguration buildWifiConfigurationForPasspoint() {
             WifiConfiguration wifiConfiguration = new WifiConfiguration();
             wifiConfiguration.FQDN = mPasspointConfiguration.getHomeSp().getFqdn();
+            wifiConfiguration.setPasspointUniqueId(mPasspointConfiguration.getUniqueId());
             wifiConfiguration.priority = mPriority;
             wifiConfiguration.meteredOverride =
                     mIsMetered ? WifiConfiguration.METERED_OVERRIDE_METERED
@@ -804,7 +805,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(wifiConfiguration.SSID, wifiConfiguration.BSSID,
-                wifiConfiguration.allowedKeyManagement, wifiConfiguration.FQDN);
+                wifiConfiguration.allowedKeyManagement, wifiConfiguration.getKey());
     }
 
     /**
@@ -827,7 +828,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 && TextUtils.equals(this.wifiConfiguration.BSSID, lhs.wifiConfiguration.BSSID)
                 && Objects.equals(this.wifiConfiguration.allowedKeyManagement,
                 lhs.wifiConfiguration.allowedKeyManagement)
-                && TextUtils.equals(this.wifiConfiguration.FQDN, lhs.wifiConfiguration.FQDN);
+                && TextUtils.equals(this.wifiConfiguration.getKey(),
+                lhs.wifiConfiguration.getKey());
     }
 
     @Override

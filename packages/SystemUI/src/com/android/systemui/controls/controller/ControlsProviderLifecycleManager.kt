@@ -25,11 +25,10 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.os.UserHandle
-import android.service.controls.Control
+import android.service.controls.ControlsProviderService
 import android.service.controls.ControlsProviderService.CALLBACK_BUNDLE
 import android.service.controls.ControlsProviderService.CALLBACK_TOKEN
 import android.service.controls.IControlsActionCallback
-import android.service.controls.IControlsLoadCallback
 import android.service.controls.IControlsProvider
 import android.service.controls.IControlsSubscriber
 import android.service.controls.IControlsSubscription
@@ -40,19 +39,30 @@ import com.android.internal.annotations.GuardedBy
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.util.concurrent.TimeUnit
 
-typealias LoadCallback = (List<Control>) -> Unit
+/**
+ * Manager for the lifecycle of the connection to a given [ControlsProviderService].
+ *
+ * This class handles binding and unbinding and requests to the service. The class will queue
+ * requests until the service is connected and dispatch them then.
+ *
+ * @property context A SystemUI context for binding to the services
+ * @property executor A delayable executor for posting timeouts
+ * @property actionCallbackService a callback interface to hand the remote service for sending
+ *                                 action responses
+ * @property subscriberService an "subscriber" interface for requesting and accepting updates for
+ *                             controls from the service.
+ * @property user the user for whose this service should be bound.
+ * @property componentName the name of the component for the service.
+ */
 class ControlsProviderLifecycleManager(
     private val context: Context,
     private val executor: DelayableExecutor,
-    private val loadCallbackService: IControlsLoadCallback.Stub,
     private val actionCallbackService: IControlsActionCallback.Stub,
     private val subscriberService: IControlsSubscriber.Stub,
     val user: UserHandle,
     val componentName: ComponentName
 ) : IBinder.DeathRecipient {
 
-    var lastLoadCallback: LoadCallback? = null
-        private set
     val token: IBinder = Binder()
     @GuardedBy("subscriptions")
     private val subscriptions = mutableListOf<IControlsSubscription>()
@@ -70,7 +80,7 @@ class ControlsProviderLifecycleManager(
         private const val MSG_ACTION = 2
         private const val MSG_UNBIND = 3
         private const val BIND_RETRY_DELAY = 1000L // ms
-        private const val LOAD_TIMEOUT = 5000L // ms
+        private const val LOAD_TIMEOUT_SECONDS = 30L // seconds
         private const val MAX_BIND_RETRIES = 5
         private const val MAX_CONTROLS_REQUEST = 100000L
         private const val DEBUG = true
@@ -140,9 +150,12 @@ class ControlsProviderLifecycleManager(
             bindService(false)
             return
         }
-        if (Message.Load in queue) {
-            load()
+
+        queue.filter { it is Message.Load }.forEach {
+            val msg = it as Message.Load
+            load(msg.subscriber)
         }
+
         queue.filter { it is Message.Subscribe }.flatMap { (it as Message.Subscribe).list }.run {
             if (this.isNotEmpty()) {
                 subscribe(this)
@@ -177,17 +190,17 @@ class ControlsProviderLifecycleManager(
         }
     }
 
-    private fun load() {
+    private fun load(subscriber: IControlsSubscriber.Stub) {
         if (DEBUG) {
             Log.d(TAG, "load $componentName")
         }
-        if (!(wrapper?.load(loadCallbackService) ?: false)) {
-            queueMessage(Message.Load)
+        if (!(wrapper?.load(subscriber) ?: false)) {
+            queueMessage(Message.Load(subscriber))
             binderDied()
         }
     }
 
-    private fun invokeOrQueue(f: () -> Unit, msg: Message) {
+    private inline fun invokeOrQueue(f: () -> Unit, msg: Message) {
         wrapper?.run {
             f()
         } ?: run {
@@ -196,18 +209,33 @@ class ControlsProviderLifecycleManager(
         }
     }
 
-    fun maybeBindAndLoad(callback: LoadCallback) {
+    /**
+     * Request a call to [IControlsProvider.load].
+     *
+     * If the service is not bound, the call will be queued and the service will be bound first.
+     * The service will be unbound after the controls are returned or the call times out.
+     *
+     * @param subscriber the subscriber that manages coordination for loading controls
+     */
+    fun maybeBindAndLoad(subscriber: IControlsSubscriber.Stub) {
         unqueueMessage(Message.Unbind)
-        lastLoadCallback = callback
         onLoadCanceller = executor.executeDelayed({
-            // Didn't receive a response in time, log and send back empty list
+            // Didn't receive a response in time, log and send back error
             Log.d(TAG, "Timeout waiting onLoad for $componentName")
-            loadCallbackService.accept(token, emptyList())
-        }, LOAD_TIMEOUT, TimeUnit.MILLISECONDS)
+            subscriber.onError(token, "Timeout waiting onLoad")
+            unbindService()
+        }, LOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
 
-        invokeOrQueue(::load, Message.Load)
+        invokeOrQueue({ load(subscriber) }, Message.Load(subscriber))
     }
 
+    /**
+     * Request a subscription to the [Publisher] returned by [ControlsProviderService.publisherFor]
+     *
+     * If the service is not bound, the call will be queued and the service will be bound first.
+     *
+     * @param controlIds a list of the ids of controls to send status back.
+     */
     fun maybeBindAndSubscribe(controlIds: List<String>) {
         invokeOrQueue({ subscribe(controlIds) }, Message.Subscribe(controlIds))
     }
@@ -222,6 +250,14 @@ class ControlsProviderLifecycleManager(
         }
     }
 
+    /**
+     * Request a call to [ControlsProviderService.performControlAction].
+     *
+     * If the service is not bound, the call will be queued and the service will be bound first.
+     *
+     * @param controlId the id of the [Control] the action is performed on
+     * @param action the action performed
+     */
     fun maybeBindAndSendAction(controlId: String, action: ControlAction) {
         invokeOrQueue({ action(controlId, action) }, Message.Action(controlId, action))
     }
@@ -236,6 +272,12 @@ class ControlsProviderLifecycleManager(
         }
     }
 
+    /**
+     * Starts the subscription to the [ControlsProviderService] and requests status of controls.
+     *
+     * @param subscription the subscriber to use to request controls
+     * @see maybeBindAndLoad
+     */
     fun startSubscription(subscription: IControlsSubscription) {
         synchronized(subscriptions) {
             subscriptions.add(subscription)
@@ -243,6 +285,9 @@ class ControlsProviderLifecycleManager(
         wrapper?.request(subscription, MAX_CONTROLS_REQUEST)
     }
 
+    /**
+     * Unsubscribe from this service, cancelling all status requests.
+     */
     fun unsubscribe() {
         if (DEBUG) {
             Log.d(TAG, "unsubscribe $componentName")
@@ -260,13 +305,18 @@ class ControlsProviderLifecycleManager(
         }
     }
 
+    /**
+     * Request bind to the service.
+     */
     fun bindService() {
         unqueueMessage(Message.Unbind)
         bindService(true)
     }
 
+    /**
+     * Request unbind from the service.
+     */
     fun unbindService() {
-        lastLoadCallback = null
         onLoadCanceller?.run()
         onLoadCanceller = null
 
@@ -281,9 +331,12 @@ class ControlsProviderLifecycleManager(
         }.toString()
     }
 
+    /**
+     * Messages for the internal queue.
+     */
     sealed class Message {
         abstract val type: Int
-        object Load : Message() {
+        class Load(val subscriber: IControlsSubscriber.Stub) : Message() {
             override val type = MSG_LOAD
         }
         object Unbind : Message() {

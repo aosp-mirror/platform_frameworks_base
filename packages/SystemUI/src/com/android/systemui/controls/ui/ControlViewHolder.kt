@@ -17,15 +17,15 @@
 package com.android.systemui.controls.ui
 
 import android.content.Context
-import android.content.Intent
+import android.graphics.BlendMode
 import android.graphics.drawable.ClipDrawable
-import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.TemperatureControlTemplate
+import android.service.controls.templates.ThumbnailTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
 import android.view.View
@@ -37,14 +37,15 @@ import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.R
 
-const val MIN_LEVEL = 0
-const val MAX_LEVEL = 10000
-private const val UPDATE_DELAY_IN_MILLIS = 2000L
+import kotlin.reflect.KClass
+
+private const val UPDATE_DELAY_IN_MILLIS = 3000L
 
 class ControlViewHolder(
     val layout: ViewGroup,
     val controlsController: ControlsController,
-    val uiExecutor: DelayableExecutor
+    val uiExecutor: DelayableExecutor,
+    val bgExecutor: DelayableExecutor
 ) {
     val icon: ImageView = layout.requireViewById(R.id.icon)
     val status: TextView = layout.requireViewById(R.id.status)
@@ -53,15 +54,14 @@ class ControlViewHolder(
     val subtitle: TextView = layout.requireViewById(R.id.subtitle)
     val context: Context = layout.getContext()
     val clipLayer: ClipDrawable
-    val gd: GradientDrawable
     lateinit var cws: ControlWithState
     var cancelUpdate: Runnable? = null
+    var behavior: Behavior? = null
 
     init {
         val ld = layout.getBackground() as LayerDrawable
         ld.mutate()
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer) as ClipDrawable
-        gd = clipLayer.getDrawable() as GradientDrawable
     }
 
     fun bindData(cws: ControlWithState) {
@@ -79,17 +79,21 @@ class ControlViewHolder(
             Pair(Control.STATUS_UNKNOWN, ControlTemplate.NO_TEMPLATE)
         }
 
-        cws.control?.let { c ->
+        cws.control?.let {
             layout.setOnLongClickListener(View.OnLongClickListener() {
-                val closeDialog = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-                context.sendBroadcast(closeDialog)
-
-                c.getAppIntent().send()
+                ControlActionCoordinator.longPress(this@ControlViewHolder)
                 true
             })
         }
 
-        findBehavior(status, template).apply(this, cws)
+        val clazz = findBehavior(status, template)
+        if (behavior == null || behavior!!::class != clazz) {
+            // Behavior changes can signal a change in template from the app or
+            // first time setup
+            behavior = clazz.java.newInstance()
+            behavior?.initialize(this)
+        }
+        behavior?.bind(cws)
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
@@ -100,37 +104,35 @@ class ControlViewHolder(
         }
 
         if (!text.isEmpty()) {
-            val previousText = status.getText()
-            val previousTextExtra = statusExtra.getText()
-
-            cancelUpdate = uiExecutor.executeDelayed({
-                    status.setText(previousText)
-                    statusExtra.setText(previousTextExtra)
-                }, UPDATE_DELAY_IN_MILLIS)
-
-            status.setText(text)
-            statusExtra.setText("")
+            setTransientStatus(text)
         }
+    }
+
+    fun setTransientStatus(tempStatus: String) {
+        val previousText = status.getText()
+        val previousTextExtra = statusExtra.getText()
+
+        cancelUpdate = uiExecutor.executeDelayed({
+                status.setText(previousText)
+                statusExtra.setText(previousTextExtra)
+            }, UPDATE_DELAY_IN_MILLIS)
+
+        status.setText(tempStatus)
+        statusExtra.setText("")
     }
 
     fun action(action: ControlAction) {
         controlsController.action(cws.ci, action)
     }
 
-    private fun findBehavior(status: Int, template: ControlTemplate): Behavior {
+    private fun findBehavior(status: Int, template: ControlTemplate): KClass<out Behavior> {
         return when {
-            status == Control.STATUS_UNKNOWN -> UnknownBehavior()
-            template is ToggleTemplate -> ToggleBehavior()
-            template is ToggleRangeTemplate -> ToggleRangeBehavior()
-            template is TemperatureControlTemplate -> TemperatureControlBehavior()
-            else -> {
-                object : Behavior {
-                    override fun apply(cvh: ControlViewHolder, cws: ControlWithState) {
-                        cvh.status.setText(cws.control?.getStatusText())
-                        cvh.applyRenderInfo(RenderInfo.lookup(cws.ci.deviceType, false))
-                    }
-                }
-            }
+            status == Control.STATUS_UNKNOWN -> UnknownBehavior::class
+            template is ToggleTemplate -> ToggleBehavior::class
+            template is ToggleRangeTemplate -> ToggleRangeBehavior::class
+            template is TemperatureControlTemplate -> TemperatureControlBehavior::class
+            template is ThumbnailTemplate -> StaticBehavior::class
+            else -> DefaultBehavior::class
         }
     }
 
@@ -143,7 +145,10 @@ class ControlViewHolder(
         icon.setImageIcon(Icon.createWithResource(context, ri.iconResourceId))
         icon.setImageTintList(fg)
 
-        gd.setColor(bg)
+        clipLayer.getDrawable().apply {
+            setTintBlendMode(BlendMode.HUE)
+            setTintList(bg)
+        }
     }
 
     fun setEnabled(enabled: Boolean) {

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-apex {
+apex_test {
     name: "test_com.android.permission",
     visibility: [
         "//system/apex/tests",

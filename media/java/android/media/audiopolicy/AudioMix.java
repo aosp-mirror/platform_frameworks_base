@@ -192,6 +192,16 @@ public class AudioMix {
         return mRule.isAffectingUsage(usage);
     }
 
+    /**
+      * Returns {@code true} if the rule associated with this mix contains a
+      * RULE_MATCH_ATTRIBUTE_USAGE criterion for the given usage
+      *
+      * @hide
+      */
+    public boolean containsMatchAttributeRuleForUsage(int usage) {
+        return mRule.containsMatchAttributeRuleForUsage(usage);
+    }
+
     /** @hide */
     public boolean isRoutedToDevice(int deviceType, @NonNull String deviceAddress) {
         if ((mRouteFlags & ROUTE_FLAG_RENDER) != ROUTE_FLAG_RENDER) {

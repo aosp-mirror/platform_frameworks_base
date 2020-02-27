@@ -28,10 +28,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.hardware.thermal.V2_0.TemperatureThreshold;
 import android.os.CoolingDevice;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.IThermalEventListener;
+import android.os.IThermalService;
 import android.os.IThermalStatusListener;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -71,6 +73,8 @@ public class ThermalManagerServiceTest {
     private Context mContext;
     @Mock
     private IPowerManager mIPowerManagerMock;
+    @Mock
+    private IThermalService mIThermalServiceMock;
     @Mock
     private IThermalEventListener mEventListener1;
     @Mock
@@ -133,6 +137,12 @@ public class ThermalManagerServiceTest {
         }
 
         @Override
+        protected List<TemperatureThreshold> getTemperatureThresholds(boolean shouldFilter,
+                int type) {
+            return new ArrayList<>();
+        }
+
+        @Override
         protected boolean connectToHal() {
             return true;
         }
@@ -153,7 +163,7 @@ public class ThermalManagerServiceTest {
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mFakeHal = new ThermalHalFake();
-        mPowerManager = new PowerManager(mContext, mIPowerManagerMock, null);
+        mPowerManager = new PowerManager(mContext, mIPowerManagerMock, mIThermalServiceMock, null);
         when(mContext.getSystemServiceName(PowerManager.class)).thenReturn(Context.POWER_SERVICE);
         when(mContext.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
         resetListenerMock();
@@ -287,9 +297,11 @@ public class ThermalManagerServiceTest {
     @Test
     public void testGetCurrentTemperatures() throws RemoteException {
         assertListEqualsIgnoringOrder(mFakeHal.getCurrentTemperatures(false, 0),
-                mService.mService.getCurrentTemperatures());
-        assertListEqualsIgnoringOrder(mFakeHal.getCurrentTemperatures(true, Temperature.TYPE_SKIN),
-                mService.mService.getCurrentTemperaturesWithType(Temperature.TYPE_SKIN));
+                Arrays.asList(mService.mService.getCurrentTemperatures()));
+        assertListEqualsIgnoringOrder(
+                mFakeHal.getCurrentTemperatures(true, Temperature.TYPE_SKIN),
+                Arrays.asList(mService.mService.getCurrentTemperaturesWithType(
+                        Temperature.TYPE_SKIN)));
     }
 
     @Test
@@ -321,21 +333,22 @@ public class ThermalManagerServiceTest {
         assertTrue(mService.mService.registerThermalStatusListener(mStatusListener1));
         assertTrue(mService.mService.unregisterThermalEventListener(mEventListener1));
         assertTrue(mService.mService.unregisterThermalStatusListener(mStatusListener1));
-        assertEquals(0, mService.mService.getCurrentTemperatures().size());
-        assertEquals(0,
-                mService.mService.getCurrentTemperaturesWithType(Temperature.TYPE_SKIN).size());
+        assertEquals(0, Arrays.asList(mService.mService.getCurrentTemperatures()).size());
+        assertEquals(0, Arrays.asList(mService.mService.getCurrentTemperaturesWithType(
+                        Temperature.TYPE_SKIN)).size());
         assertEquals(Temperature.THROTTLING_NONE, mService.mService.getCurrentThermalStatus());
     }
 
     @Test
     public void testGetCurrentCoolingDevices() throws RemoteException {
         assertListEqualsIgnoringOrder(mFakeHal.getCurrentCoolingDevices(false, 0),
-                mService.mService.getCurrentCoolingDevices());
+                Arrays.asList(mService.mService.getCurrentCoolingDevices()));
         assertListEqualsIgnoringOrder(
                 mFakeHal.getCurrentCoolingDevices(false, CoolingDevice.TYPE_BATTERY),
-                mService.mService.getCurrentCoolingDevices());
+                Arrays.asList(mService.mService.getCurrentCoolingDevices()));
         assertListEqualsIgnoringOrder(
                 mFakeHal.getCurrentCoolingDevices(true, CoolingDevice.TYPE_CPU),
-                mService.mService.getCurrentCoolingDevicesWithType(CoolingDevice.TYPE_CPU));
+                Arrays.asList(mService.mService.getCurrentCoolingDevicesWithType(
+                        CoolingDevice.TYPE_CPU)));
     }
 }

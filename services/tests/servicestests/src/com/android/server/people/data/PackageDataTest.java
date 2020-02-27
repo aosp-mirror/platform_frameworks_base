@@ -20,15 +20,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.content.Context;
 import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.File;
 import java.util.List;
 
 @RunWith(JUnit4.class)
@@ -52,8 +56,12 @@ public final class PackageDataTest {
 
     @Before
     public void setUp() {
+        Context ctx = InstrumentationRegistry.getContext();
+        File testDir = new File(ctx.getCacheDir(), "testdir");
+        testDir.mkdir();
         mPackageData = new PackageData(
-                PACKAGE_NAME, USER_ID, pkg -> mIsDefaultDialer, pkg -> mIsDefaultSmsApp);
+                PACKAGE_NAME, USER_ID, pkg -> mIsDefaultDialer, pkg -> mIsDefaultSmsApp,
+                new MockScheduledExecutorService(), testDir);
         ConversationInfo conversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
                 .setLocusId(LOCUS_ID)
@@ -73,8 +81,10 @@ public final class PackageDataTest {
     @Test
     public void testGetEventHistory() {
         EventStore eventStore = mPackageData.getEventStore();
-        eventStore.getOrCreateShortcutEventHistory(SHORTCUT_ID).addEvent(mE1);
-        eventStore.getOrCreateLocusEventHistory(LOCUS_ID).addEvent(mE2);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_SHORTCUT_BASED, SHORTCUT_ID)
+                .addEvent(mE1);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_LOCUS_ID_BASED, LOCUS_ID.getId())
+                .addEvent(mE2);
 
         EventHistory eventHistory = mPackageData.getEventHistory(SHORTCUT_ID);
         List<Event> events = eventHistory.queryEvents(Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
@@ -88,9 +98,10 @@ public final class PackageDataTest {
         mIsDefaultDialer = true;
         mIsDefaultSmsApp = true;
         EventStore eventStore = mPackageData.getEventStore();
-        eventStore.getOrCreateShortcutEventHistory(SHORTCUT_ID).addEvent(mE1);
-        eventStore.getOrCreateCallEventHistory(PHONE_NUMBER).addEvent(mE3);
-        eventStore.getOrCreateSmsEventHistory(PHONE_NUMBER).addEvent(mE4);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_SHORTCUT_BASED, SHORTCUT_ID)
+                .addEvent(mE1);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_CALL, PHONE_NUMBER).addEvent(mE3);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_SMS, PHONE_NUMBER).addEvent(mE4);
 
         assertTrue(mPackageData.isDefaultDialer());
         assertTrue(mPackageData.isDefaultSmsApp());
@@ -105,15 +116,71 @@ public final class PackageDataTest {
     @Test
     public void testGetEventHistoryNotDefaultDialerOrSmsApp() {
         EventStore eventStore = mPackageData.getEventStore();
-        eventStore.getOrCreateShortcutEventHistory(SHORTCUT_ID).addEvent(mE1);
-        eventStore.getOrCreateCallEventHistory(PHONE_NUMBER).addEvent(mE3);
-        eventStore.getOrCreateSmsEventHistory(PHONE_NUMBER).addEvent(mE4);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_SHORTCUT_BASED, SHORTCUT_ID)
+                .addEvent(mE1);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_CALL, PHONE_NUMBER).addEvent(mE3);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_SMS, PHONE_NUMBER).addEvent(mE4);
 
         assertFalse(mPackageData.isDefaultDialer());
         assertFalse(mPackageData.isDefaultSmsApp());
         EventHistory eventHistory = mPackageData.getEventHistory(SHORTCUT_ID);
         List<Event> events = eventHistory.queryEvents(Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
         assertEquals(1, events.size());
+        assertEventEquals(mE1, events.get(0));
+    }
+
+    @Test
+    public void testDeleteConversationData() {
+        mIsDefaultDialer = true;
+        mIsDefaultSmsApp = true;
+        EventStore eventStore = mPackageData.getEventStore();
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_SHORTCUT_BASED, SHORTCUT_ID)
+                .addEvent(mE1);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_LOCUS_ID_BASED, LOCUS_ID.getId())
+                .addEvent(mE2);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_CALL, PHONE_NUMBER).addEvent(mE3);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_SMS, PHONE_NUMBER).addEvent(mE4);
+
+        EventHistory eventHistory = mPackageData.getEventHistory(SHORTCUT_ID);
+        List<Event> events = eventHistory.queryEvents(Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
+        assertEquals(4, events.size());
+
+        mPackageData.deleteDataForConversation(SHORTCUT_ID);
+
+        eventHistory = mPackageData.getEventHistory(SHORTCUT_ID);
+        events = eventHistory.queryEvents(Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
+        assertTrue(events.isEmpty());
+    }
+
+    @Test
+    public void testPruneOrphanEvents() {
+        mIsDefaultDialer = true;
+        mIsDefaultSmsApp = true;
+        EventStore eventStore = mPackageData.getEventStore();
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_SHORTCUT_BASED, SHORTCUT_ID)
+                .addEvent(mE1);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_LOCUS_ID_BASED, LOCUS_ID.getId())
+                .addEvent(mE2);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_CALL, PHONE_NUMBER).addEvent(mE3);
+        eventStore.getOrCreateEventHistory(EventStore.CATEGORY_SMS, PHONE_NUMBER).addEvent(mE4);
+
+        EventHistory eventHistory = mPackageData.getEventHistory(SHORTCUT_ID);
+        List<Event> events = eventHistory.queryEvents(Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
+        assertEquals(4, events.size());
+
+        ConversationInfo conversationInfo = new ConversationInfo.Builder()
+                .setShortcutId(SHORTCUT_ID)
+                .setLocusId(null)
+                .setContactUri(null)
+                .setContactPhoneNumber(null)
+                .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED)
+                .build();
+        mPackageData.getConversationStore().addOrUpdate(conversationInfo);
+        mPackageData.pruneOrphanEvents();
+        eventHistory = mPackageData.getEventHistory(SHORTCUT_ID);
+        events = eventHistory.queryEvents(Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
+        assertEquals(1, events.size());
+        // Only the shortcut based event is kept. All the other events are deleted.
         assertEventEquals(mE1, events.get(0));
     }
 

@@ -224,21 +224,43 @@ public class RollbackUnitTest {
     }
 
     @Test
-    public void snapshotThenDelete() {
+    public void snapshotThenDeleteNoApex() {
         Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
         PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
-        PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
+        PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, false);
         rollback.info.getPackages().addAll(Arrays.asList(pkgInfo1, pkgInfo2));
 
-        int[] userIds = {12, 18};
+        int[] userIds = {111, 222};
         rollback.snapshotUserData(PKG_2, userIds, mMockDataHelper);
 
         verify(mMockDataHelper).snapshotAppData(eq(123), pkgRollbackInfoFor(PKG_2), eq(userIds));
 
         rollback.delete(mMockDataHelper);
 
-        verify(mMockDataHelper).destroyAppDataSnapshot(eq(123), pkgRollbackInfoFor(PKG_2), eq(12));
-        verify(mMockDataHelper).destroyAppDataSnapshot(eq(123), pkgRollbackInfoFor(PKG_2), eq(18));
+        verify(mMockDataHelper).destroyAppDataSnapshot(eq(123), pkgRollbackInfoFor(PKG_2), eq(111));
+        verify(mMockDataHelper).destroyAppDataSnapshot(eq(123), pkgRollbackInfoFor(PKG_2), eq(222));
+        verify(mMockDataHelper, never()).destroyApexDeSnapshots(anyInt());
+
+        assertThat(rollback.isDeleted()).isTrue();
+    }
+
+    @Test
+    public void snapshotThenDeleteWithApex() {
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
+        PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
+        PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
+        rollback.info.getPackages().addAll(Arrays.asList(pkgInfo1, pkgInfo2));
+
+        int[] userIds = {111, 222};
+        rollback.snapshotUserData(PKG_2, userIds, mMockDataHelper);
+
+        verify(mMockDataHelper).snapshotAppData(eq(123), pkgRollbackInfoFor(PKG_2), eq(userIds));
+
+        rollback.delete(mMockDataHelper);
+
+        verify(mMockDataHelper, never())
+                .destroyAppDataSnapshot(anyInt(), pkgRollbackInfoFor(PKG_2), anyInt());
+        verify(mMockDataHelper).destroyApexDeSnapshots(123);
 
         assertThat(rollback.isDeleted()).isTrue();
     }

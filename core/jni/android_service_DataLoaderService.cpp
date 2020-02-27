@@ -75,8 +75,9 @@ static const JNINativeMethod dlc_method_table[] = {
         {"nativeStartDataLoader", "(I)Z", (void*)nativeStartDataLoader},
         {"nativeStopDataLoader", "(I)Z", (void*)nativeStopDataLoader},
         {"nativeDestroyDataLoader", "(I)Z", (void*)nativeDestroyDataLoader},
-        {"nativePrepareImage", "(ILjava/util/Collection;Ljava/util/Collection;)Z", (void*)nativePrepareImage},
-        {"nativeWriteData", "(JLjava/lang/String;JJLandroid/os/ParcelFileDescriptor;)V", (void*)nativeWriteData},
+        {"nativePrepareImage", "(ILjava/util/List;Ljava/util/List;)Z", (void*)nativePrepareImage},
+        {"nativeWriteData", "(JLjava/lang/String;JJLandroid/os/ParcelFileDescriptor;)V",
+         (void*)nativeWriteData},
 };
 
 }  // namespace

@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.settingslib.applications.DefaultAppInfo
 import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.R
+import java.text.Collator
 import java.util.concurrent.Executor
 
 /**
@@ -44,23 +45,27 @@ import java.util.concurrent.Executor
  * @param onAppSelected a callback to indicate that an app has been selected in the list.
  */
 class AppAdapter(
+    backgroundExecutor: Executor,
     uiExecutor: Executor,
     lifecycle: Lifecycle,
     controlsListingController: ControlsListingController,
     private val layoutInflater: LayoutInflater,
     private val onAppSelected: (ComponentName?) -> Unit = {},
-    private val favoritesRenderer: FavoritesRenderer
+    private val favoritesRenderer: FavoritesRenderer,
+    private val resources: Resources
 ) : RecyclerView.Adapter<AppAdapter.Holder>() {
 
     private var listOfServices = emptyList<CandidateInfo>()
 
     private val callback = object : ControlsListingController.ControlsListingCallback {
-        override fun onServicesUpdated(list: List<CandidateInfo>) {
-            uiExecutor.execute {
-                listOfServices = list.sortedBy {
-                    it.loadLabel().toString()
+        override fun onServicesUpdated(candidates: List<CandidateInfo>) {
+            backgroundExecutor.execute {
+                val collator = Collator.getInstance(resources.configuration.locales[0])
+                val localeComparator = compareBy<CandidateInfo, CharSequence>(collator) {
+                    it.loadLabel()
                 }
-                notifyDataSetChanged()
+                listOfServices = candidates.sortedWith(localeComparator)
+                uiExecutor.execute(::notifyDataSetChanged)
             }
         }
     }
@@ -111,6 +116,10 @@ class FavoritesRenderer(
 
     fun renderFavoritesForComponent(component: ComponentName): String {
         val qty = favoriteFunction(component)
-        return resources.getQuantityString(R.plurals.controls_number_of_favorites, qty, qty)
+        if (qty != 0) {
+            return resources.getQuantityString(R.plurals.controls_number_of_favorites, qty, qty)
+        } else {
+            return ""
+        }
     }
 }

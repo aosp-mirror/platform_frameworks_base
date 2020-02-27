@@ -20,6 +20,7 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.DisplayInfo;
 import android.view.Surface.Rotation;
@@ -27,6 +28,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.server.wm.utils.CoordinateTransforms;
+import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -45,32 +47,49 @@ public class SeamlessRotator {
     private final float[] mFloat9 = new float[9];
     private final int mOldRotation;
     private final int mNewRotation;
+    private final int mRotationDelta;
+    private final int mW;
+    private final int mH;
 
     public SeamlessRotator(@Rotation int oldRotation, @Rotation int newRotation, DisplayInfo info) {
         mOldRotation = oldRotation;
         mNewRotation = newRotation;
+        mRotationDelta = DisplayContent.deltaRotation(oldRotation, newRotation);
 
         final boolean flipped = info.rotation == ROTATION_90 || info.rotation == ROTATION_270;
-        final int h = flipped ? info.logicalWidth : info.logicalHeight;
-        final int w = flipped ? info.logicalHeight : info.logicalWidth;
+        mH = flipped ? info.logicalWidth : info.logicalHeight;
+        mW = flipped ? info.logicalHeight : info.logicalWidth;
 
         final Matrix tmp = new Matrix();
-        CoordinateTransforms.transformLogicalToPhysicalCoordinates(oldRotation, w, h, mTransform);
-        CoordinateTransforms.transformPhysicalToLogicalCoordinates(newRotation, w, h, tmp);
+        CoordinateTransforms.transformLogicalToPhysicalCoordinates(oldRotation, mW, mH, mTransform);
+        CoordinateTransforms.transformPhysicalToLogicalCoordinates(newRotation, mW, mH, tmp);
         mTransform.postConcat(tmp);
     }
 
     /**
-     * Applies a transform to the {@link WindowState} surface that undoes the effect of the global
-     * display rotation.
+     * Applies a transform to the {@link WindowContainer} surface that undoes the effect of the
+     * global display rotation.
      */
-    public void unrotate(Transaction transaction, WindowState win) {
+    public void unrotate(Transaction transaction, WindowContainer win) {
         transaction.setMatrix(win.getSurfaceControl(), mTransform, mFloat9);
-
         // WindowState sets the position of the window so transform the position and update it.
         final float[] winSurfacePos = {win.mLastSurfacePosition.x, win.mLastSurfacePosition.y};
         mTransform.mapPoints(winSurfacePos);
         transaction.setPosition(win.getSurfaceControl(), winSurfacePos[0], winSurfacePos[1]);
+    }
+
+    /** Rotates the frame from {@link #mNewRotation} to {@link #mOldRotation}. */
+    void unrotateFrame(Rect inOut) {
+        if (mRotationDelta == ROTATION_90) {
+            inOut.set(inOut.top, mH - inOut.right, inOut.bottom, mH - inOut.left);
+        } else if (mRotationDelta == ROTATION_270) {
+            inOut.set(mW - inOut.bottom, inOut.left, mW - inOut.top, inOut.right);
+        }
+    }
+
+    /** Rotates the insets from {@link #mNewRotation} to {@link #mOldRotation}. */
+    void unrotateInsets(Rect inOut) {
+        InsetUtils.rotateInsets(inOut, mRotationDelta);
     }
 
     /**
@@ -95,16 +114,21 @@ public class SeamlessRotator {
      * it.
      */
     public void finish(WindowState win, boolean timeout) {
-        mTransform.reset();
         final Transaction t = win.getPendingTransaction();
-        t.setMatrix(win.mSurfaceControl, mTransform, mFloat9);
-        t.setPosition(win.mSurfaceControl, win.mLastSurfacePosition.x, win.mLastSurfacePosition.y);
+        finish(t, win);
         if (win.mWinAnimator.mSurfaceController != null && !timeout) {
             t.deferTransactionUntil(win.mSurfaceControl,
                     win.getDeferTransactionBarrier(), win.getFrameNumber());
             t.deferTransactionUntil(win.mWinAnimator.mSurfaceController.mSurfaceControl,
                     win.getDeferTransactionBarrier(), win.getFrameNumber());
         }
+    }
+
+    /** Removes the transform and restore to the original last position. */
+    void finish(Transaction t, WindowContainer win) {
+        mTransform.reset();
+        t.setMatrix(win.mSurfaceControl, mTransform, mFloat9);
+        t.setPosition(win.mSurfaceControl, win.mLastSurfacePosition.x, win.mLastSurfacePosition.y);
     }
 
     public void dump(PrintWriter pw) {

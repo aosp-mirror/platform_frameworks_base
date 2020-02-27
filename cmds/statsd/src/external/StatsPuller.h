@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <android/os/IStatsCompanionService.h>
+#include <aidl/android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
 #include <mutex>
 #include <vector>
@@ -25,6 +25,9 @@
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "puller_util.h"
+
+using aidl::android::os::IStatsCompanionService;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
@@ -58,7 +61,8 @@ public:
 
     static void SetUidMap(const sp<UidMap>& uidMap);
 
-    virtual void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService){};
+    virtual void SetStatsCompanionService(
+            shared_ptr<IStatsCompanionService> statsCompanionService) {};
 
 protected:
     const int mTagId;

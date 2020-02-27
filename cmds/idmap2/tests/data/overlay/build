@@ -51,4 +51,12 @@ aapt2 link \
     -o overlay-static-2.apk \
     compiled.flata
 
+aapt2 link \
+    --no-resource-removal \
+    --shared-lib \
+    -I "$FRAMEWORK_RES_APK" \
+    --manifest AndroidManifest.xml \
+    -o overlay-shared.apk \
+    compiled.flata
+
 rm compiled.flata

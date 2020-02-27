@@ -16,12 +16,14 @@
 
 #pragma once
 
+#include <android-base/unique_fd.h>
 #include <apex/window.h>
-#include <gui/Surface.h>
+#include <utils/Errors.h>
 #include <utils/Macros.h>
 #include <utils/StrongPointer.h>
 
 #include <memory>
+#include <mutex>
 
 namespace android::uirenderer::renderthread {
 
@@ -29,7 +31,7 @@ class ReliableSurface {
     PREVENT_COPY_AND_ASSIGN(ReliableSurface);
 
 public:
-    ReliableSurface(sp<Surface>&& surface);
+    ReliableSurface(ANativeWindow* window);
     ~ReliableSurface();
 
     // Performs initialization that is not safe to do in the constructor.
@@ -37,11 +39,9 @@ public:
     // passed as the data pointer is not safe.
     void init();
 
-    ANativeWindow* getNativeWindow() { return mSurface.get(); }
+    ANativeWindow* getNativeWindow() { return mWindow; }
 
     int reserveNext();
-
-    int query(int what, int* value) const { return mSurface->query(what, value); }
 
     int getAndClearError() {
         int ret = mBufferQueueState;
@@ -50,12 +50,12 @@ public:
     }
 
 private:
-    sp<Surface> mSurface;
+    ANativeWindow* mWindow;
 
     mutable std::mutex mMutex;
 
     uint64_t mUsage = AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER;
-    PixelFormat mFormat = PIXEL_FORMAT_RGBA_8888;
+    AHardwareBuffer_Format mFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
     std::unique_ptr<AHardwareBuffer, void (*)(AHardwareBuffer*)> mScratchBuffer{
             nullptr, AHardwareBuffer_release};
     ANativeWindowBuffer* mReservedBuffer = nullptr;

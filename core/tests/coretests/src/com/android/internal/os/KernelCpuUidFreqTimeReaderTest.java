@@ -29,7 +29,6 @@ import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 
@@ -37,6 +36,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -45,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Random;
 
 /**
@@ -53,14 +55,16 @@ import java.util.Random;
  * $ atest FrameworksCoreTests:com.android.internal.os.KernelCpuUidFreqTimeReaderTest
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 public class KernelCpuUidFreqTimeReaderTest {
     private File mTestDir;
     private File mTestFile;
     private KernelCpuUidFreqTimeReader mReader;
+    private KernelCpuUidTestBpfMapReader mBpfMapReader;
     private VerifiableCallback mCallback;
     @Mock
     private PowerProfile mPowerProfile;
+    private boolean mUseBpf;
 
     private Random mRand = new Random(12345);
     private final int[] mUids = {0, 1, 22, 333, 4444, 55555};
@@ -69,13 +73,23 @@ public class KernelCpuUidFreqTimeReaderTest {
         return InstrumentationRegistry.getContext();
     }
 
+    @Parameters(name="useBpf={0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] { {true}, {false} });
+    }
+
+    public KernelCpuUidFreqTimeReaderTest(boolean useBpf) {
+        mUseBpf = useBpf;
+    }
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mTestDir = getContext().getDir("test", Context.MODE_PRIVATE);
         mTestFile = new File(mTestDir, "test.file");
+        mBpfMapReader = new KernelCpuUidTestBpfMapReader();
         mReader = new KernelCpuUidFreqTimeReader(mTestFile.getAbsolutePath(),
-                new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), false);
+                new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), mBpfMapReader, false);
         mCallback = new VerifiableCallback();
     }
 
@@ -97,17 +111,17 @@ public class KernelCpuUidFreqTimeReaderTest {
         final int[][] numFreqs = {{3, 6}, {4, 5}, {3, 5, 4}, {3}};
         for (int i = 0; i < freqs.length; ++i) {
             mReader = new KernelCpuUidFreqTimeReader(mTestFile.getAbsolutePath(),
-                    new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), false);
+                    new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), mBpfMapReader, false);
             setCpuClusterFreqs(numClusters[i], numFreqs[i]);
-            writeToFile(freqsLine(freqs[i]));
+            setFreqs(freqs[i]);
             long[] actualFreqs = mReader.readFreqs(mPowerProfile);
             assertArrayEquals(freqs[i], actualFreqs);
             final String errMsg = String.format("Freqs=%s, nClusters=%d, nFreqs=%s",
                     Arrays.toString(freqs[i]), numClusters[i], Arrays.toString(numFreqs[i]));
             assertFalse(errMsg, mReader.perClusterTimesAvailable());
 
-            // Verify that a second call won't read the proc file again
-            assertTrue(mTestFile.delete());
+            // Verify that a second call won't re-read the freqs
+            clearFreqsAndData();
             actualFreqs = mReader.readFreqs(mPowerProfile);
             assertArrayEquals(freqs[i], actualFreqs);
             assertFalse(errMsg, mReader.perClusterTimesAvailable());
@@ -125,17 +139,17 @@ public class KernelCpuUidFreqTimeReaderTest {
         final int[][] numFreqs = {{4}, {3, 5}, {3, 5, 4}};
         for (int i = 0; i < freqs.length; ++i) {
             mReader = new KernelCpuUidFreqTimeReader(mTestFile.getAbsolutePath(),
-                    new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), false);
+                    new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), mBpfMapReader, false);
             setCpuClusterFreqs(numClusters[i], numFreqs[i]);
-            writeToFile(freqsLine(freqs[i]));
+            setFreqs(freqs[i]);
             long[] actualFreqs = mReader.readFreqs(mPowerProfile);
             assertArrayEquals(freqs[i], actualFreqs);
             final String errMsg = String.format("Freqs=%s, nClusters=%d, nFreqs=%s",
                     Arrays.toString(freqs[i]), numClusters[i], Arrays.toString(numFreqs[i]));
             assertTrue(errMsg, mReader.perClusterTimesAvailable());
 
-            // Verify that a second call won't read the proc file again
-            assertTrue(mTestFile.delete());
+            // Verify that a second call won't re-read the freqs
+            clearFreqsAndData();
             actualFreqs = mReader.readFreqs(mPowerProfile);
             assertArrayEquals(freqs[i], actualFreqs);
             assertTrue(errMsg, mReader.perClusterTimesAvailable());
@@ -147,7 +161,7 @@ public class KernelCpuUidFreqTimeReaderTest {
         final long[] freqs = {110, 123, 145, 167, 289, 997};
         final long[][] times = increaseTime(new long[mUids.length][freqs.length]);
 
-        writeToFile(freqsLine(freqs) + uidLines(mUids, times));
+        setFreqsAndData(freqs, times);
         mReader.readDelta(mCallback);
         for (int i = 0; i < mUids.length; ++i) {
             mCallback.verify(mUids[i], times[i]);
@@ -155,14 +169,14 @@ public class KernelCpuUidFreqTimeReaderTest {
         mCallback.verifyNoMoreInteractions();
 
         // Verify that readDelta also reads the frequencies if not already available.
-        assertTrue(mTestFile.delete());
+        clearFreqsAndData();
         long[] actualFreqs = mReader.readFreqs(mPowerProfile);
         assertArrayEquals(freqs, actualFreqs);
 
         // Verify that a second call will only return deltas.
         mCallback.clear();
         final long[][] newTimes1 = increaseTime(times);
-        writeToFile(freqsLine(freqs) + uidLines(mUids, newTimes1));
+        setFreqsAndData(freqs, newTimes1);
         mReader.readDelta(mCallback);
         for (int i = 0; i < mUids.length; ++i) {
             mCallback.verify(mUids[i], subtract(newTimes1[i], times[i]));
@@ -177,7 +191,7 @@ public class KernelCpuUidFreqTimeReaderTest {
         // Verify that calling with a null callback doesn't result in any crashes
         mCallback.clear();
         final long[][] newTimes2 = increaseTime(newTimes1);
-        writeToFile(freqsLine(freqs) + uidLines(mUids, newTimes2));
+        setFreqsAndData(freqs, newTimes2);
         mReader.readDelta(null);
         mCallback.verifyNoMoreInteractions();
 
@@ -185,13 +199,13 @@ public class KernelCpuUidFreqTimeReaderTest {
         // the previous call had null callback.
         mCallback.clear();
         final long[][] newTimes3 = increaseTime(newTimes2);
-        writeToFile(freqsLine(freqs) + uidLines(mUids, newTimes3));
+        setFreqsAndData(freqs, newTimes3);
         mReader.readDelta(mCallback);
         for (int i = 0; i < mUids.length; ++i) {
             mCallback.verify(mUids[i], subtract(newTimes3[i], newTimes2[i]));
         }
         mCallback.verifyNoMoreInteractions();
-        assertTrue(mTestFile.delete());
+        clearFreqsAndData();
     }
 
     @Test
@@ -199,7 +213,7 @@ public class KernelCpuUidFreqTimeReaderTest {
         final long[] freqs = {110, 123, 145, 167, 289, 997};
         final long[][] times1 = increaseTime(new long[mUids.length][freqs.length]);
 
-        writeToFile(freqsLine(freqs) + uidLines(mUids, times1));
+        setFreqsAndData(freqs, times1);
         mReader.readAbsolute(mCallback);
         for (int i = 0; i < mUids.length; i++) {
             mCallback.verify(mUids[i], times1[i]);
@@ -207,20 +221,20 @@ public class KernelCpuUidFreqTimeReaderTest {
         mCallback.verifyNoMoreInteractions();
 
         // Verify that readDelta also reads the frequencies if not already available.
-        assertTrue(mTestFile.delete());
+        clearFreqsAndData();
         long[] actualFreqs = mReader.readFreqs(mPowerProfile);
         assertArrayEquals(freqs, actualFreqs);
 
         // Verify that a second call should still return absolute values
         mCallback.clear();
         final long[][] times2 = increaseTime(times1);
-        writeToFile(freqsLine(freqs) + uidLines(mUids, times2));
+        setFreqsAndData(freqs, times2);
         mReader.readAbsolute(mCallback);
         for (int i = 0; i < mUids.length; i++) {
             mCallback.verify(mUids[i], times2[i]);
         }
         mCallback.verifyNoMoreInteractions();
-        assertTrue(mTestFile.delete());
+        clearFreqsAndData();
     }
 
     @Test
@@ -228,14 +242,14 @@ public class KernelCpuUidFreqTimeReaderTest {
         final long[] freqs = {110, 123, 145, 167, 289, 997};
         final long[][] times1 = increaseTime(new long[mUids.length][freqs.length]);
 
-        writeToFile(freqsLine(freqs) + uidLines(mUids, times1));
+        setFreqsAndData(freqs, times1);
         mReader.readDelta(mCallback);
 
         // Verify that there should not be a callback for a particular UID if its time decreases.
         mCallback.clear();
         final long[][] times2 = increaseTime(times1);
         times2[0][0] = 1000;
-        writeToFile(freqsLine(freqs) + uidLines(mUids, times2));
+        setFreqsAndData(freqs, times2);
         mReader.readDelta(mCallback);
         for (int i = 1; i < mUids.length; i++) {
             mCallback.verify(mUids[i], subtract(times2[i], times1[i]));
@@ -246,7 +260,7 @@ public class KernelCpuUidFreqTimeReaderTest {
         mCallback.clear();
         final long[][] times3 = increaseTime(times2);
         times3[0] = increaseTime(times1)[0];
-        writeToFile(freqsLine(freqs) + uidLines(mUids, times3));
+        setFreqsAndData(freqs, times3);
         mReader.readDelta(mCallback);
         mCallback.verify(mUids[0], subtract(times3[0], times1[0]));
         for (int i = 1; i < mUids.length; i++) {
@@ -258,7 +272,7 @@ public class KernelCpuUidFreqTimeReaderTest {
         mCallback.clear();
         final long[][] times4 = increaseTime(times3);
         times4[0][0] *= -1;
-        writeToFile(freqsLine(freqs) + uidLines(mUids, times4));
+        setFreqsAndData(freqs, times4);
         mReader.readDelta(mCallback);
         for (int i = 1; i < mUids.length; ++i) {
             mCallback.verify(mUids[i], subtract(times4[i], times3[i]));
@@ -269,14 +283,44 @@ public class KernelCpuUidFreqTimeReaderTest {
         mCallback.clear();
         final long[][] times5 = increaseTime(times4);
         times5[0] = increaseTime(times3)[0];
-        writeToFile(freqsLine(freqs) + uidLines(mUids, times5));
+        setFreqsAndData(freqs, times5);
         mReader.readDelta(mCallback);
         mCallback.verify(mUids[0], subtract(times5[0], times3[0]));
         for (int i = 1; i < mUids.length; i++) {
             mCallback.verify(mUids[i], subtract(times5[i], times4[i]));
         }
 
-        assertTrue(mTestFile.delete());
+        clearFreqsAndData();
+    }
+
+    private void setFreqs(long[] freqs) throws IOException {
+        if (mUseBpf) {
+            mBpfMapReader.setFreqs(freqs);
+        } else {
+            writeToFile(freqsLine(freqs));
+        }
+    }
+
+    private void setFreqsAndData(long[] freqs, long[][] times) throws IOException {
+        if (mUseBpf) {
+            mBpfMapReader.setFreqs(freqs);
+            SparseArray<long[]> data = new SparseArray<>();
+            for (int i = 0; i < mUids.length; i++) {
+                data.put(mUids[i], times[i]);
+            }
+            mBpfMapReader.setData(data);
+        } else {
+            writeToFile(freqsLine(freqs) + uidLines(mUids, times));
+        }
+    }
+
+    private void clearFreqsAndData() {
+        if (mUseBpf) {
+            mBpfMapReader.setFreqs(null);
+            mBpfMapReader.setData(new SparseArray<>());
+        } else {
+            assertTrue(mTestFile.delete());
+        }
     }
 
     private String freqsLine(long[] freqs) {
@@ -356,6 +400,38 @@ public class KernelCpuUidFreqTimeReaderTest {
 
         public void verifyNoMoreInteractions() {
             assertEquals(0, mData.size());
+        }
+    }
+
+    private class KernelCpuUidTestBpfMapReader extends KernelCpuUidBpfMapReader {
+        private long[] mCpuFreqs;
+        private SparseArray<long[]> mNewData = new SparseArray<>();
+
+        public void setData(SparseArray<long[]> data) {
+            mNewData = data;
+        }
+
+        public void setFreqs(long[] freqs) {
+            mCpuFreqs = freqs;
+        }
+
+        @Override
+        public final boolean startTrackingBpfTimes() {
+            return true;
+        }
+
+        @Override
+        protected final boolean readBpfData() {
+            if (!mUseBpf) {
+                return false;
+            }
+            mData = mNewData;
+            return true;
+        }
+
+        @Override
+        public final long[] getDataDimensions() {
+            return mCpuFreqs;
         }
     }
 }

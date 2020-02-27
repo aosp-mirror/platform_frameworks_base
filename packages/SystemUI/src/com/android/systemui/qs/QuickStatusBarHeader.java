@@ -60,10 +60,11 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.qs.QSDetail.Callback;
+import com.android.systemui.qs.carrier.QSCarrierGroup;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
+import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.DateView;
@@ -146,6 +147,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
     };
     private boolean mHasTopCutout = false;
+    private int mRoundedCornerPadding = 0;
 
     @Inject
     public QuickStatusBarHeader(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -325,6 +327,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         Resources resources = mContext.getResources();
         updateMinimumHeight();
 
+        mRoundedCornerPadding = resources.getDimensionPixelSize(
+                R.dimen.rounded_corner_content_padding);
+
         // Update height for a few views, especially due to landscape mode restricting space.
         mHeaderTextContainerView.getLayoutParams().height =
                 resources.getDimensionPixelSize(R.dimen.qs_header_tooltip_height);
@@ -431,17 +436,23 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        // Handle padding of SystemIconsView
         DisplayCutout cutout = insets.getDisplayCutout();
-        Pair<Integer, Integer> padding = PhoneStatusBarView.cornerCutoutMargins(
+        Pair<Integer, Integer> cornerCutoutPadding = StatusBarWindowView.cornerCutoutMargins(
                 cutout, getDisplay());
-        if (padding == null) {
-            mSystemIconsView.setPaddingRelative(
-                    getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start), 0,
-                    getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end), 0);
-        } else {
-            mSystemIconsView.setPadding(padding.first, 0, padding.second, 0);
+        Pair<Integer, Integer> padding =
+                StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
+                        cutout, cornerCutoutPadding, mRoundedCornerPadding);
+        final int waterfallTopInset = cutout == null ? 0 : cutout.getWaterfallInsets().top;
+        int statusBarPaddingLeft = isLayoutRtl()
+                ? getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end)
+                : getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start);
+        int statusBarPaddingRight = isLayoutRtl()
+                ? getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start)
+                : getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end);
+        mSystemIconsView.setPadding(padding.first + statusBarPaddingLeft, waterfallTopInset,
+                padding.second + statusBarPaddingRight, 0);
 
-        }
         return super.onApplyWindowInsets(insets);
     }
 

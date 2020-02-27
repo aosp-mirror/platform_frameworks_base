@@ -33,6 +33,9 @@ interface IAuthService {
     void authenticate(IBinder token, long sessionId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, in Bundle bundle);
 
+    // Cancel authentication for the given sessionId
+    void cancelAuthentication(IBinder token, String opPackageName);
+
     // TODO(b/141025588): Make userId the first arg to be consistent with hasEnrolledBiometrics.
     // Checks if biometrics can be used.
     int canAuthenticate(String opPackageName, int userId, int authenticators);
@@ -48,4 +51,9 @@ interface IAuthService {
 
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
     void resetLockout(in byte [] token);
+
+    // Get a list of AuthenticatorIDs for authenticators which have enrolled templates and meet
+    // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore
+    // land as SIDs, and are used during key generation.
+    long[] getAuthenticatorIds();
 }

@@ -739,6 +739,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         final UriPermission perm = findOrCreateUriPermission(
                 pi.packageName, targetPkg, targetUid, grantUri);
         perm.grantModes(modeFlags, owner);
+        getPmInternal().grantImplicitAccess(UserHandle.getUserId(targetUid), null,
+                UserHandle.getAppId(targetUid), pi.applicationInfo.uid, false /*direct*/);
     }
 
     /** Like grantUriPermissionUnchecked, but takes an Intent. */

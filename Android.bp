@@ -263,8 +263,6 @@ filegroup {
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
         ":libupdate_engine_aidl",
-        // TODO: this needs to be removed when statsd-framework.jar is separated out
-        ":statsd_java_aidl",
         ":storaged_aidl",
         ":vold_aidl",
 
@@ -293,7 +291,6 @@ filegroup {
         ":framework-permission-sources",
         ":framework-wifi-updatable-sources",
         ":framework-telephony-sources",
-        ":ike-srcs",
     ]
 }
 
@@ -329,7 +326,6 @@ java_defaults {
             "rs/java",
             "sax/java",
             "telecomm/java",
-            "wifi/aidl-export",
         ],
     },
 }
@@ -348,6 +344,7 @@ java_library {
         "android.hardware.cas-V1.1-java",
         "android.hardware.cas-V1.2-java",
         "android.hardware.contexthub-V1.0-java",
+        "android.hardware.contexthub-V1.1-java",
         "android.hardware.gnss-V1.0-java",
         "android.hardware.gnss-V2.1-java",
         "android.hardware.health-V1.0-java-constants",
@@ -374,6 +371,7 @@ java_library {
         "devicepolicyprotosnano",
 
         "com.android.sysprop.apex",
+        "com.android.sysprop.init",
         "PlatformProperties",
     ],
     sdk_version: "core_platform",
@@ -393,7 +391,7 @@ java_defaults {
 
     exclude_srcs: [
         // See comment on framework-atb-backward-compatibility module below
-        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 
     sdk_version: "core_platform",
@@ -403,7 +401,6 @@ java_defaults {
         "unsupportedappusage",
         "framework-media-stubs-systemapi",
         "framework-mediaprovider-stubs-systemapi",
-        "framework-tethering",
         "framework-telephony-stubs",
     ],
 
@@ -446,17 +443,22 @@ filegroup {
 }
 
 filegroup {
-    name: "graphicsstats_proto",
-    srcs: [
-        "libs/hwui/protos/graphicsstats.proto",
-    ],
-}
-
-filegroup {
     name: "libvibrator_aidl",
     srcs: [
         "core/java/android/os/IExternalVibrationController.aidl",
         "core/java/android/os/IExternalVibratorService.aidl",
+    ],
+    path: "core/java",
+}
+
+filegroup {
+    name: "libpowermanager_aidl",
+    srcs: [
+        "core/java/android/os/Temperature.aidl",
+        "core/java/android/os/CoolingDevice.aidl",
+        "core/java/android/os/IThermalEventListener.aidl",
+        "core/java/android/os/IThermalStatusListener.aidl",
+        "core/java/android/os/IThermalService.aidl",
     ],
     path: "core/java",
 }
@@ -468,10 +470,10 @@ java_library {
     libs: [
         "framework-appsearch-stubs",
         "framework-sdkextensions-stubs-systemapi",
-        "framework-statsd", // TODO(b/146167933): Use framework-statsd-stubs
+        "framework-statsd-stubs-module_libs_api",
         "framework-permission-stubs-systemapi",
-        "framework-wifi-stubs",
-        "ike-stubs",
+        "framework-wifi-stubs-systemapi",
+        "framework-tethering-stubs",
     ],
     installable: true,
     javac_shard_size: 150,
@@ -479,7 +481,6 @@ java_library {
         "framework-platform-compat-config",
         "libcore-platform-compat-config",
         "services-platform-compat-config",
-        "media-provider-platform-compat-config",
     ],
     static_libs: [
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
@@ -495,7 +496,7 @@ java_library {
         "//frameworks/base/apex/appsearch/framework",
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
-        "//frameworks/base/apex/statsd/service",
+        "//frameworks/base/packages/Tethering/tests/unit",
     ],
 }
 
@@ -519,12 +520,9 @@ java_library {
         "framework-mediaprovider-stubs-systemapi",
         "framework-permission-stubs-systemapi",
         "framework-sdkextensions-stubs-systemapi",
-        // TODO(b/146167933): Use framework-statsd-stubs instead.
-        "framework-statsd",
-        "framework-wifi-stubs",
-        "ike-stubs",
-        // TODO(b/147200698): should be the stub of framework-tethering
-        "framework-tethering",
+        "framework-statsd-stubs-module_libs_api",
+        "framework-wifi-stubs-systemapi",
+        "framework-tethering-stubs",
         // TODO (b/147688669) should be framework-telephony-stubs
         "framework-telephony",
         // TODO(jiyong): add stubs for APEXes here
@@ -544,6 +542,13 @@ java_library {
     ],
     libs: ["icing-java-proto-lite"],
     apex_available: ["//apex_available:platform"],
+    visibility: [
+        // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
+        "//external/robolectric-shadows:__subpackages__",
+        "//frameworks/base/packages/Tethering/common/TetheringLib:__subpackages__",
+        "//frameworks/layoutlib:__subpackages__",
+        "//frameworks/opt/net/ike:__subpackages__",
+    ],
 }
 
 java_library {
@@ -606,7 +611,7 @@ java_library {
     installable: true,
     libs: ["app-compat-annotations"],
     srcs: [
-        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 }
 
@@ -623,6 +628,18 @@ genrule {
     cmd: "$(location stats-log-api-gen) --java $(out) --module framework" +
          " --javaPackage com.android.internal.util --javaClass FrameworkStatsLog --worksource",
     out: ["com/android/internal/util/FrameworkStatsLog.java"],
+}
+
+java_library {
+    name: "uieventloggerlib",
+    srcs: [
+        "core/java/com/android/internal/logging/UiEvent.java",
+        "core/java/com/android/internal/logging/UiEventLogger.java",
+        "core/java/com/android/internal/logging/UiEventLoggerImpl.java",
+        "core/java/com/android/internal/logging/InstanceId.java",
+        "core/java/com/android/internal/logging/InstanceIdSequence.java",
+        ":statslog-framework-java-gen",
+    ],
 }
 
 gensrcs {
@@ -685,8 +702,10 @@ filegroup {
     srcs: [
         "core/java/android/annotation/CallbackExecutor.java",
         "core/java/android/annotation/CheckResult.java",
+        "core/java/android/annotation/CurrentTimeMillisLong.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/LongDef.java",
         "core/java/android/annotation/NonNull.java",
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/RequiresPermission.java",
@@ -758,17 +777,6 @@ filegroup {
     ],
 }
 
-filegroup {
-    name: "framework-tethering-annotations",
-    srcs: [
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/RequiresPermission.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/com/android/internal/annotations/GuardedBy.java",
-    ],
-}
 // Build ext.jar
 // ============================================================
 java_library {
@@ -1037,22 +1045,6 @@ aidl_interface {
     },
 }
 
-
-subdirs = [
-    "cmds/*",
-    "core/*",
-    "libs/*",
-    "media/*",
-    "proto",
-    "tools/*",
-    "native/android",
-    "native/graphics/jni",
-]
-
-optional_subdirs = [
-    "core/tests/utiltests/jni",
-]
-
 // TODO(b/77285514): remove this once the last few hidl interfaces have been
 // updated to use hwbinder.stubs.
 java_library {
@@ -1112,13 +1104,6 @@ python_binary_host {
 }
 
 filegroup {
-    name: "framework-annotation-nonnull-srcs",
-    srcs: [
-        "core/java/android/annotation/NonNull.java",
-    ],
-}
-
-filegroup {
     name: "framework-media-annotation-srcs",
     srcs: [
         ":framework-annotations",
@@ -1135,7 +1120,6 @@ filegroup {
     srcs: [
         ":framework-annotations",
         "core/java/android/annotation/BytesLong.java",
-        "core/java/android/annotation/CurrentTimeMillisLong.java",
         "core/java/android/annotation/CurrentTimeSecondsLong.java",
         "core/java/android/annotation/DurationMillisLong.java",
     ],
@@ -1249,6 +1233,12 @@ java_library {
     visibility: ["//frameworks/base/wifi"],
 }
 
+filegroup {
+    name: "framework-wifi-util-lib-aidls",
+    srcs: ["core/java/android/content/pm/ParceledListSlice.aidl"],
+    path: "core/java",
+}
+
 // utility classes statically linked into wifi-service
 filegroup {
     name: "framework-wifi-service-shared-srcs",
@@ -1335,7 +1325,6 @@ java_library {
     libs: [
         "framework-minus-apex",
         "unsupportedappusage",
-        "ike-stubs",
     ],
     static_libs: [
         "libphonenumber-platform",

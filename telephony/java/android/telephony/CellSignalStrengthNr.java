@@ -40,6 +40,8 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      */
     public static final int UNKNOWN_ASU_LEVEL = 99;
 
+    private static final boolean VDBG = false;
+
     private static final String TAG = "CellSignalStrengthNr";
 
     // Lifted from Default carrier configs and max range of SSRSRP
@@ -301,31 +303,45 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         } else {
             mParametersUseForLevel = cc.getInt(
                     CarrierConfigManager.KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT, USE_SSRSRP);
-            Rlog.i(TAG, "Using SSRSRP for Level.");
             mSsRsrpThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_5G_NR_SSRSRP_THRESHOLDS_INT_ARRAY);
-            Rlog.i(TAG, "Applying 5G NR SSRSRP Thresholds: " + Arrays.toString(mSsRsrpThresholds));
+            if (VDBG) {
+                Rlog.i(TAG, "Applying 5G NR SSRSRP Thresholds: "
+                        + Arrays.toString(mSsRsrpThresholds));
+            }
             mSsRsrqThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_5G_NR_SSRSRQ_THRESHOLDS_INT_ARRAY);
-            Rlog.i(TAG, "Applying 5G NR SSRSRQ Thresholds: " + Arrays.toString(mSsRsrqThresholds));
+            if (VDBG) {
+                Rlog.i(TAG, "Applying 5G NR SSRSRQ Thresholds: "
+                        + Arrays.toString(mSsRsrqThresholds));
+            }
             mSsSinrThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY);
-            Rlog.i(TAG, "Applying 5G NR SSSINR Thresholds: " + Arrays.toString(mSsSinrThresholds));
+            if (VDBG) {
+                Rlog.i(TAG, "Applying 5G NR SSSINR Thresholds: "
+                        + Arrays.toString(mSsSinrThresholds));
+            }
         }
         int ssRsrpLevel = SignalStrength.INVALID;
         int ssRsrqLevel = SignalStrength.INVALID;
         int ssSinrLevel = SignalStrength.INVALID;
         if (isLevelForParameter(USE_SSRSRP)) {
             ssRsrpLevel = updateLevelWithMeasure(mSsRsrp, mSsRsrpThresholds);
-            Rlog.i(TAG, "Updated 5G NR SSRSRP Level: " + ssRsrpLevel);
+            if (VDBG) {
+                Rlog.i(TAG, "Updated 5G NR SSRSRP Level: " + ssRsrpLevel);
+            }
         }
         if (isLevelForParameter(USE_SSRSRQ)) {
             ssRsrqLevel = updateLevelWithMeasure(mSsRsrq, mSsRsrqThresholds);
-            Rlog.i(TAG, "Updated 5G NR SSRSRQ Level: " + ssRsrqLevel);
+            if (VDBG) {
+                Rlog.i(TAG, "Updated 5G NR SSRSRQ Level: " + ssRsrqLevel);
+            }
         }
         if (isLevelForParameter(USE_SSSINR)) {
             ssSinrLevel = updateLevelWithMeasure(mSsSinr, mSsSinrThresholds);
-            Rlog.i(TAG, "Updated 5G NR SSSINR Level: " + ssSinrLevel);
+            if (VDBG) {
+                Rlog.i(TAG, "Updated 5G NR SSSINR Level: " + ssSinrLevel);
+            }
         }
         // Apply the smaller value among three levels of three measures.
         mLevel = Math.min(Math.min(ssRsrpLevel, ssRsrqLevel), ssSinrLevel);

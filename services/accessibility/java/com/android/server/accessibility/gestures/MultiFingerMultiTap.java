@@ -42,10 +42,10 @@ class MultiFingerMultiTap extends GestureMatcher {
     // The acceptable distance the pointer can move and still count as a tap.
     private int mTouchSlop;
     // A tap counts when target number of fingers are down and up once.
-    private int mCompletedTapCount;
+    protected int mCompletedTapCount;
     // A flag set to true when target number of fingers have touched down at once before.
     // Used to indicate what next finger action should be. Down when false and lift when true.
-    private boolean mIsTargetFingerCountReached = false;
+    protected boolean mIsTargetFingerCountReached = false;
     // Store initial down points for slop checking and update when next down if is inside slop.
     private PointF[] mBases;
     // The points in bases that already have slop checked when onDown or onPointerDown.
@@ -56,7 +56,11 @@ class MultiFingerMultiTap extends GestureMatcher {
      * @throws IllegalArgumentException if <code>fingers<code/> is less than 2
      *                                  or <code>taps<code/> is not positive.
      */
-    MultiFingerMultiTap(Context context, int fingers, int taps, int gestureId,
+    MultiFingerMultiTap(
+            Context context,
+            int fingers,
+            int taps,
+            int gestureId,
             GestureMatcher.StateChangeListener listener) {
         super(gestureId, new Handler(context.getMainLooper()), listener);
         Preconditions.checkArgument(fingers >= 2);
@@ -117,8 +121,7 @@ class MultiFingerMultiTap extends GestureMatcher {
         cancelAfterDoubleTapTimeout(event, rawEvent, policyFlags);
 
         final PointF nearest = findNearestPoint(rawEvent, mTouchSlop, false);
-        if ((getState() == STATE_GESTURE_STARTED || getState() == STATE_CLEAR)
-                && null != nearest) {
+        if ((getState() == STATE_GESTURE_STARTED || getState() == STATE_CLEAR) && null != nearest) {
             // Increase current tap count when the user have all fingers lifted
             // within the tap timeout since the target number of fingers are down.
             if (mIsTargetFingerCountReached) {
@@ -169,8 +172,7 @@ class MultiFingerMultiTap extends GestureMatcher {
         } else {
             nearest = findNearestPoint(rawEvent, mDoubleTapSlop, true);
         }
-        if ((getState() == STATE_GESTURE_STARTED || getState() == STATE_CLEAR)
-                && nearest != null) {
+        if ((getState() == STATE_GESTURE_STARTED || getState() == STATE_CLEAR) && nearest != null) {
             // The user have all fingers down within the tap timeout since first finger down,
             // setting the timeout for fingers to be lifted.
             if (currentFingerCount == mTargetFingerCount) {
@@ -227,11 +229,11 @@ class MultiFingerMultiTap extends GestureMatcher {
     }
 
     /**
-     * Find the nearest location to the given event in the bases.
-     * If no one found, it could be not inside {@code slop}, filtered or empty bases.
-     * When {@code filterMatched} is true, if the location of given event matches one of the points
-     * in {@link #mExcludedPointsForDownSlopChecked} it would be ignored. Otherwise, the location
-     * will be added to {@link #mExcludedPointsForDownSlopChecked}.
+     * Find the nearest location to the given event in the bases. If no one found, it could be not
+     * inside {@code slop}, filtered or empty bases. When {@code filterMatched} is true, if the
+     * location of given event matches one of the points in {@link
+     * #mExcludedPointsForDownSlopChecked} it would be ignored. Otherwise, the location will be
+     * added to {@link #mExcludedPointsForDownSlopChecked}.
      *
      * @param event to find nearest point in bases.
      * @param slop to check to the given location of the event.

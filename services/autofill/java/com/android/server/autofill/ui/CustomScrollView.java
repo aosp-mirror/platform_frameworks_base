@@ -75,7 +75,7 @@ public class CustomScrollView extends ScrollView {
         final TypedValue typedValue = new TypedValue();
         final Point point = new Point();
         final Context context = getContext();
-        context.getDisplay().getSize(point);
+        context.getDisplayNoVerify().getSize(point);
         context.getTheme().resolveAttribute(R.attr.autofillSaveCustomSubtitleMaxHeight,
                 typedValue, true);
         final View child = getChildAt(0);

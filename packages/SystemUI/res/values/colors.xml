@@ -88,21 +88,16 @@
     <!-- The color of the text inside a notification -->
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_light</color>
 
-    <!-- The "inside" of a notification, reached via longpress -->
-    <color name="notification_guts_bg_color">@color/GM2_grey_50</color>
 
     <color name="notification_guts_link_icon_tint">@color/GM2_grey_700</color>
     <color name="notification_guts_sub_text_color">@color/GM2_grey_700</color>
     <color name="notification_guts_header_text_color">@color/GM2_grey_900</color>
     <color name="notification_silence_color">#FF32c1de</color>
     <color name="notification_alert_color">#FFF87B2B</color>
-    <color name="notification_guts_info_button_color">@color/GM2_blue_700</color>
     <color name="notification_guts_priority_button_content_color">@color/GM2_grey_700</color>
-    <color name="notification_guts_priority_button_content_color_selected">@color/GM2_blue_700</color>
     <color name="notification_guts_priority_button_bg_fill_color">@color/transparent</color>
     <color name="notification_guts_priority_button_bg_fill_color_selected">#FFFFFF</color>
     <color name="notification_guts_priority_button_bg_stroke_color">@color/GM2_grey_300</color>
-    <color name="notification_guts_priority_button_bg_stroke_color_selected">@color/GM2_blue_600</color>
 
     <color name="notification_section_header_label_color">@color/GM2_grey_900</color>
     <color name="notification_section_clear_all_btn_color">@color/GM2_grey_700</color>
@@ -201,6 +196,7 @@
     <color name="GM2_grey_900">#202124</color>
 
     <color name="GM2_red_50">#FCE8E6</color>
+    <color name="GM2_red_200">#F6AEA9</color>
     <color name="GM2_red_300">#F28B82</color>
     <color name="GM2_red_500">#B71C1C</color>
     <color name="GM2_red_700">#C5221F</color>
@@ -213,6 +209,7 @@
     <color name="GM2_blue_700">#1967D2</color>
 
     <color name="GM2_yellow_50">#FEF7E0</color>
+    <color name="GM2_yellow_200">#FDE293</color>
     <color name="GM2_yellow_500">#FFFBBC04</color>
 
     <color name="GM2_green_500">#FF34A853</color>
@@ -222,6 +219,8 @@
     <color name="magnification_border_color">#FF9900</color>
 
     <!-- controls -->
-    <color name="control_default_foreground">?android:attr/textColorPrimary</color>
-    <color name="control_default_background">?android:attr/colorBackgroundFloating</color>
+    <color name="control_primary_text">@*android:color/foreground_material_dark</color>
+    <color name="control_secondary_text">@*android:color/dim_foreground_dark</color>
+    <color name="control_default_foreground">@*android:color/foreground_material_dark</color>
+    <color name="control_default_background">@*android:color/background_floating_material_dark</color>
 </resources>

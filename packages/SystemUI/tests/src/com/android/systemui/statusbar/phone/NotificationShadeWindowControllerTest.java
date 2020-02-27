@@ -34,7 +34,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
@@ -52,14 +52,14 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
 
     @Mock private WindowManager mWindowManager;
     @Mock private DozeParameters mDozeParameters;
-    @Mock private NotificationShadeWindowView mStatusBarView;
+    @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private IActivityManager mActivityManager;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock ColorExtractor.GradientColors mGradientColors;
-    @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    @Mock private DumpManager mDumpManager;
 
     private NotificationShadeWindowController mNotificationShadeWindowController;
 
@@ -68,13 +68,12 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
-        when(mSuperStatusBarViewFactory.getNotificationShadeWindowView())
-                .thenReturn(mStatusBarView);
 
         mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardBypassController, mColorExtractor,
-                mSuperStatusBarViewFactory);
+                mDumpManager);
+        mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
 
         mNotificationShadeWindowController.attach();
     }
@@ -104,7 +103,7 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
 
     @Test
     public void testAdd_updatesVisibilityFlags() {
-        verify(mStatusBarView).setSystemUiVisibility(anyInt());
+        verify(mNotificationShadeWindowView).setSystemUiVisibility(anyInt());
     }
 
     @Test

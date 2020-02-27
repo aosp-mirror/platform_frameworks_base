@@ -59,13 +59,13 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     private final EnhancedEstimates mEstimates;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final ArrayList<BatteryController.BatteryStateChangeCallback>
+    protected final ArrayList<BatteryController.BatteryStateChangeCallback>
             mChangeCallbacks = new ArrayList<>();
     private final ArrayList<EstimateFetchCompletion> mFetchCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
     private final Handler mMainHandler;
     private final Handler mBgHandler;
-    private final Context mContext;
+    protected final Context mContext;
 
     private int mLevel;
     private boolean mPluggedIn;
@@ -80,7 +80,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     @VisibleForTesting
     @Inject
-    BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates,
+    protected BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates,
             PowerManager powerManager, BroadcastDispatcher broadcastDispatcher,
             @Main Handler mainHandler, @Background Handler bgHandler) {
         mContext = context;

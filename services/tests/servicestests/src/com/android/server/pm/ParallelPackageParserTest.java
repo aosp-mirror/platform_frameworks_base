@@ -17,10 +17,13 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.ParsedPackage;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import junit.framework.Assert;
 
@@ -36,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Tests for {@link ParallelPackageParser}
  */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ParallelPackageParserTest {
     private static final String TAG = ParallelPackageParserTest.class.getSimpleName();
@@ -44,7 +48,7 @@ public class ParallelPackageParserTest {
 
     @Before
     public void setUp() {
-        mParser = new TestParallelPackageParser(new PackageParser(),
+        mParser = new TestParallelPackageParser(new PackageParser2(null, false, null, null, null),
                 ParallelPackageParser.makeExecutorService());
     }
 
@@ -72,7 +76,7 @@ public class ParallelPackageParserTest {
 
     private class TestParallelPackageParser extends ParallelPackageParser {
 
-        TestParallelPackageParser(PackageParser packageParser, ExecutorService executorService) {
+        TestParallelPackageParser(PackageParser2 packageParser, ExecutorService executorService) {
             super(packageParser, executorService);
         }
 

@@ -92,7 +92,7 @@ public enum ScrimState {
     BOUNCER {
         @Override
         public void prepare(ScrimState previousState) {
-            mBehindAlpha = ScrimController.GRADIENT_SCRIM_ALPHA_BUSY;
+            mBehindAlpha = ScrimController.BUSY_SCRIM_ALPHA;
             mFrontAlpha = 0f;
             mBubbleAlpha = 0f;
         }
@@ -106,7 +106,7 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mBehindAlpha = 0;
             mBubbleAlpha = 0f;
-            mFrontAlpha = ScrimController.GRADIENT_SCRIM_ALPHA_BUSY;
+            mFrontAlpha = ScrimController.BUSY_SCRIM_ALPHA;
         }
     },
 
@@ -234,8 +234,8 @@ public enum ScrimState {
             mBubbleTint = Color.TRANSPARENT;
 
             mFrontAlpha = ScrimController.TRANSPARENT;
-            mBehindAlpha = ScrimController.GRADIENT_SCRIM_ALPHA_BUSY;
-            mBubbleAlpha = ScrimController.GRADIENT_SCRIM_ALPHA_BUSY;
+            mBehindAlpha = ScrimController.BUSY_SCRIM_ALPHA;
+            mBubbleAlpha = ScrimController.BUSY_SCRIM_ALPHA;
 
             mAnimationDuration = ScrimController.ANIMATION_DURATION;
             mBlankScreen = false;

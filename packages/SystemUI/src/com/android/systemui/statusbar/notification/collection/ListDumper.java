@@ -123,6 +123,16 @@ public class ListDumper {
                         .append(" ");
             }
 
+            if (!notifEntry.mDismissInterceptors.isEmpty()) {
+                String[] interceptorsNames = new String[notifEntry.mDismissInterceptors.size()];
+                for (int i = 0; i < interceptorsNames.length; i++) {
+                    interceptorsNames[i] = notifEntry.mDismissInterceptors.get(i).getName();
+                }
+                rksb.append("dismissInterceptors=")
+                        .append(Arrays.toString(interceptorsNames))
+                        .append(" ");
+            }
+
             if (notifEntry.mExcludingFilter != null) {
                 rksb.append("filter=")
                         .append(notifEntry.mExcludingFilter)
@@ -139,10 +149,6 @@ public class ListDumper {
                 rksb.append("cancellationReason=")
                         .append(notifEntry.mCancellationReason)
                         .append(" ");
-            }
-
-            if (notifEntry.hasInflationError()) {
-                rksb.append("(!)hasInflationError ");
             }
 
             if (notifEntry.getDismissState() != NOT_DISMISSED) {

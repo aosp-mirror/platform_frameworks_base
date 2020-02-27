@@ -49,7 +49,6 @@ stubs_defaults {
         ":opt-net-voip-srcs",
         ":core-current-stubs-source",
         ":core_public_api_files",
-        ":ike-api-srcs",
     ],
     // TODO(b/147699819): remove below aidl includes.
     aidl: {
@@ -190,7 +189,6 @@ droidstubs {
 droidstubs {
     name: "module-lib-api",
     defaults: ["metalava-api-stubs-default"],
-    libs: ["framework-all"],
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args + module_libs,
     check_api: {
@@ -198,20 +196,17 @@ droidstubs {
             api_file: "api/module-lib-current.txt",
             removed_api_file: "api/module-lib-removed.txt",
         },
-        // TODO(b/147559833) enable the compatibility check against the last release API
-        // and the API lint
-        //last_released: {
-        //    api_file: ":last-released-module-lib-api",
-        //    removed_api_file: "api/module-lib-removed.txt",
-        //    baseline_file: ":module-lib-api-incompatibilities-with-last-released"
-        //},
-        //api_lint: {
-        //    enabled: true,
-        //    new_since: ":last-released-module-lib-api",
-        //    baseline_file: "api/module-lib-lint-baseline.txt",
-        //},
+        last_released: {
+            api_file: ":last-released-module-lib-api",
+            removed_api_file: "api/module-lib-removed.txt",
+            baseline_file: ":module-lib-api-incompatibilities-with-last-released"
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":last-released-module-lib-api",
+            baseline_file: "api/module-lib-lint-baseline.txt",
+        },
     },
-    //jdiff_enabled: true,
 }
 
 
@@ -222,7 +217,6 @@ droidstubs {
 droidstubs {
     name: "module-lib-api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
-    libs: ["framework-all"],
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args + priv_apps + module_libs,
 }
@@ -234,6 +228,9 @@ droidstubs {
 
 java_defaults {
     name: "framework-stubs-default",
+    libs: [ "stub-annotations" ],
+    static_libs: [ "private-stub-annotations-jar" ],
+    sdk_version: "core_current",
     errorprone: {
         javacflags: [
             "-XepDisableAllChecks",
@@ -249,61 +246,25 @@ java_defaults {
 
 java_library_static {
     name: "android_stubs_current",
-    srcs: [
-        ":api-stubs-docs",
-    ],
-    libs: [
-        "stub-annotations",
-    ],
-    static_libs: [
-        "private-stub-annotations-jar",
-    ],
+    srcs: [ ":api-stubs-docs" ],
     defaults: ["framework-stubs-default"],
-    sdk_version: "core_current",
 }
 
 java_library_static {
     name: "android_system_stubs_current",
-    srcs: [
-        ":system-api-stubs-docs",
-    ],
-    libs: [
-        "stub-annotations",
-    ],
-    static_libs: [
-        "private-stub-annotations-jar",
-    ],
+    srcs: [ ":system-api-stubs-docs" ],
     defaults: ["framework-stubs-default"],
-    sdk_version: "core_current",
 }
 
 java_library_static {
     name: "android_test_stubs_current",
-    srcs: [
-        ":test-api-stubs-docs",
-    ],
-    libs: [
-        "stub-annotations",
-    ],
-    static_libs: [
-        "private-stub-annotations-jar",
-    ],
+    srcs: [ ":test-api-stubs-docs" ],
     defaults: ["framework-stubs-default"],
-    sdk_version: "core_current",
 }
 
 java_library_static {
     name: "android_module_lib_stubs_current",
-    srcs: [
-        ":module-lib-api-stubs-docs",
-    ],
-    libs: [
-        "stub-annotations",
-        "framework-all",
-    ],
-    static_libs: [
-        "private-stub-annotations-jar",
-    ],
+    srcs: [ ":module-lib-api-stubs-docs" ],
     defaults: ["framework-stubs-default"],
 }
 

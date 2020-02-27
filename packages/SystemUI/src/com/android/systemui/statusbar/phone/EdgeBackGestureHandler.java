@@ -375,6 +375,7 @@ public class EdgeBackGestureHandler implements DisplayListener,
                 mDownPoint.set(ev.getX(), ev.getY());
                 mThresholdCrossed = false;
             }
+
         } else if (mAllowGesture) {
             if (!mThresholdCrossed) {
                 if (action == MotionEvent.ACTION_POINTER_DOWN) {
@@ -422,9 +423,7 @@ public class EdgeBackGestureHandler implements DisplayListener,
     }
 
     private void updateDisplaySize() {
-        mContext.getSystemService(DisplayManager.class)
-                .getDisplay(mDisplayId)
-                .getRealSize(mDisplaySize);
+        mContext.getDisplay().getRealSize(mDisplaySize);
         if (mEdgeBackPlugin != null) {
             mEdgeBackPlugin.setDisplaySize(mDisplaySize);
         }

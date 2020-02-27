@@ -82,4 +82,8 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public long getManagedProfileMaximumTimeOff(ComponentName admin) {
         return 0;
     }
+
+    public boolean canProfileOwnerResetPasswordWhenLocked(int userId) {
+        return false;
+    }
 }

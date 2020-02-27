@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -44,7 +43,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         mNotificationTestHelper = new NotificationTestHelper(mContext, mDependency);
         mGroup = mNotificationTestHelper.createGroup();
         mChildrenContainer = mGroup.getChildrenContainer();

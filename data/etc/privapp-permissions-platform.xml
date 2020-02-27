@@ -70,6 +70,7 @@ applications that come with the platform
     <privapp-permissions package="com.android.managedprovisioning">
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
         <permission name="android.permission.CHANGE_CONFIGURATION"/>
+        <permission name="android.permission.CONFIGURE_INTERACT_ACROSS_PROFILES"/>
         <permission name="android.permission.CRYPT_KEEPER"/>
         <permission name="android.permission.DELETE_PACKAGES"/>
         <permission name="android.permission.INSTALL_PACKAGES"/>
@@ -194,6 +195,7 @@ applications that come with the platform
         <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
     </privapp-permissions>
@@ -218,6 +220,9 @@ applications that come with the platform
         <permission name="android.permission.WATCH_APPOPS"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
+        <!-- Permissions required for reading and logging compat changes -->
+        <permission name="android.permission.LOG_COMPAT_CHANGE" />
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">
@@ -378,6 +383,10 @@ applications that come with the platform
         <!-- Permission required for ShortcutManagerUsageTest CTS test. -->
         <permission name="android.permission.ACCESS_SHORTCUTS"/>
         <permission name="android.permission.REBOOT"/>
+        <!-- Permission required for access VIBRATOR_STATE. -->
+        <permission name="android.permission.ACCESS_VIBRATOR_STATE"/>
+        <!-- Permission required for UsageStatsTest CTS test. -->
+        <permission name="android.permission.MANAGE_NOTIFICATIONS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -402,6 +411,7 @@ applications that come with the platform
     <privapp-permissions package="com.android.dynsystem">
         <permission name="android.permission.REBOOT"/>
         <permission name="android.permission.MANAGE_DYNAMIC_SYSTEM"/>
+        <permission name="android.permission.READ_OEM_UNLOCK_STATE"/>
     </privapp-permissions>
     <privapp-permissions package="com.android.settings">
         <permission name="android.permission.INSTALL_DYNAMIC_SYSTEM"/>

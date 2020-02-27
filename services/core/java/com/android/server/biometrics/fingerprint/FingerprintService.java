@@ -21,6 +21,7 @@ import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC;
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 
@@ -41,7 +42,7 @@ import android.hardware.biometrics.IBiometricNativeHandle;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
-import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClientCallback;
+import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
@@ -410,24 +411,9 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public long getAuthenticatorId(String opPackageName) {
-            // In this method, we're not checking whether the caller is permitted to use fingerprint
-            // API because current authenticator ID is leaked (in a more contrived way) via Android
-            // Keystore (android.security.keystore package): the user of that API can create a key
-            // which requires fingerprint authentication for its use, and then query the key's
-            // characteristics (hidden API) which returns, among other things, fingerprint
-            // authenticator ID which was active at key creation time.
-            //
-            // Reason: The part of Android Keystore which runs inside an app's process invokes this
-            // method in certain cases. Those cases are not always where the developer demonstrates
-            // explicit intent to use fingerprint functionality. Thus, to avoiding throwing an
-            // unexpected SecurityException this method does not check whether its caller is
-            // permitted to use fingerprint API.
-            //
-            // The permission check should be restored once Android Keystore no longer invokes this
-            // method from inside app processes.
-
-            return FingerprintService.super.getAuthenticatorId(opPackageName);
+        public long getAuthenticatorId() {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            return FingerprintService.this.getAuthenticatorId();
         }
 
         @Override // Binder call
@@ -461,6 +447,12 @@ public class FingerprintService extends BiometricServiceBase {
         public void removeClientActiveCallback(IFingerprintClientActiveCallback callback) {
             checkPermission(MANAGE_FINGERPRINT);
             mClientActiveCallbacks.remove(callback);
+        }
+
+        @Override // Binder call
+        public void initConfiguredStrength(int strength) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            initConfiguredStrengthInternal(strength);
         }
     }
 
@@ -526,8 +518,8 @@ public class FingerprintService extends BiometricServiceBase {
                 throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
                 if (biometric == null || biometric instanceof Fingerprint) {
-                    mFingerprintServiceReceiver
-                            .onAuthenticationSucceeded(deviceId, (Fingerprint) biometric, userId);
+                    mFingerprintServiceReceiver.onAuthenticationSucceeded(deviceId,
+                            (Fingerprint) biometric, userId, isStrongBiometric());
                 } else {
                     Slog.e(TAG, "onAuthenticationSucceeded received non-fingerprint biometric");
                 }
@@ -601,6 +593,11 @@ public class FingerprintService extends BiometricServiceBase {
 
         @Override
         public void onAcquired(final long deviceId, final int acquiredInfo, final int vendorCode) {
+            onAcquired_2_2(deviceId, acquiredInfo, vendorCode);
+        }
+
+        @Override
+        public void onAcquired_2_2(long deviceId, int acquiredInfo, int vendorCode) {
             mHandler.post(() -> {
                 FingerprintService.super.handleAcquired(deviceId, acquiredInfo, vendorCode);
             });

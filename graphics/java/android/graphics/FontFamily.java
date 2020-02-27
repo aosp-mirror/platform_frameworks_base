@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
+import android.graphics.fonts.Font;
 import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
 import android.text.TextUtils;
@@ -195,18 +196,13 @@ public class FontFamily {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("Unable to call addFontFromAsset after freezing.");
         }
-        if (axes != null) {
-            for (FontVariationAxis axis : axes) {
-                nAddAxisValue(mBuilderPtr, axis.getOpenTypeTagValue(), axis.getStyleValue());
-            }
-        }
-        return nAddFontFromAssetManager(mBuilderPtr, mgr, path, cookie, isAsset, ttcIndex, weight,
-                isItalic);
-    }
 
-    // TODO: Remove once internal user stop using private API.
-    private static boolean nAddFont(long builderPtr, ByteBuffer font, int ttcIndex) {
-        return nAddFont(builderPtr, font, ttcIndex, -1, -1);
+        try {
+            ByteBuffer buffer =  Font.Builder.createBuffer(mgr, path, isAsset, cookie);
+            return addFontFromBuffer(buffer, ttcIndex, axes, weight, isItalic);
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private static native long nInitBuilder(String langs, int variant);
@@ -225,8 +221,6 @@ public class FontFamily {
             int weight, int isItalic);
     private static native boolean nAddFontWeightStyle(long builderPtr, ByteBuffer font,
             int ttcIndex, int weight, int isItalic);
-    private static native boolean nAddFontFromAssetManager(long builderPtr, AssetManager mgr,
-            String path, int cookie, boolean isAsset, int ttcIndex, int weight, int isItalic);
 
     // The added axis values are only valid for the next nAddFont* method call.
     @CriticalNative

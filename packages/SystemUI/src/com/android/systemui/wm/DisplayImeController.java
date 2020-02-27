@@ -34,6 +34,7 @@ import android.view.WindowInsets;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import com.android.systemui.TransactionPool;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import java.util.ArrayList;
@@ -48,8 +49,8 @@ import javax.inject.Singleton;
 public class DisplayImeController implements DisplayController.OnDisplaysChangedListener {
     private static final String TAG = "DisplayImeController";
 
-    static final int ANIMATION_DURATION_SHOW_MS = 275;
-    static final int ANIMATION_DURATION_HIDE_MS = 340;
+    public static final int ANIMATION_DURATION_SHOW_MS = 275;
+    public static final int ANIMATION_DURATION_HIDE_MS = 340;
     static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     private static final int DIRECTION_NONE = 0;
     private static final int DIRECTION_SHOW = 1;
@@ -57,6 +58,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
     SystemWindows mSystemWindows;
     final Handler mHandler;
+    final TransactionPool mTransactionPool;
 
     final SparseArray<PerDisplay> mImePerDisplay = new SparseArray<>();
 
@@ -64,9 +66,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
     @Inject
     public DisplayImeController(SystemWindows syswin, DisplayController displayController,
-            @Main Handler mainHandler) {
+            @Main Handler mainHandler, TransactionPool transactionPool) {
         mHandler = mainHandler;
         mSystemWindows = syswin;
+        mTransactionPool = transactionPool;
         displayController.addDisplayWindowListener(this);
     }
 
@@ -255,18 +258,18 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         show ? ANIMATION_DURATION_SHOW_MS : ANIMATION_DURATION_HIDE_MS);
 
                 mAnimation.addUpdateListener(animation -> {
-                    SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                    SurfaceControl.Transaction t = mTransactionPool.acquire();
                     float value = (float) animation.getAnimatedValue();
                     t.setPosition(mImeSourceControl.getLeash(), x, value);
                     dispatchPositionChanged(mDisplayId, imeTop(imeSource, value), t);
                     t.apply();
-                    t.close();
+                    mTransactionPool.release(t);
                 });
                 mAnimation.setInterpolator(INTERPOLATOR);
                 mAnimation.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationStart(Animator animation) {
-                        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                        SurfaceControl.Transaction t = mTransactionPool.acquire();
                         t.setPosition(mImeSourceControl.getLeash(), x, startY);
                         dispatchStartPositioning(mDisplayId, imeTop(imeSource, startY),
                                 imeTop(imeSource, endY), mAnimationDirection == DIRECTION_SHOW,
@@ -275,11 +278,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             t.show(mImeSourceControl.getLeash());
                         }
                         t.apply();
-                        t.close();
+                        mTransactionPool.release(t);
                     }
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                        SurfaceControl.Transaction t = mTransactionPool.acquire();
                         t.setPosition(mImeSourceControl.getLeash(), x, endY);
                         dispatchEndPositioning(mDisplayId, imeTop(imeSource, endY),
                                 mAnimationDirection == DIRECTION_SHOW, t);
@@ -287,7 +290,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             t.hide(mImeSourceControl.getLeash());
                         }
                         t.apply();
-                        t.close();
+                        mTransactionPool.release(t);
 
                         mAnimationDirection = DIRECTION_NONE;
                         mAnimation = null;

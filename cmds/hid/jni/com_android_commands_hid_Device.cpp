@@ -129,7 +129,7 @@ JNIEnv* DeviceCallback::getJNIEnv() {
 }
 
 std::unique_ptr<Device> Device::open(int32_t id, const char* name, int32_t vid, int32_t pid,
-                                     const std::vector<uint8_t>& descriptor,
+                                     uint16_t bus, const std::vector<uint8_t>& descriptor,
                                      std::unique_ptr<DeviceCallback> callback) {
     size_t size = descriptor.size();
     if (size > HID_MAX_DESCRIPTOR_SIZE) {
@@ -146,9 +146,11 @@ std::unique_ptr<Device> Device::open(int32_t id, const char* name, int32_t vid, 
     struct uhid_event ev = {};
     ev.type = UHID_CREATE2;
     strlcpy(reinterpret_cast<char*>(ev.u.create2.name), name, sizeof(ev.u.create2.name));
+    std::string uniq = android::base::StringPrintf("Id: %d", id);
+    strlcpy(reinterpret_cast<char*>(ev.u.create2.uniq), uniq.c_str(), sizeof(ev.u.create2.uniq));
     memcpy(&ev.u.create2.rd_data, descriptor.data(), size * sizeof(ev.u.create2.rd_data[0]));
     ev.u.create2.rd_size = size;
-    ev.u.create2.bus = BUS_BLUETOOTH;
+    ev.u.create2.bus = bus;
     ev.u.create2.vendor = vid;
     ev.u.create2.product = pid;
     ev.u.create2.version = 0;
@@ -293,8 +295,8 @@ std::vector<uint8_t> getData(JNIEnv* env, jbyteArray javaArray) {
     return data;
 }
 
-static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint id, jint vid, jint pid,
-        jbyteArray rawDescriptor, jobject callback) {
+static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint id, jint vid,
+                        jint pid, jint bus, jbyteArray rawDescriptor, jobject callback) {
     ScopedUtfChars name(env, rawName);
     if (name.c_str() == nullptr) {
         return 0;
@@ -305,7 +307,7 @@ static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint i
     std::unique_ptr<uhid::DeviceCallback> cb(new uhid::DeviceCallback(env, callback));
 
     std::unique_ptr<uhid::Device> d =
-            uhid::Device::open(id, reinterpret_cast<const char*>(name.c_str()), vid, pid, desc,
+            uhid::Device::open(id, reinterpret_cast<const char*>(name.c_str()), vid, pid, bus, desc,
                                std::move(cb));
     return reinterpret_cast<jlong>(d.release());
 }
@@ -339,14 +341,14 @@ static void closeDevice(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
 }
 
 static JNINativeMethod sMethods[] = {
-    { "nativeOpenDevice",
-            "(Ljava/lang/String;III[B"
-            "Lcom/android/commands/hid/Device$DeviceCallback;)J",
-            reinterpret_cast<void*>(openDevice) },
-    { "nativeSendReport", "(J[B)V", reinterpret_cast<void*>(sendReport) },
-    { "nativeSendGetFeatureReportReply", "(JI[B)V",
-            reinterpret_cast<void*>(sendGetFeatureReportReply) },
-    { "nativeCloseDevice", "(J)V", reinterpret_cast<void*>(closeDevice) },
+        {"nativeOpenDevice",
+         "(Ljava/lang/String;IIII[B"
+         "Lcom/android/commands/hid/Device$DeviceCallback;)J",
+         reinterpret_cast<void*>(openDevice)},
+        {"nativeSendReport", "(J[B)V", reinterpret_cast<void*>(sendReport)},
+        {"nativeSendGetFeatureReportReply", "(JI[B)V",
+         reinterpret_cast<void*>(sendGetFeatureReportReply)},
+        {"nativeCloseDevice", "(J)V", reinterpret_cast<void*>(closeDevice)},
 };
 
 int register_com_android_commands_hid_Device(JNIEnv* env) {

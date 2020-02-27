@@ -49,13 +49,13 @@ interface ILauncherApps {
     ActivityInfo resolveActivity(
             String callingPackage, in ComponentName component, in UserHandle user);
     void startSessionDetailsActivityAsUser(in IApplicationThread caller, String callingPackage,
-                in PackageInstaller.SessionInfo sessionInfo, in Rect sourceBounds, in Bundle opts,
-                in UserHandle user);
+                String callingFeatureId, in PackageInstaller.SessionInfo sessionInfo,
+                in Rect sourceBounds, in Bundle opts, in UserHandle user);
     void startActivityAsUser(in IApplicationThread caller, String callingPackage,
-            in ComponentName component, in Rect sourceBounds,
+            String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
-    void showAppDetailsAsUser(in IApplicationThread caller,
-            String callingPackage, in ComponentName component, in Rect sourceBounds,
+    void showAppDetailsAsUser(in IApplicationThread caller, String callingPackage,
+            String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
     boolean isPackageEnabled(String callingPackage, String packageName, in UserHandle user);
     Bundle getSuspendedPackageLauncherExtras(String packageName, in UserHandle user);
@@ -72,7 +72,7 @@ interface ILauncherApps {
             int flags, in UserHandle user);
     void pinShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
             in UserHandle user);
-    boolean startShortcut(String callingPackage, String packageName, String id,
+    boolean startShortcut(String callingPackage, String packageName, String featureId, String id,
             in Rect sourceBounds, in Bundle startActivityOptions, int userId);
 
     int getShortcutIconResId(String callingPackage, String packageName, String id,
@@ -95,7 +95,12 @@ interface ILauncherApps {
 
     void registerShortcutChangeCallback(String callingPackage, long changedSince,
             String packageName, in List shortcutIds, in List<LocusId> locusIds,
-            in ComponentName componentName, int flags, in IShortcutChangeCallback callback,
-            int callbackId);
-    void unregisterShortcutChangeCallback(String callingPackage, int callbackId);
+            in ComponentName componentName, int flags, in IShortcutChangeCallback callback);
+    void unregisterShortcutChangeCallback(String callingPackage,
+            in IShortcutChangeCallback callback);
+
+    void cacheShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
+            in UserHandle user);
+    void uncacheShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
+            in UserHandle user);
 }

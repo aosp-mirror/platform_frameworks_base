@@ -443,8 +443,8 @@ public class AccessibilitySecurityPolicy {
                 return false;
             }
         }
-        // TODO: Check parent windowId if the giving windowId is from embedded view hierarchy.
-        if (windowId == mAccessibilityWindowManager.getActiveWindowId(userId)) {
+        if (mAccessibilityWindowManager.resolveParentWindowIdLocked(windowId)
+                == mAccessibilityWindowManager.getActiveWindowId(userId)) {
             return true;
         }
         return mAccessibilityWindowManager.findA11yWindowInfoByIdLocked(windowId) != null;

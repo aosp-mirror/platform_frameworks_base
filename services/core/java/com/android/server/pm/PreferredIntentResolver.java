@@ -16,6 +16,9 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
+import android.content.IntentFilter;
+
 import java.io.PrintWriter;
 
 import com.android.server.IntentResolver;
@@ -36,5 +39,10 @@ public class PreferredIntentResolver
     protected void dumpFilter(PrintWriter out, String prefix,
             PreferredActivity filter) {
         filter.mPref.dump(out, prefix, filter);
+    }
+
+    @Override
+    protected IntentFilter getIntentFilter(@NonNull PreferredActivity input) {
+        return input;
     }
 }

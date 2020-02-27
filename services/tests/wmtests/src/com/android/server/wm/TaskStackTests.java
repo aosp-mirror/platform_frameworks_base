@@ -16,9 +16,11 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
@@ -33,6 +35,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 
+import android.app.WindowConfiguration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
@@ -183,6 +186,16 @@ public class TaskStackTests extends WindowTestsBase {
         spyOn(stack);
         doReturn(stackOutset).when(stack).getStackOutset();
         doReturn(true).when(stack).inMultiWindowMode();
+
+        // Mock the resolved override windowing mode to non-fullscreen
+        final WindowConfiguration windowConfiguration =
+                stack.getResolvedOverrideConfiguration().windowConfiguration;
+        spyOn(windowConfiguration);
+        doReturn(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY)
+                .when(windowConfiguration).getWindowingMode();
+
+        // Prevent adjust task dimensions
+        doNothing().when(stack).adjustForMinimalTaskDimensions(any(), any());
 
         final Rect stackBounds = new Rect(200, 200, 800, 1000);
         // Update surface position and size by the given bounds.

@@ -2543,12 +2543,13 @@ public abstract class Context {
      *
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      * @see android.app.BroadcastOptions
+     * @hide
      */
-    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
+    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent, int initialCode,
             @Nullable String receiverPermission, @Nullable String receiverAppOp,
-            @Nullable Bundle options, @Nullable BroadcastReceiver resultReceiver,
-            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
-            @Nullable Bundle initialExtras) {
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            @Nullable String initialData, @Nullable Bundle initialExtras,
+            @Nullable Bundle options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -3457,6 +3458,7 @@ public abstract class Context {
             CONSUMER_IR_SERVICE,
             //@hide: TRUST_SERVICE,
             TV_INPUT_SERVICE,
+            //@hide: TV_TUNER_RESOURCE_MGR_SERVICE,
             //@hide: NETWORK_SCORE_SERVICE,
             USAGE_STATS_SERVICE,
             MEDIA_SESSION_SERVICE,
@@ -3494,13 +3496,23 @@ public abstract class Context {
      * <dl>
      *  <dt> {@link #WINDOW_SERVICE} ("window")
      *  <dd> The top-level window manager in which you can place custom
-     *  windows.  The returned object is a {@link android.view.WindowManager}.
+     *  windows.  The returned object is a {@link android.view.WindowManager}. Must only be obtained
+     *  from a visual context such as Activity or a Context created with
+     *  {@link #createWindowContext(int, Bundle)}, which are adjusted to the configuration and
+     *  visual bounds of an area on screen.
      *  <dt> {@link #LAYOUT_INFLATER_SERVICE} ("layout_inflater")
      *  <dd> A {@link android.view.LayoutInflater} for inflating layout resources
-     *  in this context.
+     *  in this context. Must only be obtained from a visual context such as Activity or a Context
+     *  created with {@link #createWindowContext(int, Bundle)}, which are adjusted to the
+     *  configuration and visual bounds of an area on screen.
      *  <dt> {@link #ACTIVITY_SERVICE} ("activity")
      *  <dd> A {@link android.app.ActivityManager} for interacting with the
      *  global activity state of the system.
+     *  <dt> {@link #WALLPAPER_SERVICE} ("wallpaper")
+     *  <dd> A {@link android.service.wallpaper.WallpaperService} for accessing wallpapers in this
+     *  context. Must only be obtained from a visual context such as Activity or a Context created
+     *  with {@link #createWindowContext(int, Bundle)}, which are adjusted to the configuration and
+     *  visual bounds of an area on screen.
      *  <dt> {@link #POWER_SERVICE} ("power")
      *  <dd> A {@link android.os.PowerManager} for controlling power
      *  management.
@@ -4063,16 +4075,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.net.wifi.WifiCondManager} for handling management of the Wi-Fi control
-     * daemon.
+     * {@link android.net.wifi.wificond.WifiNl80211Manager} for handling management of the
+     * Wi-Fi nl802.11 daemon (wificond).
      *
      * @see #getSystemService(String)
-     * @see android.net.wifi.WifiCondManager
+     * @see android.net.wifi.wificond.WifiNl80211Manager
      * @hide
      */
     @SystemApi
     @SuppressLint("ServiceName")
-    public static final String WIFI_COND_SERVICE = "wificond";
+    public static final String WIFI_NL80211_SERVICE = "wifinl80211";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
@@ -4757,6 +4769,17 @@ public abstract class Context {
     public static final String TV_INPUT_SERVICE = "tv_input";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.tv.TunerResourceManager} for interacting with TV
+     * tuner resources on the device.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.tv.TunerResourceManager
+     * @hide
+     */
+    public static final String TV_TUNER_RESOURCE_MGR_SERVICE = "tv_tuner_resource_mgr";
+
+    /**
      * {@link android.net.NetworkScoreManager} for managing network scoring.
      * @see #getSystemService(String)
      * @see android.net.NetworkScoreManager
@@ -5086,10 +5109,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * AppSearchManager for indexing and querying app data managed
-     * by the system.
+     * {@link android.app.appsearch.AppSearchManager} for
+     * indexing and querying app data managed by the system.
      *
      * @see #getSystemService(String)
+     * @hide
      */
     public static final String APP_SEARCH_SERVICE = "app_search";
 
@@ -5132,6 +5156,17 @@ public abstract class Context {
      * @hide
      */
     public static final String LIGHTS_SERVICE = "lights";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.DreamManager} for controlling Dream states.
+     *
+     * @see #getSystemService(String)
+
+     * @hide
+     */
+    @TestApi
+    public static final String DREAM_SERVICE = "dream";
 
     /**
      * Determine whether the given permission is allowed for a particular
@@ -5888,9 +5923,22 @@ public abstract class Context {
      * {@link #createDisplayContext(Display)} to get a display object associated with a Context, or
      * {@link android.hardware.display.DisplayManager#getDisplay} to get a display object by id.
      * @return Returns the {@link Display} object this context is associated with.
+     * @throws UnsupportedOperationException if the method is called on an instance that is not
+     *         associated with any display.
      */
     @Nullable
     public Display getDisplay() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * A version of {@link #getDisplay()} that does not perform a Context misuse check to be used by
+     * legacy APIs.
+     * TODO(b/149790106): Fix usages and remove.
+     * @hide
+     */
+    @Nullable
+    public Display getDisplayNoVerify() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

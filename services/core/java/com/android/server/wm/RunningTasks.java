@@ -76,7 +76,7 @@ class RunningTasks {
 
         final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,
                 PooledLambda.__(Task.class));
-        root.forAllTasks(c, false);
+        root.forAllLeafTasks(c, false);
         c.recycle();
 
         // Take the first {@param maxNum} tasks and create running task infos for them
@@ -93,9 +93,6 @@ class RunningTasks {
     }
 
     private void processTask(Task task) {
-        if (task.isRootTask()) {
-            return;
-        }
         if (task.getTopNonFinishingActivity() == null) {
             // Skip if there are no activities in the task
             return;

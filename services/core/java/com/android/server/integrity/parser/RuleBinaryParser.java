@@ -23,6 +23,7 @@ import static com.android.server.integrity.model.ComponentBitSize.COMPOUND_FORMU
 import static com.android.server.integrity.model.ComponentBitSize.CONNECTOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.EFFECT_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.FORMAT_VERSION_BITS;
+import static com.android.server.integrity.model.ComponentBitSize.INSTALLER_ALLOWED_BY_MANIFEST_START;
 import static com.android.server.integrity.model.ComponentBitSize.IS_HASHED_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.KEY_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.OPERATOR_BITS;
@@ -35,6 +36,7 @@ import static com.android.server.integrity.parser.BinaryFileOperations.getString
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
+import android.content.integrity.InstallerAllowedByManifestFormula;
 import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 
@@ -66,8 +68,7 @@ public class RuleBinaryParser implements RuleParser {
     }
 
     private List<Rule> parseRules(
-            RandomAccessInputStream randomAccessInputStream,
-            List<RuleIndexRange> indexRanges)
+            RandomAccessInputStream randomAccessInputStream, List<RuleIndexRange> indexRanges)
             throws IOException {
 
         // Read the rule binary file format version.
@@ -94,8 +95,7 @@ public class RuleBinaryParser implements RuleParser {
     }
 
     private List<Rule> parseIndexedRules(
-            RandomAccessInputStream randomAccessInputStream,
-            List<RuleIndexRange> indexRanges)
+            RandomAccessInputStream randomAccessInputStream, List<RuleIndexRange> indexRanges)
             throws IOException {
         List<Rule> parsedRules = new ArrayList<>();
 
@@ -140,6 +140,8 @@ public class RuleBinaryParser implements RuleParser {
                 return parseCompoundFormula(bitInputStream);
             case COMPOUND_FORMULA_END:
                 return null;
+            case INSTALLER_ALLOWED_BY_MANIFEST_START:
+                return new InstallerAllowedByManifestFormula();
             default:
                 throw new IllegalArgumentException(
                         String.format("Unknown formula separator: %s", separator));
@@ -168,6 +170,7 @@ public class RuleBinaryParser implements RuleParser {
             case AtomicFormula.APP_CERTIFICATE:
             case AtomicFormula.INSTALLER_NAME:
             case AtomicFormula.INSTALLER_CERTIFICATE:
+            case AtomicFormula.STAMP_CERTIFICATE_HASH:
                 boolean isHashedValue = bitInputStream.getNext(IS_HASHED_BITS) == 1;
                 int valueSize = bitInputStream.getNext(VALUE_SIZE_BITS);
                 String stringValue = getStringValue(bitInputStream, valueSize, isHashedValue);
@@ -179,6 +182,7 @@ public class RuleBinaryParser implements RuleParser {
                 long longValue = (upper << 32) | lower;
                 return new AtomicFormula.LongAtomicFormula(key, operator, longValue);
             case AtomicFormula.PRE_INSTALLED:
+            case AtomicFormula.STAMP_TRUSTED:
                 boolean booleanValue = getBooleanValue(bitInputStream);
                 return new AtomicFormula.BooleanAtomicFormula(key, booleanValue);
             default:

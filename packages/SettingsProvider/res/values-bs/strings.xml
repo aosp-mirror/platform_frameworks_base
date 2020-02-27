@@ -20,7 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"Postavke za pohranu podataka"</string>
-    <string name="wifi_softap_config_change" msgid="5338670993556993667">"Promjene postavki pristupne tačke"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"Opseg pristupne tačke je promijenjen."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"Ovaj uređaj ne podržava vašu postavku za mreže od isključivo 5 GHz. Uređaj će koristiti opseg of 5 GHz kada bude dostupan."</string>
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"Postavke pristupne tačke su promijenjene"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"Dodirnite da vidite detalje"</string>
 </resources>

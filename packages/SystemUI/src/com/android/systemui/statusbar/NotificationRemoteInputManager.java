@@ -54,6 +54,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -70,9 +71,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import dagger.Lazy;
 
 /**
@@ -81,7 +79,6 @@ import dagger.Lazy;
  * interaction, keeping track of notifications to remove when NotificationPresenter is collapsed,
  * and handling clicks on remote views.
  */
-@Singleton
 public class NotificationRemoteInputManager implements Dumpable {
     public static final boolean ENABLE_REMOTE_INPUT =
             SystemProperties.getBoolean("debug.enable_remote_input", true);
@@ -257,7 +254,9 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
     };
 
-    @Inject
+    /**
+     * Injected constructor. See {@link StatusBarModule}.
+     */
     public NotificationRemoteInputManager(
             Context context,
             NotificationLockscreenUserManager lockscreenUserManager,

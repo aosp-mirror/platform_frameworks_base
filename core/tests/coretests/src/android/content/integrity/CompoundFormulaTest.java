@@ -286,8 +286,8 @@ public class CompoundFormulaTest {
     private AppInstallMetadata.Builder getAppInstallMetadataBuilder() {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")
-                .setAppCertificate("abc")
-                .setInstallerCertificate("abc")
+                .setAppCertificates(Collections.singletonList("abc"))
+                .setInstallerCertificates(Collections.singletonList("abc"))
                 .setInstallerName("abc")
                 .setVersionCode(-1)
                 .setIsPreInstalled(true);

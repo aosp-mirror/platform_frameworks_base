@@ -61,6 +61,7 @@ import android.telephony.CellSignalStrengthTdscdma;
 import android.telephony.CellSignalStrengthWcdma;
 import android.telephony.DataFailCause;
 import android.telephony.DisconnectCause;
+import android.telephony.DisplayInfo;
 import android.telephony.LocationAccessPolicy;
 import android.telephony.PhoneCapability;
 import android.telephony.PhoneStateListener;
@@ -84,6 +85,7 @@ import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -205,6 +207,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private boolean[] mUserMobileDataState;
 
+    private DisplayInfo[] mDisplayInfos;
+
     private SignalStrength[] mSignalStrength;
 
     private boolean[] mMessageWaiting;
@@ -285,15 +289,16 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR
                         | PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR
                         | PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST
+                        | PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED;
+
+    static final int ENFORCE_PRECISE_PHONE_STATE_PERMISSION_MASK =
+                PhoneStateListener.LISTEN_PRECISE_CALL_STATE
+                        | PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE
+                        | PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES
+                        | PhoneStateListener.LISTEN_CALL_ATTRIBUTES_CHANGED
+                        | PhoneStateListener.LISTEN_IMS_CALL_DISCONNECT_CAUSES
                         | PhoneStateListener.LISTEN_REGISTRATION_FAILURE
                         | PhoneStateListener.LISTEN_BARRING_INFO;
-
-    static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
-                PhoneStateListener.LISTEN_PRECISE_CALL_STATE
-                | PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE
-                | PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES
-                | PhoneStateListener.LISTEN_CALL_ATTRIBUTES_CHANGED
-                | PhoneStateListener.LISTEN_IMS_CALL_DISCONNECT_CAUSES;
 
     static final int READ_ACTIVE_EMERGENCY_SESSION_PERMISSION_MASK =
             PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL
@@ -443,6 +448,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCallAttributes = copyOf(mCallAttributes, mNumPhones);
         mOutgoingCallEmergencyNumber = copyOf(mOutgoingCallEmergencyNumber, mNumPhones);
         mOutgoingSmsEmergencyNumber = copyOf(mOutgoingSmsEmergencyNumber, mNumPhones);
+        mDisplayInfos = copyOf(mDisplayInfos, mNumPhones);
 
         // ds -> ss switch.
         if (mNumPhones < oldNumPhones) {
@@ -482,6 +488,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mPreciseDataConnectionStates.add(new HashMap<Integer, PreciseDataConnectionState>());
             mBarringInfo.add(i, new BarringInfo());
+            mDisplayInfos[i] = null;
         }
     }
 
@@ -540,6 +547,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mOutgoingCallEmergencyNumber = new EmergencyNumber[numPhones];
         mOutgoingSmsEmergencyNumber = new EmergencyNumber[numPhones];
         mBarringInfo = new ArrayList<>();
+        mDisplayInfos = new DisplayInfo[numPhones];
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -568,6 +576,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mPreciseDataConnectionStates.add(new HashMap<Integer, PreciseDataConnectionState>());
             mBarringInfo.add(i, new BarringInfo());
+            mDisplayInfos[i] = null;
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -974,6 +983,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_USER_MOBILE_DATA_STATE) != 0) {
                         try {
                             r.callback.onUserMobileDataStateChanged(mUserMobileDataState[phoneId]);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
+                    if ((events & PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED) != 0) {
+                        try {
+                            if (mDisplayInfos[phoneId] != null) {
+                                r.callback.onDisplayInfoChanged(mDisplayInfos[phoneId]);
+                            }
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1501,6 +1519,45 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    /**
+     * Notify display network info changed.
+     *
+     * @param phoneId Phone id
+     * @param subId Subscription id
+     * @param displayInfo Display network info
+     *
+     * @see PhoneStateListener#onDisplayInfoChanged(DisplayInfo)
+     */
+    public void notifyDisplayInfoChanged(int phoneId, int subId,
+                                         @NonNull DisplayInfo displayInfo) {
+        if (!checkNotifyPermission("notifyDisplayInfoChanged()")) {
+            return;
+        }
+        if (VDBG) {
+            log("notifyDisplayInfoChanged: PhoneId=" + phoneId
+                    + " subId=" + subId + " displayInfo=" + displayInfo);
+        }
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                if (mDisplayInfos[phoneId] != null) {
+                    mDisplayInfos[phoneId] = displayInfo;
+                    for (Record r : mRecords) {
+                        if (r.matchPhoneStateListenerEvent(
+                                PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED)
+                                && idMatch(r.subId, subId, phoneId)) {
+                            try {
+                                r.callback.onDisplayInfoChanged(displayInfo);
+                            } catch (RemoteException ex) {
+                                mRemoveList.add(r.binder);
+                            }
+                        }
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
     public void notifyCallForwardingChanged(boolean cfi) {
         notifyCallForwardingChangedForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, cfi);
     }
@@ -1601,7 +1658,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         && (mDataConnectionState[phoneId] != state
                         || mDataConnectionNetworkType[phoneId] != networkType)) {
                     String str = "onDataConnectionStateChanged("
-                            + dataStateToString(state)
+                            + TelephonyUtils.dataStateToString(state)
                             + ", " + getNetworkTypeName(networkType)
                             + ") subId=" + subId + ", phoneId=" + phoneId;
                     log(str);
@@ -2462,7 +2519,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // status bar takes care of that after taking into account all of the
         // required info.
         Intent intent = new Intent(ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
-        intent.putExtra(PHONE_CONSTANTS_STATE_KEY, dataStateToString(state));
+        intent.putExtra(PHONE_CONSTANTS_STATE_KEY, TelephonyUtils.dataStateToString(state));
         intent.putExtra(PHONE_CONSTANTS_DATA_APN_KEY, apn);
         intent.putExtra(PHONE_CONSTANTS_DATA_APN_TYPE_KEY,
                 ApnSetting.getApnTypesStringFromBitmask(apnType));
@@ -2535,7 +2592,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
 
-        if ((events & PRECISE_PHONE_STATE_PERMISSION_MASK) != 0) {
+        if ((events & ENFORCE_PRECISE_PHONE_STATE_PERMISSION_MASK) != 0) {
             // check if calling app has either permission READ_PRECISE_PHONE_STATE
             // or with carrier privileges
             try {
@@ -2730,6 +2787,20 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
 
+        if ((events & PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED) != 0) {
+            try {
+                if (VDBG) {
+                    log("checkPossibleMissNotify: onDisplayInfoChanged phoneId="
+                            + phoneId + " dpi=" + mDisplayInfos[phoneId]);
+                }
+                if (mDisplayInfos[phoneId] != null) {
+                    r.callback.onDisplayInfoChanged(mDisplayInfos[phoneId]);
+                }
+            } catch (RemoteException ex) {
+                mRemoveList.add(r.binder);
+            }
+        }
+
         if ((events & PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR) != 0) {
             try {
                 if (VDBG) {
@@ -2785,21 +2856,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mRemoveList.add(r.binder);
             }
         }
-    }
-
-    /**
-     * Convert TelephonyManager.DATA_* to string.
-     *
-     * @return The data state in string format.
-     */
-    private static String dataStateToString(int state) {
-        switch (state) {
-            case TelephonyManager.DATA_DISCONNECTED: return "DISCONNECTED";
-            case TelephonyManager.DATA_CONNECTING: return "CONNECTING";
-            case TelephonyManager.DATA_CONNECTED: return "CONNECTED";
-            case TelephonyManager.DATA_SUSPENDED: return "SUSPENDED";
-        }
-        return "UNKNOWN(" + state + ")";
     }
 
     /**

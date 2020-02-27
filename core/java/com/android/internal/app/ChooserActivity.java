@@ -373,7 +373,11 @@ public class ChooserActivity extends ResolverActivity implements
                 Log.i(TAG, "Hiding image preview area. Timed out waiting for preview to load"
                         + " within " + mImageLoadTimeoutMillis + "ms.");
                 collapseParentView();
-                hideContentPreview();
+                if (shouldShowTabs()) {
+                    hideStickyContentPreview();
+                } else if (mChooserMultiProfilePagerAdapter.getCurrentRootAdapter() != null) {
+                    mChooserMultiProfilePagerAdapter.getCurrentRootAdapter().hideContentPreview();
+                }
                 mHideParentOnFail = false;
             }
         }
@@ -769,7 +773,7 @@ public class ChooserActivity extends ResolverActivity implements
             Intent[] initialIntents,
             List<ResolveInfo> rList,
             boolean filterLastUsed) {
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             mChooserMultiProfilePagerAdapter = createChooserMultiProfilePagerAdapterForTwoProfiles(
                     initialIntents, rList, filterLastUsed);
         } else {
@@ -829,7 +833,12 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override
     protected boolean postRebuildList(boolean rebuildCompleted) {
-        updateContentPreview();
+        updateStickyContentPreview();
+        if (shouldShowStickyContentPreview()
+                || mChooserMultiProfilePagerAdapter
+                        .getCurrentRootAdapter().getContentPreviewRowCount() != 0) {
+            logActionShareWithPreview();
+        }
         return postRebuildListInternal(rebuildCompleted);
     }
 
@@ -978,6 +987,8 @@ public class ChooserActivity extends ResolverActivity implements
         updateLayoutWidth(R.id.content_preview_text_layout, width, parent);
         updateLayoutWidth(R.id.content_preview_title_layout, width, parent);
         updateLayoutWidth(R.id.content_preview_file_layout, width, parent);
+        findViewById(R.id.content_preview_container)
+                .setVisibility(shouldShowStickyContentPreview() ? View.VISIBLE : View.GONE);
     }
 
     private void updateLayoutWidth(int layoutResourceId, int width, View parent) {
@@ -1465,7 +1476,6 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override
     public void addUseDifferentAppLabelIfNecessary(ResolverListAdapter adapter) {
-        mChooserMultiProfilePagerAdapter.getActiveAdapterView().setVisibility(View.VISIBLE);
         if (mCallerChooserTargets != null && mCallerChooserTargets.length > 0) {
             mChooserMultiProfilePagerAdapter.getActiveListAdapter().addServiceResults(
                     /* origTarget */ null,
@@ -1795,6 +1805,10 @@ public class ChooserActivity extends ResolverActivity implements
             if (!TextUtils.isEmpty(dataString)) {
                 return new IntentFilter(intent.getAction(), dataString);
             }
+            if (intent.getType() == null) {
+                Log.e(TAG, "Failed to get target intent filter: intent data and type are null");
+                return null;
+            }
             IntentFilter intentFilter = new IntentFilter(intent.getAction(), intent.getType());
             List<Uri> contentUris = new ArrayList<>();
             if (Intent.ACTION_SEND.equals(intent.getAction())) {
@@ -1815,7 +1829,7 @@ public class ChooserActivity extends ResolverActivity implements
             }
             return intentFilter;
         } catch (Exception e) {
-            Log.e(TAG, "failed to get target intent filter", e);
+            Log.e(TAG, "Failed to get target intent filter", e);
             return null;
         }
     }
@@ -2413,18 +2427,18 @@ public class ChooserActivity extends ResolverActivity implements
 
                 // still zero? then use a default height and leave, which
                 // can happen when there are no targets to show
-                if (rowsToShow == 0 && !shouldShowContentPreview()) {
+                if (rowsToShow == 0 && !shouldShowStickyContentPreview()) {
                     offset += getResources().getDimensionPixelSize(
                             R.dimen.chooser_max_collapsed_height);
                     mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
                     return;
                 }
 
-                if (shouldShowContentPreview()) {
+                if (shouldShowStickyContentPreview()) {
                     offset += findViewById(R.id.content_preview_container).getHeight();
                 }
 
-                if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+                if (shouldShowTabs()) {
                     offset += findViewById(R.id.tabs).getHeight();
                 }
 
@@ -2552,7 +2566,7 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private void setupScrollListener() {
-        if (mResolverDrawerLayout == null) {
+        if (mResolverDrawerLayout == null || shouldShowTabs()) {
             return;
         }
         final View chooserHeader = mResolverDrawerLayout.findViewById(R.id.chooser_header);
@@ -2597,28 +2611,35 @@ public class ChooserActivity extends ResolverActivity implements
         return false;
     }
 
-    private boolean shouldShowContentPreview() {
-        return mMultiProfilePagerAdapter.getActiveListAdapter().getCount() > 0
-                && isSendAction(getTargetIntent());
+    /**
+     * The sticky content preview is shown only when we have a tabbed view. It's shown above
+     * the tabs so it is not part of the scrollable list. If we are not in tabbed view,
+     * we instead show the content preview as a regular list item.
+     */
+    private boolean shouldShowStickyContentPreview() {
+        return shouldShowTabs()
+                && mMultiProfilePagerAdapter.getListAdapterForUserHandle(
+                        UserHandle.of(UserHandle.myUserId())).getCount() > 0
+                && isSendAction(getTargetIntent())
+                && getResources().getBoolean(R.bool.sharesheet_show_content_preview);
     }
 
-    private void updateContentPreview() {
-        if (shouldShowContentPreview()) {
-            showContentPreview();
+    private void updateStickyContentPreview() {
+        if (shouldShowStickyContentPreview()) {
+            showStickyContentPreview();
         } else {
-            hideContentPreview();
+            hideStickyContentPreview();
         }
     }
 
-    private void showContentPreview() {
+    private void showStickyContentPreview() {
         ViewGroup contentPreviewContainer = findViewById(R.id.content_preview_container);
         contentPreviewContainer.setVisibility(View.VISIBLE);
         ViewGroup contentPreviewView = createContentPreviewView(contentPreviewContainer);
         contentPreviewContainer.addView(contentPreviewView);
-        logActionShareWithPreview();
     }
 
-    private void hideContentPreview() {
+    private void hideStickyContentPreview() {
         ViewGroup contentPreviewContainer = findViewById(R.id.content_preview_container);
         contentPreviewContainer.removeAllViews();
         contentPreviewContainer.setVisibility(View.GONE);
@@ -2634,6 +2655,7 @@ public class ChooserActivity extends ResolverActivity implements
     /**
      * Used to bind types of individual item including
      * {@link ChooserGridAdapter#VIEW_TYPE_NORMAL},
+     * {@link ChooserGridAdapter#VIEW_TYPE_CONTENT_PREVIEW},
      * {@link ChooserGridAdapter#VIEW_TYPE_PROFILE},
      * and {@link ChooserGridAdapter#VIEW_TYPE_AZ_LABEL}.
      */
@@ -2680,6 +2702,11 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     protected void resetButtonBar() {}
 
+    @Override
+    protected String getMetricsCategory() {
+        return METRICS_CATEGORY_CHOOSER;
+    }
+
     /**
      * Adapter for all types of items and targets in ShareSheet.
      * Note that ranked sections like Direct Share - while appearing grid-like - are handled on the
@@ -2695,16 +2722,18 @@ public class ChooserActivity extends ResolverActivity implements
         private int mChooserTargetWidth = 0;
         private boolean mShowAzLabelIfPoss;
 
+        private boolean mHideContentPreview = false;
         private boolean mLayoutRequested = false;
 
         private int mFooterHeight = 0;
 
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
-        private static final int VIEW_TYPE_PROFILE = 2;
-        private static final int VIEW_TYPE_AZ_LABEL = 3;
-        private static final int VIEW_TYPE_CALLER_AND_RANK = 4;
-        private static final int VIEW_TYPE_FOOTER = 5;
+        private static final int VIEW_TYPE_CONTENT_PREVIEW = 2;
+        private static final int VIEW_TYPE_PROFILE = 3;
+        private static final int VIEW_TYPE_AZ_LABEL = 4;
+        private static final int VIEW_TYPE_CALLER_AND_RANK = 5;
+        private static final int VIEW_TYPE_FOOTER = 6;
 
         private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
         private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
@@ -2765,6 +2794,17 @@ public class ChooserActivity extends ResolverActivity implements
             return maxTargets;
         }
 
+        /**
+         * Hides the list item content preview.
+         * <p>Not to be confused with the sticky content preview which is above the
+         * personal and work tabs.
+         */
+        public void hideContentPreview() {
+            mHideContentPreview = true;
+            mLayoutRequested = true;
+            notifyDataSetChanged();
+        }
+
         public boolean consumeLayoutRequest() {
             boolean oldValue = mLayoutRequested;
             mLayoutRequested = false;
@@ -2773,7 +2813,8 @@ public class ChooserActivity extends ResolverActivity implements
 
         public int getRowCount() {
             return (int) (
-                    getProfileRowCount()
+                    getContentPreviewRowCount()
+                            + getProfileRowCount()
                             + getServiceTargetRowCount()
                             + getCallerAndRankedTargetRowCount()
                             + getAzLabelRowCount()
@@ -2783,7 +2824,33 @@ public class ChooserActivity extends ResolverActivity implements
             );
         }
 
+        /**
+         * Returns either {@code 0} or {@code 1} depending on whether we want to show the list item
+         * content preview. Not to be confused with the sticky content preview which is above the
+         * personal and work tabs.
+         */
+        public int getContentPreviewRowCount() {
+            // For the tabbed case we show the sticky content preview above the tabs,
+            // please refer to shouldShowStickyContentPreview
+            if (shouldShowTabs()) {
+                return 0;
+            }
+            if (!isSendAction(getTargetIntent())) {
+                return 0;
+            }
+
+            if (mHideContentPreview || mChooserListAdapter == null
+                    || mChooserListAdapter.getCount() == 0) {
+                return 0;
+            }
+
+            return 1;
+        }
+
         public int getProfileRowCount() {
+            if (shouldShowTabs()) {
+                return 0;
+            }
             return mChooserListAdapter.getOtherProfile() == null ? 0 : 1;
         }
 
@@ -2815,7 +2882,8 @@ public class ChooserActivity extends ResolverActivity implements
         @Override
         public int getItemCount() {
             return (int) (
-                    getProfileRowCount()
+                    getContentPreviewRowCount()
+                            + getProfileRowCount()
                             + getServiceTargetRowCount()
                             + getCallerAndRankedTargetRowCount()
                             + getAzLabelRowCount()
@@ -2827,6 +2895,8 @@ public class ChooserActivity extends ResolverActivity implements
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             switch (viewType) {
+                case VIEW_TYPE_CONTENT_PREVIEW:
+                    return new ItemViewHolder(createContentPreviewView(parent), false);
                 case VIEW_TYPE_PROFILE:
                     return new ItemViewHolder(createProfileView(parent), false);
                 case VIEW_TYPE_AZ_LABEL:
@@ -2866,7 +2936,10 @@ public class ChooserActivity extends ResolverActivity implements
         public int getItemViewType(int position) {
             int count;
 
-            int countSum = (count = getProfileRowCount());
+            int countSum = (count = getContentPreviewRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_CONTENT_PREVIEW;
+
+            countSum += (count = getProfileRowCount());
             if (count > 0 && position < countSum) return VIEW_TYPE_PROFILE;
 
             countSum += (count = getServiceTargetRowCount());
@@ -3031,7 +3104,7 @@ public class ChooserActivity extends ResolverActivity implements
             final ViewGroup viewGroup = (ViewGroup) holder.itemView;
             int start = getListPosition(position);
             int startType = getRowType(start);
-            if (viewGroup.getForeground() == null) {
+            if (viewGroup.getForeground() == null && position > 0) {
                 viewGroup.setForeground(
                         getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
             }
@@ -3082,7 +3155,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         int getListPosition(int position) {
-            position -= getProfileRowCount();
+            position -= getContentPreviewRowCount() + getProfileRowCount();
 
             final int serviceCount = mChooserListAdapter.getServiceTargetCount();
             final int serviceRows = (int) Math.ceil((float) serviceCount

@@ -1998,8 +1998,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
 
         mUserStackInFront.put(mCurrentUser, focusStackId);
-        final int restoreStackId =
-                mUserStackInFront.get(userId, getDefaultDisplay().getRootHomeTask().getRootTaskId());
         mCurrentUser = userId;
 
         mStackSupervisor.mStartingUsers.add(uss);
@@ -2008,16 +2006,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getStackAt(stackNdx);
                 stack.switchUser(userId);
-                Task task = stack.getTopMostTask();
-                if (task != null && task != stack) {
-                    stack.positionChildAtTop(task);
-                }
             }
         }
 
+        final int restoreStackId = mUserStackInFront.get(userId);
         ActivityStack stack = getStack(restoreStackId);
         if (stack == null) {
-            stack = getDefaultDisplay().getRootHomeTask();
+            stack = getDefaultDisplay().getOrCreateRootHomeTask();
         }
         final boolean homeInFront = stack.isActivityTypeHome();
         if (stack.isOnHomeDisplay()) {
@@ -2039,8 +2034,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     void updateUserStack(int userId, ActivityStack stack) {
         if (userId != mCurrentUser) {
-            mUserStackInFront.put(userId, stack != null ? stack.getRootTaskId()
-                    : getDefaultDisplay().getRootHomeTask().getRootTaskId());
+            if (stack == null) {
+                stack = getDefaultDisplay().getOrCreateRootHomeTask();
+            }
+
+            mUserStackInFront.put(userId, stack.getRootTaskId());
         }
     }
 
@@ -2139,10 +2137,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         r.getActivityType(), ON_TOP, r.info, r.intent);
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
-
-                Task newTask = stack.createTask(mStackSupervisor.getNextTaskIdForUser(r.mUserId),
-                        r.info, r.intent, true);
-                r.reparent(newTask, MAX_VALUE, "moveActivityToStack");
+                r.reparent(stack, MAX_VALUE, "moveActivityToStack");
             }
 
             stack.setWindowingMode(WINDOWING_MODE_PINNED);
@@ -2152,19 +2147,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             r.supportsEnterPipOnTaskSwitch = false;
         } finally {
             mService.continueWindowLayout();
-        }
-
-        // TODO(b/146594635): Remove all PIP animation code from WM once SysUI handles animation.
-        // Notify the pinned stack controller to prepare the PiP animation, expect callback
-        // delivered from SystemUI to WM to start the animation. Unless we are using
-        // the TaskOrganizer in which case the animation will be entirely handled
-        // on that side.
-        if (mService.mTaskOrganizerController.getTaskOrganizer(WINDOWING_MODE_PINNED)
-                == null) {
-            final PinnedStackController pinnedStackController =
-                display.mDisplayContent.getPinnedStackController();
-            pinnedStackController.prepareAnimation(sourceHintBounds, aspectRatio,
-                    null /* stackBounds */);
         }
 
         // TODO: revisit the following statement after the animation is moved from WM to SysUI.
@@ -2409,7 +2391,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 RootWindowContainer::processTaskForStackInfo, PooledLambda.__(Task.class), info,
                 currentIndex);
-        stack.forAllTasks(c, false /* traverseTopToBottom */, stack);
+        stack.forAllLeafTasks(c, false /* traverseTopToBottom */);
         c.recycle();
 
         final ActivityRecord top = stack.topRunningActivity();
@@ -3304,7 +3286,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     RootWindowContainer::taskTopActivityIsUser, this, PooledLambda.__(Task.class),
                     userId);
-            forAllTasks(c);
+            forAllLeafTasks(c, true /* traverseTopToBottom */);
             c.recycle();
         } finally {
             mService.continueWindowLayout();
@@ -3424,18 +3406,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     ActivityRecord isInAnyStack(IBinder token) {
-        int numDisplays = getChildCount();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent display = getChildAt(displayNdx);
-            for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getStackAt(stackNdx);
-                final ActivityRecord r = stack.isInStackLocked(token);
-                if (r != null) {
-                    return r;
-                }
-            }
-        }
-        return null;
+        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+        return (r != null && r.isDescendantOf(this)) ? r : null;
     }
 
     @VisibleForTesting

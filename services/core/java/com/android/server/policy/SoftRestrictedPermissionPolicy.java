@@ -37,6 +37,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.UserHandle;
+import android.os.storage.StorageManagerInternal;
+
+import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 /**
  * The behavior of soft restricted permissions is different for each permission. This class collects
@@ -105,8 +109,8 @@ public abstract class SoftRestrictedPermissionPolicy {
      * @return The policy for this permission
      */
     public static @NonNull SoftRestrictedPermissionPolicy forPermission(@NonNull Context context,
-            @Nullable ApplicationInfo appInfo, @Nullable UserHandle user,
-            @NonNull String permission) {
+            @Nullable ApplicationInfo appInfo, @Nullable AndroidPackage pkg,
+            @Nullable UserHandle user, @NonNull String permission) {
         switch (permission) {
             // Storage uses a special app op to decide the mount state and supports soft restriction
             // where the restricted state allows the permission but only for accessing the medial
@@ -116,23 +120,31 @@ public abstract class SoftRestrictedPermissionPolicy {
                 boolean shouldApplyRestriction;
                 final int targetSDK;
                 final boolean hasRequestedLegacyExternalStorage;
+                final boolean shouldPreserveLegacyExternalStorage;
                 final boolean hasWriteMediaStorageGrantedForUid;
 
                 if (appInfo != null) {
                     PackageManager pm = context.getPackageManager();
+                    StorageManagerInternal smInternal =
+                            LocalServices.getService(StorageManagerInternal.class);
                     int flags = pm.getPermissionFlags(permission, appInfo.packageName, user);
                     isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
-                    shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
-                    targetSDK = getMinimumTargetSDK(context, appInfo, user);
                     hasRequestedLegacyExternalStorage = hasUidRequestedLegacyExternalStorage(
                             appInfo.uid, context);
                     hasWriteMediaStorageGrantedForUid = hasWriteMediaStorageGrantedForUid(
                             appInfo.uid, context);
+                    shouldPreserveLegacyExternalStorage = pkg.hasPreserveLegacyExternalStorage()
+                            && smInternal.hasLegacyExternalStorage(appInfo.uid);
+                    targetSDK = getMinimumTargetSDK(context, appInfo, user);
+                    shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0
+                            || (targetSDK > Build.VERSION_CODES.Q
+                            && !shouldPreserveLegacyExternalStorage);
                 } else {
                     isWhiteListed = false;
                     shouldApplyRestriction = false;
                     targetSDK = 0;
                     hasRequestedLegacyExternalStorage = false;
+                    shouldPreserveLegacyExternalStorage = false;
                     hasWriteMediaStorageGrantedForUid = false;
                 }
 
@@ -153,7 +165,8 @@ public abstract class SoftRestrictedPermissionPolicy {
                     public boolean mayAllowExtraAppOp() {
                         return !shouldApplyRestriction && targetSDK <= Build.VERSION_CODES.Q
                                 && (hasRequestedLegacyExternalStorage
-                                        || hasWriteMediaStorageGrantedForUid);
+                                        || hasWriteMediaStorageGrantedForUid
+                                        || shouldPreserveLegacyExternalStorage);
                     }
                     @Override
                     public boolean mayDenyExtraAppOpIfGranted() {

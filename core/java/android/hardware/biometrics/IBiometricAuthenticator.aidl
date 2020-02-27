@@ -55,4 +55,7 @@ interface IBiometricAuthenticator {
 
     // Explicitly set the active user (for enrolling work profile)
     void setActiveUser(int uid);
+
+    // Gets the authenticator ID representing the current set of enrolled templates
+    long getAuthenticatorId();
 }

@@ -38,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -67,12 +68,21 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
 
     @Inject
     public ToastUI(Context context, CommandQueue commandQueue) {
+        this(context, commandQueue,
+                (WindowManager) context.getSystemService(Context.WINDOW_SERVICE),
+                INotificationManager.Stub.asInterface(
+                        ServiceManager.getService(Context.NOTIFICATION_SERVICE)),
+                AccessibilityManager.getInstance(context));
+    }
+
+    @VisibleForTesting
+    ToastUI(Context context, CommandQueue commandQueue, WindowManager windowManager,
+            INotificationManager notificationManager, AccessibilityManager accessibilityManager) {
         super(context);
         mCommandQueue = commandQueue;
-        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        mNotificationManager = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-        mAccessibilityManager = AccessibilityManager.getInstance(context);
+        mWindowManager = windowManager;
+        mNotificationManager = notificationManager;
+        mAccessibilityManager = accessibilityManager;
     }
 
     @Override

@@ -58,10 +58,6 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     protected void handleUserSwitch(int newUserId) {
     }
 
@@ -102,14 +98,13 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
         }
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
         state.secondaryLabel = "";
+        state.stateDescription = "";
         if (!mFlashlightController.isAvailable()) {
             state.icon = mIcon;
             state.slash.isSlashed = true;
             state.secondaryLabel = mContext.getString(
                     R.string.quick_settings_flashlight_camera_in_use);
-            state.contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_flashlight_unavailable)
-                    + ", " + state.secondaryLabel;
+            state.stateDescription = state.secondaryLabel;
             state.state = Tile.STATE_UNAVAILABLE;
             return;
         }

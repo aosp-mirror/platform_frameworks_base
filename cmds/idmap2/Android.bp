@@ -146,6 +146,7 @@ cc_binary {
     host_supported: true,
     srcs: [
         "idmap2/Create.cpp",
+        "idmap2/CreateMultiple.cpp",
         "idmap2/Dump.cpp",
         "idmap2/Lookup.cpp",
         "idmap2/Main.cpp",

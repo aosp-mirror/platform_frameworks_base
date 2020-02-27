@@ -35,7 +35,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Objects;
@@ -54,10 +56,6 @@ public final class Font {
      * A builder class for creating new Font.
      */
     public static final class Builder {
-        private static final NativeAllocationRegistry sAssetByteBufferRegistry =
-                NativeAllocationRegistry.createMalloced(ByteBuffer.class.getClassLoader(),
-                    nGetReleaseNativeAssetFunc());
-
         private static final NativeAllocationRegistry sFontRegistry =
                 NativeAllocationRegistry.createMalloced(Font.class.getClassLoader(),
                     nGetReleaseNativeFont());
@@ -151,7 +149,11 @@ public final class Font {
          * @param path the file name of the font data in the asset directory
          */
         public Builder(@NonNull AssetManager am, @NonNull String path) {
-            this(am, path, true /* is asset */, 0 /* cookie */);
+            try {
+                mBuffer = createBuffer(am, path, true /* is asset */, 0 /* cookie */);
+            } catch (IOException e) {
+                mException = e;
+            }
         }
 
         /**
@@ -165,18 +167,11 @@ public final class Font {
          */
         public Builder(@NonNull AssetManager am, @NonNull String path, boolean isAsset,
                 int cookie) {
-            final long nativeAsset = nGetNativeAsset(am, path, isAsset, cookie);
-            if (nativeAsset == 0) {
-                mException = new FileNotFoundException("Unable to open " + path);
-                return;
+            try {
+                mBuffer = createBuffer(am, path, isAsset, cookie);
+            } catch (IOException e) {
+                mException = e;
             }
-            final ByteBuffer b = nGetAssetBuffer(nativeAsset);
-            sAssetByteBufferRegistry.registerNativeAllocation(b, nativeAsset);
-            if (b == null) {
-                mException = new FileNotFoundException(path + " not found");
-                return;
-            }
-            mBuffer = b;
         }
 
         /**
@@ -199,19 +194,45 @@ public final class Font {
                 mException = new FileNotFoundException(resId + " must be font file.");
                 return;
             }
-            final long nativeAsset = nGetNativeAsset(res.getAssets(), str, false /* is asset */,
-                    value.assetCookie);
-            if (nativeAsset == 0) {
-                mException = new FileNotFoundException("Unable to open " + str);
-                return;
+
+            try {
+                mBuffer = createBuffer(res.getAssets(), str, false, value.assetCookie);
+            } catch (IOException e) {
+                mException = e;
             }
-            final ByteBuffer b = nGetAssetBuffer(nativeAsset);
-            sAssetByteBufferRegistry.registerNativeAllocation(b, nativeAsset);
-            if (b == null) {
-                mException = new FileNotFoundException(str + " not found");
-                return;
+        }
+
+        /**
+         * Creates a buffer containing font data using the assetManager and other
+         * provided inputs.
+         *
+         * @param am the application's asset manager
+         * @param path the file name of the font data in the asset directory
+         * @param isAsset true if the undelying data is in asset
+         * @param cookie set asset cookie
+         * @return buffer containing the contents of the file
+         *
+         * @hide
+         */
+        public static ByteBuffer createBuffer(@NonNull AssetManager am, @NonNull String path,
+                                              boolean isAsset, int cookie) throws IOException {
+            Preconditions.checkNotNull(am, "assetManager can not be null");
+            Preconditions.checkNotNull(path, "path can not be null");
+
+            try (InputStream assetStream = isAsset ? am.open(path, AssetManager.ACCESS_BUFFER)
+                    : am.openNonAsset(cookie, path, AssetManager.ACCESS_BUFFER)) {
+
+                int capacity = assetStream.available();
+                ByteBuffer buffer = ByteBuffer.allocateDirect(capacity);
+                buffer.order(ByteOrder.nativeOrder());
+                assetStream.read(buffer.array(), buffer.arrayOffset(), assetStream.available());
+
+                if (assetStream.read() != -1) {
+                    throw new IOException("Unable to access full contents of " + path);
+                }
+
+                return buffer;
             }
-            mBuffer = b;
         }
 
         /**
@@ -394,15 +415,6 @@ public final class Font {
             sFontRegistry.registerNativeAllocation(font, ptr);
             return font;
         }
-
-        /**
-         * Native methods for accessing underlying buffer in Asset
-         */
-        private static native long nGetNativeAsset(
-                @NonNull AssetManager am, @NonNull String path, boolean isAsset, int cookie);
-        private static native ByteBuffer nGetAssetBuffer(long nativeAsset);
-        @CriticalNative
-        private static native long nGetReleaseNativeAssetFunc();
 
         /**
          * Native methods for creating Font

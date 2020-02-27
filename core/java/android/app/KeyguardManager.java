@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.PasswordMetrics;
 import android.app.trust.ITrustManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -676,8 +677,9 @@ public class KeyguardManager {
     /**
     * Determine if a given password is valid based off its lock type and expected complexity level.
     *
-    * @param isPin - whether this is a PIN-type password (only digits)
-    * @param password - password to validate
+    * @param lockType - type of lock as specified in {@link LockTypes}
+    * @param password - password to validate; this has the same encoding
+    *        as the output of String#getBytes
     * @param complexity - complexity level imposed by the requester
     *        as defined in {@code DevicePolicyManager.PasswordComplexity}
     * @return true if the password is valid, false otherwise
@@ -685,8 +687,8 @@ public class KeyguardManager {
     */
     @RequiresPermission(Manifest.permission.SET_INITIAL_LOCK)
     @SystemApi
-    public boolean validateLockPasswordComplexity(
-            boolean isPin, @NonNull byte[] password, int complexity) {
+    public boolean isValidLockPasswordComplexity(@LockTypes int lockType, @NonNull byte[] password,
+            @PasswordComplexity int complexity) {
         if (!checkInitialLockMethodUsage()) {
             return false;
         }
@@ -696,9 +698,11 @@ public class KeyguardManager {
                 (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
         PasswordMetrics adminMetrics =
                 devicePolicyManager.getPasswordMinimumMetrics(mContext.getUserId());
+        // Check if the password fits the mold of a pin or pattern.
+        boolean isPinOrPattern = lockType != LockTypes.PASSWORD;
 
         return PasswordMetrics.validatePassword(
-                adminMetrics, complexity, isPin, password).size() == 0;
+                adminMetrics, complexity, isPinOrPattern, password).size() == 0;
     }
 
     /**
@@ -712,7 +716,7 @@ public class KeyguardManager {
     */
     @RequiresPermission(Manifest.permission.SET_INITIAL_LOCK)
     @SystemApi
-    public int getMinLockLength(boolean isPin, int complexity) {
+    public int getMinLockLength(boolean isPin, @PasswordComplexity int complexity) {
         if (!checkInitialLockMethodUsage()) {
             return -1;
         }
@@ -731,7 +735,8 @@ public class KeyguardManager {
     * Set the lockscreen password after validating against its expected complexity level.
     *
     * @param lockType - type of lock as specified in {@link LockTypes}
-    * @param password - password to validate
+    * @param password - password to validate; this has the same encoding
+    *        as the output of String#getBytes
     * @param complexity - complexity level imposed by the requester
     *        as defined in {@code DevicePolicyManager.PasswordComplexity}
     * @return true if the lock is successfully set, false otherwise
@@ -739,7 +744,8 @@ public class KeyguardManager {
     */
     @RequiresPermission(Manifest.permission.SET_INITIAL_LOCK)
     @SystemApi
-    public boolean setLock(@LockTypes int lockType, @NonNull byte[] password, int complexity) {
+    public boolean setLock(@LockTypes int lockType, @NonNull byte[] password,
+            @PasswordComplexity int complexity) {
         if (!checkInitialLockMethodUsage()) {
             return false;
         }
@@ -750,7 +756,7 @@ public class KeyguardManager {
             Log.e(TAG, "Password already set, rejecting call to setLock");
             return false;
         }
-        if (!validateLockPasswordComplexity(lockType != LockTypes.PASSWORD, password, complexity)) {
+        if (!isValidLockPasswordComplexity(lockType, password, complexity)) {
             Log.e(TAG, "Password is not valid, rejecting call to setLock");
             return false;
         }

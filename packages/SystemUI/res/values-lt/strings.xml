@@ -71,7 +71,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Keisti mast., kad atit. ekr."</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Ištempti, kad atit. ekr."</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Ekrano kopija"</string>
-    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"Vaizdas įterptas"</string>
+    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"išsiuntė vaizdą"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Išsaugoma ekrano kopija..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Išsaugoma ekrano kopija..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Ekrano kopija išsaugota"</string>
@@ -80,11 +80,19 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Pabandykite padaryti ekrano kopiją dar kartą"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Negalima išsaugoti ekrano kopijos dėl ribotos saugyklos vietos"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Jūsų organizacijoje arba naudojant šią programą neleidžiama daryti ekrano kopijų"</string>
-    <string name="screenrecord_name" msgid="6286499308042305686">"Ekrano įrašymas"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Ekrano garso įrašytuvas"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Šiuo metu rodomas ekrano įrašymo sesijos pranešimas"</string>
-    <string name="screenrecord_start_label" msgid="1539048263178882562">"Pradėti įrašymą"</string>
-    <string name="screenrecord_mic_label" msgid="6134198080740031632">"Įrašyti balsą už kadro"</string>
-    <string name="screenrecord_taps_label" msgid="2518244240225925076">"Rodyti palietimus"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Pradėti įrašymą?"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Įrašant „Android“ sistema gali fiksuoti bet kokią neskelbtiną informaciją, rodomą ekrane ar leidžiamą įrenginyje. Tai apima slaptažodžius, išsamią mokėjimo informaciją, nuotraukas, pranešimus ir garso įrašus."</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Įrašyti garsą"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Įrenginio garsas"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Garsas iš jūsų įrenginio, pvz., muzika, skambučiai ir skambėjimo tonai"</string>
+    <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofonas"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Įrenginio garsas ir mikrofonas"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Pradėti"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Įrašomas ekrano vaizdas"</string>
+    <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Įrašomas ekrano vaizdas ir garsas"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Rodyti lietimus ekrane"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Sustabdykite palietę"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Sustabdyti"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Pristabdyti"</string>
@@ -97,6 +105,7 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"Ekrano įrašas ištrintas"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Ištrinant ekrano įrašą įvyko klaida"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Nepavyko gauti leidimų"</string>
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"Pradedant ekrano vaizdo įrašymą iškilo problema"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"USB failo perdavimo parinktys"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"Įmontuoti kaip medijos leistuvę (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Įmontuoti kaip fotoaparatą (PTP)"</string>
@@ -483,6 +492,7 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Daugiau neberodyti"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Viską išvalyti"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Tvarkyti"</string>
+    <string name="manage_notifications_history_text" msgid="57055985396576230">"Istorija"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Tylieji pranešimai"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Pokalbiai"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Išvalyti visus tylius pranešimus"</string>
@@ -682,6 +692,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Padeda atkreipti dėmesį be garso arba vibravimo."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Atkreipia dėmesį garsu arba vibravimu."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Naudojant slankųjį spartųjį klavišą lengviau sutelkti dėmesį į šį turinį."</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nėra naujausių debesėlių"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="3106801169793396894">"Neseniai atmesti debesėliai bus rodomi čia, kad galėtumėte lengvai vėl juos pasiekti."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šių pranešimų keisti negalima."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Šios grupės pranešimai čia nekonfigūruojami"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Per tarpinį serverį gautas pranešimas"</string>
@@ -704,17 +716,18 @@
     <string name="notification_done" msgid="6215117625922713976">"Atlikta"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Anuliuoti"</string>
     <string name="demote" msgid="6225813324237153980">"Žymėti šį pranešimą kaip ne pokalbį"</string>
-    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Mėgstamiausi"</string>
-    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Pašalinti iš mėgstamiausių"</string>
-    <string name="notification_conversation_mute" msgid="477431709687199671">"Nutildyti"</string>
-    <string name="notification_conversation_unmute" msgid="410885000669775294">"Rodyti"</string>
-    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Rodyti kaip debesėlį"</string>
-    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Išjungti debesėlius"</string>
+    <string name="notification_conversation_favorite" msgid="1905240206975921907">"Svarbus pokalbis"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Nesvarbus pokalbis"</string>
+    <string name="notification_conversation_mute" msgid="268951550222925548">"Nutildyta"</string>
+    <string name="notification_conversation_unmute" msgid="2692255619510896710">"Įspėti"</string>
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"Rodyti debesėlį"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Pašalinti debesėlius"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Pridėti prie pagrindinio ekrano"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"pranešimų valdikliai"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"pranešimų snaudimo parinktys"</string>
-    <string name="notification_menu_snooze_action" msgid="8411152711279433989">"Snausti"</string>
+    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Priminti"</string>
+    <string name="notification_menu_settings_action" msgid="7085494017202764285">"Nustatymai"</string>
     <string name="snooze_undo" msgid="60890935148417175">"ANULIUOTI"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Nustatyta snausti <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
@@ -790,6 +803,7 @@
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Duomenų taupymo priemonė išjungta"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Įjungta"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Išjungta"</string>
+    <string name="tile_unavailable" msgid="3095879009136616920">"Nepasiekiama"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Naršymo juosta"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Išdėstymas"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Papildomo mygtuko kairėje tipas"</string>
@@ -975,4 +989,17 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Didinimo langas"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Didinimo lango valdikliai"</string>
     <string name="quick_controls_title" msgid="525285759614231333">"Spartieji valdikliai"</string>
+    <string name="controls_providers_title" msgid="8844124515157926071">"Valdiklių pridėjimas"</string>
+    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Pasirinkite programą, iš kurios norėsite pridėti valdiklių"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> dabartinis mėgstamiausias elementas.</item>
+      <item quantity="few"><xliff:g id="NUMBER_1">%s</xliff:g> dabartiniai mėgstamiausi elementai.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> dabartinio mėgstamiausio elemento.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> dabartinių mėgstamiausių elementų.</item>
+    </plurals>
+    <string name="controls_favorite_default_title" msgid="967742178688938137">"Valdikliai"</string>
+    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Pasirinkite sparčiosios prieigos valdiklius"</string>
+    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"Mėgstamiausi"</string>
+    <string name="controls_favorite_header_all" msgid="7507855973418969992">"Visi"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nepavyko įkelti visų valdiklių sąrašo."</string>
 </resources>

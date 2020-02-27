@@ -56,6 +56,12 @@ import java.util.List;
  * instantiate this class directly; instead, retrieve it through
  * {@link android.content.Context#getSystemService
  * Context.getSystemService(Context.JOB_SCHEDULER_SERVICE)}.
+ *
+ * <p class="caution"><strong>Note:</strong> Beginning with API 30
+ * ({@link android.os.Build.VERSION_CODES#R}), JobScheduler will throttle runaway applications.
+ * Calling {@link #schedule(JobInfo)} and other such methods with very high frequency is indicative
+ * of an app bug and so, to make sure the system doesn't get overwhelmed, JobScheduler will begin
+ * to throttle apps that show buggy behavior, regardless of target SDK version.
  */
 @SystemService(Context.JOB_SCHEDULER_SERVICE)
 public abstract class JobScheduler {

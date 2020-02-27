@@ -18,7 +18,6 @@ package com.android.systemui.controls.controller
 
 import android.os.RemoteException
 import android.service.controls.IControlsActionCallback
-import android.service.controls.IControlsLoadCallback
 import android.service.controls.IControlsProvider
 import android.service.controls.IControlsSubscriber
 import android.service.controls.IControlsSubscription
@@ -56,9 +55,6 @@ class ServiceWrapperTest : SysuiTestCase() {
     private lateinit var subscriber: IControlsSubscriber
 
     @Mock
-    private lateinit var loadCallback: IControlsLoadCallback
-
-    @Mock
     private lateinit var actionCallback: IControlsActionCallback
 
     @Captor
@@ -81,16 +77,16 @@ class ServiceWrapperTest : SysuiTestCase() {
 
     @Test
     fun testLoad_happyPath() {
-        val result = wrapper.load(loadCallback)
+        val result = wrapper.load(subscriber)
 
         assertTrue(result)
-        verify(service).load(loadCallback)
+        verify(service).load(subscriber)
     }
 
     @Test
     fun testLoad_error() {
         `when`(service.load(any())).thenThrow(exception)
-        val result = wrapper.load(loadCallback)
+        val result = wrapper.load(subscriber)
 
         assertFalse(result)
     }

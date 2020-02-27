@@ -15,6 +15,7 @@
  */
 package android.os.image;
 
+import android.gsi.AvbPublicKey;
 import android.gsi.GsiProgress;
 
 /** {@hide} */
@@ -108,4 +109,13 @@ interface IDynamicSystemService
      * @return              true on success, false otherwise.
      */
     boolean submitFromAshmem(long bytes);
+
+    /**
+     * Retrieve AVB public key from installing partition.
+     *
+     * @param dst           Output the AVB public key.
+     * @return              true on success, false if partition doesn't have a
+     *                      valid VBMeta block to retrieve the AVB key from.
+     */
+    boolean getAvbPublicKey(out AvbPublicKey dst);
 }

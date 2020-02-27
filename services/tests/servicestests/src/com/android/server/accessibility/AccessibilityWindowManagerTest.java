@@ -88,6 +88,10 @@ public class AccessibilityWindowManagerTest {
     private static final int DEFAULT_FOCUSED_INDEX = 1;
     private static final int SCREEN_WIDTH = 1080;
     private static final int SCREEN_HEIGHT = 1920;
+    private static final int INVALID_ID = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+    private static final int HOST_WINDOW_ID = 10;
+    private static final int EMBEDDED_WINDOW_ID = 11;
+    private static final int OTHER_WINDOW_ID = 12;
 
     private AccessibilityWindowManager mA11yWindowManager;
     // Window manager will support multiple focused window if config_perDisplayFocusEnabled is true,
@@ -117,6 +121,10 @@ public class AccessibilityWindowManagerTest {
     @Mock private AccessibilitySecurityPolicy mMockA11ySecurityPolicy;
     @Mock private AccessibilitySecurityPolicy.AccessibilityUserManager mMockA11yUserManager;
 
+    @Mock private IBinder mMockHostToken;
+    @Mock private IBinder mMockEmbeddedToken;
+    @Mock private IBinder mMockInvalidToken;
+
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
@@ -140,6 +148,8 @@ public class AccessibilityWindowManagerTest {
         // AccessibilityEventSender is invoked during onWindowsForAccessibilityChanged.
         // Resets it for mockito verify of further test case.
         Mockito.reset(mMockA11yEventSender);
+
+        registerLeashedTokenAndWindowId();
     }
 
     @After
@@ -404,6 +414,51 @@ public class AccessibilityWindowManagerTest {
             assertEquals(mA11yWindowManager.findWindowIdLocked(
                     USER_SYSTEM_ID, windowToken), windowId);
         }
+    }
+
+    @Test
+    public void resolveParentWindowId_windowIsNotEmbedded_shouldReturnGivenId()
+            throws RemoteException {
+        final int windowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY, false,
+                Mockito.mock(IBinder.class), USER_SYSTEM_ID);
+        assertEquals(windowId, mA11yWindowManager.resolveParentWindowIdLocked(windowId));
+    }
+
+    @Test
+    public void resolveParentWindowId_windowIsNotRegistered_shouldReturnGivenId() {
+        final int windowId = -1;
+        assertEquals(windowId, mA11yWindowManager.resolveParentWindowIdLocked(windowId));
+    }
+
+    @Test
+    public void resolveParentWindowId_windowIsAssociated_shouldReturnParentWindowId()
+            throws RemoteException {
+        final IBinder mockHostToken = Mockito.mock(IBinder.class);
+        final IBinder mockEmbeddedToken = Mockito.mock(IBinder.class);
+        final int hostWindowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
+                false, mockHostToken, USER_SYSTEM_ID);
+        final int embeddedWindowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
+                false, mockEmbeddedToken, USER_SYSTEM_ID);
+        mA11yWindowManager.associateEmbeddedHierarchyLocked(mockHostToken, mockEmbeddedToken);
+        final int resolvedWindowId = mA11yWindowManager.resolveParentWindowIdLocked(
+                embeddedWindowId);
+        assertEquals(hostWindowId, resolvedWindowId);
+    }
+
+    @Test
+    public void resolveParentWindowId_windowIsDisassociated_shouldReturnGivenId()
+            throws RemoteException {
+        final IBinder mockHostToken = Mockito.mock(IBinder.class);
+        final IBinder mockEmbeddedToken = Mockito.mock(IBinder.class);
+        final int hostWindowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
+                false, mockHostToken, USER_SYSTEM_ID);
+        final int embeddedWindowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
+                false, mockEmbeddedToken, USER_SYSTEM_ID);
+        mA11yWindowManager.associateEmbeddedHierarchyLocked(mockHostToken, mockEmbeddedToken);
+        mA11yWindowManager.disassociateEmbeddedHierarchyLocked(mockEmbeddedToken);
+        final int resolvedWindowId = mA11yWindowManager.resolveParentWindowIdLocked(
+                embeddedWindowId);
+        assertEquals(embeddedWindowId, resolvedWindowId);
     }
 
     @Test
@@ -726,6 +781,64 @@ public class AccessibilityWindowManagerTest {
                 token.asBinder(), -1);
     }
 
+    @Test
+    public void getHostTokenLocked_hierarchiesAreAssociated_shouldReturnHostToken() {
+        mA11yWindowManager.associateLocked(mMockEmbeddedToken, mMockHostToken);
+        final IBinder hostToken = mA11yWindowManager.getHostTokenLocked(mMockEmbeddedToken);
+        assertEquals(hostToken, mMockHostToken);
+    }
+
+    @Test
+    public void getHostTokenLocked_hierarchiesAreNotAssociated_shouldReturnNull() {
+        final IBinder hostToken = mA11yWindowManager.getHostTokenLocked(mMockEmbeddedToken);
+        assertNull(hostToken);
+    }
+
+    @Test
+    public void getHostTokenLocked_embeddedHierarchiesAreDisassociated_shouldReturnNull() {
+        mA11yWindowManager.associateLocked(mMockEmbeddedToken, mMockHostToken);
+        mA11yWindowManager.disassociateLocked(mMockEmbeddedToken);
+        final IBinder hostToken = mA11yWindowManager.getHostTokenLocked(mMockEmbeddedToken);
+        assertNull(hostToken);
+    }
+
+    @Test
+    public void getHostTokenLocked_hostHierarchiesAreDisassociated_shouldReturnNull() {
+        mA11yWindowManager.associateLocked(mMockEmbeddedToken, mMockHostToken);
+        mA11yWindowManager.disassociateLocked(mMockHostToken);
+        final IBinder hostToken = mA11yWindowManager.getHostTokenLocked(mMockHostToken);
+        assertNull(hostToken);
+    }
+
+    @Test
+    public void getWindowIdLocked_windowIsRegistered_shouldReturnWindowId() {
+        final int windowId = mA11yWindowManager.getWindowIdLocked(mMockHostToken);
+        assertEquals(windowId, HOST_WINDOW_ID);
+    }
+
+    @Test
+    public void getWindowIdLocked_windowIsNotRegistered_shouldReturnInvalidWindowId() {
+        final int windowId = mA11yWindowManager.getWindowIdLocked(mMockInvalidToken);
+        assertEquals(windowId, INVALID_ID);
+    }
+
+    @Test
+    public void getTokenLocked_windowIsRegistered_shouldReturnToken() {
+        final IBinder token = mA11yWindowManager.getTokenLocked(HOST_WINDOW_ID);
+        assertEquals(token, mMockHostToken);
+    }
+
+    @Test
+    public void getTokenLocked_windowIsNotRegistered_shouldReturnNull() {
+        final IBinder token = mA11yWindowManager.getTokenLocked(OTHER_WINDOW_ID);
+        assertNull(token);
+    }
+
+    private void registerLeashedTokenAndWindowId() {
+        mA11yWindowManager.registerIdLocked(mMockHostToken, HOST_WINDOW_ID);
+        mA11yWindowManager.registerIdLocked(mMockEmbeddedToken, EMBEDDED_WINDOW_ID);
+    }
+
     private void startTrackingPerDisplay(int displayId) throws RemoteException {
         ArrayList<WindowInfo> windowInfosForDisplay = new ArrayList<>();
         // Adds RemoteAccessibilityConnection into AccessibilityWindowManager, and copy
@@ -784,6 +897,7 @@ public class AccessibilityWindowManagerTest {
                 IAccessibilityInteractionConnection.class);
         final IBinder mockConnectionBinder = Mockito.mock(IBinder.class);
         final IBinder mockWindowBinder = Mockito.mock(IBinder.class);
+        final IBinder mockLeashToken = Mockito.mock(IBinder.class);
         when(mockA11yConnection.asBinder()).thenReturn(mockConnectionBinder);
         when(mockWindowToken.asBinder()).thenReturn(mockWindowBinder);
         when(mMockA11ySecurityPolicy.isCallerInteractingAcrossUsers(userId))
@@ -792,9 +906,29 @@ public class AccessibilityWindowManagerTest {
                 .thenReturn(displayId);
 
         int windowId = mA11yWindowManager.addAccessibilityInteractionConnection(
-                mockWindowToken, mockA11yConnection, PACKAGE_NAME, userId);
+                mockWindowToken, mockLeashToken, mockA11yConnection, PACKAGE_NAME, userId);
         mA11yWindowTokens.put(windowId, mockWindowToken);
         return mockWindowToken;
+    }
+
+    private int addAccessibilityInteractionConnection(int displayId, boolean bGlobal,
+            IBinder leashToken, int userId) throws RemoteException {
+        final IWindow mockWindowToken = Mockito.mock(IWindow.class);
+        final IAccessibilityInteractionConnection mockA11yConnection = Mockito.mock(
+                IAccessibilityInteractionConnection.class);
+        final IBinder mockConnectionBinder = Mockito.mock(IBinder.class);
+        final IBinder mockWindowBinder = Mockito.mock(IBinder.class);
+        when(mockA11yConnection.asBinder()).thenReturn(mockConnectionBinder);
+        when(mockWindowToken.asBinder()).thenReturn(mockWindowBinder);
+        when(mMockA11ySecurityPolicy.isCallerInteractingAcrossUsers(userId))
+                .thenReturn(bGlobal);
+        when(mMockWindowManagerInternal.getDisplayIdForWindow(mockWindowToken.asBinder()))
+                .thenReturn(displayId);
+
+        int windowId = mA11yWindowManager.addAccessibilityInteractionConnection(
+                mockWindowToken, leashToken, mockA11yConnection, PACKAGE_NAME, userId);
+        mA11yWindowTokens.put(windowId, mockWindowToken);
+        return windowId;
     }
 
     private void addWindowInfo(ArrayList<WindowInfo> windowInfos, IWindow windowToken, int layer) {

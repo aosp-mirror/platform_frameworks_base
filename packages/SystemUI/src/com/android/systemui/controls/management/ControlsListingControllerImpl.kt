@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.management
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ServiceInfo
@@ -72,7 +73,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
 
     private var availableServices = emptyList<ServiceInfo>()
 
-    override var currentUserId = context.userId
+    override var currentUserId = ActivityManager.getCurrentUser()
         private set
 
     private val serviceListingCallback = ServiceListing.Callback {

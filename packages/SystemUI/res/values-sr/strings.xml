@@ -71,7 +71,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Зумирај на целом екрану"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Развуци на цео екран"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Снимак екрана"</string>
-    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"Слика је уметнута"</string>
+    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"је послао/ла слику"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Чување снимка екрана..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Чување снимка екрана..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Снимак екрана је сачуван"</string>
@@ -80,11 +80,19 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Пробајте да поново направите снимак екрана"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Чување снимка екрана није успело због ограниченог меморијског простора"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Апликација или организација не дозвољавају прављење снимака екрана"</string>
-    <string name="screenrecord_name" msgid="6286499308042305686">"Снимање екрана"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Снимач екрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Обавештење о сесији снимања екрана је активно"</string>
-    <string name="screenrecord_start_label" msgid="1539048263178882562">"Започни снимање"</string>
-    <string name="screenrecord_mic_label" msgid="6134198080740031632">"Сними пренос гласа"</string>
-    <string name="screenrecord_taps_label" msgid="2518244240225925076">"Приказуј додире"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Желите да започнете снимање?"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Током снимања Android систем може да сними осетљиве информације које су видљиве на екрану или које се пуштају на уређају. То обухвата лозинке, информације о плаћању, слике, поруке и звук."</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Сними звук"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Звук уређаја"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук са уређаја, на пример, музика, позиви и мелодије звона"</string>
+    <string name="screenrecord_mic_label" msgid="2111264835791332350">"Микрофон"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Звук уређаја и микрофон"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Покрени"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Снима се екран"</string>
+    <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Снимају се екран и звук"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Приказуј додире на екрану"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Додирните да бисте зауставили"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Заустави"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Паузирај"</string>
@@ -97,6 +105,7 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"Снимак екрана је избрисан"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Дошло је до проблема при брисању снимка екрана"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Преузимање дозвола није успело"</string>
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"Грешка при покретању снимања екрана"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Опције USB преноса датотека"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"Прикључи као медија плејер (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Прикључи као камеру (PTP)"</string>
@@ -480,6 +489,7 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Не приказуј поново"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Обриши све"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управљајте"</string>
+    <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Нечујна обавештења"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Конверзације"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Обришите сва нечујна обавештења"</string>
@@ -679,6 +689,10 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Помаже вам да се концентришете без звука или вибрације."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Привлачи вам пажњу помоћу звука или вибрације."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Привлачи вам пажњу помоћу плутајуће пречице до овог садржаја."</string>
+    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
+    <skip />
+    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ова обавештења не могу да се мењају."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ова група обавештења не може да се конфигурише овде"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Обавештење преко проксија"</string>
@@ -701,17 +715,18 @@
     <string name="notification_done" msgid="6215117625922713976">"Готово"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Опозови"</string>
     <string name="demote" msgid="6225813324237153980">"Означи да ово обавештење није конверзација"</string>
-    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Означи као омиљено"</string>
-    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Уклони из омиљених"</string>
-    <string name="notification_conversation_mute" msgid="477431709687199671">"Искључи звук"</string>
-    <string name="notification_conversation_unmute" msgid="410885000669775294">"Укључи звук"</string>
-    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Прикажи као облачић"</string>
-    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Искључи облачиће"</string>
+    <string name="notification_conversation_favorite" msgid="1905240206975921907">"Важна конверзација"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Није важна конверзација"</string>
+    <string name="notification_conversation_mute" msgid="268951550222925548">"Звук је искључен"</string>
+    <string name="notification_conversation_unmute" msgid="2692255619510896710">"Упозоравај"</string>
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"Прикажи облачић"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Уклони облачиће"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Додај на почетни екран"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"контроле обавештења"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"опције за одлагање обавештења"</string>
-    <string name="notification_menu_snooze_action" msgid="8411152711279433989">"Одложи"</string>
+    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Подсети ме"</string>
+    <string name="notification_menu_settings_action" msgid="7085494017202764285">"Подешавања"</string>
     <string name="snooze_undo" msgid="60890935148417175">"ОПОЗОВИ"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Одложено је за <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
@@ -785,6 +800,7 @@
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Уштеда података је искључена"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Укључено"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Искључено"</string>
+    <string name="tile_unavailable" msgid="3095879009136616920">"Недоступно"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Трака за навигацију"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Распоред"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Додатни тип левог дугмета"</string>
@@ -970,4 +986,19 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозор за увећање"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Контроле прозора за увећање"</string>
     <string name="quick_controls_title" msgid="525285759614231333">"Брзе контроле"</string>
+    <string name="controls_providers_title" msgid="8844124515157926071">"Додајте контроле"</string>
+    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Одаберите апликацију из које ћете додавати контроле"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> актуелни фаворит.</item>
+      <item quantity="few"><xliff:g id="NUMBER_1">%s</xliff:g> актуелна фаворита.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> актуелних фаворита.</item>
+    </plurals>
+    <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроле"</string>
+    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Одаберите контроле за брз приступ"</string>
+    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
+    <skip />
+    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <skip />
 </resources>

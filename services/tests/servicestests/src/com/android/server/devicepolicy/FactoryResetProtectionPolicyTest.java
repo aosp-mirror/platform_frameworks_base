@@ -62,7 +62,7 @@ public class FactoryResetProtectionPolicyTest {
 
         FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
                 .setFactoryResetProtectionAccounts(accounts)
-                .setFactoryResetProtectionDisabled(true)
+                .setFactoryResetProtectionEnabled(false)
                 .build();
 
         testParcelAndUnparcel(policy);
@@ -77,7 +77,7 @@ public class FactoryResetProtectionPolicyTest {
 
         FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
                 .setFactoryResetProtectionAccounts(accounts)
-                .setFactoryResetProtectionDisabled(true)
+                .setFactoryResetProtectionEnabled(false)
                 .build();
 
         testParcelAndUnparcel(policy);
@@ -133,8 +133,8 @@ public class FactoryResetProtectionPolicyTest {
 
     private void assertPoliciesAreEqual(FactoryResetProtectionPolicy expectedPolicy,
             FactoryResetProtectionPolicy actualPolicy) {
-        assertEquals(expectedPolicy.isFactoryResetProtectionDisabled(),
-                actualPolicy.isFactoryResetProtectionDisabled());
+        assertEquals(expectedPolicy.isFactoryResetProtectionEnabled(),
+                actualPolicy.isFactoryResetProtectionEnabled());
         assertAccountsAreEqual(expectedPolicy.getFactoryResetProtectionAccounts(),
                 actualPolicy.getFactoryResetProtectionAccounts());
     }

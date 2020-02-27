@@ -44,7 +44,7 @@ class DirectoryAssetsProviderTest : ResourceLoaderTestBase() {
         testDir = context.filesDir.resolve("DirectoryAssetsProvider_${testName.methodName}")
         assetsProvider = DirectoryAssetsProvider(testDir)
         loader = ResourcesLoader()
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
     }
 
     @After

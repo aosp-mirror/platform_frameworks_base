@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
@@ -43,6 +44,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.server.location.UserInfoHelper.UserListener;
 
 import org.junit.After;
 import org.junit.Before;
@@ -117,62 +119,88 @@ public class UserInfoHelperTest {
         }
     }
 
+    private void startUser(int userId) {
+        Intent intent = new Intent(Intent.ACTION_USER_STARTED).putExtra(Intent.EXTRA_USER_HANDLE,
+                userId);
+        for (BroadcastReceiver broadcastReceiver : mBroadcastReceivers) {
+            broadcastReceiver.onReceive(mContext, intent);
+        }
+    }
+
+    private void stopUser(int userId) {
+        Intent intent = new Intent(Intent.ACTION_USER_STOPPED).putExtra(Intent.EXTRA_USER_HANDLE,
+                userId);
+        for (BroadcastReceiver broadcastReceiver : mBroadcastReceivers) {
+            broadcastReceiver.onReceive(mContext, intent);
+        }
+    }
+
     @Test
-    public void testListeners() {
-        UserInfoHelper.UserChangedListener listener = mock(
-                UserInfoHelper.UserChangedListener.class);
+    public void testListener_SwitchUser() {
+        UserListener listener = mock(UserListener.class);
         mHelper.addListener(listener);
 
         switchUser(USER1_ID);
         verify(listener, never()).onUserChanged(anyInt(), anyInt());
 
         switchUser(USER2_ID);
-        verify(listener).onUserChanged(USER1_ID, USER2_ID);
+        verify(listener, times(1)).onUserChanged(USER1_ID, UserListener.USER_SWITCHED);
+        verify(listener, times(1)).onUserChanged(USER2_ID, UserListener.USER_SWITCHED);
 
         switchUser(USER1_ID);
-        verify(listener).onUserChanged(USER2_ID, USER1_ID);
+        verify(listener, times(2)).onUserChanged(USER1_ID, UserListener.USER_SWITCHED);
+        verify(listener, times(2)).onUserChanged(USER2_ID, UserListener.USER_SWITCHED);
     }
 
     @Test
-    public void testCurrentUser() {
-        assertThat(mHelper.getCurrentUserId()).isEqualTo(USER1_ID);
+    public void testListener_StartUser() {
+        UserListener listener = mock(UserListener.class);
+        mHelper.addListener(listener);
+
+        startUser(USER1_ID);
+        verify(listener).onUserChanged(USER1_ID, UserListener.USER_STARTED);
+
+        startUser(USER2_ID);
+        verify(listener).onUserChanged(USER2_ID, UserListener.USER_STARTED);
+    }
+
+    @Test
+    public void testListener_StopUser() {
+        UserListener listener = mock(UserListener.class);
+        mHelper.addListener(listener);
+
+        stopUser(USER1_ID);
+        verify(listener).onUserChanged(USER1_ID, UserListener.USER_STOPPED);
+
+        stopUser(USER2_ID);
+        verify(listener).onUserChanged(USER2_ID, UserListener.USER_STOPPED);
+    }
+
+    @Test
+    public void testCurrentUserIds() {
+        assertThat(mHelper.getCurrentUserIds()).isEqualTo(USER1_PROFILES);
 
         switchUser(USER2_ID);
 
-        assertThat(mHelper.getCurrentUserId()).isEqualTo(USER2_ID);
+        assertThat(mHelper.getCurrentUserIds()).isEqualTo(USER2_PROFILES);
 
         switchUser(USER1_ID);
 
-        assertThat(mHelper.getCurrentUserId()).isEqualTo(USER1_ID);
+        assertThat(mHelper.getCurrentUserIds()).isEqualTo(USER1_PROFILES);
     }
 
     @Test
-    public void testIsCurrentUserOrProfile() {
-        assertThat(mHelper.isCurrentUserOrProfile(USER1_ID)).isTrue();
-        assertThat(mHelper.isCurrentUserOrProfile(USER1_MANAGED_ID)).isTrue();
-        assertThat(mHelper.isCurrentUserOrProfile(USER2_ID)).isFalse();
-        assertThat(mHelper.isCurrentUserOrProfile(USER2_MANAGED_ID)).isFalse();
+    public void testIsCurrentUserId() {
+        assertThat(mHelper.isCurrentUserId(USER1_ID)).isTrue();
+        assertThat(mHelper.isCurrentUserId(USER1_MANAGED_ID)).isTrue();
+        assertThat(mHelper.isCurrentUserId(USER2_ID)).isFalse();
+        assertThat(mHelper.isCurrentUserId(USER2_MANAGED_ID)).isFalse();
 
         switchUser(USER2_ID);
 
-        assertThat(mHelper.isCurrentUserOrProfile(USER1_ID)).isFalse();
-        assertThat(mHelper.isCurrentUserOrProfile(USER2_ID)).isTrue();
-        assertThat(mHelper.isCurrentUserOrProfile(USER1_MANAGED_ID)).isFalse();
-        assertThat(mHelper.isCurrentUserOrProfile(USER2_MANAGED_ID)).isTrue();
-    }
-
-    @Test
-    public void testGetParentUserId() {
-        assertThat(mHelper.getParentUserId(USER1_ID)).isEqualTo(USER1_ID);
-        assertThat(mHelper.getParentUserId(USER1_MANAGED_ID)).isEqualTo(USER1_ID);
-        assertThat(mHelper.getParentUserId(USER2_ID)).isEqualTo(USER2_ID);
-        assertThat(mHelper.getParentUserId(USER2_MANAGED_ID)).isEqualTo(USER2_ID);
-
-        switchUser(USER2_ID);
-
-        assertThat(mHelper.getParentUserId(USER1_ID)).isEqualTo(USER1_ID);
-        assertThat(mHelper.getParentUserId(USER2_ID)).isEqualTo(USER2_ID);
-        assertThat(mHelper.getParentUserId(USER1_MANAGED_ID)).isEqualTo(USER1_ID);
-        assertThat(mHelper.getParentUserId(USER2_MANAGED_ID)).isEqualTo(USER2_ID);
+        assertThat(mHelper.isCurrentUserId(USER1_ID)).isFalse();
+        assertThat(mHelper.isCurrentUserId(USER2_ID)).isTrue();
+        assertThat(mHelper.isCurrentUserId(USER1_MANAGED_ID)).isFalse();
+        assertThat(mHelper.isCurrentUserId(USER2_MANAGED_ID)).isTrue();
     }
 }

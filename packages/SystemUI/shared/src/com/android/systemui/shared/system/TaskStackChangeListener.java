@@ -20,8 +20,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ITaskStackListener;
 import android.content.ComponentName;
 import android.os.IBinder;
-import android.os.UserHandle;
-import android.util.Log;
 
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
@@ -40,8 +38,6 @@ public abstract class TaskStackChangeListener {
     public void onActivityPinned(String packageName, int userId, int taskId, int stackId) { }
     public void onActivityUnpinned() { }
     public void onPinnedActivityRestartAttempt(boolean clearedTask) { }
-    public void onPinnedStackAnimationStarted() { }
-    public void onPinnedStackAnimationEnded() { }
     public void onActivityForcedResizable(String packageName, int taskId, int reason) { }
     public void onActivityDismissingDockedStack() { }
     public void onActivityLaunchOnSecondaryDisplayFailed() { }
@@ -117,22 +113,4 @@ public abstract class TaskStackChangeListener {
 
     /** @see ITaskStackListener#onRecentTaskListFrozenChanged(boolean) */
     public void onRecentTaskListFrozenChanged(boolean frozen) { }
-
-    /**
-     * Checks that the current user matches the process. Since
-     * {@link android.app.ITaskStackListener} is not multi-user aware, handlers of
-     * {@link TaskStackChangeListener} should make this call to verify that we don't act on events
-     * originating from another user's interactions.
-     */
-    protected final boolean checkCurrentUserId(int currentUserId, boolean debug) {
-        int processUserId = UserHandle.myUserId();
-        if (processUserId != currentUserId) {
-            if (debug) {
-                Log.d("TaskStackChangeListener", "UID mismatch. Process is uid=" + processUserId
-                        + " and the current user is uid=" + currentUserId);
-            }
-            return false;
-        }
-        return true;
-    }
 }

@@ -28,13 +28,10 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.annotation.NonNull;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
@@ -42,13 +39,8 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.AdaptiveIconDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.InsetDrawable;
 import android.os.Bundle;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.DisplayCutout;
@@ -56,6 +48,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -63,9 +56,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.FloatPropertyCompat;
@@ -79,6 +72,10 @@ import com.android.systemui.bubbles.animation.ExpandedAnimationController;
 import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.util.DismissCircleView;
+import com.android.systemui.util.FloatingContentCoordinator;
+import com.android.systemui.util.animation.PhysicsAnimator;
+import com.android.systemui.util.magnetictarget.MagnetizedObject;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -115,7 +112,6 @@ public class BubbleStackView extends FrameLayout {
     /** How long to wait, in milliseconds, before hiding the flyout. */
     @VisibleForTesting
     static final int FLYOUT_HIDE_AFTER = 5000;
-    private BubbleController.BubbleScreenshotListener mBubbleScreenshotListener;
 
     /**
      * Interface to synchronize {@link View} state and the screen.
@@ -169,7 +165,6 @@ public class BubbleStackView extends FrameLayout {
     private ExpandedAnimationController mExpandedAnimationController;
 
     private FrameLayout mExpandedViewContainer;
-    @Nullable private BubbleMenuView mBubbleMenuView;
 
     private BubbleFlyoutView mFlyout;
     /** Runnable that fades out the flyout and then sets it to GONE. */
@@ -201,7 +196,7 @@ public class BubbleStackView extends FrameLayout {
     private int mPointerHeight;
     private int mStatusBarHeight;
     private int mImeOffset;
-    private Bubble mExpandedBubble;
+    private BubbleViewProvider mExpandedBubble;
     private boolean mIsExpanded;
 
     /** Whether the stack is currently on the left side of the screen, or animating there. */
@@ -216,8 +211,6 @@ public class BubbleStackView extends FrameLayout {
         pw.print("  gestureInProgress:    "); pw.println(mIsGestureInProgress);
         pw.print("  showingDismiss:       "); pw.println(mShowingDismiss);
         pw.print("  isExpansionAnimating: "); pw.println(mIsExpansionAnimating);
-        pw.print("  draggingInDismiss:    "); pw.println(mDraggingInDismissTarget);
-        pw.print("  animatingMagnet:      "); pw.println(mAnimatingMagnet);
         mStackAnimationController.dump(fd, pw, args);
         mExpandedAnimationController.dump(fd, pw, args);
     }
@@ -228,16 +221,6 @@ public class BubbleStackView extends FrameLayout {
     private boolean mViewUpdatedRequested = false;
     private boolean mIsExpansionAnimating = false;
     private boolean mShowingDismiss = false;
-
-    /**
-     * Whether the user is currently dragging their finger within the dismiss target. In this state
-     * the stack will be magnetized to the center of the target, so we shouldn't move it until the
-     * touch exits the dismiss target area.
-     */
-    private boolean mDraggingInDismissTarget = false;
-
-    /** Whether the stack is magneting towards the dismiss target. */
-    private boolean mAnimatingMagnet = false;
 
     /** The view to desaturate/darken when magneted to the dismiss target. */
     private View mDesaturateAndDarkenTargetView;
@@ -320,22 +303,114 @@ public class BubbleStackView extends FrameLayout {
     @NonNull
     private final SurfaceSynchronizer mSurfaceSynchronizer;
 
-    private BubbleDismissView mDismissContainer;
-    private Runnable mAfterMagnet;
+    /**
+     * The currently magnetized object, which is being dragged and will be attracted to the magnetic
+     * dismiss target.
+     *
+     * This is either the stack itself, or an individual bubble.
+     */
+    private MagnetizedObject<?> mMagnetizedObject;
+
+    /**
+     * The action to run when the magnetized object is released in the dismiss target.
+     *
+     * This will actually perform the dismissal of either the stack or an individual bubble.
+     */
+    private Runnable mReleasedInDismissTargetAction;
+
+    /**
+     * The MagneticTarget instance for our circular dismiss view. This is added to the
+     * MagnetizedObject instances for the stack and any dragged-out bubbles.
+     */
+    private MagnetizedObject.MagneticTarget mMagneticTarget;
+
+    /** Magnet listener that handles animating and dismissing individual dragged-out bubbles. */
+    private final MagnetizedObject.MagnetListener mIndividualBubbleMagnetListener =
+            new MagnetizedObject.MagnetListener() {
+                @Override
+                public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                    animateDesaturateAndDarken(
+                            mExpandedAnimationController.getDraggedOutBubble(), true);
+                }
+
+                @Override
+                public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                        float velX, float velY, boolean wasFlungOut) {
+                    animateDesaturateAndDarken(
+                            mExpandedAnimationController.getDraggedOutBubble(), false);
+
+                    if (wasFlungOut) {
+                        mExpandedAnimationController.snapBubbleBack(
+                                mExpandedAnimationController.getDraggedOutBubble(), velX, velY);
+                        hideDismissTarget();
+                    } else {
+                        mExpandedAnimationController.onUnstuckFromTarget();
+                    }
+                }
+
+                @Override
+                public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                    mExpandedAnimationController.dismissDraggedOutBubble(
+                            mExpandedAnimationController.getDraggedOutBubble(),
+                            mReleasedInDismissTargetAction);
+                    hideDismissTarget();
+                }
+            };
+
+    /** Magnet listener that handles animating and dismissing the entire stack. */
+    private final MagnetizedObject.MagnetListener mStackMagnetListener =
+            new MagnetizedObject.MagnetListener() {
+                @Override
+                public void onStuckToTarget(
+                        @NonNull MagnetizedObject.MagneticTarget target) {
+                    animateDesaturateAndDarken(mBubbleContainer, true);
+                }
+
+                @Override
+                public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                        float velX, float velY, boolean wasFlungOut) {
+                    animateDesaturateAndDarken(mBubbleContainer, false);
+
+                    if (wasFlungOut) {
+                        mStackAnimationController.flingStackThenSpringToEdge(
+                                mStackAnimationController.getStackPosition().x, velX, velY);
+                        hideDismissTarget();
+                    } else {
+                        mStackAnimationController.onUnstuckFromTarget();
+                    }
+                }
+
+                @Override
+                public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                    mStackAnimationController.implodeStack(
+                            () -> {
+                                resetDesaturationAndDarken();
+                                mReleasedInDismissTargetAction.run();
+                            }
+                    );
+
+                    hideDismissTarget();
+                }
+            };
+
+    private ViewGroup mDismissTargetContainer;
+    private PhysicsAnimator<View> mDismissTargetAnimator;
+    private PhysicsAnimator.SpringConfig mDismissTargetSpring = new PhysicsAnimator.SpringConfig(
+            SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
-    private BubbleExpandedView mOverflowExpandedView;
-    private ImageView mOverflowBtn;
+
+    private BubbleOverflow mBubbleOverflow;
 
     public BubbleStackView(Context context, BubbleData data,
-            @Nullable SurfaceSynchronizer synchronizer) {
+            @Nullable SurfaceSynchronizer synchronizer,
+            FloatingContentCoordinator floatingContentCoordinator) {
         super(context);
 
         mBubbleData = data;
         mInflater = LayoutInflater.from(context);
         mTouchHandler = new BubbleTouchHandler(this, data, context);
         setOnTouchListener(mTouchHandler);
-        mInflater = LayoutInflater.from(context);
 
         Resources res = getResources();
         mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
@@ -363,7 +438,7 @@ public class BubbleStackView extends FrameLayout {
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
 
-        mStackAnimationController = new StackAnimationController();
+        mStackAnimationController = new StackAnimationController(floatingContentCoordinator);
 
         mExpandedAnimationController = new ExpandedAnimationController(
                 mDisplaySize, mExpandedViewPadding, res.getConfiguration().orientation);
@@ -388,12 +463,30 @@ public class BubbleStackView extends FrameLayout {
                 .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
         mFlyoutTransitionSpring.addEndListener(mAfterFlyoutTransitionSpring);
 
-        mDismissContainer = new BubbleDismissView(mContext);
-        mDismissContainer.setLayoutParams(new FrameLayout.LayoutParams(
+        final View targetView = new DismissCircleView(context);
+        final FrameLayout.LayoutParams newParams =
+                new FrameLayout.LayoutParams(targetView.getLayoutParams());
+        newParams.gravity = Gravity.CENTER;
+        targetView.setLayoutParams(newParams);
+        mDismissTargetAnimator = PhysicsAnimator.getInstance(targetView);
+
+        mDismissTargetContainer = new FrameLayout(context);
+        mDismissTargetContainer.setLayoutParams(new FrameLayout.LayoutParams(
                 MATCH_PARENT,
                 getResources().getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height),
                 Gravity.BOTTOM));
-        addView(mDismissContainer);
+        mDismissTargetContainer.setClipChildren(false);
+        mDismissTargetContainer.addView(targetView);
+        mDismissTargetContainer.setVisibility(View.INVISIBLE);
+        addView(mDismissTargetContainer);
+
+        // Start translated down so the target springs up.
+        targetView.setTranslationY(
+                getResources().getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height));
+
+        // Save the MagneticTarget instance for the newly set up view - we'll add this to the
+        // MagnetizedObjects.
+        mMagneticTarget = new MagnetizedObject.MagneticTarget(targetView, mBubbleSize * 2);
 
         mExpandedViewXAnim =
                 new SpringAnimation(mExpandedViewContainer, DynamicAnimation.TRANSLATION_X);
@@ -409,12 +502,8 @@ public class BubbleStackView extends FrameLayout {
                         .setStiffness(SpringForce.STIFFNESS_LOW)
                         .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
         mExpandedViewYAnim.addEndListener((anim, cancelled, value, velocity) -> {
-            if (mIsExpanded) {
-                if (mExpandedBubble == null) {
-                    mOverflowExpandedView.updateView();
-                } else {
-                    mExpandedBubble.getExpandedView().updateView();
-                }
+            if (mIsExpanded && mExpandedBubble != null) {
+                mExpandedBubble.getExpandedView().updateView();
             }
         });
 
@@ -422,9 +511,7 @@ public class BubbleStackView extends FrameLayout {
         setFocusable(true);
         mBubbleContainer.bringToFront();
 
-        if (BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
-            setUpOverflow();
-        }
+        setUpOverflow();
 
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
             if (!mIsExpanded || mIsExpansionAnimating) {
@@ -434,9 +521,7 @@ public class BubbleStackView extends FrameLayout {
                     // Update the insets after we're done translating otherwise position
                     // calculation for them won't be correct.
                     () -> {
-                        if (mExpandedBubble == null) {
-                            mOverflowExpandedView.updateInsets(insets);
-                        } else {
+                        if (mExpandedBubble != null) {
                             mExpandedBubble.getExpandedView().updateInsets(insets);
                         }
                     });
@@ -451,9 +536,7 @@ public class BubbleStackView extends FrameLayout {
                     // Reposition & adjust the height for new orientation
                     if (mIsExpanded) {
                         mExpandedViewContainer.setTranslationY(getExpandedViewY());
-                        if (mExpandedBubble == null) {
-                            mOverflowExpandedView.updateView();
-                        } else {
+                        if (mExpandedBubble != null) {
                             mExpandedBubble.getExpandedView().updateView();
                         }
                     }
@@ -516,41 +599,10 @@ public class BubbleStackView extends FrameLayout {
             mDesaturateAndDarkenPaint.setColorFilter(new ColorMatrixColorFilter(animatedMatrix));
             mDesaturateAndDarkenTargetView.setLayerPaint(mDesaturateAndDarkenPaint);
         });
-
-        mInflater.inflate(R.layout.bubble_menu_view, this);
-        mBubbleMenuView = findViewById(R.id.bubble_menu_container);
-    }
-
-    private void setUpOverflow() {
-        mOverflowExpandedView = (BubbleExpandedView) mInflater.inflate(
-                R.layout.bubble_expanded_view, this /* root */, false /* attachToRoot */);
-        mOverflowExpandedView.setOverflow(true);
-
-        mOverflowBtn = (ImageView) mInflater.inflate(R.layout.bubble_overflow_button,
-                this /* root */,
-                false /* attachToRoot */);
-
-        mBubbleContainer.addView(mOverflowBtn, 0,
-                new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-
-        TypedArray ta = mContext.obtainStyledAttributes(
-                new int[]{android.R.attr.colorBackgroundFloating});
-        int bgColor = ta.getColor(0, Color.WHITE /* default */);
-        ta.recycle();
-
-        InsetDrawable fg = new InsetDrawable(mOverflowBtn.getDrawable(), 28);
-        ColorDrawable bg = new ColorDrawable(bgColor);
-        AdaptiveIconDrawable adaptiveIcon = new AdaptiveIconDrawable(bg, fg);
-        mOverflowBtn.setImageDrawable(adaptiveIcon);
-
-        mOverflowBtn.setVisibility(GONE);
     }
 
     void showExpandedViewContents(int displayId) {
-        if (mOverflowExpandedView != null
-                && mOverflowExpandedView.getVirtualDisplayId() == displayId) {
-            mOverflowExpandedView.setContentVisibility(true);
-        } else if (mExpandedBubble != null
+        if (mExpandedBubble != null
                 && mExpandedBubble.getExpandedView().getVirtualDisplayId() == displayId) {
             mExpandedBubble.setContentVisibility(true);
         }
@@ -568,11 +620,29 @@ public class BubbleStackView extends FrameLayout {
         addView(mFlyout, new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
     }
 
+    private void setUpOverflow() {
+        if (!BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
+            return;
+        }
+        int overflowBtnIndex = 0;
+        if (mBubbleOverflow == null) {
+            mBubbleOverflow = new BubbleOverflow(mContext);
+            mBubbleOverflow.setUpOverflow(this);
+        } else {
+            mBubbleContainer.removeView(mBubbleOverflow.getBtn());
+            mBubbleOverflow.updateIcon(mContext, this);
+            overflowBtnIndex = mBubbleContainer.getChildCount() - 1;
+        }
+        mBubbleContainer.addView(mBubbleOverflow.getBtn(), overflowBtnIndex,
+                new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+
+    }
     /**
      * Handle theme changes.
      */
     public void onThemeChanged() {
         setUpFlyout();
+        setUpOverflow();
     }
 
     /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
@@ -662,16 +732,16 @@ public class BubbleStackView extends FrameLayout {
             mBubbleData.setExpanded(true);
             return true;
         } else if (action == R.id.action_move_top_left) {
-            mStackAnimationController.springStack(stackBounds.left, stackBounds.top);
+            mStackAnimationController.springStackAfterFling(stackBounds.left, stackBounds.top);
             return true;
         } else if (action == R.id.action_move_top_right) {
-            mStackAnimationController.springStack(stackBounds.right, stackBounds.top);
+            mStackAnimationController.springStackAfterFling(stackBounds.right, stackBounds.top);
             return true;
         } else if (action == R.id.action_move_bottom_left) {
-            mStackAnimationController.springStack(stackBounds.left, stackBounds.bottom);
+            mStackAnimationController.springStackAfterFling(stackBounds.left, stackBounds.bottom);
             return true;
         } else if (action == R.id.action_move_bottom_right) {
-            mStackAnimationController.springStack(stackBounds.right, stackBounds.bottom);
+            mStackAnimationController.springStackAfterFling(stackBounds.right, stackBounds.bottom);
             return true;
         }
         return false;
@@ -688,7 +758,7 @@ public class BubbleStackView extends FrameLayout {
         String appName = topBubble.getAppName();
         Notification notification = topBubble.getEntry().getSbn().getNotification();
         CharSequence titleCharSeq = notification.extras.getCharSequence(Notification.EXTRA_TITLE);
-        String titleStr = getResources().getString(R.string.stream_notification);
+        String titleStr = getResources().getString(R.string.notification_bubble_title);
         if (titleCharSeq != null) {
             titleStr = titleCharSeq.toString();
         }
@@ -738,13 +808,6 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
-     * Sets the screenshot listener.
-     */
-    public void setBubbleScreenshotListener(BubbleController.BubbleScreenshotListener listener) {
-        mBubbleScreenshotListener = listener;
-    }
-
-    /**
      * Whether the stack of bubbles is expanded or not.
      */
     public boolean isExpanded() {
@@ -761,15 +824,22 @@ public class BubbleStackView extends FrameLayout {
     /**
      * The {@link BadgedImageView} that is expanded, null if one does not exist.
      */
-    BadgedImageView getExpandedBubbleView() {
+    View getExpandedBubbleView() {
         return mExpandedBubble != null ? mExpandedBubble.getIconView() : null;
     }
 
     /**
      * The {@link Bubble} that is expanded, null if one does not exist.
      */
+    @Nullable
     Bubble getExpandedBubble() {
-        return mExpandedBubble;
+        if (mExpandedBubble == null
+                || (BubbleExperimentConfig.allowBubbleOverflow(mContext)
+                    && mExpandedBubble.getIconView() == mBubbleOverflow.getBtn()
+                    && mExpandedBubble.getKey() == BubbleOverflow.KEY)) {
+            return null;
+        }
+        return (Bubble) mExpandedBubble;
     }
 
     // via BubbleData.Listener
@@ -807,6 +877,7 @@ public class BubbleStackView extends FrameLayout {
         if (removedIndex >= 0) {
             mBubbleContainer.removeViewAt(removedIndex);
             bubble.cleanupExpandedState();
+            bubble.setInflated(false);
             logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
         } else {
             Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
@@ -822,7 +893,7 @@ public class BubbleStackView extends FrameLayout {
             if (DEBUG_BUBBLE_STACK_VIEW) {
                 Log.d(TAG, "Show overflow button.");
             }
-            mOverflowBtn.setVisibility(VISIBLE);
+            mBubbleOverflow.setBtnVisible(VISIBLE);
             if (apply) {
                 mExpandedAnimationController.expandFromStack(() -> {
                     updatePointerPosition();
@@ -832,7 +903,7 @@ public class BubbleStackView extends FrameLayout {
             if (DEBUG_BUBBLE_STACK_VIEW) {
                 Log.d(TAG, "Collapsed. Hide overflow button.");
             }
-            mOverflowBtn.setVisibility(GONE);
+            mBubbleOverflow.setBtnVisible(GONE);
         }
     }
 
@@ -853,7 +924,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     void showOverflow() {
-        setSelectedBubble(null);
+        setSelectedBubble(mBubbleOverflow);
     }
 
     /**
@@ -862,14 +933,14 @@ public class BubbleStackView extends FrameLayout {
      * position of any bubble.
      */
     // via BubbleData.Listener
-    public void setSelectedBubble(@Nullable Bubble bubbleToSelect) {
+    public void setSelectedBubble(@Nullable BubbleViewProvider bubbleToSelect) {
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "setSelectedBubble: " + bubbleToSelect);
         }
         if (mExpandedBubble != null && mExpandedBubble.equals(bubbleToSelect)) {
             return;
         }
-        final Bubble previouslySelected = mExpandedBubble;
+        final BubbleViewProvider previouslySelected = mExpandedBubble;
         mExpandedBubble = bubbleToSelect;
 
         if (mIsExpanded) {
@@ -878,14 +949,11 @@ public class BubbleStackView extends FrameLayout {
             // expanded view becomes visible on the screen. See b/126856255
             mExpandedViewContainer.setAlpha(0.0f);
             mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
-                if (previouslySelected == null) {
-                    mOverflowExpandedView.setContentVisibility(false);
-                } else {
-                    previouslySelected.setContentVisibility(false);
-                }
+                previouslySelected.setContentVisibility(false);
                 updateExpandedBubble();
                 updatePointerPosition();
                 requestUpdate();
+
                 logBubbleEvent(previouslySelected,
                         SysUiStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
                 logBubbleEvent(bubbleToSelect, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
@@ -921,6 +989,14 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
+     * Sets the action to run to dismiss the currently dragging object (either the stack or an
+     * individual bubble).
+     */
+    public void setReleasedInDismissTargetAction(Runnable action) {
+        mReleasedInDismissTargetAction = action;
+    }
+
+    /**
      * Dismiss the stack of bubbles.
      *
      * @deprecated
@@ -942,17 +1018,11 @@ public class BubbleStackView extends FrameLayout {
     public View getTargetView(MotionEvent event) {
         float x = event.getRawX();
         float y = event.getRawY();
-        if (mBubbleMenuView.isShowing()) {
-            if (isIntersecting(mBubbleMenuView.getMenuView(), x, y)) {
-                return mBubbleMenuView;
-            }
-            return null;
-        }
         if (mIsExpanded) {
             if (isIntersecting(mBubbleContainer, x, y)) {
                 if (BubbleExperimentConfig.allowBubbleOverflow(mContext)
-                        && isIntersecting(mOverflowBtn, x, y)) {
-                    return mOverflowBtn;
+                        && isIntersecting(mBubbleOverflow.getBtn(), x, y)) {
+                    return mBubbleOverflow.getBtn();
                 }
                 // Could be tapping or dragging a bubble while expanded
                 for (int i = 0; i < getBubbleCount(); i++) {
@@ -1040,7 +1110,7 @@ public class BubbleStackView extends FrameLayout {
 
     private void animateCollapse() {
         mIsExpanded = false;
-        final Bubble previouslySelected = mExpandedBubble;
+        final BubbleViewProvider previouslySelected = mExpandedBubble;
         beforeExpandedViewAnimation();
 
         if (DEBUG_BUBBLE_STACK_VIEW) {
@@ -1056,11 +1126,7 @@ public class BubbleStackView extends FrameLayout {
                 () -> {
                     mBubbleContainer.setActiveController(mStackAnimationController);
                     afterExpandedViewAnimation();
-                    if (previouslySelected == null) {
-                        mOverflowExpandedView.setContentVisibility(false);
-                    } else {
-                        previouslySelected.setContentVisibility(false);
-                    }
+                    previouslySelected.setContentVisibility(false);
                 });
 
         mExpandedViewXAnim.animateToFinalPosition(getCollapsedX());
@@ -1103,7 +1169,7 @@ public class BubbleStackView extends FrameLayout {
                 mExpandedAnimateYDistance);
     }
 
-    private void notifyExpansionChanged(Bubble bubble, boolean expanded) {
+    private void notifyExpansionChanged(BubbleViewProvider bubble, boolean expanded) {
         if (mExpandListener != null && bubble != null) {
             mExpandListener.onBubbleExpandChanged(expanded, bubble.getKey());
         }
@@ -1130,7 +1196,12 @@ public class BubbleStackView extends FrameLayout {
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "onBubbleDragStart: bubble=" + bubble);
         }
-        mExpandedAnimationController.prepareForBubbleDrag(bubble);
+        mExpandedAnimationController.prepareForBubbleDrag(bubble, mMagneticTarget);
+
+        // We're dragging an individual bubble, so set the magnetized object to the magnetized
+        // bubble.
+        mMagnetizedObject = mExpandedAnimationController.getMagnetizedBubbleDraggingOut();
+        mMagnetizedObject.setMagnetListener(mIndividualBubbleMagnetListener);
     }
 
     /** Called with the coordinates to which an individual bubble has been dragged. */
@@ -1168,12 +1239,13 @@ public class BubbleStackView extends FrameLayout {
             }
             return;
         }
-        hideBubbleMenu();
         mStackAnimationController.cancelStackPositionAnimations();
         mBubbleContainer.setActiveController(mStackAnimationController);
         hideFlyoutImmediate();
 
-        mDraggingInDismissTarget = false;
+        // Since we're dragging the stack, set the magnetized object to the magnetized stack.
+        mMagnetizedObject = mStackAnimationController.getMagnetizedStack(mMagneticTarget);
+        mMagnetizedObject.setMagnetListener(mStackMagnetListener);
     }
 
     void onDragged(float x, float y) {
@@ -1292,6 +1364,11 @@ public class BubbleStackView extends FrameLayout {
         }
     }
 
+    /** Passes the MotionEvent to the magnetized object and returns true if it was consumed. */
+    boolean passEventToMagnetizedObject(MotionEvent event) {
+        return mMagnetizedObject != null && mMagnetizedObject.maybeConsumeMotionEvent(event);
+    }
+
     /** Prepares and starts the desaturate/darken animation on the bubble stack. */
     private void animateDesaturateAndDarken(View targetView, boolean desaturateAndDarken) {
         mDesaturateAndDarkenTargetView = targetView;
@@ -1322,102 +1399,6 @@ public class BubbleStackView extends FrameLayout {
         mDesaturateAndDarkenTargetView.setLayerType(View.LAYER_TYPE_NONE, null);
     }
 
-    /**
-     * Magnets the stack to the target, while also transforming the target to encircle the stack and
-     * desaturating/darkening the bubbles.
-     */
-    void animateMagnetToDismissTarget(
-            View magnetView, boolean toTarget, float x, float y, float velX, float velY) {
-        mDraggingInDismissTarget = toTarget;
-
-        if (toTarget) {
-            // The Y-value for the bubble stack to be positioned in the center of the dismiss target
-            final float destY = mDismissContainer.getDismissTargetCenterY() - mBubbleSize / 2f;
-
-            mAnimatingMagnet = true;
-
-            final Runnable afterMagnet = () -> {
-                mAnimatingMagnet = false;
-                if (mAfterMagnet != null) {
-                    mAfterMagnet.run();
-                }
-            };
-
-            if (magnetView == this) {
-                mStackAnimationController.magnetToDismiss(velX, velY, destY, afterMagnet);
-                animateDesaturateAndDarken(mBubbleContainer, true);
-            } else {
-                mExpandedAnimationController.magnetBubbleToDismiss(
-                        magnetView, velX, velY, destY, afterMagnet);
-
-                animateDesaturateAndDarken(magnetView, true);
-            }
-        } else {
-            mAnimatingMagnet = false;
-
-            if (magnetView == this) {
-                mStackAnimationController.demagnetizeFromDismissToPoint(x, y, velX, velY);
-                animateDesaturateAndDarken(mBubbleContainer, false);
-            } else {
-                mExpandedAnimationController.demagnetizeBubbleTo(x, y, velX, velY);
-                animateDesaturateAndDarken(magnetView, false);
-            }
-        }
-
-        mVibrator.vibrate(VibrationEffect.get(toTarget
-                ? VibrationEffect.EFFECT_CLICK
-                : VibrationEffect.EFFECT_TICK));
-    }
-
-    /**
-     * Magnets the stack to the dismiss target if it's not already there. Then, dismiss the stack
-     * using the 'implode' animation and animate out the target.
-     */
-    void magnetToStackIfNeededThenAnimateDismissal(
-            View touchedView, float velX, float velY, Runnable after) {
-        final View draggedOutBubble = mExpandedAnimationController.getDraggedOutBubble();
-        final Runnable animateDismissal = () -> {
-            mAfterMagnet = null;
-
-            mVibrator.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
-            mDismissContainer.springOut();
-
-            // 'Implode' the stack and then hide the dismiss target.
-            if (touchedView == this) {
-                mStackAnimationController.implodeStack(
-                        () -> {
-                            mAnimatingMagnet = false;
-                            mShowingDismiss = false;
-                            mDraggingInDismissTarget = false;
-                            after.run();
-                            resetDesaturationAndDarken();
-                        });
-            } else {
-                mExpandedAnimationController.dismissDraggedOutBubble(draggedOutBubble, () -> {
-                    mAnimatingMagnet = false;
-                    mShowingDismiss = false;
-                    mDraggingInDismissTarget = false;
-                    resetDesaturationAndDarken();
-                    after.run();
-                });
-            }
-        };
-
-        if (mAnimatingMagnet) {
-            // If the magnet animation is currently playing, dismiss the stack after it's done. This
-            // happens if the stack is flung towards the target.
-            mAfterMagnet = animateDismissal;
-        } else if (mDraggingInDismissTarget) {
-            // If we're in the dismiss target, but not animating, we already magneted - dismiss
-            // immediately.
-            animateDismissal.run();
-        } else {
-            // Otherwise, we need to start the magnet animation and then dismiss afterward.
-            animateMagnetToDismissTarget(touchedView, true, -1 /* x */, -1 /* y */, velX, velY);
-            mAfterMagnet = animateDismissal;
-        }
-    }
-
     /** Animates in the dismiss target. */
     private void springInDismissTarget() {
         if (mShowingDismiss) {
@@ -1426,10 +1407,14 @@ public class BubbleStackView extends FrameLayout {
 
         mShowingDismiss = true;
 
-        // Show the dismiss container and bring it to the front so the bubbles will go behind it.
-        mDismissContainer.springIn();
-        mDismissContainer.bringToFront();
-        mDismissContainer.setZ(Short.MAX_VALUE - 1);
+        mDismissTargetContainer.bringToFront();
+        mDismissTargetContainer.setZ(Short.MAX_VALUE - 1);
+        mDismissTargetContainer.setVisibility(VISIBLE);
+
+        mDismissTargetAnimator.cancel();
+        mDismissTargetAnimator
+                .spring(DynamicAnimation.TRANSLATION_Y, 0f, mDismissTargetSpring)
+                .start();
     }
 
     /**
@@ -1441,13 +1426,13 @@ public class BubbleStackView extends FrameLayout {
             return;
         }
 
-        mDismissContainer.springOut();
         mShowingDismiss = false;
-    }
 
-    /** Whether the location of the given MotionEvent is within the dismiss target area. */
-    boolean isInDismissTarget(MotionEvent ev) {
-        return isIntersecting(mDismissContainer.getDismissTarget(), ev.getRawX(), ev.getRawY());
+        mDismissTargetAnimator
+                .spring(DynamicAnimation.TRANSLATION_Y, mDismissTargetContainer.getHeight(),
+                        mDismissTargetSpring)
+                .withEndActions(() -> mDismissTargetContainer.setVisibility(View.INVISIBLE))
+                .start();
     }
 
     /** Animates the flyout collapsed (to dot), or the reverse, starting with the given velocity. */
@@ -1570,10 +1555,6 @@ public class BubbleStackView extends FrameLayout {
     @Override
     public void getBoundsOnScreen(Rect outRect) {
         // If the bubble menu is open, the entire screen should capture touch events.
-        if (mBubbleMenuView.isShowing()) {
-            outRect.set(0, 0, getWidth(), getHeight());
-            return;
-        }
         if (!mIsExpanded) {
             if (getBubbleCount() > 0) {
                 mBubbleContainer.getChildAt(0).getBoundsOnScreen(outRect);
@@ -1628,11 +1609,8 @@ public class BubbleStackView extends FrameLayout {
             Log.d(TAG, "updateExpandedBubble()");
         }
         mExpandedViewContainer.removeAllViews();
-        if (mIsExpanded) {
-            BubbleExpandedView bev = mOverflowExpandedView;
-            if (mExpandedBubble != null) {
-                bev = mExpandedBubble.getExpandedView();
-            }
+        if (mIsExpanded && mExpandedBubble != null) {
+            BubbleExpandedView bev = mExpandedBubble.getExpandedView();
             mExpandedViewContainer.addView(bev);
             bev.populateExpandedView();
             mExpandedViewContainer.setVisibility(VISIBLE);
@@ -1651,9 +1629,7 @@ public class BubbleStackView extends FrameLayout {
             if (!mExpandedViewYAnim.isRunning()) {
                 // We're not animating so set the value
                 mExpandedViewContainer.setTranslationY(y);
-                if (mExpandedBubble == null) {
-                    mOverflowExpandedView.updateView();
-                } else {
+                if (mExpandedBubble != null) {
                     mExpandedBubble.getExpandedView().updateView();
                 }
             } else {
@@ -1708,15 +1684,16 @@ public class BubbleStackView extends FrameLayout {
     /**
      * Finds the bubble index within the stack.
      *
-     * @param bubble the bubble to look up.
+     * @param provider the bubble view provider with the bubble to look up.
      * @return the index of the bubble view within the bubble stack. The range of the position
      * is between 0 and the bubble count minus 1.
      */
-    int getBubbleIndex(@Nullable Bubble bubble) {
-        if (bubble == null) {
+    int getBubbleIndex(@Nullable BubbleViewProvider provider) {
+        if (provider == null || provider.getKey() == BubbleOverflow.KEY) {
             return 0;
         }
-        return mBubbleContainer.indexOfChild(bubble.getIconView());
+        Bubble b = (Bubble) provider;
+        return mBubbleContainer.indexOfChild(b.getIconView());
     }
 
     /**
@@ -1748,36 +1725,12 @@ public class BubbleStackView extends FrameLayout {
      *               the user interaction is not specific to one bubble.
      * @param action the user interaction enum.
      */
-    private void logBubbleEvent(@Nullable Bubble bubble, int action) {
-        if (bubble == null || bubble.getEntry() == null
-                || bubble.getEntry().getSbn() == null) {
-            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
-                    null /* package name */,
-                    null /* notification channel */,
-                    0 /* notification ID */,
-                    0 /* bubble position */,
-                    getBubbleCount(),
-                    action,
-                    getNormalizedXPosition(),
-                    getNormalizedYPosition(),
-                    false /* unread bubble */,
-                    false /* on-going bubble */,
-                    false /* isAppForeground (unused) */);
-        } else {
-            StatusBarNotification notification = bubble.getEntry().getSbn();
-            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
-                    notification.getPackageName(),
-                    notification.getNotification().getChannelId(),
-                    notification.getId(),
-                    getBubbleIndex(bubble),
-                    getBubbleCount(),
-                    action,
-                    getNormalizedXPosition(),
-                    getNormalizedYPosition(),
-                    bubble.showInShade(),
-                    bubble.isOngoing(),
-                    false /* isAppForeground (unused) */);
+    private void logBubbleEvent(@Nullable BubbleViewProvider bubble, int action) {
+        if (bubble == null) {
+            return;
         }
+        bubble.logUIEvent(getBubbleCount(), action, getNormalizedXPosition(),
+                getNormalizedYPosition(), getBubbleIndex(bubble));
     }
 
     /**
@@ -1785,14 +1738,10 @@ public class BubbleStackView extends FrameLayout {
      * a back key down/up event pair is forwarded to the bubble Activity.
      */
     boolean performBackPressIfNeeded() {
-        if (!isExpanded()) {
+        if (!isExpanded() || mExpandedBubble == null) {
             return false;
         }
-        if (mExpandedBubble == null) {
-            return mOverflowExpandedView.performBackPressIfNeeded();
-        } else {
-            return mExpandedBubble.getExpandedView().performBackPressIfNeeded();
-        }
+        return mExpandedBubble.getExpandedView().performBackPressIfNeeded();
     }
 
     /** For debugging only */
@@ -1807,51 +1756,5 @@ public class BubbleStackView extends FrameLayout {
             }
         }
         return bubbles;
-    }
-
-    /**
-     * Show the bubble menu, positioned relative to the stack.
-     */
-    public void showBubbleMenu() {
-        PointF currentPos = mStackAnimationController.getStackPosition();
-        mBubbleMenuView.setVisibility(View.INVISIBLE);
-        post(() -> {
-            float yPos = currentPos.y;
-            float xPos = currentPos.x;
-            if (mStackAnimationController.isStackOnLeftSide()) {
-                xPos += mBubbleSize;
-            } else {
-                xPos -= mBubbleMenuView.getMenuView().getWidth();
-            }
-
-            mBubbleMenuView.show(xPos, yPos);
-        });
-    }
-
-    /**
-     * Hide the bubble menu.
-     */
-    public void hideBubbleMenu() {
-        mBubbleMenuView.hide();
-    }
-
-    /**
-     * Determines whether the bubble menu is currently showing.
-     */
-    public boolean isShowingBubbleMenu() {
-        return mBubbleMenuView.isShowing();
-    }
-
-    /**
-     * Take a screenshot and send it to the specified bubble.
-     */
-    public void sendScreenshotToBubble(Bubble bubble) {
-        hideBubbleMenu();
-        // delay allows the bubble menu to disappear before the screenshot
-        // done here because we already have a Handler to delay with.
-        // TODO: Hide bubble + menu UI from screenshots entirely instead of just delaying.
-        postDelayed(() -> {
-            mBubbleScreenshotListener.onBubbleScreenshot(bubble);
-        }, BubbleMenuView.SCREENSHOT_DELAY);
     }
 }

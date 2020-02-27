@@ -149,7 +149,7 @@ public class BlobStoreManagerServiceTest {
         final BlobMetadata blobMetadata2 = createBlobMetadataMock(blobId2, blobFile2, false);
         mUserBlobs.put(blobHandle2, blobMetadata2);
 
-        mService.addKnownIdsForTest(sessionId1, sessionId2, sessionId3, sessionId4,
+        mService.addActiveIdsForTest(sessionId1, sessionId2, sessionId3, sessionId4,
                 blobId1, blobId2);
 
         // Invoke test method
@@ -180,8 +180,10 @@ public class BlobStoreManagerServiceTest {
         assertThat(mUserBlobs.get(blobHandle1)).isNotNull();
         assertThat(mUserBlobs.get(blobHandle2)).isNull();
 
-        assertThat(mService.getKnownIdsForTest()).containsExactly(
+        assertThat(mService.getActiveIdsForTest()).containsExactly(
                 sessionId2, sessionId3, blobId1);
+        assertThat(mService.getKnownIdsForTest()).containsExactly(
+                sessionId1, sessionId2, sessionId3, sessionId4, blobId1, blobId2);
     }
 
     @Test
@@ -198,12 +200,12 @@ public class BlobStoreManagerServiceTest {
         doReturn(String.valueOf(testId3)).when(file3).getName();
 
         doReturn(new File[] {file1, file2, file3}).when(mBlobsDir).listFiles();
-        mService.addKnownIdsForTest(testId1, testId3);
+        mService.addActiveIdsForTest(testId1, testId3);
 
         // Invoke test method
         mService.handleIdleMaintenanceLocked();
 
-        // Verify unknown blobs are delete
+        // Verify unknown blobs are deleted
         verify(file1, never()).delete();
         verify(file2).delete();
         verify(file3, never()).delete();
@@ -216,8 +218,8 @@ public class BlobStoreManagerServiceTest {
         doReturn(System.currentTimeMillis() - SESSION_EXPIRY_TIMEOUT_MILLIS + 1000)
                 .when(sessionFile1).lastModified();
         final long sessionId1 = 342;
-        final BlobHandle blobHandle1 = mock(BlobHandle.class);
-        doReturn(System.currentTimeMillis() - 1000).when(blobHandle1).getExpiryTimeMillis();
+        final BlobHandle blobHandle1 = BlobHandle.createWithSha256("digest1".getBytes(),
+                "label1", System.currentTimeMillis() - 1000, "tag1");
         final BlobStoreSession session1 = createBlobStoreSessionMock(TEST_PKG1, TEST_UID1,
                 sessionId1, sessionFile1, blobHandle1);
         mUserSessions.append(sessionId1, session1);
@@ -226,8 +228,8 @@ public class BlobStoreManagerServiceTest {
         doReturn(System.currentTimeMillis() - 20000)
                 .when(sessionFile2).lastModified();
         final long sessionId2 = 4597;
-        final BlobHandle blobHandle2 = mock(BlobHandle.class);
-        doReturn(System.currentTimeMillis() + 20000).when(blobHandle2).getExpiryTimeMillis();
+        final BlobHandle blobHandle2 = BlobHandle.createWithSha256("digest2".getBytes(),
+                "label2", System.currentTimeMillis() + 20000, "tag2");
         final BlobStoreSession session2 = createBlobStoreSessionMock(TEST_PKG2, TEST_UID2,
                 sessionId2, sessionFile2, blobHandle2);
         mUserSessions.append(sessionId2, session2);
@@ -236,13 +238,13 @@ public class BlobStoreManagerServiceTest {
         doReturn(System.currentTimeMillis() - SESSION_EXPIRY_TIMEOUT_MILLIS - 2000)
                 .when(sessionFile3).lastModified();
         final long sessionId3 = 9484;
-        final BlobHandle blobHandle3 = mock(BlobHandle.class);
-        doReturn(System.currentTimeMillis() + 30000).when(blobHandle3).getExpiryTimeMillis();
+        final BlobHandle blobHandle3 = BlobHandle.createWithSha256("digest3".getBytes(),
+                "label3", System.currentTimeMillis() + 30000, "tag3");
         final BlobStoreSession session3 = createBlobStoreSessionMock(TEST_PKG3, TEST_UID3,
                 sessionId3, sessionFile3, blobHandle3);
         mUserSessions.append(sessionId3, session3);
 
-        mService.addKnownIdsForTest(sessionId1, sessionId2, sessionId3);
+        mService.addActiveIdsForTest(sessionId1, sessionId2, sessionId3);
 
         // Invoke test method
         mService.handleIdleMaintenanceLocked();
@@ -255,7 +257,9 @@ public class BlobStoreManagerServiceTest {
         assertThat(mUserSessions.size()).isEqualTo(1);
         assertThat(mUserSessions.get(sessionId2)).isNotNull();
 
-        assertThat(mService.getKnownIdsForTest()).containsExactly(sessionId2);
+        assertThat(mService.getActiveIdsForTest()).containsExactly(sessionId2);
+        assertThat(mService.getKnownIdsForTest()).containsExactly(
+                sessionId1, sessionId2, sessionId3);
     }
 
     @Test
@@ -282,7 +286,7 @@ public class BlobStoreManagerServiceTest {
         final BlobMetadata blobMetadata3 = createBlobMetadataMock(blobId3, blobFile3, false);
         mUserBlobs.put(blobHandle3, blobMetadata3);
 
-        mService.addKnownIdsForTest(blobId1, blobId2, blobId3);
+        mService.addActiveIdsForTest(blobId1, blobId2, blobId3);
 
         // Invoke test method
         mService.handleIdleMaintenanceLocked();
@@ -295,7 +299,8 @@ public class BlobStoreManagerServiceTest {
         assertThat(mUserBlobs.size()).isEqualTo(1);
         assertThat(mUserBlobs.get(blobHandle2)).isNotNull();
 
-        assertThat(mService.getKnownIdsForTest()).containsExactly(blobId2);
+        assertThat(mService.getActiveIdsForTest()).containsExactly(blobId2);
+        assertThat(mService.getKnownIdsForTest()).containsExactly(blobId1, blobId2, blobId3);
     }
 
     private BlobStoreSession createBlobStoreSessionMock(String ownerPackageName, int ownerUid,

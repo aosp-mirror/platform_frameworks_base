@@ -28,7 +28,7 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPON
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.pm.parsing.ComponentParseUtils;
+import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.BaseBundle;
 import android.os.Debug;
 import android.os.PersistableBundle;
@@ -163,7 +163,7 @@ public class PackageUserState {
     }
 
     public boolean isMatch(boolean isSystem, boolean isPackageEnabled,
-            ComponentParseUtils.ParsedComponent component, int flags) {
+            ParsedMainComponent component, int flags) {
         return isMatch(isSystem, isPackageEnabled, component.isEnabled(),
                 component.isDirectBootAware(), component.getName(), flags);
     }
@@ -217,7 +217,7 @@ public class PackageUserState {
     }
 
     public boolean isEnabled(boolean isPackageEnabled,
-            ComponentParseUtils.ParsedComponent parsedComponent, int flags) {
+            ParsedMainComponent parsedComponent, int flags) {
         return isEnabled(isPackageEnabled, parsedComponent.isEnabled(), parsedComponent.getName(),
                 flags);
     }

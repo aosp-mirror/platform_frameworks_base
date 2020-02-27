@@ -58,7 +58,7 @@ public class BubbleFlyoutView extends FrameLayout {
     private final int mFlyoutSpaceFromBubble;
     private final int mPointerSize;
     private final int mBubbleSize;
-    private final int mBubbleIconBitmapSize;
+    private final int mBubbleBitmapSize;
     private final float mBubbleIconTopPadding;
 
     private final int mFlyoutElevation;
@@ -156,13 +156,13 @@ public class BubbleFlyoutView extends FrameLayout {
         mPointerSize = res.getDimensionPixelSize(R.dimen.bubble_flyout_pointer_size);
 
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mBubbleIconBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
-        mBubbleIconTopPadding  = (mBubbleSize - mBubbleIconBitmapSize) / 2f;
+        mBubbleBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_bitmap_size);
+        mBubbleIconTopPadding  = (mBubbleSize - mBubbleBitmapSize) / 2f;
 
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mFlyoutElevation = res.getDimensionPixelSize(R.dimen.bubble_flyout_elevation);
 
-        mOriginalDotSize = SIZE_PERCENTAGE * mBubbleIconBitmapSize;
+        mOriginalDotSize = SIZE_PERCENTAGE * mBubbleBitmapSize;
         mNewDotRadius = (DOT_SCALE * mOriginalDotSize) / 2f;
         mNewDotSize = mNewDotRadius * 2f;
 

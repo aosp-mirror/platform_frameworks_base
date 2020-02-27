@@ -20,7 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"Iestatījumu krātuve"</string>
-    <string name="wifi_softap_config_change" msgid="5338670993556993667">"Izmaiņas tīklāja iestatījumos"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"Ir mainīts tīklāja joslas platums."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"Šajā ierīcē netiek atbalstīta jūsu preference par tikai 5 GHz joslu. 5 GHz josla ierīcē tiks izmantota, kad tā būs pieejama."</string>
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"Ir mainīti tīklāja iestatījumi"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"Pieskarieties, lai skatītu detalizētāku informāciju."</string>
 </resources>

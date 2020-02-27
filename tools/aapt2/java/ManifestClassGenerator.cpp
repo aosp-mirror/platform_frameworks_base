@@ -39,7 +39,7 @@ static Maybe<std::string> ExtractJavaIdentifier(IDiagnostics* diag, const Source
   }
 
   // Normalize only the java identifier, leave the original value unchanged.
-  if (result.find("-") != std::string::npos) {
+  if (result.find('-') != std::string::npos) {
     result = JavaClassGenerator::TransformToFieldName(result);
   }
 

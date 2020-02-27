@@ -14,6 +14,7 @@
 
 package com.android.systemui.plugins.qs;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
@@ -107,6 +108,12 @@ public interface QSTile {
         public int getPadding() {
             return 0;
         }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return "Icon";
+        }
     }
 
     @ProvidesInterface(version = State.VERSION)
@@ -118,6 +125,7 @@ public interface QSTile {
         public CharSequence label;
         public CharSequence secondaryLabel;
         public CharSequence contentDescription;
+        public CharSequence stateDescription;
         public CharSequence dualLabelContentDescription;
         public boolean disabledByPolicy;
         public boolean dualTarget = false;
@@ -135,6 +143,7 @@ public interface QSTile {
                     || !Objects.equals(other.label, label)
                     || !Objects.equals(other.secondaryLabel, secondaryLabel)
                     || !Objects.equals(other.contentDescription, contentDescription)
+                    || !Objects.equals(other.stateDescription, stateDescription)
                     || !Objects.equals(other.dualLabelContentDescription,
                             dualLabelContentDescription)
                     || !Objects.equals(other.expandedAccessibilityClassName,
@@ -151,6 +160,7 @@ public interface QSTile {
             other.label = label;
             other.secondaryLabel = secondaryLabel;
             other.contentDescription = contentDescription;
+            other.stateDescription = stateDescription;
             other.dualLabelContentDescription = dualLabelContentDescription;
             other.expandedAccessibilityClassName = expandedAccessibilityClassName;
             other.disabledByPolicy = disabledByPolicy;
@@ -177,6 +187,7 @@ public interface QSTile {
             sb.append(",label=").append(label);
             sb.append(",secondaryLabel=").append(secondaryLabel);
             sb.append(",contentDescription=").append(contentDescription);
+            sb.append(",stateDescription=").append(stateDescription);
             sb.append(",dualLabelContentDescription=").append(dualLabelContentDescription);
             sb.append(",expandedAccessibilityClassName=").append(expandedAccessibilityClassName);
             sb.append(",disabledByPolicy=").append(disabledByPolicy);

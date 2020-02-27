@@ -38,7 +38,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -123,10 +122,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         if (isCancelled()) {
             return null;
         }
-
-        // By default, AsyncTask sets the worker thread to have background thread priority,
-        // so bump it back up so that we save a little quicker.
-        Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
         ContentResolver resolver = mContext.getContentResolver();
         Bitmap image = mParams.image;
@@ -224,11 +219,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mParams.mActionsReadyListener.onActionsReady(null, null, null);
         }
 
-        // Recycle the bitmap data
-        if (image != null) {
-            image.recycle();
-        }
-
         return null;
     }
 
@@ -291,7 +281,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                         .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
                         .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
                                 mSmartActionsEnabled)
-                        .setAction(Intent.ACTION_SEND),
+                        .setAction(Intent.ACTION_SEND)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
                 PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
 
         Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
@@ -320,7 +311,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                         .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
                         .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
                                 mSmartActionsEnabled)
-                        .setAction(Intent.ACTION_EDIT),
+                        .setAction(Intent.ACTION_EDIT)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
                 PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
         Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
                 Icon.createWithResource(r, R.drawable.ic_screenshot_edit),
@@ -334,7 +326,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                             .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString())
                             .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
                             .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
-                                    mSmartActionsEnabled),
+                                    mSmartActionsEnabled)
+                            .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
             Notification.Action.Builder deleteActionBuilder = new Notification.Action.Builder(
                     Icon.createWithResource(r, R.drawable.ic_screenshot_delete),
@@ -371,9 +364,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             String actionType = extras.getString(
                     ScreenshotNotificationSmartActionsProvider.ACTION_TYPE,
                     ScreenshotNotificationSmartActionsProvider.DEFAULT_ACTION_TYPE);
-            Intent intent = new Intent(context,
-                    GlobalScreenshot.SmartActionsReceiver.class).putExtra(
-                    GlobalScreenshot.EXTRA_ACTION_INTENT, action.actionIntent);
+            Intent intent = new Intent(context, GlobalScreenshot.SmartActionsReceiver.class)
+                    .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, action.actionIntent)
+                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             addIntentExtras(mScreenshotId, intent, actionType, mSmartActionsEnabled);
             PendingIntent broadcastIntent = PendingIntent.getBroadcast(context,
                     mRandom.nextInt(),

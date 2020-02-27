@@ -54,11 +54,13 @@ using ::android::hardware::tv::tuner::V1_0::IFrontend;
 using ::android::hardware::tv::tuner::V1_0::IFrontendCallback;
 using ::android::hardware::tv::tuner::V1_0::ILnb;
 using ::android::hardware::tv::tuner::V1_0::ILnbCallback;
+using ::android::hardware::tv::tuner::V1_0::ITimeFilter;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
 using ::android::hardware::tv::tuner::V1_0::LnbEventType;
 using ::android::hardware::tv::tuner::V1_0::LnbId;
 using ::android::hardware::tv::tuner::V1_0::PlaybackStatus;
 using ::android::hardware::tv::tuner::V1_0::RecordStatus;
+using ::android::hardware::tv::tuner::V1_0::Result;
 
 using FilterMQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
 using DvrMQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
@@ -101,15 +103,16 @@ struct FilterCallback : public IFilterCallback {
     virtual Return<void> onFilterStatus(const DemuxFilterStatus status);
 
     void setFilter(const jobject filter);
+    jobject handleToLinearBlock(const native_handle_t* handle, uint32_t size);
 private:
     jweak mFilter;
+    jobject getMediaEvent(const DemuxFilterEvent::Event& event);
 };
 
 struct FrontendCallback : public IFrontendCallback {
     FrontendCallback(jweak tunerObj, FrontendId id);
 
     virtual Return<void> onEvent(FrontendEventType frontendEventType);
-    virtual Return<void> onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
     virtual Return<void> onScanMessage(
             FrontendScanMessageType type, const FrontendScanMessage& message);
 
@@ -128,9 +131,21 @@ struct Filter : public RefBase {
     jweak mFilterObj;
 };
 
+struct TimeFilter : public RefBase {
+    TimeFilter(sp<ITimeFilter> sp, jweak obj);
+    ~TimeFilter();
+    sp<ITimeFilter> getITimeFilter();
+    sp<ITimeFilter> mTimeFilterSp;
+    jweak mTimeFilterObj;
+};
+
 struct JTuner : public RefBase {
     JTuner(JNIEnv *env, jobject thiz);
     sp<ITuner> getTunerService();
+    jobject getAvSyncHwId(sp<Filter> filter);
+    jobject getAvSyncTime(jint id);
+    int connectCiCam(jint id);
+    int disconnectCiCam();
     jobject getFrontendIds();
     jobject openFrontendById(int id);
     jobject getFrontendInfo(int id);
@@ -143,11 +158,12 @@ struct JTuner : public RefBase {
     jobject getLnbIds();
     jobject openLnbById(int id);
     jobject openFilter(DemuxFilterType type, int bufferSize);
+    jobject openTimeFilter();
     jobject openDescrambler();
     jobject openDvr(DvrType type, int bufferSize);
 
 protected:
-    bool openDemux();
+    Result openDemux();
     virtual ~JTuner();
 
 private:
@@ -159,7 +175,7 @@ private:
     hidl_vec<LnbId> mLnbIds;
     sp<ILnb> mLnb;
     sp<IDemux> mDemux;
-    int mDemuxId;
+    uint32_t mDemuxId;
     static jobject getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
     static jobject getAtsc3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
     static jobject getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);

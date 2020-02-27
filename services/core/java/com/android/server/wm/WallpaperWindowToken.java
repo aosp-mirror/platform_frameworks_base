@@ -122,10 +122,37 @@ class WallpaperWindowToken extends WindowToken {
             mDisplayContent.setLayoutNeeded();
         }
 
-        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
+        final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
+
+        if (visible) {
+            final WindowState wallpaperTarget = wallpaperController.getWallpaperTarget();
+            final RecentsAnimationController recentsAnimationController =
+                    mWmService.getRecentsAnimationController();
+            if (wallpaperTarget != null
+                    && recentsAnimationController != null
+                    && recentsAnimationController.isAnimatingTask(wallpaperTarget.getTask())) {
+                // If the Recents animation is running, and the wallpaper target is the animating
+                // task we want the wallpaper to be rotated in the same orientation as the
+                // RecentsAnimation's target (e.g the launcher)
+                recentsAnimationController.applyFixedRotationTransformIfNeeded(this);
+            } else if (wallpaperTarget != null
+                    && wallpaperTarget.mToken.hasFixedRotationTransform()) {
+                // If the wallpaper target has a fixed rotation, we want the wallpaper to follow its
+                // rotation
+                applyFixedRotationTransform(wallpaperTarget.mToken);
+            } else if (hasFixedRotationTransform()) {
+                clearFixedRotationTransform();
+            }
+        }
+
+        DisplayInfo displayInfo = getFixedRotationTransformDisplayInfo();
+        if (displayInfo == null) {
+            displayInfo = mDisplayContent.getDisplayInfo();
+        }
+
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
-        final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
+
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
 

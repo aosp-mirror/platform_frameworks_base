@@ -683,8 +683,6 @@ public class JobSchedulerServiceTest {
                 mService.new MaybeReadyJobQueueFunctor();
         mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
         mService.mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = HOUR_IN_MILLIS;
-        mService.mConstants.MIN_CONNECTIVITY_COUNT = 2;
-        mService.mConstants.MIN_READY_JOBS_COUNT = 1;
 
         JobStatus job = createJobStatus(
                 "testRareJobBatching",

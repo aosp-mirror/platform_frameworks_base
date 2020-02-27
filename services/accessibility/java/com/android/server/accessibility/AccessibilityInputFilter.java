@@ -17,6 +17,7 @@
 package com.android.server.accessibility;
 
 import android.content.Context;
+import android.graphics.Region;
 import android.os.PowerManager;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -724,6 +725,18 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             boolean shouldProcess = event.getAction() == KeyEvent.ACTION_DOWN;
             mEventSequenceStartedMap.put(deviceId, shouldProcess);
             return shouldProcess;
+        }
+    }
+
+    public void setGestureDetectionPassthroughRegion(int displayId, Region region) {
+        if (region != null && mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).setGestureDetectionPassthroughRegion(region);
+        }
+    }
+
+    public void setTouchExplorationPassthroughRegion(int displayId, Region region) {
+        if (region != null && mTouchExplorer.contains(displayId)) {
+            mTouchExplorer.get(displayId).setTouchExplorationPassthroughRegion(region);
         }
     }
 }

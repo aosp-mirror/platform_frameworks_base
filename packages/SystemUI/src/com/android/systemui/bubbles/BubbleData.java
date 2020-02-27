@@ -199,16 +199,21 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
-    public void promoteBubbleFromOverflow(Bubble bubble) {
+    public void promoteBubbleFromOverflow(Bubble bubble, BubbleStackView stack,
+            BubbleIconFactory factory) {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "promoteBubbleFromOverflow: " + bubble);
         }
-        mOverflowBubbles.remove(bubble);
-        doAdd(bubble);
-        setSelectedBubbleInternal(bubble);
+
         // Preserve new order for next repack, which sorts by last updated time.
         bubble.markUpdatedAt(mTimeSource.currentTimeMillis());
-        trim();
+        setSelectedBubbleInternal(bubble);
+        mOverflowBubbles.remove(bubble);
+
+        bubble.inflate(
+                b -> notificationEntryUpdated(bubble, /* suppressFlyout */
+                        false, /* showInShade */ true),
+                mContext, stack, factory);
         dispatchPendingChanges();
     }
 
@@ -438,16 +443,7 @@ public class BubbleData {
             mStateChange.orderChanged |= repackAll();
         }
 
-        if (reason == BubbleController.DISMISS_AGED) {
-            if (DEBUG_BUBBLE_DATA) {
-                Log.d(TAG, "overflowing bubble: " + bubbleToRemove);
-            }
-            mOverflowBubbles.add(0, bubbleToRemove);
-            if (mOverflowBubbles.size() == mMaxOverflowBubbles + 1) {
-                // Remove oldest bubble.
-                mOverflowBubbles.remove(mOverflowBubbles.size() - 1);
-            }
-        }
+        overflowBubble(reason, bubbleToRemove);
 
         // Note: If mBubbles.isEmpty(), then mSelectedBubble is now null.
         if (Objects.equals(mSelectedBubble, bubbleToRemove)) {
@@ -457,6 +453,25 @@ public class BubbleData {
             setSelectedBubbleInternal(newSelected);
         }
         maybeSendDeleteIntent(reason, bubbleToRemove.getEntry());
+    }
+
+    void overflowBubble(@DismissReason int reason, Bubble bubble) {
+        if (reason == BubbleController.DISMISS_AGED
+                || reason == BubbleController.DISMISS_USER_GESTURE) {
+            if (DEBUG_BUBBLE_DATA) {
+                Log.d(TAG, "overflowing bubble: " + bubble);
+            }
+            mOverflowBubbles.add(0, bubble);
+
+            if (mOverflowBubbles.size() == mMaxOverflowBubbles + 1) {
+                // Remove oldest bubble.
+                if (DEBUG_BUBBLE_DATA) {
+                    Log.d(TAG, "Overflow full. Remove bubble: " + mOverflowBubbles.get(
+                            mOverflowBubbles.size() - 1));
+                }
+                mOverflowBubbles.remove(mOverflowBubbles.size() - 1);
+            }
+        }
     }
 
     public void dismissAll(@DismissReason int reason) {
@@ -469,9 +484,7 @@ public class BubbleData {
         setExpandedInternal(false);
         setSelectedBubbleInternal(null);
         while (!mBubbles.isEmpty()) {
-            Bubble bubble = mBubbles.remove(0);
-            maybeSendDeleteIntent(reason, bubble.getEntry());
-            mStateChange.bubbleRemoved(bubble, reason);
+            doRemove(mBubbles.get(0).getKey(), reason);
         }
         dispatchPendingChanges();
     }
@@ -511,7 +524,7 @@ public class BubbleData {
         if (Objects.equals(bubble, mSelectedBubble)) {
             return;
         }
-        if (bubble != null && !mBubbles.contains(bubble)) {
+        if (bubble != null && !mBubbles.contains(bubble) && !mOverflowBubbles.contains(bubble)) {
             Log.e(TAG, "Cannot select bubble which doesn't exist!"
                     + " (" + bubble + ") bubbles=" + mBubbles);
             return;

@@ -205,14 +205,6 @@ public class LocationProviderProxy extends AbstractLocationProvider {
     }
 
     @Override
-    public void onRequestSetAllowed(boolean allowed) {
-        mServiceWatcher.runOnBinder(binder -> {
-            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-            service.requestSetAllowed(allowed);
-        });
-    }
-
-    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mServiceWatcher.dump(fd, pw, args);
     }

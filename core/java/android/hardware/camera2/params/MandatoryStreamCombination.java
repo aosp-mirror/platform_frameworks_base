@@ -267,7 +267,7 @@ public final class MandatoryStreamCombination {
                 mStreamsInformation.hashCode());
     }
 
-    private static enum SizeThreshold { VGA, PREVIEW, RECORD, MAXIMUM, s720p }
+    private static enum SizeThreshold { VGA, PREVIEW, RECORD, MAXIMUM, s720p, s1440p }
     private static enum ReprocessType { NONE, PRIVATE, YUV }
     private static final class StreamTemplate {
         public int mFormat;
@@ -651,23 +651,38 @@ public final class MandatoryStreamCombination {
 
     private static StreamCombinationTemplate sConcurrentStreamCombinations[] = {
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s720p) },
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p) },
                 "In-app video / image processing"),
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s720p) },
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p) },
                 "preview / preview to GPU"),
         new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.s1440p) },
+                "No view-finder still image capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s720p),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s720p)},
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p)},
+                "Two-input in app video / image processing"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s720p),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p)},
+                "High resolution video recording with preview"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s720p),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p)},
+                "In-app video / image processing with preview"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s720p),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p)},
                 "In-app video / image processing with preview"),
         new StreamCombinationTemplate(new StreamTemplate [] {
                 new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s720p),
-                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s720p)},
-                "In-app video / image processing with preview"),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.s1440p)},
+                "Standard stil image capture"),
         new StreamCombinationTemplate(new StreamTemplate [] {
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s720p),
-                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s720p)},
-                "Standard Recording"),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s720p),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.s1440p)},
+                "Standard still image capture"),
     };
 
     /**
@@ -720,6 +735,7 @@ public final class MandatoryStreamCombination {
                          + " cannot have mandatory concurrent streams");
             }
             Size size720p = new Size(1280, 720);
+            Size size1440p = new Size(1920, 1440);
 
             ArrayList<MandatoryStreamCombination> availableConcurrentStreamCombinations =
                     new ArrayList<MandatoryStreamCombination>();
@@ -732,8 +748,16 @@ public final class MandatoryStreamCombination {
                 for (StreamTemplate template : combTemplate.mStreamTemplates) {
                     MandatoryStreamInformation streamInfo;
                     List<Size> sizes = new ArrayList<Size>();
+                    Size formatSize = null;
+                    switch (template.mSizeThreshold) {
+                        case s1440p:
+                            formatSize = size1440p;
+                            break;
+                        default:
+                            formatSize = size720p;
+                    }
                     Size sizeChosen =
-                            getMinSize(size720p,
+                            getMinSize(formatSize,
                                     getMaxSize(mStreamConfigMap.getOutputSizes(template.mFormat)));
                     sizes.add(sizeChosen);
                     try {

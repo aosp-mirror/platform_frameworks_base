@@ -20,7 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"პარამეტრების საცავი"</string>
-    <string name="wifi_softap_config_change" msgid="5338670993556993667">"თქვენი უსადენო ქსელის პარამეტრების ცვლილება"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"თქვენი უსადენო ქსელის დიაპაზონი შეიცვალა."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"ამ მოწყობილობას არ შეუძლია მხოლოდ 5 გჰც სიხშირეზე მუშაობა. აღნიშნული სიხშირის გამოყენება მოხდება მაშინ, როცა ეს შესაძლებელია."</string>
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"უსადენო ქსელის პარამეტრები შეიცვალა"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"შეეხეთ დეტალების სანახავად"</string>
 </resources>

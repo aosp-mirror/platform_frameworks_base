@@ -3774,7 +3774,7 @@
         <attr name="animatedImageDrawable" format="reference"/>
         <!-- Html description of the accessibility service, to help users understand
              how the service can help them.-->
-        <attr name="htmlDescription" format="string"/>
+        <attr name="htmlDescription" format="reference"/>
 
         <!-- Short description of the accessibility service purpose or behavior.-->
         <attr name="description" />
@@ -3790,6 +3790,12 @@
         <attr name="description" />
         <!-- Brief summary of the target of accessibility shortcut purpose or behavior. -->
         <attr name="summary" />
+        <!-- Animated image of the target of accessibility shortcut purpose or behavior, to help
+             users understand how the target of accessibility shortcut can help them.-->
+        <attr name="animatedImageDrawable" format="reference"/>
+        <!-- Html description of the target of accessibility shortcut purpose or behavior, to help
+             users understand how the target of accessibility shortcut can help them. -->
+        <attr name="htmlDescription" format="reference"/>
     </declare-styleable>
 
     <!-- Use <code>print-service</code> as the root tag of the XML resource that
@@ -9201,12 +9207,4 @@
     </declare-styleable>
 
     <attr name="autoSizePresetSizes" />
-
-    <declare-styleable name="AutofillInlineSuggestion">
-        <!-- @hide @SystemApi -->
-        <attr name="isAutofillInlineSuggestionTheme" format="boolean" />
-        <attr name="autofillInlineSuggestionChip" format="reference" />
-        <attr name="autofillInlineSuggestionTitle" format="reference" />
-        <attr name="autofillInlineSuggestionSubtitle" format="reference" />
-    </declare-styleable>
 </resources>

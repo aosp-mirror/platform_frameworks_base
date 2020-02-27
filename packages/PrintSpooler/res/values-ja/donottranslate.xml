@@ -16,7 +16,7 @@
 
 <resources>
 
-    <string name="mediasize_default">JIS_B5</string>
+    <string name="mediasize_default">ISO_A4</string>
     <string name="mediasize_standard">@string/mediasize_standard_japan</string>
 
 </resources>

@@ -54,7 +54,7 @@ import java.util.concurrent.Executor;
  */
 @SystemApi
 @SystemService(Context.CONTEXTHUB_SERVICE)
-@RequiresFeature(PackageManager.FEATURE_CONTEXTHUB)
+@RequiresFeature(PackageManager.FEATURE_CONTEXT_HUB)
 public final class ContextHubManager {
     private static final String TAG = "ContextHubManager";
 

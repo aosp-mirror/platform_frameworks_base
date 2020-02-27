@@ -101,6 +101,8 @@ public final class Trace {
     public static final long TRACE_TAG_NNAPI = 1L << 25;
     /** @hide */
     public static final long TRACE_TAG_RRO = 1L << 26;
+    /** @hide */
+    public static final long TRACE_TAG_APEX_MANAGER = 1L << 18;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;
@@ -175,11 +177,7 @@ public final class Trace {
     }
 
     /**
-     * Set whether tracing is enabled in this process.  Tracing is disabled shortly after Zygote
-     * initializes and re-enabled after processes fork from Zygote.  This is done because Zygote
-     * has no way to be notified about changes to the tracing tags, and if Zygote ever reads and
-     * caches the tracing tags, forked processes will inherit those stale tags.
-     *
+     * Set whether tracing is enabled in this process.
      * @hide
      */
     public static void setTracingEnabled(boolean enabled, int debugFlags) {

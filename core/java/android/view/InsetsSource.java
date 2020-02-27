@@ -198,7 +198,7 @@ public class InsetsSource implements Parcelable {
         return "InsetsSource: {"
                 + "mType=" + InsetsState.typeToString(mType)
                 + ", mFrame=" + mFrame.toShortString()
-                + ", mVisible" + mVisible
+                + ", mVisible=" + mVisible
                 + "}";
     }
 

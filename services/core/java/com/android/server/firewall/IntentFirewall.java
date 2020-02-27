@@ -16,6 +16,7 @@
 
 package com.android.server.firewall;
 
+import android.annotation.NonNull;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -519,6 +520,11 @@ public class IntentFirewall {
         protected void sortResults(List<Rule> results) {
             // there's no need to sort the results
             return;
+        }
+
+        @Override
+        protected IntentFilter getIntentFilter(@NonNull FirewallIntentFilter input) {
+            return input;
         }
 
         public void queryByComponent(ComponentName componentName, List<Rule> candidateRules) {

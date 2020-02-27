@@ -19,7 +19,6 @@ package com.android.systemui.statusbar
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Point
 import android.graphics.Rect
 import android.renderscript.Allocation
 import android.renderscript.Element
@@ -27,9 +26,11 @@ import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
 import android.util.Log
 import android.util.MathUtils
+import android.util.Size
+import android.view.WindowManager
+import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
-
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -41,10 +42,9 @@ private const val DOWNSAMPLE = 6
 @Singleton
 class MediaArtworkProcessor @Inject constructor() {
 
-    private val mTmpSize = Point()
     private var mArtworkCache: Bitmap? = null
 
-    fun processArtwork(context: Context, artwork: Bitmap): Bitmap? {
+    fun processArtwork(context: Context, artwork: Bitmap, windowType: Int): Bitmap? {
         if (mArtworkCache != null) {
             return mArtworkCache
         }
@@ -54,9 +54,9 @@ class MediaArtworkProcessor @Inject constructor() {
         var output: Allocation? = null
         var inBitmap: Bitmap? = null
         try {
-            context.display.getSize(mTmpSize)
+            val size = getWindowSize(context, windowType)
             val rect = Rect(0, 0, artwork.width, artwork.height)
-            MathUtils.fitRect(rect, Math.max(mTmpSize.x / DOWNSAMPLE, mTmpSize.y / DOWNSAMPLE))
+            MathUtils.fitRect(rect, Math.max(size.width / DOWNSAMPLE, size.height / DOWNSAMPLE))
             inBitmap = Bitmap.createScaledBitmap(artwork, rect.width(), rect.height(),
                     true /* filter */)
             // Render script blurs only support ARGB_8888, we need a conversion if we got a
@@ -97,5 +97,16 @@ class MediaArtworkProcessor @Inject constructor() {
     fun clearCache() {
         mArtworkCache?.recycle()
         mArtworkCache = null
+    }
+
+    @VisibleForTesting
+    internal fun getWindowSize(context: Context, windowType: Int): Size {
+        val windowContext = context.display?.let {
+            context.createDisplayContext(it)
+                    .createWindowContext(windowType, null)
+        } ?: run { throw NullPointerException("Display is null") }
+        val windowManager = windowContext.getSystemService(WindowManager::class.java)
+                ?: run { throw NullPointerException("Null window manager") }
+        return windowManager.currentWindowMetrics.size
     }
 }

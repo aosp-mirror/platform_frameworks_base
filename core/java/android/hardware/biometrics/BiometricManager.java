@@ -25,7 +25,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -61,10 +60,20 @@ public class BiometricManager {
     public static final int BIOMETRIC_ERROR_NO_HARDWARE =
             BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
 
+    /**
+     * A security vulnerability has been discovered and the sensor is unavailable until a
+     * security update has addressed this issue. This error can be received if for example,
+     * authentication was requested with {@link Authenticators#BIOMETRIC_STRONG}, but the
+     * sensor's strength can currently only meet {@link Authenticators#BIOMETRIC_WEAK}.
+     */
+    public static final int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED =
+            BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
+
     @IntDef({BIOMETRIC_SUCCESS,
             BIOMETRIC_ERROR_HW_UNAVAILABLE,
             BIOMETRIC_ERROR_NONE_ENROLLED,
-            BIOMETRIC_ERROR_NO_HARDWARE})
+            BIOMETRIC_ERROR_NO_HARDWARE,
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED})
     @interface BiometricError {}
 
     /**
@@ -150,19 +159,6 @@ public class BiometricManager {
 
     private final Context mContext;
     private final IAuthService mService;
-    private final boolean mHasHardware;
-
-    /**
-     * @param context
-     * @return
-     * @hide
-     */
-    public static boolean hasBiometrics(Context context) {
-        final PackageManager pm = context.getPackageManager();
-        return pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)
-                || pm.hasSystemFeature(PackageManager.FEATURE_IRIS)
-                || pm.hasSystemFeature(PackageManager.FEATURE_FACE);
-    }
 
     /**
      * @hide
@@ -172,8 +168,6 @@ public class BiometricManager {
     public BiometricManager(Context context, IAuthService service) {
         mContext = context;
         mService = service;
-
-        mHasHardware = hasBiometrics(context);
     }
 
     /**
@@ -239,12 +233,8 @@ public class BiometricManager {
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            if (!mHasHardware) {
-                return BIOMETRIC_ERROR_NO_HARDWARE;
-            } else {
-                Slog.w(TAG, "hasEnrolledBiometrics(): Service not connected");
-                return BIOMETRIC_ERROR_HW_UNAVAILABLE;
-            }
+            Slog.w(TAG, "hasEnrolledBiometrics(): Service not connected");
+            return BIOMETRIC_ERROR_HW_UNAVAILABLE;
         }
     }
 
@@ -318,6 +308,26 @@ public class BiometricManager {
             }
         } else {
             Slog.w(TAG, "resetLockout(): Service not connected");
+        }
+    }
+
+    /**
+     * Get a list of AuthenticatorIDs for biometric authenticators which have 1) enrolled templates,
+     * and 2) meet the requirements for integrating with Keystore. The AuthenticatorIDs are known
+     * in Keystore land as SIDs, and are used during key generation.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public long[] getAuthenticatorIds() {
+        if (mService != null) {
+            try {
+                return mService.getAuthenticatorIds();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "getAuthenticatorIds(): Service not connected");
+            return new long[0];
         }
     }
 

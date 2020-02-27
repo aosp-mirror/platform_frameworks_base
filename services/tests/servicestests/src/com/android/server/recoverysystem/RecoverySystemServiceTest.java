@@ -36,6 +36,7 @@ import android.content.IntentSender;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.IRecoverySystemProgressListener;
+import android.os.IThermalService;
 import android.os.Looper;
 import android.os.PowerManager;
 
@@ -62,6 +63,7 @@ public class RecoverySystemServiceTest {
     private RecoverySystemService.UncryptSocket mUncryptSocket;
     private Context mContext;
     private IPowerManager mIPowerManager;
+    private IThermalService mIThermalService;
     private FileWriter mUncryptUpdateFileWriter;
     private LockSettingsInternal mLockSettingsInternal;
 
@@ -77,8 +79,9 @@ public class RecoverySystemServiceTest {
 
         Looper looper = InstrumentationRegistry.getContext().getMainLooper();
         mIPowerManager = mock(IPowerManager.class);
+        mIThermalService = mock(IThermalService.class);
         PowerManager powerManager = new PowerManager(mock(Context.class), mIPowerManager,
-                new Handler(looper));
+                mIThermalService, new Handler(looper));
 
         mRecoverySystemService = new RecoverySystemServiceTestable(mContext, mSystemProperties,
                 powerManager, mUncryptUpdateFileWriter, mUncryptSocket, mLockSettingsInternal);

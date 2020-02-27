@@ -23,6 +23,7 @@ import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.integrity.AppIntegrityManager.EXTRA_STATUS;
 import static android.content.integrity.AppIntegrityManager.STATUS_FAILURE;
 import static android.content.integrity.AppIntegrityManager.STATUS_SUCCESS;
+import static android.content.integrity.InstallerAllowedByManifestFormula.INSTALLER_CERTIFICATE_NOT_EVALUATED;
 import static android.content.integrity.IntegrityUtils.getHexDigest;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 
@@ -39,14 +40,11 @@ import android.content.integrity.Rule;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
-import android.content.pm.parsing.ApkParseUtils;
-import android.content.pm.parsing.PackageInfoUtils;
-import android.content.pm.parsing.ParsedPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -63,6 +61,9 @@ import com.android.server.LocalServices;
 import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.integrity.model.RuleMetadata;
+import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -78,8 +79,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
 public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
@@ -95,18 +98,18 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
      * This string will be used as the "installer" for formula evaluation when the app is being
      * installed via ADB.
      */
-    private static final String ADB_INSTALLER = "adb";
+    public static final String ADB_INSTALLER = "adb";
 
     private static final String TAG = "AppIntegrityManagerServiceImpl";
 
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
-    private static final String PACKAGE_INSTALLER = "com.google.android.packageinstaller";
     private static final String BASE_APK_FILE = "base.apk";
     private static final String ALLOWED_INSTALLERS_METADATA_NAME = "allowed-installers";
     private static final String ALLOWED_INSTALLER_DELIMITER = ",";
     private static final String INSTALLER_PACKAGE_CERT_DELIMITER = "\\|";
 
-    private static final String INSTALLER_CERT_NOT_APPLICABLE = "";
+    private static final Set<String> PACKAGE_INSTALLER = new HashSet<>(
+            Arrays.asList("com.google.android.packageinstaller", "com.android.packageinstaller"));
 
     // Access to files inside mRulesDir is protected by mRulesLock;
     private final Context mContext;
@@ -202,7 +205,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                                 intent,
                                 /* onFinished= */ null,
                                 /* handler= */ null);
-                    } catch (IntentSender.SendIntentException e) {
+                    } catch (Exception e) {
                         Slog.e(TAG, "Error sending status feedback.", e);
                     }
                 });
@@ -272,31 +275,26 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             List<String> installerCertificates =
                     getInstallerCertificateFingerprint(installerPackageName);
 
-            // TODO (b/148373316): Figure out what field contains which fields are populated for
-            // rotated and the multiple signers. Until then, return the first certificate.
-            String appCert = appCertificates.isEmpty() ? "" : appCertificates.get(0);
-            String installerCert =
-                    installerCertificates.isEmpty() ? "" : installerCertificates.get(0);
-
             Slog.w(TAG, appCertificates.toString());
 
             AppInstallMetadata.Builder builder = new AppInstallMetadata.Builder();
 
             builder.setPackageName(getPackageNameNormalized(packageName));
-            builder.setAppCertificate(appCert);
+            builder.setAppCertificates(appCertificates);
             builder.setVersionCode(intent.getLongExtra(EXTRA_LONG_VERSION_CODE, -1));
             builder.setInstallerName(getPackageNameNormalized(installerPackageName));
-            builder.setInstallerCertificate(installerCert);
+            builder.setInstallerCertificates(installerCertificates);
             builder.setIsPreInstalled(isSystemApp(packageName));
+            builder.setAllowedInstallersAndCert(getAllowedInstallers(packageInfo));
 
             AppInstallMetadata appInstallMetadata = builder.build();
-            Map<String, String> allowedInstallers = getAllowedInstallers(packageInfo);
 
             Slog.i(
                     TAG,
-                    "To be verified: " + appInstallMetadata + " installers " + allowedInstallers);
+                    "To be verified: " + appInstallMetadata + " installers " + getAllowedInstallers(
+                            packageInfo));
             IntegrityCheckResult result =
-                    mEvaluationEngine.evaluate(appInstallMetadata, allowedInstallers);
+                    mEvaluationEngine.evaluate(appInstallMetadata);
             Slog.i(
                     TAG,
                     "Integrity check result: "
@@ -307,7 +305,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             FrameworkStatsLog.write(
                     FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED,
                     packageName,
-                    appCert,
+                    appCertificates.toString(),
                     appInstallMetadata.getVersionCode(),
                     installerPackageName,
                     result.getLoggingResponse(),
@@ -382,7 +380,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         // A common way for apps to install packages is to send an intent to PackageInstaller. In
         // that case, the installer will always show up as PackageInstaller which is not what we
         // want.
-        if (installer.equals(PACKAGE_INSTALLER)) {
+        if (PACKAGE_INSTALLER.contains(installer)) {
             int originatingUid = intent.getIntExtra(EXTRA_ORIGINATING_UID, -1);
             if (originatingUid < 0) {
                 Slog.e(TAG, "Installer is package installer but originating UID not found.");
@@ -455,9 +453,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                         String packageName = getPackageNameNormalized(packageAndCert[0]);
                         String cert = packageAndCert[1];
                         packageCertMap.put(packageName, cert);
-                    } else if (packageAndCert.length == 1
-                            && packageAndCert[0].equals(ADB_INSTALLER)) {
-                        packageCertMap.put(ADB_INSTALLER, INSTALLER_CERT_NOT_APPLICABLE);
+                    } else if (packageAndCert.length == 1) {
+                        packageCertMap.put(getPackageNameNormalized(packageAndCert[0]),
+                                INSTALLER_CERTIFICATE_NOT_EVALUATED);
                     }
                 }
             }
@@ -514,13 +512,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             throw new IllegalArgumentException("Installation path is null, package not found");
         }
 
-        PackageParser parser = new PackageParser();
+        PackageParser2 parser = new PackageParser2(null, false, null, null, null);
         try {
-            ParsedPackage pkg = parser.parseParsedPackage(installationPath, 0, false);
+            ParsedPackage pkg = parser.parsePackage(installationPath, 0, false);
             int flags = PackageManager.GET_SIGNING_CERTIFICATES | PackageManager.GET_META_DATA;
-            ApkParseUtils.collectCertificates(pkg, false);
+            pkg.setSigningDetails(ParsingPackageUtils.collectCertificates(pkg, false));
             return PackageInfoUtils.generate(pkg, null, flags, 0, 0, null, new PackageUserState(),
-                    UserHandle.getCallingUserId());
+                    UserHandle.getCallingUserId(), null);
         } catch (Exception e) {
             throw new IllegalArgumentException("Exception reading " + dataUri, e);
         }

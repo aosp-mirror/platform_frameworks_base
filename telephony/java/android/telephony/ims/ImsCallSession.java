@@ -16,6 +16,8 @@
 
 package android.telephony.ims;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.CallQuality;
@@ -451,6 +453,21 @@ public class ImsCallSession {
         }
 
         /**
+         * Received success response for call transfer request.
+         */
+        public void callSessionTransferred(@NonNull ImsCallSession session) {
+            // no-op
+        }
+
+        /**
+         * Received failure response for call transfer request.
+         */
+        public void callSessionTransferFailed(@NonNull ImsCallSession session,
+                @Nullable ImsReasonInfo reasonInfo) {
+            // no-op
+        }
+
+        /**
          * Called when the IMS service reports a change to the call quality.
          */
         public void callQualityChanged(CallQuality callQuality) {
@@ -790,6 +807,41 @@ public class ImsCallSession {
 
         try {
             miSession.reject(reason);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Transfers an ongoing call.
+     *
+     * @param number number to be transferred to.
+     * @param isConfirmationRequired indicates blind or assured transfer.
+     */
+    public void transfer(@NonNull String number, boolean isConfirmationRequired) {
+        if (mClosed) {
+            return;
+        }
+
+        try {
+            miSession.transfer(number, isConfirmationRequired);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Transfers a call to another ongoing call.
+     *
+     * @param transferToSession the other ImsCallSession to which this session will be transferred.
+     */
+    public void transfer(@NonNull ImsCallSession transferToSession) {
+        if (mClosed) {
+            return;
+        }
+
+        try {
+            if (transferToSession != null) {
+                miSession.consultativeTransfer(transferToSession.getSession());
+            }
         } catch (RemoteException e) {
         }
     }
@@ -1407,6 +1459,20 @@ public class ImsCallSession {
         public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile) {
             if (mListener != null) {
                 mListener.callSessionRttAudioIndicatorChanged(profile);
+            }
+        }
+
+        @Override
+        public void callSessionTransferred() {
+            if (mListener != null) {
+                mListener.callSessionTransferred(ImsCallSession.this);
+            }
+        }
+
+        @Override
+        public void callSessionTransferFailed(@Nullable ImsReasonInfo reasonInfo) {
+            if (mListener != null) {
+                mListener.callSessionTransferFailed(ImsCallSession.this, reasonInfo);
             }
         }
 

@@ -132,6 +132,14 @@ public interface BiometricConstants {
     int BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL = 14;
 
     /**
+     * A security vulnerability has been discovered and the sensor is unavailable until a
+     * security update has addressed this issue. This error can be received if for example,
+     * authentication was requested with {@link Authenticators#BIOMETRIC_STRONG}, but the
+     * sensor's strength can currently only meet {@link Authenticators#BIOMETRIC_WEAK}.
+     */
+    int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED = 15;
+
+    /**
      * This constant is only used by SystemUI. It notifies SystemUI that authentication was paused
      * because the authentication attempt was unsuccessful.
      * @hide

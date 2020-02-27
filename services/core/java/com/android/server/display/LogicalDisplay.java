@@ -269,6 +269,7 @@ final class LogicalDisplay {
 
             mBaseDisplayInfo.type = deviceInfo.type;
             mBaseDisplayInfo.address = deviceInfo.address;
+            mBaseDisplayInfo.deviceProductInfo = deviceInfo.deviceProductInfo;
             mBaseDisplayInfo.name = deviceInfo.name;
             mBaseDisplayInfo.uniqueId = deviceInfo.uniqueId;
             mBaseDisplayInfo.appWidth = maskedWidth;

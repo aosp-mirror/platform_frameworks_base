@@ -1550,6 +1550,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     private static native long nativeCopy(long destNativePtr, long sourceNativePtr,
             boolean keepHistory);
     @CriticalNative
+    private static native int nativeGetId(long nativePtr);
+    @CriticalNative
     private static native int nativeGetDeviceId(long nativePtr);
     @CriticalNative
     private static native int nativeGetSource(long nativePtr);
@@ -2022,6 +2024,12 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         if (scale != 1.0f) {
             nativeScale(mNativePtr, scale);
         }
+    }
+
+    /** @hide */
+    @Override
+    public int getId() {
+        return nativeGetId(mNativePtr);
     }
 
     /** {@inheritDoc} */

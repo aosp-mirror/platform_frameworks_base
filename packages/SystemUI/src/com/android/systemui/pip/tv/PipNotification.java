@@ -50,7 +50,7 @@ public class PipNotification {
     private static final String ACTION_MENU = "PipNotification.menu";
     private static final String ACTION_CLOSE = "PipNotification.close";
 
-    private final PipManager mPipManager = PipManager.getInstance();
+    private final PipManager mPipManager;
 
     private final NotificationManager mNotificationManager;
     private final Notification.Builder mNotificationBuilder;
@@ -144,7 +144,8 @@ public class PipNotification {
         }
     };
 
-    public PipNotification(Context context, BroadcastDispatcher broadcastDispatcher) {
+    public PipNotification(Context context, BroadcastDispatcher broadcastDispatcher,
+            PipManager pipManager) {
         mNotificationManager = (NotificationManager) context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
 
@@ -156,6 +157,7 @@ public class PipNotification {
                         .setContentIntent(createPendingIntent(context, ACTION_MENU))
                         .setDeleteIntent(createPendingIntent(context, ACTION_CLOSE)));
 
+        mPipManager = pipManager;
         mPipManager.addListener(mPipListener);
         mPipManager.addMediaListener(mPipMediaListener);
 

@@ -43,7 +43,7 @@ private:
 class Device {
 public:
     static std::unique_ptr<Device> open(int32_t id, const char* name, int32_t vid, int32_t pid,
-                                        const std::vector<uint8_t>& descriptor,
+                                        uint16_t bus, const std::vector<uint8_t>& descriptor,
                                         std::unique_ptr<DeviceCallback> callback);
 
     ~Device();

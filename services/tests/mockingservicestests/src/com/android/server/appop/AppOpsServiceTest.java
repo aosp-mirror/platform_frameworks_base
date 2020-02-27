@@ -50,7 +50,6 @@ import android.app.AppOpsManager.PackageOps;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -63,6 +62,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.junit.After;
 import org.junit.Before;

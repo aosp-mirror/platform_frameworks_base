@@ -73,7 +73,7 @@ public class DisplayModeDirector {
     private static final int GLOBAL_ID = -1;
 
     // The tolerance within which we consider something approximately equals.
-    private static final float EPSILON = 0.01f;
+    private static final float FLOAT_TOLERANCE = 0.01f;
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -178,6 +178,8 @@ public class DisplayModeDirector {
             float maxRefreshRate = Float.POSITIVE_INFINITY;
             int lowestConsideredPriority = Vote.MIN_PRIORITY;
             while (lowestConsideredPriority <= Vote.MAX_PRIORITY) {
+                minRefreshRate = 0f;
+                maxRefreshRate = Float.POSITIVE_INFINITY;
                 int height = Vote.INVALID_SIZE;
                 int width = Vote.INVALID_SIZE;
 
@@ -267,8 +269,8 @@ public class DisplayModeDirector {
             // Some refresh rates are calculated based on frame timings, so they aren't *exactly*
             // equal to expected refresh rate. Given that, we apply a bit of tolerance to this
             // comparison.
-            if (refreshRate < (minRefreshRate - EPSILON)
-                    || refreshRate > (maxRefreshRate + EPSILON)) {
+            if (refreshRate < (minRefreshRate - FLOAT_TOLERANCE)
+                    || refreshRate > (maxRefreshRate + FLOAT_TOLERANCE)) {
                 if (DEBUG) {
                     Slog.w(TAG, "Discarding mode " + mode.getModeId()
                             + ", outside refresh rate bounds"
@@ -487,11 +489,17 @@ public class DisplayModeDirector {
         public RefreshRateRange() {}
 
         public RefreshRateRange(float min, float max) {
-            if (min < 0 || max < 0 || min > max) {
+            if (min < 0 || max < 0 || min > max + FLOAT_TOLERANCE) {
                 Slog.e(TAG, "Wrong values for min and max when initializing RefreshRateRange : "
                         + min + " " + max);
                 this.min = this.max = 0;
                 return;
+            }
+            if (min > max) {
+                // Min and max are within epsilon of each other, but in the wrong order.
+                float t = min;
+                min = max;
+                max = t;
             }
             this.min = min;
             this.max = max;
@@ -946,9 +954,9 @@ public class DisplayModeDirector {
      * {@link R.array#config_ambientThresholdsOfPeakRefreshRate}.
      */
     private class BrightnessObserver extends ContentObserver {
+        // TODO: brightnessfloat: change this to the float setting
         private final Uri mDisplayBrightnessSetting =
                 Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS);
-
         private final static int LIGHT_SENSOR_RATE_MS = 250;
         private int[] mDisplayBrightnessThresholds;
         private int[] mAmbientBrightnessThresholds;
@@ -1174,7 +1182,7 @@ public class DisplayModeDirector {
 
             return false;
         }
-
+        // TODO: brightnessfloat: make it use float not int
         private void onBrightnessChangedLocked() {
             int brightness = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.SCREEN_BRIGHTNESS, -1);

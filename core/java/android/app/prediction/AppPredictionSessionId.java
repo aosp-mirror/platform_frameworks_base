@@ -22,6 +22,8 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * The id for an app prediction session. See {@link AppPredictor}.
  *
@@ -32,18 +34,28 @@ import android.os.Parcelable;
 public final class AppPredictionSessionId implements Parcelable {
 
     private final String mId;
+    private final int mUserId;
 
     /**
      * Creates a new id for a prediction session.
      *
      * @hide
      */
-    public AppPredictionSessionId(@NonNull String id) {
+    public AppPredictionSessionId(@NonNull final String id, final int userId) {
         mId = id;
+        mUserId = userId;
     }
 
     private AppPredictionSessionId(Parcel p) {
         mId = p.readString();
+        mUserId = p.readInt();
+    }
+
+    /**
+     * @hide
+     */
+    public int getUserId() {
+        return mUserId;
     }
 
     @Override
@@ -51,17 +63,17 @@ public final class AppPredictionSessionId implements Parcelable {
         if (!getClass().equals(o != null ? o.getClass() : null)) return false;
 
         AppPredictionSessionId other = (AppPredictionSessionId) o;
-        return mId.equals(other.mId);
+        return mId.equals(other.mId) && mUserId == other.mUserId;
     }
 
     @Override
     public @NonNull String toString() {
-        return mId;
+        return mId + "," + mUserId;
     }
 
     @Override
     public int hashCode() {
-        return mId.hashCode();
+        return Objects.hash(mId, mUserId);
     }
 
     @Override
@@ -72,6 +84,7 @@ public final class AppPredictionSessionId implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mId);
+        dest.writeInt(mUserId);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<AppPredictionSessionId> CREATOR =

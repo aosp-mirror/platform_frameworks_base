@@ -37,6 +37,10 @@ typedef uint16_t EntryId;     // eeee in 0xpptteeee
 
 namespace utils {
 
+// Returns whether the Res_value::data_type represents a dynamic or regular resource reference.
+bool IsReference(uint8_t data_type);
+
+// Converts the Res_value::data_type to a human-readable string representation.
 StringPiece DataTypeToString(uint8_t data_type);
 
 struct OverlayManifestInfo {

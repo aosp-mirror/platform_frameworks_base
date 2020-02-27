@@ -73,10 +73,6 @@ public class UserTile extends QSTileImpl<State> implements UserInfoController.On
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     public CharSequence getTileLabel() {
         return getState().label;
     }

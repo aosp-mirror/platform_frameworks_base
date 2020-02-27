@@ -53,7 +53,10 @@ public final class DecorContextTest {
 
     @Test
     public void testDecorContextWithDefaultDisplay() {
-        DecorContext context = new DecorContext(mContext.getApplicationContext(), mContext);
+        Display defaultDisplay = new Display(DisplayManagerGlobal.getInstance(), DEFAULT_DISPLAY,
+                new DisplayInfo(), DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
+        DecorContext context = new DecorContext(mContext.getApplicationContext(),
+                mContext.createDisplayContext(defaultDisplay));
 
         assertDecorContextDisplay(DEFAULT_DISPLAY, context);
     }

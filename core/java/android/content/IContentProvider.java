@@ -45,7 +45,7 @@ public interface IContentProvider extends IInterface {
     public String getType(Uri url) throws RemoteException;
 
     /**
-     * An oneway version of getType. The functionality is exactly the same, except that the
+     * A oneway version of getType. The functionality is exactly the same, except that the
      * call returns immediately, and the resulting type is returned when available via
      * a binder callback.
      */
@@ -126,6 +126,14 @@ public interface IContentProvider extends IInterface {
     public Uri canonicalize(String callingPkg, @Nullable String featureId, Uri uri)
             throws RemoteException;
 
+    /**
+     * A oneway version of canonicalize. The functionality is exactly the same, except that the
+     * call returns immediately, and the resulting type is returned when available via
+     * a binder callback.
+     */
+    void canonicalizeAsync(String callingPkg, @Nullable String featureId, Uri uri,
+            RemoteCallback callback) throws RemoteException;
+
     public Uri uncanonicalize(String callingPkg, @Nullable String featureId, Uri uri)
             throws RemoteException;
 
@@ -162,4 +170,5 @@ public interface IContentProvider extends IInterface {
     static final int REFRESH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 26;
     static final int CHECK_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 27;
     int GET_TYPE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 28;
+    int CANONICALIZE_ASYNC_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 29;
 }

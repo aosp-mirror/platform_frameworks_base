@@ -55,6 +55,11 @@ message NotificationHistoryProto {
     // The small icon of the notification
     optional Icon icon = 12;
 
+    // The conversation id, if any, that this notification belongs to
+    optional string conversation_id = 13;
+    // conversation_id_index contains the index + 1 of the conversation id in the string pool
+    optional int32 conversation_id_index = 14;
+
     // Matches the constants of android.graphics.drawable.Icon
     enum ImageTypeEnum {
       TYPE_UNKNOWN = 0;

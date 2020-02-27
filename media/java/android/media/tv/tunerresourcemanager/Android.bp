@@ -1,0 +1,17 @@
+filegroup {
+    name: "framework-media-tv-tunerresourcemanager-sources",
+    srcs: [
+        "*.java",
+        "*.aidl",
+    ],
+    path: ".",
+}
+
+java_library {
+    name: "framework-media-tv-trm-sources",
+    srcs: [":framework-media-tv-tunerresourcemanager-sources"],
+    installable: true,
+    visibility: [
+        "//frameworks/base",
+    ],
+}

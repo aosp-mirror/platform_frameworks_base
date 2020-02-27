@@ -109,6 +109,8 @@ import android.media.session.MediaSessionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
+import android.media.tv.tunerresourcemanager.ITunerResourceManager;
+import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityThread;
@@ -130,7 +132,7 @@ import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
 import android.net.wifi.WifiFrameworkInitializer;
-import android.net.wifi.wificond.WifiCondManager;
+import android.net.wifi.nl80211.WifiNl80211Manager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -146,6 +148,7 @@ import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
 import android.os.ISystemUpdateManager;
+import android.os.IThermalService;
 import android.os.IUserManager;
 import android.os.IncidentManager;
 import android.os.PowerManager;
@@ -574,10 +577,12 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<PowerManager>() {
             @Override
             public PowerManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.POWER_SERVICE);
-                IPowerManager service = IPowerManager.Stub.asInterface(b);
-                return new PowerManager(ctx.getOuterContext(),
-                        service, ctx.mMainThread.getHandler());
+                IBinder powerBinder = ServiceManager.getServiceOrThrow(Context.POWER_SERVICE);
+                IPowerManager powerService = IPowerManager.Stub.asInterface(powerBinder);
+                IBinder thermalBinder = ServiceManager.getServiceOrThrow(Context.THERMAL_SERVICE);
+                IThermalService thermalService = IThermalService.Stub.asInterface(thermalBinder);
+                return new PowerManager(ctx.getOuterContext(), powerService, thermalService,
+                        ctx.mMainThread.getHandler());
             }});
 
         registerService(Context.RECOVERY_SERVICE, RecoverySystem.class,
@@ -759,11 +764,11 @@ public final class SystemServiceRegistry {
                 return new EthernetManager(ctx.getOuterContext(), service);
             }});
 
-        registerService(Context.WIFI_COND_SERVICE, WifiCondManager.class,
-                new CachedServiceFetcher<WifiCondManager>() {
+        registerService(Context.WIFI_NL80211_SERVICE, WifiNl80211Manager.class,
+                new CachedServiceFetcher<WifiNl80211Manager>() {
                     @Override
-                    public WifiCondManager createService(ContextImpl ctx) {
-                        return new WifiCondManager(ctx.getOuterContext());
+                    public WifiNl80211Manager createService(ContextImpl ctx) {
+                        return new WifiNl80211Manager(ctx.getOuterContext());
                     }
                 });
 
@@ -914,17 +919,11 @@ public final class SystemServiceRegistry {
                     @Override
                     public BiometricManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        if (BiometricManager.hasBiometrics(ctx)) {
-                            final IBinder binder =
-                                    ServiceManager.getServiceOrThrow(Context.AUTH_SERVICE);
-                            final IAuthService service =
-                                    IAuthService.Stub.asInterface(binder);
-                            return new BiometricManager(ctx.getOuterContext(), service);
-                        } else {
-                            // Allow access to the manager when service is null. This saves memory
-                            // on devices without biometric hardware.
-                            return new BiometricManager(ctx.getOuterContext(), null);
-                        }
+                        final IBinder binder =
+                                ServiceManager.getServiceOrThrow(Context.AUTH_SERVICE);
+                        final IAuthService service =
+                                IAuthService.Stub.asInterface(binder);
+                        return new BiometricManager(ctx.getOuterContext(), service);
                     }
                 });
 
@@ -935,6 +934,17 @@ public final class SystemServiceRegistry {
                 IBinder iBinder = ServiceManager.getServiceOrThrow(Context.TV_INPUT_SERVICE);
                 ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
                 return new TvInputManager(service, ctx.getUserId());
+            }});
+
+        registerService(Context.TV_TUNER_RESOURCE_MGR_SERVICE, TunerResourceManager.class,
+                new CachedServiceFetcher<TunerResourceManager>() {
+            @Override
+            public TunerResourceManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                IBinder iBinder =
+                        ServiceManager.getServiceOrThrow(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
+                ITunerResourceManager service = ITunerResourceManager.Stub.asInterface(iBinder);
+                return new TunerResourceManager(service, ctx.getUserId());
             }});
 
         registerService(Context.NETWORK_SCORE_SERVICE, NetworkScoreManager.class,
@@ -1320,6 +1330,13 @@ public final class SystemServiceRegistry {
                             throws ServiceNotFoundException {
                         IBinder b = ServiceManager.getServiceOrThrow(Context.APP_INTEGRITY_SERVICE);
                         return new AppIntegrityManager(IAppIntegrityManager.Stub.asInterface(b));
+                    }});
+        registerService(Context.DREAM_SERVICE, DreamManager.class,
+                new CachedServiceFetcher<DreamManager>() {
+                    @Override
+                    public DreamManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new DreamManager(ctx);
                     }});
 
         sInitializing = true;

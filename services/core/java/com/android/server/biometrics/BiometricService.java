@@ -16,15 +16,14 @@
 
 package com.android.server.biometrics;
 
-import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
-import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.UserSwitchObserver;
@@ -32,7 +31,6 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -82,6 +80,25 @@ public class BiometricService extends SystemService {
 
     static final String TAG = "BiometricService";
     private static final boolean DEBUG = true;
+
+    private static final int BIOMETRIC_NO_HARDWARE = 0;
+    private static final int BIOMETRIC_OK = 1;
+    private static final int BIOMETRIC_DISABLED_BY_DEVICE_POLICY = 2;
+    private static final int BIOMETRIC_INSUFFICIENT_STRENGTH = 3;
+    private static final int BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE = 4;
+    private static final int BIOMETRIC_HARDWARE_NOT_DETECTED = 5;
+    private static final int BIOMETRIC_NOT_ENROLLED = 6;
+    private static final int BIOMETRIC_NOT_ENABLED_FOR_APPS = 7;
+
+    @IntDef({BIOMETRIC_NO_HARDWARE,
+            BIOMETRIC_OK,
+            BIOMETRIC_DISABLED_BY_DEVICE_POLICY,
+            BIOMETRIC_INSUFFICIENT_STRENGTH,
+            BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE,
+            BIOMETRIC_HARDWARE_NOT_DETECTED,
+            BIOMETRIC_NOT_ENROLLED,
+            BIOMETRIC_NOT_ENABLED_FOR_APPS})
+    @interface BiometricStatus {}
 
     private static final int MSG_ON_AUTHENTICATION_SUCCEEDED = 2;
     private static final int MSG_ON_AUTHENTICATION_REJECTED = 3;
@@ -206,7 +223,7 @@ public class BiometricService extends SystemService {
         }
 
         boolean isAllowDeviceCredential() {
-            return Utils.isDeviceCredentialAllowed(mBundle);
+            return Utils.isCredentialRequested(mBundle);
         }
     }
 
@@ -318,7 +335,10 @@ public class BiometricService extends SystemService {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleCancelAuthentication(
                             (IBinder) args.arg1 /* token */,
-                            (String) args.arg2 /* opPackageName */);
+                            (String) args.arg2 /* opPackageName */,
+                            args.argi1 /* callingUid */,
+                            args.argi2 /* callingPid */,
+                            args.argi3 /* callingUserId */);
                     args.recycle();
                     break;
                 }
@@ -372,8 +392,12 @@ public class BiometricService extends SystemService {
          * strength.
          * @return a bitfield, see {@link Authenticators}
          */
-        public int getActualStrength() {
+        int getActualStrength() {
             return OEMStrength | updatedStrength;
+        }
+
+        boolean isDowngraded() {
+            return OEMStrength != updatedStrength;
         }
 
         /**
@@ -381,7 +405,7 @@ public class BiometricService extends SystemService {
          * is checked.
          * @param newStrength
          */
-        public void updateStrength(int newStrength) {
+        void updateStrength(int newStrength) {
             String log = "updateStrength: Before(" + toString() + ")";
             updatedStrength = newStrength;
             log += " After(" + toString() + ")";
@@ -543,8 +567,7 @@ public class BiometricService extends SystemService {
     final IBiometricServiceReceiverInternal mInternalReceiver =
             new IBiometricServiceReceiverInternal.Stub() {
         @Override
-        public void onAuthenticationSucceeded(boolean requireConfirmation, byte[] token)
-                throws RemoteException {
+        public void onAuthenticationSucceeded(boolean requireConfirmation, byte[] token) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = requireConfirmation;
             args.arg2 = token;
@@ -552,8 +575,7 @@ public class BiometricService extends SystemService {
         }
 
         @Override
-        public void onAuthenticationFailed()
-                throws RemoteException {
+        public void onAuthenticationFailed() {
             Slog.v(TAG, "onAuthenticationFailed");
             mHandler.obtainMessage(MSG_ON_AUTHENTICATION_REJECTED).sendToTarget();
         }
@@ -624,22 +646,9 @@ public class BiometricService extends SystemService {
 
         @Override // Binder call
         public void authenticate(IBinder token, long sessionId, int userId,
-                IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle)
-                throws RemoteException {
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final int callingUserId = UserHandle.getCallingUserId();
-
-            // In the BiometricServiceBase, check do the AppOps and foreground check.
-            if (userId == callingUserId) {
-                // Check the USE_BIOMETRIC permission here.
-                checkPermission();
-            } else {
-                // Only allow internal clients to authenticate with a different userId
-                Slog.w(TAG, "User " + callingUserId + " is requesting authentication of userid: "
-                        + userId);
-                checkInternalPermission();
-            }
+                IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
+                int callingUid, int callingPid, int callingUserId) {
+            checkInternalPermission();
 
             if (token == null || receiver == null || opPackageName == null || bundle == null) {
                 Slog.e(TAG, "Unable to authenticate, one or more null arguments");
@@ -650,19 +659,10 @@ public class BiometricService extends SystemService {
                 throw new SecurityException("Invalid authenticator configuration");
             }
 
-            if (bundle.getBoolean(BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS)) {
-                checkInternalPermission();
-            }
-
             Utils.combineAuthenticatorBundles(bundle);
 
-            // Check the usage of this in system server. Need to remove this check if it becomes a
-            // public API.
-            final boolean useDefaultTitle =
-                    bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false);
-            if (useDefaultTitle) {
-                checkInternalPermission();
-                // Set the default title if necessary
+            // Set the default title if necessary.
+            if (bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false)) {
                 if (TextUtils.isEmpty(bundle.getCharSequence(BiometricPrompt.KEY_TITLE))) {
                     bundle.putCharSequence(BiometricPrompt.KEY_TITLE,
                             getContext().getString(R.string.biometric_dialog_default_title));
@@ -684,28 +684,27 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public void cancelAuthentication(IBinder token, String opPackageName)
-                throws RemoteException {
-            checkPermission();
+        public void cancelAuthentication(IBinder token, String opPackageName,
+                int callingUid, int callingPid, int callingUserId) {
+            checkInternalPermission();
 
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = token;
             args.arg2 = opPackageName;
+            args.argi1 = callingUid;
+            args.argi2 = callingPid;
+            args.argi3 = callingUserId;
             mHandler.obtainMessage(MSG_CANCEL_AUTHENTICATION, args).sendToTarget();
         }
 
         @Override // Binder call
-        public int canAuthenticate(String opPackageName, int userId,
+        public int canAuthenticate(String opPackageName, int userId, int callingUserId,
                 @Authenticators.Types int authenticators) {
-            Slog.d(TAG, "canAuthenticate: User=" + userId
-                    + ", Caller=" + UserHandle.getCallingUserId()
-                    + ", Authenticators=" + authenticators);
+            checkInternalPermission();
 
-            if (userId != UserHandle.getCallingUserId()) {
-                checkInternalPermission();
-            } else {
-                checkPermission();
-            }
+            Slog.d(TAG, "canAuthenticate: User=" + userId
+                    + ", Caller=" + callingUserId
+                    + ", Authenticators=" + authenticators);
 
             if (!Utils.isValidAuthenticatorConfig(authenticators)) {
                 throw new SecurityException("Invalid authenticator configuration");
@@ -715,14 +714,11 @@ public class BiometricService extends SystemService {
             bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
 
             int biometricConstantsResult = BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
-            final long ident = Binder.clearCallingIdentity();
             try {
                 biometricConstantsResult = checkAndGetAuthenticators(userId, bundle, opPackageName,
                         false /* checkDevicePolicyManager */).second;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
 
             return Utils.biometricConstantsToBiometricManager(biometricConstantsResult);
@@ -732,7 +728,6 @@ public class BiometricService extends SystemService {
         public boolean hasEnrolledBiometrics(int userId, String opPackageName) {
             checkInternalPermission();
 
-            final long ident = Binder.clearCallingIdentity();
             try {
                 for (AuthenticatorWrapper authenticator : mAuthenticators) {
                     if (authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
@@ -741,9 +736,8 @@ public class BiometricService extends SystemService {
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
+
             return false;
         }
 
@@ -788,17 +782,19 @@ public class BiometricService extends SystemService {
             }
 
             mAuthenticators.add(new AuthenticatorWrapper(id, modality, strength, authenticator));
+
+            mBiometricStrengthController.updateStrengths();
         }
 
         @Override // Binder call
-        public void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback)
-                throws RemoteException {
+        public void registerEnabledOnKeyguardCallback(
+                IBiometricEnabledOnKeyguardCallback callback, int callingUserId) {
             checkInternalPermission();
+
             mEnabledOnKeyguardCallbacks.add(new EnabledOnKeyguardCallback(callback));
             try {
                 callback.onChanged(BiometricSourceType.FACE,
-                        mSettingObserver.getFaceEnabledOnKeyguard(),
-                        UserHandle.getCallingUserId());
+                        mSettingObserver.getFaceEnabledOnKeyguard(), callingUserId);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
             }
@@ -807,45 +803,60 @@ public class BiometricService extends SystemService {
         @Override // Binder call
         public void setActiveUser(int userId) {
             checkInternalPermission();
-            final long ident = Binder.clearCallingIdentity();
+
             try {
                 for (AuthenticatorWrapper authenticator : mAuthenticators) {
                     authenticator.impl.setActiveUser(userId);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
         }
 
         @Override // Binder call
         public void resetLockout(byte[] token) {
             checkInternalPermission();
-            final long ident = Binder.clearCallingIdentity();
+
             try {
                 for (AuthenticatorWrapper authenticator : mAuthenticators) {
                     authenticator.impl.resetLockout(token);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        @Override // Binder call
+        public long[] getAuthenticatorIds() {
+            checkInternalPermission();
+
+            final List<Long> ids = new ArrayList<>();
+            for (AuthenticatorWrapper authenticator : mAuthenticators) {
+                try {
+                    final long id = authenticator.impl.getAuthenticatorId();
+                    if (Utils.isAtLeastStrength(authenticator.getActualStrength(),
+                            Authenticators.BIOMETRIC_STRONG) && id != 0) {
+                        ids.add(id);
+                    } else {
+                        Slog.d(TAG, "Authenticator " + authenticator + ", authenticatorID " + id
+                                + " cannot participate in Keystore operations");
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "RemoteException", e);
+                }
+            }
+
+            long[] result = new long[ids.size()];
+            for (int i = 0; i < ids.size(); i++) {
+                result[i] = ids.get(i);
+            }
+            return result;
         }
     }
 
     private void checkInternalPermission() {
         getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL,
                 "Must have USE_BIOMETRIC_INTERNAL permission");
-    }
-
-    private void checkPermission() {
-        if (getContext().checkCallingOrSelfPermission(USE_FINGERPRINT)
-                != PackageManager.PERMISSION_GRANTED) {
-            getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC,
-                    "Must have USE_BIOMETRIC permission");
-        }
     }
 
     /**
@@ -1007,6 +1018,79 @@ public class BiometricService extends SystemService {
         return isBiometricDisabled;
     }
 
+    private static int biometricStatusToBiometricConstant(@BiometricStatus int status) {
+        switch (status) {
+            case BIOMETRIC_NO_HARDWARE:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
+            case BIOMETRIC_OK:
+                return BiometricConstants.BIOMETRIC_SUCCESS;
+            case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+            case BIOMETRIC_INSUFFICIENT_STRENGTH:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
+            case BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE:
+                return BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
+            case BIOMETRIC_HARDWARE_NOT_DETECTED:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+            case BIOMETRIC_NOT_ENROLLED:
+                return BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS;
+            case BIOMETRIC_NOT_ENABLED_FOR_APPS:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+            default:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+        }
+    }
+
+    /**
+     * Returns the status of the authenticator, with errors returned in a specific priority order.
+     * For example, {@link #BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE} is only returned
+     * if it has enrollments, and is enabled for apps.
+     *
+     * We should only return the modality if the authenticator should be exposed. e.g.
+     * BIOMETRIC_NOT_ENROLLED_FOR_APPS should not expose the authenticator's type.
+     *
+     * @return A Pair with `first` being modality, and `second` being @BiometricStatus
+     */
+    private Pair<Integer, Integer> getStatusForBiometricAuthenticator(
+            AuthenticatorWrapper authenticator, int userId, String opPackageName,
+            boolean checkDevicePolicyManager, int requestedStrength) {
+        if (checkDevicePolicyManager) {
+            if (isBiometricDisabledByDevicePolicy(authenticator.modality, userId)) {
+                return new Pair<>(TYPE_NONE, BIOMETRIC_DISABLED_BY_DEVICE_POLICY);
+            }
+        }
+
+        final boolean wasStrongEnough =
+                Utils.isAtLeastStrength(authenticator.OEMStrength, requestedStrength);
+        final boolean isStrongEnough =
+                Utils.isAtLeastStrength(authenticator.getActualStrength(), requestedStrength);
+
+        if (wasStrongEnough && !isStrongEnough) {
+            return new Pair<>(authenticator.modality,
+                    BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE);
+        } else if (!wasStrongEnough) {
+            return new Pair<>(TYPE_NONE, BIOMETRIC_INSUFFICIENT_STRENGTH);
+        }
+
+        try {
+            if (!authenticator.impl.isHardwareDetected(opPackageName)) {
+                return new Pair<>(authenticator.modality, BIOMETRIC_HARDWARE_NOT_DETECTED);
+            }
+
+            if (!authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
+                return new Pair<>(authenticator.modality, BIOMETRIC_NOT_ENROLLED);
+            }
+        } catch (RemoteException e) {
+            return new Pair<>(authenticator.modality, BIOMETRIC_HARDWARE_NOT_DETECTED);
+        }
+
+        if (!isEnabledForApp(authenticator.modality, userId)) {
+            return new Pair<>(TYPE_NONE, BIOMETRIC_NOT_ENABLED_FOR_APPS);
+        }
+
+        return new Pair<>(authenticator.modality, BIOMETRIC_OK);
+    }
+
     /**
      * Depending on the requested authentication (credential/biometric combination), checks their
      * availability.
@@ -1029,10 +1113,9 @@ public class BiometricService extends SystemService {
     private Pair<Integer, Integer> checkAndGetAuthenticators(int userId, Bundle bundle,
             String opPackageName, boolean checkDevicePolicyManager) throws RemoteException {
 
-        final boolean biometricRequested = Utils.isBiometricAllowed(bundle);
-        final boolean credentialRequested = Utils.isDeviceCredentialAllowed(bundle);
+        final boolean biometricRequested = Utils.isBiometricRequested(bundle);
+        final boolean credentialRequested = Utils.isCredentialRequested(bundle);
 
-        final boolean biometricOk;
         final boolean credentialOk = mTrustManager.isDeviceSecure(userId);
 
         // Assuming that biometric authenticators are listed in priority-order, the rest of this
@@ -1041,96 +1124,56 @@ public class BiometricService extends SystemService {
         // the correct error. Error strings that are modality-specific should also respect the
         // priority-order.
 
-        // Find first biometric authenticator that's strong enough, detected, enrolled, and enabled.
-        boolean disabledByDevicePolicy = false;
-        boolean hasSufficientStrength = false;
-        boolean isHardwareDetected = false;
-        boolean hasTemplatesEnrolled = false;
-        boolean enabledForApps = false;
+        int firstBiometricModality = TYPE_NONE;
+        @BiometricStatus int firstBiometricStatus = BIOMETRIC_NO_HARDWARE;
 
-        int modality = TYPE_NONE;
-        int firstHwAvailable = TYPE_NONE;
+        int biometricModality = TYPE_NONE;
+        @BiometricStatus int biometricStatus = BIOMETRIC_NO_HARDWARE;
+
         for (AuthenticatorWrapper authenticator : mAuthenticators) {
-            final int actualStrength = authenticator.getActualStrength();
             final int requestedStrength = Utils.getPublicBiometricStrength(bundle);
+            Pair<Integer, Integer> result = getStatusForBiometricAuthenticator(
+                    authenticator, userId, opPackageName, checkDevicePolicyManager,
+                    requestedStrength);
 
-            if (isBiometricDisabledByDevicePolicy(authenticator.modality, userId)) {
-                disabledByDevicePolicy = true;
-                continue;
-            }
-            disabledByDevicePolicy = false;
+            biometricStatus = result.second;
 
-            if (!Utils.isAtLeastStrength(actualStrength, requestedStrength)) {
-                continue;
-            }
-            hasSufficientStrength = true;
+            Slog.d(TAG, "Authenticator ID: " + authenticator.id
+                    + " Modality: " + authenticator.modality
+                    + " ReportedModality: " + result.first
+                    + " Status: " + biometricStatus);
 
-            if (!authenticator.impl.isHardwareDetected(opPackageName)) {
-                continue;
-            }
-            isHardwareDetected = true;
-
-            if (firstHwAvailable == TYPE_NONE) {
-                // Store the first one since we want to return the error in correct
-                // priority order.
-                firstHwAvailable = authenticator.modality;
+            if (firstBiometricModality == TYPE_NONE) {
+                firstBiometricModality = result.first;
+                firstBiometricStatus = biometricStatus;
             }
 
-            if (!authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
-                continue;
+            if (biometricStatus == BIOMETRIC_OK) {
+                biometricModality = result.first;
+                break;
             }
-            hasTemplatesEnrolled = true;
-
-            if (!isEnabledForApp(authenticator.modality, userId)) {
-                continue;
-            }
-            enabledForApps = true;
-            modality = authenticator.modality;
-            break;
         }
 
-        biometricOk = !disabledByDevicePolicy
-                && hasSufficientStrength && isHardwareDetected
-                && hasTemplatesEnrolled && enabledForApps;
-
-        Slog.d(TAG, "checkAndGetAuthenticators: user=" + userId
-                + " checkDevicePolicyManager=" + checkDevicePolicyManager
-                + " isHardwareDetected=" + isHardwareDetected
-                + " hasTemplatesEnrolled=" + hasTemplatesEnrolled
-                + " enabledForApps=" + enabledForApps
-                + " disabledByDevicePolicy=" + disabledByDevicePolicy);
-
         if (biometricRequested && credentialRequested) {
-            if (credentialOk || biometricOk) {
-                if (!biometricOk) {
+            if (credentialOk || biometricStatus == BIOMETRIC_OK) {
+                if (biometricStatus != BIOMETRIC_OK) {
                     // If there's a problem with biometrics but device credential is
                     // allowed, only show credential UI.
                     bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
                             Authenticators.DEVICE_CREDENTIAL);
                 }
-                return new Pair<>(modality, BiometricConstants.BIOMETRIC_SUCCESS);
+                return new Pair<>(biometricModality, BiometricConstants.BIOMETRIC_SUCCESS);
             } else {
-                return new Pair<>(firstHwAvailable,
+                return new Pair<>(firstBiometricModality,
                         BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS);
             }
         } else if (biometricRequested) {
-            if (biometricOk) {
-                return new Pair<>(modality, BiometricConstants.BIOMETRIC_SUCCESS);
-            } else if (disabledByDevicePolicy) {
-                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
-            } else if (!hasSufficientStrength) {
-                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT);
-            } else if (!isHardwareDetected) {
-                return new Pair<>(firstHwAvailable,
-                        BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
-            } else if (!hasTemplatesEnrolled) {
-                return new Pair<>(firstHwAvailable,
-                        BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS);
-            } else if (!enabledForApps) {
-                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+            if (biometricStatus == BIOMETRIC_OK) {
+                return new Pair<>(biometricModality,
+                        biometricStatusToBiometricConstant(biometricStatus));
             } else {
-                Slog.e(TAG, "Unexpected case");
-                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+                return new Pair<>(firstBiometricModality,
+                        biometricStatusToBiometricConstant(firstBiometricStatus));
             }
         } else if (credentialRequested) {
             if (credentialOk) {
@@ -1403,16 +1446,14 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        if (acquiredInfo != BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
-            if (message == null) {
-                Slog.w(TAG, "Ignoring null message: " + acquiredInfo);
-                return;
-            }
-            try {
-                mStatusBarService.onBiometricHelp(message);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-            }
+        if (message == null) {
+            Slog.w(TAG, "Ignoring null message: " + acquiredInfo);
+            return;
+        }
+        try {
+            mStatusBarService.onBiometricHelp(message);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
         }
     }
 
@@ -1440,7 +1481,9 @@ public class BiometricService extends SystemService {
                     mCurrentAuthSession.mClientReceiver.onDialogDismissed(reason);
                     // Cancel authentication. Skip the token/package check since we are cancelling
                     // from system server. The interface is permission protected so this is fine.
-                    cancelInternal(null /* token */, null /* package */, false /* fromClient */);
+                    cancelInternal(null /* token */, null /* package */,
+                            mCurrentAuthSession.mCallingUid, mCurrentAuthSession.mCallingPid,
+                            mCurrentAuthSession.mCallingUserId, false /* fromClient */);
                     break;
 
                 case BiometricPrompt.DISMISSED_REASON_USER_CANCEL:
@@ -1451,7 +1494,9 @@ public class BiometricService extends SystemService {
                     );
                     // Cancel authentication. Skip the token/package check since we are cancelling
                     // from system server. The interface is permission protected so this is fine.
-                    cancelInternal(null /* token */, null /* package */, false /* fromClient */);
+                    cancelInternal(null /* token */, null /* package */, Binder.getCallingUid(),
+                            Binder.getCallingPid(), UserHandle.getCallingUserId(),
+                            false /* fromClient */);
                     break;
 
                 case BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED:
@@ -1501,7 +1546,9 @@ public class BiometricService extends SystemService {
 
         // Cancel authentication. Skip the token/package check since we are cancelling
         // from system server. The interface is permission protected so this is fine.
-        cancelInternal(null /* token */, null /* package */, false /* fromClient */);
+        cancelInternal(null /* token */, null /* package */, Binder.getCallingUid(),
+                Binder.getCallingPid(), UserHandle.getCallingUserId(),
+                false /* fromClient */);
 
         mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
     }
@@ -1671,7 +1718,8 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleCancelAuthentication(IBinder token, String opPackageName) {
+    private void handleCancelAuthentication(IBinder token, String opPackageName, int callingUid,
+            int callingPid, int callingUserId) {
         if (token == null || opPackageName == null) {
             Slog.e(TAG, "Unable to cancel, one or more null arguments");
             return;
@@ -1694,14 +1742,13 @@ public class BiometricService extends SystemService {
                 Slog.e(TAG, "Remote exception", e);
             }
         } else {
-            cancelInternal(token, opPackageName, true /* fromClient */);
+            cancelInternal(token, opPackageName, callingUid, callingPid, callingUserId,
+                    true /* fromClient */);
         }
     }
 
-    void cancelInternal(IBinder token, String opPackageName, boolean fromClient) {
-        final int callingUid = Binder.getCallingUid();
-        final int callingPid = Binder.getCallingPid();
-        final int callingUserId = UserHandle.getCallingUserId();
+    void cancelInternal(IBinder token, String opPackageName, int callingUid, int callingPid,
+            int callingUserId, boolean fromClient) {
 
         if (mCurrentAuthSession == null) {
             Slog.w(TAG, "Skipping cancelInternal");

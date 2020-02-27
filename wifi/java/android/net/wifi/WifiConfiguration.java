@@ -123,7 +123,9 @@ public class WifiConfiguration implements Parcelable {
                 WPA_PSK_SHA256,
                 WPA_EAP_SHA256,
                 WAPI_PSK,
-                WAPI_CERT})
+                WAPI_CERT,
+                FILS_SHA256,
+                FILS_SHA384})
         public @interface KeyMgmtScheme {}
 
         /** WPA is not used; plaintext or static WEP could be used. */
@@ -204,12 +206,23 @@ public class WifiConfiguration implements Parcelable {
         @SystemApi
         public static final int WAPI_CERT = 14;
 
+        /**
+        * IEEE 802.11ai FILS SK with SHA256
+         * @hide
+        */
+        public static final int FILS_SHA256 = 15;
+        /**
+         * IEEE 802.11ai FILS SK with SHA384:
+         * @hide
+         */
+        public static final int FILS_SHA384 = 16;
+
         public static final String varName = "key_mgmt";
 
         public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP",
                 "IEEE8021X", "WPA2_PSK", "OSEN", "FT_PSK", "FT_EAP",
                 "SAE", "OWE", "SUITE_B_192", "WPA_PSK_SHA256", "WPA_EAP_SHA256",
-                "WAPI_PSK", "WAPI_CERT" };
+                "WAPI_PSK", "WAPI_CERT", "FILS_SHA256", "FILS_SHA384" };
     }
 
     /**
@@ -486,7 +499,7 @@ public class WifiConfiguration implements Parcelable {
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SAE);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-                requirePMF = true;
+                requirePmf = true;
                 break;
             case SECURITY_TYPE_EAP_SUITE_B:
                 allowedProtocols.set(WifiConfiguration.Protocol.RSN);
@@ -496,14 +509,14 @@ public class WifiConfiguration implements Parcelable {
                 allowedGroupManagementCiphers.set(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256);
                 // Note: allowedSuiteBCiphers bitset will be set by the service once the
                 // certificates are attached to this profile
-                requirePMF = true;
+                requirePmf = true;
                 break;
             case SECURITY_TYPE_OWE:
                 allowedProtocols.set(WifiConfiguration.Protocol.RSN);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-                requirePMF = true;
+                requirePmf = true;
                 break;
             case SECURITY_TYPE_WAPI_PSK:
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WAPI_PSK);
@@ -662,7 +675,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     @SystemApi
-    public boolean requirePMF;
+    public boolean requirePmf;
 
     /**
      * Update identifier, for Passpoint network.
@@ -951,7 +964,7 @@ public class WifiConfiguration implements Parcelable {
      * Indicate whether the network is trusted or not. Networks are considered trusted
      * if the user explicitly allowed this network connection.
      * This bit can be used by suggestion network, see
-     * {@link WifiNetworkSuggestion.Builder#setUnTrusted(boolean)}
+     * {@link WifiNetworkSuggestion.Builder#setUntrusted(boolean)}
      * @hide
      */
     public boolean trusted;
@@ -2112,7 +2125,8 @@ public class WifiConfiguration implements Parcelable {
         return !TextUtils.isEmpty(FQDN)
                 && !TextUtils.isEmpty(providerFriendlyName)
                 && enterpriseConfig != null
-                && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
+                && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE
+                && !TextUtils.isEmpty(mPasspointUniqueId);
     }
 
     /**
@@ -2139,7 +2153,8 @@ public class WifiConfiguration implements Parcelable {
     public boolean isEnterprise() {
         return (allowedKeyManagement.get(KeyMgmt.WPA_EAP)
                 || allowedKeyManagement.get(KeyMgmt.IEEE8021X)
-                || allowedKeyManagement.get(KeyMgmt.SUITE_B_192))
+                || allowedKeyManagement.get(KeyMgmt.SUITE_B_192)
+                || allowedKeyManagement.get(KeyMgmt.WAPI_CERT))
                 && enterpriseConfig != null
                 && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
     }
@@ -2165,9 +2180,10 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append("ID: ").append(this.networkId).append(" SSID: ").append(this.SSID).
                 append(" PROVIDER-NAME: ").append(this.providerFriendlyName).
                 append(" BSSID: ").append(this.BSSID).append(" FQDN: ").append(this.FQDN)
+                .append(" HOME-PROVIDER-NETWORK: ").append(this.isHomeProviderNetwork)
                 .append(" PRIO: ").append(this.priority)
                 .append(" HIDDEN: ").append(this.hiddenSSID)
-                .append(" PMF: ").append(this.requirePMF)
+                .append(" PMF: ").append(this.requirePmf)
                 .append("CarrierId: ").append(this.carrierId)
                 .append('\n');
 
@@ -2415,6 +2431,9 @@ public class WifiConfiguration implements Parcelable {
             if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
                 keyMgmt += KeyMgmt.strings[KeyMgmt.SUITE_B_192];
             }
+            if (allowedKeyManagement.get(KeyMgmt.WAPI_CERT)) {
+                keyMgmt += KeyMgmt.strings[KeyMgmt.WAPI_CERT];
+            }
 
             if (TextUtils.isEmpty(keyMgmt)) {
                 throw new IllegalStateException("Not an EAP network");
@@ -2494,12 +2513,17 @@ public class WifiConfiguration implements Parcelable {
      */
     @NonNull
     public String getKey() {
-        String key = providerFriendlyName == null
-                ? getSsidAndSecurityTypeString()
-                : FQDN + KeyMgmt.strings[KeyMgmt.WPA_EAP];
+        // Passpoint ephemeral networks have their unique identifier set. Return it as is to be
+        // able to match internally.
+        if (mPasspointUniqueId != null) {
+            return mPasspointUniqueId;
+        }
+
+        String key = getSsidAndSecurityTypeString();
         if (!shared) {
             key += "-" + UserHandle.getUserHandleForUid(creatorUid).getIdentifier();
         }
+
         return key;
     }
 
@@ -2751,9 +2775,10 @@ public class WifiConfiguration implements Parcelable {
             mRandomizedMacAddress = source.mRandomizedMacAddress;
             macRandomizationSetting = source.macRandomizationSetting;
             randomizedMacExpirationTimeMs = source.randomizedMacExpirationTimeMs;
-            requirePMF = source.requirePMF;
+            requirePmf = source.requirePmf;
             updateIdentifier = source.updateIdentifier;
             carrierId = source.carrierId;
+            mPasspointUniqueId = source.mPasspointUniqueId;
         }
     }
 
@@ -2782,7 +2807,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(wepTxKeyIndex);
         dest.writeInt(priority);
         dest.writeInt(hiddenSSID ? 1 : 0);
-        dest.writeInt(requirePMF ? 1 : 0);
+        dest.writeInt(requirePmf ? 1 : 0);
         dest.writeString(updateIdentifier);
 
         writeBitSet(dest, allowedKeyManagement);
@@ -2826,6 +2851,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(osu ? 1 : 0);
         dest.writeLong(randomizedMacExpirationTimeMs);
         dest.writeInt(carrierId);
+        dest.writeString(mPasspointUniqueId);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -2857,7 +2883,7 @@ public class WifiConfiguration implements Parcelable {
                 config.wepTxKeyIndex = in.readInt();
                 config.priority = in.readInt();
                 config.hiddenSSID = in.readInt() != 0;
-                config.requirePMF = in.readInt() != 0;
+                config.requirePmf = in.readInt() != 0;
                 config.updateIdentifier = in.readString();
 
                 config.allowedKeyManagement   = readBitSet(in);
@@ -2900,6 +2926,7 @@ public class WifiConfiguration implements Parcelable {
                 config.osu = in.readInt() != 0;
                 config.randomizedMacExpirationTimeMs = in.readLong();
                 config.carrierId = in.readInt();
+                config.mPasspointUniqueId = in.readString();
                 return config;
             }
 
@@ -2907,4 +2934,28 @@ public class WifiConfiguration implements Parcelable {
                 return new WifiConfiguration[size];
             }
         };
+
+    /**
+     * Passpoint Unique identifier
+     * @hide
+     */
+    private String mPasspointUniqueId = null;
+
+    /**
+     * Set the Passpoint unique identifier
+     * @param uniqueId Passpoint unique identifier to be set
+     * @hide
+     */
+    public void setPasspointUniqueId(String uniqueId) {
+        mPasspointUniqueId = uniqueId;
+    }
+
+    /**
+     * Set the Passpoint unique identifier
+     * @hide
+     */
+    public String getPasspointUniqueId() {
+        return mPasspointUniqueId;
+    }
+
 }

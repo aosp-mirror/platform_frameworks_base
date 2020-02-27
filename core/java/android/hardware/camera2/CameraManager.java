@@ -140,6 +140,11 @@ public final class CameraManager {
      * <p>The set of combinations doesn't contain physical cameras that can only be used as
      * part of a logical multi-camera device.</p>
      *
+     * <p> If a new camera id becomes available through
+     * {@link AvailabilityCallback#onCameraUnavailable(String)}, clients can call
+     * this method to check if new combinations of camera ids which can stream concurrently are
+     * available.
+     *
      * @return The set of combinations of currently connected camera devices, that may have
      *         sessions configured concurrently. The set of combinations will be empty if no such
      *         combinations are supported by the camera subsystem.
@@ -400,7 +405,8 @@ public final class CameraManager {
                     try {
                         info.setCameraId(Integer.parseInt(cameraId));
                     } catch (NumberFormatException e) {
-                        Log.e(TAG, "Failed to parse camera Id " + cameraId + " to integer");
+                        // For external camera, reaching here is expected.
+                        Log.v(TAG, "Failed to parse camera Id " + cameraId + " to integer");
                     }
                     boolean hasConcurrentStreams =
                             CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId);

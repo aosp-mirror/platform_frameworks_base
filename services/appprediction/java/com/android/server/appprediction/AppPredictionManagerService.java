@@ -18,12 +18,14 @@ package com.android.server.appprediction;
 
 import static android.Manifest.permission.MANAGE_APP_PREDICTIONS;
 import static android.Manifest.permission.PACKAGE_USAGE_STATS;
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.content.Context.APP_PREDICTION_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManagerInternal;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionSessionId;
 import android.app.prediction.AppTargetEvent;
@@ -34,7 +36,6 @@ import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
-import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
@@ -108,21 +109,21 @@ public class AppPredictionManagerService extends
         @Override
         public void createPredictionSession(@NonNull AppPredictionContext context,
                 @NonNull AppPredictionSessionId sessionId) {
-            runForUserLocked("createPredictionSession",
+            runForUserLocked("createPredictionSession", sessionId,
                     (service) -> service.onCreatePredictionSessionLocked(context, sessionId));
         }
 
         @Override
         public void notifyAppTargetEvent(@NonNull AppPredictionSessionId sessionId,
                 @NonNull AppTargetEvent event) {
-            runForUserLocked("notifyAppTargetEvent",
+            runForUserLocked("notifyAppTargetEvent", sessionId,
                     (service) -> service.notifyAppTargetEventLocked(sessionId, event));
         }
 
         @Override
         public void notifyLaunchLocationShown(@NonNull AppPredictionSessionId sessionId,
                 @NonNull String launchLocation, @NonNull ParceledListSlice targetIds) {
-            runForUserLocked("notifyLaunchLocationShown", (service) ->
+            runForUserLocked("notifyLaunchLocationShown", sessionId, (service) ->
                     service.notifyLaunchLocationShownLocked(sessionId, launchLocation, targetIds));
         }
 
@@ -130,32 +131,32 @@ public class AppPredictionManagerService extends
         public void sortAppTargets(@NonNull AppPredictionSessionId sessionId,
                 @NonNull ParceledListSlice targets,
                 IPredictionCallback callback) {
-            runForUserLocked("sortAppTargets",
+            runForUserLocked("sortAppTargets", sessionId,
                     (service) -> service.sortAppTargetsLocked(sessionId, targets, callback));
         }
 
         @Override
         public void registerPredictionUpdates(@NonNull AppPredictionSessionId sessionId,
                 @NonNull IPredictionCallback callback) {
-            runForUserLocked("registerPredictionUpdates",
+            runForUserLocked("registerPredictionUpdates", sessionId,
                     (service) -> service.registerPredictionUpdatesLocked(sessionId, callback));
         }
 
         public void unregisterPredictionUpdates(@NonNull AppPredictionSessionId sessionId,
                 @NonNull IPredictionCallback callback) {
-            runForUserLocked("unregisterPredictionUpdates",
+            runForUserLocked("unregisterPredictionUpdates", sessionId,
                     (service) -> service.unregisterPredictionUpdatesLocked(sessionId, callback));
         }
 
         @Override
         public void requestPredictionUpdate(@NonNull AppPredictionSessionId sessionId) {
-            runForUserLocked("requestPredictionUpdate",
+            runForUserLocked("requestPredictionUpdate", sessionId,
                     (service) -> service.requestPredictionUpdateLocked(sessionId));
         }
 
         @Override
         public void onDestroyPredictionSession(@NonNull AppPredictionSessionId sessionId) {
-            runForUserLocked("onDestroyPredictionSession",
+            runForUserLocked("onDestroyPredictionSession", sessionId,
                     (service) -> service.onDestroyPredictionSessionLocked(sessionId));
         }
 
@@ -167,9 +168,12 @@ public class AppPredictionManagerService extends
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
-        private void runForUserLocked(@NonNull String func,
-                @NonNull Consumer<AppPredictionPerUserService> c) {
-            final int userId = UserHandle.getCallingUserId();
+        private void runForUserLocked(@NonNull final String func,
+                @NonNull final AppPredictionSessionId sessionId,
+                @NonNull final Consumer<AppPredictionPerUserService> c) {
+            ActivityManagerInternal am = LocalServices.getService(ActivityManagerInternal.class);
+            final int userId = am.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                    sessionId.getUserId(), false, ALLOW_NON_FULL, null, null);
 
             Context ctx = getContext();
             if (!(ctx.checkCallingPermission(PACKAGE_USAGE_STATS) == PERMISSION_GRANTED

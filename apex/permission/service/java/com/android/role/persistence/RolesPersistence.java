@@ -40,7 +40,7 @@ public interface RolesPersistence {
      * @return the roles read
      */
     @Nullable
-    RolesState read(@NonNull UserHandle user);
+    RolesState readAsUser(@NonNull UserHandle user);
 
     /**
      * Write the roles to persistence.
@@ -50,7 +50,7 @@ public interface RolesPersistence {
      * @param roles the roles to write
      * @param user the user to write for
      */
-    void write(@NonNull RolesState roles, @NonNull UserHandle user);
+    void writeAsUser(@NonNull RolesState roles, @NonNull UserHandle user);
 
     /**
      * Delete the roles from persistence.
@@ -59,7 +59,7 @@ public interface RolesPersistence {
      *
      * @param user the user to delete for
      */
-    void delete(@NonNull UserHandle user);
+    void deleteAsUser(@NonNull UserHandle user);
 
     /**
      * Create a new instance of {@link RolesPersistence} implementation.

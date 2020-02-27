@@ -299,8 +299,7 @@ public class BackupHandler extends Handler {
                                 params.pmToken,
                                 params.isSystemRestore,
                                 params.filterSet,
-                                params.listener,
-                                params.excludedKeys);
+                                params.listener);
 
                 synchronized (backupManagerService.getPendingRestores()) {
                     if (backupManagerService.isRestoreInProgress()) {

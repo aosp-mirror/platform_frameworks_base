@@ -17,28 +17,11 @@
 package android.service.quickaccesswallet;
 
 import android.annotation.NonNull;
-import android.os.Handler;
-import android.os.RemoteException;
-import android.util.Log;
 
 /**
  * Handles response from the {@link QuickAccessWalletService} for {@link GetWalletCardsRequest}
  */
-public final class GetWalletCardsCallback {
-
-    private static final String TAG = "QAWalletCallback";
-
-    private final IQuickAccessWalletServiceCallbacks mCallback;
-    private final Handler mHandler;
-    private boolean mCalled;
-
-    /**
-     * @hide
-     */
-    GetWalletCardsCallback(IQuickAccessWalletServiceCallbacks callback, Handler handler) {
-        mCallback = callback;
-        mHandler = handler;
-    }
+public interface GetWalletCardsCallback {
 
     /**
      * Notifies the Android System that an {@link QuickAccessWalletService#onWalletCardsRequested}
@@ -46,11 +29,10 @@ public final class GetWalletCardsCallback {
      *
      * @param response The response contains the list of {@link WalletCard walletCards} to be shown
      *                 to the user as well as the index of the card that should initially be
-     *                 presented as the selected card.
+     *                 presented as the selected card. The list should not contain more than the
+     *                 maximum number of cards requested.
      */
-    public void onSuccess(@NonNull GetWalletCardsResponse response) {
-        mHandler.post(() -> onSuccessInternal(response));
-    }
+    void onSuccess(@NonNull GetWalletCardsResponse response);
 
     /**
      * Notifies the Android System that an {@link QuickAccessWalletService#onWalletCardsRequested}
@@ -60,33 +42,5 @@ public final class GetWalletCardsCallback {
      *              (Personally Identifiable Information, such as username or email address).
      * @throws IllegalStateException if this method or {@link #onSuccess} was already called.
      */
-    public void onFailure(@NonNull GetWalletCardsError error) {
-        mHandler.post(() -> onFailureInternal(error));
-    }
-
-    private void onSuccessInternal(GetWalletCardsResponse response) {
-        if (mCalled) {
-            Log.w(TAG, "already called");
-            return;
-        }
-        mCalled = true;
-        try {
-            mCallback.onGetWalletCardsSuccess(response);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error returning wallet cards", e);
-        }
-    }
-
-    private void onFailureInternal(GetWalletCardsError error) {
-        if (mCalled) {
-            Log.w(TAG, "already called");
-            return;
-        }
-        mCalled = true;
-        try {
-            mCallback.onGetWalletCardsFailure(error);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error returning failure message", e);
-        }
-    }
+    void onFailure(@NonNull GetWalletCardsError error);
 }

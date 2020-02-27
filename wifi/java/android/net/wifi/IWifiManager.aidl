@@ -125,6 +125,8 @@ interface IWifiManager
 
     DhcpInfo getDhcpInfo();
 
+    void setScanAlwaysAvailable(boolean isAvailable);
+
     boolean isScanAlwaysAvailable();
 
     boolean acquireWifiLock(IBinder lock, int lockType, String tag, in WorkSource ws);
@@ -266,4 +268,14 @@ interface IWifiManager
      * Return the Map of {@link WifiNetworkSuggestion} and the list of <ScanResult>
      */
     Map getMatchingScanResults(in List<WifiNetworkSuggestion> networkSuggestions, in List<ScanResult> scanResults, String callingPackage, String callingFeatureId);
+
+    void setScanThrottleEnabled(boolean enable);
+
+    boolean isScanThrottleEnabled();
+
+    Map getAllMatchingPasspointProfilesForScanResults(in List<ScanResult> scanResult);
+
+    void setAutoWakeupEnabled(boolean enable);
+
+    boolean isAutoWakeupEnabled();
 }

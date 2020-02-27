@@ -20,6 +20,11 @@ import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER_FORCED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
+import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_BOTTOM;
+import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_LEFT;
+import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_NONE;
+import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_RIGHT;
+import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_TOP;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
@@ -29,7 +34,6 @@ import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.IActivityTaskManager;
 import android.graphics.Point;
@@ -55,10 +59,9 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.TaskResizingAlgorithm;
+import com.android.internal.policy.TaskResizingAlgorithm.CtrlType;
 import com.android.server.protolog.common.ProtoLog;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 class TaskPositioner implements IBinder.DeathRecipient {
     private static final boolean DEBUG_ORIENTATION_VIOLATIONS = false;
@@ -67,32 +70,9 @@ class TaskPositioner implements IBinder.DeathRecipient {
 
     private static Factory sFactory;
 
-    @IntDef(flag = true,
-            value = {
-                    CTRL_NONE,
-                    CTRL_LEFT,
-                    CTRL_RIGHT,
-                    CTRL_TOP,
-                    CTRL_BOTTOM
-            })
-    @Retention(RetentionPolicy.SOURCE)
-    @interface CtrlType {}
-
-    private static final int CTRL_NONE   = 0x0;
-    private static final int CTRL_LEFT   = 0x1;
-    private static final int CTRL_RIGHT  = 0x2;
-    private static final int CTRL_TOP    = 0x4;
-    private static final int CTRL_BOTTOM = 0x8;
-
     public static final float RESIZING_HINT_ALPHA = 0.5f;
 
     public static final int RESIZING_HINT_DURATION_MS = 0;
-
-    // The minimal aspect ratio which needs to be met to count as landscape (or 1/.. for portrait).
-    // Note: We do not use the 1.33 from the CDD here since the user is allowed to use what ever
-    // aspect he desires.
-    @VisibleForTesting
-    static final float MIN_ASPECT = 1.2f;
 
     private final WindowManagerService mService;
     private final IActivityTaskManager mActivityManager;
@@ -477,122 +457,13 @@ class TaskPositioner implements IBinder.DeathRecipient {
      */
     @VisibleForTesting
     void resizeDrag(float x, float y) {
-        // This is a resizing operation.
-        // We need to keep various constraints:
-        // 1. mMinVisible[Width/Height] <= [width/height] <= mMaxVisibleSize.[x/y]
-        // 2. The orientation is kept - if required.
-        final int deltaX = Math.round(x - mStartDragX);
-        final int deltaY = Math.round(y - mStartDragY);
-        int left = mWindowOriginalBounds.left;
-        int top = mWindowOriginalBounds.top;
-        int right = mWindowOriginalBounds.right;
-        int bottom = mWindowOriginalBounds.bottom;
-
-        // Calculate the resulting width and height of the drag operation.
-        int width = right - left;
-        int height = bottom - top;
-        if ((mCtrlType & CTRL_LEFT) != 0) {
-            width = Math.max(mMinVisibleWidth, width - deltaX);
-        } else if ((mCtrlType & CTRL_RIGHT) != 0) {
-            width = Math.max(mMinVisibleWidth, width + deltaX);
-        }
-        if ((mCtrlType & CTRL_TOP) != 0) {
-            height = Math.max(mMinVisibleHeight, height - deltaY);
-        } else if ((mCtrlType & CTRL_BOTTOM) != 0) {
-            height = Math.max(mMinVisibleHeight, height + deltaY);
-        }
-
-        // If we have to preserve the orientation - check that we are doing so.
-        final float aspect = (float) width / (float) height;
-        if (mPreserveOrientation && ((mStartOrientationWasLandscape && aspect < MIN_ASPECT)
-                || (!mStartOrientationWasLandscape && aspect > (1.0 / MIN_ASPECT)))) {
-            // Calculate 2 rectangles fulfilling all requirements for either X or Y being the major
-            // drag axis. What ever is producing the bigger rectangle will be chosen.
-            int width1;
-            int width2;
-            int height1;
-            int height2;
-            if (mStartOrientationWasLandscape) {
-                // Assuming that the width is our target we calculate the height.
-                width1 = Math.max(mMinVisibleWidth, Math.min(mMaxVisibleSize.x, width));
-                height1 = Math.min(height, Math.round((float)width1 / MIN_ASPECT));
-                if (height1 < mMinVisibleHeight) {
-                    // If the resulting height is too small we adjust to the minimal size.
-                    height1 = mMinVisibleHeight;
-                    width1 = Math.max(mMinVisibleWidth,
-                            Math.min(mMaxVisibleSize.x, Math.round((float)height1 * MIN_ASPECT)));
-                }
-                // Assuming that the height is our target we calculate the width.
-                height2 = Math.max(mMinVisibleHeight, Math.min(mMaxVisibleSize.y, height));
-                width2 = Math.max(width, Math.round((float)height2 * MIN_ASPECT));
-                if (width2 < mMinVisibleWidth) {
-                    // If the resulting width is too small we adjust to the minimal size.
-                    width2 = mMinVisibleWidth;
-                    height2 = Math.max(mMinVisibleHeight,
-                            Math.min(mMaxVisibleSize.y, Math.round((float)width2 / MIN_ASPECT)));
-                }
-            } else {
-                // Assuming that the width is our target we calculate the height.
-                width1 = Math.max(mMinVisibleWidth, Math.min(mMaxVisibleSize.x, width));
-                height1 = Math.max(height, Math.round((float)width1 * MIN_ASPECT));
-                if (height1 < mMinVisibleHeight) {
-                    // If the resulting height is too small we adjust to the minimal size.
-                    height1 = mMinVisibleHeight;
-                    width1 = Math.max(mMinVisibleWidth,
-                            Math.min(mMaxVisibleSize.x, Math.round((float)height1 / MIN_ASPECT)));
-                }
-                // Assuming that the height is our target we calculate the width.
-                height2 = Math.max(mMinVisibleHeight, Math.min(mMaxVisibleSize.y, height));
-                width2 = Math.min(width, Math.round((float)height2 / MIN_ASPECT));
-                if (width2 < mMinVisibleWidth) {
-                    // If the resulting width is too small we adjust to the minimal size.
-                    width2 = mMinVisibleWidth;
-                    height2 = Math.max(mMinVisibleHeight,
-                            Math.min(mMaxVisibleSize.y, Math.round((float)width2 * MIN_ASPECT)));
-                }
-            }
-
-            // Use the bigger of the two rectangles if the major change was positive, otherwise
-            // do the opposite.
-            final boolean grows = width > (right - left) || height > (bottom - top);
-            if (grows == (width1 * height1 > width2 * height2)) {
-                width = width1;
-                height = height1;
-            } else {
-                width = width2;
-                height = height2;
-            }
-        }
-
-        // Update mWindowDragBounds to the new drag size.
-        updateDraggedBounds(left, top, right, bottom, width, height);
+        updateDraggedBounds(TaskResizingAlgorithm.resizeDrag(x, y, mStartDragX, mStartDragY,
+                mWindowOriginalBounds, mCtrlType, mMinVisibleWidth, mMinVisibleHeight,
+                mMaxVisibleSize, mPreserveOrientation, mStartOrientationWasLandscape));
     }
 
-    /**
-     * Given the old coordinates and the new width and height, update the mWindowDragBounds.
-     *
-     * @param left      The original left bound before the user started dragging.
-     * @param top       The original top bound before the user started dragging.
-     * @param right     The original right bound before the user started dragging.
-     * @param bottom    The original bottom bound before the user started dragging.
-     * @param newWidth  The new dragged width.
-     * @param newHeight The new dragged height.
-     */
-    void updateDraggedBounds(int left, int top, int right, int bottom, int newWidth,
-                             int newHeight) {
-        // Generate the final bounds by keeping the opposite drag edge constant.
-        if ((mCtrlType & CTRL_LEFT) != 0) {
-            left = right - newWidth;
-        } else { // Note: The right might have changed - if we pulled at the right or not.
-            right = left + newWidth;
-        }
-        if ((mCtrlType & CTRL_TOP) != 0) {
-            top = bottom - newHeight;
-        } else { // Note: The height might have changed - if we pulled at the bottom or not.
-            bottom = top + newHeight;
-        }
-
-        mWindowDragBounds.set(left, top, right, bottom);
+    private void updateDraggedBounds(Rect newBounds) {
+        mWindowDragBounds.set(newBounds);
 
         checkBoundsForOrientationViolations(mWindowDragBounds);
     }

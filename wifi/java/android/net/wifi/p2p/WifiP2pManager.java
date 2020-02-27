@@ -326,6 +326,12 @@ public class WifiP2pManager {
 
     /**
      * Broadcast intent action indicating that remembered persistent groups have changed.
+     *
+     * You can <em>not</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link android.content.Context#registerReceiver(android.content.BroadcastReceiver,
+     * android.content.IntentFilter) Context.registerReceiver()}.
+     *
      * @hide
      */
     @SystemApi
@@ -1347,20 +1353,33 @@ public class WifiP2pManager {
     }
 
     /**
-     * Force p2p to enter or exit listen state
+     * Force p2p to enter listen state
      *
      * @param c is the channel created at {@link #initialize(Context, Looper, ChannelListener)}
-     * @param enable enables or disables listening
      * @param listener for callbacks on success or failure. Can be null.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void listen(@NonNull Channel c, boolean enable, @Nullable ActionListener listener) {
+    public void startListening(@NonNull Channel c, @Nullable ActionListener listener) {
         checkChannel(c);
-        c.mAsyncChannel.sendMessage(enable ? START_LISTEN : STOP_LISTEN,
-                0, c.putListener(listener));
+        c.mAsyncChannel.sendMessage(START_LISTEN, 0, c.putListener(listener));
+    }
+
+    /**
+     * Force p2p to exit listen state
+     *
+     * @param c is the channel created at {@link #initialize(Context, Looper, ChannelListener)}
+     * @param listener for callbacks on success or failure. Can be null.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void stopListening(@NonNull Channel c, @Nullable ActionListener listener) {
+        checkChannel(c);
+        c.mAsyncChannel.sendMessage(STOP_LISTEN, 0, c.putListener(listener));
     }
 
     /**

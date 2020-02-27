@@ -539,15 +539,29 @@ public final class ProcessStatsService extends IProcessStats.Stub {
      * @param highWaterMarkMs Report stats committed after this time.
      * @param section Integer mask to indicage which sections to include in the stats.
      * @param doAggregate Whether to aggregate the stats or keep them separated.
-     * @return List of proto binary of individual commit files or one that is merged from them.
+     * @return List of proto binary of individual commit files or one that is merged from them
      */
     @Override
     public long getCommittedStats(long highWaterMarkMs, int section, boolean doAggregate,
             List<ParcelFileDescriptor> committedStats) {
+        return getCommittedStatsMerged(highWaterMarkMs, section, doAggregate, committedStats,
+                new ProcessStats(false));
+    }
+
+    /**
+     * Get stats committed after highWaterMarkMs
+     * @param highWaterMarkMs Report stats committed after this time.
+     * @param section Integer mask to indicage which sections to include in the stats.
+     * @param doAggregate Whether to aggregate the stats or keep them separated.
+     * @return List of proto binary of individual commit files or one that is merged from them;
+     *         the merged, final ProcessStats object.
+     */
+    @Override
+    public long getCommittedStatsMerged(long highWaterMarkMs, int section, boolean doAggregate,
+            List<ParcelFileDescriptor> committedStats, ProcessStats mergedStats) {
         mAm.mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_USAGE_STATS, null);
 
-        ProcessStats mergedStats = new ProcessStats(false);
         long newHighWaterMark = highWaterMarkMs;
         mWriteLock.lock();
         try {

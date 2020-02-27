@@ -37,7 +37,6 @@ public class RestoreParams {
     public final boolean isSystemRestore;
     @Nullable public final String[] filterSet;
     public final OnTaskFinishedListener listener;
-    public final Map<String, Set<String>> excludedKeys;
 
     /**
      * No kill after restore.
@@ -48,8 +47,7 @@ public class RestoreParams {
             IBackupManagerMonitor monitor,
             long token,
             PackageInfo packageInfo,
-            OnTaskFinishedListener listener,
-            Map<String, Set<String>> excludedKeys) {
+            OnTaskFinishedListener listener) {
         return new RestoreParams(
                 transportClient,
                 observer,
@@ -59,8 +57,7 @@ public class RestoreParams {
                 /* pmToken */ 0,
                 /* isSystemRestore */ false,
                 /* filterSet */ null,
-                listener,
-                excludedKeys);
+                listener);
     }
 
     /**
@@ -73,8 +70,7 @@ public class RestoreParams {
             long token,
             String packageName,
             int pmToken,
-            OnTaskFinishedListener listener,
-            Map<String, Set<String>> excludedKeys) {
+            OnTaskFinishedListener listener) {
         String[] filterSet = {packageName};
         return new RestoreParams(
                 transportClient,
@@ -85,8 +81,7 @@ public class RestoreParams {
                 pmToken,
                 /* isSystemRestore */ false,
                 filterSet,
-                listener,
-                excludedKeys);
+                listener);
     }
 
     /**
@@ -97,8 +92,7 @@ public class RestoreParams {
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
             long token,
-            OnTaskFinishedListener listener,
-            Map<String, Set<String>> excludedKeys) {
+            OnTaskFinishedListener listener) {
         return new RestoreParams(
                 transportClient,
                 observer,
@@ -108,8 +102,7 @@ public class RestoreParams {
                 /* pmToken */ 0,
                 /* isSystemRestore */ true,
                 /* filterSet */ null,
-                listener,
-                excludedKeys);
+                listener);
     }
 
     /**
@@ -122,8 +115,7 @@ public class RestoreParams {
             long token,
             String[] filterSet,
             boolean isSystemRestore,
-            OnTaskFinishedListener listener,
-            Map<String, Set<String>> excludedKeys) {
+            OnTaskFinishedListener listener) {
         return new RestoreParams(
                 transportClient,
                 observer,
@@ -133,8 +125,7 @@ public class RestoreParams {
                 /* pmToken */ 0,
                 isSystemRestore,
                 filterSet,
-                listener,
-                excludedKeys);
+                listener);
     }
 
     private RestoreParams(
@@ -146,8 +137,7 @@ public class RestoreParams {
             int pmToken,
             boolean isSystemRestore,
             @Nullable String[] filterSet,
-            OnTaskFinishedListener listener,
-            Map<String, Set<String>> excludedKeys) {
+            OnTaskFinishedListener listener) {
         this.transportClient = transportClient;
         this.observer = observer;
         this.monitor = monitor;
@@ -157,6 +147,5 @@ public class RestoreParams {
         this.isSystemRestore = isSystemRestore;
         this.filterSet = filterSet;
         this.listener = listener;
-        this.excludedKeys = excludedKeys;
     }
 }

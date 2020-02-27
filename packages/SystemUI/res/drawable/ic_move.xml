@@ -1,0 +1,34 @@
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid
+                android:color="@android:color/black" />
+            <size
+                android:height="@dimen/magnification_drag_view_size"
+                android:width="@dimen/magnification_drag_view_size"/>
+        </shape>
+    </item>
+    <item
+        android:gravity="center">
+        <vector android:height="28dp" android:viewportHeight="512"
+            android:viewportWidth="512" android:width="28dp">
+            <path android:fillColor="#FFFFFF" android:pathData="M506.528,243.712l-96.224,-80c-4.8,-4 -11.456,-4.832 -17.056,-2.208C387.616,164.16 384,169.792 384,176v48h-96v-96h48c6.208,0 11.84,-3.616 14.496,-9.248c2.624,-5.632 1.792,-12.288 -2.208,-17.056l-80,-96.224c-6.08,-7.296 -18.496,-7.296 -24.608,0l-80,96.224c-3.968,4.8 -4.832,11.456 -2.176,17.056C164.128,124.384 169.792,128 176,128h48v96h-96v-48c0,-6.208 -3.616,-11.84 -9.248,-14.496c-5.6,-2.624 -12.256,-1.792 -17.056,2.208l-96.224,80c-7.296,6.08 -7.296,18.496 0,24.608l96.224,80c4.8,3.968 11.456,4.832 17.056,2.176C124.416,347.872 128,342.208 128,336v-48h96v96h-48c-6.208,0 -11.872,3.616 -14.496,9.248c-2.656,5.632 -1.792,12.288 2.176,17.056l80,96.224c6.08,7.296 18.496,7.296 24.608,0l80,-96.224c4,-4.8 4.832,-11.456 2.208,-17.056C347.84,387.616 342.208,384 336,384h-48v-96h96v48c0,6.208 3.616,11.872 9.248,14.496c5.632,2.656 12.288,1.792 17.056,-2.176l96.224,-80C513.824,262.208 513.824,249.792 506.528,243.712z"/>
+        </vector>
+    </item>
+</layer-list>

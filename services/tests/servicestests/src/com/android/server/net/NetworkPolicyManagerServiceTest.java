@@ -1779,7 +1779,7 @@ public class NetworkPolicyManagerServiceTest {
         // Get active mobile network in place
         expectMobileDefaults();
         mService.updateNetworks();
-        verify(mStatsService).setStatsProviderLimit(TEST_IFACE, Long.MAX_VALUE);
+        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, Long.MAX_VALUE);
 
         // Set limit to 10KB.
         setNetworkPolicies(new NetworkPolicy(
@@ -1788,7 +1788,7 @@ public class NetworkPolicyManagerServiceTest {
         postMsgAndWaitForCompletion();
 
         // Verifies that remaining quota is set to providers.
-        verify(mStatsService).setStatsProviderLimit(TEST_IFACE, 10000L - 4999L);
+        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, 10000L - 4999L);
 
         reset(mStatsService);
 
@@ -1810,7 +1810,7 @@ public class NetworkPolicyManagerServiceTest {
         postMsgAndWaitForCompletion();
         verify(mStatsService).forceUpdate();
         postMsgAndWaitForCompletion();
-        verify(mStatsService).setStatsProviderLimit(TEST_IFACE, 10000L - 4999L - 1999L);
+        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, 10000L - 4999L - 1999L);
     }
 
     /**

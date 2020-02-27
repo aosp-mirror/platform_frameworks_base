@@ -401,10 +401,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             pw.print(prefix); pw.print("hasStartedWhitelistingBgActivityStarts=");
             pw.println(mHasStartedWhitelistingBgActivityStarts);
         }
-        if (mAllowWhileInUsePermissionInFgs) {
-            pw.print(prefix); pw.print("allowWhileInUsePermissionInFgs=");
-            pw.println(mAllowWhileInUsePermissionInFgs);
-        }
+        pw.print(prefix); pw.print("allowWhileInUsePermissionInFgs=");
+                pw.println(mAllowWhileInUsePermissionInFgs);
+        pw.print(prefix); pw.print("recentCallingPackage=");
+                pw.println(mRecentCallingPackage);
         if (delayed) {
             pw.print(prefix); pw.print("delayed="); pw.println(delayed);
         }

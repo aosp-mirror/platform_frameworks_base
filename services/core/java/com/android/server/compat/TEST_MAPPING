@@ -1,0 +1,21 @@
+{
+    "presubmit": [
+        // Unit tests
+        {
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.compat"
+                }
+            ]
+        },
+        // Tests for the TestRule
+        {
+            "name": "PlatformCompatGating"
+        },
+        // CTS tests
+        {
+            "name": "CtsAppCompatHostTestCases#"
+        }
+    ]
+}

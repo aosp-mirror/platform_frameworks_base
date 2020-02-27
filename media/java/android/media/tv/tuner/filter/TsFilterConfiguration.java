@@ -17,7 +17,6 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -43,13 +42,6 @@ public class TsFilterConfiguration extends FilterConfiguration {
     }
 
     /**
-     * Gets the {@link Settings} object of this filter configuration.
-     */
-    @Nullable
-    public Settings getSettings() {
-        return mSettings;
-    }
-    /**
      * Gets Tag Protocol ID.
      */
     public int getTpid() {
@@ -71,22 +63,10 @@ public class TsFilterConfiguration extends FilterConfiguration {
     /**
      * Builder for {@link TsFilterConfiguration}.
      */
-    public static class Builder {
-        private Settings mSettings;
+    public static class Builder extends FilterConfiguration.Builder<Builder> {
         private int mTpid;
 
         private Builder() {
-        }
-
-        /**
-         * Sets filter settings.
-         *
-         * @param settings the filter settings.
-         */
-        @NonNull
-        public Builder setSettings(@NonNull Settings settings) {
-            mSettings = settings;
-            return this;
         }
 
         /**
@@ -106,6 +86,11 @@ public class TsFilterConfiguration extends FilterConfiguration {
         @NonNull
         public TsFilterConfiguration build() {
             return new TsFilterConfiguration(mSettings, mTpid);
+        }
+
+        @Override
+        Builder self() {
+            return this;
         }
     }
 }

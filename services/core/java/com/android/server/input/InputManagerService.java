@@ -79,6 +79,7 @@ import android.view.InputWindowHandle;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
+import android.view.VerifiedInputEvent;
 import android.view.ViewConfiguration;
 import android.widget.Toast;
 
@@ -214,6 +215,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native int nativeInjectInputEvent(long ptr, InputEvent event,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
+    private static native VerifiedInputEvent nativeVerifyInputEvent(long ptr, InputEvent event);
     private static native void nativeToggleCapsLock(long ptr, int deviceId);
     private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles,
             int displayId);
@@ -670,6 +672,11 @@ public class InputManagerService extends IInputManager.Stub
                 Slog.w(TAG, "Input event injection from pid " + pid + " failed.");
                 return false;
         }
+    }
+
+    @Override // Binder call
+    public VerifiedInputEvent verifyInputEvent(InputEvent event) {
+        return nativeVerifyInputEvent(mPtr, event);
     }
 
     /**

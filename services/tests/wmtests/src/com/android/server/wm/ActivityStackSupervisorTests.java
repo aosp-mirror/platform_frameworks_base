@@ -144,4 +144,33 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
                 anyInt() /* reason */, anyString() /* packageName */);
         verify(taskChangeNotifier, never()).notifyActivityDismissingDockedStack();
     }
+
+    /**
+     * Ensures that notify focus task changes.
+     */
+    @Test
+    public void testNotifyTaskFocusChanged() {
+        final ActivityRecord fullScreenActivityA = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(mFullscreenStack).build();
+        final Task taskA = fullScreenActivityA.getTask();
+
+        final TaskChangeNotificationController taskChangeNotifier =
+                mService.getTaskChangeNotificationController();
+        spyOn(taskChangeNotifier);
+
+        mService.setResumedActivityUncheckLocked(fullScreenActivityA, "resumeA");
+        verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskA.mTaskId) /* taskId */,
+                eq(true) /* focused */);
+        reset(taskChangeNotifier);
+
+        final ActivityRecord fullScreenActivityB = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(mFullscreenStack).build();
+        final Task taskB = fullScreenActivityB.getTask();
+
+        mService.setResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");
+        verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskA.mTaskId) /* taskId */,
+                eq(false) /* focused */);
+        verify(taskChangeNotifier).notifyTaskFocusChanged(eq(taskB.mTaskId) /* taskId */,
+                eq(true) /* focused */);
+    }
 }

@@ -696,6 +696,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
+        if (mToken.hasFixedRotationTransform()) {
+            // The transform of its surface is handled by fixed rotation.
+            return;
+        }
+
         if (mPendingSeamlessRotate != null) {
             oldRotation = mPendingSeamlessRotate.getOldRotation();
         }
@@ -1000,6 +1005,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean isFullscreenAndFillsDisplay = !inMultiWindowMode() && matchesDisplayBounds();
         final boolean windowsAreFloating = task != null && task.isFloating();
         final DisplayContent dc = getDisplayContent();
+        final DisplayInfo displayInfo = getDisplayInfo();
         final WindowFrames windowFrames = getLayoutingWindowFrames();
 
         mInsetFrame.set(getBounds());
@@ -1072,21 +1078,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             final ActivityStack stack = getRootTask();
-            if (inPinnedWindowingMode() && stack != null
-                    && stack.lastAnimatingBoundsWasToFullscreen()) {
-                // PIP edge case: When going from pinned to fullscreen, we apply a
-                // tempInsetFrame for the full task - but we're still at the start of the animation.
-                // To prevent a jump if there's a letterbox, restrict to the parent frame.
-                mInsetFrame.intersectUnchecked(windowFrames.mParentFrame);
-                windowFrames.mContainingFrame.intersectUnchecked(windowFrames.mParentFrame);
-            }
-
             layoutDisplayFrame = new Rect(windowFrames.mDisplayFrame);
             windowFrames.mDisplayFrame.set(windowFrames.mContainingFrame);
             layoutXDiff = mInsetFrame.left - windowFrames.mContainingFrame.left;
             layoutYDiff = mInsetFrame.top - windowFrames.mContainingFrame.top;
             layoutContainingFrame = mInsetFrame;
-            mTmpRect.set(0, 0, dc.getDisplayInfo().logicalWidth, dc.getDisplayInfo().logicalHeight);
+            mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
             subtractInsets(windowFrames.mDisplayFrame, layoutContainingFrame, layoutDisplayFrame,
                     mTmpRect);
             if (!layoutInParentFrame()) {
@@ -1161,9 +1158,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     windowFrames.mDisplayFrame);
             windowFrames.calculateDockedDividerInsets(c.getDisplayCutout().getSafeInsets());
         } else {
-            getDisplayContent().getBounds(mTmpRect);
-            windowFrames.calculateInsets(
-                    windowsAreFloating, isFullscreenAndFillsDisplay, mTmpRect);
+            windowFrames.calculateInsets(windowsAreFloating, isFullscreenAndFillsDisplay,
+                    getDisplayFrames(dc.mDisplayFrames).mUnrestricted);
         }
 
         windowFrames.setDisplayCutout(
@@ -1186,12 +1182,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mIsWallpaper && (fw != windowFrames.mFrame.width()
                 || fh != windowFrames.mFrame.height())) {
-            final DisplayContent displayContent = getDisplayContent();
-            if (displayContent != null) {
-                final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-                getDisplayContent().mWallpaperController.updateWallpaperOffset(this,
-                        displayInfo.logicalWidth, displayInfo.logicalHeight, false);
-            }
+            dc.mWallpaperController.updateWallpaperOffset(this,
+                    displayInfo.logicalWidth, displayInfo.logicalHeight, false /* sync */);
         }
 
         // Calculate relative frame
@@ -1342,16 +1334,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final Task task = getTask();
-        // In the case of stack bound animations, the window frames will update (unlike other
-        // animations which just modify various transformation properties). We don't want to
-        // notify the client of frame changes in this case. Not only is it a lot of churn, but
-        // the frame may not correspond to the surface size or the onscreen area at various
-        // phases in the animation, and the client will become sad and confused.
-        if (task != null && task.getStack().isAnimatingBounds()) {
-            return;
-        }
-
         boolean didFrameInsetsChange = setReportResizeHints();
         boolean configChanged = !isLastConfigReportedToClient();
         if (DEBUG_CONFIGURATION && configChanged) {
@@ -1467,9 +1449,28 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    DisplayFrames getDisplayFrames(DisplayFrames originalFrames) {
+        final DisplayFrames diplayFrames = mToken.getFixedRotationTransformDisplayFrames();
+        if (diplayFrames != null) {
+            return diplayFrames;
+        }
+        return originalFrames;
+    }
+
     DisplayInfo getDisplayInfo() {
-        final DisplayContent displayContent = getDisplayContent();
-        return displayContent != null ? displayContent.getDisplayInfo() : null;
+        final DisplayInfo displayInfo = mToken.getFixedRotationTransformDisplayInfo();
+        if (displayInfo != null) {
+            return displayInfo;
+        }
+        return getDisplayContent().getDisplayInfo();
+    }
+
+    InsetsState getInsetsState() {
+        final InsetsState insetsState = mToken.getFixedRotationTransformInsetsState();
+        if (insetsState != null) {
+            return insetsState;
+        }
+        return getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this);
     }
 
     @Override
@@ -1989,6 +1990,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private boolean matchesDisplayBounds() {
+        final Rect displayBounds = mToken.getFixedRotationTransformDisplayBounds();
+        if (displayBounds != null) {
+            // If the rotated display bounds are available, the window bounds are also rotated.
+            return displayBounds.equals(getBounds());
+        }
         return getDisplayContent().getBounds().equals(getBounds());
     }
 
@@ -2250,9 +2256,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        if (PixelFormat.formatHasAlpha(mAttrs.format)) {
-            // Support legacy use cases where transparent windows can still be ime target with
-            // FLAG_NOT_FOCUSABLE and ALT_FOCUSABLE_IM set.
+        if (PixelFormat.formatHasAlpha(mAttrs.format) && mAttrs.alpha == 0) {
+            // Support legacy use cases where completely transparent windows can still be ime target
+            // with FLAG_NOT_FOCUSABLE and ALT_FOCUSABLE_IM set.
             // Certain apps listen for IME insets using transparent windows and ADJUST_NOTHING to
             // manually synchronize app content to IME animation b/144619551.
             // TODO(b/145812508): remove this once new focus management is complete b/141738570
@@ -2661,18 +2667,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             mWmService.mTaskSnapshotController.onAppDied(win.mActivityRecord);
                         }
                         win.removeIfPossible(shouldKeepVisibleDeadAppWindow());
-                        if (win.mAttrs.type == TYPE_DOCK_DIVIDER) {
-                            // The owner of the docked divider died :( We reset the docked stack,
-                            // just in case they have the divider at an unstable position. Better
-                            // also reset drag resizing state, because the owner can't do it
-                            // anymore.
-                            final ActivityStack stack =
-                                    dc.getRootSplitScreenPrimaryTask();
-                            if (stack != null) {
-                                stack.resetDockedStackToMiddle();
-                            }
-                            resetSplitScreenResizing = true;
-                        }
                     } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
                         WindowState.this.removeIfPossible();
@@ -4785,7 +4779,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!displayContent.isDefaultDisplay && !displayContent.supportsSystemDecorations()) {
             // On a different display there is no system decor. Crop the window
             // by the screen boundaries.
-            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+            final DisplayInfo displayInfo = getDisplayInfo();
             policyCrop.set(0, 0, mWindowFrames.mCompatFrame.width(),
                     mWindowFrames.mCompatFrame.height());
             policyCrop.intersect(-mWindowFrames.mCompatFrame.left, -mWindowFrames.mCompatFrame.top,
@@ -5011,7 +5005,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final DisplayInfo displayInfo = getDisplayContent().getDisplayInfo();
+        final DisplayInfo displayInfo = getDisplayInfo();
         anim.initialize(mWindowFrames.mFrame.width(), mWindowFrames.mFrame.height(),
                 displayInfo.appWidth, displayInfo.appHeight);
         anim.restrictDuration(MAX_ANIMATION_DURATION);
@@ -5549,7 +5543,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * If the transient frame is set, the computed result won't be used in real layout. So this
+     * If the simulated frame is set, the computed result won't be used in real layout. So this
      * frames must be cleared when the simulated computation is done.
      */
     void setSimulatedWindowFrames(WindowFrames windowFrames) {

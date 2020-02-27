@@ -19,16 +19,23 @@ package com.android.server.people.data;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 
+import java.io.File;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 
 /** The data associated with a user profile. */
 class UserData {
 
     private final @UserIdInt int mUserId;
+
+    private final File mPerUserPeopleDataDir;
+
+    private final ScheduledExecutorService mScheduledExecutorService;
 
     private boolean mIsUnlocked;
 
@@ -40,8 +47,10 @@ class UserData {
     @Nullable
     private String mDefaultSmsApp;
 
-    UserData(@UserIdInt int userId) {
+    UserData(@UserIdInt int userId, @NonNull ScheduledExecutorService scheduledExecutorService) {
         mUserId = userId;
+        mPerUserPeopleDataDir = new File(Environment.getDataSystemCeDirectory(mUserId), "people");
+        mScheduledExecutorService = scheduledExecutorService;
     }
 
     @UserIdInt int getUserId() {
@@ -56,6 +65,12 @@ class UserData {
 
     void setUserUnlocked() {
         mIsUnlocked = true;
+
+        // Ensures per user root directory for people data is present, and attempt to load
+        // data from disk.
+        mPerUserPeopleDataDir.mkdirs();
+        mPackageDataMap.putAll(PackageData.packagesDataFromDisk(mUserId, this::isDefaultDialer,
+                this::isDefaultSmsApp, mScheduledExecutorService, mPerUserPeopleDataDir));
     }
 
     void setUserStopped() {
@@ -84,6 +99,14 @@ class UserData {
         return mPackageDataMap.get(packageName);
     }
 
+    /** Deletes the specified package data. */
+    void deletePackageData(@NonNull String packageName) {
+        PackageData packageData = mPackageDataMap.remove(packageName);
+        if (packageData != null) {
+            packageData.onDestroy();
+        }
+    }
+
     void setDefaultDialer(@Nullable String packageName) {
         mDefaultDialer = packageName;
     }
@@ -103,7 +126,8 @@ class UserData {
     }
 
     private PackageData createPackageData(String packageName) {
-        return new PackageData(packageName, mUserId, this::isDefaultDialer, this::isDefaultSmsApp);
+        return new PackageData(packageName, mUserId, this::isDefaultDialer, this::isDefaultSmsApp,
+                mScheduledExecutorService, mPerUserPeopleDataDir);
     }
 
     private boolean isDefaultDialer(String packageName) {

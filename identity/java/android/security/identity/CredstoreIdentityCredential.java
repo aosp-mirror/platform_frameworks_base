@@ -152,8 +152,8 @@ class CredstoreIdentityCredential extends IdentityCredential {
             derivedKey = Util.computeHkdf("HmacSha256", sharedSecret, salt, info, 32);
             mReaderSecretKey = new SecretKeySpec(derivedKey, "AES");
 
-            mEphemeralCounter = 0;
-            mReadersExpectedEphemeralCounter = 0;
+            mEphemeralCounter = 1;
+            mReadersExpectedEphemeralCounter = 1;
 
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Error performing key agreement", e);

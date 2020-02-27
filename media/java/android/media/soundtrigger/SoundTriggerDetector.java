@@ -113,7 +113,7 @@ public final class SoundTriggerDetector {
      * This capability may or may not be supported by the system, and support can be queried
      * by calling {@link SoundTriggerManager#getModuleProperties()} and checking
      * {@link ModuleProperties#audioCapabilities}. The corresponding capabilities field for
-     * this flag is {@link SoundTrigger.ModuleProperties#CAPABILITY_ECHO_CANCELLATION}.
+     * this flag is {@link SoundTrigger.ModuleProperties#AUDIO_CAPABILITY_ECHO_CANCELLATION}.
      * If this flag is passed without the audio capability supported, there will be no audio effect
      * applied.
      */
@@ -125,8 +125,9 @@ public final class SoundTriggerDetector {
      * This capability may or may not be supported by the system, and support can be queried
      * by calling {@link SoundTriggerManager#getModuleProperties()} and checking
      * {@link ModuleProperties#audioCapabilities}. The corresponding capabilities field for
-     * this flag is {@link SoundTrigger.ModuleProperties#CAPABILITY_NOISE_SUPPRESSION}. If this flag
-     * is passed without the audio capability supported, there will be no audio effect applied.
+     * this flag is {@link SoundTrigger.ModuleProperties#AUDIO_CAPABILITY_NOISE_SUPPRESSION}.
+     * If this flag is passed without the audio capability supported, there will be no audio effect
+     * applied.
      */
     public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 0x8;
 
@@ -296,10 +297,10 @@ public final class SoundTriggerDetector {
 
         int audioCapabilities = 0;
         if ((recognitionFlags & RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION) != 0) {
-            audioCapabilities |= SoundTrigger.ModuleProperties.CAPABILITY_ECHO_CANCELLATION;
+            audioCapabilities |= SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_ECHO_CANCELLATION;
         }
         if ((recognitionFlags & RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION) != 0) {
-            audioCapabilities |= SoundTrigger.ModuleProperties.CAPABILITY_NOISE_SUPPRESSION;
+            audioCapabilities |= SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_NOISE_SUPPRESSION;
         }
 
         int status;

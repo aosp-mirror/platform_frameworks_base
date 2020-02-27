@@ -32,6 +32,7 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
+import android.util.proto.ProtoOutputStream;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -606,5 +607,35 @@ public final class ApduServiceInfo implements Parcelable {
             }
         }
         pw.println("    Settings Activity: " + mSettingsActivityName);
+    }
+
+    /**
+     * Dump debugging info as ApduServiceInfoProto
+     *
+     * If the output belongs to a sub message, the caller is responsible for wrapping this function
+     * between {@link ProtoOutputStream#start(long)} and {@link ProtoOutputStream#end(long)}.
+     * See proto definition in frameworks/base/core/proto/android/nfc/apdu_service_info.proto
+     *
+     * @param proto the ProtoOutputStream to write to
+     */
+    public void dumpDebug(ProtoOutputStream proto) {
+        getComponent().dumpDebug(proto, ApduServiceInfoProto.COMPONENT_NAME);
+        proto.write(ApduServiceInfoProto.DESCRIPTION, getDescription());
+        proto.write(ApduServiceInfoProto.ON_HOST, mOnHost);
+        if (!mOnHost) {
+            proto.write(ApduServiceInfoProto.OFF_HOST_NAME, mOffHostName);
+            proto.write(ApduServiceInfoProto.STATIC_OFF_HOST_NAME, mStaticOffHostName);
+        }
+        for (AidGroup group : mStaticAidGroups.values()) {
+            long token = proto.start(ApduServiceInfoProto.STATIC_AID_GROUPS);
+            group.dump(proto);
+            proto.end(token);
+        }
+        for (AidGroup group : mDynamicAidGroups.values()) {
+            long token = proto.start(ApduServiceInfoProto.STATIC_AID_GROUPS);
+            group.dump(proto);
+            proto.end(token);
+        }
+        proto.write(ApduServiceInfoProto.SETTINGS_ACTIVITY_NAME, mSettingsActivityName);
     }
 }

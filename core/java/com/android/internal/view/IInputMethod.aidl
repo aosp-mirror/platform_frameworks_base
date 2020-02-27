@@ -16,10 +16,8 @@
 
 package com.android.internal.view;
 
-import android.content.ComponentName;
 import android.os.IBinder;
 import android.os.ResultReceiver;
-import android.view.autofill.AutofillId;
 import android.view.InputChannel;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
@@ -29,6 +27,7 @@ import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 /**
  * Top-level interface to an input method component (implemented in a
@@ -38,7 +37,7 @@ import com.android.internal.view.IInputSessionCallback;
 oneway interface IInputMethod {
     void initializeInternal(IBinder token, int displayId, IInputMethodPrivilegedOperations privOps);
 
-    void onCreateInlineSuggestionsRequest(in ComponentName componentName, in AutofillId autofillId,
+    void onCreateInlineSuggestionsRequest(in InlineSuggestionsRequestInfo requestInfo,
             in IInlineSuggestionsRequestCallback cb);
 
     void bindInput(in InputBinding binding);

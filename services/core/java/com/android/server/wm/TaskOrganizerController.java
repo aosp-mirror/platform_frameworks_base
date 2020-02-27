@@ -23,6 +23,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -41,12 +43,14 @@ import android.view.IWindowContainer;
 import android.view.SurfaceControl;
 import android.view.WindowContainerTransaction;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -302,7 +306,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         task.fillTaskInfo(mTmpTaskInfo);
         boolean changed = lastInfo == null
                 || mTmpTaskInfo.topActivityType != lastInfo.topActivityType
-                || mTmpTaskInfo.isResizable() != lastInfo.isResizable();
+                || mTmpTaskInfo.isResizable() != lastInfo.isResizable()
+                || mTmpTaskInfo.pictureInPictureParams != lastInfo.pictureInPictureParams;
         if (!(changed || force)) {
             return;
         }
@@ -375,6 +380,84 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         }
     }
 
+    @Override
+    public List<RunningTaskInfo> getChildTasks(IWindowContainer parent,
+            @Nullable int[] activityTypes) {
+        enforceStackPermission("getChildTasks()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                if (parent == null) {
+                    throw new IllegalArgumentException("Can't get children of null parent");
+                }
+                final WindowContainer container = WindowContainer.fromBinder(parent.asBinder());
+                if (container == null) {
+                    Slog.e(TAG, "Can't get children of " + parent + " because it is not valid.");
+                    return null;
+                }
+                // For now, only support returning children of persistent root tasks (of which the
+                // only current implementation is TaskTile).
+                if (!(container instanceof TaskTile)) {
+                    Slog.w(TAG, "Can only get children of root tasks created via createRootTask");
+                    return null;
+                }
+                ArrayList<RunningTaskInfo> out = new ArrayList<>();
+                // Tiles aren't real parents, so we need to go through stacks on the display to
+                // ensure correct ordering.
+                final DisplayContent dc = container.getDisplayContent();
+                for (int i = dc.getStackCount() - 1; i >= 0; --i) {
+                    final ActivityStack as = dc.getStackAt(i);
+                    if (as.getTile() == container) {
+                        if (activityTypes != null
+                                && !ArrayUtils.contains(activityTypes, as.getActivityType())) {
+                            continue;
+                        }
+                        final RunningTaskInfo info = new RunningTaskInfo();
+                        as.fillTaskInfo(info);
+                        out.add(info);
+                    }
+                }
+                return out;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public List<RunningTaskInfo> getRootTasks(int displayId, @Nullable int[] activityTypes) {
+        enforceStackPermission("getRootTasks()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc =
+                        mService.mRootWindowContainer.getDisplayContent(displayId);
+                if (dc == null) {
+                    throw new IllegalArgumentException("Display " + displayId + " doesn't exist");
+                }
+                ArrayList<RunningTaskInfo> out = new ArrayList<>();
+                for (int i = dc.getStackCount() - 1; i >= 0; --i) {
+                    final ActivityStack task = dc.getStackAt(i);
+                    if (task.getTile() != null) {
+                        // a tile is supposed to look like a parent, so don't include their
+                        // "children" here. They can be accessed via getChildTasks()
+                        continue;
+                    }
+                    if (activityTypes != null
+                            && !ArrayUtils.contains(activityTypes, task.getActivityType())) {
+                        continue;
+                    }
+                    final RunningTaskInfo info = new RunningTaskInfo();
+                    task.fillTaskInfo(info);
+                    out.add(info);
+                }
+                return out;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     private int sanitizeAndApplyChange(WindowContainer container,
             WindowContainerTransaction.Change change) {
         if (!(container instanceof Task)) {
@@ -405,6 +488,58 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         return effects;
     }
 
+    private int sanitizeAndApplyHierarchyOp(WindowContainer container,
+            WindowContainerTransaction.HierarchyOp hop) {
+        if (!(container instanceof Task)) {
+            throw new IllegalArgumentException("Invalid container in hierarchy op");
+        }
+        if (container.getDisplayContent() == null) {
+            Slog.w(TAG, "Container is no longer attached: " + container);
+            return 0;
+        }
+        if (hop.isReparent()) {
+            // special case for tiles since they are "virtual" parents
+            if (container instanceof ActivityStack && ((ActivityStack) container).isRootTask()) {
+                ActivityStack as = (ActivityStack) container;
+                TaskTile newParent = hop.getNewParent() == null ? null
+                        : (TaskTile) WindowContainer.fromBinder(hop.getNewParent());
+                if (as.getTile() != newParent) {
+                    if (as.getTile() != null) {
+                        as.getTile().removeChild(as);
+                    }
+                    if (newParent != null) {
+                        if (!as.affectedBySplitScreenResize()) {
+                            return 0;
+                        }
+                        newParent.addChild(as, POSITION_TOP);
+                    }
+                }
+                if (hop.getToTop()) {
+                    as.getDisplay().positionStackAtTop(as, false /* includingParents */);
+                } else {
+                    as.getDisplay().positionStackAtBottom(as);
+                }
+            } else if (container instanceof Task) {
+                throw new RuntimeException("Reparenting leaf Tasks is not supported now.");
+            }
+        } else {
+            // Ugh, of course ActivityStack has its own special reorder logic...
+            if (container instanceof ActivityStack && ((ActivityStack) container).isRootTask()) {
+                ActivityStack as = (ActivityStack) container;
+                if (hop.getToTop()) {
+                    as.getDisplay().positionStackAtTop(as, false /* includingParents */);
+                } else {
+                    as.getDisplay().positionStackAtBottom(as);
+                }
+            } else {
+                container.getParent().positionChildAt(
+                        hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
+                        container, false /* includingParents */);
+            }
+        }
+        return TRANSACT_EFFECTS_LIFECYCLE;
+    }
+
     private void resizePinnedStackIfNeeded(ConfigurationContainer container, int configMask,
             int windowMask, Configuration config) {
         if ((container instanceof ActivityStack)
@@ -413,8 +548,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
             final ActivityStack stack = (ActivityStack) container;
             if (stack.inPinnedWindowingMode()) {
                 stack.resize(config.windowConfiguration.getBounds(),
-                        null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                        PRESERVE_WINDOWS, true /* deferResume */);
+                        null /* configBounds */, PRESERVE_WINDOWS, true /* deferResume */);
             }
         }
     }
@@ -422,6 +556,12 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
     private int applyWindowContainerChange(WindowContainer wc,
             WindowContainerTransaction.Change c) {
         int effects = sanitizeAndApplyChange(wc, c);
+
+        final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
+        if (t != null) {
+            Task tr = (Task) wc;
+            tr.setMainWindowSizeChangeTransaction(t);
+        }
 
         Rect enterPipBounds = c.getEnterPipBounds();
         if (enterPipBounds != null) {
@@ -470,8 +610,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
                     while (entries.hasNext()) {
                         final Map.Entry<IBinder, WindowContainerTransaction.Change> entry =
                                 entries.next();
-                        final WindowContainer wc = WindowContainer.RemoteToken.fromBinder(
-                                entry.getKey()).getContainer();
+                        final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
                         int containerEffect = applyWindowContainerChange(wc, entry.getValue());
                         effects |= containerEffect;
 
@@ -483,6 +622,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
                         if (syncId >= 0) {
                             mBLASTSyncEngine.addToSyncSet(syncId, wc);
                         }
+                    }
+                    // Hierarchy changes
+                    final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
+                    for (int i = 0, n = hops.size(); i < n; ++i) {
+                        final WindowContainerTransaction.HierarchyOp hop = hops.get(i);
+                        final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
+                        effects |= sanitizeAndApplyHierarchyOp(wc, hop);
                     }
                     if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
                         // Already calls ensureActivityConfig

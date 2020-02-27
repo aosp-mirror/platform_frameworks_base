@@ -708,6 +708,22 @@ enum Action {
 
     // ACTION: Deny "Access all files" for an app
     APP_SPECIAL_PERMISSION_MANAGE_EXT_STRG_DENY = 1731;
+
+    // ACTION: Battery feature usage
+    ACTION_BATTERY_OPTION_FEATURE_USAGE = 1732;
+
+    // ACTION: Battery feature runtime event
+    ACTION_BATTERY_OPTION_RUNTIME_EVENT = 1733;
+
+    // ACTION: Settings > Developer Options > Toggle on Wireless debugging
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_ADB_WIRELESS_ON = 1734;
+
+    // ACTION: Settings > Developer Options > Toggle off Wireless debugging
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_ADB_WIRELESS_OFF = 1735;
 }
 
 /**
@@ -2578,4 +2594,43 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     CONNECTION_DEVICE_ADVANCED_NFC = 1828;
+
+    // OPEN: Settings -> Apps & Notifications -> Special App Access
+    INTERACT_ACROSS_PROFILES = 1829;
+
+    // OPEN: Settings > Notifications > (app or conversations) > conversation
+    NOTIFICATION_CONVERSATION_SETTINGS = 1830;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    // CATEGORY: SETTINGS
+    // OS: R
+    SETTINGS_ADB_WIRELESS = 1831;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Pair device with pairing code > Pairing code dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_PAIRING_DIALOG = 1832;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Pair device with QR code > Scan QR code > Pairing device dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_QR_PAIRING_DIALOG = 1833;
+
+    // OPEN: Settings > apps & notifications > notifications > conversations
+    // CATEGORY: SETTINGS
+    // OS: R
+    NOTIFICATION_CONVERSATION_LIST_SETTINGS = 1834;
+
+    // Panel for Media Output Group operation
+    // CATEGORY: SETTINGS
+    // OS: R
+    PANEL_MEDIA_OUTPUT_GROUP = 1835;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Click on paired device
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_DETAILS = 1836;
 }

@@ -34,11 +34,9 @@ public abstract class StorageStatsManagerInternal {
     public interface StorageStatsAugmenter {
         void augmentStatsForPackage(@NonNull PackageStats stats,
                 @NonNull String packageName, @UserIdInt int userId,
-                @NonNull String callingPackage);
+                boolean callerHasStatsPermission);
         void augmentStatsForUid(@NonNull PackageStats stats, int uid,
-                @NonNull String callingPackage);
-        void augmentStatsForUser(@NonNull PackageStats stats, @UserIdInt int userId,
-                @NonNull String callingPackage);
+                boolean callerHasStatsPermission);
     }
 
     /**

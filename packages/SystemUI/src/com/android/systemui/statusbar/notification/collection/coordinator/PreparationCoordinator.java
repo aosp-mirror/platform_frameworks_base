@@ -16,12 +16,18 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import android.os.RemoteException;
+import android.service.notification.StatusBarNotification;
+
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +40,7 @@ import javax.inject.Singleton;
  * Aborts inflation when a notification is removed.
  *
  * If a notification is not done inflating, this coordinator will filter the notification out
- * from the NotifListBuilder.
+ * from the {@link ShadeListBuilder}.
  */
 @Singleton
 public class PreparationCoordinator implements Coordinator {
@@ -42,15 +48,22 @@ public class PreparationCoordinator implements Coordinator {
 
     private final PreparationCoordinatorLogger mLogger;
     private final NotifInflater mNotifInflater;
+    private final NotifInflationErrorManager mNotifErrorManager;
     private final List<NotificationEntry> mPendingNotifications = new ArrayList<>();
+    private final IStatusBarService mStatusBarService;
 
     @Inject
     public PreparationCoordinator(
             PreparationCoordinatorLogger logger,
-            NotifInflaterImpl notifInflater) {
+            NotifInflaterImpl notifInflater,
+            NotifInflationErrorManager errorManager,
+            IStatusBarService service) {
         mLogger = logger;
         mNotifInflater = notifInflater;
         mNotifInflater.setInflationCallback(mInflationCallback);
+        mNotifErrorManager = errorManager;
+        mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
+        mStatusBarService = service;
     }
 
     @Override
@@ -84,8 +97,7 @@ public class PreparationCoordinator implements Coordinator {
          */
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
-            if (entry.hasInflationError()) {
-                mPendingNotifications.remove(entry);
+            if (mNotifErrorManager.hasInflationError(entry)) {
                 return true;
             }
             return false;
@@ -109,6 +121,34 @@ public class PreparationCoordinator implements Coordinator {
             mLogger.logNotifInflated(entry.getKey());
             mPendingNotifications.remove(entry);
             mNotifInflatingFilter.invalidateList();
+        }
+    };
+
+    private final NotifInflationErrorManager.NotifInflationErrorListener mInflationErrorListener =
+            new NotifInflationErrorManager.NotifInflationErrorListener() {
+        @Override
+        public void onNotifInflationError(NotificationEntry entry, Exception e) {
+            mPendingNotifications.remove(entry);
+            try {
+                final StatusBarNotification sbn = entry.getSbn();
+                // report notification inflation errors back up
+                // to notification delegates
+                mStatusBarService.onNotificationError(
+                        sbn.getPackageName(),
+                        sbn.getTag(),
+                        sbn.getId(),
+                        sbn.getUid(),
+                        sbn.getInitialPid(),
+                        e.getMessage(),
+                        sbn.getUserId());
+            } catch (RemoteException ex) {
+            }
+            mNotifInflationErrorFilter.invalidateList();
+        }
+
+        @Override
+        public void onNotifInflationErrorCleared(NotificationEntry entry) {
+            mNotifInflationErrorFilter.invalidateList();
         }
     };
 

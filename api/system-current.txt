@@ -9,6 +9,7 @@ package android {
     field public static final String ACCESS_DRM_CERTIFICATES = "android.permission.ACCESS_DRM_CERTIFICATES";
     field @Deprecated public static final String ACCESS_FM_RADIO = "android.permission.ACCESS_FM_RADIO";
     field public static final String ACCESS_INSTANT_APPS = "android.permission.ACCESS_INSTANT_APPS";
+    field public static final String ACCESS_LOCUS_ID_USAGE_STATS = "android.permission.ACCESS_LOCUS_ID_USAGE_STATS";
     field public static final String ACCESS_MESSAGES_ON_ICC = "android.permission.ACCESS_MESSAGES_ON_ICC";
     field public static final String ACCESS_MOCK_LOCATION = "android.permission.ACCESS_MOCK_LOCATION";
     field public static final String ACCESS_MTP = "android.permission.ACCESS_MTP";
@@ -17,7 +18,9 @@ package android {
     field public static final String ACCESS_SHARED_LIBRARIES = "android.permission.ACCESS_SHARED_LIBRARIES";
     field public static final String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field public static final String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
+    field public static final String ACCESS_TV_DESCRAMBLER = "android.permission.ACCESS_TV_DESCRAMBLER";
     field public static final String ACCESS_TV_TUNER = "android.permission.ACCESS_TV_TUNER";
+    field public static final String ACCESS_VIBRATOR_STATE = "android.permission.ACCESS_VIBRATOR_STATE";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String ADJUST_RUNTIME_PERMISSIONS_POLICY = "android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY";
     field public static final String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
@@ -115,6 +118,7 @@ package android {
     field public static final String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
     field public static final String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
+    field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final String MANAGE_ONE_TIME_PERMISSION_SESSIONS = "android.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS";
     field public static final String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
@@ -133,7 +137,6 @@ package android {
     field public static final String MODIFY_PARENTAL_CONTROLS = "android.permission.MODIFY_PARENTAL_CONTROLS";
     field public static final String MODIFY_QUIET_MODE = "android.permission.MODIFY_QUIET_MODE";
     field public static final String MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE = "android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE";
-    field public static final String MONITOR_DEVICE_CONFIG_ACCESS = "android.permission.MONITOR_DEVICE_CONFIG_ACCESS";
     field public static final String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
     field public static final String NETWORK_AIRPLANE_MODE = "android.permission.NETWORK_AIRPLANE_MODE";
     field public static final String NETWORK_CARRIER_PROVISIONING = "android.permission.NETWORK_CARRIER_PROVISIONING";
@@ -254,7 +257,6 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
-    field public static final int isAutofillInlineSuggestionTheme = 16844310; // 0x1010616
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844306; // 0x1010612
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
@@ -362,16 +364,18 @@ package android.app {
   }
 
   public class AppOpsManager {
+    method @Nullable @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public android.app.RuntimeAppOpAccessMessage collectRuntimeAppOpAccessMessage();
     method @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public void getHistoricalOps(@NonNull android.app.AppOpsManager.HistoricalOpsRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.AppOpsManager.HistoricalOps>);
     method public static String[] getOpStrs();
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable java.lang.String...);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getPackagesForOps(@Nullable String[]);
     method public static int opToDefaultMode(@NonNull String);
     method @Nullable public static String opToPermission(@NonNull String);
-    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(String, int, String, int);
-    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(String, int, int);
+    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(@NonNull String, int, @Nullable String, int);
+    method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(@NonNull String, int, int);
     field public static final String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
     field public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
+    field public static final String OPSTR_ACCESS_CALL_AUDIO = "android:access_call_audio";
     field public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
     field public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
     field public static final String OPSTR_ASSIST_SCREENSHOT = "android:assist_screenshot";
@@ -391,6 +395,7 @@ package android.app {
     field public static final String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
     field public static final String OPSTR_INTERACT_ACROSS_PROFILES = "android:interact_across_profiles";
     field public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
+    field public static final String OPSTR_LOADER_USAGE_STATS = "android:loader_usage_stats";
     field public static final String OPSTR_MANAGE_EXTERNAL_STORAGE = "android:manage_external_storage";
     field public static final String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
     field public static final String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
@@ -585,10 +590,6 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
   }
 
-  public final class ApplicationExitInfo implements android.os.Parcelable {
-    method @NonNull public android.os.UserHandle getUserHandle();
-  }
-
   public class BroadcastOptions {
     method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission("android.permission.START_ACTIVITIES_FROM_BACKGROUND") public void setBackgroundActivityStartsAllowed(boolean);
@@ -629,10 +630,10 @@ package android.app {
     method public android.content.Intent createConfirmFactoryResetCredentialIntent(CharSequence, CharSequence, CharSequence);
     method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public int getMinLockLength(boolean, int);
     method @RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS) public boolean getPrivateNotificationsAllowed();
+    method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public boolean isValidLockPasswordComplexity(int, @NonNull byte[], int);
     method @RequiresPermission(android.Manifest.permission.SHOW_KEYGUARD_MESSAGE) public void requestDismissKeyguard(@NonNull android.app.Activity, @Nullable CharSequence, @Nullable android.app.KeyguardManager.KeyguardDismissCallback);
     method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public boolean setLock(int, @NonNull byte[], int);
     method @RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS) public void setPrivateNotificationsAllowed(boolean);
-    method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public boolean validateLockPasswordComplexity(boolean, @NonNull byte[], int);
   }
 
   public class Notification implements android.os.Parcelable {
@@ -679,6 +680,19 @@ package android.app {
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
     method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
+  }
+
+  public final class RuntimeAppOpAccessMessage implements android.os.Parcelable {
+    ctor public RuntimeAppOpAccessMessage(@IntRange(from=0L) int, @IntRange(from=0L) int, @NonNull String, @Nullable String, @NonNull String, int);
+    method public int describeContents();
+    method @Nullable public String getFeatureId();
+    method @NonNull public String getMessage();
+    method @NonNull public String getOp();
+    method @NonNull public String getPackageName();
+    method public int getSamplingStrategy();
+    method @IntRange(from=0L) public int getUid();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.RuntimeAppOpAccessMessage> CREATOR;
   }
 
   public class SearchManager implements android.content.DialogInterface.OnCancelListener android.content.DialogInterface.OnDismissListener {
@@ -874,7 +888,7 @@ package android.app.admin {
     field public static final String ACTION_PROVISION_FINALIZATION = "android.app.action.PROVISION_FINALIZATION";
     field public static final String ACTION_PROVISION_FINANCED_DEVICE = "android.app.action.PROVISION_FINANCED_DEVICE";
     field public static final String ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE = "android.app.action.PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE";
-    field public static final String ACTION_RESET_PROTECTION_POLICY_CHANGED = "android.app.action.RESET_PROTECTION_POLICY_CHANGED";
+    field @RequiresPermission(android.Manifest.permission.MANAGE_FACTORY_RESET_PROTECTION) public static final String ACTION_RESET_PROTECTION_POLICY_CHANGED = "android.app.action.RESET_PROTECTION_POLICY_CHANGED";
     field public static final String ACTION_SET_PROFILE_OWNER = "android.app.action.SET_PROFILE_OWNER";
     field public static final String ACTION_STATE_USER_SETUP_COMPLETE = "android.app.action.STATE_USER_SETUP_COMPLETE";
     field public static final String EXTRA_PROFILE_OWNER_NAME = "android.app.extra.PROFILE_OWNER_NAME";
@@ -1475,10 +1489,10 @@ package android.bluetooth {
 
   public final class BluetoothA2dpSink implements android.bluetooth.BluetoothProfile {
     method public void finalize();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isAudioPlaying(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED";
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isAudioPlaying(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED";
   }
 
   public final class BluetoothAdapter {
@@ -1619,15 +1633,17 @@ package android.bluetooth {
   }
 
   public final class BluetoothHidHost implements android.bluetooth.BluetoothProfile {
-    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
-    method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
   }
 
-  public final class BluetoothMap implements android.bluetooth.BluetoothProfile {
-    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+  public final class BluetoothMap implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void close();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) protected void finalize();
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
@@ -1651,9 +1667,9 @@ package android.bluetooth {
   }
 
   public class BluetoothPbap implements android.bluetooth.BluetoothProfile {
-    method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
   }
 
   public interface BluetoothProfile {
@@ -1810,7 +1826,7 @@ package android.content {
     field public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
     field public static final String TETHERING_SERVICE = "tethering";
     field public static final String VR_SERVICE = "vrmanager";
-    field public static final String WIFI_COND_SERVICE = "wificond";
+    field public static final String WIFI_NL80211_SERVICE = "wifinl80211";
     field @Deprecated public static final String WIFI_RTT_SERVICE = "rttmanager";
     field public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
   }
@@ -1926,18 +1942,27 @@ package android.content.integrity {
   public abstract class IntegrityFormula {
     method @NonNull public static android.content.integrity.IntegrityFormula all(@NonNull android.content.integrity.IntegrityFormula...);
     method @NonNull public static android.content.integrity.IntegrityFormula any(@NonNull android.content.integrity.IntegrityFormula...);
-    method @NonNull public android.content.integrity.IntegrityFormula equalTo(@NonNull String);
-    method @NonNull public android.content.integrity.IntegrityFormula equalTo(boolean);
-    method @NonNull public android.content.integrity.IntegrityFormula equalTo(long);
-    method @NonNull public android.content.integrity.IntegrityFormula greaterThan(long);
-    method @NonNull public android.content.integrity.IntegrityFormula greaterThanOrEquals(long);
     method @NonNull public static android.content.integrity.IntegrityFormula not(@NonNull android.content.integrity.IntegrityFormula);
-    field @NonNull public static final android.content.integrity.IntegrityFormula APP_CERTIFICATE;
-    field @NonNull public static final android.content.integrity.IntegrityFormula INSTALLER_CERTIFICATE;
-    field @NonNull public static final android.content.integrity.IntegrityFormula INSTALLER_NAME;
-    field @NonNull public static final android.content.integrity.IntegrityFormula PACKAGE_NAME;
-    field @NonNull public static final android.content.integrity.IntegrityFormula PRE_INSTALLED;
-    field @NonNull public static final android.content.integrity.IntegrityFormula VERSION_CODE;
+  }
+
+  public static final class IntegrityFormula.Application {
+    method @NonNull public static android.content.integrity.IntegrityFormula certificatesContain(@NonNull String);
+    method @NonNull public static android.content.integrity.IntegrityFormula isPreInstalled();
+    method @NonNull public static android.content.integrity.IntegrityFormula packageNameEquals(@NonNull String);
+    method @NonNull public static android.content.integrity.IntegrityFormula versionCodeEquals(@NonNull long);
+    method @NonNull public static android.content.integrity.IntegrityFormula versionCodeGreaterThan(@NonNull long);
+    method @NonNull public static android.content.integrity.IntegrityFormula versionCodeGreaterThanOrEqualTo(@NonNull long);
+  }
+
+  public static final class IntegrityFormula.Installer {
+    method @NonNull public static android.content.integrity.IntegrityFormula certificatesContain(@NonNull String);
+    method @NonNull public static android.content.integrity.IntegrityFormula notAllowedByManifest();
+    method @NonNull public static android.content.integrity.IntegrityFormula packageNameEquals(@NonNull String);
+  }
+
+  public static final class IntegrityFormula.SourceStamp {
+    method @NonNull public static android.content.integrity.IntegrityFormula notTrusted();
+    method @NonNull public static android.content.integrity.IntegrityFormula stampCertificateHashEquals(@NonNull String);
   }
 
   public final class Rule implements android.os.Parcelable {
@@ -2011,18 +2036,15 @@ package android.content.pm {
   }
 
   public final class InstallationFile implements android.os.Parcelable {
-    ctor public InstallationFile(@NonNull String, long, @Nullable byte[]);
+    ctor public InstallationFile(int, @NonNull String, long, @Nullable byte[], @Nullable byte[]);
     method public int describeContents();
-    method public int getFileType();
+    method public long getLengthBytes();
+    method public int getLocation();
     method @Nullable public byte[] getMetadata();
     method @NonNull public String getName();
-    method public long getSize();
+    method @Nullable public byte[] getSignature();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstallationFile> CREATOR;
-    field public static final int FILE_TYPE_APK = 0; // 0x0
-    field public static final int FILE_TYPE_LIB = 1; // 0x1
-    field public static final int FILE_TYPE_OBB = 2; // 0x2
-    field public static final int FILE_TYPE_UNKNOWN = -1; // 0xffffffff
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {
@@ -2196,6 +2218,7 @@ package android.content.pm {
     method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void removeOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public void replacePreferredActivity(@NonNull android.content.IntentFilter, int, @NonNull java.util.List<android.content.ComponentName>, @NonNull android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle, @NonNull String);
     method public void sendDeviceCustomizationReadyBroadcast();
     method @RequiresPermission(allOf={android.Manifest.permission.SET_PREFERRED_APPLICATIONS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public abstract boolean setDefaultBrowserPackageNameAsUser(@Nullable String, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setDistractingPackageRestrictions(@NonNull String[], int);
@@ -2212,12 +2235,14 @@ package android.content.pm {
     field public static final String EXTRA_REQUEST_PERMISSIONS_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
+    field public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
     field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
     field public static final int FLAGS_PERMISSION_RESERVED_PERMISSIONCONTROLLER = -268435456; // 0xf0000000
     field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
-    field public static final int FLAG_PERMISSION_DONT_AUTO_REVOKE = 131072; // 0x20000
-    field public static final int FLAG_PERMISSION_DONT_AUTO_REVOKE_USER_SET = 262144; // 0x40000
+    field public static final int FLAG_PERMISSION_AUTO_REVOKED = 1048576; // 0x100000
+    field public static final int FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED = 131072; // 0x20000
+    field public static final int FLAG_PERMISSION_AUTO_REVOKE_USER_SET = 262144; // 0x40000
     field public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT = 32; // 0x20
     field public static final int FLAG_PERMISSION_GRANTED_BY_ROLE = 32768; // 0x8000
     field public static final int FLAG_PERMISSION_ONE_TIME = 65536; // 0x10000
@@ -2301,7 +2326,7 @@ package android.content.pm {
     method public void onPermissionsChanged(int);
   }
 
-  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT, android.content.pm.PackageManager.FLAG_PERMISSION_ONE_TIME, android.content.pm.PackageManager.FLAG_PERMISSION_DONT_AUTO_REVOKE}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
+  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT, android.content.pm.PackageManager.FLAG_PERMISSION_ONE_TIME, android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED, android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKE_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
   }
 
   public class PermissionGroupInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -3704,8 +3729,8 @@ package android.hardware.soundtrigger {
   public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
-    field public static final int CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
+    field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
+    field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> CREATOR;
     field public final int audioCapabilities;
     field @NonNull public final String description;
@@ -3758,8 +3783,14 @@ package android.hardware.usb {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setCurrentFunctions(long);
     field @RequiresPermission(android.Manifest.permission.MANAGE_USB) public static final String ACTION_USB_PORT_CHANGED = "android.hardware.usb.action.USB_PORT_CHANGED";
     field public static final String ACTION_USB_STATE = "android.hardware.usb.action.USB_STATE";
+    field public static final long FUNCTION_ACCESSORY = 2L; // 0x2L
+    field public static final long FUNCTION_ADB = 1L; // 0x1L
+    field public static final long FUNCTION_AUDIO_SOURCE = 64L; // 0x40L
+    field public static final long FUNCTION_MIDI = 8L; // 0x8L
+    field public static final long FUNCTION_MTP = 4L; // 0x4L
     field public static final long FUNCTION_NCM = 1024L; // 0x400L
     field public static final long FUNCTION_NONE = 0L; // 0x0L
+    field public static final long FUNCTION_PTP = 16L; // 0x10L
     field public static final long FUNCTION_RNDIS = 32L; // 0x20L
     field public static final String USB_CONFIGURED = "configured";
     field public static final String USB_CONNECTED = "connected";
@@ -3865,6 +3896,20 @@ package android.location {
     method @NonNull public android.location.GnssReflectingPlane.Builder setLongitudeDegrees(@FloatRange(from=-180.0F, to=180.0f) double);
   }
 
+  public final class GnssRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isFullTracking();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssRequest> CREATOR;
+  }
+
+  public static final class GnssRequest.Builder {
+    ctor public GnssRequest.Builder();
+    ctor public GnssRequest.Builder(@NonNull android.location.GnssRequest);
+    method @NonNull public android.location.GnssRequest build();
+    method @NonNull public android.location.GnssRequest.Builder setFullTracking(boolean);
+  }
+
   public final class GnssSingleSatCorrection implements android.os.Parcelable {
     method public int describeContents();
     method @FloatRange(from=0.0f, fromInclusive=false) public float getCarrierFrequencyHz();
@@ -3894,236 +3939,236 @@ package android.location {
     method @NonNull public android.location.GnssSingleSatCorrection.Builder setSatelliteId(@IntRange(from=0) int);
   }
 
-  public class GpsClock implements android.os.Parcelable {
-    method public int describeContents();
-    method public double getBiasInNs();
-    method public double getBiasUncertaintyInNs();
-    method public double getDriftInNsPerSec();
-    method public double getDriftUncertaintyInNsPerSec();
-    method public long getFullBiasInNs();
-    method public short getLeapSecond();
-    method public long getTimeInNs();
-    method public double getTimeUncertaintyInNs();
-    method public byte getType();
-    method public boolean hasBiasInNs();
-    method public boolean hasBiasUncertaintyInNs();
-    method public boolean hasDriftInNsPerSec();
-    method public boolean hasDriftUncertaintyInNsPerSec();
-    method public boolean hasFullBiasInNs();
-    method public boolean hasLeapSecond();
-    method public boolean hasTimeUncertaintyInNs();
-    method public void reset();
-    method public void resetBiasInNs();
-    method public void resetBiasUncertaintyInNs();
-    method public void resetDriftInNsPerSec();
-    method public void resetDriftUncertaintyInNsPerSec();
-    method public void resetFullBiasInNs();
-    method public void resetLeapSecond();
-    method public void resetTimeUncertaintyInNs();
-    method public void set(android.location.GpsClock);
-    method public void setBiasInNs(double);
-    method public void setBiasUncertaintyInNs(double);
-    method public void setDriftInNsPerSec(double);
-    method public void setDriftUncertaintyInNsPerSec(double);
-    method public void setFullBiasInNs(long);
-    method public void setLeapSecond(short);
-    method public void setTimeInNs(long);
-    method public void setTimeUncertaintyInNs(double);
-    method public void setType(byte);
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.GpsClock> CREATOR;
-    field public static final byte TYPE_GPS_TIME = 2; // 0x2
-    field public static final byte TYPE_LOCAL_HW_TIME = 1; // 0x1
-    field public static final byte TYPE_UNKNOWN = 0; // 0x0
+  @Deprecated public class GpsClock implements android.os.Parcelable {
+    method @Deprecated public int describeContents();
+    method @Deprecated public double getBiasInNs();
+    method @Deprecated public double getBiasUncertaintyInNs();
+    method @Deprecated public double getDriftInNsPerSec();
+    method @Deprecated public double getDriftUncertaintyInNsPerSec();
+    method @Deprecated public long getFullBiasInNs();
+    method @Deprecated public short getLeapSecond();
+    method @Deprecated public long getTimeInNs();
+    method @Deprecated public double getTimeUncertaintyInNs();
+    method @Deprecated public byte getType();
+    method @Deprecated public boolean hasBiasInNs();
+    method @Deprecated public boolean hasBiasUncertaintyInNs();
+    method @Deprecated public boolean hasDriftInNsPerSec();
+    method @Deprecated public boolean hasDriftUncertaintyInNsPerSec();
+    method @Deprecated public boolean hasFullBiasInNs();
+    method @Deprecated public boolean hasLeapSecond();
+    method @Deprecated public boolean hasTimeUncertaintyInNs();
+    method @Deprecated public void reset();
+    method @Deprecated public void resetBiasInNs();
+    method @Deprecated public void resetBiasUncertaintyInNs();
+    method @Deprecated public void resetDriftInNsPerSec();
+    method @Deprecated public void resetDriftUncertaintyInNsPerSec();
+    method @Deprecated public void resetFullBiasInNs();
+    method @Deprecated public void resetLeapSecond();
+    method @Deprecated public void resetTimeUncertaintyInNs();
+    method @Deprecated public void set(android.location.GpsClock);
+    method @Deprecated public void setBiasInNs(double);
+    method @Deprecated public void setBiasUncertaintyInNs(double);
+    method @Deprecated public void setDriftInNsPerSec(double);
+    method @Deprecated public void setDriftUncertaintyInNsPerSec(double);
+    method @Deprecated public void setFullBiasInNs(long);
+    method @Deprecated public void setLeapSecond(short);
+    method @Deprecated public void setTimeInNs(long);
+    method @Deprecated public void setTimeUncertaintyInNs(double);
+    method @Deprecated public void setType(byte);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.location.GpsClock> CREATOR;
+    field @Deprecated public static final byte TYPE_GPS_TIME = 2; // 0x2
+    field @Deprecated public static final byte TYPE_LOCAL_HW_TIME = 1; // 0x1
+    field @Deprecated public static final byte TYPE_UNKNOWN = 0; // 0x0
   }
 
-  public class GpsMeasurement implements android.os.Parcelable {
-    method public int describeContents();
-    method public double getAccumulatedDeltaRangeInMeters();
-    method public short getAccumulatedDeltaRangeState();
-    method public double getAccumulatedDeltaRangeUncertaintyInMeters();
-    method public double getAzimuthInDeg();
-    method public double getAzimuthUncertaintyInDeg();
-    method public int getBitNumber();
-    method public long getCarrierCycles();
-    method public float getCarrierFrequencyInHz();
-    method public double getCarrierPhase();
-    method public double getCarrierPhaseUncertainty();
-    method public double getCn0InDbHz();
-    method public double getCodePhaseInChips();
-    method public double getCodePhaseUncertaintyInChips();
-    method public double getDopplerShiftInHz();
-    method public double getDopplerShiftUncertaintyInHz();
-    method public double getElevationInDeg();
-    method public double getElevationUncertaintyInDeg();
-    method public byte getLossOfLock();
-    method public byte getMultipathIndicator();
-    method public byte getPrn();
-    method public double getPseudorangeInMeters();
-    method public double getPseudorangeRateInMetersPerSec();
-    method public double getPseudorangeRateUncertaintyInMetersPerSec();
-    method public double getPseudorangeUncertaintyInMeters();
-    method public long getReceivedGpsTowInNs();
-    method public long getReceivedGpsTowUncertaintyInNs();
-    method public double getSnrInDb();
-    method public short getState();
-    method public short getTimeFromLastBitInMs();
-    method public double getTimeOffsetInNs();
-    method public boolean hasAzimuthInDeg();
-    method public boolean hasAzimuthUncertaintyInDeg();
-    method public boolean hasBitNumber();
-    method public boolean hasCarrierCycles();
-    method public boolean hasCarrierFrequencyInHz();
-    method public boolean hasCarrierPhase();
-    method public boolean hasCarrierPhaseUncertainty();
-    method public boolean hasCodePhaseInChips();
-    method public boolean hasCodePhaseUncertaintyInChips();
-    method public boolean hasDopplerShiftInHz();
-    method public boolean hasDopplerShiftUncertaintyInHz();
-    method public boolean hasElevationInDeg();
-    method public boolean hasElevationUncertaintyInDeg();
-    method public boolean hasPseudorangeInMeters();
-    method public boolean hasPseudorangeUncertaintyInMeters();
-    method public boolean hasSnrInDb();
-    method public boolean hasTimeFromLastBitInMs();
-    method public boolean isPseudorangeRateCorrected();
-    method public boolean isUsedInFix();
-    method public void reset();
-    method public void resetAzimuthInDeg();
-    method public void resetAzimuthUncertaintyInDeg();
-    method public void resetBitNumber();
-    method public void resetCarrierCycles();
-    method public void resetCarrierFrequencyInHz();
-    method public void resetCarrierPhase();
-    method public void resetCarrierPhaseUncertainty();
-    method public void resetCodePhaseInChips();
-    method public void resetCodePhaseUncertaintyInChips();
-    method public void resetDopplerShiftInHz();
-    method public void resetDopplerShiftUncertaintyInHz();
-    method public void resetElevationInDeg();
-    method public void resetElevationUncertaintyInDeg();
-    method public void resetPseudorangeInMeters();
-    method public void resetPseudorangeUncertaintyInMeters();
-    method public void resetSnrInDb();
-    method public void resetTimeFromLastBitInMs();
-    method public void set(android.location.GpsMeasurement);
-    method public void setAccumulatedDeltaRangeInMeters(double);
-    method public void setAccumulatedDeltaRangeState(short);
-    method public void setAccumulatedDeltaRangeUncertaintyInMeters(double);
-    method public void setAzimuthInDeg(double);
-    method public void setAzimuthUncertaintyInDeg(double);
-    method public void setBitNumber(int);
-    method public void setCarrierCycles(long);
-    method public void setCarrierFrequencyInHz(float);
-    method public void setCarrierPhase(double);
-    method public void setCarrierPhaseUncertainty(double);
-    method public void setCn0InDbHz(double);
-    method public void setCodePhaseInChips(double);
-    method public void setCodePhaseUncertaintyInChips(double);
-    method public void setDopplerShiftInHz(double);
-    method public void setDopplerShiftUncertaintyInHz(double);
-    method public void setElevationInDeg(double);
-    method public void setElevationUncertaintyInDeg(double);
-    method public void setLossOfLock(byte);
-    method public void setMultipathIndicator(byte);
-    method public void setPrn(byte);
-    method public void setPseudorangeInMeters(double);
-    method public void setPseudorangeRateInMetersPerSec(double);
-    method public void setPseudorangeRateUncertaintyInMetersPerSec(double);
-    method public void setPseudorangeUncertaintyInMeters(double);
-    method public void setReceivedGpsTowInNs(long);
-    method public void setReceivedGpsTowUncertaintyInNs(long);
-    method public void setSnrInDb(double);
-    method public void setState(short);
-    method public void setTimeFromLastBitInMs(short);
-    method public void setTimeOffsetInNs(double);
-    method public void setUsedInFix(boolean);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final short ADR_STATE_CYCLE_SLIP = 4; // 0x4
-    field public static final short ADR_STATE_RESET = 2; // 0x2
-    field public static final short ADR_STATE_UNKNOWN = 0; // 0x0
-    field public static final short ADR_STATE_VALID = 1; // 0x1
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.GpsMeasurement> CREATOR;
-    field public static final byte LOSS_OF_LOCK_CYCLE_SLIP = 2; // 0x2
-    field public static final byte LOSS_OF_LOCK_OK = 1; // 0x1
-    field public static final byte LOSS_OF_LOCK_UNKNOWN = 0; // 0x0
-    field public static final byte MULTIPATH_INDICATOR_DETECTED = 1; // 0x1
-    field public static final byte MULTIPATH_INDICATOR_NOT_USED = 2; // 0x2
-    field public static final byte MULTIPATH_INDICATOR_UNKNOWN = 0; // 0x0
-    field public static final short STATE_BIT_SYNC = 2; // 0x2
-    field public static final short STATE_CODE_LOCK = 1; // 0x1
-    field public static final short STATE_MSEC_AMBIGUOUS = 16; // 0x10
-    field public static final short STATE_SUBFRAME_SYNC = 4; // 0x4
-    field public static final short STATE_TOW_DECODED = 8; // 0x8
-    field public static final short STATE_UNKNOWN = 0; // 0x0
+  @Deprecated public class GpsMeasurement implements android.os.Parcelable {
+    method @Deprecated public int describeContents();
+    method @Deprecated public double getAccumulatedDeltaRangeInMeters();
+    method @Deprecated public short getAccumulatedDeltaRangeState();
+    method @Deprecated public double getAccumulatedDeltaRangeUncertaintyInMeters();
+    method @Deprecated public double getAzimuthInDeg();
+    method @Deprecated public double getAzimuthUncertaintyInDeg();
+    method @Deprecated public int getBitNumber();
+    method @Deprecated public long getCarrierCycles();
+    method @Deprecated public float getCarrierFrequencyInHz();
+    method @Deprecated public double getCarrierPhase();
+    method @Deprecated public double getCarrierPhaseUncertainty();
+    method @Deprecated public double getCn0InDbHz();
+    method @Deprecated public double getCodePhaseInChips();
+    method @Deprecated public double getCodePhaseUncertaintyInChips();
+    method @Deprecated public double getDopplerShiftInHz();
+    method @Deprecated public double getDopplerShiftUncertaintyInHz();
+    method @Deprecated public double getElevationInDeg();
+    method @Deprecated public double getElevationUncertaintyInDeg();
+    method @Deprecated public byte getLossOfLock();
+    method @Deprecated public byte getMultipathIndicator();
+    method @Deprecated public byte getPrn();
+    method @Deprecated public double getPseudorangeInMeters();
+    method @Deprecated public double getPseudorangeRateInMetersPerSec();
+    method @Deprecated public double getPseudorangeRateUncertaintyInMetersPerSec();
+    method @Deprecated public double getPseudorangeUncertaintyInMeters();
+    method @Deprecated public long getReceivedGpsTowInNs();
+    method @Deprecated public long getReceivedGpsTowUncertaintyInNs();
+    method @Deprecated public double getSnrInDb();
+    method @Deprecated public short getState();
+    method @Deprecated public short getTimeFromLastBitInMs();
+    method @Deprecated public double getTimeOffsetInNs();
+    method @Deprecated public boolean hasAzimuthInDeg();
+    method @Deprecated public boolean hasAzimuthUncertaintyInDeg();
+    method @Deprecated public boolean hasBitNumber();
+    method @Deprecated public boolean hasCarrierCycles();
+    method @Deprecated public boolean hasCarrierFrequencyInHz();
+    method @Deprecated public boolean hasCarrierPhase();
+    method @Deprecated public boolean hasCarrierPhaseUncertainty();
+    method @Deprecated public boolean hasCodePhaseInChips();
+    method @Deprecated public boolean hasCodePhaseUncertaintyInChips();
+    method @Deprecated public boolean hasDopplerShiftInHz();
+    method @Deprecated public boolean hasDopplerShiftUncertaintyInHz();
+    method @Deprecated public boolean hasElevationInDeg();
+    method @Deprecated public boolean hasElevationUncertaintyInDeg();
+    method @Deprecated public boolean hasPseudorangeInMeters();
+    method @Deprecated public boolean hasPseudorangeUncertaintyInMeters();
+    method @Deprecated public boolean hasSnrInDb();
+    method @Deprecated public boolean hasTimeFromLastBitInMs();
+    method @Deprecated public boolean isPseudorangeRateCorrected();
+    method @Deprecated public boolean isUsedInFix();
+    method @Deprecated public void reset();
+    method @Deprecated public void resetAzimuthInDeg();
+    method @Deprecated public void resetAzimuthUncertaintyInDeg();
+    method @Deprecated public void resetBitNumber();
+    method @Deprecated public void resetCarrierCycles();
+    method @Deprecated public void resetCarrierFrequencyInHz();
+    method @Deprecated public void resetCarrierPhase();
+    method @Deprecated public void resetCarrierPhaseUncertainty();
+    method @Deprecated public void resetCodePhaseInChips();
+    method @Deprecated public void resetCodePhaseUncertaintyInChips();
+    method @Deprecated public void resetDopplerShiftInHz();
+    method @Deprecated public void resetDopplerShiftUncertaintyInHz();
+    method @Deprecated public void resetElevationInDeg();
+    method @Deprecated public void resetElevationUncertaintyInDeg();
+    method @Deprecated public void resetPseudorangeInMeters();
+    method @Deprecated public void resetPseudorangeUncertaintyInMeters();
+    method @Deprecated public void resetSnrInDb();
+    method @Deprecated public void resetTimeFromLastBitInMs();
+    method @Deprecated public void set(android.location.GpsMeasurement);
+    method @Deprecated public void setAccumulatedDeltaRangeInMeters(double);
+    method @Deprecated public void setAccumulatedDeltaRangeState(short);
+    method @Deprecated public void setAccumulatedDeltaRangeUncertaintyInMeters(double);
+    method @Deprecated public void setAzimuthInDeg(double);
+    method @Deprecated public void setAzimuthUncertaintyInDeg(double);
+    method @Deprecated public void setBitNumber(int);
+    method @Deprecated public void setCarrierCycles(long);
+    method @Deprecated public void setCarrierFrequencyInHz(float);
+    method @Deprecated public void setCarrierPhase(double);
+    method @Deprecated public void setCarrierPhaseUncertainty(double);
+    method @Deprecated public void setCn0InDbHz(double);
+    method @Deprecated public void setCodePhaseInChips(double);
+    method @Deprecated public void setCodePhaseUncertaintyInChips(double);
+    method @Deprecated public void setDopplerShiftInHz(double);
+    method @Deprecated public void setDopplerShiftUncertaintyInHz(double);
+    method @Deprecated public void setElevationInDeg(double);
+    method @Deprecated public void setElevationUncertaintyInDeg(double);
+    method @Deprecated public void setLossOfLock(byte);
+    method @Deprecated public void setMultipathIndicator(byte);
+    method @Deprecated public void setPrn(byte);
+    method @Deprecated public void setPseudorangeInMeters(double);
+    method @Deprecated public void setPseudorangeRateInMetersPerSec(double);
+    method @Deprecated public void setPseudorangeRateUncertaintyInMetersPerSec(double);
+    method @Deprecated public void setPseudorangeUncertaintyInMeters(double);
+    method @Deprecated public void setReceivedGpsTowInNs(long);
+    method @Deprecated public void setReceivedGpsTowUncertaintyInNs(long);
+    method @Deprecated public void setSnrInDb(double);
+    method @Deprecated public void setState(short);
+    method @Deprecated public void setTimeFromLastBitInMs(short);
+    method @Deprecated public void setTimeOffsetInNs(double);
+    method @Deprecated public void setUsedInFix(boolean);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated public static final short ADR_STATE_CYCLE_SLIP = 4; // 0x4
+    field @Deprecated public static final short ADR_STATE_RESET = 2; // 0x2
+    field @Deprecated public static final short ADR_STATE_UNKNOWN = 0; // 0x0
+    field @Deprecated public static final short ADR_STATE_VALID = 1; // 0x1
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.location.GpsMeasurement> CREATOR;
+    field @Deprecated public static final byte LOSS_OF_LOCK_CYCLE_SLIP = 2; // 0x2
+    field @Deprecated public static final byte LOSS_OF_LOCK_OK = 1; // 0x1
+    field @Deprecated public static final byte LOSS_OF_LOCK_UNKNOWN = 0; // 0x0
+    field @Deprecated public static final byte MULTIPATH_INDICATOR_DETECTED = 1; // 0x1
+    field @Deprecated public static final byte MULTIPATH_INDICATOR_NOT_USED = 2; // 0x2
+    field @Deprecated public static final byte MULTIPATH_INDICATOR_UNKNOWN = 0; // 0x0
+    field @Deprecated public static final short STATE_BIT_SYNC = 2; // 0x2
+    field @Deprecated public static final short STATE_CODE_LOCK = 1; // 0x1
+    field @Deprecated public static final short STATE_MSEC_AMBIGUOUS = 16; // 0x10
+    field @Deprecated public static final short STATE_SUBFRAME_SYNC = 4; // 0x4
+    field @Deprecated public static final short STATE_TOW_DECODED = 8; // 0x8
+    field @Deprecated public static final short STATE_UNKNOWN = 0; // 0x0
   }
 
-  public class GpsMeasurementsEvent implements android.os.Parcelable {
-    ctor public GpsMeasurementsEvent(android.location.GpsClock, android.location.GpsMeasurement[]);
-    method public int describeContents();
-    method @NonNull public android.location.GpsClock getClock();
-    method @NonNull public java.util.Collection<android.location.GpsMeasurement> getMeasurements();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.GpsMeasurementsEvent> CREATOR;
-    field public static final int STATUS_GPS_LOCATION_DISABLED = 2; // 0x2
-    field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
-    field public static final int STATUS_READY = 1; // 0x1
+  @Deprecated public class GpsMeasurementsEvent implements android.os.Parcelable {
+    ctor @Deprecated public GpsMeasurementsEvent(android.location.GpsClock, android.location.GpsMeasurement[]);
+    method @Deprecated public int describeContents();
+    method @Deprecated @NonNull public android.location.GpsClock getClock();
+    method @Deprecated @NonNull public java.util.Collection<android.location.GpsMeasurement> getMeasurements();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.location.GpsMeasurementsEvent> CREATOR;
+    field @Deprecated public static final int STATUS_GPS_LOCATION_DISABLED = 2; // 0x2
+    field @Deprecated public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
+    field @Deprecated public static final int STATUS_READY = 1; // 0x1
   }
 
-  public static interface GpsMeasurementsEvent.Listener {
-    method public void onGpsMeasurementsReceived(android.location.GpsMeasurementsEvent);
-    method public void onStatusChanged(int);
+  @Deprecated public static interface GpsMeasurementsEvent.Listener {
+    method @Deprecated public void onGpsMeasurementsReceived(android.location.GpsMeasurementsEvent);
+    method @Deprecated public void onStatusChanged(int);
   }
 
-  public class GpsNavigationMessage implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public byte[] getData();
-    method public short getMessageId();
-    method public byte getPrn();
-    method public short getStatus();
-    method public short getSubmessageId();
-    method public byte getType();
-    method public void reset();
-    method public void set(android.location.GpsNavigationMessage);
-    method public void setData(byte[]);
-    method public void setMessageId(short);
-    method public void setPrn(byte);
-    method public void setStatus(short);
-    method public void setSubmessageId(short);
-    method public void setType(byte);
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.GpsNavigationMessage> CREATOR;
-    field public static final short STATUS_PARITY_PASSED = 1; // 0x1
-    field public static final short STATUS_PARITY_REBUILT = 2; // 0x2
-    field public static final short STATUS_UNKNOWN = 0; // 0x0
-    field public static final byte TYPE_CNAV2 = 4; // 0x4
-    field public static final byte TYPE_L1CA = 1; // 0x1
-    field public static final byte TYPE_L2CNAV = 2; // 0x2
-    field public static final byte TYPE_L5CNAV = 3; // 0x3
-    field public static final byte TYPE_UNKNOWN = 0; // 0x0
+  @Deprecated public class GpsNavigationMessage implements android.os.Parcelable {
+    method @Deprecated public int describeContents();
+    method @Deprecated @NonNull public byte[] getData();
+    method @Deprecated public short getMessageId();
+    method @Deprecated public byte getPrn();
+    method @Deprecated public short getStatus();
+    method @Deprecated public short getSubmessageId();
+    method @Deprecated public byte getType();
+    method @Deprecated public void reset();
+    method @Deprecated public void set(android.location.GpsNavigationMessage);
+    method @Deprecated public void setData(byte[]);
+    method @Deprecated public void setMessageId(short);
+    method @Deprecated public void setPrn(byte);
+    method @Deprecated public void setStatus(short);
+    method @Deprecated public void setSubmessageId(short);
+    method @Deprecated public void setType(byte);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.location.GpsNavigationMessage> CREATOR;
+    field @Deprecated public static final short STATUS_PARITY_PASSED = 1; // 0x1
+    field @Deprecated public static final short STATUS_PARITY_REBUILT = 2; // 0x2
+    field @Deprecated public static final short STATUS_UNKNOWN = 0; // 0x0
+    field @Deprecated public static final byte TYPE_CNAV2 = 4; // 0x4
+    field @Deprecated public static final byte TYPE_L1CA = 1; // 0x1
+    field @Deprecated public static final byte TYPE_L2CNAV = 2; // 0x2
+    field @Deprecated public static final byte TYPE_L5CNAV = 3; // 0x3
+    field @Deprecated public static final byte TYPE_UNKNOWN = 0; // 0x0
   }
 
-  public class GpsNavigationMessageEvent implements android.os.Parcelable {
-    ctor public GpsNavigationMessageEvent(android.location.GpsNavigationMessage);
-    method public int describeContents();
-    method @NonNull public android.location.GpsNavigationMessage getNavigationMessage();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.GpsNavigationMessageEvent> CREATOR;
-    field public static int STATUS_GPS_LOCATION_DISABLED;
-    field public static int STATUS_NOT_SUPPORTED;
-    field public static int STATUS_READY;
+  @Deprecated public class GpsNavigationMessageEvent implements android.os.Parcelable {
+    ctor @Deprecated public GpsNavigationMessageEvent(android.location.GpsNavigationMessage);
+    method @Deprecated public int describeContents();
+    method @Deprecated @NonNull public android.location.GpsNavigationMessage getNavigationMessage();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.location.GpsNavigationMessageEvent> CREATOR;
+    field @Deprecated public static int STATUS_GPS_LOCATION_DISABLED;
+    field @Deprecated public static int STATUS_NOT_SUPPORTED;
+    field @Deprecated public static int STATUS_READY;
   }
 
-  public static interface GpsNavigationMessageEvent.Listener {
-    method public void onGpsNavigationMessageReceived(android.location.GpsNavigationMessageEvent);
-    method public void onStatusChanged(int);
+  @Deprecated public static interface GpsNavigationMessageEvent.Listener {
+    method @Deprecated public void onGpsNavigationMessageReceived(android.location.GpsNavigationMessageEvent);
+    method @Deprecated public void onStatusChanged(int);
   }
 
   public class Location implements android.os.Parcelable {
     method public boolean isComplete();
     method public void makeComplete();
     method public void setIsFromMockProvider(boolean);
-    field public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
+    field @Deprecated public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
   }
 
   public class LocationManager {
@@ -4131,13 +4176,13 @@ package android.location {
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull android.location.LocationRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
     method @Nullable public String getExtraLocationControllerPackage();
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public int getGnssBatchSize();
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.location.GnssCapabilities getGnssCapabilities();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void injectGnssMeasurementCorrections(@NonNull android.location.GnssMeasurementCorrections);
     method public boolean isExtraLocationControllerPackageEnabled();
     method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
     method public boolean isProviderEnabledForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
+    method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.LOCATION_HARDWARE}) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.app.PendingIntent);
@@ -4215,15 +4260,15 @@ package android.media {
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioAttributes.Builder setSystemUsage(int);
   }
 
-  public final class AudioDeviceAddress implements android.os.Parcelable {
-    ctor public AudioDeviceAddress(@NonNull android.media.AudioDeviceInfo);
-    ctor public AudioDeviceAddress(int, int, @NonNull String);
+  public final class AudioDeviceAttributes implements android.os.Parcelable {
+    ctor public AudioDeviceAttributes(@NonNull android.media.AudioDeviceInfo);
+    ctor public AudioDeviceAttributes(int, int, @NonNull String);
     method public int describeContents();
     method @NonNull public String getAddress();
     method public int getRole();
     method public int getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioDeviceAddress> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioDeviceAttributes> CREATOR;
     field public static final int ROLE_INPUT = 1; // 0x1
     field public static final int ROLE_OUTPUT = 2; // 0x2
   }
@@ -4255,22 +4300,24 @@ package android.media {
 
   public class AudioManager {
     method @Deprecated public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDeviceForStrategyChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener) throws java.lang.SecurityException;
     method public void clearAudioServerStateCallback();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @IntRange(from=0) public int getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioProductStrategy> getAudioProductStrategies();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioVolumeGroup> getAudioVolumeGroups();
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAddress> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) public int getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDeviceAddress getPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDeviceAttributes getPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int[] getSupportedSystemUsages();
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method public boolean isAudioServerRunning();
     method public boolean isHdmiSystemAudioSupported();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method public void registerVolumeGroupCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.VolumeGroupCallback);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnPreferredDeviceForStrategyChangedListener(@NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean removePreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy) throws java.lang.IllegalArgumentException;
@@ -4278,7 +4325,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo, @IntRange(from=0) int);
     method public void setAudioServerStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.AudioServerStateCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAddress);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAttributes);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setSupportedSystemUsages(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setVolumeIndexForAttributes(@NonNull android.media.AudioAttributes, int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
@@ -4295,6 +4342,10 @@ package android.media {
     ctor public AudioManager.AudioServerStateCallback();
     method public void onAudioServerDown();
     method public void onAudioServerUp();
+  }
+
+  public static interface AudioManager.OnPreferredDeviceForStrategyChangedListener {
+    method public void onPreferredDeviceForStrategyChanged(@NonNull android.media.audiopolicy.AudioProductStrategy, @Nullable android.media.AudioDeviceAttributes);
   }
 
   public abstract static class AudioManager.VolumeGroupCallback {
@@ -4374,7 +4425,7 @@ package android.media {
 package android.media.audiofx {
 
   public class AudioEffect {
-    ctor @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public AudioEffect(@NonNull java.util.UUID, @NonNull android.media.AudioDeviceAddress);
+    ctor @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public AudioEffect(@NonNull java.util.UUID, @NonNull android.media.AudioDeviceAttributes);
   }
 
 }
@@ -4788,7 +4839,7 @@ package android.media.tv.tuner {
     method public int getAudioFilterCount();
     method public int getDemuxCount();
     method public int getFilterCapabilities();
-    method @Nullable @Size(5) public int[] getLinkCapabilities();
+    method @NonNull @Size(5) public int[] getLinkCapabilities();
     method public int getPcrFilterCount();
     method public int getPesFilterCount();
     method public int getPlaybackCount();
@@ -4804,7 +4855,7 @@ package android.media.tv.tuner {
     method public int addPid(int, int, @Nullable android.media.tv.tuner.filter.Filter);
     method public void close();
     method public int removePid(int, int, @Nullable android.media.tv.tuner.filter.Filter);
-    method public int setKeyToken(@Nullable byte[]);
+    method public int setKeyToken(@NonNull byte[]);
     field public static final int PID_TYPE_MMTP = 2; // 0x2
     field public static final int PID_TYPE_T = 1; // 0x1
   }
@@ -4841,8 +4892,11 @@ package android.media.tv.tuner {
   }
 
   public class Tuner implements java.lang.AutoCloseable {
-    ctor @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public Tuner(@NonNull android.content.Context, @NonNull String, int, @Nullable android.media.tv.tuner.Tuner.OnResourceLostListener);
+    ctor @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public Tuner(@NonNull android.content.Context, @Nullable String, int);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int cancelScanning();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int cancelTuning();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void clearOnTuneEventListener();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void clearResourceLostListener();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void close();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int connectCiCam(int);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int disconnectCiCam();
@@ -4851,19 +4905,18 @@ package android.media.tv.tuner {
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities(@NonNull android.content.Context);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();
     method @Nullable public android.media.tv.tuner.frontend.FrontendStatus getFrontendStatus(@NonNull int[]);
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Descrambler openDescrambler();
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.dvr.DvrPlayback openDvrPlayback(long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener);
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.dvr.DvrRecorder openDvrRecorder(long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.dvr.OnRecordStatusChangedListener);
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER) public android.media.tv.tuner.Descrambler openDescrambler();
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.dvr.DvrPlayback openDvrPlayback(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener);
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.dvr.DvrRecorder openDvrRecorder(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnRecordStatusChangedListener);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.filter.Filter openFilter(int, int, long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.filter.FilterCallback);
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Lnb openLnb(@Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.LnbCallback);
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Lnb openLnbByName(@Nullable String, @Nullable java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Lnb openLnb(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
+    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Lnb openLnbByName(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
     method @Nullable public android.media.tv.tuner.filter.TimeFilter openTimeFilter();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int scan(@NonNull android.media.tv.tuner.frontend.FrontendSettings, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.ScanCallback);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setLna(boolean);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setLnaEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void setOnTuneEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.OnTuneEventListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void setResourceLostListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.Tuner.OnResourceLostListener);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopScan();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopTune();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void updateResourcePriority(int, int);
   }
@@ -4873,8 +4926,10 @@ package android.media.tv.tuner {
   }
 
   public final class TunerConstants {
-    field public static final int INVALID_STREAM_ID = -1; // 0xffffffff
-    field public static final int INVALID_TS_PID = -1; // 0xffffffff
+    field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
+    field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
+    field public static final int INVALID_STREAM_ID = 65535; // 0xffff
+    field public static final int INVALID_TS_PID = 65535; // 0xffff
     field public static final int RESULT_INVALID_ARGUMENT = 4; // 0x4
     field public static final int RESULT_INVALID_STATE = 3; // 0x3
     field public static final int RESULT_NOT_INITIALIZED = 2; // 0x2
@@ -4891,8 +4946,24 @@ package android.media.tv.tuner {
 
 package android.media.tv.tuner.dvr {
 
-  public class Dvr implements java.lang.AutoCloseable {
-    ctor protected Dvr(int);
+  public class DvrPlayback implements java.lang.AutoCloseable {
+    method public int attachFilter(@NonNull android.media.tv.tuner.filter.Filter);
+    method public void close();
+    method public int configure(@NonNull android.media.tv.tuner.dvr.DvrSettings);
+    method public int detachFilter(@NonNull android.media.tv.tuner.filter.Filter);
+    method public int flush();
+    method public long read(long);
+    method public long read(@NonNull byte[], long, long);
+    method public void setFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
+    method public int start();
+    method public int stop();
+    field public static final int PLAYBACK_STATUS_ALMOST_EMPTY = 2; // 0x2
+    field public static final int PLAYBACK_STATUS_ALMOST_FULL = 4; // 0x4
+    field public static final int PLAYBACK_STATUS_EMPTY = 1; // 0x1
+    field public static final int PLAYBACK_STATUS_FULL = 8; // 0x8
+  }
+
+  public class DvrRecorder implements java.lang.AutoCloseable {
     method public int attachFilter(@NonNull android.media.tv.tuner.filter.Filter);
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.dvr.DvrSettings);
@@ -4901,20 +4972,6 @@ package android.media.tv.tuner.dvr {
     method public void setFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
     method public int start();
     method public int stop();
-    field public static final int TYPE_PLAYBACK = 1; // 0x1
-    field public static final int TYPE_RECORD = 0; // 0x0
-  }
-
-  public class DvrPlayback extends android.media.tv.tuner.dvr.Dvr {
-    method public long read(long);
-    method public long read(@NonNull byte[], long, long);
-    field public static final int PLAYBACK_STATUS_ALMOST_EMPTY = 2; // 0x2
-    field public static final int PLAYBACK_STATUS_ALMOST_FULL = 4; // 0x4
-    field public static final int PLAYBACK_STATUS_EMPTY = 1; // 0x1
-    field public static final int PLAYBACK_STATUS_FULL = 8; // 0x8
-  }
-
-  public class DvrRecorder extends android.media.tv.tuner.dvr.Dvr {
     method public long write(long);
     method public long write(@NonNull byte[], long, long);
   }
@@ -5267,9 +5324,8 @@ package android.media.tv.tuner.filter {
     method public int getType();
   }
 
-  public static class TsFilterConfiguration.Builder {
+  public static class TsFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.TsFilterConfiguration.Builder> {
     method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration build();
-    method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration.Builder setSettings(@NonNull android.media.tv.tuner.filter.Settings);
     method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration.Builder setTpid(int);
   }
 
@@ -5745,7 +5801,6 @@ package android.media.tv.tuner.frontend {
     method public int getFreqOffset();
     method public int getHierarchy();
     method @NonNull public boolean[] getLayerErrors();
-    method public int getLberCn();
     method public int getLnbVoltage();
     method public int getMer();
     method public int getModulation();
@@ -5757,37 +5812,32 @@ package android.media.tv.tuner.frontend {
     method public int getSnr();
     method public int getSpectralInversion();
     method public int getSymbolRate();
-    method public int getVberCn();
-    method public int getXerCn();
     method public boolean isDemodLocked();
     method public boolean isEwbs();
     method public boolean isLnaOn();
     method public boolean isRfLock();
     field public static final int FRONTEND_STATUS_TYPE_AGC = 14; // 0xe
-    field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 24; // 0x18
+    field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 21; // 0x15
     field public static final int FRONTEND_STATUS_TYPE_BER = 2; // 0x2
     field public static final int FRONTEND_STATUS_TYPE_DEMOD_LOCK = 0; // 0x0
     field public static final int FRONTEND_STATUS_TYPE_EWBS = 13; // 0xd
     field public static final int FRONTEND_STATUS_TYPE_FEC = 8; // 0x8
-    field public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET = 21; // 0x15
-    field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 22; // 0x16
+    field public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET = 18; // 0x12
+    field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 19; // 0x13
     field public static final int FRONTEND_STATUS_TYPE_LAYER_ERROR = 16; // 0x10
-    field public static final int FRONTEND_STATUS_TYPE_LBER_CN = 18; // 0x12
     field public static final int FRONTEND_STATUS_TYPE_LNA = 15; // 0xf
     field public static final int FRONTEND_STATUS_TYPE_LNB_VOLTAGE = 11; // 0xb
-    field public static final int FRONTEND_STATUS_TYPE_MER = 20; // 0x14
+    field public static final int FRONTEND_STATUS_TYPE_MER = 17; // 0x11
     field public static final int FRONTEND_STATUS_TYPE_MODULATION = 9; // 0x9
     field public static final int FRONTEND_STATUS_TYPE_PER = 3; // 0x3
     field public static final int FRONTEND_STATUS_TYPE_PLP_ID = 12; // 0xc
     field public static final int FRONTEND_STATUS_TYPE_PRE_BER = 4; // 0x4
-    field public static final int FRONTEND_STATUS_TYPE_RF_LOCK = 23; // 0x17
+    field public static final int FRONTEND_STATUS_TYPE_RF_LOCK = 20; // 0x14
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_QUALITY = 5; // 0x5
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH = 6; // 0x6
     field public static final int FRONTEND_STATUS_TYPE_SNR = 1; // 0x1
     field public static final int FRONTEND_STATUS_TYPE_SPECTRAL = 10; // 0xa
     field public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE = 7; // 0x7
-    field public static final int FRONTEND_STATUS_TYPE_VBER_CN = 17; // 0x11
-    field public static final int FRONTEND_STATUS_TYPE_XER_CN = 19; // 0x13
   }
 
   public static class FrontendStatus.Atsc3PlpInfo {
@@ -6015,7 +6065,7 @@ package android.net {
 
   public class CaptivePortal implements android.os.Parcelable {
     method public void logEvent(int, @NonNull String);
-    method public void reevaluateNetwork();
+    method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void reevaluateNetwork();
     method public void useNetwork();
     field public static final int APP_REQUEST_REEVALUATION_REQUIRED = 100; // 0x64
     field public static final int APP_RETURN_DISMISSED = 0; // 0x0
@@ -6702,337 +6752,6 @@ package android.net.apf {
 
 }
 
-package android.net.eap {
-
-  public final class EapSessionConfig {
-  }
-
-  public static final class EapSessionConfig.Builder {
-    ctor public EapSessionConfig.Builder();
-    method @NonNull public android.net.eap.EapSessionConfig build();
-    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapAkaConfig(int, int);
-    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapAkaPrimeConfig(int, int, @NonNull String, boolean);
-    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapIdentity(@NonNull byte[]);
-    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapMsChapV2Config(@NonNull String, @NonNull String);
-    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapSimConfig(int, int);
-  }
-
-  public static class EapSessionConfig.EapAkaConfig extends android.net.eap.EapSessionConfig.EapUiccConfig {
-  }
-
-  public static class EapSessionConfig.EapAkaPrimeConfig extends android.net.eap.EapSessionConfig.EapAkaConfig {
-    method public boolean allowsMismatchedNetworkNames();
-    method @NonNull public String getNetworkName();
-  }
-
-  public abstract static class EapSessionConfig.EapMethodConfig {
-    method public int getMethodType();
-  }
-
-  public static class EapSessionConfig.EapMsChapV2Config extends android.net.eap.EapSessionConfig.EapMethodConfig {
-    method @NonNull public String getPassword();
-    method @NonNull public String getUsername();
-  }
-
-  public static class EapSessionConfig.EapSimConfig extends android.net.eap.EapSessionConfig.EapUiccConfig {
-  }
-
-  public abstract static class EapSessionConfig.EapUiccConfig extends android.net.eap.EapSessionConfig.EapMethodConfig {
-    method public int getAppType();
-    method public int getSubId();
-  }
-
-}
-
-package android.net.ipsec.ike {
-
-  public final class ChildSaProposal extends android.net.ipsec.ike.SaProposal {
-  }
-
-  public static final class ChildSaProposal.Builder {
-    ctor public ChildSaProposal.Builder();
-    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addDhGroup(int);
-    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addEncryptionAlgorithm(int, int);
-    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addIntegrityAlgorithm(int);
-    method @NonNull public android.net.ipsec.ike.ChildSaProposal build();
-  }
-
-  public interface ChildSessionCallback {
-    method public void onClosed();
-    method public void onClosedExceptionally(@NonNull android.net.ipsec.ike.exceptions.IkeException);
-    method public void onIpSecTransformCreated(@NonNull android.net.IpSecTransform, int);
-    method public void onIpSecTransformDeleted(@NonNull android.net.IpSecTransform, int);
-    method public void onOpened(@NonNull android.net.ipsec.ike.ChildSessionConfiguration);
-  }
-
-  public final class ChildSessionConfiguration {
-    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getInboundTrafficSelectors();
-    method @NonNull public java.util.List<android.net.LinkAddress> getInternalAddresses();
-    method @NonNull public java.util.List<java.net.InetAddress> getInternalDhcpServers();
-    method @NonNull public java.util.List<java.net.InetAddress> getInternalDnsServers();
-    method @NonNull public java.util.List<android.net.IpPrefix> getInternalSubnets();
-    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getOutboundTrafficSelectors();
-  }
-
-  public abstract class ChildSessionParams {
-    method public long getHardLifetime();
-    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getLocalTrafficSelectors();
-    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getRemoteTrafficSelectors();
-    method @NonNull public java.util.List<android.net.ipsec.ike.ChildSaProposal> getSaProposals();
-    method public long getSoftLifetime();
-  }
-
-  public class IkeFqdnIdentification extends android.net.ipsec.ike.IkeIdentification {
-    ctor public IkeFqdnIdentification(@NonNull String);
-    field @NonNull public final String fqdn;
-  }
-
-  public abstract class IkeIdentification {
-  }
-
-  public final class IkeIpv4AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
-    ctor public IkeIpv4AddrIdentification(@NonNull java.net.Inet4Address);
-    field @NonNull public final java.net.Inet4Address ipv4Address;
-  }
-
-  public class IkeIpv6AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
-    ctor public IkeIpv6AddrIdentification(@NonNull java.net.Inet6Address);
-    field @NonNull public final java.net.Inet6Address ipv6Address;
-  }
-
-  public final class IkeKeyIdIdentification extends android.net.ipsec.ike.IkeIdentification {
-    ctor public IkeKeyIdIdentification(@NonNull byte[]);
-    field @NonNull public final byte[] keyId;
-  }
-
-  public final class IkeRfc822AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
-    ctor public IkeRfc822AddrIdentification(@NonNull String);
-    field @NonNull public final String rfc822Name;
-  }
-
-  public final class IkeSaProposal extends android.net.ipsec.ike.SaProposal {
-    method @NonNull public java.util.List<java.lang.Integer> getPseudorandomFunctions();
-  }
-
-  public static final class IkeSaProposal.Builder {
-    ctor public IkeSaProposal.Builder();
-    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addDhGroup(int);
-    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addEncryptionAlgorithm(int, int);
-    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addIntegrityAlgorithm(int);
-    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addPseudorandomFunction(int);
-    method @NonNull public android.net.ipsec.ike.IkeSaProposal build();
-  }
-
-  public final class IkeSession implements java.lang.AutoCloseable {
-    ctor public IkeSession(@NonNull android.content.Context, @NonNull android.net.ipsec.ike.IkeSessionParams, @NonNull android.net.ipsec.ike.ChildSessionParams, @NonNull java.util.concurrent.Executor, @NonNull android.net.ipsec.ike.IkeSessionCallback, @NonNull android.net.ipsec.ike.ChildSessionCallback);
-    method public void close();
-    method public void closeChildSession(@NonNull android.net.ipsec.ike.ChildSessionCallback);
-    method public void kill();
-    method public void openChildSession(@NonNull android.net.ipsec.ike.ChildSessionParams, @NonNull android.net.ipsec.ike.ChildSessionCallback);
-  }
-
-  public interface IkeSessionCallback {
-    method public void onClosed();
-    method public void onClosedExceptionally(@NonNull android.net.ipsec.ike.exceptions.IkeException);
-    method public void onError(@NonNull android.net.ipsec.ike.exceptions.IkeProtocolException);
-    method public void onOpened(@NonNull android.net.ipsec.ike.IkeSessionConfiguration);
-  }
-
-  public final class IkeSessionConfiguration {
-    method @NonNull public java.util.List<java.net.InetAddress> getPcscfServers();
-    method @NonNull public String getRemoteApplicationVersion();
-    method @NonNull public java.util.List<byte[]> getRemoteVendorIDs();
-    method public boolean isIkeExtensionEnabled(int);
-    field public static final int EXTENSION_TYPE_FRAGMENTATION = 1; // 0x1
-    field public static final int EXTENSION_TYPE_MOBIKE = 2; // 0x2
-  }
-
-  public final class IkeSessionParams {
-    method @NonNull public java.util.List<android.net.ipsec.ike.IkeSessionParams.IkeConfigRequest> getConfigurationRequests();
-    method public long getHardLifetime();
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig getLocalAuthConfig();
-    method @NonNull public android.net.ipsec.ike.IkeIdentification getLocalIdentification();
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig getRemoteAuthConfig();
-    method @NonNull public android.net.ipsec.ike.IkeIdentification getRemoteIdentification();
-    method @NonNull public java.util.List<android.net.ipsec.ike.IkeSaProposal> getSaProposals();
-    method @NonNull public java.net.InetAddress getServerAddress();
-    method public long getSoftLifetime();
-    method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket getUdpEncapsulationSocket();
-  }
-
-  public static final class IkeSessionParams.Builder {
-    ctor public IkeSessionParams.Builder();
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder addPcscfServerRequest(@NonNull java.net.InetAddress);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder addPcscfServerRequest(int);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder addSaProposal(@NonNull android.net.ipsec.ike.IkeSaProposal);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams build();
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setAuthDigitalSignature(@Nullable java.security.cert.X509Certificate, @NonNull java.security.cert.X509Certificate, @NonNull java.security.PrivateKey);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setAuthDigitalSignature(@Nullable java.security.cert.X509Certificate, @NonNull java.security.cert.X509Certificate, @NonNull java.util.List<java.security.cert.X509Certificate>, @NonNull java.security.PrivateKey);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setAuthEap(@Nullable java.security.cert.X509Certificate, @NonNull android.net.eap.EapSessionConfig);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setAuthPsk(@NonNull byte[]);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setLifetime(long, long);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setLocalIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setRemoteIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setServerAddress(@NonNull java.net.InetAddress);
-    method @NonNull public android.net.ipsec.ike.IkeSessionParams.Builder setUdpEncapsulationSocket(@NonNull android.net.IpSecManager.UdpEncapsulationSocket);
-  }
-
-  public static interface IkeSessionParams.ConfigRequestIpv4PcscfServer extends android.net.ipsec.ike.IkeSessionParams.IkeConfigRequest {
-    method @Nullable public java.net.Inet4Address getAddress();
-  }
-
-  public static interface IkeSessionParams.ConfigRequestIpv6PcscfServer extends android.net.ipsec.ike.IkeSessionParams.IkeConfigRequest {
-    method @Nullable public java.net.Inet6Address getAddress();
-  }
-
-  public abstract static class IkeSessionParams.IkeAuthConfig {
-  }
-
-  public static class IkeSessionParams.IkeAuthDigitalSignLocalConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
-    method @NonNull public java.security.cert.X509Certificate getClientEndCertificate();
-    method @NonNull public java.util.List<java.security.cert.X509Certificate> getIntermediateCertificates();
-    method @NonNull public java.security.PrivateKey getPrivateKey();
-  }
-
-  public static class IkeSessionParams.IkeAuthDigitalSignRemoteConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
-    method @Nullable public java.security.cert.X509Certificate getRemoteCaCert();
-  }
-
-  public static class IkeSessionParams.IkeAuthEapConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
-    method @NonNull public android.net.eap.EapSessionConfig getEapConfig();
-  }
-
-  public static class IkeSessionParams.IkeAuthPskConfig extends android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig {
-    method @NonNull public byte[] getPsk();
-  }
-
-  public static interface IkeSessionParams.IkeConfigRequest {
-  }
-
-  public final class IkeTrafficSelector {
-    ctor public IkeTrafficSelector(int, int, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress);
-    field public final int endPort;
-    field @NonNull public final java.net.InetAddress endingAddress;
-    field public final int startPort;
-    field @NonNull public final java.net.InetAddress startingAddress;
-  }
-
-  public abstract class SaProposal {
-    method @NonNull public java.util.List<java.lang.Integer> getDhGroups();
-    method @NonNull public java.util.List<android.util.Pair<java.lang.Integer,java.lang.Integer>> getEncryptionAlgorithms();
-    method @NonNull public java.util.List<java.lang.Integer> getIntegrityAlgorithms();
-    field public static final int DH_GROUP_1024_BIT_MODP = 2; // 0x2
-    field public static final int DH_GROUP_2048_BIT_MODP = 14; // 0xe
-    field public static final int DH_GROUP_NONE = 0; // 0x0
-    field public static final int ENCRYPTION_ALGORITHM_3DES = 3; // 0x3
-    field public static final int ENCRYPTION_ALGORITHM_AES_CBC = 12; // 0xc
-    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_12 = 19; // 0x13
-    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_16 = 20; // 0x14
-    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_8 = 18; // 0x12
-    field public static final int INTEGRITY_ALGORITHM_AES_XCBC_96 = 5; // 0x5
-    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA1_96 = 2; // 0x2
-    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_256_128 = 12; // 0xc
-    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_384_192 = 13; // 0xd
-    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_512_256 = 14; // 0xe
-    field public static final int INTEGRITY_ALGORITHM_NONE = 0; // 0x0
-    field public static final int KEY_LEN_AES_128 = 128; // 0x80
-    field public static final int KEY_LEN_AES_192 = 192; // 0xc0
-    field public static final int KEY_LEN_AES_256 = 256; // 0x100
-    field public static final int KEY_LEN_UNUSED = 0; // 0x0
-    field public static final int PSEUDORANDOM_FUNCTION_AES128_XCBC = 4; // 0x4
-    field public static final int PSEUDORANDOM_FUNCTION_HMAC_SHA1 = 2; // 0x2
-  }
-
-  public final class TransportModeChildSessionParams extends android.net.ipsec.ike.ChildSessionParams {
-  }
-
-  public static final class TransportModeChildSessionParams.Builder {
-    ctor public TransportModeChildSessionParams.Builder();
-    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionParams.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
-    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionParams.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
-    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionParams.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
-    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionParams build();
-    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionParams.Builder setLifetime(long, long);
-  }
-
-  public final class TunnelModeChildSessionParams extends android.net.ipsec.ike.ChildSessionParams {
-    method @NonNull public java.util.List<android.net.ipsec.ike.TunnelModeChildSessionParams.TunnelModeChildConfigRequest> getConfigurationRequests();
-  }
-
-  public static final class TunnelModeChildSessionParams.Builder {
-    ctor public TunnelModeChildSessionParams.Builder();
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalAddressRequest(int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalAddressRequest(@NonNull java.net.Inet4Address);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalAddressRequest(@NonNull java.net.Inet6Address, int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalDhcpServerRequest(int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addInternalDnsServerRequest(int);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams build();
-    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionParams.Builder setLifetime(long, long);
-  }
-
-  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4Address extends android.net.ipsec.ike.TunnelModeChildSessionParams.TunnelModeChildConfigRequest {
-    method @Nullable public java.net.Inet4Address getAddress();
-  }
-
-  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4DhcpServer extends android.net.ipsec.ike.TunnelModeChildSessionParams.TunnelModeChildConfigRequest {
-    method @Nullable public java.net.Inet4Address getAddress();
-  }
-
-  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4DnsServer extends android.net.ipsec.ike.TunnelModeChildSessionParams.TunnelModeChildConfigRequest {
-    method @Nullable public java.net.Inet4Address getAddress();
-  }
-
-  public static interface TunnelModeChildSessionParams.ConfigRequestIpv4Netmask extends android.net.ipsec.ike.TunnelModeChildSessionParams.TunnelModeChildConfigRequest {
-  }
-
-  public static interface TunnelModeChildSessionParams.ConfigRequestIpv6Address extends android.net.ipsec.ike.TunnelModeChildSessionParams.TunnelModeChildConfigRequest {
-    method @Nullable public java.net.Inet6Address getAddress();
-    method public int getPrefixLength();
-  }
-
-  public static interface TunnelModeChildSessionParams.ConfigRequestIpv6DnsServer extends android.net.ipsec.ike.TunnelModeChildSessionParams.TunnelModeChildConfigRequest {
-    method @Nullable public java.net.Inet6Address getAddress();
-  }
-
-  public static interface TunnelModeChildSessionParams.TunnelModeChildConfigRequest {
-  }
-
-}
-
-package android.net.ipsec.ike.exceptions {
-
-  public abstract class IkeException extends java.lang.Exception {
-  }
-
-  public final class IkeInternalException extends android.net.ipsec.ike.exceptions.IkeException {
-  }
-
-  public abstract class IkeProtocolException extends android.net.ipsec.ike.exceptions.IkeException {
-    method @Nullable public byte[] getErrorData();
-    method public int getErrorType();
-    field public static final int ERROR_TYPE_AUTHENTICATION_FAILED = 24; // 0x18
-    field public static final int ERROR_TYPE_CHILD_SA_NOT_FOUND = 44; // 0x2c
-    field public static final int ERROR_TYPE_FAILED_CP_REQUIRED = 37; // 0x25
-    field public static final int ERROR_TYPE_INTERNAL_ADDRESS_FAILURE = 36; // 0x24
-    field public static final int ERROR_TYPE_INVALID_IKE_SPI = 4; // 0x4
-    field public static final int ERROR_TYPE_INVALID_KE_PAYLOAD = 17; // 0x11
-    field public static final int ERROR_TYPE_INVALID_MAJOR_VERSION = 5; // 0x5
-    field public static final int ERROR_TYPE_INVALID_MESSAGE_ID = 9; // 0x9
-    field public static final int ERROR_TYPE_INVALID_SELECTORS = 39; // 0x27
-    field public static final int ERROR_TYPE_INVALID_SYNTAX = 7; // 0x7
-    field public static final int ERROR_TYPE_NO_ADDITIONAL_SAS = 35; // 0x23
-    field public static final int ERROR_TYPE_NO_PROPOSAL_CHOSEN = 14; // 0xe
-    field public static final int ERROR_TYPE_SINGLE_PAIR_REQUIRED = 34; // 0x22
-    field public static final int ERROR_TYPE_TEMPORARY_FAILURE = 43; // 0x2b
-    field public static final int ERROR_TYPE_TS_UNACCEPTABLE = 38; // 0x26
-    field public static final int ERROR_TYPE_UNSUPPORTED_CRITICAL_PAYLOAD = 1; // 0x1
-  }
-
-}
-
 package android.net.metrics {
 
   public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
@@ -7205,6 +6924,28 @@ package android.net.netstats.provider {
     method public void onLimitReached();
     method public void onStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
     method public void unregister();
+  }
+
+}
+
+package android.net.sip {
+
+  public class SipAudioCall {
+    method @Nullable public android.net.rtp.AudioGroup getAudioGroup();
+    method public void setAudioGroup(@NonNull android.net.rtp.AudioGroup);
+  }
+
+  public class SipManager {
+    method @NonNull public java.util.List<android.net.sip.SipProfile> getProfiles() throws android.net.sip.SipException;
+    field public static final String ACTION_SIP_CALL_OPTION_CHANGED = "android.net.sip.action.SIP_CALL_OPTION_CHANGED";
+    field public static final String ACTION_SIP_INCOMING_CALL = "android.net.sip.action.SIP_INCOMING_CALL";
+    field public static final String ACTION_SIP_REMOVE_PROFILE = "android.net.sip.action.SIP_REMOVE_PROFILE";
+    field public static final String ACTION_SIP_SERVICE_UP = "android.net.sip.action.SIP_SERVICE_UP";
+    field public static final String ACTION_START_SIP = "android.net.sip.action.START_SIP";
+  }
+
+  public class SipProfile implements java.lang.Cloneable android.os.Parcelable java.io.Serializable {
+    method public int getCallingUid();
   }
 
 }
@@ -7462,14 +7203,14 @@ package android.net.wifi {
   }
 
   public final class SoftApCapability implements android.os.Parcelable {
+    method public boolean areFeaturesSupported(long);
     method public int describeContents();
     method public int getMaxSupportedClients();
-    method public boolean isFeatureSupported(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApCapability> CREATOR;
-    field public static final int SOFTAP_FEATURE_ACS_OFFLOAD = 1; // 0x1
-    field public static final int SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT = 2; // 0x2
-    field public static final int SOFTAP_FEATURE_WPA3_SAE = 4; // 0x4
+    field public static final long SOFTAP_FEATURE_ACS_OFFLOAD = 1L; // 0x1L
+    field public static final long SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT = 2L; // 0x2L
+    field public static final long SOFTAP_FEATURE_WPA3_SAE = 4L; // 0x4L
   }
 
   public final class SoftApConfiguration implements android.os.Parcelable {
@@ -7479,6 +7220,7 @@ package android.net.wifi {
     method public int getChannel();
     method public int getMaxNumberOfClients();
     method public int getShutdownTimeoutMillis();
+    method public boolean isAutoShutdownEnabled();
     method public boolean isClientControlByUserEnabled();
     method @Nullable public android.net.wifi.WifiConfiguration toWifiConfiguration();
     field public static final int BAND_2GHZ = 1; // 0x1
@@ -7492,14 +7234,15 @@ package android.net.wifi {
     ctor public SoftApConfiguration.Builder(@NonNull android.net.wifi.SoftApConfiguration);
     method @NonNull public android.net.wifi.SoftApConfiguration build();
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder enableClientControlByUser(boolean);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setAutoShutdownEnabled(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBand(int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBssid(@Nullable android.net.MacAddress);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int, int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setClientList(@NonNull java.util.List<android.net.MacAddress>, @NonNull java.util.List<android.net.MacAddress>);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMaxNumberOfClients(int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMaxNumberOfClients(@IntRange(from=0) int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setPassphrase(@Nullable String, int);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(@IntRange(from=0) int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setSsid(@Nullable String);
   }
 
@@ -7559,7 +7302,7 @@ package android.net.wifi {
     field @Deprecated public int numAssociation;
     field @Deprecated public int numScorerOverride;
     field @Deprecated public int numScorerOverrideAndSwitchedNetwork;
-    field @Deprecated public boolean requirePMF;
+    field @Deprecated public boolean requirePmf;
     field @Deprecated @Nullable public String saePasswordId;
     field @Deprecated public boolean shared;
     field @Deprecated public boolean useExternalScores;
@@ -7689,9 +7432,12 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public byte[] retrieveBackupData();
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public byte[] retrieveSoftApBackupData();
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void save(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setAutoWakeupEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WIFI_SET_DEVICE_MOBILITY_STATE) public void setDeviceMobilityState(int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMacRandomizationSettingPasspointEnabled(@NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMeteredOverridePasspoint(@NonNull String, int);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setScanAlwaysAvailable(boolean);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setScanThrottleEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public boolean setSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setVerboseLoggingEnabled(boolean);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE) public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
@@ -7786,7 +7532,7 @@ package android.net.wifi {
   }
 
   public static interface WifiManager.ScoreChangeCallback {
-    method public void onScoreChange(int, @NonNull android.net.NetworkScore);
+    method public void onScoreChange(int, int);
     method public void onTriggerUpdateOfWifiUsabilityStats(int);
   }
 
@@ -7812,6 +7558,52 @@ package android.net.wifi {
     method public void stop(int);
   }
 
+  public final class WifiMigration {
+    method @Nullable public static android.net.wifi.WifiMigration.ConfigStoreMigrationData loadFromConfigStore();
+    method @NonNull public static android.net.wifi.WifiMigration.SettingsMigrationData loadFromSettings(@NonNull android.content.Context);
+    method public static void removeConfigStore();
+  }
+
+  public static final class WifiMigration.ConfigStoreMigrationData implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
+    method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiMigration.ConfigStoreMigrationData> CREATOR;
+  }
+
+  public static final class WifiMigration.ConfigStoreMigrationData.Builder {
+    ctor public WifiMigration.ConfigStoreMigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData build();
+    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
+    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
+  }
+
+  public static final class WifiMigration.SettingsMigrationData implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getP2pDeviceName();
+    method public boolean isP2pFactoryResetPending();
+    method public boolean isScanAlwaysAvailable();
+    method public boolean isScanThrottleEnabled();
+    method public boolean isSoftApTimeoutEnabled();
+    method public boolean isVerboseLoggingEnabled();
+    method public boolean isWakeUpEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiMigration.SettingsMigrationData> CREATOR;
+  }
+
+  public static final class WifiMigration.SettingsMigrationData.Builder {
+    ctor public WifiMigration.SettingsMigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData build();
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setP2pDeviceName(@Nullable String);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setP2pFactoryResetPending(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setScanAlwaysAvailable(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setScanThrottleEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setSoftApTimeoutEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setVerboseLoggingEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setWakeUpEnabled(boolean);
+  }
+
   public class WifiNetworkConnectionStatistics implements android.os.Parcelable {
     ctor public WifiNetworkConnectionStatistics(int, int);
     ctor public WifiNetworkConnectionStatistics();
@@ -7834,25 +7626,6 @@ package android.net.wifi {
 
   public static final class WifiNetworkSuggestion.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
-  }
-
-  public final class WifiOemConfigStoreMigrationHook {
-    method @Nullable public static android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData load();
-  }
-
-  public static final class WifiOemConfigStoreMigrationHook.MigrationData implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
-    method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData> CREATOR;
-  }
-
-  public static final class WifiOemConfigStoreMigrationHook.MigrationData.Builder {
-    ctor public WifiOemConfigStoreMigrationHook.MigrationData.Builder();
-    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData build();
-    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
-    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
   }
 
   public class WifiScanner {
@@ -8106,11 +7879,179 @@ package android.net.wifi.hotspot2 {
 
 }
 
+package android.net.wifi.nl80211 {
+
+  public final class DeviceWiphyCapabilities implements android.os.Parcelable {
+    ctor public DeviceWiphyCapabilities();
+    method public int describeContents();
+    method public int getMaxNumberRxSpatialStreams();
+    method public int getMaxNumberTxSpatialStreams();
+    method public boolean isChannelWidthSupported(int);
+    method public boolean isWifiStandardSupported(int);
+    method public void setChannelWidthSupported(int, boolean);
+    method public void setMaxNumberRxSpatialStreams(int);
+    method public void setMaxNumberTxSpatialStreams(int);
+    method public void setWifiStandardSupport(int, boolean);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.DeviceWiphyCapabilities> CREATOR;
+  }
+
+  public final class NativeScanResult implements android.os.Parcelable {
+    ctor public NativeScanResult();
+    method public int describeContents();
+    method @Nullable public android.net.MacAddress getBssid();
+    method public int getCapabilities();
+    method public int getFrequencyMhz();
+    method @NonNull public byte[] getInformationElements();
+    method @NonNull public java.util.List<android.net.wifi.nl80211.RadioChainInfo> getRadioChainInfos();
+    method public int getSignalMbm();
+    method @NonNull public byte[] getSsid();
+    method public long getTsf();
+    method public boolean isAssociated();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int BSS_CAPABILITY_APSD = 2048; // 0x800
+    field public static final int BSS_CAPABILITY_CF_POLLABLE = 4; // 0x4
+    field public static final int BSS_CAPABILITY_CF_POLL_REQUEST = 8; // 0x8
+    field public static final int BSS_CAPABILITY_CHANNEL_AGILITY = 128; // 0x80
+    field public static final int BSS_CAPABILITY_DELAYED_BLOCK_ACK = 16384; // 0x4000
+    field public static final int BSS_CAPABILITY_DSSS_OFDM = 8192; // 0x2000
+    field public static final int BSS_CAPABILITY_ESS = 1; // 0x1
+    field public static final int BSS_CAPABILITY_IBSS = 2; // 0x2
+    field public static final int BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK = 32768; // 0x8000
+    field public static final int BSS_CAPABILITY_PBCC = 64; // 0x40
+    field public static final int BSS_CAPABILITY_PRIVACY = 16; // 0x10
+    field public static final int BSS_CAPABILITY_QOS = 512; // 0x200
+    field public static final int BSS_CAPABILITY_RADIO_MANAGEMENT = 4096; // 0x1000
+    field public static final int BSS_CAPABILITY_SHORT_PREAMBLE = 32; // 0x20
+    field public static final int BSS_CAPABILITY_SHORT_SLOT_TIME = 1024; // 0x400
+    field public static final int BSS_CAPABILITY_SPECTRUM_MANAGEMENT = 256; // 0x100
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.NativeScanResult> CREATOR;
+  }
+
+  public final class NativeWifiClient implements android.os.Parcelable {
+    ctor public NativeWifiClient(@Nullable android.net.MacAddress);
+    method public int describeContents();
+    method @Nullable public android.net.MacAddress getMacAddress();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.NativeWifiClient> CREATOR;
+  }
+
+  public final class PnoNetwork implements android.os.Parcelable {
+    ctor public PnoNetwork();
+    method public int describeContents();
+    method @NonNull public int[] getFrequenciesMhz();
+    method @NonNull public byte[] getSsid();
+    method public boolean isHidden();
+    method public void setFrequenciesMhz(@NonNull int[]);
+    method public void setHidden(boolean);
+    method public void setSsid(@NonNull byte[]);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.PnoNetwork> CREATOR;
+  }
+
+  public final class PnoSettings implements android.os.Parcelable {
+    ctor public PnoSettings();
+    method public int describeContents();
+    method public long getIntervalMillis();
+    method public int getMin2gRssiDbm();
+    method public int getMin5gRssiDbm();
+    method public int getMin6gRssiDbm();
+    method @NonNull public java.util.List<android.net.wifi.nl80211.PnoNetwork> getPnoNetworks();
+    method public void setIntervalMillis(long);
+    method public void setMin2gRssiDbm(int);
+    method public void setMin5gRssiDbm(int);
+    method public void setMin6gRssiDbm(int);
+    method public void setPnoNetworks(@NonNull java.util.List<android.net.wifi.nl80211.PnoNetwork>);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.PnoSettings> CREATOR;
+  }
+
+  public final class RadioChainInfo implements android.os.Parcelable {
+    ctor public RadioChainInfo(int, int);
+    method public int describeContents();
+    method public int getChainId();
+    method public int getLevelDbm();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.RadioChainInfo> CREATOR;
+  }
+
+  public class WifiNl80211Manager {
+    method public void abortScan(@NonNull String);
+    method public void enableVerboseLogging(boolean);
+    method @NonNull public int[] getChannelsMhzForBand(int);
+    method @Nullable public android.net.wifi.nl80211.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
+    method @NonNull public java.util.List<android.net.wifi.nl80211.NativeScanResult> getScanResults(@NonNull String, int);
+    method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.TxPacketCounters getTxPacketCounters(@NonNull String);
+    method @Nullable public static android.net.wifi.nl80211.WifiNl80211Manager.OemSecurityType parseOemSecurityTypeElement(int, int, @NonNull byte[]);
+    method public boolean registerApCallback(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SoftApCallback);
+    method public void sendMgmtFrame(@NonNull String, @NonNull byte[], int, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SendMgmtFrameCallback);
+    method public void setOnServiceDeadCallback(@NonNull Runnable);
+    method public boolean setupInterfaceForClientMode(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.ScanEventCallback);
+    method public boolean setupInterfaceForSoftApMode(@NonNull String);
+    method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.SignalPollResult signalPoll(@NonNull String);
+    method public boolean startPnoScan(@NonNull String, @NonNull android.net.wifi.nl80211.PnoSettings, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.PnoScanRequestCallback);
+    method public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>);
+    method public boolean stopPnoScan(@NonNull String);
+    method public boolean tearDownClientInterface(@NonNull String);
+    method public boolean tearDownInterfaces();
+    method public boolean tearDownSoftApInterface(@NonNull String);
+    field public static final int SCAN_TYPE_PNO_SCAN = 1; // 0x1
+    field public static final int SCAN_TYPE_SINGLE_SCAN = 0; // 0x0
+    field public static final int SEND_MGMT_FRAME_ERROR_ALREADY_STARTED = 5; // 0x5
+    field public static final int SEND_MGMT_FRAME_ERROR_MCS_UNSUPPORTED = 2; // 0x2
+    field public static final int SEND_MGMT_FRAME_ERROR_NO_ACK = 3; // 0x3
+    field public static final int SEND_MGMT_FRAME_ERROR_TIMEOUT = 4; // 0x4
+    field public static final int SEND_MGMT_FRAME_ERROR_UNKNOWN = 1; // 0x1
+  }
+
+  public static class WifiNl80211Manager.OemSecurityType {
+    ctor public WifiNl80211Manager.OemSecurityType(int, @NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<java.lang.Integer>, int);
+    field public final int groupCipher;
+    field @NonNull public final java.util.List<java.lang.Integer> keyManagement;
+    field @NonNull public final java.util.List<java.lang.Integer> pairwiseCipher;
+    field public final int protocol;
+  }
+
+  public static interface WifiNl80211Manager.PnoScanRequestCallback {
+    method public void onPnoRequestFailed();
+    method public void onPnoRequestSucceeded();
+  }
+
+  public static interface WifiNl80211Manager.ScanEventCallback {
+    method public void onScanFailed();
+    method public void onScanResultReady();
+  }
+
+  public static interface WifiNl80211Manager.SendMgmtFrameCallback {
+    method public void onAck(int);
+    method public void onFailure(int);
+  }
+
+  public static class WifiNl80211Manager.SignalPollResult {
+    field public final int associationFrequencyMHz;
+    field public final int currentRssiDbm;
+    field public final int rxBitrateMbps;
+    field public final int txBitrateMbps;
+  }
+
+  public static interface WifiNl80211Manager.SoftApCallback {
+    method public void onConnectedClientsChanged(@NonNull android.net.wifi.nl80211.NativeWifiClient, boolean);
+    method public void onFailure();
+    method public void onSoftApChannelSwitched(int, int);
+  }
+
+  public static class WifiNl80211Manager.TxPacketCounters {
+    field public final int txPacketFailed;
+    field public final int txPacketSucceeded;
+  }
+
+}
+
 package android.net.wifi.p2p {
 
   public final class WifiP2pGroupList implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public java.util.Collection<android.net.wifi.p2p.WifiP2pGroup> getGroupList();
+    method @NonNull public java.util.List<android.net.wifi.p2p.WifiP2pGroup> getGroupList();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.p2p.WifiP2pGroupList> CREATOR;
   }
@@ -8118,12 +8059,13 @@ package android.net.wifi.p2p {
   public class WifiP2pManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.OVERRIDE_WIFI_CONFIG}) public void deletePersistentGroup(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, int, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void factoryReset(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
-    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void listen(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, boolean, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.READ_WIFI_CREDENTIAL}) public void requestPersistentGroupInfo(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @Nullable android.net.wifi.p2p.WifiP2pManager.PersistentGroupInfoListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.OVERRIDE_WIFI_CONFIG}) public void setDeviceName(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @NonNull String, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method @RequiresPermission(allOf={android.Manifest.permission.CONNECTIVITY_INTERNAL, android.Manifest.permission.CONFIGURE_WIFI_DISPLAY}) public void setMiracastMode(int);
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY) public void setWfdInfo(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @NonNull android.net.wifi.p2p.WifiP2pWfdInfo, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.OVERRIDE_WIFI_CONFIG}) public void setWifiP2pChannels(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, int, int, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void startListening(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void stopListening(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
     field public static final String ACTION_WIFI_P2P_PERSISTENT_GROUPS_CHANGED = "android.net.wifi.p2p.action.WIFI_P2P_PERSISTENT_GROUPS_CHANGED";
     field public static final int MIRACAST_DISABLED = 0; // 0x0
     field public static final int MIRACAST_SINK = 2; // 0x2
@@ -8188,158 +8130,6 @@ package android.net.wifi.rtt {
   public class WifiRttManager {
     method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE}) public void cancelRanging(@Nullable android.os.WorkSource);
     method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.CHANGE_WIFI_STATE, android.Manifest.permission.ACCESS_WIFI_STATE}) public void startRanging(@Nullable android.os.WorkSource, @NonNull android.net.wifi.rtt.RangingRequest, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.rtt.RangingResultCallback);
-  }
-
-}
-
-package android.net.wifi.wificond {
-
-  public final class DeviceWiphyCapabilities implements android.os.Parcelable {
-    ctor public DeviceWiphyCapabilities();
-    method public int describeContents();
-    method public int getMaxNumberRxSpatialStreams();
-    method public int getMaxNumberTxSpatialStreams();
-    method public boolean isChannelWidthSupported(int);
-    method public boolean isWifiStandardSupported(int);
-    method public void setChannelWidthSupported(int, boolean);
-    method public void setMaxNumberRxSpatialStreams(int);
-    method public void setMaxNumberTxSpatialStreams(int);
-    method public void setWifiStandardSupport(int, boolean);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.DeviceWiphyCapabilities> CREATOR;
-  }
-
-  public final class NativeScanResult implements android.os.Parcelable {
-    ctor public NativeScanResult();
-    method public int describeContents();
-    method @NonNull public byte[] getBssid();
-    method @NonNull public int getCapabilities();
-    method public int getFrequencyMhz();
-    method @NonNull public byte[] getInformationElements();
-    method @NonNull public java.util.List<android.net.wifi.wificond.RadioChainInfo> getRadioChainInfos();
-    method public int getSignalMbm();
-    method @NonNull public byte[] getSsid();
-    method public long getTsf();
-    method public boolean isAssociated();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeScanResult> CREATOR;
-  }
-
-  public final class NativeWifiClient implements android.os.Parcelable {
-    ctor public NativeWifiClient(@NonNull byte[]);
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeWifiClient> CREATOR;
-    field @NonNull public final byte[] macAddress;
-  }
-
-  public final class PnoNetwork implements android.os.Parcelable {
-    ctor public PnoNetwork();
-    method public int describeContents();
-    method @NonNull public int[] getFrequenciesMhz();
-    method @NonNull public byte[] getSsid();
-    method public boolean isHidden();
-    method public void setFrequenciesMhz(@NonNull int[]);
-    method public void setHidden(boolean);
-    method public void setSsid(@NonNull byte[]);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.PnoNetwork> CREATOR;
-  }
-
-  public final class PnoSettings implements android.os.Parcelable {
-    ctor public PnoSettings();
-    method public int describeContents();
-    method public long getIntervalMillis();
-    method public int getMin2gRssiDbm();
-    method public int getMin5gRssiDbm();
-    method public int getMin6gRssiDbm();
-    method @NonNull public java.util.List<android.net.wifi.wificond.PnoNetwork> getPnoNetworks();
-    method public void setIntervalMillis(long);
-    method public void setMin2gRssiDbm(int);
-    method public void setMin5gRssiDbm(int);
-    method public void setMin6gRssiDbm(int);
-    method public void setPnoNetworks(@NonNull java.util.List<android.net.wifi.wificond.PnoNetwork>);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.PnoSettings> CREATOR;
-  }
-
-  public final class RadioChainInfo implements android.os.Parcelable {
-    ctor public RadioChainInfo(int, int);
-    method public int describeContents();
-    method public int getChainId();
-    method public int getLevelDbm();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.RadioChainInfo> CREATOR;
-  }
-
-  public class WifiCondManager {
-    method public void abortScan(@NonNull String);
-    method public void enableVerboseLogging(boolean);
-    method @NonNull public java.util.List<java.lang.Integer> getChannelsMhzForBand(int);
-    method @Nullable public android.net.wifi.wificond.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
-    method @NonNull public java.util.List<android.net.wifi.wificond.NativeScanResult> getScanResults(@NonNull String, int);
-    method @Nullable public android.net.wifi.wificond.WifiCondManager.TxPacketCounters getTxPacketCounters(@NonNull String);
-    method @Nullable public static android.net.wifi.wificond.WifiCondManager.OemSecurityType parseOemSecurityTypeElement(int, int, @NonNull byte[]);
-    method public boolean registerApCallback(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiCondManager.SoftApCallback);
-    method public void sendMgmtFrame(@NonNull String, @NonNull byte[], int, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiCondManager.SendMgmtFrameCallback);
-    method public void setOnServiceDeadCallback(@NonNull Runnable);
-    method public boolean setupInterfaceForClientMode(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiCondManager.ScanEventCallback, @NonNull android.net.wifi.wificond.WifiCondManager.ScanEventCallback);
-    method public boolean setupInterfaceForSoftApMode(@NonNull String);
-    method @Nullable public android.net.wifi.wificond.WifiCondManager.SignalPollResult signalPoll(@NonNull String);
-    method public boolean startPnoScan(@NonNull String, @NonNull android.net.wifi.wificond.PnoSettings, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.wificond.WifiCondManager.PnoScanRequestCallback);
-    method public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>);
-    method public boolean stopPnoScan(@NonNull String);
-    method public boolean tearDownClientInterface(@NonNull String);
-    method public boolean tearDownInterfaces();
-    method public boolean tearDownSoftApInterface(@NonNull String);
-    field public static final int SCAN_TYPE_PNO_SCAN = 1; // 0x1
-    field public static final int SCAN_TYPE_SINGLE_SCAN = 0; // 0x0
-    field public static final int SEND_MGMT_FRAME_ERROR_ALREADY_STARTED = 5; // 0x5
-    field public static final int SEND_MGMT_FRAME_ERROR_MCS_UNSUPPORTED = 2; // 0x2
-    field public static final int SEND_MGMT_FRAME_ERROR_NO_ACK = 3; // 0x3
-    field public static final int SEND_MGMT_FRAME_ERROR_TIMEOUT = 4; // 0x4
-    field public static final int SEND_MGMT_FRAME_ERROR_UNKNOWN = 1; // 0x1
-  }
-
-  public static class WifiCondManager.OemSecurityType {
-    ctor public WifiCondManager.OemSecurityType(int, @NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<java.lang.Integer>, int);
-    field public final int groupCipher;
-    field @NonNull public final java.util.List<java.lang.Integer> keyManagement;
-    field @NonNull public final java.util.List<java.lang.Integer> pairwiseCipher;
-    field public final int protocol;
-  }
-
-  public static interface WifiCondManager.PnoScanRequestCallback {
-    method public void onPnoRequestFailed();
-    method public void onPnoRequestSucceeded();
-  }
-
-  public static interface WifiCondManager.ScanEventCallback {
-    method public void onScanFailed();
-    method public void onScanResultReady();
-  }
-
-  public static interface WifiCondManager.SendMgmtFrameCallback {
-    method public void onAck(int);
-    method public void onFailure(int);
-  }
-
-  public static class WifiCondManager.SignalPollResult {
-    field public final int associationFrequencyMHz;
-    field public final int currentRssiDbm;
-    field public final int rxBitrateMbps;
-    field public final int txBitrateMbps;
-  }
-
-  public static interface WifiCondManager.SoftApCallback {
-    method public void onConnectedClientsChanged(@NonNull android.net.wifi.wificond.NativeWifiClient, boolean);
-    method public void onFailure();
-    method public void onSoftApChannelSwitched(int, int);
-  }
-
-  public static class WifiCondManager.TxPacketCounters {
-    field public final int txPacketFailed;
-    field public final int txPacketSucceeded;
   }
 
 }
@@ -8782,8 +8572,8 @@ package android.os {
   }
 
   public class PowerWhitelistManager {
-    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public boolean addToWhitelist(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public int addToWhitelist(@NonNull java.util.List<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToWhitelist(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToWhitelist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(@NonNull String, long);
     method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long whitelistAppTemporarilyForEvent(@NonNull String, int, @NonNull String);
     field public static final int EVENT_MMS = 2; // 0x2
@@ -8842,26 +8632,6 @@ package android.os {
     field public static final int LONG_VALUE_TYPE = 4; // 0x4
     field public static final int STRING_VALUE_TYPE = 2; // 0x2
     field public static final int TUPLE_VALUE_TYPE = 7; // 0x7
-  }
-
-  public class StatsFrameworkInitializer {
-    method public static void registerServiceWrappers();
-    method public static void setStatsServiceManager(@NonNull android.os.StatsServiceManager);
-  }
-
-  public class StatsServiceManager {
-    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsCompanionServiceRegisterer();
-    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsManagerServiceRegisterer();
-    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsdServiceRegisterer();
-  }
-
-  public static class StatsServiceManager.ServiceNotFoundException extends java.lang.Exception {
-    ctor public StatsServiceManager.ServiceNotFoundException(@NonNull String);
-  }
-
-  public static final class StatsServiceManager.ServiceRegisterer {
-    method @Nullable public android.os.IBinder get();
-    method @Nullable public android.os.IBinder getOrThrow() throws android.os.StatsServiceManager.ServiceNotFoundException;
   }
 
   public class SystemConfigManager {
@@ -8993,7 +8763,9 @@ package android.os {
 
   public class UserManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void clearSeedAccountData();
-    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.os.UserHandle createProfile(@NonNull String, @NonNull String, @Nullable String[]) throws android.os.UserManager.UserOperationException;
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.os.UserHandle createProfile(@NonNull String, @NonNull String, @NonNull java.util.Set<java.lang.String>) throws android.os.UserManager.UserOperationException;
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public java.util.List<android.os.UserHandle> getAllProfiles();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public java.util.List<android.os.UserHandle> getEnabledProfiles();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getProfileParent(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getSeedAccountName();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.PersistableBundle getSeedAccountOptions();
@@ -9001,7 +8773,6 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public long[] getSerialNumbersOfUsers(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<android.os.UserHandle> getUserHandles(boolean);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public android.graphics.Bitmap getUserIcon();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional=true) public java.util.List<android.os.UserHandle> getUserProfiles(boolean);
     method @Deprecated @android.os.UserManager.UserRestrictionSource @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public int getUserRestrictionSource(String, android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<android.os.UserManager.EnforcingUser> getUserRestrictionSources(String, android.os.UserHandle);
     method @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public int getUserSwitchability();
@@ -9047,6 +8818,17 @@ package android.os {
   }
 
   @IntDef(flag=true, prefix={"RESTRICTION_"}, value={android.os.UserManager.RESTRICTION_NOT_SET, android.os.UserManager.RESTRICTION_SOURCE_SYSTEM, android.os.UserManager.RESTRICTION_SOURCE_DEVICE_OWNER, android.os.UserManager.RESTRICTION_SOURCE_PROFILE_OWNER}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface UserManager.UserRestrictionSource {
+  }
+
+  public abstract class Vibrator {
+    method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void addVibratorStateListener(@NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void addVibratorStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public boolean isVibrating();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void removeVibratorStateListener(@NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+  }
+
+  public static interface Vibrator.OnVibratorStateChangedListener {
+    method public void onVibratorStateChanged(boolean);
   }
 
   public class WorkSource implements android.os.Parcelable {
@@ -9143,6 +8925,15 @@ package android.os.ext {
 
 }
 
+package android.os.ext.test {
+
+  @Deprecated public class Test {
+    method @Deprecated public void testF();
+    method @Deprecated public void testG();
+  }
+
+}
+
 package android.os.image {
 
   public class DynamicSystemClient {
@@ -9233,6 +9024,8 @@ package android.permission {
   }
 
   public final class PermissionManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getAutoRevokeExemptionGrantedPermissions();
+    method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getAutoRevokeExemptionRequestedPermissions();
     method @IntRange(from=0) @RequiresPermission(anyOf={android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY, "android.permission.UPGRADE_RUNTIME_PERMISSIONS"}) public int getRuntimePermissionsVersion();
     method @NonNull public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
     method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS) public void grantDefaultPermissionsToEnabledCarrierApps(@NonNull String[], @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
@@ -9622,6 +9415,7 @@ package android.provider {
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
     field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
+    field public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -9641,22 +9435,14 @@ package android.provider {
     field public static final String EUICC_UNSUPPORTED_COUNTRIES = "euicc_unsupported_countries";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT = "install_carrier_app_notification_persistent";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
-    field public static final String NETWORK_RECOMMENDATIONS_ENABLED = "network_recommendations_enabled";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
-    field public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
     field public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
     field public static final String TETHER_SUPPORTED = "tether_supported";
     field public static final String THEATER_MODE_ON = "theater_mode_on";
     field public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
     field public static final String WIFI_BADGING_THRESHOLDS = "wifi_badging_thresholds";
-    field public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
-    field public static final String WIFI_P2P_PENDING_FACTORY_RESET = "wifi_p2p_pending_factory_reset";
-    field public static final String WIFI_SCAN_ALWAYS_AVAILABLE = "wifi_scan_always_enabled";
-    field public static final String WIFI_SCAN_THROTTLE_ENABLED = "wifi_scan_throttle_enabled";
-    field public static final String WIFI_SCORE_PARAMS = "wifi_score_params";
-    field public static final String WIFI_VERBOSE_LOGGING_ENABLED = "wifi_verbose_logging_enabled";
-    field public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
+    field @Deprecated public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
   }
 
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
@@ -9670,6 +9456,7 @@ package android.provider {
     field public static final String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE = "autofill_user_data_max_user_data_size";
     field public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH = "autofill_user_data_max_value_length";
     field public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH = "autofill_user_data_min_value_length";
+    field public static final String AUTO_REVOKE_DISABLED = "auto_revoke_disabled";
     field public static final String CARRIER_APPS_HANDLED = "carrier_apps_handled";
     field public static final String COMPLETED_CATEGORY_PREFIX = "suggested.completed_category.";
     field public static final String DOZE_ALWAYS_ON = "doze_always_on";
@@ -10113,6 +9900,7 @@ package android.service.autofill {
   public abstract class InlineSuggestionRenderService extends android.app.Service {
     ctor public InlineSuggestionRenderService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method @Nullable public android.os.Bundle onGetInlineSuggestionsRendererInfo();
     method @Nullable public android.view.View onRenderSuggestion(@NonNull android.service.autofill.InlinePresentation, int, int);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.InlineSuggestionRenderService";
   }
@@ -10129,6 +9917,7 @@ package android.service.autofill.augmented {
     method public void onConnected();
     method public void onDisconnected();
     method public void onFillRequest(@NonNull android.service.autofill.augmented.FillRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.augmented.FillController, @NonNull android.service.autofill.augmented.FillCallback);
+    method public final boolean requestAutofill(@NonNull android.content.ComponentName, @NonNull android.view.autofill.AutofillId);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.augmented.AugmentedAutofillService";
   }
 
@@ -10278,7 +10067,7 @@ package android.service.dataloader {
 
   public abstract class DataLoaderService extends android.app.Service {
     ctor public DataLoaderService();
-    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader();
+    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader(@NonNull android.content.pm.DataLoaderParams);
   }
 
   public static interface DataLoaderService.DataLoader {
@@ -10798,27 +10587,26 @@ package android.telecom {
   public abstract class Conference extends android.telecom.Conferenceable {
     method @Deprecated public final android.telecom.AudioState getAudioState();
     method @Deprecated public final long getConnectTimeMillis();
-    method public final long getConnectionStartElapsedRealTime();
     method public android.telecom.Connection getPrimaryConnection();
     method @NonNull public final String getTelecomCallId();
     method @Deprecated public void onAudioStateChanged(android.telecom.AudioState);
-    method public final void setAddress(@NonNull android.net.Uri, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setAddress(@NonNull android.net.Uri, int);
     method public final void setCallerDisplayName(@NonNull String, int);
-    method public void setConferenceState(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setConferenceState(boolean);
     method @Deprecated public final void setConnectTimeMillis(long);
   }
 
   public abstract class Connection extends android.telecom.Conferenceable {
     method @Deprecated public final android.telecom.AudioState getAudioState();
-    method public final long getConnectElapsedTimeMillis();
-    method public final long getConnectTimeMillis();
+    method @IntRange(from=0) public final long getConnectTimeMillis();
+    method public final long getConnectionStartElapsedRealtimeMillis();
     method @Nullable public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method @Nullable public final String getTelecomCallId();
     method @Deprecated public void onAudioStateChanged(android.telecom.AudioState);
     method public final void resetConnectionTime();
     method public void setCallDirection(int);
-    method public final void setConnectTimeMillis(long);
-    method public final void setConnectionStartElapsedRealTime(long);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setConnectTimeMillis(@IntRange(from=0) long);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setConnectionStartElapsedRealtimeMillis(long);
     method public void setPhoneAccountHandle(@NonNull android.telecom.PhoneAccountHandle);
     method public void setTelecomCallId(@NonNull String);
     field public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 2097152; // 0x200000
@@ -10977,7 +10765,7 @@ package android.telecom {
   }
 
   public static class PhoneAccount.Builder {
-    method @NonNull public android.telecom.PhoneAccount.Builder setGroupId(@NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telecom.PhoneAccount.Builder setGroupId(@NonNull String);
   }
 
   public class PhoneAccountSuggestionService extends android.app.Service {
@@ -11052,7 +10840,7 @@ package android.telecom {
     method public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCurrentTtyMode();
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDefaultDialerPackage(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDefaultDialerPackage(@NonNull android.os.UserHandle);
     method @Deprecated public android.content.ComponentName getDefaultPhoneApp();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(String);
@@ -11290,347 +11078,7 @@ package android.telephony {
   }
 
   public final class DataFailCause {
-    field public static final int ACCESS_ATTEMPT_ALREADY_IN_PROGRESS = 2219; // 0x8ab
-    field public static final int ACCESS_BLOCK = 2087; // 0x827
-    field public static final int ACCESS_BLOCK_ALL = 2088; // 0x828
-    field public static final int ACCESS_CLASS_DSAC_REJECTION = 2108; // 0x83c
-    field public static final int ACCESS_CONTROL_LIST_CHECK_FAILURE = 2128; // 0x850
-    field public static final int ACTIVATION_REJECTED_BCM_VIOLATION = 48; // 0x30
-    field public static final int ACTIVATION_REJECT_GGSN = 30; // 0x1e
-    field public static final int ACTIVATION_REJECT_UNSPECIFIED = 31; // 0x1f
-    field public static final int ACTIVE_PDP_CONTEXT_MAX_NUMBER_REACHED = 65; // 0x41
-    field public static final int APN_DISABLED = 2045; // 0x7fd
-    field public static final int APN_DISALLOWED_ON_ROAMING = 2059; // 0x80b
-    field public static final int APN_MISMATCH = 2054; // 0x806
-    field public static final int APN_PARAMETERS_CHANGED = 2060; // 0x80c
-    field public static final int APN_PENDING_HANDOVER = 2041; // 0x7f9
-    field public static final int APN_TYPE_CONFLICT = 112; // 0x70
-    field public static final int AUTH_FAILURE_ON_EMERGENCY_CALL = 122; // 0x7a
-    field public static final int BEARER_HANDLING_NOT_SUPPORTED = 60; // 0x3c
-    field public static final int CALL_DISALLOWED_IN_ROAMING = 2068; // 0x814
-    field public static final int CALL_PREEMPT_BY_EMERGENCY_APN = 127; // 0x7f
-    field public static final int CANNOT_ENCODE_OTA_MESSAGE = 2159; // 0x86f
-    field public static final int CDMA_ALERT_STOP = 2077; // 0x81d
-    field public static final int CDMA_INCOMING_CALL = 2076; // 0x81c
-    field public static final int CDMA_INTERCEPT = 2073; // 0x819
-    field public static final int CDMA_LOCK = 2072; // 0x818
-    field public static final int CDMA_RELEASE_DUE_TO_SO_REJECTION = 2075; // 0x81b
-    field public static final int CDMA_REORDER = 2074; // 0x81a
-    field public static final int CDMA_RETRY_ORDER = 2086; // 0x826
-    field public static final int CHANNEL_ACQUISITION_FAILURE = 2078; // 0x81e
-    field public static final int CLOSE_IN_PROGRESS = 2030; // 0x7ee
-    field public static final int COLLISION_WITH_NETWORK_INITIATED_REQUEST = 56; // 0x38
-    field public static final int COMPANION_IFACE_IN_USE = 118; // 0x76
-    field public static final int CONCURRENT_SERVICES_INCOMPATIBLE = 2083; // 0x823
-    field public static final int CONCURRENT_SERVICES_NOT_ALLOWED = 2091; // 0x82b
-    field public static final int CONCURRENT_SERVICE_NOT_SUPPORTED_BY_BASE_STATION = 2080; // 0x820
-    field public static final int CONDITIONAL_IE_ERROR = 100; // 0x64
-    field public static final int CONGESTION = 2106; // 0x83a
-    field public static final int CONNECTION_RELEASED = 2113; // 0x841
-    field public static final int CS_DOMAIN_NOT_AVAILABLE = 2181; // 0x885
-    field public static final int CS_FALLBACK_CALL_ESTABLISHMENT_NOT_ALLOWED = 2188; // 0x88c
-    field public static final int DATA_PLAN_EXPIRED = 2198; // 0x896
-    field public static final int DATA_ROAMING_SETTINGS_DISABLED = 2064; // 0x810
-    field public static final int DATA_SETTINGS_DISABLED = 2063; // 0x80f
-    field public static final int DBM_OR_SMS_IN_PROGRESS = 2211; // 0x8a3
-    field public static final int DDS_SWITCHED = 2065; // 0x811
-    field public static final int DDS_SWITCH_IN_PROGRESS = 2067; // 0x813
-    field public static final int DRB_RELEASED_BY_RRC = 2112; // 0x840
-    field public static final int DS_EXPLICIT_DEACTIVATION = 2125; // 0x84d
-    field public static final int DUAL_SWITCH = 2227; // 0x8b3
-    field public static final int DUN_CALL_DISALLOWED = 2056; // 0x808
-    field public static final int DUPLICATE_BEARER_ID = 2118; // 0x846
-    field public static final int EHRPD_TO_HRPD_FALLBACK = 2049; // 0x801
-    field public static final int EMBMS_NOT_ENABLED = 2193; // 0x891
-    field public static final int EMBMS_REGULAR_DEACTIVATION = 2195; // 0x893
-    field public static final int EMERGENCY_IFACE_ONLY = 116; // 0x74
-    field public static final int EMERGENCY_MODE = 2221; // 0x8ad
-    field public static final int EMM_ACCESS_BARRED = 115; // 0x73
-    field public static final int EMM_ACCESS_BARRED_INFINITE_RETRY = 121; // 0x79
-    field public static final int EMM_ATTACH_FAILED = 2115; // 0x843
-    field public static final int EMM_ATTACH_STARTED = 2116; // 0x844
-    field public static final int EMM_DETACHED = 2114; // 0x842
-    field public static final int EMM_T3417_EXPIRED = 2130; // 0x852
-    field public static final int EMM_T3417_EXT_EXPIRED = 2131; // 0x853
-    field public static final int EPS_SERVICES_AND_NON_EPS_SERVICES_NOT_ALLOWED = 2178; // 0x882
-    field public static final int EPS_SERVICES_NOT_ALLOWED_IN_PLMN = 2179; // 0x883
-    field public static final int ERROR_UNSPECIFIED = 65535; // 0xffff
-    field public static final int ESM_BAD_OTA_MESSAGE = 2122; // 0x84a
-    field public static final int ESM_BEARER_DEACTIVATED_TO_SYNC_WITH_NETWORK = 2120; // 0x848
-    field public static final int ESM_COLLISION_SCENARIOS = 2119; // 0x847
-    field public static final int ESM_CONTEXT_TRANSFERRED_DUE_TO_IRAT = 2124; // 0x84c
-    field public static final int ESM_DOWNLOAD_SERVER_REJECTED_THE_CALL = 2123; // 0x84b
-    field public static final int ESM_FAILURE = 2182; // 0x886
-    field public static final int ESM_INFO_NOT_RECEIVED = 53; // 0x35
-    field public static final int ESM_LOCAL_CAUSE_NONE = 2126; // 0x84e
-    field public static final int ESM_NW_ACTIVATED_DED_BEARER_WITH_ID_OF_DEF_BEARER = 2121; // 0x849
-    field public static final int ESM_PROCEDURE_TIME_OUT = 2155; // 0x86b
-    field public static final int ESM_UNKNOWN_EPS_BEARER_CONTEXT = 2111; // 0x83f
-    field public static final int EVDO_CONNECTION_DENY_BY_BILLING_OR_AUTHENTICATION_FAILURE = 2201; // 0x899
-    field public static final int EVDO_CONNECTION_DENY_BY_GENERAL_OR_NETWORK_BUSY = 2200; // 0x898
-    field public static final int EVDO_HDR_CHANGED = 2202; // 0x89a
-    field public static final int EVDO_HDR_CONNECTION_SETUP_TIMEOUT = 2206; // 0x89e
-    field public static final int EVDO_HDR_EXITED = 2203; // 0x89b
-    field public static final int EVDO_HDR_NO_SESSION = 2204; // 0x89c
-    field public static final int EVDO_USING_GPS_FIX_INSTEAD_OF_HDR_CALL = 2205; // 0x89d
-    field public static final int FADE = 2217; // 0x8a9
-    field public static final int FAILED_TO_ACQUIRE_COLOCATED_HDR = 2207; // 0x89f
-    field public static final int FEATURE_NOT_SUPP = 40; // 0x28
-    field public static final int FILTER_SEMANTIC_ERROR = 44; // 0x2c
-    field public static final int FILTER_SYTAX_ERROR = 45; // 0x2d
-    field public static final int FORBIDDEN_APN_NAME = 2066; // 0x812
-    field public static final int GPRS_REGISTRATION_FAIL = -2; // 0xfffffffe
-    field public static final int GPRS_SERVICES_AND_NON_GPRS_SERVICES_NOT_ALLOWED = 2097; // 0x831
-    field public static final int GPRS_SERVICES_NOT_ALLOWED = 2098; // 0x832
-    field public static final int GPRS_SERVICES_NOT_ALLOWED_IN_THIS_PLMN = 2103; // 0x837
-    field public static final int HANDOFF_PREFERENCE_CHANGED = 2251; // 0x8cb
-    field public static final int HDR_ACCESS_FAILURE = 2213; // 0x8a5
-    field public static final int HDR_FADE = 2212; // 0x8a4
-    field public static final int HDR_NO_LOCK_GRANTED = 2210; // 0x8a2
-    field public static final int IFACE_AND_POL_FAMILY_MISMATCH = 120; // 0x78
-    field public static final int IFACE_MISMATCH = 117; // 0x75
-    field public static final int ILLEGAL_ME = 2096; // 0x830
-    field public static final int ILLEGAL_MS = 2095; // 0x82f
-    field public static final int IMEI_NOT_ACCEPTED = 2177; // 0x881
-    field public static final int IMPLICITLY_DETACHED = 2100; // 0x834
-    field public static final int IMSI_UNKNOWN_IN_HOME_SUBSCRIBER_SERVER = 2176; // 0x880
-    field public static final int INCOMING_CALL_REJECTED = 2092; // 0x82c
-    field public static final int INSUFFICIENT_RESOURCES = 26; // 0x1a
-    field public static final int INTERFACE_IN_USE = 2058; // 0x80a
-    field public static final int INTERNAL_CALL_PREEMPT_BY_HIGH_PRIO_APN = 114; // 0x72
-    field public static final int INTERNAL_EPC_NONEPC_TRANSITION = 2057; // 0x809
-    field public static final int INVALID_CONNECTION_ID = 2156; // 0x86c
-    field public static final int INVALID_DNS_ADDR = 123; // 0x7b
-    field public static final int INVALID_EMM_STATE = 2190; // 0x88e
-    field public static final int INVALID_MANDATORY_INFO = 96; // 0x60
-    field public static final int INVALID_MODE = 2223; // 0x8af
-    field public static final int INVALID_PCSCF_ADDR = 113; // 0x71
-    field public static final int INVALID_PCSCF_OR_DNS_ADDRESS = 124; // 0x7c
-    field public static final int INVALID_PRIMARY_NSAPI = 2158; // 0x86e
-    field public static final int INVALID_SIM_STATE = 2224; // 0x8b0
-    field public static final int INVALID_TRANSACTION_ID = 81; // 0x51
-    field public static final int IPV6_ADDRESS_TRANSFER_FAILED = 2047; // 0x7ff
-    field public static final int IPV6_PREFIX_UNAVAILABLE = 2250; // 0x8ca
-    field public static final int IP_ADDRESS_MISMATCH = 119; // 0x77
-    field public static final int IP_VERSION_MISMATCH = 2055; // 0x807
-    field public static final int IRAT_HANDOVER_FAILED = 2194; // 0x892
-    field public static final int IS707B_MAX_ACCESS_PROBES = 2089; // 0x829
-    field public static final int LIMITED_TO_IPV4 = 2234; // 0x8ba
-    field public static final int LIMITED_TO_IPV6 = 2235; // 0x8bb
-    field public static final int LLC_SNDCP = 25; // 0x19
-    field public static final int LOCAL_END = 2215; // 0x8a7
-    field public static final int LOCATION_AREA_NOT_ALLOWED = 2102; // 0x836
-    field public static final int LOST_CONNECTION = 65540; // 0x10004
-    field public static final int LOWER_LAYER_REGISTRATION_FAILURE = 2197; // 0x895
-    field public static final int LOW_POWER_MODE_OR_POWERING_DOWN = 2044; // 0x7fc
-    field public static final int LTE_NAS_SERVICE_REQUEST_FAILED = 2117; // 0x845
-    field public static final int LTE_THROTTLING_NOT_REQUIRED = 2127; // 0x84f
-    field public static final int MAC_FAILURE = 2183; // 0x887
-    field public static final int MAXIMIUM_NSAPIS_EXCEEDED = 2157; // 0x86d
-    field public static final int MAXINUM_SIZE_OF_L2_MESSAGE_EXCEEDED = 2166; // 0x876
-    field public static final int MAX_ACCESS_PROBE = 2079; // 0x81f
-    field public static final int MAX_IPV4_CONNECTIONS = 2052; // 0x804
-    field public static final int MAX_IPV6_CONNECTIONS = 2053; // 0x805
-    field public static final int MAX_PPP_INACTIVITY_TIMER_EXPIRED = 2046; // 0x7fe
-    field public static final int MESSAGE_INCORRECT_SEMANTIC = 95; // 0x5f
-    field public static final int MESSAGE_TYPE_UNSUPPORTED = 97; // 0x61
-    field public static final int MIP_CONFIG_FAILURE = 2050; // 0x802
-    field public static final int MIP_FA_ADMIN_PROHIBITED = 2001; // 0x7d1
-    field public static final int MIP_FA_DELIVERY_STYLE_NOT_SUPPORTED = 2012; // 0x7dc
-    field public static final int MIP_FA_ENCAPSULATION_UNAVAILABLE = 2008; // 0x7d8
-    field public static final int MIP_FA_HOME_AGENT_AUTHENTICATION_FAILURE = 2004; // 0x7d4
-    field public static final int MIP_FA_INSUFFICIENT_RESOURCES = 2002; // 0x7d2
-    field public static final int MIP_FA_MALFORMED_REPLY = 2007; // 0x7d7
-    field public static final int MIP_FA_MALFORMED_REQUEST = 2006; // 0x7d6
-    field public static final int MIP_FA_MISSING_CHALLENGE = 2017; // 0x7e1
-    field public static final int MIP_FA_MISSING_HOME_ADDRESS = 2015; // 0x7df
-    field public static final int MIP_FA_MISSING_HOME_AGENT = 2014; // 0x7de
-    field public static final int MIP_FA_MISSING_NAI = 2013; // 0x7dd
-    field public static final int MIP_FA_MOBILE_NODE_AUTHENTICATION_FAILURE = 2003; // 0x7d3
-    field public static final int MIP_FA_REASON_UNSPECIFIED = 2000; // 0x7d0
-    field public static final int MIP_FA_REQUESTED_LIFETIME_TOO_LONG = 2005; // 0x7d5
-    field public static final int MIP_FA_REVERSE_TUNNEL_IS_MANDATORY = 2011; // 0x7db
-    field public static final int MIP_FA_REVERSE_TUNNEL_UNAVAILABLE = 2010; // 0x7da
-    field public static final int MIP_FA_STALE_CHALLENGE = 2018; // 0x7e2
-    field public static final int MIP_FA_UNKNOWN_CHALLENGE = 2016; // 0x7e0
-    field public static final int MIP_FA_VJ_HEADER_COMPRESSION_UNAVAILABLE = 2009; // 0x7d9
-    field public static final int MIP_HA_ADMIN_PROHIBITED = 2020; // 0x7e4
-    field public static final int MIP_HA_ENCAPSULATION_UNAVAILABLE = 2029; // 0x7ed
-    field public static final int MIP_HA_FOREIGN_AGENT_AUTHENTICATION_FAILURE = 2023; // 0x7e7
-    field public static final int MIP_HA_INSUFFICIENT_RESOURCES = 2021; // 0x7e5
-    field public static final int MIP_HA_MALFORMED_REQUEST = 2025; // 0x7e9
-    field public static final int MIP_HA_MOBILE_NODE_AUTHENTICATION_FAILURE = 2022; // 0x7e6
-    field public static final int MIP_HA_REASON_UNSPECIFIED = 2019; // 0x7e3
-    field public static final int MIP_HA_REGISTRATION_ID_MISMATCH = 2024; // 0x7e8
-    field public static final int MIP_HA_REVERSE_TUNNEL_IS_MANDATORY = 2028; // 0x7ec
-    field public static final int MIP_HA_REVERSE_TUNNEL_UNAVAILABLE = 2027; // 0x7eb
-    field public static final int MIP_HA_UNKNOWN_HOME_AGENT_ADDRESS = 2026; // 0x7ea
-    field public static final int MISSING_UNKNOWN_APN = 27; // 0x1b
-    field public static final int MODEM_APP_PREEMPTED = 2032; // 0x7f0
-    field public static final int MODEM_RESTART = 2037; // 0x7f5
-    field public static final int MSC_TEMPORARILY_NOT_REACHABLE = 2180; // 0x884
-    field public static final int MSG_AND_PROTOCOL_STATE_UNCOMPATIBLE = 101; // 0x65
-    field public static final int MSG_TYPE_NONCOMPATIBLE_STATE = 98; // 0x62
-    field public static final int MS_IDENTITY_CANNOT_BE_DERIVED_BY_THE_NETWORK = 2099; // 0x833
-    field public static final int MULTIPLE_PDP_CALL_NOT_ALLOWED = 2192; // 0x890
-    field public static final int MULTI_CONN_TO_SAME_PDN_NOT_ALLOWED = 55; // 0x37
-    field public static final int NAS_LAYER_FAILURE = 2191; // 0x88f
-    field public static final int NAS_REQUEST_REJECTED_BY_NETWORK = 2167; // 0x877
-    field public static final int NAS_SIGNALLING = 14; // 0xe
-    field public static final int NETWORK_FAILURE = 38; // 0x26
-    field public static final int NETWORK_INITIATED_DETACH_NO_AUTO_REATTACH = 2154; // 0x86a
-    field public static final int NETWORK_INITIATED_DETACH_WITH_AUTO_REATTACH = 2153; // 0x869
-    field public static final int NETWORK_INITIATED_TERMINATION = 2031; // 0x7ef
-    field public static final int NONE = 0; // 0x0
-    field public static final int NON_IP_NOT_SUPPORTED = 2069; // 0x815
-    field public static final int NORMAL_RELEASE = 2218; // 0x8aa
-    field public static final int NO_CDMA_SERVICE = 2084; // 0x824
-    field public static final int NO_COLLOCATED_HDR = 2225; // 0x8b1
-    field public static final int NO_EPS_BEARER_CONTEXT_ACTIVATED = 2189; // 0x88d
-    field public static final int NO_GPRS_CONTEXT = 2094; // 0x82e
-    field public static final int NO_HYBRID_HDR_SERVICE = 2209; // 0x8a1
-    field public static final int NO_PDP_CONTEXT_ACTIVATED = 2107; // 0x83b
-    field public static final int NO_RESPONSE_FROM_BASE_STATION = 2081; // 0x821
-    field public static final int NO_SERVICE = 2216; // 0x8a8
-    field public static final int NO_SERVICE_ON_GATEWAY = 2093; // 0x82d
-    field public static final int NSAPI_IN_USE = 35; // 0x23
-    field public static final int NULL_APN_DISALLOWED = 2061; // 0x80d
-    field public static final int OEM_DCFAILCAUSE_1 = 4097; // 0x1001
-    field public static final int OEM_DCFAILCAUSE_10 = 4106; // 0x100a
-    field public static final int OEM_DCFAILCAUSE_11 = 4107; // 0x100b
-    field public static final int OEM_DCFAILCAUSE_12 = 4108; // 0x100c
-    field public static final int OEM_DCFAILCAUSE_13 = 4109; // 0x100d
-    field public static final int OEM_DCFAILCAUSE_14 = 4110; // 0x100e
-    field public static final int OEM_DCFAILCAUSE_15 = 4111; // 0x100f
-    field public static final int OEM_DCFAILCAUSE_2 = 4098; // 0x1002
-    field public static final int OEM_DCFAILCAUSE_3 = 4099; // 0x1003
-    field public static final int OEM_DCFAILCAUSE_4 = 4100; // 0x1004
-    field public static final int OEM_DCFAILCAUSE_5 = 4101; // 0x1005
-    field public static final int OEM_DCFAILCAUSE_6 = 4102; // 0x1006
-    field public static final int OEM_DCFAILCAUSE_7 = 4103; // 0x1007
-    field public static final int OEM_DCFAILCAUSE_8 = 4104; // 0x1008
-    field public static final int OEM_DCFAILCAUSE_9 = 4105; // 0x1009
-    field public static final int ONLY_IPV4V6_ALLOWED = 57; // 0x39
-    field public static final int ONLY_IPV4_ALLOWED = 50; // 0x32
-    field public static final int ONLY_IPV6_ALLOWED = 51; // 0x33
-    field public static final int ONLY_NON_IP_ALLOWED = 58; // 0x3a
-    field public static final int ONLY_SINGLE_BEARER_ALLOWED = 52; // 0x34
-    field public static final int OPERATOR_BARRED = 8; // 0x8
-    field public static final int OTASP_COMMIT_IN_PROGRESS = 2208; // 0x8a0
-    field public static final int PDN_CONN_DOES_NOT_EXIST = 54; // 0x36
-    field public static final int PDN_INACTIVITY_TIMER_EXPIRED = 2051; // 0x803
-    field public static final int PDN_IPV4_CALL_DISALLOWED = 2033; // 0x7f1
-    field public static final int PDN_IPV4_CALL_THROTTLED = 2034; // 0x7f2
-    field public static final int PDN_IPV6_CALL_DISALLOWED = 2035; // 0x7f3
-    field public static final int PDN_IPV6_CALL_THROTTLED = 2036; // 0x7f4
-    field public static final int PDN_NON_IP_CALL_DISALLOWED = 2071; // 0x817
-    field public static final int PDN_NON_IP_CALL_THROTTLED = 2070; // 0x816
-    field public static final int PDP_ACTIVATE_MAX_RETRY_FAILED = 2109; // 0x83d
-    field public static final int PDP_DUPLICATE = 2104; // 0x838
-    field public static final int PDP_ESTABLISH_TIMEOUT_EXPIRED = 2161; // 0x871
-    field public static final int PDP_INACTIVE_TIMEOUT_EXPIRED = 2163; // 0x873
-    field public static final int PDP_LOWERLAYER_ERROR = 2164; // 0x874
-    field public static final int PDP_MODIFY_COLLISION = 2165; // 0x875
-    field public static final int PDP_MODIFY_TIMEOUT_EXPIRED = 2162; // 0x872
-    field public static final int PDP_PPP_NOT_SUPPORTED = 2038; // 0x7f6
-    field public static final int PDP_WITHOUT_ACTIVE_TFT = 46; // 0x2e
-    field public static final int PHONE_IN_USE = 2222; // 0x8ae
-    field public static final int PHYSICAL_LINK_CLOSE_IN_PROGRESS = 2040; // 0x7f8
-    field public static final int PLMN_NOT_ALLOWED = 2101; // 0x835
-    field public static final int PPP_AUTH_FAILURE = 2229; // 0x8b5
-    field public static final int PPP_CHAP_FAILURE = 2232; // 0x8b8
-    field public static final int PPP_CLOSE_IN_PROGRESS = 2233; // 0x8b9
-    field public static final int PPP_OPTION_MISMATCH = 2230; // 0x8b6
-    field public static final int PPP_PAP_FAILURE = 2231; // 0x8b7
-    field public static final int PPP_TIMEOUT = 2228; // 0x8b4
-    field public static final int PREF_RADIO_TECH_CHANGED = -4; // 0xfffffffc
-    field public static final int PROFILE_BEARER_INCOMPATIBLE = 2042; // 0x7fa
-    field public static final int PROTOCOL_ERRORS = 111; // 0x6f
-    field public static final int QOS_NOT_ACCEPTED = 37; // 0x25
-    field public static final int RADIO_ACCESS_BEARER_FAILURE = 2110; // 0x83e
-    field public static final int RADIO_ACCESS_BEARER_SETUP_FAILURE = 2160; // 0x870
-    field public static final int RADIO_NOT_AVAILABLE = 65537; // 0x10001
-    field public static final int RADIO_POWER_OFF = -5; // 0xfffffffb
-    field public static final int REDIRECTION_OR_HANDOFF_IN_PROGRESS = 2220; // 0x8ac
-    field public static final int REGISTRATION_FAIL = -1; // 0xffffffff
-    field public static final int REGULAR_DEACTIVATION = 36; // 0x24
-    field public static final int REJECTED_BY_BASE_STATION = 2082; // 0x822
-    field public static final int RRC_CONNECTION_ABORTED_AFTER_HANDOVER = 2173; // 0x87d
-    field public static final int RRC_CONNECTION_ABORTED_AFTER_IRAT_CELL_CHANGE = 2174; // 0x87e
-    field public static final int RRC_CONNECTION_ABORTED_DUE_TO_IRAT_CHANGE = 2171; // 0x87b
-    field public static final int RRC_CONNECTION_ABORTED_DURING_IRAT_CELL_CHANGE = 2175; // 0x87f
-    field public static final int RRC_CONNECTION_ABORT_REQUEST = 2151; // 0x867
-    field public static final int RRC_CONNECTION_ACCESS_BARRED = 2139; // 0x85b
-    field public static final int RRC_CONNECTION_ACCESS_STRATUM_FAILURE = 2137; // 0x859
-    field public static final int RRC_CONNECTION_ANOTHER_PROCEDURE_IN_PROGRESS = 2138; // 0x85a
-    field public static final int RRC_CONNECTION_CELL_NOT_CAMPED = 2144; // 0x860
-    field public static final int RRC_CONNECTION_CELL_RESELECTION = 2140; // 0x85c
-    field public static final int RRC_CONNECTION_CONFIG_FAILURE = 2141; // 0x85d
-    field public static final int RRC_CONNECTION_INVALID_REQUEST = 2168; // 0x878
-    field public static final int RRC_CONNECTION_LINK_FAILURE = 2143; // 0x85f
-    field public static final int RRC_CONNECTION_NORMAL_RELEASE = 2147; // 0x863
-    field public static final int RRC_CONNECTION_OUT_OF_SERVICE_DURING_CELL_REGISTER = 2150; // 0x866
-    field public static final int RRC_CONNECTION_RADIO_LINK_FAILURE = 2148; // 0x864
-    field public static final int RRC_CONNECTION_REESTABLISHMENT_FAILURE = 2149; // 0x865
-    field public static final int RRC_CONNECTION_REJECT_BY_NETWORK = 2146; // 0x862
-    field public static final int RRC_CONNECTION_RELEASED_SECURITY_NOT_ACTIVE = 2172; // 0x87c
-    field public static final int RRC_CONNECTION_RF_UNAVAILABLE = 2170; // 0x87a
-    field public static final int RRC_CONNECTION_SYSTEM_INFORMATION_BLOCK_READ_ERROR = 2152; // 0x868
-    field public static final int RRC_CONNECTION_SYSTEM_INTERVAL_FAILURE = 2145; // 0x861
-    field public static final int RRC_CONNECTION_TIMER_EXPIRED = 2142; // 0x85e
-    field public static final int RRC_CONNECTION_TRACKING_AREA_ID_CHANGED = 2169; // 0x879
-    field public static final int RRC_UPLINK_CONNECTION_RELEASE = 2134; // 0x856
-    field public static final int RRC_UPLINK_DATA_TRANSMISSION_FAILURE = 2132; // 0x854
-    field public static final int RRC_UPLINK_DELIVERY_FAILED_DUE_TO_HANDOVER = 2133; // 0x855
-    field public static final int RRC_UPLINK_ERROR_REQUEST_FROM_NAS = 2136; // 0x858
-    field public static final int RRC_UPLINK_RADIO_LINK_FAILURE = 2135; // 0x857
-    field public static final int RUIM_NOT_PRESENT = 2085; // 0x825
-    field public static final int SECURITY_MODE_REJECTED = 2186; // 0x88a
-    field public static final int SERVICE_NOT_ALLOWED_ON_PLMN = 2129; // 0x851
-    field public static final int SERVICE_OPTION_NOT_SUBSCRIBED = 33; // 0x21
-    field public static final int SERVICE_OPTION_NOT_SUPPORTED = 32; // 0x20
-    field public static final int SERVICE_OPTION_OUT_OF_ORDER = 34; // 0x22
-    field public static final int SIGNAL_LOST = -3; // 0xfffffffd
-    field public static final int SIM_CARD_CHANGED = 2043; // 0x7fb
-    field public static final int SYNCHRONIZATION_FAILURE = 2184; // 0x888
-    field public static final int TEST_LOOPBACK_REGULAR_DEACTIVATION = 2196; // 0x894
-    field public static final int TETHERED_CALL_ACTIVE = -6; // 0xfffffffa
-    field public static final int TFT_SEMANTIC_ERROR = 41; // 0x29
-    field public static final int TFT_SYTAX_ERROR = 42; // 0x2a
-    field public static final int THERMAL_EMERGENCY = 2090; // 0x82a
-    field public static final int THERMAL_MITIGATION = 2062; // 0x80e
-    field public static final int TRAT_SWAP_FAILED = 2048; // 0x800
-    field public static final int UE_INITIATED_DETACH_OR_DISCONNECT = 128; // 0x80
-    field public static final int UE_IS_ENTERING_POWERSAVE_MODE = 2226; // 0x8b2
-    field public static final int UE_RAT_CHANGE = 2105; // 0x839
-    field public static final int UE_SECURITY_CAPABILITIES_MISMATCH = 2185; // 0x889
-    field public static final int UMTS_HANDOVER_TO_IWLAN = 2199; // 0x897
-    field public static final int UMTS_REACTIVATION_REQ = 39; // 0x27
-    field public static final int UNACCEPTABLE_NETWORK_PARAMETER = 65538; // 0x10002
-    field public static final int UNACCEPTABLE_NON_EPS_AUTHENTICATION = 2187; // 0x88b
-    field public static final int UNKNOWN = 65536; // 0x10000
-    field public static final int UNKNOWN_INFO_ELEMENT = 99; // 0x63
-    field public static final int UNKNOWN_PDP_ADDRESS_TYPE = 28; // 0x1c
-    field public static final int UNKNOWN_PDP_CONTEXT = 43; // 0x2b
-    field public static final int UNPREFERRED_RAT = 2039; // 0x7f7
-    field public static final int UNSUPPORTED_1X_PREV = 2214; // 0x8a6
-    field public static final int UNSUPPORTED_APN_IN_CURRENT_PLMN = 66; // 0x42
-    field public static final int UNSUPPORTED_QCI_VALUE = 59; // 0x3b
-    field public static final int USER_AUTHENTICATION = 29; // 0x1d
-    field public static final int VSNCP_ADMINISTRATIVELY_PROHIBITED = 2245; // 0x8c5
-    field public static final int VSNCP_APN_UNATHORIZED = 2238; // 0x8be
-    field public static final int VSNCP_GEN_ERROR = 2237; // 0x8bd
-    field public static final int VSNCP_INSUFFICIENT_PARAMETERS = 2243; // 0x8c3
-    field public static final int VSNCP_NO_PDN_GATEWAY_ADDRESS = 2240; // 0x8c0
-    field public static final int VSNCP_PDN_EXISTS_FOR_THIS_APN = 2248; // 0x8c8
-    field public static final int VSNCP_PDN_GATEWAY_REJECT = 2242; // 0x8c2
-    field public static final int VSNCP_PDN_GATEWAY_UNREACHABLE = 2241; // 0x8c1
-    field public static final int VSNCP_PDN_ID_IN_USE = 2246; // 0x8c6
-    field public static final int VSNCP_PDN_LIMIT_EXCEEDED = 2239; // 0x8bf
-    field public static final int VSNCP_RECONNECT_NOT_ALLOWED = 2249; // 0x8c9
-    field public static final int VSNCP_RESOURCE_UNAVAILABLE = 2244; // 0x8c4
-    field public static final int VSNCP_SUBSCRIBER_LIMITATION = 2247; // 0x8c7
-    field public static final int VSNCP_TIMEOUT = 2236; // 0x8bc
+    field @Deprecated public static final int VSNCP_APN_UNATHORIZED = 2238; // 0x8be
   }
 
   public final class DataSpecificRegistrationInfo implements android.os.Parcelable {
@@ -12175,7 +11623,7 @@ package android.telephony {
   public class SmsMessage {
     method @Nullable public static android.telephony.SmsMessage createFromNativeSmsSubmitPdu(@NonNull byte[], boolean);
     method @Nullable public static android.telephony.SmsMessage.SubmitPdu getSmsPdu(int, int, @Nullable String, @NonNull String, @NonNull String, long);
-    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static byte[] getSubmitPduEncodedMessage(boolean, @NonNull String, @NonNull String, int, int, int, int, int, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static byte[] getSubmitPduEncodedMessage(boolean, @NonNull String, @NonNull String, int, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0, to=255) int, @IntRange(from=1, to=255) int, @IntRange(from=1, to=255) int);
   }
 
   public class SubscriptionInfo implements android.os.Parcelable {
@@ -12204,7 +11652,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setIconTint(@ColorInt int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPreferredDataSubscriptionId(int, boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setSubscriptionEnabled(int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUiccApplicationsEnabled(boolean, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUiccApplicationsEnabled(int, boolean);
     field @RequiresPermission(android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS) public static final String ACTION_SUBSCRIPTION_PLANS_CHANGED = "android.telephony.action.SUBSCRIPTION_PLANS_CHANGED";
     field @NonNull public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
     field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
@@ -12297,7 +11745,6 @@ package android.telephony {
     method public int getMaxNumberOfSimultaneouslyActiveSims();
     method public static long getMaxNumberVerificationTimeoutMillis();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getMergedImsisFromGroup();
-    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getNetworkCountryIso(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getPreferredNetworkTypeBitmask();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public int getRadioPowerState();
     method public int getSimApplicationState();
@@ -12355,7 +11802,6 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAlwaysAllowMmsData(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAlwaysReportSignalStrength(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCallForwarding(@NonNull android.telephony.CallForwardingInfo);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCallWaitingStatus(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
@@ -12516,6 +11962,7 @@ package android.telephony {
     method public void notifyDataActivityChanged(int, int);
     method public void notifyDataConnectionForSubscriber(int, int, int, @Nullable android.telephony.PreciseDataConnectionState);
     method public void notifyDisconnectCause(int, int, int, int);
+    method public void notifyDisplayInfoChanged(int, int, @NonNull android.telephony.DisplayInfo);
     method public void notifyEmergencyNumberList(int, int);
     method public void notifyImsDisconnectCause(int, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void notifyMessageWaitingChanged(int, int, boolean);
@@ -12569,20 +12016,6 @@ package android.telephony {
   public abstract class VisualVoicemailService extends android.app.Service {
     method public static final void sendVisualVoicemailSms(android.content.Context, android.telecom.PhoneAccountHandle, String, short, String, android.app.PendingIntent);
     method public static final void setSmsFilterSettings(android.content.Context, android.telecom.PhoneAccountHandle, android.telephony.VisualVoicemailSmsFilterSettings);
-  }
-
-  public final class WapPushManagerConnector {
-    ctor public WapPushManagerConnector(@NonNull android.content.Context);
-    method public boolean bindToWapPushManagerService();
-    method @Nullable public String getConnectedWapPushManagerServicePackage();
-    method public int processMessage(@NonNull String, @NonNull String, @NonNull android.content.Intent);
-    method public void unbindWapPushManagerService();
-    field public static final int RESULT_APP_QUERY_FAILED = 2; // 0x2
-    field public static final int RESULT_EXCEPTION_CAUGHT = 16; // 0x10
-    field public static final int RESULT_FURTHER_PROCESSING = 32768; // 0x8000
-    field public static final int RESULT_INVALID_RECEIVER_NAME = 8; // 0x8
-    field public static final int RESULT_MESSAGE_HANDLED = 1; // 0x1
-    field public static final int RESULT_SIGNATURE_NO_MATCH = 4; // 0x4
   }
 
 }
@@ -13144,19 +12577,7 @@ package android.telephony.ims {
   }
 
   public class ImsRcsManager implements android.telephony.ims.RegistrationManager {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAvailable(int) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCapable(int, int) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerRcsAvailabilityCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsRcsManager.AvailabilityCallback) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterRcsAvailabilityCallback(@NonNull android.telephony.ims.ImsRcsManager.AvailabilityCallback) throws android.telephony.ims.ImsException;
-  }
-
-  public static class ImsRcsManager.AvailabilityCallback {
-    ctor public ImsRcsManager.AvailabilityCallback();
-    method public void onAvailabilityChanged(@NonNull android.telephony.ims.feature.RcsFeature.RcsImsCapabilities);
+    method @NonNull public android.telephony.ims.RcsUceAdapter getUceAdapter();
   }
 
   public final class ImsReasonInfo implements android.os.Parcelable {
@@ -13535,34 +12956,8 @@ package android.telephony.ims {
   }
 
   public class RcsUceAdapter {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getUcePublishState() throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isUceSettingEnabled() throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void requestCapabilities(@NonNull java.util.concurrent.Executor, @NonNull java.util.List<android.net.Uri>, @NonNull android.telephony.ims.RcsUceAdapter.CapabilitiesCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUceSettingEnabled(boolean) throws android.telephony.ims.ImsException;
-    field public static final int ERROR_ALREADY_IN_QUEUE = 13; // 0xd
-    field public static final int ERROR_FORBIDDEN = 6; // 0x6
-    field public static final int ERROR_GENERIC_FAILURE = 1; // 0x1
-    field public static final int ERROR_INSUFFICIENT_MEMORY = 11; // 0xb
-    field public static final int ERROR_LOST_NETWORK = 12; // 0xc
-    field public static final int ERROR_NOT_AUTHORIZED = 5; // 0x5
-    field public static final int ERROR_NOT_AVAILABLE = 3; // 0x3
-    field public static final int ERROR_NOT_ENABLED = 2; // 0x2
-    field public static final int ERROR_NOT_FOUND = 7; // 0x7
-    field public static final int ERROR_NOT_REGISTERED = 4; // 0x4
-    field public static final int ERROR_REQUEST_TIMEOUT = 10; // 0xa
-    field public static final int ERROR_REQUEST_TOO_LARGE = 8; // 0x8
-    field public static final int PUBLISH_STATE_200_OK = 1; // 0x1
-    field public static final int PUBLISH_STATE_NOT_PUBLISHED = 2; // 0x2
-    field public static final int PUBLISH_STATE_OTHER_ERROR = 6; // 0x6
-    field public static final int PUBLISH_STATE_RCS_PROVISION_ERROR = 4; // 0x4
-    field public static final int PUBLISH_STATE_REQUEST_TIMEOUT = 5; // 0x5
-    field public static final int PUBLISH_STATE_VOLTE_PROVISION_ERROR = 3; // 0x3
-  }
-
-  public static class RcsUceAdapter.CapabilitiesCallback {
-    ctor public RcsUceAdapter.CapabilitiesCallback();
-    method public void onCapabilitiesReceived(@NonNull java.util.List<android.telephony.ims.RcsContactUceCapability>);
-    method public void onError(int);
   }
 
 }
@@ -13648,23 +13043,8 @@ package android.telephony.ims.feature {
   public class RcsFeature extends android.telephony.ims.feature.ImsFeature {
     ctor public RcsFeature();
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
-    method @NonNull public android.telephony.ims.stub.RcsSipOptionsImplBase getOptionsExchangeImpl();
-    method @NonNull public android.telephony.ims.stub.RcsPresenceExchangeImplBase getPresenceExchangeImpl();
-    method public final void notifyCapabilitiesStatusChanged(@NonNull android.telephony.ims.feature.RcsFeature.RcsImsCapabilities);
     method public void onFeatureReady();
     method public void onFeatureRemoved();
-    method public boolean queryCapabilityConfiguration(int, int);
-    method @NonNull public final android.telephony.ims.feature.RcsFeature.RcsImsCapabilities queryCapabilityStatus();
-  }
-
-  public static class RcsFeature.RcsImsCapabilities extends android.telephony.ims.feature.ImsFeature.Capabilities {
-    ctor public RcsFeature.RcsImsCapabilities(int);
-    method public void addCapabilities(int);
-    method public boolean isCapable(int);
-    method public void removeCapabilities(int);
-    field public static final int CAPABILITY_TYPE_NONE = 0; // 0x0
-    field public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1; // 0x1
-    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
   }
 
 }
@@ -13840,71 +13220,6 @@ package android.telephony.ims.stub {
     field public static final int CALL_BARRING_SPECIFIC_INCOMING_CALLS = 10; // 0xa
     field public static final int CALL_BLOCKING_INCOMING_WHEN_ROAMING = 5; // 0x5
     field public static final int INVALID_RESULT = -1; // 0xffffffff
-  }
-
-  public class RcsCapabilityExchange {
-    ctor public RcsCapabilityExchange();
-    method public final void onCommandUpdate(int, int) throws android.telephony.ims.ImsException;
-    field public static final int COMMAND_CODE_FETCH_ERROR = 4; // 0x4
-    field public static final int COMMAND_CODE_GENERIC_FAILURE = 2; // 0x2
-    field public static final int COMMAND_CODE_INSUFFICIENT_MEMORY = 6; // 0x6
-    field public static final int COMMAND_CODE_INVALID_PARAM = 3; // 0x3
-    field public static final int COMMAND_CODE_LOST_NETWORK_CONNECTION = 7; // 0x7
-    field public static final int COMMAND_CODE_NOT_FOUND = 9; // 0x9
-    field public static final int COMMAND_CODE_NOT_SUPPORTED = 8; // 0x8
-    field public static final int COMMAND_CODE_NO_CHANGE_IN_CAP = 11; // 0xb
-    field public static final int COMMAND_CODE_REQUEST_TIMEOUT = 5; // 0x5
-    field public static final int COMMAND_CODE_SERVICE_UNAVAILABLE = 10; // 0xa
-    field public static final int COMMAND_CODE_SERVICE_UNKNOWN = 0; // 0x0
-    field public static final int COMMAND_CODE_SUCCESS = 1; // 0x1
-  }
-
-  public class RcsPresenceExchangeImplBase extends android.telephony.ims.stub.RcsCapabilityExchange {
-    ctor public RcsPresenceExchangeImplBase();
-    method public final void onCapabilityRequestResponse(@NonNull java.util.List<android.telephony.ims.RcsContactUceCapability>, int) throws android.telephony.ims.ImsException;
-    method public final void onNetworkResponse(int, @NonNull String, int) throws android.telephony.ims.ImsException;
-    method public final void onNotifyUpdateCapabilites(int) throws android.telephony.ims.ImsException;
-    method public final void onUnpublish() throws android.telephony.ims.ImsException;
-    method public void requestCapabilities(@NonNull java.util.List<android.net.Uri>, int);
-    method public void updateCapabilities(@NonNull android.telephony.ims.RcsContactUceCapability, int);
-    field public static final int CAPABILITY_UPDATE_TRIGGER_ETAG_EXPIRED = 0; // 0x0
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_2G = 6; // 0x6
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_3G = 5; // 0x5
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD = 3; // 0x3
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_HSPAPLUS = 4; // 0x4
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_IWLAN = 8; // 0x8
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_DISABLED = 1; // 0x1
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED = 2; // 0x2
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_DISABLED = 10; // 0xa
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED = 11; // 0xb
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_WLAN = 7; // 0x7
-    field public static final int CAPABILITY_UPDATE_TRIGGER_UNKNOWN = 9; // 0x9
-    field public static final int RESPONSE_FORBIDDEN = 3; // 0x3
-    field public static final int RESPONSE_NOT_AUTHORIZED_FOR_PRESENCE = 2; // 0x2
-    field public static final int RESPONSE_NOT_FOUND = 4; // 0x4
-    field public static final int RESPONSE_NOT_REGISTERED = 1; // 0x1
-    field public static final int RESPONSE_SIP_INTERVAL_TOO_SHORT = 7; // 0x7
-    field public static final int RESPONSE_SIP_REQUEST_TIMEOUT = 5; // 0x5
-    field public static final int RESPONSE_SIP_SERVICE_UNAVAILABLE = 8; // 0x8
-    field public static final int RESPONSE_SUBSCRIBE_GENERIC_FAILURE = -1; // 0xffffffff
-    field public static final int RESPONSE_SUBSCRIBE_TOO_LARGE = 6; // 0x6
-    field public static final int RESPONSE_SUCCESS = 0; // 0x0
-  }
-
-  public class RcsSipOptionsImplBase extends android.telephony.ims.stub.RcsCapabilityExchange {
-    ctor public RcsSipOptionsImplBase();
-    method public final void onCapabilityRequestResponse(int, @NonNull String, @Nullable android.telephony.ims.RcsContactUceCapability, int) throws android.telephony.ims.ImsException;
-    method public final void onRemoteCapabilityRequest(@NonNull android.net.Uri, @NonNull android.telephony.ims.RcsContactUceCapability, int) throws android.telephony.ims.ImsException;
-    method public void respondToCapabilityRequest(@NonNull String, @NonNull android.telephony.ims.RcsContactUceCapability, int);
-    method public void respondToCapabilityRequestWithError(@NonNull android.net.Uri, int, @NonNull String, int);
-    method public void sendCapabilityRequest(@NonNull android.net.Uri, @NonNull android.telephony.ims.RcsContactUceCapability, int);
-    field public static final int RESPONSE_BAD_REQUEST = 5; // 0x5
-    field public static final int RESPONSE_DOES_NOT_EXIST_ANYWHERE = 4; // 0x4
-    field public static final int RESPONSE_GENERIC_FAILURE = -1; // 0xffffffff
-    field public static final int RESPONSE_NOT_FOUND = 3; // 0x3
-    field public static final int RESPONSE_REQUEST_TIMEOUT = 2; // 0x2
-    field public static final int RESPONSE_SUCCESS = 0; // 0x0
-    field public static final int RESPONSE_TEMPORARILY_UNAVAILABLE = 1; // 0x1
   }
 
 }
@@ -14126,6 +13441,10 @@ package android.view.contentcapture {
 
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
+  }
+
+  public abstract class ContentCaptureSession implements java.lang.AutoCloseable {
+    field public static final int NO_SESSION_ID = 0; // 0x0
   }
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {

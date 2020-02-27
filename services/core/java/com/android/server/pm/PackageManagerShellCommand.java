@@ -88,6 +88,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.incremental.V4Signature;
 import android.os.storage.StorageManager;
 import android.permission.IPermissionManager;
 import android.system.ErrnoException;
@@ -96,6 +97,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.content.PackageHelper;
@@ -118,6 +120,7 @@ import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -134,10 +137,10 @@ import java.util.concurrent.TimeUnit;
 class PackageManagerShellCommand extends ShellCommand {
     /** Path for streaming APK content */
     private static final String STDIN_PATH = "-";
-    private static final byte[] STDIN_PATH_BYTES = "-".getBytes(StandardCharsets.UTF_8);
     /** Path where ART profiles snapshots are dumped for the shell user */
     private final static String ART_PROFILE_SNAPSHOT_DEBUG_LOCATION = "/data/misc/profman/";
     private static final int DEFAULT_WAIT_MS = 60 * 1000;
+    private static final String TAG = "PackageManagerShellCommand";
 
     final IPackageManager mInterface;
     final IPermissionManager mPermissionManager;
@@ -181,6 +184,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runInstall();
                 case "install-streaming":
                     return runStreamingInstall();
+                case "install-incremental":
+                    return runIncrementalInstall();
                 case "install-abandon":
                 case "install-destroy":
                     return runInstallAbandon();
@@ -1163,7 +1168,16 @@ class PackageManagerShellCommand extends ShellCommand {
         final InstallParams params = makeInstallParams();
         if (params.sessionParams.dataLoaderParams == null) {
             params.sessionParams.setDataLoaderParams(
-                    PackageManagerShellCommandDataLoader.getDataLoaderParams(this));
+                    PackageManagerShellCommandDataLoader.getStreamingDataLoaderParams(this));
+        }
+        return doRunInstall(params);
+    }
+
+    private int runIncrementalInstall() throws RemoteException {
+        final InstallParams params = makeInstallParams();
+        if (params.sessionParams.dataLoaderParams == null) {
+            params.sessionParams.setDataLoaderParams(
+                    PackageManagerShellCommandDataLoader.getIncrementalDataLoaderParams(this));
         }
         return doRunInstall(params);
     }
@@ -2757,6 +2771,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--no-wait":
                     params.mWaitForStagedSessionReady = false;
                     break;
+                case "--skip-verification":
+                    sessionParams.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -2973,47 +2990,111 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             // 1. Single file from stdin.
             if (args.isEmpty() || STDIN_PATH.equals(args.get(0))) {
-                String name = "base." + (isApex ? "apex" : "apk");
-                session.addFile(LOCATION_DATA_APP, name, sessionSizeBytes, STDIN_PATH_BYTES, null);
+                final String name = "base." + (isApex ? "apex" : "apk");
+                final String metadata = "-" + name;
+                session.addFile(LOCATION_DATA_APP, name, sessionSizeBytes,
+                        metadata.getBytes(StandardCharsets.UTF_8), null);
                 return 0;
             }
 
             for (String arg : args) {
                 final int delimLocation = arg.indexOf(':');
 
-                // 2. File with specified size read from stdin.
                 if (delimLocation != -1) {
-                    String name = arg.substring(0, delimLocation);
-                    String sizeStr = arg.substring(delimLocation + 1);
-                    long sizeBytes;
-
-                    if (TextUtils.isEmpty(name)) {
-                        getErrPrintWriter().println("Empty file name in: " + arg);
+                    // 2. File with specified size read from stdin.
+                    if (processArgForStdin(arg, session) != 0) {
                         return 1;
                     }
-                    try {
-                        sizeBytes = Long.parseUnsignedLong(sizeStr);
-                    } catch (NumberFormatException e) {
-                        getErrPrintWriter().println("Unable to parse size from: " + arg);
-                        return 1;
-                    }
-
-                    session.addFile(LOCATION_DATA_APP, name, sizeBytes, STDIN_PATH_BYTES, null);
-                    continue;
+                } else {
+                    // 3. Local file.
+                    processArgForLocalFile(arg, session);
                 }
-
-                // 3. Local file.
-                final String inPath = arg;
-
-                String name = new File(inPath).getName();
-                byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
-
-                session.addFile(LOCATION_DATA_APP, name, -1, metadata, null);
             }
             return 0;
         } finally {
             IoUtils.closeQuietly(session);
         }
+    }
+
+    private int processArgForStdin(String arg, PackageInstaller.Session session) {
+        final String[] fileDesc = arg.split(":");
+        String name, metadata;
+        long sizeBytes;
+        byte[] signature = null;
+
+        try {
+            if (fileDesc.length < 2) {
+                getErrPrintWriter().println("Must specify file name and size");
+                return 1;
+            }
+            name = fileDesc[0];
+            sizeBytes = Long.parseUnsignedLong(fileDesc[1]);
+            metadata = name;
+
+            if (fileDesc.length > 2 && !TextUtils.isEmpty(fileDesc[2])) {
+                metadata = fileDesc[2];
+            }
+            if (fileDesc.length > 3) {
+                signature = Base64.getDecoder().decode(fileDesc[3]);
+            }
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println(
+                    "Unable to parse file parameters: " + arg + ", reason: " + e);
+            return 1;
+        }
+
+        if (TextUtils.isEmpty(name)) {
+            getErrPrintWriter().println("Empty file name in: " + arg);
+            return 1;
+        }
+
+        if (signature != null) {
+            // Streaming/adb mode.
+            metadata = "+" + metadata;
+            try {
+                if (V4Signature.readFrom(signature) == null) {
+                    getErrPrintWriter().println("V4 signature is invalid in: " + arg);
+                    return 1;
+                }
+            } catch (Exception e) {
+                getErrPrintWriter().println(
+                        "V4 signature is invalid: " + e + " in " + arg);
+                return 1;
+            }
+        } else {
+            // Single-shot read from stdin.
+            metadata = "-" + metadata;
+        }
+
+        session.addFile(LOCATION_DATA_APP, name, sizeBytes,
+                metadata.getBytes(StandardCharsets.UTF_8), signature);
+        return 0;
+    }
+
+    private void processArgForLocalFile(String arg, PackageInstaller.Session session) {
+        final String inPath = arg;
+
+        final File file = new File(inPath);
+        final String name = file.getName();
+        final long size = file.length();
+        final byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
+
+        byte[] v4signatureBytes = null;
+        // Try to load the v4 signature file for the APK; it might not exist.
+        final String v4SignaturePath = inPath + V4Signature.EXT;
+        final ParcelFileDescriptor pfd = openFileForSystem(v4SignaturePath, "r");
+        if (pfd != null) {
+            try {
+                final V4Signature v4signature = V4Signature.readFrom(pfd);
+                v4signatureBytes = v4signature.toByteArray();
+            } catch (IOException ex) {
+                Slog.e(TAG, "V4 signature file exists but failed to be parsed.", ex);
+            } finally {
+                IoUtils.closeQuietly(pfd);
+            }
+        }
+
+        session.addFile(LOCATION_DATA_APP, name, size, metadata, v4signatureBytes);
     }
 
     private int doWriteSplits(int sessionId, ArrayList<String> splitPaths, long sessionSizeBytes,

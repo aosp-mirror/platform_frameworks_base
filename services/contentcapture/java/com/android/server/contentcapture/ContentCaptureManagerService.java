@@ -201,7 +201,7 @@ public final class ContentCaptureManagerService extends
     }
 
     @Override // from SystemService
-    public boolean isSupportedUser(TargetUser user) {
+    public boolean isUserSupported(TargetUser user) {
         return user.getUserInfo().isFull() || user.getUserInfo().isManagedProfile();
     }
 
@@ -998,6 +998,11 @@ public final class ContentCaptureManagerService extends
 
                     sendErrorSignal(mClientAdapterReference, serviceAdapterReference,
                             ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                } finally {
+                    synchronized (parentService.mLock) {
+                        parentService.mPackagesWithShareRequests
+                                .remove(mDataShareRequest.getPackageName());
+                    }
                 }
             });
 

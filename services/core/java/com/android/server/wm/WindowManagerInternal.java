@@ -120,6 +120,11 @@ public abstract class WindowManagerInternal {
         public void onAppTransitionCancelledLocked(int transit) {}
 
         /**
+         * Called when an app transition is timed out.
+         */
+        public void onAppTransitionTimeoutLocked() {}
+
+        /**
          * Called when an app transition gets started
          *
          * @param transit transition type indicating what kind of transition gets run, must be one

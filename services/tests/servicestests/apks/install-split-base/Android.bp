@@ -1,0 +1,6 @@
+android_test_helper_app {
+    name: "FrameworksServicesTests_install_split_base",
+    defaults: ["FrameworksServicesTests_apks_defaults"],
+
+    srcs: ["**/*.java"],
+}

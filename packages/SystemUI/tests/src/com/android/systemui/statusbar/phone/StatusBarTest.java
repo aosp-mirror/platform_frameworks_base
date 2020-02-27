@@ -50,6 +50,7 @@ import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -236,6 +237,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private LightsOutNotifController mLightsOutNotifController;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private DismissCallbackRegistry mDismissCallbackRegistry;
+    @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     @Mock private ScreenPinningRequest mScreenPinningRequest;
     @Mock private LockscreenLockIconController mLockscreenLockIconController;
     @Mock private StatusBarNotificationActivityStarter.Builder
@@ -245,6 +247,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private KeyguardDismissUtil mKeyguardDismissUtil;
     @Mock private ExtensionController mExtensionController;
     @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
+    @Mock private PhoneStatusBarPolicy mPhoneStatusBarPolicy;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
@@ -255,7 +258,8 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationFilter.class, mNotificationFilter);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
-        mPowerManager = new PowerManager(mContext, powerManagerService,
+        IThermalService thermalService = mock(IThermalService.class);
+        mPowerManager = new PowerManager(mContext, powerManagerService, thermalService,
                 Handler.createAsync(Looper.myLooper()));
 
         mNotificationInterruptionStateProvider =
@@ -397,7 +401,9 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardDismissUtil,
                 mExtensionController,
                 mUserInfoControllerImpl,
-                mDismissCallbackRegistry);
+                mPhoneStatusBarPolicy,
+                mDismissCallbackRegistry,
+                mStatusBarTouchableRegionManager);
 
         when(mNotificationShadeWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);

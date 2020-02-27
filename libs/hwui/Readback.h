@@ -47,7 +47,7 @@ public:
     /**
      * Copies the surface's most recently queued buffer into the provided bitmap.
      */
-    CopyResult copySurfaceInto(Surface& surface, const Rect& srcRect, SkBitmap* bitmap);
+    CopyResult copySurfaceInto(ANativeWindow* window, const Rect& srcRect, SkBitmap* bitmap);
 
     CopyResult copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap);
 

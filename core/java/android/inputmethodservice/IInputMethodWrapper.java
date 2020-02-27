@@ -19,7 +19,6 @@ package android.inputmethodservice;
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -29,7 +28,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.InputChannel;
-import android.view.autofill.AutofillId;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
@@ -46,6 +44,7 @@ import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.internal.view.InputConnectionWrapper;
 
 import java.io.FileDescriptor;
@@ -233,8 +232,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 return;
             case DO_CREATE_INLINE_SUGGESTIONS_REQUEST:
                 args = (SomeArgs) msg.obj;
-                inputMethod.onCreateInlineSuggestionsRequest((ComponentName) args.arg1,
-                        (AutofillId) args.arg2, (IInlineSuggestionsRequestCallback) args.arg3);
+                inputMethod.onCreateInlineSuggestionsRequest(
+                        (InlineSuggestionsRequestInfo) args.arg1,
+                        (IInlineSuggestionsRequestCallback) args.arg2);
                 return;
 
         }
@@ -279,11 +279,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void onCreateInlineSuggestionsRequest(ComponentName componentName, AutofillId autofillId,
+    public void onCreateInlineSuggestionsRequest(InlineSuggestionsRequestInfo requestInfo,
             IInlineSuggestionsRequestCallback cb) {
         mCaller.executeOrSendMessage(
-                mCaller.obtainMessageOOO(DO_CREATE_INLINE_SUGGESTIONS_REQUEST, componentName,
-                        autofillId, cb));
+                mCaller.obtainMessageOO(DO_CREATE_INLINE_SUGGESTIONS_REQUEST, requestInfo, cb));
     }
 
     @BinderThread

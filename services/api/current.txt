@@ -3,9 +3,9 @@ package com.android.permission.persistence {
 
   public interface RuntimePermissionsPersistence {
     method @NonNull public static com.android.permission.persistence.RuntimePermissionsPersistence createInstance();
-    method public void delete(@NonNull android.os.UserHandle);
-    method @Nullable public com.android.permission.persistence.RuntimePermissionsState read(@NonNull android.os.UserHandle);
-    method public void write(@NonNull com.android.permission.persistence.RuntimePermissionsState, @NonNull android.os.UserHandle);
+    method public void deleteAsUser(@NonNull android.os.UserHandle);
+    method @Nullable public com.android.permission.persistence.RuntimePermissionsState readAsUser(@NonNull android.os.UserHandle);
+    method public void writeAsUser(@NonNull com.android.permission.persistence.RuntimePermissionsState, @NonNull android.os.UserHandle);
   }
 
   public final class RuntimePermissionsState {
@@ -30,9 +30,9 @@ package com.android.role.persistence {
 
   public interface RolesPersistence {
     method @NonNull public static com.android.role.persistence.RolesPersistence createInstance();
-    method public void delete(@NonNull android.os.UserHandle);
-    method @Nullable public com.android.role.persistence.RolesState read(@NonNull android.os.UserHandle);
-    method public void write(@NonNull com.android.role.persistence.RolesState, @NonNull android.os.UserHandle);
+    method public void deleteAsUser(@NonNull android.os.UserHandle);
+    method @Nullable public com.android.role.persistence.RolesState readAsUser(@NonNull android.os.UserHandle);
+    method public void writeAsUser(@NonNull com.android.role.persistence.RolesState, @NonNull android.os.UserHandle);
   }
 
   public final class RolesState {
@@ -49,14 +49,15 @@ package com.android.server {
   public abstract class SystemService {
     ctor public SystemService(@NonNull android.content.Context);
     method @NonNull public final android.content.Context getContext();
-    method public boolean isSupportedUser(@NonNull com.android.server.SystemService.TargetUser);
+    method public boolean isUserSupported(@NonNull com.android.server.SystemService.TargetUser);
     method public void onBootPhase(int);
-    method public void onCleanupUser(@NonNull com.android.server.SystemService.TargetUser);
     method public abstract void onStart();
-    method public void onStartUser(@NonNull com.android.server.SystemService.TargetUser);
-    method public void onStopUser(@NonNull com.android.server.SystemService.TargetUser);
-    method public void onSwitchUser(@Nullable com.android.server.SystemService.TargetUser, @NonNull com.android.server.SystemService.TargetUser);
-    method public void onUnlockUser(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserStarting(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserStopped(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserStopping(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserSwitching(@Nullable com.android.server.SystemService.TargetUser, @NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserUnlocked(@NonNull com.android.server.SystemService.TargetUser);
+    method public void onUserUnlocking(@NonNull com.android.server.SystemService.TargetUser);
     method protected final void publishBinderService(@NonNull String, @NonNull android.os.IBinder);
     method protected final void publishBinderService(@NonNull String, @NonNull android.os.IBinder, boolean);
     field public static final int PHASE_ACTIVITY_MANAGER_READY = 550; // 0x226
@@ -70,6 +71,15 @@ package com.android.server {
 
   public static final class SystemService.TargetUser {
     method @NonNull public android.os.UserHandle getUserHandle();
+  }
+
+}
+
+package com.android.server.wifi {
+
+  public class SupplicantManager {
+    method public static void start();
+    method public static void stop();
   }
 
 }

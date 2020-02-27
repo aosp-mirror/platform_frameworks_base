@@ -84,7 +84,6 @@ public class VerificationActivity extends Activity {
         // retrieve data from calling intent
         Intent callingIntent = getIntent();
         Uri url = callingIntent.getData();
-        Bundle extras = callingIntent.getExtras();
 
         if (url != null) {
             sVerifiedUrl = url.toString();
@@ -96,7 +95,7 @@ public class VerificationActivity extends Activity {
             intent.setData(url);
         }
         intent.setAction(DynamicSystemClient.ACTION_START_INSTALL);
-        intent.putExtras(extras);
+        intent.putExtras(callingIntent);
 
         Log.d(TAG, "Starting Installation Service");
         startServiceAsUser(intent, UserHandle.SYSTEM);

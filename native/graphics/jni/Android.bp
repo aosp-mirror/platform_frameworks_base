@@ -37,6 +37,8 @@ cc_library_shared {
         "liblog",
     ],
 
+    header_libs: [ "libhwui_internal_headers" ],
+
     static_libs: ["libarect"],
 
     arch: {

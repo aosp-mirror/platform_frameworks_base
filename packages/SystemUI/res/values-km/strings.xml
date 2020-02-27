@@ -71,7 +71,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ពង្រីក​​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ទាញ​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"រូបថតអេក្រង់"</string>
-    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"បាន​បញ្ចូល​រូបភាព"</string>
+    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"បាន​ផ្ញើរូបភាព"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"បានរក្សាទុក​រូបថតអេក្រង់"</string>
@@ -80,11 +80,19 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"សាកល្បង​ថតរូបថត​អេក្រង់​ម្តងទៀត"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"មិនអាច​រក្សាទុក​រូបថតអេក្រង់​បានទេ ​ដោយសារ​ទំហំផ្ទុក​មានកម្រិតទាប"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ការថត​រូបអេក្រង់​មិនត្រូវ​បាន​អនុញ្ញាត​ដោយ​កម្មវិធី​នេះ ឬ​ស្ថាប័ន​របស់អ្នក"</string>
-    <string name="screenrecord_name" msgid="6286499308042305686">"ការថត​សកម្មភាព​អេក្រង់"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"កម្មវិធីថត​អេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
-    <string name="screenrecord_start_label" msgid="1539048263178882562">"ចាប់​ផ្តើមថត"</string>
-    <string name="screenrecord_mic_label" msgid="6134198080740031632">"ថត​ការបញ្ចូល​សំឡេង"</string>
-    <string name="screenrecord_taps_label" msgid="2518244240225925076">"បង្ហាញការចុច"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"ចាប់ផ្តើម​ថត​ឬ?"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"នៅពេល​កំពុងថត ប្រព័ន្ធ Android អាច​ថត​ព័ត៌មាន​រសើប​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែល​បានចាក់​នៅលើ​ឧបករណ៍​របស់អ្នក។ ព័ត៌មាននេះ​រួមមាន​ពាក្យសម្ងាត់ ព័ត៌មាន​អំពី​ការបង់ប្រាក់ រូបថត សារ និងសំឡេង។"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"ថត​សំឡេង"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"សំឡេង​ឧបករណ៍"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"សំឡេង​ពី​ឧបករណ៍​របស់អ្នក​ដូចជា តន្ត្រី ការហៅទូរសព្ទ និងសំឡេងរោទ៍​ជាដើម"</string>
+    <string name="screenrecord_mic_label" msgid="2111264835791332350">"មីក្រូហ្វូន"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"មីក្រូហ្វូន និង​សំឡេង​ឧបករណ៍"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"ចាប់ផ្ដើម"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"កំពុងថត​អេក្រង់"</string>
+    <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"កំពុងថត​អេក្រង់ និងសំឡេង"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"បង្ហាញ​ការប៉ះ​នៅលើ​អេក្រង់"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"ចុច ដើម្បីបញ្ឈប់"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ឈប់"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"ផ្អាក"</string>
@@ -97,6 +105,7 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"បានលុប​ការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"មានបញ្ហា​ក្នុងការ​លុបការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"មិនអាច​ទទួលបាន​ការអនុញ្ញាត​ទេ"</string>
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"មានបញ្ហា​ក្នុងការ​ចាប់ផ្ដើម​ថត​អេក្រង់"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"ជម្រើស​ផ្ទេរ​ឯកសារ​តាម​យូអេសប៊ី"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"ភ្ជាប់​ជា​កម្មវិធី​ចាក់​មេឌៀ (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"ភ្ជាប់​ជា​ម៉ាស៊ីន​ថត (PTP)"</string>
@@ -477,6 +486,7 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"កុំ​បង្ហាញ​ម្ដងទៀត"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"សម្អាត​ទាំងអស់"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"គ្រប់គ្រង"</string>
+    <string name="manage_notifications_history_text" msgid="57055985396576230">"ប្រវត្តិ"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"ការជូនដំណឹង​ស្ងាត់"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ការសន្ទនា"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"សម្អាត​ការជូនដំណឹង​ស្ងាត់ទាំងអស់"</string>
@@ -676,6 +686,10 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ជួយឱ្យ​អ្នក​ផ្តោតអារម្មណ៍ ដោយមិនឮសំឡេង ឬ​ការញ័រ។"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ធ្វើឱ្យ​អ្នក​ចាប់អារម្មណ៍​តាមរយៈ​សំឡេង ឬ​ការញ័រ។"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ធ្វើឱ្យអ្នក​ចាប់អារម្មណ៍​ដោយប្រើ​ផ្លូវកាត់​អណ្ដែត​សម្រាប់ខ្លឹមសារនេះ។"</string>
+    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
+    <skip />
+    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"មិនអាច​កំណត់​រចនាសម្ព័ន្ធ​ក្រុមការជូនដំណឹងនេះ​នៅទីនេះ​បានទេ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ការជូនដំណឹង​ជា​ប្រូកស៊ី"</string>
@@ -698,17 +712,18 @@
     <string name="notification_done" msgid="6215117625922713976">"រួចរាល់"</string>
     <string name="inline_undo" msgid="9026953267645116526">"ត្រឡប់វិញ"</string>
     <string name="demote" msgid="6225813324237153980">"សម្គាល់​ការជូន​ដំណឹង​នេះ​ថា​មិនមែនជា​ការសន្ទនា"</string>
-    <string name="notification_conversation_favorite" msgid="8252976467488182853">"សំណព្វ"</string>
-    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"ដក​ចេញ​ពី​សំណព្វ"</string>
-    <string name="notification_conversation_mute" msgid="477431709687199671">"បិទ​សំឡេង"</string>
-    <string name="notification_conversation_unmute" msgid="410885000669775294">"បើក​សំឡេង"</string>
-    <string name="notification_conversation_bubble" msgid="4598142032706190028">"បង្ហាញ​ជា​សារ​លេចឡើង"</string>
-    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"បិទ​សារ​លេចឡើង"</string>
+    <string name="notification_conversation_favorite" msgid="1905240206975921907">"ការសន្ទនា​សំខាន់"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"មិនមែនជា​ការសន្ទនា​សំខាន់​ទេ"</string>
+    <string name="notification_conversation_mute" msgid="268951550222925548">"បានបិទសំឡេង"</string>
+    <string name="notification_conversation_unmute" msgid="2692255619510896710">"បញ្ចេញ​សំឡេង"</string>
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"បង្ហាញ​ជា​សារ​លេចឡើង"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"លុប​សារលេចឡើង"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"បញ្ចូល​ទៅក្នុង​អេក្រង់​ដើម"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"ការគ្រប់គ្រង​ការជូន​ដំណឹង"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ជម្រើស​ផ្អាកការ​ជូនដំណឹង"</string>
-    <string name="notification_menu_snooze_action" msgid="8411152711279433989">"ផ្អាក"</string>
+    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"រំលឹក​ខ្ញុំ"</string>
+    <string name="notification_menu_settings_action" msgid="7085494017202764285">"ការកំណត់"</string>
     <string name="snooze_undo" msgid="60890935148417175">"មិន​ធ្វើវិញ"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"បាន​ផ្អាក​រយៈពេល <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
@@ -780,6 +795,7 @@
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"កម្មវិធីសន្សំសំចៃទិន្នន័យបានបិទ"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"បើក"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"បិទ"</string>
+    <string name="tile_unavailable" msgid="3095879009136616920">"មិនមាន"</string>
     <string name="nav_bar" msgid="4642708685386136807">"របាររុករក"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"ប្លង់"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"ប្រភេទ​ប៊ូតុង​ខាង​ឆ្វេង​បន្ថែម"</string>
@@ -965,4 +981,18 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"វិនដូ​ការពង្រីក"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"វិនដូគ្រប់គ្រង​​ការពង្រីក"</string>
     <string name="quick_controls_title" msgid="525285759614231333">"ការគ្រប់គ្រង​រហ័ស"</string>
+    <string name="controls_providers_title" msgid="8844124515157926071">"បញ្ចូល​ការគ្រប់គ្រង"</string>
+    <string name="controls_providers_subtitle" msgid="8187768950110836569">"ជ្រើសរើសកម្មវិធី​ដើម្បីបញ្ចូល​ការគ្រប់គ្រង"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
+      <item quantity="other">សំណព្វបច្ចុប្បន្ន <xliff:g id="NUMBER_1">%s</xliff:g>។</item>
+      <item quantity="one">សំណព្វបច្ចុប្បន្ន <xliff:g id="NUMBER_0">%s</xliff:g>។</item>
+    </plurals>
+    <string name="controls_favorite_default_title" msgid="967742178688938137">"ការគ្រប់គ្រង"</string>
+    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"ជ្រើសរើស​ការគ្រប់គ្រង​សម្រាប់ការចូលប្រើ​ប្រាស់រហ័ស"</string>
+    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
+    <skip />
+    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <skip />
 </resources>

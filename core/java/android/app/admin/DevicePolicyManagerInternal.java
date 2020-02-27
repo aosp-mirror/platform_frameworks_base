@@ -187,4 +187,22 @@ public abstract class DevicePolicyManagerInternal {
      * @hide
      */
     public abstract List<String> getAllCrossProfilePackages();
+
+    /**
+     * Sends the {@code intent} to the packages with cross profile capabilities.
+     *
+     * <p>This means the application must have the {@code crossProfile} property and the
+     * corresponding permissions, defined by
+     * {@link
+     * android.content.pm.CrossProfileAppsInternal#verifyPackageHasInteractAcrossProfilePermission}.
+     *
+     * <p>Note: This method doesn't modify {@code intent} but copies it before use.
+     *
+     * @param intent Template for the intent sent to the package.
+     * @param parentHandle Handle of the user that will receive the intents.
+     * @param requiresPermission If false, all packages with the {@code crossProfile} property
+     *                           will receive the intent.
+     */
+    public abstract void broadcastIntentToCrossProfileManifestReceiversAsUser(Intent intent,
+            UserHandle parentHandle, boolean requiresPermission);
 }

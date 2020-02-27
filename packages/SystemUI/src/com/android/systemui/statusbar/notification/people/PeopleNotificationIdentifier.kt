@@ -23,6 +23,7 @@ import javax.inject.Singleton
 
 interface PeopleNotificationIdentifier {
     fun isPeopleNotification(sbn: StatusBarNotification, ranking: Ranking): Boolean
+    fun isImportantPeopleNotification(sbn: StatusBarNotification, ranking: Ranking): Boolean
 }
 
 @Singleton
@@ -32,4 +33,7 @@ class PeopleNotificationIdentifierImpl @Inject constructor(
 
     override fun isPeopleNotification(sbn: StatusBarNotification, ranking: Ranking) =
             ranking.isConversation || personExtractor.isPersonNotification(sbn)
+
+    override fun isImportantPeopleNotification(sbn: StatusBarNotification, ranking: Ranking) =
+            isPeopleNotification(sbn, ranking) && ranking.channel.isImportantConversation
 }

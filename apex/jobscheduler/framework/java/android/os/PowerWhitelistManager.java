@@ -80,27 +80,22 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Add the specified package to the power save whitelist.
-     *
-     * @return true if the package was successfully added to the whitelist
+     * Add the specified package to the permanent power save whitelist.
      */
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
-    public boolean addToWhitelist(@NonNull String packageName) {
-        return addToWhitelist(Collections.singletonList(packageName)) == 1;
+    public void addToWhitelist(@NonNull String packageName) {
+        addToWhitelist(Collections.singletonList(packageName));
     }
 
     /**
-     * Add the specified packages to the power save whitelist.
-     *
-     * @return the number of packages that were successfully added to the whitelist
+     * Add the specified packages to the permanent power save whitelist.
      */
     @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
-    public int addToWhitelist(@NonNull List<String> packageNames) {
+    public void addToWhitelist(@NonNull List<String> packageNames) {
         try {
-            return mService.addPowerSaveWhitelistApps(packageNames);
+            mService.addPowerSaveWhitelistApps(packageNames);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
-            return 0;
         }
     }
 

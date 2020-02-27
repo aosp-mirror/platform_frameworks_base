@@ -25,6 +25,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Handler;
@@ -1299,6 +1300,31 @@ public final class BluetoothDevice implements Parcelable {
         return false;
     }
 
+    private static final String BLUETOOTH_BONDING_CACHE_PROPERTY =
+            "cache_key.bluetooth.get_bond_state";
+    private final PropertyInvalidatedCache<BluetoothDevice, Integer> mBluetoothBondCache =
+            new PropertyInvalidatedCache<BluetoothDevice, Integer>(
+                8, BLUETOOTH_BONDING_CACHE_PROPERTY) {
+                @Override
+                protected Integer recompute(BluetoothDevice query) {
+                    try {
+                        return sService.getBondState(query);
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                }
+            };
+
+    /** @hide */
+    public void disableBluetoothGetBondStateCache() {
+        mBluetoothBondCache.disableLocal();
+    }
+
+    /** @hide */
+    public static void invalidateBluetoothGetBondStateCache() {
+        PropertyInvalidatedCache.invalidateCache(BLUETOOTH_BONDING_CACHE_PROPERTY);
+    }
+
     /**
      * Get the bond state of the remote device.
      * <p>Possible values for the bond state are:
@@ -1316,9 +1342,13 @@ public final class BluetoothDevice implements Parcelable {
             return BOND_NONE;
         }
         try {
-            return service.getBondState(this);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
+            return mBluetoothBondCache.query(this);
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof RemoteException) {
+                Log.e(TAG, "", e);
+            } else {
+                throw e;
+            }
         }
         return BOND_NONE;
     }

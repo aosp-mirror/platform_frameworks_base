@@ -18,14 +18,16 @@ package com.android.server.location;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.HubAppInfo;
-import android.hardware.contexthub.V1_0.IContexthub;
 import android.hardware.contexthub.V1_0.IContexthubCallback;
 import android.hardware.contexthub.V1_0.Result;
 import android.hardware.contexthub.V1_0.TransactionResult;
+import android.hardware.contexthub.V1_1.Setting;
+import android.hardware.contexthub.V1_1.SettingValue;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
 import android.hardware.location.ContextHubTransaction;
@@ -40,8 +42,11 @@ import android.hardware.location.NanoAppFilter;
 import android.hardware.location.NanoAppInstanceInfo;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
+import android.location.LocationManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
@@ -56,7 +61,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 /**
  * @hide
@@ -92,7 +96,7 @@ public class ContextHubService extends IContextHubService.Stub {
             new RemoteCallbackList<>();
 
     // Proxy object to communicate with the Context Hub HAL
-    private final IContexthub mContextHubProxy;
+    private final IContextHubWrapper mContextHubWrapper;
 
     // The manager for transaction queue
     private final ContextHubTransactionManager mTransactionManager;
@@ -145,8 +149,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public ContextHubService(Context context) {
         mContext = context;
 
-        mContextHubProxy = getContextHubProxy();
-        if (mContextHubProxy == null) {
+        mContextHubWrapper = getContextHubWrapper();
+        if (mContextHubWrapper == null) {
             mTransactionManager = null;
             mClientManager = null;
             mDefaultClientMap = Collections.emptyMap();
@@ -155,13 +159,13 @@ public class ContextHubService extends IContextHubService.Stub {
             return;
         }
 
-        mClientManager = new ContextHubClientManager(mContext, mContextHubProxy);
+        mClientManager = new ContextHubClientManager(mContext, mContextHubWrapper.getHub());
         mTransactionManager = new ContextHubTransactionManager(
-                mContextHubProxy, mClientManager, mNanoAppStateManager);
+                mContextHubWrapper.getHub(), mClientManager, mNanoAppStateManager);
 
         List<ContextHub> hubList;
         try {
-            hubList = mContextHubProxy.getHubs();
+            hubList = mContextHubWrapper.getHub().getHubs();
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException while getting Context Hub info", e);
             hubList = Collections.emptyList();
@@ -178,7 +182,7 @@ public class ContextHubService extends IContextHubService.Stub {
             defaultClientMap.put(contextHubId, client);
 
             try {
-                mContextHubProxy.registerCallback(
+                mContextHubWrapper.getHub().registerCallback(
                         contextHubId, new ContextHubServiceCallback(contextHubId));
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while registering service callback for hub (ID = "
@@ -190,6 +194,19 @@ public class ContextHubService extends IContextHubService.Stub {
             queryNanoAppsInternal(contextHubId);
         }
         mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
+
+        if (mContextHubWrapper.supportsSettingNotifications()) {
+            sendLocationSettingUpdate();
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.LOCATION_MODE),
+                    true /* notifyForDescendants */,
+                    new ContentObserver(null /* handler */) {
+                        @Override
+                        public void onChange(boolean selfChange) {
+                            sendLocationSettingUpdate();
+                        }
+                    }, UserHandle.USER_ALL);
+        }
     }
 
     /**
@@ -239,19 +256,15 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
-     * @return the IContexthub proxy interface
+     * @return the IContextHubWrapper interface
      */
-    private IContexthub getContextHubProxy() {
-        IContexthub proxy = null;
-        try {
-            proxy = IContexthub.getService(true /* retry */);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while attaching to Context Hub HAL proxy", e);
-        } catch (NoSuchElementException e) {
-            Log.i(TAG, "Context Hub HAL service not found");
+    private IContextHubWrapper getContextHubWrapper() {
+        IContextHubWrapper wrapper = IContextHubWrapper.maybeConnectTo1_1();
+        if (wrapper == null) {
+            wrapper = IContextHubWrapper.maybeConnectTo1_0();
         }
 
-        return proxy;
+        return wrapper;
     }
 
     @Override
@@ -355,7 +368,7 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public int loadNanoApp(int contextHubHandle, NanoApp nanoApp) throws RemoteException {
         checkPermissions();
-        if (mContextHubProxy == null) {
+        if (mContextHubWrapper == null) {
             return -1;
         }
         if (!isValidContextHubId(contextHubHandle)) {
@@ -382,7 +395,7 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public int unloadNanoApp(int nanoAppHandle) throws RemoteException {
         checkPermissions();
-        if (mContextHubProxy == null) {
+        if (mContextHubWrapper == null) {
             return -1;
         }
 
@@ -444,7 +457,7 @@ public class ContextHubService extends IContextHubService.Stub {
      * @throws IllegalStateException if the transaction queue is full
      */
     private int queryNanoAppsInternal(int contextHubId) {
-        if (mContextHubProxy == null) {
+        if (mContextHubWrapper == null) {
             return Result.UNKNOWN_FAILURE;
         }
 
@@ -461,7 +474,7 @@ public class ContextHubService extends IContextHubService.Stub {
     public int sendMessage(int contextHubHandle, int nanoAppHandle, ContextHubMessage msg)
             throws RemoteException {
         checkPermissions();
-        if (mContextHubProxy == null) {
+        if (mContextHubWrapper == null) {
             return -1;
         }
         if (msg == null) {
@@ -563,6 +576,8 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     private void handleHubEventCallback(int contextHubId, int eventType) {
         if (eventType == AsyncEventType.RESTARTED) {
+            sendLocationSettingUpdate();
+
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
 
@@ -870,12 +885,12 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param callback        the client transaction callback interface
      * @param transactionType the type of the transaction
      *
-     * @return {@code true} if mContextHubProxy and contextHubId is valid, {@code false} otherwise
+     * @return {@code true} if mContextHubWrapper and contextHubId is valid, {@code false} otherwise
      */
     private boolean checkHalProxyAndContextHubId(
             int contextHubId, IContextHubTransactionCallback callback,
             @ContextHubTransaction.Type int transactionType) {
-        if (mContextHubProxy == null) {
+        if (mContextHubWrapper == null) {
             try {
                 callback.onTransactionComplete(
                         ContextHubTransaction.RESULT_FAILED_HAL_UNAVAILABLE);
@@ -897,5 +912,16 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         return true;
+    }
+
+    /**
+     * Obtains the latest location setting value and notifies the Contexthub.
+     */
+    private void sendLocationSettingUpdate() {
+        boolean enabled = mContext.getSystemService(LocationManager.class)
+                .isLocationEnabledForUser(UserHandle.CURRENT);
+
+        mContextHubWrapper.onSettingChanged(Setting.LOCATION,
+                enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
     }
 }

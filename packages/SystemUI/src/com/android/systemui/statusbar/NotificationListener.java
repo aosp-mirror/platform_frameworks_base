@@ -31,20 +31,17 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * This class handles listening to notification updates and passing them along to
  * NotificationPresenter to be displayed to the user.
  */
 @SuppressLint("OverrideAbstract")
-@Singleton
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
 
@@ -54,7 +51,9 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private final List<NotificationHandler> mNotificationHandlers = new ArrayList<>();
     private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
 
-    @Inject
+    /**
+     * Injected constructor. See {@link StatusBarModule}.
+     */
     public NotificationListener(
             Context context,
             NotificationManager notificationManager,

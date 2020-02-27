@@ -31,6 +31,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
@@ -65,11 +66,17 @@ private const val DEBUG = true
 open class BroadcastDispatcher @Inject constructor (
     private val context: Context,
     @Main private val mainHandler: Handler,
-    @Background private val bgLooper: Looper
+    @Background private val bgLooper: Looper,
+    dumpManager: DumpManager
 ) : Dumpable {
 
     // Only modify in BG thread
     private val receiversByUser = SparseArray<UserBroadcastDispatcher>(20)
+
+    init {
+        // TODO: Don't do this in the constructor
+        dumpManager.registerDumpable(javaClass.name, this)
+    }
 
     /**
      * Register a receiver for broadcast with the dispatcher
@@ -112,10 +119,10 @@ open class BroadcastDispatcher @Inject constructor (
      */
     @JvmOverloads
     fun registerReceiver(
-            receiver: BroadcastReceiver,
-            filter: IntentFilter,
-            executor: Executor? = context.mainExecutor,
-            user: UserHandle = context.user
+        receiver: BroadcastReceiver,
+        filter: IntentFilter,
+        executor: Executor? = context.mainExecutor,
+        user: UserHandle = context.user
     ) {
         checkFilter(filter)
         this.handler

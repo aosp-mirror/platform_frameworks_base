@@ -27,9 +27,7 @@ import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 
 import android.annotation.Nullable;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -40,6 +38,8 @@ import android.util.Slog;
 
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 
 import dalvik.system.VMRuntime;
 
@@ -131,11 +131,11 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     }
 
     @Override
-    public NativeLibraryPaths getNativeLibraryPaths(
-            AndroidPackage pkg, File appLib32InstallDir) {
-        return getNativeLibraryPaths(new Abis(pkg), appLib32InstallDir, pkg.getCodePath(),
-                pkg.getBaseCodePath(), pkg.isSystemApp(),
-                pkg.isUpdatedSystemApp());
+    public NativeLibraryPaths getNativeLibraryPaths(AndroidPackage pkg, PackageSetting pkgSetting,
+            File appLib32InstallDir) {
+        return getNativeLibraryPaths(new Abis(pkg, pkgSetting), appLib32InstallDir,
+                pkg.getCodePath(), pkg.getBaseCodePath(), pkg.isSystem(),
+                pkgSetting.getPkgState().isUpdatedSystemApp());
     }
 
     private static NativeLibraryPaths getNativeLibraryPaths(final Abis abis,
@@ -273,7 +273,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             // ABI that's higher on the list, i.e, a device that's configured to prefer
             // 64 bit apps will see a 64 bit primary ABI,
 
-            if ((pkg.getFlags() & ApplicationInfo.FLAG_MULTIARCH) == 0) {
+            if (!pkg.isMultiArch()) {
                 Slog.e(PackageManagerService.TAG,
                         "Package " + pkg + " has multiple bundled libs, but is not multiarch.");
             }
@@ -293,18 +293,21 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     }
 
     @Override
-    public Pair<Abis, NativeLibraryPaths> derivePackageAbi(
-            AndroidPackage pkg, String cpuAbiOverride, boolean extractLibs)
+    public Pair<Abis, NativeLibraryPaths> derivePackageAbi(AndroidPackage pkg,
+            boolean isUpdatedSystemApp, String cpuAbiOverride, boolean extractLibs)
             throws PackageManagerException {
         // Give ourselves some initial paths; we'll come back for another
         // pass once we've determined ABI below.
-        final NativeLibraryPaths initialLibraryPaths = getNativeLibraryPaths(new Abis(pkg),
+        String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(pkg);
+        String pkgRawSecondaryCpuAbi = AndroidPackageUtils.getRawSecondaryCpuAbi(pkg);
+        final NativeLibraryPaths initialLibraryPaths = getNativeLibraryPaths(
+                new Abis(pkgRawPrimaryCpuAbi, pkgRawSecondaryCpuAbi),
                 PackageManagerService.sAppLib32InstallDir, pkg.getCodePath(),
-                pkg.getBaseCodePath(), pkg.isSystemApp(),
-                pkg.isUpdatedSystemApp());
+                pkg.getBaseCodePath(), pkg.isSystem(),
+                isUpdatedSystemApp);
 
         // We shouldn't attempt to extract libs from system app when it was not updated.
-        if (PackageManagerService.isSystemApp(pkg) && !pkg.isUpdatedSystemApp()) {
+        if (pkg.isSystem() && !isUpdatedSystemApp) {
             extractLibs = false;
         }
 
@@ -317,7 +320,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
         NativeLibraryHelper.Handle handle = null;
         try {
-            handle = NativeLibraryHelper.Handle.create(pkg);
+            handle = AndroidPackageUtils.createNativeLibraryHandle(pkg);
             // TODO(multiArch): This can be null for apps that didn't go through the
             // usual installation process. We can calculate it again, like we
             // do during install time.
@@ -329,33 +332,15 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             // Null out the abis so that they can be recalculated.
             primaryCpuAbi = null;
             secondaryCpuAbi = null;
-            if ((pkg.getFlags() & ApplicationInfo.FLAG_MULTIARCH) != 0) {
-                // Warn if we've set an abiOverride for multi-lib packages..
-                // By definition, we need to copy both 32 and 64 bit libraries for
-                // such packages.
-                if (pkg.getCpuAbiOverride() != null
-                        && !NativeLibraryHelper.CLEAR_ABI_OVERRIDE.equals(
-                        pkg.getCpuAbiOverride())) {
-                    Slog.w(PackageManagerService.TAG,
-                            "Ignoring abiOverride for multi arch application.");
-                }
-
+            if (pkg.isMultiArch()) {
                 int abi32 = PackageManager.NO_NATIVE_LIBRARIES;
                 int abi64 = PackageManager.NO_NATIVE_LIBRARIES;
                 if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
                     if (extractLibs) {
-                        if (onIncremental) {
-                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER,
-                                    "incrementalNativeBinaries");
-                            abi32 = NativeLibraryHelper.configureNativeBinariesForSupportedAbi(pkg,
-                                    handle, nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
-                                    useIsaSpecificSubdirs);
-                        } else {
-                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
-                            abi32 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                    nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
-                                    useIsaSpecificSubdirs);
-                        }
+                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
+                        abi32 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
+                                nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
+                                useIsaSpecificSubdirs, onIncremental);
                     } else {
                         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                         abi32 = NativeLibraryHelper.findSupportedAbi(
@@ -365,7 +350,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
                 }
 
                 // Shared library native code should be in the APK zip aligned
-                if (abi32 >= 0 && pkg.isLibrary() && extractLibs) {
+                if (abi32 >= 0 && AndroidPackageUtils.isLibrary(pkg) && extractLibs) {
                     throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                             "Shared library native lib extraction not supported");
                 }
@@ -375,18 +360,10 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
                 if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
                     if (extractLibs) {
-                        if (onIncremental) {
-                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER,
-                                    "incrementalNativeBinaries");
-                            abi64 = NativeLibraryHelper.configureNativeBinariesForSupportedAbi(pkg,
-                                    handle, nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
-                                    useIsaSpecificSubdirs);
-                        } else {
-                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
-                            abi64 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                    nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
-                                    useIsaSpecificSubdirs);
-                        }
+                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
+                        abi64 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
+                                nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
+                                useIsaSpecificSubdirs, onIncremental);
                     } else {
                         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                         abi64 = NativeLibraryHelper.findSupportedAbi(
@@ -400,7 +377,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
                 if (abi64 >= 0) {
                     // Shared library native libs should be in the APK zip aligned
-                    if (extractLibs && pkg.isLibrary()) {
+                    if (extractLibs && AndroidPackageUtils.isLibrary(pkg)) {
                         throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                                 "Shared library native lib extraction not supported");
                     }
@@ -437,15 +414,9 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
                 final int copyRet;
                 if (extractLibs) {
-                    if (onIncremental) {
-                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "incrementalNativeBinaries");
-                        copyRet = NativeLibraryHelper.configureNativeBinariesForSupportedAbi(pkg,
-                                handle, nativeLibraryRoot, abiList, useIsaSpecificSubdirs);
-                    } else {
-                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
-                        copyRet = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                nativeLibraryRoot, abiList, useIsaSpecificSubdirs);
-                    }
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
+                    copyRet = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
+                            nativeLibraryRoot, abiList, useIsaSpecificSubdirs, onIncremental);
                 } else {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                     copyRet = NativeLibraryHelper.findSupportedAbi(handle, abiList);
@@ -459,7 +430,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
                 if (copyRet >= 0) {
                     // Shared libraries that have native libs must be multi-architecture
-                    if (pkg.isLibrary()) {
+                    if (AndroidPackageUtils.isLibrary(pkg)) {
                         throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                                 "Shared library with native libs must be multiarch");
                     }
@@ -483,9 +454,8 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         final Abis abis = new Abis(primaryCpuAbi, secondaryCpuAbi);
         return new Pair<>(abis,
                 getNativeLibraryPaths(abis, PackageManagerService.sAppLib32InstallDir,
-                        pkg.getCodePath(), pkg.getBaseCodePath(),
-                        pkg.isSystemApp(),
-                        pkg.isUpdatedSystemApp()));
+                        pkg.getCodePath(), pkg.getBaseCodePath(), pkg.isSystem(),
+                        isUpdatedSystemApp));
     }
 
     /**
@@ -506,9 +476,11 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     public String getAdjustedAbiForSharedUser(
             Set<PackageSetting> packagesForUser, AndroidPackage scannedPackage) {
         String requiredInstructionSet = null;
-        if (scannedPackage != null && scannedPackage.getPrimaryCpuAbi() != null) {
-            requiredInstructionSet = VMRuntime.getInstructionSet(
-                    scannedPackage.getPrimaryCpuAbi());
+        if (scannedPackage != null) {
+            String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(scannedPackage);
+            if (pkgRawPrimaryCpuAbi != null) {
+                requiredInstructionSet = VMRuntime.getInstructionSet(pkgRawPrimaryCpuAbi);
+            }
         }
 
         PackageSetting requirer = null;
@@ -555,7 +527,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         } else {
             // requirer == null implies that we're updating all ABIs in the set to
             // match scannedPackage.
-            adjustedAbi = scannedPackage.getPrimaryCpuAbi();
+            adjustedAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(scannedPackage);
         }
         return adjustedAbi;
     }

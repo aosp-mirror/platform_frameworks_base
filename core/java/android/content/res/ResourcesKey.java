@@ -54,7 +54,6 @@ public final class ResourcesKey {
 
     private final int mHash;
 
-    @UnsupportedAppUsage
     public ResourcesKey(@Nullable String resDir,
                         @Nullable String[] splitResDirs,
                         @Nullable String[] overlayDirs,
@@ -83,6 +82,18 @@ public final class ResourcesKey {
         hash = 31 * hash + Objects.hashCode(mCompatInfo);
         hash = 31 * hash + Arrays.hashCode(mLoaders);
         mHash = hash;
+    }
+
+    @UnsupportedAppUsage
+    public ResourcesKey(@Nullable String resDir,
+            @Nullable String[] splitResDirs,
+            @Nullable String[] overlayDirs,
+            @Nullable String[] libDirs,
+            int displayId,
+            @Nullable Configuration overrideConfig,
+            @Nullable CompatibilityInfo compatInfo) {
+        this(resDir, splitResDirs, overlayDirs, libDirs, displayId, overrideConfig, compatInfo,
+                null);
     }
 
     public boolean hasOverrideConfiguration() {

@@ -16,15 +16,18 @@
 
 package android.util;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.LongObjPredicate;
 
 import libcore.util.EmptyArray;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * SparseArray mapping longs to Objects.  Unlike a normal array of Objects,
@@ -143,6 +146,18 @@ public class LongSparseArray<E> implements Cloneable {
      */
     public void remove(long key) {
         delete(key);
+    }
+
+    /** @hide */
+    @SuppressWarnings("unchecked")
+    public void removeIf(@NonNull LongObjPredicate<? super E> filter) {
+        Objects.requireNonNull(filter);
+        for (int i = 0; i < mSize; ++i) {
+            if (mValues[i] != DELETED && filter.test(mKeys[i], (E) mValues[i])) {
+                mValues[i] = DELETED;
+                mGarbage = true;
+            }
+        }
     }
 
     /**

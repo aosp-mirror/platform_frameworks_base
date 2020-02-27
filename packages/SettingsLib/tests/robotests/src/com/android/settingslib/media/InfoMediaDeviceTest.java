@@ -18,7 +18,6 @@ package com.android.settingslib.media;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -46,7 +45,6 @@ public class InfoMediaDeviceTest {
     private MediaRouter2Manager mRouterManager;
     @Mock
     private MediaRoute2Info mRouteInfo;
-
 
     private Context mContext;
     private InfoMediaDevice mInfoMediaDevice;
@@ -87,12 +85,5 @@ public class InfoMediaDeviceTest {
         when(mRouteInfo.getId()).thenReturn(TEST_ID);
 
         assertThat(mInfoMediaDevice.getId()).isEqualTo(TEST_ID);
-    }
-
-    @Test
-    public void connect_shouldSelectRoute() {
-        mInfoMediaDevice.connect();
-
-        verify(mRouterManager).selectRoute(TEST_PACKAGE_NAME, mRouteInfo);
     }
 }

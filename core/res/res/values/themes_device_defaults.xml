@@ -1679,6 +1679,15 @@ easier.
         <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
         <item name="navigationBarColor">@android:color/transparent</item>
+        <item name="tabWidgetStyle">@style/Widget.DeviceDefault.Resolver.TabWidget</item>
+    </style>
+
+    <style name="Widget.DeviceDefault.Resolver.TabWidget" parent="Widget.DeviceDefault.TabWidget">
+        <item name="tabLayout">@layout/tab_indicator_resolver</item>
+    </style>
+
+    <style name="Widget.Material.Resolver.Tab" parent="Widget.Material.Tab">
+        <item name="background">@drawable/tab_indicator_resolver</item>
     </style>
 
     <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">

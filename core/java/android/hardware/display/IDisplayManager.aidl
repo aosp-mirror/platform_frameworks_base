@@ -115,7 +115,7 @@ interface IDisplayManager {
     boolean isMinimalPostProcessingRequested(int displayId);
 
     // Temporarily sets the display brightness.
-    void setTemporaryBrightness(int brightness);
+    void setTemporaryBrightness(float brightness);
 
     // Temporarily sets the auto brightness adjustment factor.
     void setTemporaryAutoBrightnessAdjustment(float adjustment);

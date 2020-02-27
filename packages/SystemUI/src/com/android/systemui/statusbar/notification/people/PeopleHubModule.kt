@@ -24,8 +24,8 @@ abstract class PeopleHubModule {
 
     @Binds
     abstract fun peopleHubSectionFooterViewAdapter(
-        impl: PeopleHubSectionFooterViewAdapterImpl
-    ): PeopleHubSectionFooterViewAdapter
+        impl: PeopleHubViewAdapterImpl
+    ): PeopleHubViewAdapter
 
     @Binds
     abstract fun peopleHubDataSource(impl: PeopleHubDataSourceImpl): DataSource<PeopleHubModel>

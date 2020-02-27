@@ -1821,13 +1821,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private ViewRootImpl getViewRootImpl() {
-        if (mDecor != null) {
-            ViewRootImpl viewRootImpl = mDecor.getViewRootImpl();
-            if (viewRootImpl != null) {
-                return viewRootImpl;
-            }
+        ViewRootImpl viewRootImpl = getViewRootImplOrNull();
+        if (viewRootImpl != null) {
+            return viewRootImpl;
         }
         throw new IllegalStateException("view not added");
+    }
+
+    private ViewRootImpl getViewRootImplOrNull() {
+        if (mDecor == null) {
+            return null;
+        }
+        return mDecor.getViewRootImpl();
     }
 
     /**
@@ -3900,7 +3905,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setDecorFitsSystemWindows(boolean decorFitsSystemWindows) {
-        ViewRootImpl impl = getViewRootImpl();
+        ViewRootImpl impl = getViewRootImplOrNull();
         OnContentApplyWindowInsetsListener listener = decorFitsSystemWindows
                 ? createDefaultContentWindowInsetsListener()
                 : null;

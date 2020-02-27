@@ -24,7 +24,8 @@ import android.util.Log;
 /**
  * Implementation of a handler for {@link IGnssStatusListener}.
  */
-public abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGnssStatusListener> {
+public abstract class GnssStatusListenerHelper extends
+        RemoteListenerHelper<Void, IGnssStatusListener> {
     private static final String TAG = "GnssStatusListenerHelper";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -75,7 +76,7 @@ public abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGns
             final float[] basebandCn0s) {
         foreach((IGnssStatusListener listener, CallerIdentity callerIdentity) -> {
             if (!hasPermission(mContext, callerIdentity)) {
-                logPermissionDisabledEventNotReported(TAG, callerIdentity.mPackageName,
+                logPermissionDisabledEventNotReported(TAG, callerIdentity.packageName,
                         "GNSS status");
                 return;
             }
@@ -87,7 +88,7 @@ public abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGns
     public void onNmeaReceived(final long timestamp, final String nmea) {
         foreach((IGnssStatusListener listener, CallerIdentity callerIdentity) -> {
             if (!hasPermission(mContext, callerIdentity)) {
-                logPermissionDisabledEventNotReported(TAG, callerIdentity.mPackageName, "NMEA");
+                logPermissionDisabledEventNotReported(TAG, callerIdentity.packageName, "NMEA");
                 return;
             }
             listener.onNmeaReceived(timestamp, nmea);

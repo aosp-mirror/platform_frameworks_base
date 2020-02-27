@@ -36,12 +36,28 @@ public class Event {
     public static final String COMMAND_DELAY = "delay";
     public static final String COMMAND_REPORT = "report";
 
+    // These constants come from "include/uapi/linux/input.h" in the kernel
+    enum Bus {
+        USB(0x03), BLUETOOTH(0x05);
+
+        Bus(int value) {
+            mValue = value;
+        }
+
+        int getValue() {
+            return mValue;
+        }
+
+        private int mValue;
+    }
+
     private int mId;
     private String mCommand;
     private String mName;
     private byte[] mDescriptor;
     private int mVid;
     private int mPid;
+    private Bus mBus;
     private byte[] mReport;
     private SparseArray<byte[]> mFeatureReports;
     private Map<ByteBuffer, byte[]> mOutputs;
@@ -71,6 +87,10 @@ public class Event {
         return mPid;
     }
 
+    public int getBus() {
+        return mBus.getValue();
+    }
+
     public byte[] getReport() {
         return mReport;
     }
@@ -94,6 +114,7 @@ public class Event {
             + ", descriptor=" + Arrays.toString(mDescriptor)
             + ", vid=" + mVid
             + ", pid=" + mPid
+            + ", bus=" + mBus
             + ", report=" + Arrays.toString(mReport)
             + ", feature_reports=" + mFeatureReports.toString()
             + ", outputs=" + mOutputs.toString()
@@ -142,6 +163,10 @@ public class Event {
 
         public void setPid(int pid) {
             mEvent.mPid = pid;
+        }
+
+        public void setBus(Bus bus) {
+            mEvent.mBus = bus;
         }
 
         public void setDuration(int duration) {
@@ -206,6 +231,9 @@ public class Event {
                             case "pid":
                                 eb.setPid(readInt());
                                 break;
+                            case "bus":
+                                eb.setBus(readBus());
+                                break;
                             case "report":
                                 eb.setReport(readData());
                                 break;
@@ -262,6 +290,11 @@ public class Event {
         private int readInt() throws IOException {
             String val = mReader.nextString();
             return Integer.decode(val);
+        }
+
+        private Bus readBus() throws IOException {
+            String val = mReader.nextString();
+            return Bus.valueOf(val.toUpperCase());
         }
 
         private SparseArray<byte[]> readFeatureReports()

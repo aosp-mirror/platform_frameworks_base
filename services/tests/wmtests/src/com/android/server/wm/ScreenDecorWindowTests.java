@@ -60,6 +60,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
@@ -77,6 +78,8 @@ import java.util.function.BooleanSupplier;
  */
 // TODO: Add test for FLAG_FULLSCREEN which hides the status bar and also other flags.
 // TODO: Test non-Activity windows.
+@FlakyTest(detail = "TODO (b/145242835): Re-enable once type mapping is implemented for "
+        + "PRIVATE_FLAG_IS_SCREEN_DECOR")
 @SmallTest
 @Presubmit
 public class ScreenDecorWindowTests {

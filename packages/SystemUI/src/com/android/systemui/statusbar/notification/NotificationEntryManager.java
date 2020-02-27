@@ -47,10 +47,9 @@ import com.android.systemui.statusbar.notification.collection.NotificationRankin
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -63,9 +62,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -94,7 +90,6 @@ import dagger.Lazy;
  * aware of
  * @see #getActiveNotificationsForCurrentUser() to see every notification that the current user owns
  */
-@Singleton
 public class NotificationEntryManager implements
         CommonNotifCollection,
         Dumpable,
@@ -181,7 +176,9 @@ public class NotificationEntryManager implements
         }
     }
 
-    @Inject
+    /**
+     * Injected constructor. See {@link NotificationsModule}.
+     */
     public NotificationEntryManager(
             NotificationEntryManagerLogger logger,
             NotificationGroupManager groupManager,
@@ -231,9 +228,7 @@ public class NotificationEntryManager implements
         mRemoveInterceptors.remove(interceptor);
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationListContainer listContainer,
-            HeadsUpManager headsUpManager) {
+    public void setUpWithPresenter(NotificationPresenter presenter) {
         mPresenter = presenter;
     }
 
@@ -290,6 +285,9 @@ public class NotificationEntryManager implements
             NotificationEntry entry = mPendingNotifications.get(key);
             entry.abortTask();
             mPendingNotifications.remove(key);
+            for (NotifCollectionListener listener : mNotifCollectionListeners) {
+                listener.onEntryCleanUp(entry);
+            }
             mLogger.logInflationAborted(key, "pending", reason);
         }
         NotificationEntry addedEntry = getActiveNotificationUnfiltered(key);

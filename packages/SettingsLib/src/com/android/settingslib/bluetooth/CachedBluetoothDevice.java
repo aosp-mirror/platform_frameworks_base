@@ -41,7 +41,6 @@ import com.android.settingslib.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -71,10 +70,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     short mRssi;
     // mProfiles and mRemovedProfiles does not do swap() between main and sub device. It is
     // because current sub device is only for HearingAid and its profile is the same.
-    private final List<LocalBluetoothProfile> mProfiles = new ArrayList<>();
+    private final Collection<LocalBluetoothProfile> mProfiles = new CopyOnWriteArrayList<>();
 
     // List of profiles that were previously in mProfiles, but have been removed
-    private final List<LocalBluetoothProfile> mRemovedProfiles = new ArrayList<>();
+    private final Collection<LocalBluetoothProfile> mRemovedProfiles = new CopyOnWriteArrayList<>();
 
     // Device supports PANU but not NAP: remove PanProfile after device disconnects from NAP
     private boolean mLocalNapRoleConnected;
@@ -717,7 +716,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public List<LocalBluetoothProfile> getProfiles() {
-        return Collections.unmodifiableList(mProfiles);
+        return new ArrayList<>(mProfiles);
     }
 
     public List<LocalBluetoothProfile> getConnectableProfiles() {
@@ -734,7 +733,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public List<LocalBluetoothProfile> getRemovedProfiles() {
-        return mRemovedProfiles;
+        return new ArrayList<>(mRemovedProfiles);
     }
 
     public void registerCallback(Callback callback) {

@@ -47,8 +47,8 @@ filegroup {
         // framework-wifi.jar. This is not a good idea, should move WifiNetworkScoreCache
         // to a separate package.
         "java/android/net/wifi/WifiNetworkScoreCache.java",
-        "java/android/net/wifi/WifiOemConfigStoreMigrationHook.java",
-        "java/android/net/wifi/wificond/*.java",
+        "java/android/net/wifi/WifiMigration.java",
+        "java/android/net/wifi/nl80211/*.java",
         ":libwificond_ipc_aidl",
     ],
 }
@@ -72,8 +72,7 @@ test_access_hidden_api_whitelist = [
 // classes before they are renamed.
 java_library {
     name: "framework-wifi-pre-jarjar",
-    // TODO(b/146757305): sdk_version should be "module_lib_current"
-    sdk_version: "core_current",
+    sdk_version: "module_current",
     static_libs: [
         "framework-wifi-util-lib",
         "android.hardware.wifi-V1.0-java-constants",
@@ -83,12 +82,10 @@ java_library {
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
         "unsupportedappusage-annotation", // for dalvik.annotation.compat.UnsupportedAppUsage
         "framework-telephony-stubs",
-        // TODO(b/146757305): should be unnecessary once
-        // sdk_version="module_lib_current"
-        "android_system_stubs_current",
     ],
     srcs: [
         ":framework-wifi-updatable-sources",
+        ":framework-wifi-util-lib-aidls",
     ],
     // java_api_finder must accompany `srcs`
     plugins: ["java_api_finder"],
@@ -97,21 +94,12 @@ java_library {
         "//frameworks/opt/net/wifi/service",
         "//frameworks/opt/net/wifi/tests/wifitests",
     ],
-
-    // TODO(b/146757305): should be unnecessary once
-    // sdk_version="module_lib_current"
-    aidl: {
-        include_dirs: [
-            "frameworks/base/core/java",
-        ],
-    },
 }
 
 // post-jarjar version of framework-wifi
 java_library {
     name: "framework-wifi",
-    // TODO(b/146757305): sdk_version should be "module_lib_current"
-    sdk_version: "core_current",
+    sdk_version: "module_current",
     static_libs: [
         "framework-wifi-pre-jarjar",
     ],
@@ -131,27 +119,68 @@ java_library {
     ],
 }
 
-droidstubs {
-    name: "framework-wifi-stubs-srcs",
+stubs_defaults {
+    name: "framework-wifi-stubs-srcs-defaults",
     srcs: [
-        ":framework-annotations",
         ":framework-wifi-updatable-sources",
+        ":framework-wifi-util-lib-aidls",
     ],
-    // This is needed as IOnWifiActivityEnergyInfoListener.aidl in framework-wifi depends on
-    // WifiActivityEnergyInfo.aidl in framework-minus-apex
-    aidl: {
-        include_dirs: ["frameworks/base/core/java"],
-    },
-    defaults: [ "framework-module-stubs-defaults-systemapi" ],
-    sdk_version: "core_current",
-    libs: ["android_system_stubs_current"],
+    libs: [ "framework-annotations-lib" ],
+    sdk_version: "module_current",
+}
+
+droidstubs {
+    name: "framework-wifi-stubs-srcs-publicapi",
+    defaults: [
+        "framework-module-stubs-defaults-publicapi",
+        "framework-wifi-stubs-srcs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-wifi-stubs-srcs-systemapi",
+    defaults: [
+        "framework-module-stubs-defaults-systemapi",
+        "framework-wifi-stubs-srcs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-wifi-api-module_libs_api",
+    defaults: [
+        "framework-module-api-defaults-module_libs_api",
+        "framework-wifi-stubs-srcs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-wifi-stubs-srcs-module_libs_api",
+    defaults: [
+        "framework-module-stubs-defaults-module_libs_api",
+        "framework-wifi-stubs-srcs-defaults",
+    ],
 }
 
 java_library {
-    name: "framework-wifi-stubs",
-    srcs: [":framework-wifi-stubs-srcs"],
-    sdk_version: "core_current",
-    libs: ["android_system_stubs_current"],
+    name: "framework-wifi-stubs-publicapi",
+    srcs: [":framework-wifi-stubs-srcs-publicapi"],
+    sdk_version: "module_current",
+    installable: false,
+}
+
+java_library {
+    name: "framework-wifi-stubs-systemapi",
+    srcs: [":framework-wifi-stubs-srcs-systemapi"],
+    sdk_version: "module_current",
+    libs: ["framework-annotations-lib"],
+    installable: false,
+}
+
+java_library {
+    name: "framework-wifi-stubs-module_libs_api",
+    srcs: [":framework-wifi-stubs-srcs-module_libs_api"],
+    sdk_version: "module_current",
+    libs: ["framework-annotations-lib"],
     installable: false,
 }
 

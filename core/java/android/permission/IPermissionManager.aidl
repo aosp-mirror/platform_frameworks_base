@@ -106,4 +106,10 @@ interface IPermissionManager {
             int importanceToResetTimer, int importanceToKeepSessionAlive);
 
     void stopOneTimePermissionSession(String packageName, int userId);
+
+    /** Map<String, List<String>> */
+    Map getAutoRevokeExemptionRequestedPermissions(int userId);
+
+    /** Map<String, List<String>> */
+    Map getAutoRevokeExemptionGrantedPermissions(int userId);
 }

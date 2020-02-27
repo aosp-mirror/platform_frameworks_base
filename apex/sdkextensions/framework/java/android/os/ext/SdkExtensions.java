@@ -38,7 +38,7 @@ public class SdkExtensions {
 
     private static final int R_EXTENSION_INT;
     static {
-        R_EXTENSION_INT = SystemProperties.getInt("ro.build.version.extensions.r", 0);
+        R_EXTENSION_INT = SystemProperties.getInt("build.version.extensions.r", 0);
     }
 
     /**

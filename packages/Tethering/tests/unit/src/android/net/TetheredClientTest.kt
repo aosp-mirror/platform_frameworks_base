@@ -75,7 +75,7 @@ class TetheredClientTest {
         assertNotEquals(makeTestClient(), TetheredClient(
                 TEST_MACADDR,
                 listOf(TEST_ADDRINFO1, TEST_ADDRINFO2),
-                TETHERING_BLUETOOTH))
+                TETHERING_USB))
     }
 
     @Test

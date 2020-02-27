@@ -17,6 +17,7 @@
 package android.net.wifi.p2p;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -133,6 +134,7 @@ public class WifiP2pConfig implements Parcelable {
      *
      * By default this field is set to {@link #GROUP_OWNER_INTENT_AUTO}.
      */
+    @IntRange(from = 0, to = 15)
     public int groupOwnerIntent = GROUP_OWNER_INTENT_AUTO;
 
     /** @hide */

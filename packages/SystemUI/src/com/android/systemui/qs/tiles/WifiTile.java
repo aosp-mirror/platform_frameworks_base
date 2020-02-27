@@ -84,10 +84,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     public void setDetailListening(boolean listening) {
         if (listening) {
             mWifiController.addAccessPointCallback(mDetailAdapter);
@@ -195,6 +191,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
         final StringBuffer minimalContentDescription = new StringBuffer();
+        final StringBuffer minimalStateDescription = new StringBuffer();
         final Resources r = mContext.getResources();
         if (isTransient) {
             state.icon = ResourceIcon.get(
@@ -209,7 +206,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
             state.icon = ResourceIcon.get(cb.wifiSignalIconId);
             state.label = removeDoubleQuotes(cb.ssid);
         } else if (wifiNotConnected) {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_disconnected);
+            state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_NO_NETWORK);
             state.label = r.getString(R.string.quick_settings_wifi_label);
         } else {
             state.icon = ResourceIcon.get(WifiIcons.QS_WIFI_NO_NETWORK);
@@ -219,13 +216,14 @@ public class WifiTile extends QSTileImpl<SignalState> {
                 mContext.getString(R.string.quick_settings_wifi_label)).append(",");
         if (state.value) {
             if (wifiConnected) {
-                minimalContentDescription.append(cb.wifiSignalContentDescription).append(",");
+                minimalStateDescription.append(cb.wifiSignalContentDescription);
                 minimalContentDescription.append(removeDoubleQuotes(cb.ssid));
                 if (!TextUtils.isEmpty(state.secondaryLabel)) {
                     minimalContentDescription.append(",").append(state.secondaryLabel);
                 }
             }
         }
+        state.stateDescription = minimalStateDescription.toString();
         state.contentDescription = minimalContentDescription.toString();
         state.dualLabelContentDescription = r.getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());

@@ -50,4 +50,10 @@ interface IAugmentedAutofillManagerClient {
       * Requests hiding the fill UI.
       */
     void requestHideFillUi(int sessionId, in AutofillId id);
+
+    /**
+      * Requests to start a new autofill flow. Returns true if the autofill request is made to
+      * {@link AutofillManager#requestAutofill(View)}.
+      */
+    boolean requestAutofill(int sessionId, in AutofillId id);
 }

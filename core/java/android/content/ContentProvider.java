@@ -580,6 +580,15 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
+        public void canonicalizeAsync(String callingPkg, @Nullable String featureId, Uri uri,
+                RemoteCallback callback) {
+            final Bundle result = new Bundle();
+            result.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
+                    canonicalize(callingPkg, featureId, uri));
+            callback.sendResult(result);
+        }
+
+        @Override
         public Uri uncanonicalize(String callingPkg, String featureId,  Uri uri) {
             uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);

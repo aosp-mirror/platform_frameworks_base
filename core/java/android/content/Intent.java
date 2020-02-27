@@ -4289,7 +4289,9 @@ public class Intent implements Parcelable, Cloneable {
      * intent filter in their manifests, so that they can be looked up and bound to by
      * {@code DataLoaderManagerService}.
      *
-     * Data loader service providers must be privileged apps. 
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     *
+     * Data loader service providers must be privileged apps.
      * See {@link com.android.server.pm.PackageManagerShellCommandDataLoader} as an example of such
      * data loader service provider.
      *
@@ -4970,11 +4972,14 @@ public class Intent implements Parcelable, Cloneable {
      * <pre>
      * &lt;accessibility-shortcut-target
      *     android:description="@string/shortcut_target_description"
-     *     android:summary="@string/shortcut_target_summary" /&gt;
+     *     android:summary="@string/shortcut_target_summary"
+     *     android:animatedImageDrawable="@drawable/shortcut_target_animated_image"
+     *     android:htmlDescription="@string/shortcut_target_html_description" /&gt;
      * </pre>
      * <p>
      * Both description and summary are necessary. The system will ignore the accessibility
-     * shortcut target if they are missing.
+     * shortcut target if they are missing. The animated image and html description are supported
+     * to help users understand how to use the shortcut target.
      * </p>
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
@@ -6473,6 +6478,21 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_ACTIVITY_MATCH_EXTERNAL = 0x00000800;
 
     /**
+     * If set in an intent passed to {@link Context#startActivity Context.startActivity()}, this
+     * flag will only launch the intent if it resolves to a result that is not a browser. If no such
+     * result exists, an {@link ActivityNotFoundException} will be thrown.
+     */
+    public static final int FLAG_ACTIVITY_REQUIRE_NON_BROWSER = 0x00000400;
+
+    /**
+     * If set in an intent passed to {@link Context#startActivity Context.startActivity()}, this
+     * flag will only launch the intent if it resolves to a single result. If no such result exists
+     * or if the system chooser would otherwise be displayed, an {@link ActivityNotFoundException}
+     * will be thrown.
+     */
+    public static final int FLAG_ACTIVITY_REQUIRE_DEFAULT = 0x00000200;
+
+    /**
      * If set, when sending a broadcast only registered receivers will be
      * called -- no BroadcastReceiver components will be launched.
      */
@@ -6762,7 +6782,7 @@ public class Intent implements Parcelable, Cloneable {
                     this.mClipData = new ClipData(o.mClipData);
                 }
             } else {
-                if (o.mExtras != null && !o.mExtras.maybeIsEmpty()) {
+                if (o.mExtras != null && !o.mExtras.isDefinitelyEmpty()) {
                     this.mExtras = Bundle.STRIPPED;
                 }
 

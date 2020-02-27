@@ -184,6 +184,12 @@ oneway interface IImsCallSessionListener {
     void callSessionRttAudioIndicatorChanged(in ImsStreamMediaProfile profile);
 
     /**
+     * Notifies about the response for call transfer request.
+     */
+    void callSessionTransferred();
+
+    void callSessionTransferFailed(in ImsReasonInfo reasonInfo);
+    /**
      * Notifies of a change to the call quality.
      * @param callQuality then updated call quality
      */

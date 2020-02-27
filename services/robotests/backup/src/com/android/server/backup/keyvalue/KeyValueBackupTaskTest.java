@@ -96,7 +96,6 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.util.FeatureFlagUtils;
 import android.util.Pair;
 
 import com.android.internal.backup.IBackupTransport;
@@ -259,9 +258,6 @@ public class KeyValueBackupTaskTest  {
     public void tearDown() throws Exception {
         ShadowBackupDataInput.reset();
         ShadowApplicationPackageManager.reset();
-        // False by default.
-        FeatureFlagUtils.setEnabled(
-                mContext, FeatureFlagUtils.BACKUP_NO_KV_DATA_CHANGE_CALLS, false);
     }
 
     @Test
@@ -2348,9 +2344,6 @@ public class KeyValueBackupTaskTest  {
     @Test
     public void testRunTask_whenNoDataToBackupOnFirstBackup_doesNotTellTransportOfBackup()
             throws Exception {
-        FeatureFlagUtils.setEnabled(
-                mContext, FeatureFlagUtils.BACKUP_NO_KV_DATA_CHANGE_CALLS, true);
-
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         mBackupManagerService.setCurrentToken(0L);
         when(transportMock.transport.getCurrentRestoreSet()).thenReturn(1234L);
@@ -2368,9 +2361,6 @@ public class KeyValueBackupTaskTest  {
     @Test
     public void testRunTask_whenBackupHasCompletedAndThenNoDataChanges_transportGetsNotified()
             throws Exception {
-        FeatureFlagUtils.setEnabled(
-                mContext, FeatureFlagUtils.BACKUP_NO_KV_DATA_CHANGE_CALLS, true);
-
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         when(transportMock.transport.getCurrentRestoreSet()).thenReturn(1234L);
         when(transportMock.transport.isAppEligibleForBackup(

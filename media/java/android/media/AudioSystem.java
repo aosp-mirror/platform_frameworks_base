@@ -1024,7 +1024,18 @@ public class AudioSystem
                                                       String device_name,
                                                       int codecFormat);
     @UnsupportedAppUsage
-    public static native int setPhoneState(int state);
+    public static int setPhoneState(int state) {
+        Log.w(TAG, "Do not use this method! Use AudioManager.setMode() instead.");
+        return 0;
+    }
+    /**
+     * @hide
+     * Send the current audio mode to audio policy manager and audio HAL.
+     * @param state the audio mode
+     * @param uid the UID of the app owning the audio mode
+     * @return command completion status.
+     */
+    public static native int setPhoneState(int state, int uid);
     @UnsupportedAppUsage
     public static native int setForceUse(int usage, int config);
     @UnsupportedAppUsage
@@ -1085,18 +1096,18 @@ public class AudioSystem
      * @return an empty list if there was an issue with the request, a list of audio devices
      *   otherwise (typically one device, except for duplicated paths).
      */
-    public static @NonNull ArrayList<AudioDeviceAddress> getDevicesForAttributes(
+    public static @NonNull ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
         Objects.requireNonNull(attributes);
-        final AudioDeviceAddress[] devices = new AudioDeviceAddress[MAX_DEVICE_ROUTING];
+        final AudioDeviceAttributes[] devices = new AudioDeviceAttributes[MAX_DEVICE_ROUTING];
         final int res = getDevicesForAttributes(attributes, devices);
-        final ArrayList<AudioDeviceAddress> routeDevices = new ArrayList<>();
+        final ArrayList<AudioDeviceAttributes> routeDevices = new ArrayList<>();
         if (res != SUCCESS) {
             Log.e(TAG, "error " + res + " in getDevicesForAttributes for " + attributes);
             return routeDevices;
         }
 
-        for (AudioDeviceAddress device : devices) {
+        for (AudioDeviceAttributes device : devices) {
             if (device != null) {
                 routeDevices.add(device);
             }
@@ -1106,12 +1117,12 @@ public class AudioSystem
 
     /**
      * Maximum number of audio devices a track is ever routed to, determines the size of the
-     * array passed to {@link #getDevicesForAttributes(AudioAttributes, AudioDeviceAddress[])}
+     * array passed to {@link #getDevicesForAttributes(AudioAttributes, AudioDeviceAttributes[])}
      */
     private static final int MAX_DEVICE_ROUTING = 4;
 
     private static native int getDevicesForAttributes(@NonNull AudioAttributes aa,
-                                                      @NonNull AudioDeviceAddress[] devices);
+                                                      @NonNull AudioDeviceAttributes[] devices);
 
     /** @hide returns true if master mono is enabled. */
     public static native boolean getMasterMono();
@@ -1246,7 +1257,7 @@ public class AudioSystem
      * @return {@link #SUCCESS} if successfully set
      */
     public static int setPreferredDeviceForStrategy(
-            int strategy, @NonNull AudioDeviceAddress device) {
+            int strategy, @NonNull AudioDeviceAttributes device) {
         return setPreferredDeviceForStrategy(strategy,
                 AudioDeviceInfo.convertDeviceTypeToInternalDevice(device.getType()),
                 device.getAddress());
@@ -1277,7 +1288,7 @@ public class AudioSystem
      *     and written to the array
      */
     public static native int getPreferredDeviceForStrategy(int strategy,
-                                                           AudioDeviceAddress[] device);
+                                                           AudioDeviceAttributes[] device);
 
     // Items shared with audio service
 

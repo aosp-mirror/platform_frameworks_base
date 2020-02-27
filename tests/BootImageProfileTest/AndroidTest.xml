@@ -19,18 +19,8 @@
     -->
     <target_preparer
         class="com.android.tradefed.targetprep.DeviceSetup">
-        <!-- we need this magic flag, otherwise it always reboots and breaks the selinux -->
+        <!-- we need this magic flag, otherwise it always reboots and breaks selinux -->
         <option name="force-skip-system-props" value="true" />
-
-        <option name="run-command" value="device_config put runtime_native_boot profilesystemserver true" />
-        <option name="run-command" value="device_config put runtime_native_boot profilebootclasspath true" />
-
-        <!-- Profiling does not pick up the above changes we restart the shell -->
-        <option name="run-command" value="stop" />
-        <option name="run-command" value="start" />
-
-        <!-- give it some time to restart the shell; otherwise the first unit test might fail -->
-        <option name="run-command" value="sleep 2" />
     </target_preparer>
 
     <test class="com.android.tradefed.testtype.HostTest" >

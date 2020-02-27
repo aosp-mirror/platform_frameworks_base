@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.NonNull;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -31,32 +32,34 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
-import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
-import android.content.pm.parsing.ComponentParseUtils.ParsedService;
-import android.content.pm.parsing.PackageImpl;
-import android.content.pm.parsing.PackageInfoUtils;
-import android.content.pm.parsing.ParsedPackage;
 import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedService;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.parsing.PackageCacher;
+import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -70,12 +73,12 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class PackageParserTest {
@@ -96,13 +99,13 @@ public class PackageParserTest {
 
     @Test
     public void testParse_noCache() throws Exception {
-        PackageParser pp = new CachePackageNameParser();
-        ParsedPackage pkg = pp.parseParsedPackage(FRAMEWORK, 0 /* parseFlags */,
+        CachePackageNameParser pp = new CachePackageNameParser(null, false, null, null, null);
+        ParsedPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
                 false /* useCaches */);
         assertNotNull(pkg);
 
         pp.setCacheDir(mTmpDir);
-        pkg = pp.parseParsedPackage(FRAMEWORK, 0 /* parseFlags */,
+        pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
                 false /* useCaches */);
         assertNotNull(pkg);
 
@@ -113,39 +116,37 @@ public class PackageParserTest {
 
     @Test
     public void testParse_withCache() throws Exception {
-        PackageParser pp = new CachePackageNameParser();
+        CachePackageNameParser pp = new CachePackageNameParser(null, false, null, null, null);
 
         pp.setCacheDir(mTmpDir);
         // The first parse will write this package to the cache.
-        pp.parseParsedPackage(FRAMEWORK, 0 /* parseFlags */, true /* useCaches */);
+        pp.parsePackage(FRAMEWORK, 0 /* parseFlags */, true /* useCaches */);
 
         // Now attempt to parse the package again, should return the
         // cached result.
-        ParsedPackage pkg = pp.parseParsedPackage(FRAMEWORK, 0 /* parseFlags */,
+        ParsedPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
                 true /* useCaches */);
         assertEquals("cache_android", pkg.getPackageName());
 
         // Try again, with useCaches == false, shouldn't return the parsed
         // result.
-        pkg = pp.parseParsedPackage(FRAMEWORK, 0 /* parseFlags */, false /* useCaches */);
+        pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */, false /* useCaches */);
         assertEquals("android", pkg.getPackageName());
 
         // We haven't set a cache directory here : the parse should still succeed,
         // just not using the cached results.
-        pp = new CachePackageNameParser();
-        pkg = pp.parseParsedPackage(FRAMEWORK, 0 /* parseFlags */, true /* useCaches */);
+        pp = new CachePackageNameParser(null, false, null, null, null);
+        pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */, true /* useCaches */);
         assertEquals("android", pkg.getPackageName());
 
-        pkg = pp.parseParsedPackage(FRAMEWORK, 0 /* parseFlags */, false /* useCaches */);
+        pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */, false /* useCaches */);
         assertEquals("android", pkg.getPackageName());
     }
 
     @Test
     public void test_serializePackage() throws Exception {
-        PackageParser pp = new PackageParser();
-        pp.setCacheDir(mTmpDir);
-
-        ParsedPackage pkg = pp.parseParsedPackage(FRAMEWORK, 0 /* parseFlags */,
+        PackageParser2 pp = new PackageParser2(null, false, null, mTmpDir, null);
+        ParsedPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
                 true /* useCaches */);
 
         Parcel p = Parcel.obtain();
@@ -161,7 +162,7 @@ public class PackageParserTest {
     @SmallTest
     @Presubmit
     public void test_roundTripKnownFields() throws Exception {
-        ParsingPackage pkg = PackageImpl.forParsing("foo");
+        ParsingPackage pkg = PackageImpl.forTesting("foo");
         setKnownFields(pkg);
 
         Parcel p = Parcel.obtain();
@@ -174,7 +175,7 @@ public class PackageParserTest {
 
     @Test
     public void test_stringInterning() throws Exception {
-        ParsingPackage pkg = PackageImpl.forParsing("foo");
+        ParsingPackage pkg = PackageImpl.forTesting("foo");
         setKnownFields(pkg);
 
         Parcel p = Parcel.obtain();
@@ -212,17 +213,42 @@ public class PackageParserTest {
      * A trivial subclass of package parser that only caches the package name, and throws away
      * all other information.
      */
-    public static class CachePackageNameParser extends PackageParser {
-        @Override
-        public byte[] toCacheEntry(ParsedPackage pkg) {
-            return ("cache_" + pkg.getPackageName()).getBytes(StandardCharsets.UTF_8);
+    public static class CachePackageNameParser extends PackageParser2 {
+
+        CachePackageNameParser(String[] separateProcesses, boolean onlyCoreApps,
+                DisplayMetrics displayMetrics, @Nullable File cacheDir,
+                PackageParser2.Callback callback) {
+            super(separateProcesses, onlyCoreApps, displayMetrics, cacheDir, callback);
+            if (cacheDir != null) {
+                setCacheDir(cacheDir);
+            }
         }
 
-        @Override
-        public ParsedPackage fromCacheEntry(byte[] cacheEntry) {
-            return PackageImpl.forParsing(new String(cacheEntry, StandardCharsets.UTF_8))
-                    .hideAsParsed();
+        void setCacheDir(@NonNull File cacheDir) {
+            this.mCacher = new PackageCacher(cacheDir) {
+                @Override
+                public byte[] toCacheEntry(ParsedPackage pkg) {
+                    return ("cache_" + pkg.getPackageName()).getBytes(StandardCharsets.UTF_8);
+                }
+
+                @Override
+                public ParsedPackage fromCacheEntry(byte[] cacheEntry) {
+                    return ((ParsedPackage) PackageImpl.forTesting(
+                            new String(cacheEntry, StandardCharsets.UTF_8))
+                            .hideAsParsed());
+                }
+            };
         }
+    }
+
+    private static PackageSetting mockPkgSetting(AndroidPackage pkg) {
+        return new PackageSetting(pkg.getPackageName(), pkg.getRealPackage(),
+                new File(pkg.getCodePath()), new File(pkg.getCodePath()), null,
+                pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi(),
+                null, pkg.getVersionCode(),
+                PackageInfoUtils.appInfoFlags(pkg, null),
+                PackageInfoUtils.appInfoPrivateFlags(pkg, null),
+                pkg.getSharedUserLabel(), null, null, null);
     }
 
     // NOTE: The equality assertions below are based on code autogenerated by IntelliJ.
@@ -232,7 +258,6 @@ public class PackageParserTest {
         assertEquals(a.isBaseHardwareAccelerated(), b.isBaseHardwareAccelerated());
         assertEquals(a.getVersionCode(), b.getVersionCode());
         assertEquals(a.getSharedUserLabel(), b.getSharedUserLabel());
-        assertEquals(a.getPreferredOrder(), b.getPreferredOrder());
         assertEquals(a.getInstallLocation(), b.getInstallLocation());
         assertEquals(a.isCoreApp(), b.isCoreApp());
         assertEquals(a.isRequiredForAllUsers(), b.isRequiredForAllUsers());
@@ -249,9 +274,9 @@ public class PackageParserTest {
         assertArrayEquals(a.getSplitFlags(), b.getSplitFlags());
 
         PackageInfo aInfo = PackageInfoUtils.generate(a, new int[]{}, 0, 0, 0,
-                Collections.emptySet(), new PackageUserState(), 0);
+                Collections.emptySet(), new PackageUserState(), 0, mockPkgSetting(a));
         PackageInfo bInfo = PackageInfoUtils.generate(b, new int[]{}, 0, 0, 0,
-                Collections.emptySet(), new PackageUserState(), 0);
+                Collections.emptySet(), new PackageUserState(), 0, mockPkgSetting(b));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
 
         assertEquals(ArrayUtils.size(a.getPermissions()), ArrayUtils.size(b.getPermissions()));
@@ -298,15 +323,13 @@ public class PackageParserTest {
         assertEquals(a.getLibraryNames(), b.getLibraryNames());
         assertEquals(a.getUsesLibraries(), b.getUsesLibraries());
         assertEquals(a.getUsesOptionalLibraries(), b.getUsesOptionalLibraries());
-        assertArrayEquals(a.getUsesLibraryFiles(), b.getUsesLibraryFiles());
         assertEquals(a.getOriginalPackages(), b.getOriginalPackages());
         assertEquals(a.getRealPackage(), b.getRealPackage());
         assertEquals(a.getAdoptPermissions(), b.getAdoptPermissions());
-        assertBundleApproximateEquals(a.getAppMetaData(), b.getAppMetaData());
+        assertBundleApproximateEquals(a.getMetaData(), b.getMetaData());
         assertEquals(a.getVersionName(), b.getVersionName());
         assertEquals(a.getSharedUserId(), b.getSharedUserId());
         assertArrayEquals(a.getSigningDetails().signatures, b.getSigningDetails().signatures);
-        assertArrayEquals(a.getLastPackageUsageTimeInMills(), b.getLastPackageUsageTimeInMills());
         assertEquals(a.getRestrictedAccountType(), b.getRestrictedAccountType());
         assertEquals(a.getRequiredAccountType(), b.getRequiredAccountType());
         assertEquals(a.getOverlayTarget(), b.getOverlayTarget());
@@ -317,7 +340,6 @@ public class PackageParserTest {
         assertEquals(a.getSigningDetails().publicKeys, b.getSigningDetails().publicKeys);
         assertEquals(a.getUpgradeKeySets(), b.getUpgradeKeySets());
         assertEquals(a.getKeySetMapping(), b.getKeySetMapping());
-        assertEquals(a.getCpuAbiOverride(), b.getCpuAbiOverride());
         assertArrayEquals(a.getRestrictUpdateHash(), b.getRestrictUpdateHash());
     }
 
@@ -333,44 +355,42 @@ public class PackageParserTest {
         assertEquals(a.toString(), b.toString());
     }
 
-    private static void assertComponentsEqual(ParsedComponent<?> a,
-            ParsedComponent<?> b) {
-        assertEquals(a.className, b.className);
+    private static void assertComponentsEqual(ParsedComponent a, ParsedComponent b) {
+        assertEquals(a.getName(), b.getName());
         assertBundleApproximateEquals(a.getMetaData(), b.getMetaData());
         assertEquals(a.getComponentName(), b.getComponentName());
 
-        if (a.intents != null && b.intents != null) {
-            assertEquals(a.intents.size(), b.intents.size());
-        } else if (a.intents == null || b.intents == null) {
+        if (a.getIntents() != null && b.getIntents() != null) {
+            assertEquals(a.getIntents().size(), b.getIntents().size());
+        } else if (a.getIntents() == null || b.getIntents() == null) {
             return;
         }
 
-        for (int i = 0; i < a.intents.size(); ++i) {
-            ParsedIntentInfo aIntent = a.intents.get(i);
-            ParsedIntentInfo bIntent = b.intents.get(i);
+        for (int i = 0; i < a.getIntents().size(); ++i) {
+            ParsedIntentInfo aIntent = a.getIntents().get(i);
+            ParsedIntentInfo bIntent = b.getIntents().get(i);
 
-            assertEquals(aIntent.hasDefault, bIntent.hasDefault);
-            assertEquals(aIntent.labelRes, bIntent.labelRes);
-            assertEquals(aIntent.nonLocalizedLabel, bIntent.nonLocalizedLabel);
-            assertEquals(aIntent.icon, bIntent.icon);
+            assertEquals(aIntent.isHasDefault(), bIntent.isHasDefault());
+            assertEquals(aIntent.getLabelRes(), bIntent.getLabelRes());
+            assertEquals(aIntent.getNonLocalizedLabel(), bIntent.getNonLocalizedLabel());
+            assertEquals(aIntent.getIcon(), bIntent.getIcon());
         }
     }
 
-    private static void assertPermissionsEqual(ParsedPermission a,
-            ParsedPermission b) {
+    private static void assertPermissionsEqual(ParsedPermission a, ParsedPermission b) {
         assertComponentsEqual(a, b);
-        assertEquals(a.tree, b.tree);
+        assertEquals(a.isTree(), b.isTree());
 
         // Verify basic flags in PermissionInfo to make sure they're consistent. We don't perform
         // a full structural equality here because the code that serializes them isn't parser
         // specific and is tested elsewhere.
         assertEquals(a.getProtection(), b.getProtection());
         assertEquals(a.getGroup(), b.getGroup());
-        assertEquals(a.flags, b.flags);
+        assertEquals(a.getFlags(), b.getFlags());
 
-        if (a.parsedPermissionGroup != null && b.parsedPermissionGroup != null) {
-            assertPermissionGroupsEqual(a.parsedPermissionGroup, b.parsedPermissionGroup);
-        } else if (a.parsedPermissionGroup != null || b.parsedPermissionGroup != null) {
+        if (a.getParsedPermissionGroup() != null && b.getParsedPermissionGroup() != null) {
+            assertPermissionGroupsEqual(a.getParsedPermissionGroup(), b.getParsedPermissionGroup());
+        } else if (a.getParsedPermissionGroup() != null || b.getParsedPermissionGroup() != null) {
             throw new AssertionError();
         }
     }
@@ -382,6 +402,8 @@ public class PackageParserTest {
         // Sanity check for InstrumentationInfo.
         assertEquals(a.getTargetPackage(), b.getTargetPackage());
         assertEquals(a.getTargetProcesses(), b.getTargetProcesses());
+        assertEquals(a.isHandleProfiling(), b.isHandleProfiling());
+        assertEquals(a.isFunctionalTest(), b.isFunctionalTest());
     }
 
     private static void assertServicesEqual(
@@ -393,10 +415,10 @@ public class PackageParserTest {
         assertComponentsEqual(a, b);
 
         // Sanity check for ServiceInfo.
-        ServiceInfo aInfo = PackageInfoUtils.generateServiceInfo(aPkg, a, 0, new PackageUserState(),
-                0);
-        ServiceInfo bInfo = PackageInfoUtils.generateServiceInfo(bPkg, b, 0, new PackageUserState(),
-                0);
+        ServiceInfo aInfo = PackageInfoUtils.generateServiceInfo(aPkg, a, 0,
+                new PackageUserState(), 0, mockPkgSetting(aPkg));
+        ServiceInfo bInfo = PackageInfoUtils.generateServiceInfo(bPkg, b, 0,
+                new PackageUserState(), 0, mockPkgSetting(bPkg));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }
@@ -408,13 +430,6 @@ public class PackageParserTest {
             ParsedProvider b
     ) {
         assertComponentsEqual(a, b);
-
-        // Sanity check for ProviderInfo
-        ProviderInfo aInfo = PackageInfoUtils.generateProviderInfo(aPkg, a, 0,
-                new PackageUserState(), 0);
-        ProviderInfo bInfo = PackageInfoUtils.generateProviderInfo(bPkg, b, 0,
-                new PackageUserState(), 0);
-        assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }
 
@@ -428,9 +443,9 @@ public class PackageParserTest {
 
         // Sanity check for ActivityInfo.
         ActivityInfo aInfo = PackageInfoUtils.generateActivityInfo(aPkg, a, 0,
-                new PackageUserState(), 0);
+                new PackageUserState(), 0, mockPkgSetting(aPkg));
         ActivityInfo bInfo = PackageInfoUtils.generateActivityInfo(bPkg, b, 0,
-                new PackageUserState(), 0);
+                new PackageUserState(), 0, mockPkgSetting(bPkg));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }
@@ -441,7 +456,7 @@ public class PackageParserTest {
 
         // Sanity check for PermissionGroupInfo.
         assertEquals(a.getName(), b.getName());
-        assertEquals(a.descriptionRes, b.descriptionRes);
+        assertEquals(a.getDescriptionRes(), b.getDescriptionRes());
     }
 
     private static void assertApplicationInfoEqual(ApplicationInfo a, ApplicationInfo that) {
@@ -494,12 +509,11 @@ public class PackageParserTest {
         bundle.putString("key", "value");
 
         ParsedPermission permission = new ParsedPermission();
-        permission.parsedPermissionGroup = new ParsedPermissionGroup();
+        permission.setParsedPermissionGroup(new ParsedPermissionGroup());
 
-        pkg.setBaseRevisionCode(100)
+        ((ParsedPackage) pkg.setBaseRevisionCode(100)
                 .setBaseHardwareAccelerated(true)
                 .setSharedUserLabel(100)
-                .setPreferredOrder(100)
                 .setInstallLocation(100)
                 .setRequiredForAllUsers(true)
                 .asSplit(
@@ -510,7 +524,6 @@ public class PackageParserTest {
                 )
                 .setUse32BitAbi(true)
                 .setVolumeUuid("foo3")
-                .setCodePath("foo4")
                 .addPermission(permission)
                 .addPermissionGroup(new ParsedPermissionGroup())
                 .addActivity(new ParsedActivity())
@@ -532,7 +545,7 @@ public class PackageParserTest {
                 .addOriginalPackage("foo14")
                 .setRealPackage("foo15")
                 .addAdoptPermission("foo16")
-                .setAppMetaData(bundle)
+                .setMetaData(bundle)
                 .setVersionName("foo17")
                 .setSharedUserId("foo18")
                 .setSigningDetails(
@@ -547,8 +560,7 @@ public class PackageParserTest {
                 .setOverlayTarget("foo21")
                 .setOverlayPriority(100)
                 .setUpgradeKeySets(new ArraySet<>())
-                .addPreferredActivityFilter(
-                        new ComponentParseUtils.ParsedActivityIntentInfo("foo", "className"))
+                .addPreferredActivityFilter("className", new ParsedIntentInfo())
                 .addConfigPreference(new ConfigurationInfo())
                 .addReqFeature(new FeatureInfo())
                 .addFeatureGroup(new FeatureGroupInfo())
@@ -559,19 +571,14 @@ public class PackageParserTest {
                 .setOverlayTargetName("foo26")
                 .setVisibleToInstantApps(true)
                 .setSplitHasCode(0, true)
-                .hideAsParsed()
+                .hideAsParsed())
                 .setBaseCodePath("foo5")
+                .setCodePath("foo4")
                 .setVersionCode(100)
-                .setCpuAbiOverride("foo22")
                 .setRestrictUpdateHash(new byte[16])
                 .setVersionCodeMajor(100)
                 .setCoreApp(true)
-                .hideAsFinal()
-                .mutate()
-                .setUsesLibraryInfos(Arrays.asList(
-                        new SharedLibraryInfo(null, null, null, null, 0L, 0, null, null, null)
-                ))
-                .setUsesLibraryFiles(new String[]{"foo13"});
+                .hideAsFinal();
     }
 
     private static void assertAllFieldsExist(ParsedPackage pkg) throws Exception {

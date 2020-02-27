@@ -26,8 +26,6 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.BoundsAnimationController.BOUNDS;
-import static com.android.server.wm.BoundsAnimationController.FADE_IN;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
@@ -63,6 +61,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     private final DisplayContent mDefaultDisplay;
     private final Intent mTargetIntent;
     private final ComponentName mRecentsComponent;
+    private final @Nullable String mRecentsFeatureId;
     private final int mRecentsUid;
     private final @Nullable WindowProcessController mCaller;
     private final int mUserId;
@@ -80,8 +79,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
     RecentsAnimation(ActivityTaskManagerService atm, ActivityStackSupervisor stackSupervisor,
             ActivityStartController activityStartController, WindowManagerService wm,
-            Intent targetIntent, ComponentName recentsComponent, int recentsUid,
-            @Nullable WindowProcessController caller) {
+            Intent targetIntent, ComponentName recentsComponent, @Nullable String recentsFeatureId,
+            int recentsUid, @Nullable WindowProcessController caller) {
         mService = atm;
         mStackSupervisor = stackSupervisor;
         mDefaultDisplay = mService.mRootWindowContainer.getDefaultDisplay();
@@ -89,6 +88,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         mWindowManager = wm;
         mTargetIntent = targetIntent;
         mRecentsComponent = recentsComponent;
+        mRecentsFeatureId = recentsFeatureId;
         mRecentsUid = recentsUid;
         mCaller = caller;
         mUserId = atm.getCurrentUserId();
@@ -332,7 +332,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         if (sendUserLeaveHint) {
                             // Setting this allows the previous app to PiP.
                             mStackSupervisor.mUserLeaving = true;
-                            targetStack.moveTaskToFrontLocked(targetActivity.getTask(),
+                            targetStack.moveTaskToFront(targetActivity.getTask(),
                                     true /* noAnimation */, null /* activityOptions */,
                                     targetActivity.appTimeTracker,
                                     "RecentsAnimation.onAnimationFinished()");
@@ -424,11 +424,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             return;
         }
 
-        final DisplayContent dc =
-                mService.mRootWindowContainer.getDefaultDisplay().mDisplayContent;
-        dc.mBoundsAnimationController.setAnimationType(
-                controller.shouldDeferCancelUntilNextTransition() ? FADE_IN : BOUNDS);
-
         // We defer canceling the recents animation until the next app transition in the following
         // cases:
         // 1) The next launching task is not being animated by the recents animation
@@ -456,6 +451,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 .obtainStarter(mTargetIntent, reason)
                 .setCallingUid(mRecentsUid)
                 .setCallingPackage(mRecentsComponent.getPackageName())
+                .setCallingFeatureId(mRecentsFeatureId)
                 .setActivityOptions(new SafeActivityOptions(options))
                 .setUserId(mUserId)
                 .execute();

@@ -191,6 +191,16 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"አስተዳዳሪ መሣሪያዎን ለግል ጥቅም ትተውታል"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"መሣሪያው የሚተዳደር ነው"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"የእርስዎ ድርጅት ይህን መሣሪያ ያስተዳድራል፣ እና የአውታረ መረብ ትራፊክን ሊከታተል ይችላል። ዝርዝሮችን ለማግኘት መታ ያድርጉ።"</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"የአካባቢ ቅንብሮች በአስተዳዳሪዎ ተቀይረዋል"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"የአካባቢ ቅንብሮችዎን ለመመልከት መታ ያድርጉ።"</string>
+    <!-- no translation found for country_detector (7023275114706088854) -->
+    <skip />
+    <!-- no translation found for location_service (2439187616018455546) -->
+    <skip />
+    <!-- no translation found for sensor_notification_service (7474531979178682676) -->
+    <skip />
+    <!-- no translation found for twilight_service (8964898045693187224) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"የእርስዎ መሣሪያ ይደመሰሳል"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"የአስተዳዳሪ መተግበሪያ ስራ ላይ ሊውል አይችልም። የእርስዎን መሣሪያ አሁን ይደመሰሳል።\n\nጥያቄዎች ካለዎት የድርጅትዎን አስተዳዳሪ ያነጋግሩ።"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ማተም በ<xliff:g id="OWNER_APP">%s</xliff:g> ተሰናክሏል።"</string>
@@ -429,6 +439,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"ይህ ልዩ ፈቃድ ያለው | የሥርዓት መተግበሪያ በማናቸውም ጊዜ የሥርዓት ካሜራን በመጠቀም ሥዕሎችን ማንሣት እና ቪዲዮ መቅረጽ ይችላል። የ android.ፈቃድን ይጠይቃል። ካሜራ ፍቃድ በመተግበሪያውም ጭምር መያዝ ይኖርበታል"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ነዛሪ ተቆጣጠር"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ነዛሪውን ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ።"</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"መተግበሪያው የንዝረት ሁኔታውን እንዲደርስ ያስችለዋል።"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"በቀጥታ ስልክ ቁጥሮች ደውል"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"መተግበሪያው ያላንተ ጣልቃ ገብነት የስልክ ቁጥሮች ላይ እንዲደውል ይፈቅድለታል። ይህ ያልተጠበቁ ክፍያዎችን ወይም ጥሪዎችን ሊያስከትል ይችላል። ይህ መተግበሪያው የድንገተኛ ስልክ ቁጥሮችን እንዲደውል እንደማይፈቅድለት ልብ በል። ተንኮል አዘል መተግበሪያዎች ያላንተ ማረጋገጫ ጥሪዎችን በማድረግ ገንዘብ ሊያስወጡህ ይችላሉ።"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"የአይኤምኤስ ጥሪ አገልግሎትን ይደርሳል"</string>
@@ -543,6 +554,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ምንም የጣት አሻራዎች አልተመዘገቡም።"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ይህ መሣሪያ የጣት አሻራ ዳሳሽ የለውም።"</string>
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ዳሳሽ ለጊዜው ተሰናክሏል።"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ጣት <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +598,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ፊትን ማረጋገጥ አይቻልም። እንደገና ይሞክሩ።"</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"በመልክ መክፈትን አላቀናበሩም።"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"በመልክ መክፈት መስጫ በዚህ መሣሪያ ላይ አይደገፍም።"</string>
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"ዳሳሽ ለጊዜው ተሰናክሏል።"</string>
     <string name="face_name_template" msgid="3877037340223318119">"ፊት <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1311,6 +1324,12 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB አድስ ተያይዟል"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"የዩኤስቢ ማረሚያን ለማጥፋት መታ ያድርጉ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ማረሚያ ላለማንቃት ምረጥ።"</string>
+    <!-- no translation found for adbwifi_active_notification_title (6147343659168302473) -->
+    <skip />
+    <!-- no translation found for adbwifi_active_notification_message (930987922852867972) -->
+    <skip />
+    <!-- no translation found for adbwifi_active_notification_message (8633421848366915478) -->
+    <skip />
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"የሙከራ ጥቅል ሁነታ ነቅቷል"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"የመሞከሪያ ጥቅል ሁነታን ለማሰናከል የፋብሪካ ዳግም ቅንብርን ይሞክሩ።"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"ተከታታይ ኮንሶል ነቅቷል"</string>
@@ -1614,7 +1633,7 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"ዳራው ከ<xliff:g id="PACKAGENAME">%1$s</xliff:g> የጀመረው የፊት አገልግሎት ወደፊት በሚኖሩት R ግንቦች ላይ ጥቅም ላይ እየዋለ ፈቃድ አይኖረውም። እባክዎ go/r-bg-fgs-restriction እና ፋይል ሳንካ ሪፖርትን ይመልከቱ።"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ድምጹ ከሚመከረው መጠን በላይ ከፍ ይበል?\n\nበከፍተኛ ድምጽ ለረጅም ጊዜ ማዳመጥ ጆሮዎን ሊጎዳው ይችላል።"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"የተደራሽነት አቋራጭ ጥቅም ላይ ይዋል?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"አቋራጩ ሲበራ ሁለቱንም የድምፅ አዝራሮች ለ3 ሰከንዶች ተጭኖ መቆየት የተደራሽነት ባህሪን ያስጀምረዋል።\n\n አሁን ያለ የተደራሽነት ባህሪ፦\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ባህሪውን በቅንብሮች &gt; ተደራሽነት ውስጥ ሊለውጡት ይችላሉ።"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"አቋራጩ ሲበራ ሁለቱንም የድምጽ አዝራሮች ለ3 ሰከንዶች ተጭኖ መቆየት የተደራሽነት ባህሪን ያስጀምረዋል።"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"አቋራጮችን አርትዕ ያድርጉ"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ይቅር"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"አቋራጩን አጥፋ"</string>
@@ -1853,6 +1872,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"የስራ መገለጫ ይብራ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"የእርስዎ የስራ መተግበሪያዎች፣ ማሳወቂያዎች፣ ውሂብ እና ሌሎች የስራ መገለጫ ባህሪያት ይበራሉ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"አብራ"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"መተግበሪያ አይገኝም"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> አሁን አይገኝም።"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ይህ መተግበሪያ ለቆየ የAndroid ስሪት ነው የተገነባው፣ እና በአግባቡ ላይሰራ ይችላል። ዝማኔዎች ካሉ ለመመልከት ይሞክሩ፣ ወይም ደግሞ ገንቢውን ያነጋግሩ።"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ዝማኔ ካለ አረጋግጥ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"አዲስ መልዕክቶች አለዎት"</string>
@@ -2008,4 +2029,16 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ወደ የRESTRICTED ባልዲ ተከትቷል"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"የግል"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ሥራ"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"በሥራ መተግበሪያዎች ማጋራት አይቻልም"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"በግል መተግበሪያዎች ማጋራት አይቻልም"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"የእርስዎ አይቲ አስተዳዳሪ በግል እና በሥራ መተግበሪያዎች መካከል ማጋራትን አግደዋል"</string>
+    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"የሥራ መተግበሪያዎች ያብሩ"</string>
+    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"የሥራ መተግበሪያዎች እና እውቂያዎችን ለመድረስ የሥራ መተግበሪያዎችን ያብሩ"</string>
+    <string name="resolver_no_apps_available" msgid="7710339903040989654">"ምንም መተግበሪያዎች አይገኙም"</string>
+    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"ምንም መተግበሪያዎች ልናገኝ አልቻልንም"</string>
+    <string name="resolver_switch_on_work" msgid="8294542702883688533">"ሥራን ያብሩ"</string>
+    <!-- no translation found for permlab_accessCallAudio (1682957511874097664) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCallAudio (8448360894684277823) -->
+    <skip />
 </resources>

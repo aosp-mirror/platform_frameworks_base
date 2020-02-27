@@ -16,17 +16,18 @@
 
 #pragma once
 
+#include <aidl/android/os/StatsDimensionsValueParcel.h>
 #include <utils/JenkinsHash.h>
 #include <vector>
-#include "FieldValue.h"
 #include "android-base/stringprintf.h"
+#include "FieldValue.h"
 #include "logd/LogEvent.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-using android::base::StringPrintf;
+using ::aidl::android::os::StatsDimensionsValueParcel;
 
 struct Metric2Condition {
     int64_t conditionId;
@@ -68,6 +69,8 @@ public:
         }
         return nullptr;
     }
+
+    StatsDimensionsValueParcel toStatsDimensionsValueParcel() const;
 
     std::string toString() const;
 

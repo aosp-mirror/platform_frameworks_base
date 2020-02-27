@@ -162,6 +162,23 @@ public class SystemWindows {
         return pd.getWindow(windowType);
     }
 
+    /**
+     * Gets the SurfaceControl associated with a root view. This is the same surface that backs the
+     * ViewRootImpl.
+     */
+    public SurfaceControl getViewSurface(View rootView) {
+        for (int i = 0; i < mPerDisplay.size(); ++i) {
+            for (int iWm = 0; iWm < mPerDisplay.valueAt(i).mWwms.size(); ++iWm) {
+                SurfaceControl out =
+                        mPerDisplay.valueAt(i).mWwms.get(iWm).getSurfaceControlForWindow(rootView);
+                if (out != null) {
+                    return out;
+                }
+            }
+        }
+        return null;
+    }
+
     private class PerDisplay {
         final int mDisplayId;
         private final SparseArray<SysUiWindowManager> mWwms = new SparseArray<>();
@@ -255,6 +272,10 @@ public class SystemWindows {
 
         void updateConfiguration(Configuration configuration) {
             setConfiguration(configuration);
+        }
+
+        SurfaceControl getSurfaceControlForWindow(View rootView) {
+            return getSurfaceControl(rootView);
         }
     }
 

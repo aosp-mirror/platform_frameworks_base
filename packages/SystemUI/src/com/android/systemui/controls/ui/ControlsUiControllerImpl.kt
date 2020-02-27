@@ -22,6 +22,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.drawable.Drawable
 import android.os.IBinder
 import android.service.controls.Control
 import android.service.controls.TokenProvider
@@ -29,23 +30,26 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Space
-import android.widget.TextView
 
+import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlInfo
+import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.R
 import com.android.systemui.util.concurrency.DelayableExecutor
 
 import dagger.Lazy
 
+import java.text.Collator
+
 import javax.inject.Inject
 import javax.inject.Singleton
-
-private const val TAG = "ControlsUi"
 
 // TEMP CODE for MOCK
 private const val TOKEN = "https://www.googleapis.com/auth/assistant"
@@ -57,13 +61,13 @@ class TokenProviderConnection(val cc: ControlsController, val context: Context)
 
     override fun onServiceConnected(cName: ComponentName, binder: IBinder) {
         Thread({
-            Log.i(TAG, "TokenProviderConnection connected")
+            Log.i(ControlsUiController.TAG, "TokenProviderConnection connected")
             mTokenProvider = TokenProvider.Stub.asInterface(binder)
 
             val mLastAccountName = mTokenProvider?.getAccountName()
 
             if (mLastAccountName == null || mLastAccountName.isEmpty()) {
-                Log.e(TAG, "NO ACCOUNT IS SET. Open HomeMock app")
+                Log.e(ControlsUiController.TAG, "NO ACCOUNT IS SET. Open HomeMock app")
             } else {
                 mTokenProvider?.setAuthToken(getAuthToken(mLastAccountName))
                 cc.subscribeToFavorites()
@@ -79,7 +83,7 @@ class TokenProviderConnection(val cc: ControlsController, val context: Context)
         val am = AccountManager.get(context)
         val accounts = am.getAccountsByType("com.google")
         if (accounts == null || accounts.size == 0) {
-            Log.w(TAG, "No com.google accounts found")
+            Log.w(ControlsUiController.TAG, "No com.google accounts found")
             return null
         }
 
@@ -98,7 +102,7 @@ class TokenProviderConnection(val cc: ControlsController, val context: Context)
         try {
             return am.blockingGetAuthToken(account!!, SCOPE, true)
         } catch (e: Throwable) {
-            Log.e(TAG, "Error getting auth token", e)
+            Log.e(ControlsUiController.TAG, "Error getting auth token", e)
             return null
         }
     }
@@ -110,7 +114,9 @@ private data class ControlKey(val componentName: ComponentName, val controlId: S
 class ControlsUiControllerImpl @Inject constructor (
     val controlsController: Lazy<ControlsController>,
     val context: Context,
-    @Main val uiExecutor: DelayableExecutor
+    @Main val uiExecutor: DelayableExecutor,
+    @Background val bgExecutor: DelayableExecutor,
+    val controlsListingController: Lazy<ControlsListingController>
 ) : ControlsUiController {
 
     private lateinit var controlInfos: List<ControlInfo>
@@ -121,8 +127,23 @@ class ControlsUiControllerImpl @Inject constructor (
     override val available: Boolean
         get() = controlsController.get().available
 
+    private val listingCallback = object : ControlsListingController.ControlsListingCallback {
+        override fun onServicesUpdated(candidates: List<CandidateInfo>) {
+            bgExecutor.execute {
+                val collator = Collator.getInstance(context.resources.configuration.locales[0])
+                val localeComparator = compareBy<CandidateInfo, CharSequence>(collator) {
+                    it.loadLabel()
+                }
+
+                val mList = candidates.toMutableList()
+                mList.sortWith(localeComparator)
+                loadInitialSetupViewIcons(mList.map { it.loadLabel() to it.loadIcon() })
+            }
+        }
+    }
+
     override fun show(parent: ViewGroup) {
-        Log.d(TAG, "show()")
+        Log.d(ControlsUiController.TAG, "show()")
 
         this.parent = parent
 
@@ -153,8 +174,26 @@ class ControlsUiControllerImpl @Inject constructor (
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
 
-        val textView = parent.requireViewById(R.id.controls_title) as TextView
-        textView.setOnClickListener(launchSelectorActivityListener(context))
+        val viewGroup = parent.requireViewById(R.id.controls_no_favorites_group) as ViewGroup
+        viewGroup.setOnClickListener(launchSelectorActivityListener(context))
+
+        controlsListingController.get().addCallback(listingCallback)
+    }
+
+    private fun loadInitialSetupViewIcons(icons: List<Pair<CharSequence, Drawable>>) {
+        uiExecutor.execute {
+            val viewGroup = parent.requireViewById(R.id.controls_icon_row) as ViewGroup
+            viewGroup.removeAllViews()
+
+            val inflater = LayoutInflater.from(context)
+            icons.forEach {
+                val imageView = inflater.inflate(R.layout.controls_icon, viewGroup, false)
+                        as ImageView
+                imageView.setContentDescription(it.first)
+                imageView.setImageDrawable(it.second)
+                viewGroup.addView(imageView)
+            }
+        }
     }
 
     private fun launchSelectorActivityListener(context: Context): (View) -> Unit {
@@ -176,14 +215,14 @@ class ControlsUiControllerImpl @Inject constructor (
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
         controlInfos.forEach {
-            Log.d(TAG, "favorited control id: " + it.controlId)
+            Log.d(ControlsUiController.TAG, "favorited control id: " + it.controlId)
             if (lastRow.getChildCount() == 2) {
                 lastRow = createRow(inflater, listView)
             }
             val item = inflater.inflate(
                 R.layout.controls_base_item, lastRow, false) as ViewGroup
             lastRow.addView(item)
-            val cvh = ControlViewHolder(item, controlsController.get(), uiExecutor)
+            val cvh = ControlViewHolder(item, controlsController.get(), uiExecutor, bgExecutor)
             val key = ControlKey(it.component, it.controlId)
             cvh.bindData(controlsById.getValue(key))
             controlViewsById.put(key, cvh)
@@ -198,7 +237,7 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     override fun hide() {
-        Log.d(TAG, "hide()")
+        Log.d(ControlsUiController.TAG, "hide()")
         controlsController.get().unsubscribe()
         context.unbindService(tokenProviderConnection)
         tokenProviderConnection = null
@@ -206,13 +245,14 @@ class ControlsUiControllerImpl @Inject constructor (
         parent.removeAllViews()
         controlsById.clear()
         controlViewsById.clear()
+        controlsListingController.get().removeCallback(listingCallback)
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
-        Log.d(TAG, "onRefreshState()")
+        Log.d(ControlsUiController.TAG, "onRefreshState()")
         controls.forEach { c ->
             controlsById.get(ControlKey(componentName, c.getControlId()))?.let {
-                Log.d(TAG, "onRefreshState() for id: " + c.getControlId())
+                Log.d(ControlsUiController.TAG, "onRefreshState() for id: " + c.getControlId())
                 val cws = ControlWithState(it.ci, c)
                 val key = ControlKey(componentName, c.getControlId())
                 controlsById.put(key, cws)
@@ -231,9 +271,9 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    private fun createRow(inflater: LayoutInflater, parent: ViewGroup): ViewGroup {
-        val row = inflater.inflate(R.layout.controls_row, parent, false) as ViewGroup
-        parent.addView(row)
+    private fun createRow(inflater: LayoutInflater, listView: ViewGroup): ViewGroup {
+        val row = inflater.inflate(R.layout.controls_row, listView, false) as ViewGroup
+        listView.addView(row)
         return row
     }
 }

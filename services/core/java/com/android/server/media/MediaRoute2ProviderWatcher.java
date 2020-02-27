@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -47,7 +48,7 @@ final class MediaRoute2ProviderWatcher {
     private final int mUserId;
     private final PackageManager mPackageManager;
 
-    private final ArrayList<MediaRoute2ProviderProxy> mProviders = new ArrayList<>();
+    private final ArrayList<MediaRoute2ProviderServiceProxy> mProxies = new ArrayList<>();
     private boolean mRunning;
 
     MediaRoute2ProviderWatcher(Context context,
@@ -63,7 +64,7 @@ final class MediaRoute2ProviderWatcher {
         pw.println(prefix + "Watcher");
         pw.println(prefix + "  mUserId=" + mUserId);
         pw.println(prefix + "  mRunning=" + mRunning);
-        pw.println(prefix + "  mProviders.size()=" + mProviders.size());
+        pw.println(prefix + "  mProxies.size()=" + mProxies.size());
     }
 
     public void start() {
@@ -94,8 +95,8 @@ final class MediaRoute2ProviderWatcher {
             mHandler.removeCallbacks(mScanPackagesRunnable);
 
             // Stop all providers.
-            for (int i = mProviders.size() - 1; i >= 0; i--) {
-                mProviders.get(i).stop();
+            for (int i = mProxies.size() - 1; i >= 0; i--) {
+                mProxies.get(i).stop();
             }
         }
     }
@@ -115,38 +116,38 @@ final class MediaRoute2ProviderWatcher {
             if (serviceInfo != null) {
                 int sourceIndex = findProvider(serviceInfo.packageName, serviceInfo.name);
                 if (sourceIndex < 0) {
-                    MediaRoute2ProviderProxy provider =
-                            new MediaRoute2ProviderProxy(mContext,
+                    MediaRoute2ProviderServiceProxy proxy =
+                            new MediaRoute2ProviderServiceProxy(mContext,
                             new ComponentName(serviceInfo.packageName, serviceInfo.name),
                             mUserId);
-                    provider.start();
-                    mProviders.add(targetIndex++, provider);
-                    mCallback.onAddProvider(provider);
+                    proxy.start();
+                    mProxies.add(targetIndex++, proxy);
+                    mCallback.onAddProviderService(proxy);
                 } else if (sourceIndex >= targetIndex) {
-                    MediaRoute2ProviderProxy provider = mProviders.get(sourceIndex);
-                    provider.start(); // restart the provider if needed
-                    provider.rebindIfDisconnected();
-                    Collections.swap(mProviders, sourceIndex, targetIndex++);
+                    MediaRoute2ProviderServiceProxy proxy = mProxies.get(sourceIndex);
+                    proxy.start(); // restart the proxy if needed
+                    proxy.rebindIfDisconnected();
+                    Collections.swap(mProxies, sourceIndex, targetIndex++);
                 }
             }
         }
 
         // Remove providers for missing services.
-        if (targetIndex < mProviders.size()) {
-            for (int i = mProviders.size() - 1; i >= targetIndex; i--) {
-                MediaRoute2ProviderProxy provider = mProviders.get(i);
-                mCallback.onRemoveProvider(provider);
-                mProviders.remove(provider);
-                provider.stop();
+        if (targetIndex < mProxies.size()) {
+            for (int i = mProxies.size() - 1; i >= targetIndex; i--) {
+                MediaRoute2ProviderServiceProxy proxy = mProxies.get(i);
+                mCallback.onRemoveProviderService(proxy);
+                mProxies.remove(proxy);
+                proxy.stop();
             }
         }
     }
 
     private int findProvider(String packageName, String className) {
-        int count = mProviders.size();
+        int count = mProxies.size();
         for (int i = 0; i < count; i++) {
-            MediaRoute2ProviderProxy provider = mProviders.get(i);
-            if (provider.hasComponentName(packageName, className)) {
+            MediaRoute2ProviderServiceProxy proxy = mProxies.get(i);
+            if (proxy.hasComponentName(packageName, className)) {
                 return i;
             }
         }
@@ -171,7 +172,7 @@ final class MediaRoute2ProviderWatcher {
     };
 
     public interface Callback {
-        void onAddProvider(MediaRoute2ProviderProxy provider);
-        void onRemoveProvider(MediaRoute2ProviderProxy provider);
+        void onAddProviderService(@NonNull MediaRoute2ProviderServiceProxy proxy);
+        void onRemoveProviderService(@NonNull MediaRoute2ProviderServiceProxy proxy);
     }
 }

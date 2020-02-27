@@ -43,6 +43,7 @@ cc_defaults {
         "service.incremental.proto",
         "libutils",
         "libvold_binder",
+        "libc++fs",
     ],
     shared_libs: [
         "libandroidfw",

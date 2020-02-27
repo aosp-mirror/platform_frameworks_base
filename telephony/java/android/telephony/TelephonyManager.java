@@ -47,13 +47,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
-import android.net.NetworkStats;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -93,6 +93,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.ims.internal.IImsServiceFeatureCallback;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
@@ -100,6 +101,8 @@ import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.IOns;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
+import com.android.internal.telephony.ISms;
+import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 import com.android.internal.telephony.OperatorInfo;
@@ -294,6 +297,21 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     private SubscriptionManager mSubscriptionManager;
     private TelephonyScanManager mTelephonyScanManager;
+
+    /** Cached service handles, cleared by resetServiceHandles() at death */
+    private static final Object sCacheLock = new Object();
+
+    /** @hide */
+    private static boolean sServiceHandleCacheEnabled = true;
+
+    @GuardedBy("sCacheLock")
+    private static IPhoneSubInfo sIPhoneSubInfo;
+    @GuardedBy("sCacheLock")
+    private static ISub sISub;
+    @GuardedBy("sCacheLock")
+    private static ISms sISms;
+    @GuardedBy("sCacheLock")
+    private static final DeathRecipient sServiceDeath = new DeathRecipient();
 
     /** Enum indicating multisim variants
      *  DSDS - Dual SIM Dual Standby
@@ -1858,24 +1876,6 @@ public class TelephonyManager {
     //
 
     /**
-     * Returns the {@link PhoneCapability} for the device or null if it is not available.
-     * <p>
-     * Requires Permission: READ_PHONE_STATE or that the calling app has
-     * carrier privileges (see {@link #hasCarrierPrivileges}).
-     */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @Nullable
-    public PhoneCapability getPhoneCapability() {
-        try {
-            ITelephony telephony = getITelephony();
-            return telephony == null ? null :
-                    telephony.getPhoneCapability(getSubId(), getOpPackageName(), getFeatureId());
-        } catch (RemoteException ex) {
-            return null;
-        }
-    }
-
-    /**
      * Returns the software version number for the device, for example,
      * the IMEI/SV for GSM phones. Return null if the software version is
      * not available.
@@ -1991,7 +1991,7 @@ public class TelephonyManager {
     public String getDeviceId(int slotIndex) {
         // FIXME this assumes phoneId == slotIndex
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getDeviceIdForPhone(slotIndex, mContext.getOpPackageName(),
@@ -2245,7 +2245,7 @@ public class TelephonyManager {
 
     private String getNaiBySubscriberId(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             String nai = info.getNaiForSubscriber(subId, mContext.getOpPackageName(),
@@ -2788,39 +2788,22 @@ public class TelephonyManager {
     /**
      * Returns the ISO-3166 country code equivalent of the MCC (Mobile Country Code) of the current
      * registered operator or the cell nearby, if available.
-     * <p>
-     * The ISO-3166 country code is provided in lowercase 2 character format.
-     * <p>
-     * Note: In multi-sim, this returns a shared emergency network country iso from other
-     * subscription if the subscription used to create the TelephonyManager doesn't camp on
-     * a network due to some reason (e.g. pin/puk locked), or sim is absent in the corresponding
-     * slot.
+     *
      * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
      * if on a CDMA network).
      * <p>
      * @return the lowercase 2 character ISO-3166 country code, or empty string if not available.
      */
     public String getNetworkCountryIso() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony == null) return "";
-            return telephony.getNetworkCountryIsoForPhone(getPhoneId(),
-                    null /* no permission check */, null);
-        } catch (RemoteException ex) {
-            return "";
-        }
+        return getNetworkCountryIso(getSlotIndex());
     }
 
     /**
      * Returns the ISO-3166 country code equivalent of the MCC (Mobile Country Code) of the current
-     * registered operator or the cell nearby, if available.
-     * <p>
-     * The ISO-3166 country code is provided in lowercase 2 character format.
-     * <p>
-     * Note: In multi-sim, this returns a shared emergency network country iso from other
-     * subscription if the subscription used to create the TelephonyManager doesn't camp on
-     * a network due to some reason (e.g. pin/puk locked), or sim is absent in the corresponding
-     * slot.
+     * registered operator or the cell nearby, if available. This is same as
+     * {@link #getNetworkCountryIso()} but allowing specifying the SIM slot index. This is used for
+     * accessing network country info from the SIM slot that does not have SIM inserted.
+     *
      * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
      * if on a CDMA network).
      * <p>
@@ -2831,22 +2814,18 @@ public class TelephonyManager {
      *
      * @throws IllegalArgumentException when the slotIndex is invalid.
      *
-     * {@hide}
      */
-    @SystemApi
-    @TestApi
     @NonNull
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getNetworkCountryIso(int slotIndex) {
         try {
-            if (!SubscriptionManager.isValidSlotIndex(slotIndex)) {
+            if (slotIndex != SubscriptionManager.DEFAULT_SIM_SLOT_INDEX
+                    && !SubscriptionManager.isValidSlotIndex(slotIndex)) {
                 throw new IllegalArgumentException("invalid slot index " + slotIndex);
             }
 
             ITelephony telephony = getITelephony();
             if (telephony == null) return "";
-            return telephony.getNetworkCountryIsoForPhone(slotIndex, getOpPackageName(),
-                    getFeatureId());
+            return telephony.getNetworkCountryIsoForPhone(slotIndex);
         } catch (RemoteException ex) {
             return "";
         }
@@ -3944,7 +3923,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getSimSerialNumber(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getIccSerialNumberForSubscriber(subId, mContext.getOpPackageName(),
@@ -4217,7 +4196,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSubscriberId(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getSubscriberIdForSubscriber(subId, mContext.getOpPackageName(),
@@ -4253,7 +4232,7 @@ public class TelephonyManager {
     @Nullable
     public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(@KeyType int keyType) {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null) {
                 Rlog.e(TAG,"IMSI error: Subscriber Info is null");
                 return null;
@@ -4296,7 +4275,7 @@ public class TelephonyManager {
     @SystemApi
     public void resetCarrierKeysForImsiEncryption() {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null) {
                 Rlog.e(TAG, "IMSI error: Subscriber Info is null");
                 if (!isSystemProcess()) {
@@ -4361,7 +4340,7 @@ public class TelephonyManager {
      */
     public void setCarrierInfoForImsiEncryption(ImsiEncryptionInfo imsiEncryptionInfo) {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null) return;
             info.setCarrierInfoForImsiEncryption(mSubId, mContext.getOpPackageName(),
                     imsiEncryptionInfo);
@@ -4385,7 +4364,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getGroupIdLevel1() {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getGroupIdLevel1ForSubscriber(getSubId(), mContext.getOpPackageName(),
@@ -4409,7 +4388,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getGroupIdLevel1(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getGroupIdLevel1ForSubscriber(subId, mContext.getOpPackageName(),
@@ -4472,7 +4451,7 @@ public class TelephonyManager {
             return number;
         }
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getLine1NumberForSubscriber(subId, mContext.getOpPackageName(),
@@ -4563,7 +4542,7 @@ public class TelephonyManager {
             return alphaTag;
         }
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getLine1AlphaTagForSubscriber(subId, getOpPackageName(),
@@ -4651,7 +4630,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getMsisdn(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getMsisdnForSubscriber(subId, getOpPackageName(), getFeatureId());
@@ -4685,7 +4664,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getVoiceMailNumber(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getVoiceMailNumberForSubscriber(subId, getOpPackageName(),
@@ -5284,7 +5263,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getVoiceMailAlphaTag(int subId) {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getVoiceMailAlphaTagForSubscriber(subId, getOpPackageName(),
@@ -5332,7 +5311,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getIsimImpi() {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             //get the Isim Impi based on subId
@@ -5359,7 +5338,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimDomain() {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             //get the Isim Domain based on subId
@@ -5383,7 +5362,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String[] getIsimImpu() {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             //get the Isim Impu based on subId
@@ -5394,19 +5373,6 @@ public class TelephonyManager {
             // This could happen before phone restarts due to crashing
             return null;
         }
-    }
-
-   /**
-    * @hide
-    */
-    @UnsupportedAppUsage
-    private IPhoneSubInfo getSubscriberInfo() {
-        // get it each time because that process crashes a lot
-        return IPhoneSubInfo.Stub.asInterface(
-                TelephonyFrameworkInitializer
-                        .getTelephonyServiceManager()
-                        .getPhoneSubServiceRegisterer()
-                        .get());
     }
 
     /**
@@ -5462,6 +5428,14 @@ public class TelephonyManager {
     public @CallState int getCallState(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getCallStateForSlot(phoneId);
+    }
+
+    /**
+    * @hide
+    */
+    @UnsupportedAppUsage
+    private IPhoneSubInfo getSubscriberInfo() {
+        return getSubscriberInfoService();
     }
 
     /**
@@ -5597,23 +5571,6 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             return DATA_DISCONNECTED;
         }
-    }
-
-    /**
-     * Convert data state to string
-     *
-     * @return The data state in string format.
-     * @hide
-     */
-    public static String dataStateToString(@DataState int state) {
-        switch (state) {
-            case DATA_DISCONNECTED: return "DISCONNECTED";
-            case DATA_CONNECTING: return "CONNECTING";
-            case DATA_CONNECTED: return "CONNECTED";
-            case DATA_SUSPENDED: return "SUSPENDED";
-            case DATA_DISCONNECTING: return "DISCONNECTING";
-        }
-        return "UNKNOWN(" + state + ")";
     }
 
    /**
@@ -6166,9 +6123,11 @@ public class TelephonyManager {
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.SEService#getUiccReader(int)},
+     *             {@link android.se.omapi.Reader#openSession()},
+     *             {@link android.se.omapi.Session#openLogicalChannel(byte[], byte)}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(String AID, int p2) {
         return iccOpenLogicalChannel(getSubId(), AID, p2);
@@ -6200,9 +6159,11 @@ public class TelephonyManager {
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.SEService#getUiccReader(int)},
+     *             {@link android.se.omapi.Reader#openSession()},
+     *             {@link android.se.omapi.Session#openLogicalChannel(byte[], byte)}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID, int p2) {
         try {
@@ -6231,9 +6192,9 @@ public class TelephonyManager {
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.Channel#close()}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
@@ -6261,9 +6222,9 @@ public class TelephonyManager {
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.Channel#close()}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public boolean iccCloseLogicalChannel(int channel) {
         return iccCloseLogicalChannel(getSubId(), channel);
@@ -6283,9 +6244,9 @@ public class TelephonyManager {
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.Channel#close()}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public boolean iccCloseLogicalChannel(int subId, int channel) {
         try {
@@ -6322,9 +6283,9 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at the end, or null if
      * there is an issue connecting to the Telephony service.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
@@ -6363,9 +6324,9 @@ public class TelephonyManager {
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public String iccTransmitApduLogicalChannel(int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
@@ -6395,9 +6356,9 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public String iccTransmitApduLogicalChannel(int subId, int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
@@ -6434,9 +6395,12 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.SEService#getUiccReader(int)},
+     *             {@link android.se.omapi.Reader#openSession()},
+     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
+     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
@@ -6473,9 +6437,12 @@ public class TelephonyManager {
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.SEService#getUiccReader(int)},
+     *             {@link android.se.omapi.Reader#openSession()},
+     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
+     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public String iccTransmitApduBasicChannel(int cla,
             int instruction, int p1, int p2, int p3, String data) {
@@ -6503,9 +6470,12 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.SEService#getUiccReader(int)},
+     *             {@link android.se.omapi.Reader#openSession()},
+     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
+     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public String iccTransmitApduBasicChannel(int subId, int cla,
             int instruction, int p1, int p2, int p3, String data) {
@@ -6534,9 +6504,12 @@ public class TelephonyManager {
      * @param p3 P3 value of the APDU command.
      * @param filePath
      * @return The APDU response.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.SEService#getUiccReader(int)},
+     *             {@link android.se.omapi.Reader#openSession()},
+     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
+     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public byte[] iccExchangeSimIO(int fileID, int command, int p1, int p2, int p3,
             String filePath) {
@@ -6559,9 +6532,12 @@ public class TelephonyManager {
      * @param filePath
      * @return The APDU response.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.SEService#getUiccReader(int)},
+     *             {@link android.se.omapi.Reader#openSession()},
+     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
+     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public byte[] iccExchangeSimIO(int subId, int fileID, int command, int p1, int p2,
             int p3, String filePath) {
@@ -6588,9 +6564,12 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card in hexadecimal format
      *         with the last 4 bytes being the status word. If the command fails,
      *         returns an empty string.
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.SEService#getUiccReader(int)},
+     *             {@link android.se.omapi.Reader#openSession()},
+     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
+     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public String sendEnvelopeWithStatus(String content) {
         return sendEnvelopeWithStatus(getSubId(), content);
@@ -6611,9 +6590,12 @@ public class TelephonyManager {
      *         with the last 4 bytes being the status word. If the command fails,
      *         returns an empty string.
      * @hide
-     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead. See
+     *             {@link android.se.omapi.SEService#getUiccReader(int)},
+     *             {@link android.se.omapi.Reader#openSession()},
+     *             {@link android.se.omapi.Session#openBasicChannel(byte[], byte)},
+     *             {@link android.se.omapi.Channel#transmit(byte[])}.
      */
-    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
     @Deprecated
     public String sendEnvelopeWithStatus(int subId, String content) {
         try {
@@ -7124,7 +7106,7 @@ public class TelephonyManager {
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimIst() {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             //get the Isim Ist based on subId
@@ -7146,7 +7128,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String[] getIsimPcscf() {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             //get the Isim Pcscf based on subId
@@ -7227,7 +7209,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getIccAuthentication(int subId, int appType, int authType, String data) {
         try {
-            IPhoneSubInfo info = getSubscriberInfo();
+            IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
                 return null;
             return info.getIccSimChallengeResponse(subId, appType, authType, data);
@@ -11068,28 +11050,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Get aggregated video call data usage since boot.
-     * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
-     *
-     * @param how one of the NetworkStats.STATS_PER_* constants depending on whether the request is
-     * for data usage per uid or overall usage.
-     * @return Snapshot of video call data usage
-     * @hide
-     */
-    public NetworkStats getVtDataUsage(int how) {
-        boolean perUidStats = (how == NetworkStats.STATS_PER_UID);
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.getVtDataUsage(getSubId(), perUidStats);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getVtDataUsage", e);
-        }
-        return null;
-    }
-
-    /**
      * Policy control of data connection. Usually used when data limit is passed.
      * @param enabled True if enabling the data, otherwise disabling.
      * @hide
@@ -11197,7 +11157,6 @@ public class TelephonyManager {
      * @param isEnabled {@code true} for enabling; {@code false} for disabling.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setAlwaysReportSignalStrength(boolean isEnabled) {
         try {
@@ -13085,5 +13044,154 @@ public class TelephonyManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private static class DeathRecipient implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            resetServiceCache();
+        }
+    }
+
+   /**
+    * Reset everything in the service cache; if one handle died then they are
+    * all probably broken.
+    * @hide
+    */
+    private static void resetServiceCache() {
+        synchronized (sCacheLock) {
+            if (sISub != null) {
+                sISub.asBinder().unlinkToDeath(sServiceDeath, 0);
+                sISub = null;
+            }
+            if (sISms != null) {
+                sISms.asBinder().unlinkToDeath(sServiceDeath, 0);
+                sISms = null;
+            }
+            if (sIPhoneSubInfo != null) {
+                sIPhoneSubInfo.asBinder().unlinkToDeath(sServiceDeath, 0);
+                sIPhoneSubInfo = null;
+            }
+        }
+    }
+
+   /**
+    * @hide
+    */
+    static IPhoneSubInfo getSubscriberInfoService() {
+        // Keeps cache disabled until test fixes are checked into AOSP.
+        if (!sServiceHandleCacheEnabled) {
+            return IPhoneSubInfo.Stub.asInterface(
+                TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getPhoneSubServiceRegisterer()
+                        .get());
+        }
+
+        if (sIPhoneSubInfo == null) {
+            IPhoneSubInfo temp = IPhoneSubInfo.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                        .getTelephonyServiceManager()
+                        .getPhoneSubServiceRegisterer()
+                        .get());
+            synchronized (sCacheLock) {
+                if (sIPhoneSubInfo == null && temp != null) {
+                    try {
+                        sIPhoneSubInfo = temp;
+                        sIPhoneSubInfo.asBinder().linkToDeath(sServiceDeath, 0);
+                    } catch (Exception e) {
+                        // something has gone horribly wrong
+                        sIPhoneSubInfo = null;
+                    }
+                }
+            }
+        }
+        return sIPhoneSubInfo;
+    }
+
+   /**
+    * @hide
+    */
+    static ISub getSubscriptionService() {
+        // Keeps cache disabled until test fixes are checked into AOSP.
+        if (!sServiceHandleCacheEnabled) {
+            return ISub.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getSubscriptionServiceRegisterer()
+                            .get());
+        }
+
+        if (sISub == null) {
+            ISub temp = ISub.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getSubscriptionServiceRegisterer()
+                            .get());
+            synchronized (sCacheLock) {
+                if (sISub == null && temp != null) {
+                    try {
+                        sISub = temp;
+                        sISub.asBinder().linkToDeath(sServiceDeath, 0);
+                    } catch (Exception e) {
+                        // something has gone horribly wrong
+                        sISub = null;
+                    }
+                }
+            }
+        }
+        return sISub;
+    }
+
+    /**
+    * @hide
+    */
+    static ISms getSmsService() {
+        // Keeps cache disabled until test fixes are checked into AOSP.
+        if (!sServiceHandleCacheEnabled) {
+            return ISms.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getSmsServiceRegisterer()
+                            .get());
+        }
+
+        if (sISms == null) {
+            ISms temp = ISms.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getSmsServiceRegisterer()
+                            .get());
+            synchronized (sCacheLock) {
+                if (sISms == null && temp != null) {
+                    try {
+                        sISms = temp;
+                        sISms.asBinder().linkToDeath(sServiceDeath, 0);
+                    } catch (Exception e) {
+                        // something has gone horribly wrong
+                        sISms = null;
+                    }
+                }
+            }
+        }
+        return sISms;
+    }
+
+    /**
+     * Disables service handle caching for tests that utilize mock services.
+     * @hide
+     */
+    @VisibleForTesting
+    public static void disableServiceHandleCaching() {
+        sServiceHandleCacheEnabled = false;
+    }
+
+    /**
+     * Reenables service handle caching.
+     * @hide
+     */
+    @VisibleForTesting
+    public static void enableServiceHandleCaching() {
+        sServiceHandleCacheEnabled = true;
     }
 }

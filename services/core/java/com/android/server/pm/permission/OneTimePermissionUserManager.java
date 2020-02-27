@@ -36,6 +36,8 @@ public class OneTimePermissionUserManager {
 
     private static final String LOG_TAG = OneTimePermissionUserManager.class.getSimpleName();
 
+    private static final boolean DEBUG = true;
+
     private final @NonNull Context mContext;
     private final @NonNull ActivityManager mActivityManager;
     private final @NonNull AlarmManager mAlarmManager;
@@ -156,6 +158,14 @@ public class OneTimePermissionUserManager {
 
         private PackageInactivityListener(int uid, @NonNull String packageName, long timeout,
                 int importanceToResetTimer, int importanceToKeepSessionAlive) {
+
+            if (DEBUG) {
+                Log.d(LOG_TAG,
+                        "Start tracking " + packageName + ". uid=" + uid + " timeout=" + timeout
+                                + " importanceToResetTimer=" + importanceToResetTimer
+                                + " importanceToKeepSessionAlive=" + importanceToKeepSessionAlive);
+            }
+
             mUid = uid;
             mPackageName = packageName;
             mTimeout = timeout;
@@ -181,6 +191,12 @@ public class OneTimePermissionUserManager {
         private void onImportanceChanged(int uid, int importance) {
             if (uid != mUid) {
                 return;
+            }
+
+
+            if (DEBUG) {
+                Log.d(LOG_TAG, "Importance changed for " + mPackageName + " (" + mUid + ")."
+                        + " importance=" + importance);
             }
             synchronized (mInnerLock) {
                 if (importance > IMPORTANCE_CACHED) {
@@ -257,8 +273,15 @@ public class OneTimePermissionUserManager {
             mIsFinished = true;
             cancelAlarmLocked();
             mContext.getMainThreadHandler().post(
-                    () -> mPermissionControllerManager.notifyOneTimePermissionSessionTimeout(
-                            mPackageName));
+                    () -> {
+                        if (DEBUG) {
+                            Log.d(LOG_TAG, "One time session expired for "
+                                    + mPackageName + " (" + mUid + ").");
+                        }
+
+                        mPermissionControllerManager.notifyOneTimePermissionSessionTimeout(
+                                mPackageName);
+                    });
             mActivityManager.removeOnUidImportanceListener(mStartTimerListener);
             mActivityManager.removeOnUidImportanceListener(mSessionKillableListener);
             mActivityManager.removeOnUidImportanceListener(mGoneListener);

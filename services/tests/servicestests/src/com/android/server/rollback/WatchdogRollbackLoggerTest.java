@@ -20,7 +20,11 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -36,6 +40,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.List;
+
 @RunWith(JUnit4.class)
 public class WatchdogRollbackLoggerTest {
 
@@ -46,6 +52,11 @@ public class WatchdogRollbackLoggerTest {
     private PackageInfo mPackageInfo;
 
     private static final String LOGGING_PARENT_KEY = "android.content.pm.LOGGING_PARENT";
+    private static final String LOGGING_PARENT_VALUE = "logging.parent";
+    private static final int PACKAGE_INFO_FLAGS = PackageManager.MATCH_APEX
+            | PackageManager.GET_META_DATA;
+    private static final List<String> sFailingPackages =
+            List.of("package1", "package2", "package3");
 
     @Before
     public void setUp() {
@@ -64,10 +75,12 @@ public class WatchdogRollbackLoggerTest {
      */
     @Test
     public void testLogPackageHasNoMetadata() throws Exception {
-        when(mMockPm.getApplicationInfo(anyString(), anyInt())).thenReturn(mApplicationInfo);
+        when(mMockPm.getPackageInfo(anyString(), anyInt())).thenReturn(mPackageInfo);
         VersionedPackage logPackage = WatchdogRollbackLogger.getLogPackage(mMockContext,
                 sTestPackageV1);
         assertThat(logPackage).isNull();
+        verify(mMockPm, times(1)).getPackageInfo(
+                sTestPackageV1.getPackageName(), PACKAGE_INFO_FLAGS);
     }
 
     /**
@@ -76,12 +89,16 @@ public class WatchdogRollbackLoggerTest {
      */
     @Test
     public void testLogPackageParentKeyIsNull() throws Exception {
-        when(mMockPm.getApplicationInfo(anyString(), anyInt())).thenReturn(mApplicationInfo);
+        when(mMockPm.getPackageInfo(anyString(), anyInt())).thenReturn(mPackageInfo);
         Bundle bundle = new Bundle();
         bundle.putString(LOGGING_PARENT_KEY, null);
+        mApplicationInfo.metaData = bundle;
+        mPackageInfo.applicationInfo = mApplicationInfo;
         VersionedPackage logPackage = WatchdogRollbackLogger.getLogPackage(mMockContext,
                 sTestPackageV1);
         assertThat(logPackage).isNull();
+        verify(mMockPm, times(1)).getPackageInfo(
+                sTestPackageV1.getPackageName(), PACKAGE_INFO_FLAGS);
     }
 
     /**
@@ -90,15 +107,18 @@ public class WatchdogRollbackLoggerTest {
     @Test
     public void testLogPackageHasParentKey() throws Exception {
         Bundle bundle = new Bundle();
-        bundle.putString(LOGGING_PARENT_KEY, "logging.parent");
+        bundle.putString(LOGGING_PARENT_KEY, LOGGING_PARENT_VALUE);
         mApplicationInfo.metaData = bundle;
+        mPackageInfo.applicationInfo = mApplicationInfo;
         mPackageInfo.setLongVersionCode(12345L);
-        when(mMockPm.getApplicationInfo(anyString(), anyInt())).thenReturn(mApplicationInfo);
         when(mMockPm.getPackageInfo(anyString(), anyInt())).thenReturn(mPackageInfo);
         VersionedPackage logPackage = WatchdogRollbackLogger.getLogPackage(mMockContext,
                 sTestPackageV1);
-        VersionedPackage expectedLogPackage = new VersionedPackage("logging.parent", 12345);
+        VersionedPackage expectedLogPackage = new VersionedPackage(LOGGING_PARENT_VALUE, 12345);
         assertThat(logPackage).isEqualTo(expectedLogPackage);
+        verify(mMockPm, times(1)).getPackageInfo(
+                sTestPackageV1.getPackageName(), PACKAGE_INFO_FLAGS);
+
     }
 
     /**
@@ -107,12 +127,64 @@ public class WatchdogRollbackLoggerTest {
     @Test
     public void testLogPackageNameNotFound() throws Exception {
         Bundle bundle = new Bundle();
-        bundle.putString("android.content.pm.LOGGING_PARENT", "logging.parent");
+        bundle.putString(LOGGING_PARENT_KEY, LOGGING_PARENT_VALUE);
         mApplicationInfo.metaData = bundle;
-        when(mMockPm.getPackageInfo(anyString(), anyInt())).thenThrow(
+        mPackageInfo.applicationInfo = mApplicationInfo;
+        when(mMockPm.getPackageInfo(anyString(), anyInt())).thenReturn(mPackageInfo);
+        when(mMockPm.getPackageInfo(same(LOGGING_PARENT_VALUE), anyInt())).thenThrow(
                 new PackageManager.NameNotFoundException());
         VersionedPackage logPackage = WatchdogRollbackLogger.getLogPackage(mMockContext,
                 sTestPackageV1);
         assertThat(logPackage).isNull();
+        verify(mMockPm, times(1)).getPackageInfo(
+                sTestPackageV1.getPackageName(), PACKAGE_INFO_FLAGS);
+    }
+
+    /**
+     * Ensures that we make the correct Package Manager calls in the case that the failing packages
+     * are correctly configured with parent packages.
+     */
+    @Test
+    public void testApexdLoggingCallsWithParents() throws Exception {
+        for (String failingPackage: sFailingPackages) {
+            PackageInfo packageInfo = new PackageInfo();
+            ApplicationInfo applicationInfo = new ApplicationInfo();
+            Bundle bundle = new Bundle();
+            bundle.putString(LOGGING_PARENT_KEY, getParent(failingPackage));
+            applicationInfo.metaData = bundle;
+            packageInfo.applicationInfo = applicationInfo;
+            when(mMockPm.getPackageInfo(same(failingPackage), anyInt())).thenReturn(packageInfo);
+        }
+
+        when(mMockPm.getPackageInfo(anyString(), eq(0))).thenReturn(mPackageInfo);
+        WatchdogRollbackLogger.logApexdRevert(mMockContext, sFailingPackages, "test_process");
+        for (String failingPackage: sFailingPackages) {
+            verify(mMockPm, times(1)).getPackageInfo(failingPackage, PACKAGE_INFO_FLAGS);
+            verify(mMockPm, times(1)).getPackageInfo(getParent(failingPackage), 0);
+        }
+    }
+
+    /**
+     * Ensures that we don't make any calls to parent packages in the case that packages are not
+     * correctly configured with parent packages.
+     */
+    @Test
+    public void testApexdLoggingCallsWithNoParents() throws Exception {
+        for (String failingPackage: sFailingPackages) {
+            PackageInfo packageInfo = new PackageInfo();
+            packageInfo.applicationInfo = new ApplicationInfo();
+            when(mMockPm.getPackageInfo(same(failingPackage), anyInt())).thenReturn(packageInfo);
+        }
+        when(mMockPm.getPackageInfo(anyString(), eq(0))).thenReturn(mPackageInfo);
+
+        WatchdogRollbackLogger.logApexdRevert(mMockContext, sFailingPackages, "test_process");
+        verify(mMockPm, times(sFailingPackages.size())).getPackageInfo(anyString(), anyInt());
+        for (String failingPackage: sFailingPackages) {
+            verify(mMockPm, times(1)).getPackageInfo(failingPackage, PACKAGE_INFO_FLAGS);
+        }
+    }
+
+    private String getParent(String packageName) {
+        return packageName + "-parent";
     }
 }

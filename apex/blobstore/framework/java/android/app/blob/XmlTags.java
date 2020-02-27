@@ -52,4 +52,5 @@ public final class XmlTags {
     // For leasee
     public static final String TAG_LEASEE = "l";
     public static final String ATTR_DESCRIPTION_RES_ID = "rid";
+    public static final String ATTR_DESCRIPTION = "d";
 }

@@ -50,6 +50,7 @@ public final class TwilightService extends SystemService
         implements AlarmManager.OnAlarmListener, Handler.Callback, LocationListener {
 
     private static final String TAG = "TwilightService";
+    private static final String FEATURE_ID = "TwilightService";
     private static final boolean DEBUG = false;
 
     private static final int MSG_START_LISTENING = 1;
@@ -73,7 +74,7 @@ public final class TwilightService extends SystemService
     protected TwilightState mLastTwilightState;
 
     public TwilightService(Context context) {
-        super(context);
+        super(context.createFeatureContext(FEATURE_ID));
         mHandler = new Handler(Looper.getMainLooper(), this);
     }
 

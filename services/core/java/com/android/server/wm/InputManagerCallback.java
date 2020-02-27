@@ -158,7 +158,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         }
 
         final File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
-                null /* processCpuTracker */, null /* lastPids */, nativePids);
+                null /* processCpuTracker */, null /* lastPids */, nativePids,
+                null /* logExceptionCreatingFile */);
         if (tracesFile != null) {
             tracesFile.renameTo(new File(tracesFile.getParent(), tracesFile.getName() + "_pre"));
         }

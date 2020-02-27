@@ -148,6 +148,15 @@ public class ConfigurationTest extends TestCase {
         assertEquals(SMALLEST_SCREEN_WIDTH_DP_UNDEFINED, config.smallestScreenWidthDp);
     }
 
+    @Test
+    public void testNightModeHelper() {
+        Configuration config = new Configuration();
+        config.uiMode = Configuration.UI_MODE_NIGHT_YES;
+        assertTrue(config.isNightModeActive());
+        config.uiMode = Configuration.UI_MODE_NIGHT_NO;
+        assertFalse(config.isNightModeActive());
+    }
+
     private void dumpDebug(File f, Configuration config) throws Exception {
         final AtomicFile af = new AtomicFile(f);
         FileOutputStream fos = af.startWrite();

@@ -301,6 +301,13 @@ public class PhoneStateListener {
     public static final int LISTEN_USER_MOBILE_DATA_STATE                  = 0x00080000;
 
     /**
+     *  Listen for display info changed event.
+     *
+     *  @see #onDisplayInfoChanged
+     */
+    public static final int LISTEN_DISPLAY_INFO_CHANGED = 0x00100000;
+
+    /**
      *  Listen for changes to the phone capability.
      *
      *  @see #onPhoneCapabilityChanged
@@ -412,23 +419,23 @@ public class PhoneStateListener {
      * domain. This indication does not necessarily indicate a change of service state, which should
      * be tracked via {@link #LISTEN_SERVICE_STATE}.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
-     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
+     * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
      * @see #onRegistrationFailed()
      */
-    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public static final int LISTEN_REGISTRATION_FAILURE = 0x40000000;
 
     /**
      * Listen for Barring Information for the current registered / camped cell.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
-     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
+     * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
      * @see #onBarringInfoChanged()
      */
-    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public static final int LISTEN_BARRING_INFO = 0x80000000;
 
     /*
@@ -848,6 +855,21 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when the display info has changed on the registered subscription.
+     * <p> The {@link DisplayInfo} contains status information shown to the user based on
+     * carrier policy.
+     *
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * @param displayInfo The display information.
+     */
+    @RequiresPermission((android.Manifest.permission.READ_PHONE_STATE))
+    public void onDisplayInfoChanged(@NonNull DisplayInfo displayInfo) {
+        // default implementation empty
+    }
+
+    /**
      * Callback invoked when the current emergency number list has changed on the registered
      * subscription.
      * Note, the registration subId comes from {@link TelephonyManager} object which registers
@@ -1224,6 +1246,15 @@ public class PhoneStateListener {
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
                             () -> psl.onUserMobileDataStateChanged(enabled)));
+        }
+
+        public void onDisplayInfoChanged(DisplayInfo displayInfo) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onDisplayInfoChanged(displayInfo)));
         }
 
         public void onOemHookRawEvent(byte[] rawData) {

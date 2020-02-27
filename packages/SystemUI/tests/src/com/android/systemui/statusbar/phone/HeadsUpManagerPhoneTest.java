@@ -62,16 +62,21 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Mock private StatusBar mBar;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private KeyguardBypassController mBypassController;
+    @Mock private ConfigurationControllerImpl mConfigurationController;
     private boolean mLivesPastNormalTime;
 
     private final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
-        TestableHeadsUpManagerPhone(Context context, View notificationShadeWindowView,
-                NotificationGroupManager groupManager, StatusBar bar,
+        TestableHeadsUpManagerPhone(
+                Context context,
+                NotificationGroupManager groupManager,
                 VisualStabilityManager vsManager,
                 StatusBarStateController statusBarStateController,
-                KeyguardBypassController keyguardBypassController) {
-            super(context, statusBarStateController, keyguardBypassController);
-            setUp(notificationShadeWindowView, groupManager, bar, vsManager);
+                KeyguardBypassController keyguardBypassController,
+                ConfigurationController configurationController
+        ) {
+            super(context, statusBarStateController, keyguardBypassController,
+                    groupManager, configurationController);
+            setup(vsManager);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }
@@ -91,8 +96,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         mDependency.injectMockDependency(BubbleController.class);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mDependency.injectMockDependency(ConfigurationController.class);
-        mHeadsUpManager = new TestableHeadsUpManagerPhone(mContext, mNotificationShadeWindowView,
-                mGroupManager, mBar, mVSManager, mStatusBarStateController, mBypassController);
+        mHeadsUpManager = new TestableHeadsUpManagerPhone(mContext, mGroupManager, mVSManager,
+                mStatusBarStateController, mBypassController, mConfigurationController);
         super.setUp();
         mHeadsUpManager.mHandler = mTestHandler;
     }

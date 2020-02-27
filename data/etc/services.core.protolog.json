@@ -223,6 +223,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1670695197": {
+      "message": "Attempted to add presentation window to a non-suitable display.  Aborting.",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-1661704580": {
       "message": "Attempted to set replacing window on non-existing app token %s",
       "level": "WARN",
@@ -691,6 +697,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-668956537": {
+      "message": "  THUMBNAIL %s: CREATE",
+      "level": "INFO",
+      "group": "WM_SHOW_TRANSACTIONS",
+      "at": "com\/android\/server\/wm\/SurfaceFreezer.java"
+    },
     "-666510420": {
       "message": "With display frozen, orientationChangeComplete=%b",
       "level": "VERBOSE",
@@ -702,6 +714,18 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "-650040763": {
+      "message": "rotationForOrientation(orient=%d, last=%d); user=%d %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
+    "-639305784": {
+      "message": "Could not report config changes to the window token client.",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowToken.java"
     },
     "-635082269": {
       "message": "******** booted=%b msg=%b haveBoot=%b haveApp=%b haveWall=%b wallEnabled=%b haveKeyguard=%b",

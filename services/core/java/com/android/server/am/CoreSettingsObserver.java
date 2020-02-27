@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Helper class for watching a set of core settings which the framework
@@ -42,16 +44,20 @@ import java.util.Map;
 final class CoreSettingsObserver extends ContentObserver {
     private static final String LOG_TAG = CoreSettingsObserver.class.getSimpleName();
 
-    private static class DeviceConfigEntry {
+    private static class DeviceConfigEntry<T> {
         String namespace;
         String flag;
         String coreSettingKey;
-        Class<?> type;
-        DeviceConfigEntry(String namespace, String flag, String coreSettingKey, Class<?> type) {
+        Class<T> type;
+        T defaultValue;
+
+        DeviceConfigEntry(String namespace, String flag, String coreSettingKey, Class<T> type,
+                @NonNull T defaultValue) {
             this.namespace = namespace;
             this.flag = flag;
             this.coreSettingKey = coreSettingKey;
             this.type = type;
+            this.defaultValue = Objects.requireNonNull(defaultValue);
         }
     }
 
@@ -105,24 +111,34 @@ final class CoreSettingsObserver extends ContentObserver {
         sGlobalSettingToTypeMap.put(Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES, String.class);
         // add other global settings here...
 
-        sDeviceConfigEntries.add(new DeviceConfigEntry(
-                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_CURSOR_CONTROL,
-                WidgetFlags.KEY_ENABLE_CURSOR_CONTROL, boolean.class));
-        sDeviceConfigEntries.add(new DeviceConfigEntry(
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE,
+                WidgetFlags.KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE, boolean.class,
+                WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_INSERTION_HANDLE_GESTURES,
+                WidgetFlags.KEY_ENABLE_INSERTION_HANDLE_GESTURES, boolean.class,
+                WidgetFlags.ENABLE_INSERTION_HANDLE_GESTURES_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Integer>(
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.INSERTION_HANDLE_DELTA_HEIGHT,
-                WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT, int.class));
-        sDeviceConfigEntries.add(new DeviceConfigEntry(
+                WidgetFlags.KEY_INSERTION_HANDLE_DELTA_HEIGHT, int.class,
+                WidgetFlags.INSERTION_HANDLE_DELTA_HEIGHT_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Integer>(
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.INSERTION_HANDLE_OPACITY,
-                WidgetFlags.KEY_INSERTION_HANDLE_OPACITY, int.class));
-        sDeviceConfigEntries.add(new DeviceConfigEntry(
+                WidgetFlags.KEY_INSERTION_HANDLE_OPACITY, int.class,
+                WidgetFlags.INSERTION_HANDLE_OPACITY_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_NEW_MAGNIFIER,
-                WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER, boolean.class));
-        sDeviceConfigEntries.add(new DeviceConfigEntry(
+                WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER, boolean.class,
+                WidgetFlags.ENABLE_NEW_MAGNIFIER_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Float>(
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.MAGNIFIER_ZOOM_FACTOR,
-                WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR, float.class));
-        sDeviceConfigEntries.add(new DeviceConfigEntry(
+                WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR, float.class,
+                WidgetFlags.MAGNIFIER_ZOOM_FACTOR_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Float>(
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.MAGNIFIER_ASPECT_RATIO,
-                WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO, float.class));
+                WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO, float.class,
+                WidgetFlags.MAGNIFIER_ASPECT_RATIO_DEFAULT));
         // add other device configs here...
     }
 
@@ -216,23 +232,29 @@ final class CoreSettingsObserver extends ContentObserver {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void populateSettingsFromDeviceConfig() {
-        for (DeviceConfigEntry entry : sDeviceConfigEntries) {
+        for (DeviceConfigEntry<?> entry : sDeviceConfigEntries) {
             if (entry.type == String.class) {
+                String defaultValue = ((DeviceConfigEntry<String>) entry).defaultValue;
                 mCoreSettings.putString(entry.coreSettingKey,
-                        DeviceConfig.getString(entry.namespace, entry.flag, ""));
+                        DeviceConfig.getString(entry.namespace, entry.flag, defaultValue));
             } else if (entry.type == int.class) {
+                int defaultValue = ((DeviceConfigEntry<Integer>) entry).defaultValue;
                 mCoreSettings.putInt(entry.coreSettingKey,
-                        DeviceConfig.getInt(entry.namespace, entry.flag, 0));
+                        DeviceConfig.getInt(entry.namespace, entry.flag, defaultValue));
             } else if (entry.type == float.class) {
+                float defaultValue = ((DeviceConfigEntry<Float>) entry).defaultValue;
                 mCoreSettings.putFloat(entry.coreSettingKey,
-                        DeviceConfig.getFloat(entry.namespace, entry.flag, 0));
+                        DeviceConfig.getFloat(entry.namespace, entry.flag, defaultValue));
             } else if (entry.type == long.class) {
+                long defaultValue = ((DeviceConfigEntry<Long>) entry).defaultValue;
                 mCoreSettings.putLong(entry.coreSettingKey,
-                        DeviceConfig.getLong(entry.namespace, entry.flag, 0));
+                        DeviceConfig.getLong(entry.namespace, entry.flag, defaultValue));
             } else if (entry.type == boolean.class) {
+                boolean defaultValue = ((DeviceConfigEntry<Boolean>) entry).defaultValue;
                 mCoreSettings.putInt(entry.coreSettingKey,
-                        DeviceConfig.getBoolean(entry.namespace, entry.flag, false) ? 1 : 0);
+                        DeviceConfig.getBoolean(entry.namespace, entry.flag, defaultValue) ? 1 : 0);
             }
         }
     }

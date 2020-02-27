@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
@@ -33,6 +34,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -45,19 +47,23 @@ import static org.mockito.Mockito.when;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService.RankingMap;
+import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
@@ -69,8 +75,8 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
-import com.android.systemui.util.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -103,6 +109,13 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Spy private RecordingLifetimeExtender mExtender2 = new RecordingLifetimeExtender("Extender2");
     @Spy private RecordingLifetimeExtender mExtender3 = new RecordingLifetimeExtender("Extender3");
 
+    @Spy private RecordingDismissInterceptor mInterceptor1 = new RecordingDismissInterceptor(
+            "Interceptor1");
+    @Spy private RecordingDismissInterceptor mInterceptor2 = new RecordingDismissInterceptor(
+            "Interceptor2");
+    @Spy private RecordingDismissInterceptor mInterceptor3 = new RecordingDismissInterceptor(
+            "Interceptor3");
+
     @Captor private ArgumentCaptor<BatchableNotificationHandler> mListenerCaptor;
     @Captor private ArgumentCaptor<NotificationEntry> mEntryCaptor;
     @Captor private ArgumentCaptor<Collection<NotificationEntry>> mBuildListCaptor;
@@ -115,14 +128,14 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
 
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
         when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(true);
 
         mCollection = new NotifCollection(
                 mStatusBarService,
-                mock(DumpController.class),
+                mock(DumpManager.class),
                 mFeatureFlags,
                 mLogger);
         mCollection.attach(mGroupCoalescer);
@@ -410,13 +423,16 @@ public class NotifCollectionTest extends SysuiTestCase {
     public void testDismissingLifetimeExtendedSummaryDoesNotDismissChildren() {
         // GIVEN A notif group with one summary and two children
         mCollection.addNotificationLifetimeExtender(mExtender1);
-        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 1, "myTag")
-                .setGroup(mContext, GROUP_1)
-                .setGroupSummary(mContext, true));
-        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 2, "myTag")
-                .setGroup(mContext, GROUP_1));
-        NotifEvent notif3 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 3, "myTag")
-                .setGroup(mContext, GROUP_1));
+        CollectionEvent notif1 = postNotif(
+                buildNotif(TEST_PACKAGE, 1, "myTag")
+                        .setGroup(mContext, GROUP_1)
+                        .setGroupSummary(mContext, true));
+        CollectionEvent notif2 = postNotif(
+                buildNotif(TEST_PACKAGE, 2, "myTag")
+                        .setGroup(mContext, GROUP_1));
+        CollectionEvent notif3 = postNotif(
+                buildNotif(TEST_PACKAGE, 3, "myTag")
+                        .setGroup(mContext, GROUP_1));
 
         NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
         NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
@@ -441,6 +457,156 @@ public class NotifCollectionTest extends SysuiTestCase {
         assertEquals(NOT_DISMISSED, entry3.getDismissState());
     }
 
+    @Test
+    public void testDismissNotificationCallsDismissInterceptors() throws RemoteException {
+        // GIVEN a collection with notifications with multiple dismiss interceptors
+        mInterceptor1.shouldInterceptDismissal = true;
+        mInterceptor2.shouldInterceptDismissal = true;
+        mInterceptor3.shouldInterceptDismissal = false;
+        mCollection.addNotificationDismissInterceptor(mInterceptor1);
+        mCollection.addNotificationDismissInterceptor(mInterceptor2);
+        mCollection.addNotificationDismissInterceptor(mInterceptor3);
+
+        NotifEvent notif = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+
+        // WHEN a notification is manually dismissed
+        DismissedByUserStats stats = defaultStats(entry);
+        mCollection.dismissNotification(entry, stats);
+
+        // THEN all interceptors get checked
+        verify(mInterceptor1).shouldInterceptDismissal(entry);
+        verify(mInterceptor2).shouldInterceptDismissal(entry);
+        verify(mInterceptor3).shouldInterceptDismissal(entry);
+        assertEquals(List.of(mInterceptor1, mInterceptor2), entry.mDismissInterceptors);
+
+        // THEN we never send the dismissal to system server
+        verify(mStatusBarService, never()).onNotificationClear(
+                notif.sbn.getPackageName(),
+                notif.sbn.getTag(),
+                47,
+                notif.sbn.getUser().getIdentifier(),
+                notif.sbn.getKey(),
+                stats.dismissalSurface,
+                stats.dismissalSentiment,
+                stats.notificationVisibility);
+    }
+
+    @Test
+    public void testDismissInterceptorsCanceledWhenNotifIsUpdated() throws RemoteException {
+        // GIVEN a few lifetime extenders and a couple notifications
+        mCollection.addNotificationDismissInterceptor(mInterceptor1);
+        mCollection.addNotificationDismissInterceptor(mInterceptor2);
+
+        mInterceptor1.shouldInterceptDismissal = true;
+        mInterceptor2.shouldInterceptDismissal = true;
+
+        NotifEvent notif = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+        NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+
+        // WHEN a notification is manually dismissed and intercepted
+        DismissedByUserStats stats = defaultStats(entry);
+        mCollection.dismissNotification(entry, stats);
+        assertEquals(List.of(mInterceptor1, mInterceptor2), entry.mDismissInterceptors);
+        clearInvocations(mInterceptor1, mInterceptor2);
+
+        // WHEN the notification is reposted
+        mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47));
+
+        // THEN all of the active dismissal interceptors are canceled
+        verify(mInterceptor1).cancelDismissInterception(entry);
+        verify(mInterceptor2).cancelDismissInterception(entry);
+        assertEquals(List.of(), entry.mDismissInterceptors);
+
+        // THEN the notification is never sent to system server to dismiss
+        verify(mStatusBarService, never()).onNotificationClear(
+                eq(notif.sbn.getPackageName()),
+                eq(notif.sbn.getTag()),
+                eq(47),
+                eq(notif.sbn.getUser().getIdentifier()),
+                eq(notif.sbn.getKey()),
+                anyInt(),
+                anyInt(),
+                eq(stats.notificationVisibility));
+    }
+
+    @Test
+    public void testEndingAllDismissInterceptorsSendsDismiss() throws RemoteException {
+        // GIVEN a collection with notifications a dismiss interceptor
+        mInterceptor1.shouldInterceptDismissal = true;
+        mCollection.addNotificationDismissInterceptor(mInterceptor1);
+
+        NotifEvent notif = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+
+        // GIVEN a notification is manually dismissed
+        DismissedByUserStats stats = defaultStats(entry);
+        mCollection.dismissNotification(entry, stats);
+
+        // WHEN all interceptors end their interception dismissal
+        mInterceptor1.shouldInterceptDismissal = false;
+        mInterceptor1.onEndInterceptionCallback.onEndDismissInterception(mInterceptor1, entry,
+                stats);
+
+        // THEN we send the dismissal to system server
+        verify(mStatusBarService).onNotificationClear(
+                eq(notif.sbn.getPackageName()),
+                eq(notif.sbn.getTag()),
+                eq(47),
+                eq(notif.sbn.getUser().getIdentifier()),
+                eq(notif.sbn.getKey()),
+                anyInt(),
+                anyInt(),
+                eq(stats.notificationVisibility));
+    }
+
+    @Test
+    public void testEndDismissInterceptionUpdatesDismissInterceptors() throws RemoteException {
+        // GIVEN a collection with notifications with multiple dismiss interceptors
+        mInterceptor1.shouldInterceptDismissal = true;
+        mInterceptor2.shouldInterceptDismissal = true;
+        mInterceptor3.shouldInterceptDismissal = false;
+        mCollection.addNotificationDismissInterceptor(mInterceptor1);
+        mCollection.addNotificationDismissInterceptor(mInterceptor2);
+        mCollection.addNotificationDismissInterceptor(mInterceptor3);
+
+        NotifEvent notif = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+
+        // GIVEN a notification is manually dismissed
+        mCollection.dismissNotification(entry, defaultStats(entry));
+
+       // WHEN an interceptor ends its interception
+        mInterceptor1.shouldInterceptDismissal = false;
+        mInterceptor1.onEndInterceptionCallback.onEndDismissInterception(mInterceptor1, entry,
+                defaultStats(entry));
+
+        // THEN all interceptors get checked
+        verify(mInterceptor1).shouldInterceptDismissal(entry);
+        verify(mInterceptor2).shouldInterceptDismissal(entry);
+        verify(mInterceptor3).shouldInterceptDismissal(entry);
+
+        // THEN mInterceptor2 is the only dismiss interceptor
+        assertEquals(List.of(mInterceptor2), entry.mDismissInterceptors);
+    }
+
+
+    @Test(expected = IllegalStateException.class)
+    public void testEndingDismissalOfNonInterceptedThrows() throws RemoteException {
+        // GIVEN a collection with notifications with a dismiss interceptor that hasn't been called
+        mInterceptor1.shouldInterceptDismissal = false;
+        mCollection.addNotificationDismissInterceptor(mInterceptor1);
+
+        NotifEvent notif = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+
+        // WHEN we try to end the dismissal of an interceptor that didn't intercept the notif
+        mInterceptor1.onEndInterceptionCallback.onEndDismissInterception(mInterceptor1, entry,
+                defaultStats(entry));
+
+        // THEN an exception is thrown
+    }
+
     @Test(expected = IllegalStateException.class)
     public void testDismissingNonExistentNotificationThrows() {
         // GIVEN a collection that originally had three notifs, but where one was dismissed
@@ -459,11 +625,11 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Test
     public void testGroupChildrenAreDismissedLocallyWhenSummaryIsDismissed() {
         // GIVEN a collection with two grouped notifs in it
-        NotifEvent notif0 = mNoMan.postNotif(
+        CollectionEvent notif0 = postNotif(
                 buildNotif(TEST_PACKAGE, 0)
                         .setGroup(mContext, GROUP_1)
                         .setGroupSummary(mContext, true));
-        NotifEvent notif1 = mNoMan.postNotif(
+        CollectionEvent notif1 = postNotif(
                 buildNotif(TEST_PACKAGE, 1)
                         .setGroup(mContext, GROUP_1));
         NotificationEntry entry0 = mCollectionListener.getEntry(notif0.key);
@@ -480,11 +646,11 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Test
     public void testUpdatingDismissedSummaryBringsChildrenBack() {
         // GIVEN a collection with two grouped notifs in it
-        NotifEvent notif0 = mNoMan.postNotif(
+        CollectionEvent notif0 = postNotif(
                 buildNotif(TEST_PACKAGE, 0)
                         .setGroup(mContext, GROUP_1)
                         .setGroupSummary(mContext, true));
-        NotifEvent notif1 = mNoMan.postNotif(
+        CollectionEvent notif1 = postNotif(
                 buildNotif(TEST_PACKAGE, 1)
                         .setGroup(mContext, GROUP_1));
         NotificationEntry entry0 = mCollectionListener.getEntry(notif0.key);
@@ -503,14 +669,14 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Test
     public void testDismissedChildrenAreNotResetByParentUpdate() {
         // GIVEN a collection with three grouped notifs in it
-        NotifEvent notif0 = mNoMan.postNotif(
+        CollectionEvent notif0 = postNotif(
                 buildNotif(TEST_PACKAGE, 0)
                         .setGroup(mContext, GROUP_1)
                         .setGroupSummary(mContext, true));
-        NotifEvent notif1 = mNoMan.postNotif(
+        CollectionEvent notif1 = postNotif(
                 buildNotif(TEST_PACKAGE, 1)
                         .setGroup(mContext, GROUP_1));
-        NotifEvent notif2 = mNoMan.postNotif(
+        CollectionEvent notif2 = postNotif(
                 buildNotif(TEST_PACKAGE, 2)
                         .setGroup(mContext, GROUP_1));
         NotificationEntry entry0 = mCollectionListener.getEntry(notif0.key);
@@ -532,11 +698,11 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Test
     public void testUpdatingGroupKeyOfDismissedSummaryBringsChildrenBack() {
         // GIVEN a collection with two grouped notifs in it
-        NotifEvent notif0 = mNoMan.postNotif(
+        CollectionEvent notif0 = postNotif(
                 buildNotif(TEST_PACKAGE, 0)
                         .setOverrideGroupKey(GROUP_1)
                         .setGroupSummary(mContext, true));
-        NotifEvent notif1 = mNoMan.postNotif(
+        CollectionEvent notif1 = postNotif(
                 buildNotif(TEST_PACKAGE, 1)
                         .setOverrideGroupKey(GROUP_1));
         NotificationEntry entry0 = mCollectionListener.getEntry(notif0.key);
@@ -557,6 +723,78 @@ public class NotifCollectionTest extends SysuiTestCase {
         // child that is no longer part of the group
         assertEquals(NOT_DISMISSED, entry0.getDismissState());
         assertEquals(NOT_DISMISSED, entry1.getDismissState());
+    }
+
+    @Test
+    public void testDismissingSummaryDoesNotDismissForegroundServiceChildren() {
+        // GIVEN a collection with three grouped notifs in it
+        CollectionEvent notif0 = postNotif(
+                buildNotif(TEST_PACKAGE, 0)
+                        .setGroup(mContext, GROUP_1)
+                        .setGroupSummary(mContext, true));
+        CollectionEvent notif1 = postNotif(
+                buildNotif(TEST_PACKAGE, 1)
+                        .setGroup(mContext, GROUP_1)
+                        .setFlag(mContext, Notification.FLAG_FOREGROUND_SERVICE, true));
+        CollectionEvent notif2 = postNotif(
+                buildNotif(TEST_PACKAGE, 2)
+                        .setGroup(mContext, GROUP_1));
+
+        // WHEN the summary is dismissed
+        mCollection.dismissNotification(notif0.entry, defaultStats(notif0.entry));
+
+        // THEN the foreground service child is not dismissed
+        assertEquals(DISMISSED, notif0.entry.getDismissState());
+        assertEquals(NOT_DISMISSED, notif1.entry.getDismissState());
+        assertEquals(PARENT_DISMISSED, notif2.entry.getDismissState());
+    }
+
+    @Test
+    public void testDismissingSummaryDoesNotDismissBubbledChildren() {
+        // GIVEN a collection with three grouped notifs in it
+        CollectionEvent notif0 = postNotif(
+                buildNotif(TEST_PACKAGE, 0)
+                        .setGroup(mContext, GROUP_1)
+                        .setGroupSummary(mContext, true));
+        CollectionEvent notif1 = postNotif(
+                buildNotif(TEST_PACKAGE, 1)
+                        .setGroup(mContext, GROUP_1)
+                        .setFlag(mContext, Notification.FLAG_BUBBLE, true));
+        CollectionEvent notif2 = postNotif(
+                buildNotif(TEST_PACKAGE, 2)
+                        .setGroup(mContext, GROUP_1));
+
+        // WHEN the summary is dismissed
+        mCollection.dismissNotification(notif0.entry, defaultStats(notif0.entry));
+
+        // THEN the bubbled child is not dismissed
+        assertEquals(DISMISSED, notif0.entry.getDismissState());
+        assertEquals(NOT_DISMISSED, notif1.entry.getDismissState());
+        assertEquals(PARENT_DISMISSED, notif2.entry.getDismissState());
+    }
+
+    @Test
+    public void testDismissingSummaryDoesNotDismissDuplicateSummaries() {
+        // GIVEN a group with a two summaries
+        CollectionEvent notif0 = postNotif(
+                buildNotif(TEST_PACKAGE, 0)
+                        .setGroup(mContext, GROUP_1)
+                        .setGroupSummary(mContext, true));
+        CollectionEvent notif1 = postNotif(
+                buildNotif(TEST_PACKAGE, 1)
+                        .setGroup(mContext, GROUP_1)
+                        .setGroupSummary(mContext, true));
+        CollectionEvent notif2 = postNotif(
+                buildNotif(TEST_PACKAGE, 2)
+                        .setGroup(mContext, GROUP_1));
+
+        // WHEN the first summary is dismissed
+        mCollection.dismissNotification(notif0.entry, defaultStats(notif0.entry));
+
+        // THEN the second summary is not auto-dismissed (but the child is)
+        assertEquals(DISMISSED, notif0.entry.getDismissState());
+        assertEquals(NOT_DISMISSED, notif1.entry.getDismissState());
+        assertEquals(PARENT_DISMISSED, notif2.entry.getDismissState());
     }
 
     @Test
@@ -806,6 +1044,213 @@ public class NotifCollectionTest extends SysuiTestCase {
         assertEquals(REASON_NOT_CANCELED, entry0.mCancellationReason);
     }
 
+    @Test
+    public void testDismissNotificationsRebuildsOnce() {
+        // GIVEN a collection with a couple notifications
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
+        NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
+        NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
+        clearInvocations(mBuildListener);
+
+        // WHEN both notifications are manually dismissed together
+        mCollection.dismissNotifications(
+                List.of(new Pair(entry1, defaultStats(entry1)),
+                        new Pair(entry2, defaultStats(entry2))));
+
+        // THEN build list is only called one time
+        verify(mBuildListener).onBuildList(any(Collection.class));
+    }
+
+    @Test
+    public void testDismissNotificationsSentToSystemServer() throws RemoteException {
+        // GIVEN a collection with a couple notifications
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
+        NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
+        NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
+
+        // WHEN both notifications are manually dismissed together
+        DismissedByUserStats stats1 = defaultStats(entry1);
+        DismissedByUserStats stats2 = defaultStats(entry2);
+        mCollection.dismissNotifications(
+                List.of(new Pair(entry1, defaultStats(entry1)),
+                        new Pair(entry2, defaultStats(entry2))));
+
+        // THEN we send the dismissals to system server
+        verify(mStatusBarService).onNotificationClear(
+                notif1.sbn.getPackageName(),
+                notif1.sbn.getTag(),
+                47,
+                notif1.sbn.getUser().getIdentifier(),
+                notif1.sbn.getKey(),
+                stats1.dismissalSurface,
+                stats1.dismissalSentiment,
+                stats1.notificationVisibility);
+
+        verify(mStatusBarService).onNotificationClear(
+                notif2.sbn.getPackageName(),
+                notif2.sbn.getTag(),
+                88,
+                notif2.sbn.getUser().getIdentifier(),
+                notif2.sbn.getKey(),
+                stats2.dismissalSurface,
+                stats2.dismissalSentiment,
+                stats2.notificationVisibility);
+    }
+
+    @Test
+    public void testDismissNotificationsMarkedAsDismissed() {
+        // GIVEN a collection with a couple notifications
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
+        NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
+        NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
+
+        // WHEN both notifications are manually dismissed together
+        mCollection.dismissNotifications(
+                List.of(new Pair(entry1, defaultStats(entry1)),
+                        new Pair(entry2, defaultStats(entry2))));
+
+        // THEN the entries are marked as dismissed
+        assertEquals(DISMISSED, entry1.getDismissState());
+        assertEquals(DISMISSED, entry2.getDismissState());
+    }
+
+    @Test
+    public void testDismissNotificationssCallsDismissInterceptors() {
+        // GIVEN a collection with notifications with multiple dismiss interceptors
+        mInterceptor1.shouldInterceptDismissal = true;
+        mInterceptor2.shouldInterceptDismissal = true;
+        mInterceptor3.shouldInterceptDismissal = false;
+        mCollection.addNotificationDismissInterceptor(mInterceptor1);
+        mCollection.addNotificationDismissInterceptor(mInterceptor2);
+        mCollection.addNotificationDismissInterceptor(mInterceptor3);
+
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
+        NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
+        NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
+
+        // WHEN both notifications are manually dismissed together
+        mCollection.dismissNotifications(
+                List.of(new Pair(entry1, defaultStats(entry1)),
+                        new Pair(entry2, defaultStats(entry2))));
+
+        // THEN all interceptors get checked
+        verify(mInterceptor1).shouldInterceptDismissal(entry1);
+        verify(mInterceptor2).shouldInterceptDismissal(entry1);
+        verify(mInterceptor3).shouldInterceptDismissal(entry1);
+        verify(mInterceptor1).shouldInterceptDismissal(entry2);
+        verify(mInterceptor2).shouldInterceptDismissal(entry2);
+        verify(mInterceptor3).shouldInterceptDismissal(entry2);
+
+        assertEquals(List.of(mInterceptor1, mInterceptor2), entry1.mDismissInterceptors);
+        assertEquals(List.of(mInterceptor1, mInterceptor2), entry2.mDismissInterceptors);
+    }
+
+    @Test
+    public void testDismissAllNotificationsCallsRebuildOnce() {
+        // GIVEN a collection with a couple notifications
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
+        NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
+        NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
+        clearInvocations(mBuildListener);
+
+        // WHEN all notifications are dismissed for the user who posted both notifs
+        mCollection.dismissAllNotifications(entry1.getSbn().getUser().getIdentifier());
+
+        // THEN build list is only called one time
+        verify(mBuildListener).onBuildList(any(Collection.class));
+    }
+
+    @Test
+    public void testDismissAllNotificationsSentToSystemServer() throws RemoteException {
+        // GIVEN a collection with a couple notifications
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
+        NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
+        NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
+
+        // WHEN all notifications are dismissed for the user who posted both notifs
+        mCollection.dismissAllNotifications(entry1.getSbn().getUser().getIdentifier());
+
+        // THEN we send the dismissal to system server
+        verify(mStatusBarService).onClearAllNotifications(
+                entry1.getSbn().getUser().getIdentifier());
+    }
+
+    @Test
+    public void testDismissAllNotificationsMarkedAsDismissed() {
+        // GIVEN a collection with a couple notifications
+        NotifEvent notif1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
+        NotificationEntry entry1 = mCollectionListener.getEntry(notif1.key);
+        NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
+
+        // WHEN all notifications are dismissed for the user who posted both notifs
+        mCollection.dismissAllNotifications(entry1.getSbn().getUser().getIdentifier());
+
+        // THEN the entries are marked as dismissed
+        assertEquals(DISMISSED, entry1.getDismissState());
+        assertEquals(DISMISSED, entry2.getDismissState());
+    }
+
+    @Test
+    public void testDismissAllNotificationsDoesNotMarkDismissedUnclearableNotifs() {
+        // GIVEN a collection with one unclearable notification and one clearable notification
+        NotificationEntryBuilder notifEntryBuilder = buildNotif(TEST_PACKAGE, 47, "myTag");
+        notifEntryBuilder.modifyNotification(mContext)
+                .setFlag(FLAG_NO_CLEAR, true);
+        NotifEvent unclearabeNotif = mNoMan.postNotif(notifEntryBuilder);
+        NotifEvent notif2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 88, "barTag"));
+        NotificationEntry unclearableEntry = mCollectionListener.getEntry(unclearabeNotif.key);
+        NotificationEntry entry2 = mCollectionListener.getEntry(notif2.key);
+
+        // WHEN all notifications are dismissed for the user who posted both notifs
+        mCollection.dismissAllNotifications(unclearableEntry.getSbn().getUser().getIdentifier());
+
+        // THEN only the clearable entry is marked as dismissed
+        assertEquals(NOT_DISMISSED, unclearableEntry.getDismissState());
+        assertEquals(DISMISSED, entry2.getDismissState());
+    }
+
+    @Test
+    public void testDismissAllNotificationsCallsDismissInterceptorsOnlyOnUnclearableNotifs() {
+        // GIVEN a collection with multiple dismiss interceptors
+        mInterceptor1.shouldInterceptDismissal = true;
+        mInterceptor2.shouldInterceptDismissal = true;
+        mInterceptor3.shouldInterceptDismissal = false;
+        mCollection.addNotificationDismissInterceptor(mInterceptor1);
+        mCollection.addNotificationDismissInterceptor(mInterceptor2);
+        mCollection.addNotificationDismissInterceptor(mInterceptor3);
+
+        // GIVEN a collection with one unclearable and one clearable notification
+        NotifEvent unclearableNotif = mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE, 47, "myTag")
+                        .setFlag(mContext, FLAG_NO_CLEAR, true));
+        NotificationEntry unclearable = mCollectionListener.getEntry(unclearableNotif.key);
+        NotifEvent clearableNotif = mNoMan.postNotif(
+                buildNotif(TEST_PACKAGE, 88, "myTag")
+                        .setFlag(mContext, FLAG_NO_CLEAR, false));
+        NotificationEntry clearable = mCollectionListener.getEntry(clearableNotif.key);
+
+        // WHEN all notifications are dismissed for the user who posted the notif
+        mCollection.dismissAllNotifications(clearable.getSbn().getUser().getIdentifier());
+
+        // THEN all interceptors get checked for the unclearable notification
+        verify(mInterceptor1).shouldInterceptDismissal(unclearable);
+        verify(mInterceptor2).shouldInterceptDismissal(unclearable);
+        verify(mInterceptor3).shouldInterceptDismissal(unclearable);
+        assertEquals(List.of(mInterceptor1, mInterceptor2), unclearable.mDismissInterceptors);
+
+        // THEN no interceptors get checked for the clearable notification
+        verify(mInterceptor1, never()).shouldInterceptDismissal(clearable);
+        verify(mInterceptor2, never()).shouldInterceptDismissal(clearable);
+        verify(mInterceptor3, never()).shouldInterceptDismissal(clearable);
+    }
+
     private static NotificationEntryBuilder buildNotif(String pkg, int id, String tag) {
         return new NotificationEntryBuilder()
                 .setPkg(pkg)
@@ -826,6 +1271,13 @@ public class NotifCollectionTest extends SysuiTestCase {
                 NotificationVisibility.obtain(entry.getKey(), 7, 2, true));
     }
 
+    public CollectionEvent postNotif(NotificationEntryBuilder builder) {
+        clearInvocations(mCollectionListener);
+        NotifEvent rawEvent = mNoMan.postNotif(builder);
+        verify(mCollectionListener).onEntryAdded(mEntryCaptor.capture());
+        return new CollectionEvent(rawEvent, requireNonNull(mEntryCaptor.getValue()));
+    }
+
     private static class RecordingCollectionListener implements NotifCollectionListener {
         private final Map<String, NotificationEntry> mLastSeenEntries = new ArrayMap<>();
 
@@ -840,6 +1292,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         @Override
         public void onEntryUpdated(NotificationEntry entry) {
+            mLastSeenEntries.put(entry.getKey(), entry);
         }
 
         @Override
@@ -891,6 +1344,56 @@ public class NotifCollectionTest extends SysuiTestCase {
             if (onCancelLifetimeExtension != null) {
                 onCancelLifetimeExtension.run();
             }
+        }
+    }
+
+    private static class RecordingDismissInterceptor implements NotifDismissInterceptor {
+        private final String mName;
+
+        public @Nullable OnEndDismissInterception onEndInterceptionCallback;
+        public boolean shouldInterceptDismissal = false;
+
+        private RecordingDismissInterceptor(String name) {
+            mName = name;
+        }
+
+        @Override
+        public String getName() {
+            return mName;
+        }
+
+        @Override
+        public void setCallback(OnEndDismissInterception callback) {
+            this.onEndInterceptionCallback = callback;
+        }
+
+        @Override
+        public boolean shouldInterceptDismissal(NotificationEntry entry) {
+            return shouldInterceptDismissal;
+        }
+
+        @Override
+        public void cancelDismissInterception(NotificationEntry entry) {
+        }
+    }
+
+    /**
+     * Wrapper around {@link NotifEvent} that adds the NotificationEntry that the collection under
+     * test creates.
+     */
+    private static class CollectionEvent {
+        public final String key;
+        public final StatusBarNotification sbn;
+        public final Ranking ranking;
+        public final RankingMap rankingMap;
+        public final NotificationEntry entry;
+
+        private CollectionEvent(NotifEvent rawEvent, NotificationEntry entry) {
+            this.key = rawEvent.key;
+            this.sbn = rawEvent.sbn;
+            this.ranking = rawEvent.ranking;
+            this.rankingMap = rawEvent.rankingMap;
+            this.entry = entry;
         }
     }
 

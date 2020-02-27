@@ -16,15 +16,14 @@
 
 package com.android.systemui.statusbar
 
-import com.google.common.truth.Truth.assertThat
-
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Point
 import android.testing.AndroidTestingRunner
+import android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -32,6 +31,7 @@ import org.junit.runner.RunWith
 
 private const val WIDTH = 200
 private const val HEIGHT = 200
+private const val WINDOW_TYPE = TYPE_NOTIFICATION_SHADE
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -46,10 +46,10 @@ class MediaArtworkProcessorTest : SysuiTestCase() {
     fun setUp() {
         processor = MediaArtworkProcessor()
 
-        val point = Point()
-        context.display.getSize(point)
-        screenWidth = point.x
-        screenHeight = point.y
+        val size = processor.getWindowSize(context, WINDOW_TYPE)
+
+        screenWidth = size.width
+        screenHeight = size.height
     }
 
     @After
@@ -63,7 +63,7 @@ class MediaArtworkProcessorTest : SysuiTestCase() {
         val artwork = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         Canvas(artwork).drawColor(Color.BLUE)
         // WHEN the background is created from the artwork
-        val background = processor.processArtwork(context, artwork)!!
+        val background = processor.processArtwork(context, artwork, WINDOW_TYPE)!!
         // THEN the background has the size of the screen that has been downsamples
         assertThat(background.height).isLessThan(screenHeight)
         assertThat(background.width).isLessThan(screenWidth)
@@ -76,8 +76,8 @@ class MediaArtworkProcessorTest : SysuiTestCase() {
         val artwork = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         Canvas(artwork).drawColor(Color.BLUE)
         // WHEN the background is processed twice
-        val background1 = processor.processArtwork(context, artwork)!!
-        val background2 = processor.processArtwork(context, artwork)!!
+        val background1 = processor.processArtwork(context, artwork, WINDOW_TYPE)!!
+        val background2 = processor.processArtwork(context, artwork, WINDOW_TYPE)!!
         // THEN the two bitmaps are the same
         // Note: This is currently broken and trying to use caching causes issues
         assertThat(background1).isNotSameAs(background2)
@@ -89,7 +89,7 @@ class MediaArtworkProcessorTest : SysuiTestCase() {
         val artwork = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ALPHA_8)
         Canvas(artwork).drawColor(Color.BLUE)
         // WHEN the background is created from the artwork
-        val background = processor.processArtwork(context, artwork)!!
+        val background = processor.processArtwork(context, artwork, WINDOW_TYPE)!!
         // THEN the background has Config ARGB_8888
         assertThat(background.config).isEqualTo(Bitmap.Config.ARGB_8888)
     }
@@ -102,7 +102,7 @@ class MediaArtworkProcessorTest : SysuiTestCase() {
         // AND the artwork is recycled
         artwork.recycle()
         // WHEN the background is created from the artwork
-        val background = processor.processArtwork(context, artwork)
+        val background = processor.processArtwork(context, artwork, WINDOW_TYPE)
         // THEN the processed bitmap is null
         assertThat(background).isNull()
     }

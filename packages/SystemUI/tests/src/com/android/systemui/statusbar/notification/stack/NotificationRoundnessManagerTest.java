@@ -24,13 +24,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -59,8 +57,6 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     private ExpandableNotificationRow mFirst;
     private ExpandableNotificationRow mSecond;
     @Mock
-    private StatusBarStateController mStatusBarStateController;
-    @Mock
     private KeyguardBypassController mBypassController;
 
     @Before
@@ -69,7 +65,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         mRoundnessManager = new NotificationRoundnessManager(
                 mBypassController,
                 new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext));
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         NotificationTestHelper testHelper = new NotificationTestHelper(getContext(), mDependency);
         mFirst = testHelper.createRow();
         mFirst.setHeadsUpAnimatingAwayListener(animatingAway
@@ -150,13 +146,12 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mFirst, mSecond),
                 createSection(null, null)
         });
-        ExpandableNotificationRow row = new NotificationTestHelper(getContext(), mDependency)
-                .createRow();
+        NotificationTestHelper testHelper = new NotificationTestHelper(getContext(), mDependency);
+        ExpandableNotificationRow row = testHelper.createRow();
         NotificationEntry entry = mock(NotificationEntry.class);
         when(entry.getRow()).thenReturn(row);
 
-        when(mStatusBarStateController.isDozing()).thenReturn(true);
-        row.setStatusBarStateController(mStatusBarStateController);
+        when(testHelper.getStatusBarStateController().isDozing()).thenReturn(true);
         row.setHeadsUp(true);
         mRoundnessManager.onHeadsUpStateChanged(entry, true);
         Assert.assertEquals(1f, row.getCurrentBottomRoundness(), 0.0f);

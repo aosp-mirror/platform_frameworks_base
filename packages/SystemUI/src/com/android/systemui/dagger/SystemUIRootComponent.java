@@ -25,8 +25,10 @@ import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
+import com.android.systemui.pip.phone.dagger.PipModule;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -43,6 +45,7 @@ import dagger.Component;
         DefaultComponentBinder.class,
         DependencyProvider.class,
         DependencyBinder.class,
+        PipModule.class,
         SystemServicesModule.class,
         SystemUIFactory.ContextHolder.class,
         SystemUIBinder.class,
@@ -73,6 +76,10 @@ public interface SystemUIRootComponent {
      */
     @Singleton
     Dependency.DependencyInjector createDependency();
+
+    /** */
+    @Singleton
+    DumpManager createDumpManager();
 
     /**
      * FragmentCreator generates all Fragments that need injection.

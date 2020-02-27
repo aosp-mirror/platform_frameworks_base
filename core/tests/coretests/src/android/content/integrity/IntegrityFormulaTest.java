@@ -20,8 +20,6 @@ import static android.content.integrity.IntegrityFormula.COMPOUND_FORMULA_TAG;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.testng.Assert.assertThrows;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -32,8 +30,7 @@ public class IntegrityFormulaTest {
     @Test
     public void createEqualsFormula_packageName() {
         String packageName = "com.test.app";
-        IntegrityFormula formula =
-                IntegrityFormula.PACKAGE_NAME.equalTo(packageName);
+        IntegrityFormula formula = IntegrityFormula.Application.packageNameEquals(packageName);
 
         AtomicFormula.StringAtomicFormula stringAtomicFormula =
                 (AtomicFormula.StringAtomicFormula) formula;
@@ -46,8 +43,7 @@ public class IntegrityFormulaTest {
     @Test
     public void createEqualsFormula_appCertificate() {
         String appCertificate = "com.test.app";
-        IntegrityFormula formula =
-                IntegrityFormula.APP_CERTIFICATE.equalTo(appCertificate);
+        IntegrityFormula formula = IntegrityFormula.Application.certificatesContain(appCertificate);
 
         AtomicFormula.StringAtomicFormula stringAtomicFormula =
                 (AtomicFormula.StringAtomicFormula) formula;
@@ -60,8 +56,7 @@ public class IntegrityFormulaTest {
     @Test
     public void createEqualsFormula_installerName() {
         String installerName = "com.test.app";
-        IntegrityFormula formula =
-                IntegrityFormula.INSTALLER_NAME.equalTo(installerName);
+        IntegrityFormula formula = IntegrityFormula.Installer.packageNameEquals(installerName);
 
         AtomicFormula.StringAtomicFormula stringAtomicFormula =
                 (AtomicFormula.StringAtomicFormula) formula;
@@ -75,7 +70,7 @@ public class IntegrityFormulaTest {
     public void createEqualsFormula_installerCertificate() {
         String installerCertificate = "com.test.app";
         IntegrityFormula formula =
-                IntegrityFormula.INSTALLER_CERTIFICATE.equalTo(installerCertificate);
+                IntegrityFormula.Installer.certificatesContain(installerCertificate);
 
         AtomicFormula.StringAtomicFormula stringAtomicFormula =
                 (AtomicFormula.StringAtomicFormula) formula;
@@ -88,8 +83,7 @@ public class IntegrityFormulaTest {
     @Test
     public void createEqualsFormula_versionCode() {
         int versionCode = 12;
-        IntegrityFormula formula =
-                IntegrityFormula.VERSION_CODE.equalTo(versionCode);
+        IntegrityFormula formula = IntegrityFormula.Application.versionCodeEquals(versionCode);
 
         AtomicFormula.LongAtomicFormula stringAtomicFormula =
                 (AtomicFormula.LongAtomicFormula) formula;
@@ -100,24 +94,9 @@ public class IntegrityFormulaTest {
     }
 
     @Test
-    public void createEqualsFormula_invalidKeyTypeForStringParameter() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> IntegrityFormula.PRE_INSTALLED.equalTo("wrongString"));
-    }
-
-    @Test
-    public void createEqualsFormula_invalidKeyTypeForLongParameter() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> IntegrityFormula.PACKAGE_NAME.equalTo(12));
-    }
-
-    @Test
     public void createGreaterThanFormula_versionCode() {
         int versionCode = 12;
-        IntegrityFormula formula =
-                IntegrityFormula.VERSION_CODE.greaterThan(versionCode);
+        IntegrityFormula formula = IntegrityFormula.Application.versionCodeGreaterThan(versionCode);
 
         AtomicFormula.LongAtomicFormula stringAtomicFormula =
                 (AtomicFormula.LongAtomicFormula) formula;
@@ -128,17 +107,10 @@ public class IntegrityFormulaTest {
     }
 
     @Test
-    public void createGreaterThanFormula_invalidKeyTypeForLongParameter() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> IntegrityFormula.PACKAGE_NAME.greaterThan(12));
-    }
-
-    @Test
     public void createGreaterThanOrEqualsToFormula_versionCode() {
         int versionCode = 12;
         IntegrityFormula formula =
-                IntegrityFormula.VERSION_CODE.greaterThanOrEquals(versionCode);
+                IntegrityFormula.Application.versionCodeGreaterThanOrEqualTo(versionCode);
 
         AtomicFormula.LongAtomicFormula stringAtomicFormula =
                 (AtomicFormula.LongAtomicFormula) formula;
@@ -149,38 +121,23 @@ public class IntegrityFormulaTest {
     }
 
     @Test
-    public void createGreaterThanOrEqualsToFormula_invalidKeyTypeForLongParameter() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> IntegrityFormula.PACKAGE_NAME.greaterThanOrEquals(12));
-    }
-
-    @Test
     public void createIsTrueFormula_preInstalled() {
-        IntegrityFormula formula = IntegrityFormula.PRE_INSTALLED.equalTo(true);
+        IntegrityFormula formula = IntegrityFormula.Application.isPreInstalled();
 
-        AtomicFormula.BooleanAtomicFormula stringAtomicFormula =
+        AtomicFormula.BooleanAtomicFormula booleanAtomicFormula =
                 (AtomicFormula.BooleanAtomicFormula) formula;
 
-        assertThat(stringAtomicFormula.getKey()).isEqualTo(AtomicFormula.PRE_INSTALLED);
-        assertThat(stringAtomicFormula.getValue()).isTrue();
-    }
-
-    @Test
-    public void createIsTrueFormula_invalidKeyTypeForBoolParameter() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> IntegrityFormula.PACKAGE_NAME.equalTo(true));
+        assertThat(booleanAtomicFormula.getKey()).isEqualTo(AtomicFormula.PRE_INSTALLED);
+        assertThat(booleanAtomicFormula.getValue()).isTrue();
     }
 
     @Test
     public void createAllFormula() {
         String packageName = "com.test.package";
         String certificateName = "certificate";
-        IntegrityFormula formula1 =
-                IntegrityFormula.PACKAGE_NAME.equalTo(packageName);
+        IntegrityFormula formula1 = IntegrityFormula.Application.packageNameEquals(packageName);
         IntegrityFormula formula2 =
-                IntegrityFormula.APP_CERTIFICATE.equalTo(certificateName);
+                IntegrityFormula.Application.certificatesContain(certificateName);
 
         IntegrityFormula compoundFormula = IntegrityFormula.all(formula1, formula2);
 
@@ -191,10 +148,9 @@ public class IntegrityFormulaTest {
     public void createAnyFormula() {
         String packageName = "com.test.package";
         String certificateName = "certificate";
-        IntegrityFormula formula1 =
-                IntegrityFormula.PACKAGE_NAME.equalTo(packageName);
+        IntegrityFormula formula1 = IntegrityFormula.Application.packageNameEquals(packageName);
         IntegrityFormula formula2 =
-                IntegrityFormula.APP_CERTIFICATE.equalTo(certificateName);
+                IntegrityFormula.Application.certificatesContain(certificateName);
 
         IntegrityFormula compoundFormula = IntegrityFormula.any(formula1, formula2);
 
@@ -206,9 +162,33 @@ public class IntegrityFormulaTest {
         String packageName = "com.test.package";
 
         IntegrityFormula compoundFormula =
-                IntegrityFormula.not(
-                        IntegrityFormula.PACKAGE_NAME.equalTo(packageName));
+                IntegrityFormula.not(IntegrityFormula.Application.packageNameEquals(packageName));
 
         assertThat(compoundFormula.getTag()).isEqualTo(COMPOUND_FORMULA_TAG);
+    }
+
+    @Test
+    public void createIsTrueFormula_stampNotTrusted() {
+        IntegrityFormula formula = IntegrityFormula.SourceStamp.notTrusted();
+
+        AtomicFormula.BooleanAtomicFormula booleanAtomicFormula =
+                (AtomicFormula.BooleanAtomicFormula) formula;
+
+        assertThat(booleanAtomicFormula.getKey()).isEqualTo(AtomicFormula.STAMP_TRUSTED);
+        assertThat(booleanAtomicFormula.getValue()).isFalse();
+    }
+
+    @Test
+    public void createEqualsFormula_stampCertificateHash() {
+        String stampCertificateHash = "test-cert";
+        IntegrityFormula formula =
+                IntegrityFormula.SourceStamp.stampCertificateHashEquals(stampCertificateHash);
+
+        AtomicFormula.StringAtomicFormula stringAtomicFormula =
+                (AtomicFormula.StringAtomicFormula) formula;
+
+        assertThat(stringAtomicFormula.getKey()).isEqualTo(AtomicFormula.STAMP_CERTIFICATE_HASH);
+        assertThat(stringAtomicFormula.getValue()).matches(stampCertificateHash);
+        assertThat(stringAtomicFormula.getIsHashedValue()).isTrue();
     }
 }

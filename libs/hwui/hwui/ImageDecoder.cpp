@@ -24,6 +24,19 @@
 
 using namespace android;
 
+sk_sp<SkColorSpace> ImageDecoder::getDefaultColorSpace() const {
+    const skcms_ICCProfile* encodedProfile = mCodec->getICCProfile();
+    if (encodedProfile) {
+        // If the profile maps directly to an SkColorSpace, that SkColorSpace
+        // will be returned. Otherwise, nullptr will be returned. In either
+        // case, using this SkColorSpace results in doing no color correction.
+        return SkColorSpace::Make(*encodedProfile);
+    }
+
+    // The image has no embedded color profile, and should be treated as SRGB.
+    return SkColorSpace::MakeSRGB();
+}
+
 ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChunkReader> peeker)
     : mCodec(std::move(codec))
     , mPeeker(std::move(peeker))
@@ -31,7 +44,7 @@ ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChu
     , mDecodeSize(mTargetSize)
     , mOutColorType(mCodec->computeOutputColorType(kN32_SkColorType))
     , mUnpremultipliedRequired(false)
-    , mOutColorSpace(mCodec->computeOutputColorSpace(mOutColorType, nullptr))
+    , mOutColorSpace(getDefaultColorSpace())
     , mSampleSize(1)
 {
 }

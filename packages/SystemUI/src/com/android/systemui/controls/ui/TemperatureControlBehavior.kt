@@ -16,29 +16,29 @@
 
 package com.android.systemui.controls.ui
 
-import android.content.Context
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
 import android.service.controls.templates.TemperatureControlTemplate
-import android.widget.TextView
 
 import com.android.systemui.R
+import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
+import com.android.systemui.controls.ui.ControlActionCoordinator.MAX_LEVEL
 
 class TemperatureControlBehavior : Behavior {
     lateinit var clipLayer: Drawable
     lateinit var control: Control
     lateinit var cvh: ControlViewHolder
     lateinit var template: TemperatureControlTemplate
-    lateinit var status: TextView
-    lateinit var context: Context
 
-    override fun apply(cvh: ControlViewHolder, cws: ControlWithState) {
-        this.control = cws.control!!
+    override fun initialize(cvh: ControlViewHolder) {
         this.cvh = cvh
-        status = cvh.status
+    }
 
-        status.setText(control.getStatusText())
+    override fun bind(cws: ControlWithState) {
+        this.control = cws.control!!
+
+        cvh.status.setText(control.getStatusText())
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)

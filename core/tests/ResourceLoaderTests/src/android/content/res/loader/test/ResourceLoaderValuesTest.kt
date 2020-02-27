@@ -192,13 +192,13 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     }
 
     @Test
-    fun addMultipleProviders() {
+    fun addProvidersRepeatedly() {
         val originalValue = getValue()
         val testOne = openOne()
         val testTwo = openTwo()
         val loader = ResourcesLoader()
 
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
         loader.addProvider(testOne)
         assertEquals(valueOne, getValue())
 
@@ -213,25 +213,25 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     }
 
     @Test
-    fun addMultipleLoaders() {
+    fun addLoadersRepeatedly() {
         val originalValue = getValue()
         val testOne = openOne()
         val testTwo = openTwo()
         val loader1 = ResourcesLoader()
         val loader2 = ResourcesLoader()
 
-        resources.addLoader(loader1)
+        resources.addLoaders(loader1)
         loader1.addProvider(testOne)
         assertEquals(valueOne, getValue())
 
-        resources.addLoader(loader2)
+        resources.addLoaders(loader2)
         loader2.addProvider(testTwo)
         assertEquals(valueTwo, getValue())
 
-        resources.removeLoader(loader1)
+        resources.removeLoaders(loader1)
         assertEquals(valueTwo, getValue())
 
-        resources.removeLoader(loader2)
+        resources.removeLoaders(loader2)
         assertEquals(originalValue, getValue())
     }
 
@@ -242,7 +242,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val testTwo = openTwo()
         val loader = ResourcesLoader()
 
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
         loader.providers = listOf(testOne, testTwo)
         assertEquals(valueTwo, getValue())
 
@@ -254,20 +254,20 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     }
 
     @Test
-    fun setMultipleLoaders() {
+    fun addMultipleLoaders() {
         val originalValue = getValue()
         val loader1 = ResourcesLoader()
         loader1.addProvider(openOne())
         val loader2 = ResourcesLoader()
         loader2.addProvider(openTwo())
 
-        resources.loaders = listOf(loader1, loader2)
+        resources.addLoaders(loader1, loader2)
         assertEquals(valueTwo, getValue())
 
-        resources.removeLoader(loader2)
+        resources.removeLoaders(loader2)
         assertEquals(valueOne, getValue())
 
-        resources.loaders = Collections.emptyList()
+        resources.removeLoaders(loader1)
         assertEquals(originalValue, getValue())
     }
 
@@ -291,7 +291,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val testTwo = openTwo()
         val loader = ResourcesLoader()
 
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
         loader.addProvider(testOne)
         loader.addProvider(testTwo)
         loader.addProvider(testOne)
@@ -308,9 +308,9 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val loader2 = ResourcesLoader()
         loader2.addProvider(openTwo())
 
-        resources.addLoader(loader1)
-        resources.addLoader(loader2)
-        resources.addLoader(loader1)
+        resources.addLoaders(loader1)
+        resources.addLoaders(loader2)
+        resources.addLoaders(loader1)
 
         assertEquals(2, resources.loaders.size)
         assertEquals(resources.loaders[0], loader1)
@@ -323,7 +323,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val testTwo = openTwo()
         val loader = ResourcesLoader()
 
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
         loader.addProvider(testOne)
         loader.addProvider(testTwo)
 
@@ -341,12 +341,16 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val loader2 = ResourcesLoader()
         loader2.addProvider(openTwo())
 
-        resources.loaders = listOf(loader1, loader2)
-        resources.removeLoader(loader1)
-        resources.removeLoader(loader1)
+        resources.addLoaders(loader1, loader2)
+        resources.removeLoaders(loader1)
+        resources.removeLoaders(loader1)
 
         assertEquals(1, resources.loaders.size)
         assertEquals(resources.loaders[0], loader2)
+
+        resources.removeLoaders(loader2, loader2)
+
+        assertEquals(0, resources.loaders.size)
     }
 
     @Test
@@ -355,7 +359,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val testTwo = openTwo()
         val loader = ResourcesLoader()
 
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
         loader.providers = listOf(testOne, testTwo)
         loader.providers = listOf(testOne, testTwo)
 
@@ -365,14 +369,14 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     }
 
     @Test
-    fun repeatedSetLoaders() {
+    fun repeatedAddMultipleLoaders() {
         val loader1 = ResourcesLoader()
         loader1.addProvider(openOne())
         val loader2 = ResourcesLoader()
         loader2.addProvider(openTwo())
 
-        resources.loaders = listOf(loader1, loader2)
-        resources.loaders = listOf(loader1, loader2)
+        resources.addLoaders(loader1, loader2)
+        resources.addLoaders(loader1, loader2)
 
         assertEquals(2, resources.loaders.size)
         assertEquals(resources.loaders[0], loader1)
@@ -386,7 +390,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val testTwo = openTwo()
         val loader = ResourcesLoader()
 
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
         loader.addProvider(testOne)
         loader.addProvider(testTwo)
         assertEquals(valueTwo, getValue())
@@ -414,20 +418,20 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val loader2 = ResourcesLoader()
         loader2.addProvider(testTwo)
 
-        resources.addLoader(loader1)
-        resources.addLoader(loader2)
+        resources.addLoaders(loader1)
+        resources.addLoaders(loader2)
         assertEquals(valueTwo, getValue())
 
-        resources.removeLoader(loader1)
+        resources.removeLoaders(loader1)
         assertEquals(valueTwo, getValue())
 
-        resources.addLoader(loader1)
+        resources.addLoaders(loader1)
         assertEquals(valueOne, getValue())
 
-        resources.removeLoader(loader2)
+        resources.removeLoaders(loader2)
         assertEquals(valueOne, getValue())
 
-        resources.removeLoader(loader1)
+        resources.removeLoaders(loader1)
         assertEquals(originalValue, getValue())
     }
 
@@ -444,10 +448,11 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val loader2 = ResourcesLoader()
         loader2.providers = listOf(testThree, testFour)
 
-        resources.loaders = listOf(loader1, loader2)
+        resources.addLoaders(loader1, loader2)
         assertEquals(valueFour, getValue())
 
-        resources.loaders = listOf(loader2, loader1)
+        resources.removeLoaders(loader1)
+        resources.addLoaders(loader1)
         assertEquals(valueTwo, getValue())
 
         loader1.removeProvider(testTwo)
@@ -471,7 +476,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val loader2 = ResourcesLoader()
         loader2.addProvider(openTwo())
 
-        resources.loaders = listOf(loader1)
+        resources.addLoaders(loader1)
         assertEquals(valueOne, getValue())
 
         // The child context should include the loaders of the original context.
@@ -479,12 +484,12 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         assertEquals(valueOne, getValue(childContext))
 
         // Changing the loaders of the child context should not affect the original context.
-        childContext.resources.loaders = listOf(loader1, loader2)
+        childContext.resources.addLoaders(loader2)
         assertEquals(valueOne, getValue())
         assertEquals(valueTwo, getValue(childContext))
 
         // Changing the loaders of the original context should not affect the child context.
-        resources.removeLoader(loader1)
+        resources.removeLoaders(loader1)
         assertEquals(originalValue, getValue())
         assertEquals(valueTwo, getValue(childContext))
 
@@ -506,7 +511,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         val testTwo = openTwo()
         val loader = ResourcesLoader()
 
-        resources.addLoader(loader)
+        resources.addLoaders(loader)
         loader.addProvider(testOne)
         assertEquals(valueOne, getValue())
 
@@ -527,7 +532,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         assertEquals(originalValue, getValue())
         assertEquals(originalValue, getValue(childContext2))
 
-        childContext2.resources.addLoader(loader)
+        childContext2.resources.addLoaders(loader)
         assertEquals(originalValue, getValue())
         assertEquals(valueTwo, getValue(childContext))
         assertEquals(valueTwo, getValue(childContext2))
@@ -539,7 +544,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         loader.addProvider(openOne())
 
         val applicationContext = context.applicationContext
-        applicationContext.resources.addLoader(loader)
+        applicationContext.resources.addLoaders(loader)
         assertEquals(valueOne, getValue(applicationContext))
 
         val activity = mTestActivityRule.launchActivity(Intent())
@@ -556,7 +561,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         loader2.addProvider(openTwo())
 
         val applicationContext = context.applicationContext
-        applicationContext.resources.addLoader(loader1)
+        applicationContext.resources.addLoaders(loader1)
         assertEquals(valueOne, getValue(applicationContext))
 
         var token: IBinder? = null
@@ -569,7 +574,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
             assertEquals(valueOne, getValue(applicationContext))
             assertEquals(valueOne, getValue(activity))
 
-            activity.resources.addLoader(loader2)
+            activity.resources.addLoaders(loader2)
             assertEquals(valueOne, getValue(applicationContext))
             assertEquals(valueTwo, getValue(activity))
 
@@ -598,10 +603,11 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         loader2.addProvider(provider1)
         loader2.addProvider(openTwo())
 
-        resources.loaders = listOf(loader1, loader2)
+        resources.addLoaders(loader1, loader2)
         assertEquals(valueTwo, getValue())
 
-        resources.loaders = listOf(loader2, loader1)
+        resources.removeLoaders(loader1)
+        resources.addLoaders(loader1)
         assertEquals(valueOne, getValue())
 
         assertEquals(2, resources.assets.apkAssets.count { apkAssets -> apkAssets.isForLoader })

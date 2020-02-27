@@ -16,8 +16,10 @@
 
 package android.hardware.input;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
@@ -45,12 +47,14 @@ import android.view.InputEvent;
 import android.view.InputMonitor;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
+import android.view.VerifiedInputEvent;
 
 import com.android.internal.os.SomeArgs;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import java.util.List;
 
 /**
@@ -907,6 +911,27 @@ public final class InputManager {
     }
 
     /**
+     * Verify the details of an {@link android.view.InputEvent} that came from the system.
+     * If the event did not come from the system, or its details could not be verified, then this
+     * will return {@code null}. Receiving {@code null} does not mean that the event did not
+     * originate from the system, just that we were unable to verify it. This can
+     * happen for a number of reasons during normal operation.
+     *
+     * @param event The {@link android.view.InputEvent} to check
+     *
+     * @return {@link android.view.VerifiedInputEvent}, which is a subset of the provided
+     * {@link android.view.InputEvent}
+     *         {@code null} if the event could not be verified.
+     */
+    public @Nullable VerifiedInputEvent verifyInputEvent(@NonNull InputEvent event) {
+        try {
+            return mIm.verifyInputEvent(event);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Changes the mouse pointer's icon shape into the specified id.
      *
      * @param iconId The id of the pointer graphic, as a value between
@@ -1233,6 +1258,32 @@ public final class InputManager {
         @Override
         public boolean hasVibrator() {
             return true;
+        }
+
+        @Override
+        public boolean isVibrating() {
+            throw new UnsupportedOperationException(
+                "isVibrating not supported in InputDeviceVibrator");
+        }
+
+        @Override
+        public void addVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+            throw new UnsupportedOperationException(
+                "addVibratorStateListener not supported in InputDeviceVibrator");
+        }
+
+        @Override
+        public void addVibratorStateListener(
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull OnVibratorStateChangedListener listener) {
+            throw new UnsupportedOperationException(
+                "addVibratorStateListener not supported in InputDeviceVibrator");
+        }
+
+        @Override
+        public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+            throw new UnsupportedOperationException(
+                "removeVibratorStateListener not supported in InputDeviceVibrator");
         }
 
         @Override

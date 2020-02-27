@@ -17,6 +17,7 @@
 syntax = "proto2";
 option java_multiple_files = true;
 
+import "frameworks/base/core/proto/android/nfc/nfc_service.proto";
 import "frameworks/base/core/proto/android/os/backtrace.proto";
 import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
@@ -34,6 +35,7 @@ import "frameworks/base/core/proto/android/os/system_properties.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
 import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
+import "frameworks/base/core/proto/android/server/bluetooth_manager_service.proto";
 import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/jobscheduler.proto";
 import "frameworks/base/core/proto/android/server/location/context_hub.proto";
@@ -56,6 +58,7 @@ import "frameworks/base/core/proto/android/service/sensor_service.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
+import "frameworks/base/core/proto/android/util/textdump.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
 import "frameworks/base/proto/src/ipconnectivity.proto";
@@ -428,7 +431,7 @@ message IncidentProto {
         (section).args = "dropbox --proto system_app_wtf"
     ];
 
-    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_crashes = 3037 [
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_crash = 3037 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "dropbox --proto system_server_crash"
     ];
@@ -488,14 +491,35 @@ message IncidentProto {
         (section).args = "connmetrics --proto"
     ];
 
+    optional com.android.server.BluetoothManagerServiceDumpProto bluetooth_manager = 3050 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "bluetooth_manager --proto"
+    ];
+
     optional com.android.server.location.ContextHubServiceProto context_hub = 3051 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "contexthub --proto"
     ];
 
+    optional com.android.nfc.NfcServiceDumpProto nfc_service  = 3052 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "nfc --proto"
+    ];
+
     optional android.service.SensorServiceProto sensor_service = 3053 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "sensorservice --proto"
+    ];
+
+    // Dumps in text format (on userdebug and eng builds only): 4000 ~ 4999
+    optional android.util.TextDumpProto textdump_wifi = 4000 [
+        (section).type = SECTION_TEXT_DUMPSYS,
+        (section).args = "wifi"
+    ];
+
+    optional android.util.TextDumpProto textdump_bluetooth = 4001 [
+        (section).type = SECTION_TEXT_DUMPSYS,
+        (section).args = "bluetooth_manager"
     ];
 
     // Reserved for OEMs.

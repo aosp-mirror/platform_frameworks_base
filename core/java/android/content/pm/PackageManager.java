@@ -32,13 +32,15 @@ import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.app.AppDetailsActivity;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
+import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.StorageStatsManager;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -60,8 +62,10 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.permission.PermissionManager;
 import android.util.AndroidException;
 import android.util.Log;
 
@@ -75,6 +79,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -596,6 +601,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int MODULE_APEX_NAME = 0x00000001;
 
     /** @hide */
@@ -977,7 +983,8 @@ public abstract class PackageManager {
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
      * that the given user's package restrictions state will be serialised to disk after the
-     * component state has been updated.
+     * component state has been updated. Note that this is synchronous disk access, so calls using
+     * this flag should be run on a background thread.
      */
     public static final int SYNCHRONOUS = 0x00000002;
 
@@ -1986,10 +1993,11 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device supports a Context Hub.
+     * {@link #hasSystemFeature}: The device supports a Context Hub, used to expose the
+     * functionalities in {@link android.hardware.location.ContextHubManager}.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_CONTEXTHUB = "android.hardware.context_hub";
+    public static final String FEATURE_CONTEXT_HUB = "android.hardware.context_hub";
 
     /** {@hide} */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -2997,6 +3005,41 @@ public abstract class PackageManager {
     public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the requisite kernel support to support incremental delivery aka Incremental FileSystem.
+     *
+     * @see IncrementalManager#isEnabled
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_INCREMENTAL_DELIVERY =
+            "android.software.incremental_delivery";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has tuner hardware to support tuner operations.
+     *
+     * <p>This feature implies that the device has the tuner HAL implementation.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TUNER = "android.hardware.tv.tuner";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the necessary changes to support app enumeration.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_APP_ENUMERATION = "android.software.app_enumeration";
+
+    /** @hide */
+    public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
+
+    /**
      * Extra field name for the URI to a verification file. Passed to a package
      * verifier.
      *
@@ -3359,15 +3402,24 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    public static final int FLAG_PERMISSION_DONT_AUTO_REVOKE = 1 << 17;
+    public static final int FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED = 1 << 17;
 
     /**
-     * Permission flag: Whether {@link #FLAG_PERMISSION_DONT_AUTO_REVOKE} state was set by user.
+     * Permission flag: Whether {@link #FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED} state was set by
+     * user.
      *
      * @hide
      */
     @SystemApi
-    public static final int FLAG_PERMISSION_DONT_AUTO_REVOKE_USER_SET = 1 << 18;
+    public static final int FLAG_PERMISSION_AUTO_REVOKE_USER_SET = 1 << 18;
+
+    /**
+     * Permission flag: Whether permission was revoked by auto-revoke.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_AUTO_REVOKED = 1 << 20;
 
     /**
      * Permission flags: Reserved for use by the permission controller.
@@ -3421,8 +3473,9 @@ public abstract class PackageManager {
             | FLAG_PERMISSION_GRANTED_BY_ROLE
             | FLAG_PERMISSION_REVOKED_COMPAT
             | FLAG_PERMISSION_ONE_TIME
-            | FLAG_PERMISSION_DONT_AUTO_REVOKE
-            | FLAG_PERMISSION_DONT_AUTO_REVOKE_USER_SET;
+            | FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED
+            | FLAG_PERMISSION_AUTO_REVOKE_USER_SET
+            | FLAG_PERMISSION_AUTO_REVOKED;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -3566,7 +3619,7 @@ public abstract class PackageManager {
      * @hide
      */
     @ChangeId
-    @Disabled
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     public static final long FILTER_APPLICATION_QUERY = 135549675L;
 
     /** {@hide} */
@@ -4246,7 +4299,9 @@ public abstract class PackageManager {
             FLAG_PERMISSION_GRANTED_BY_ROLE,
             FLAG_PERMISSION_REVOKED_COMPAT,
             FLAG_PERMISSION_ONE_TIME,
-            FLAG_PERMISSION_DONT_AUTO_REVOKE
+            FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED,
+            FLAG_PERMISSION_AUTO_REVOKE_USER_SET,
+            FLAG_PERMISSION_AUTO_REVOKED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
@@ -4303,6 +4358,36 @@ public abstract class PackageManager {
     @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
     public abstract void revokeRuntimePermission(@NonNull String packageName,
             @NonNull String permName, @NonNull UserHandle user);
+
+    /**
+     * Revoke a runtime permission that was previously granted by {@link
+     * #grantRuntimePermission(String, String, android.os.UserHandle)}. The
+     * permission must have been requested by and granted to the application.
+     * If the application is not allowed to hold the permission, a {@link
+     * java.lang.SecurityException} is thrown. If the package or permission is
+     * invalid, a {@link java.lang.IllegalArgumentException} is thrown.
+     * <p>
+     * <strong>Note: </strong>Using this API requires holding
+     * android.permission.REVOKE_RUNTIME_PERMISSIONS and if the user id is
+     * not the current user android.permission.INTERACT_ACROSS_USERS_FULL.
+     * </p>
+     *
+     * @param packageName The package from which to revoke the permission.
+     * @param permName The permission name to revoke.
+     * @param user The user for which to revoke the permission.
+     * @param reason The reason for the revoke.
+     *
+     * @see #grantRuntimePermission(String, String, android.os.UserHandle)
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
+    public void revokeRuntimePermission(@NonNull String packageName,
+            @NonNull String permName, @NonNull UserHandle user, @NonNull String reason) {
+        revokeRuntimePermission(packageName, permName, user);
+    }
 
     /**
      * Gets the state flags associated with a permission.
@@ -7383,8 +7468,9 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_GRANTED_BY_ROLE: return "GRANTED_BY_ROLE";
             case FLAG_PERMISSION_REVOKED_COMPAT: return "REVOKED_COMPAT";
             case FLAG_PERMISSION_ONE_TIME: return "ONE_TIME";
-            case FLAG_PERMISSION_DONT_AUTO_REVOKE: return "DONT_AUTO_REVOKE";
-            case FLAG_PERMISSION_DONT_AUTO_REVOKE_USER_SET: return "DONT_AUTO_REVOKE_USER_SET";
+            case FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED: return "AUTO_REVOKE_IF_UNUSED";
+            case FLAG_PERMISSION_AUTO_REVOKE_USER_SET: return "AUTO_REVOKE_USER_SET";
+            case FLAG_PERMISSION_AUTO_REVOKED: return "AUTO_REVOKED";
             default: return Integer.toString(flag);
         }
     }
@@ -7767,11 +7853,16 @@ public abstract class PackageManager {
     /**
      * Returns if the provided drawable represents the default activity icon provided by the system.
      *
-     * PackageManager provides a default icon for any package/activity if the app itself does not
-     * define one or if the system encountered any error when loading the icon.
+     * PackageManager silently returns a default application icon for any package/activity if the
+     * app itself does not define one or if the system encountered any error when loading the icon.
+     *
+     * Developers can use this to check implement app specific logic around retrying or caching.
      *
      * @return true if the drawable represents the default activity icon, false otherwise
      * @see #getDefaultActivityIcon()
+     * @see PackageItemInfo#loadDefaultIcon(PackageManager)
+     * @see #getActivityIcon
+     * @see LauncherActivityInfo#getIcon(int)
      */
     public boolean isDefaultApplicationIcon(@NonNull Drawable drawable) {
         int resId = drawable instanceof AdaptiveIconDrawable
@@ -7779,4 +7870,224 @@ public abstract class PackageManager {
         return resId == com.android.internal.R.drawable.sym_def_app_icon
                 || resId == com.android.internal.R.drawable.sym_app_on_sd_unavailable_icon;
     }
+
+    /**
+     * Sets MIME group's MIME types
+     *
+     * @param mimeGroup MIME group to modify
+     * @param mimeTypes new MIME types contained by MIME group
+     */
+    public void setMimeGroup(@NonNull String mimeGroup, @NonNull Set<String> mimeTypes) {
+        throw new UnsupportedOperationException(
+                "setMimeGroup not implemented in subclass");
+    }
+
+    /**
+     * Clears MIME group by removing all MIME types from it
+     *
+     * @param mimeGroup MIME group to clear
+     */
+    public void clearMimeGroup(@NonNull String mimeGroup) {
+        throw new UnsupportedOperationException(
+                "clearMimeGroup not implemented in subclass");
+    }
+
+    /**
+     * Gets all MIME types that MIME group contains
+     *
+     * @return MIME types contained by the MIME group,
+     *         or null if the MIME group was not declared in the manifest.
+     */
+    @Nullable
+    public Set<String> getMimeGroup(@NonNull String mimeGroup) {
+        throw new UnsupportedOperationException(
+                "getMimeGroup not implemented in subclass");
+    }
+
+    // Some of the flags don't affect the query result, but let's be conservative and cache
+    // each combination of flags separately.
+
+    private static final class ApplicationInfoQuery {
+        final String packageName;
+        final int flags;
+        final int userId;
+
+        ApplicationInfoQuery(@Nullable String packageName, int flags, int userId) {
+            this.packageName = packageName;
+            this.flags = flags;
+            this.userId = userId;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "ApplicationInfoQuery(packageName=\"%s\", flags=%s, userId=%s)",
+                    packageName, flags, userId);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = Objects.hashCode(packageName);
+            hash = hash * 13 + Objects.hashCode(flags);
+            hash = hash * 13 + Objects.hashCode(userId);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object rval) {
+            if (rval == null) {
+                return false;
+            }
+            ApplicationInfoQuery other;
+            try {
+                other = (ApplicationInfoQuery) rval;
+            } catch (ClassCastException ex) {
+                return false;
+            }
+            return Objects.equals(packageName, other.packageName)
+                    && flags == other.flags
+                    && userId == other.userId;
+        }
+    }
+
+    private static ApplicationInfo getApplicationInfoAsUserUncached(
+            String packageName, int flags, int userId) {
+        try {
+            return ActivityThread.getPackageManager()
+                    .getApplicationInfo(packageName, flags, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static final PropertyInvalidatedCache<ApplicationInfoQuery, ApplicationInfo>
+            sApplicationInfoCache =
+            new PropertyInvalidatedCache<ApplicationInfoQuery, ApplicationInfo>(
+                    16, PermissionManager.CACHE_KEY_PACKAGE_INFO) {
+                @Override
+                protected ApplicationInfo recompute(ApplicationInfoQuery query) {
+                    return getApplicationInfoAsUserUncached(
+                            query.packageName, query.flags, query.userId);
+                }
+                @Override
+                protected ApplicationInfo maybeCheckConsistency(
+                        ApplicationInfoQuery query, ApplicationInfo proposedResult) {
+                    // Implementing this debug check for ApplicationInfo would require a
+                    // complicated deep comparison, so just bypass it for now.
+                    return proposedResult;
+                }
+            };
+
+    /** @hide */
+    public static ApplicationInfo getApplicationInfoAsUserCached(
+            String packageName, int flags, int userId) {
+        return sApplicationInfoCache.query(
+                new ApplicationInfoQuery(packageName, flags, userId));
+    }
+
+    /**
+     * Make getApplicationInfoAsUser() bypass the cache in this process.
+     *
+     * @hide
+     */
+    public static void disableApplicationInfoCache() {
+        sApplicationInfoCache.disableLocal();
+    }
+
+    /**
+     * Invalidate caches of package and permission information system-wide.
+     *
+     * @hide
+     */
+    public static void invalidatePackageInfoCache() {
+        PropertyInvalidatedCache.invalidateCache(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+    }
+
+    // Some of the flags don't affect the query result, but let's be conservative and cache
+    // each combination of flags separately.
+
+    private static final class PackageInfoQuery {
+        final String packageName;
+        final int flags;
+        final int userId;
+
+        PackageInfoQuery(@Nullable String packageName, int flags, int userId) {
+            this.packageName = packageName;
+            this.flags = flags;
+            this.userId = userId;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "PackageInfoQuery(packageName=\"%s\", flags=%s, userId=%s)",
+                    packageName, flags, userId);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = Objects.hashCode(packageName);
+            hash = hash * 13 + Objects.hashCode(flags);
+            hash = hash * 13 + Objects.hashCode(userId);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object rval) {
+            if (rval == null) {
+                return false;
+            }
+            PackageInfoQuery other;
+            try {
+                other = (PackageInfoQuery) rval;
+            } catch (ClassCastException ex) {
+                return false;
+            }
+            return Objects.equals(packageName, other.packageName)
+                    && flags == other.flags
+                    && userId == other.userId;
+        }
+    }
+
+    private static PackageInfo getPackageInfoAsUserUncached(
+            String packageName, int flags, int userId) {
+        try {
+            return ActivityThread.getPackageManager().getPackageInfo(packageName, flags, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static final PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>
+            sPackageInfoCache =
+            new PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>(
+                    16, PermissionManager.CACHE_KEY_PACKAGE_INFO) {
+                @Override
+                protected PackageInfo recompute(PackageInfoQuery query) {
+                    return getPackageInfoAsUserUncached(
+                            query.packageName, query.flags, query.userId);
+                }
+                @Override
+                protected PackageInfo maybeCheckConsistency(
+                        PackageInfoQuery query, PackageInfo proposedResult) {
+                    // Implementing this debug check for PackageInfo would require a
+                    // complicated deep comparison, so just bypass it for now.
+                    return proposedResult;
+                }
+            };
+
+    /** @hide */
+    public static PackageInfo getPackageInfoAsUserCached(
+            String packageName, int flags, int userId) {
+        return sPackageInfoCache.query(new PackageInfoQuery(packageName, flags, userId));
+    }
+
+    /**
+     * Make getPackageInfoAsUser() bypass the cache in this process.
+     * @hide
+     */
+    public static void disablePackageInfoCache() {
+        sPackageInfoCache.disableLocal();
+    }
+
 }

@@ -89,7 +89,8 @@ public class InstallInstalling extends AlertActivity {
                 getPackageManager().installExistingPackage(appInfo.packageName);
                 launchSuccess();
             } catch (PackageManager.NameNotFoundException e) {
-                launchFailure(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
+                launchFailure(PackageInstaller.STATUS_FAILURE,
+                        PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
             }
         } else {
             final File sourceFile = new File(mPackageURI.getPath());
@@ -163,13 +164,15 @@ public class InstallInstalling extends AlertActivity {
                             .addObserver(this, EventResultPersister.GENERATE_NEW_ID,
                                     this::launchFinishBasedOnResult);
                 } catch (EventResultPersister.OutOfIdsException e) {
-                    launchFailure(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
+                    launchFailure(PackageInstaller.STATUS_FAILURE,
+                            PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
                 }
 
                 try {
                     mSessionId = getPackageManager().getPackageInstaller().createSession(params);
                 } catch (IOException e) {
-                    launchFailure(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
+                    launchFailure(PackageInstaller.STATUS_FAILURE,
+                            PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
                 }
             }
 
@@ -194,13 +197,15 @@ public class InstallInstalling extends AlertActivity {
     /**
      * Launch the "failure" version of the final package installer dialog
      *
+     * @param statusCode    The generic status code as returned by the package installer.
      * @param legacyStatus  The status as used internally in the package manager.
      * @param statusMessage The status description.
      */
-    private void launchFailure(int legacyStatus, String statusMessage) {
+    private void launchFailure(int statusCode, int legacyStatus, String statusMessage) {
         Intent failureIntent = new Intent(getIntent());
         failureIntent.setClass(this, InstallFailed.class);
         failureIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        failureIntent.putExtra(PackageInstaller.EXTRA_STATUS, statusCode);
         failureIntent.putExtra(PackageInstaller.EXTRA_LEGACY_STATUS, legacyStatus);
         failureIntent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, statusMessage);
 
@@ -289,7 +294,7 @@ public class InstallInstalling extends AlertActivity {
         if (statusCode == PackageInstaller.STATUS_SUCCESS) {
             launchSuccess();
         } else {
-            launchFailure(legacyStatus, statusMessage);
+            launchFailure(statusCode, legacyStatus, statusMessage);
         }
     }
 
@@ -410,7 +415,8 @@ public class InstallInstalling extends AlertActivity {
                 getPackageManager().getPackageInstaller().abandonSession(mSessionId);
 
                 if (!isCancelled()) {
-                    launchFailure(PackageManager.INSTALL_FAILED_INVALID_APK, null);
+                    launchFailure(PackageInstaller.STATUS_FAILURE,
+                            PackageManager.INSTALL_FAILED_INVALID_APK, null);
                 }
             }
         }

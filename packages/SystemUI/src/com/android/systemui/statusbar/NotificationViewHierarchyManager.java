@@ -29,6 +29,7 @@ import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -46,9 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * NotificationViewHierarchyManager manages updating the view hierarchy of notification views based
  * on their group structure. For example, if a notification becomes bundled with another,
@@ -56,7 +54,6 @@ import javax.inject.Singleton;
  * tell NotificationListContainer which notifications to display, and inform it of changes to those
  * notifications that might affect their display.
  */
-@Singleton
 public class NotificationViewHierarchyManager implements DynamicPrivacyController.Listener {
     private static final String TAG = "NotificationViewHierarchyManager";
 
@@ -94,8 +91,12 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     // the problem.
     private boolean mIsHandleDynamicPrivacyChangeScheduled;
 
-    @Inject
-    public NotificationViewHierarchyManager(Context context, @Main Handler mainHandler,
+    /**
+     * Injected constructor. See {@link StatusBarModule}.
+     */
+    public NotificationViewHierarchyManager(
+            Context context,
+            @Main Handler mainHandler,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGroupManager groupManager,
             VisualStabilityManager visualStabilityManager,
@@ -104,8 +105,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             KeyguardBypassController bypassController,
             BubbleController bubbleController,
             DynamicPrivacyController privacyController,
-            ForegroundServiceSectionController fgsSectionController
-    ) {
+            ForegroundServiceSectionController fgsSectionController) {
         mContext = context;
         mHandler = mainHandler;
         mLockscreenUserManager = notificationLockscreenUserManager;

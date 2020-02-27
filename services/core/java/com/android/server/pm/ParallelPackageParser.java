@@ -19,12 +19,13 @@ package com.android.server.pm;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.ParsedPackage;
 import android.os.Process;
 import android.os.Trace;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ConcurrentUtils;
+import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -50,11 +51,11 @@ class ParallelPackageParser {
                 Process.THREAD_PRIORITY_FOREGROUND);
     }
 
-    private final PackageParser mPackageParser;
+    private final PackageParser2 mPackageParser;
 
     private final ExecutorService mExecutorService;
 
-    ParallelPackageParser(PackageParser packageParser, ExecutorService executorService) {
+    ParallelPackageParser(PackageParser2 packageParser, ExecutorService executorService) {
         mPackageParser = packageParser;
         mExecutorService = executorService;
     }
@@ -125,6 +126,6 @@ class ParallelPackageParser {
     @VisibleForTesting
     protected ParsedPackage parsePackage(File scanFile, int parseFlags)
             throws PackageParser.PackageParserException {
-        return mPackageParser.parseParsedPackage(scanFile, parseFlags, true);
+        return mPackageParser.parsePackage(scanFile, parseFlags, true);
     }
 }

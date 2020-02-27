@@ -66,11 +66,13 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.MemoryPressureUtil;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -371,6 +373,15 @@ class ProcessRecord implements WindowProcessListener {
             }
         }
         pw.println("}");
+        if (processInfo != null) {
+            pw.print(prefix); pw.println("processInfo:");
+            if (processInfo.deniedPermissions != null) {
+                for (int i = 0; i < processInfo.deniedPermissions.size(); i++) {
+                    pw.print(prefix); pw.print("  deny: ");
+                    pw.println(processInfo.deniedPermissions.valueAt(i));
+                }
+            }
+        }
         pw.print(prefix); pw.print("mRequiredAbi="); pw.print(mRequiredAbi);
                 pw.print(" instructionSet="); pw.println(instructionSet);
         if (info.className != null) {
@@ -1572,6 +1583,8 @@ class ProcessRecord implements WindowProcessListener {
             info.append("Parent: ").append(parentShortComponentName).append("\n");
         }
 
+        StringBuilder report = new StringBuilder();
+        report.append(MemoryPressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
         // don't dump native PIDs for background ANRs unless it is the process of interest
@@ -1599,19 +1612,20 @@ class ProcessRecord implements WindowProcessListener {
 
         // For background ANRs, don't pass the ProcessCpuTracker to
         // avoid spending 1/2 second collecting stats to rank lastPids.
+        StringWriter tracesFileException = new StringWriter();
         File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 (isSilentAnr()) ? null : processCpuTracker, (isSilentAnr()) ? null : lastPids,
-                nativePids);
+                nativePids, tracesFileException);
 
-        String cpuInfo = null;
         if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();
             synchronized (mService.mProcessCpuTracker) {
-                cpuInfo = mService.mProcessCpuTracker.printCurrentState(anrTime);
+                report.append(mService.mProcessCpuTracker.printCurrentState(anrTime));
             }
             info.append(processCpuTracker.printCurrentLoad());
-            info.append(cpuInfo);
+            info.append(report);
         }
+        report.append(tracesFileException.getBuffer());
 
         info.append(processCpuTracker.printCurrentState(anrTime));
 
@@ -1636,7 +1650,8 @@ class ProcessRecord implements WindowProcessListener {
         final ProcessRecord parentPr = parentProcess != null
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", this, processName, activityShortComponentName,
-                parentShortComponentName, parentPr, annotation, cpuInfo, tracesFile, null);
+                parentShortComponentName, parentPr, annotation, report.toString(), tracesFile,
+                null);
 
         if (mWindowProcessController.appNotResponding(info.toString(), () -> kill("anr",
                 ApplicationExitInfo.REASON_ANR, true),
@@ -1901,8 +1916,7 @@ class ProcessRecord implements WindowProcessListener {
             mWaitDialog = null;
         }
 
-        void forAllDialogs(List<? extends BaseErrorDialog> dialogs,
-                Consumer<BaseErrorDialog> c) {
+        void forAllDialogs(List<? extends BaseErrorDialog> dialogs, Consumer<BaseErrorDialog> c) {
             for (int i = dialogs.size() - 1; i >= 0; i--) {
                 c.accept(dialogs.get(i));
             }
@@ -1911,42 +1925,72 @@ class ProcessRecord implements WindowProcessListener {
         void showCrashDialogs(AppErrorDialog.Data data) {
             List<Context> contexts = getDisplayContexts(false /* lastUsedOnly */);
             mCrashDialogs = new ArrayList<>();
-
             for (int i = contexts.size() - 1; i >= 0; i--) {
                 final Context c = contexts.get(i);
                 mCrashDialogs.add(new AppErrorDialog(c, mService, data));
             }
-            mService.mUiHandler.post(() -> mCrashDialogs.forEach(Dialog::show));
+            mService.mUiHandler.post(() -> {
+                List<AppErrorDialog> dialogs;
+                synchronized (mService) {
+                    dialogs = mCrashDialogs;
+                }
+                if (dialogs != null) {
+                    forAllDialogs(dialogs, Dialog::show);
+                }
+            });
         }
 
         void showAnrDialogs(AppNotRespondingDialog.Data data) {
             List<Context> contexts = getDisplayContexts(isSilentAnr() /* lastUsedOnly */);
             mAnrDialogs = new ArrayList<>();
-
             for (int i = contexts.size() - 1; i >= 0; i--) {
                 final Context c = contexts.get(i);
                 mAnrDialogs.add(new AppNotRespondingDialog(mService, c, data));
             }
-            mService.mUiHandler.post(() -> mAnrDialogs.forEach(Dialog::show));
+            mService.mUiHandler.post(() -> {
+                List<AppNotRespondingDialog> dialogs;
+                synchronized (mService) {
+                    dialogs = mAnrDialogs;
+                }
+                if (dialogs != null) {
+                    forAllDialogs(dialogs, Dialog::show);
+                }
+            });
         }
 
         void showViolationDialogs(AppErrorResult res) {
             List<Context> contexts = getDisplayContexts(false /* lastUsedOnly */);
             mViolationDialogs = new ArrayList<>();
-
             for (int i = contexts.size() - 1; i >= 0; i--) {
                 final Context c = contexts.get(i);
                 mViolationDialogs.add(
                         new StrictModeViolationDialog(c, mService, res, ProcessRecord.this));
             }
-            mService.mUiHandler.post(() -> mViolationDialogs.forEach(Dialog::show));
+            mService.mUiHandler.post(() -> {
+                List<StrictModeViolationDialog> dialogs;
+                synchronized (mService) {
+                    dialogs = mViolationDialogs;
+                }
+                if (dialogs != null) {
+                    forAllDialogs(dialogs, Dialog::show);
+                }
+            });
         }
 
         void showDebugWaitingDialogs() {
             List<Context> contexts = getDisplayContexts(true /* lastUsedOnly */);
             final Context c = contexts.get(0);
             mWaitDialog = new AppWaitingForDebuggerDialog(mService, c, ProcessRecord.this);
-            mService.mUiHandler.post(() -> mWaitDialog.show());
+
+            mService.mUiHandler.post(() -> {
+                Dialog dialog;
+                synchronized (mService) {
+                    dialog = mWaitDialog;
+                }
+                if (dialog != null) {
+                    dialog.show();
+                }
+            });
         }
 
         /**

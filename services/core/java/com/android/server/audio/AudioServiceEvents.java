@@ -16,8 +16,10 @@
 
 package com.android.server.audio;
 
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
+import android.media.MediaMetrics;
 
 import com.android.server.audio.AudioDeviceInventory.WiredDeviceConnectionState;
 
@@ -97,12 +99,20 @@ public class AudioServiceEvents {
         static final int VOL_ADJUST_VOL_UID = 5;
         static final int VOL_VOICE_ACTIVITY_HEARING_AID = 6;
         static final int VOL_MODE_CHANGE_HEARING_AID = 7;
+        static final int VOL_SET_GROUP_VOL = 8;
 
         final int mOp;
         final int mStream;
         final int mVal1;
         final int mVal2;
         final String mCaller;
+        final String mGroupName;
+        final AudioAttributes mAudioAttributes;
+
+        /**
+         * Audio Analytics unique Id.
+         */
+        private static final String mAnalyticsIdRoot = "audio.volumeEvent.";
 
         /** used for VOL_ADJUST_VOL_UID,
          *           VOL_ADJUST_SUGG_VOL,
@@ -114,6 +124,15 @@ public class AudioServiceEvents {
             mVal1 = val1;
             mVal2 = val2;
             mCaller = caller;
+            mGroupName = null;
+            mAudioAttributes = null;
+
+            new MediaMetrics.Item(mAnalyticsIdRoot + mStream)
+                    .putInt("op", mOp)
+                    .putInt("dir", mVal1)
+                    .putInt("flags", mVal2)
+                    .putString("from", mCaller)
+                    .record();
         }
 
         /** used for VOL_SET_HEARING_AID_VOL*/
@@ -124,6 +143,14 @@ public class AudioServiceEvents {
             // unused
             mStream = -1;
             mCaller = null;
+            mGroupName = null;
+            mAudioAttributes = null;
+
+            new MediaMetrics.Item(mAnalyticsIdRoot + "HA")
+                    .putInt("op", mOp)
+                    .putInt("index", mVal1)
+                    .putInt("gainDb", mVal2)
+                    .record();
         }
 
         /** used for VOL_SET_AVRCP_VOL */
@@ -134,6 +161,13 @@ public class AudioServiceEvents {
             mVal2 = 0;
             mStream = -1;
             mCaller = null;
+            mGroupName = null;
+            mAudioAttributes = null;
+
+            new MediaMetrics.Item(mAnalyticsIdRoot + "AVRCP")
+                    .putInt("op", mOp)
+                    .putInt("index", mVal1)
+                    .record();
         }
 
         /** used for VOL_VOICE_ACTIVITY_HEARING_AID */
@@ -144,6 +178,14 @@ public class AudioServiceEvents {
             mVal2 = voiceActive ? 1 : 0;
             // unused
             mCaller = null;
+            mGroupName = null;
+            mAudioAttributes = null;
+
+            new MediaMetrics.Item(mAnalyticsIdRoot + mStream)
+                    .putInt("op", mOp)
+                    .putInt("index", mVal1)
+                    .putInt("voiceActive", mVal2)
+                    .record();
         }
 
         /** used for VOL_MODE_CHANGE_HEARING_AID */
@@ -154,6 +196,25 @@ public class AudioServiceEvents {
             mVal2 = mode;
             // unused
             mCaller = null;
+            mGroupName = null;
+            mAudioAttributes = null;
+        }
+
+        /** used for VOL_SET_GROUP_VOL */
+        VolumeEvent(int op, AudioAttributes aa, String group, int index, int flags, String caller) {
+            mOp = op;
+            mStream = -1;
+            mVal1 = index;
+            mVal2 = flags;
+            mCaller = caller;
+            mGroupName = group;
+            mAudioAttributes = aa;
+
+            new MediaMetrics.Item(mAnalyticsIdRoot + mStream)
+                    .putInt("op", mOp)
+                    .putInt("index", mVal1)
+                    .putInt("mode", mVal2)
+                    .record();
         }
 
         @Override
@@ -207,6 +268,14 @@ public class AudioServiceEvents {
                             .append(AudioSystem.modeToString(mVal2))
                             .append(") causes setting HEARING_AID volume to idx:").append(mVal1)
                             .append(" stream:").append(AudioSystem.streamToString(mStream))
+                            .toString();
+                case VOL_SET_GROUP_VOL:
+                    return new StringBuilder("setVolumeIndexForAttributes(attr:")
+                            .append(mAudioAttributes.toString())
+                            .append(" group: ").append(mGroupName)
+                            .append(" index:").append(mVal1)
+                            .append(" flags:0x").append(Integer.toHexString(mVal2))
+                            .append(") from ").append(mCaller)
                             .toString();
                 default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
             }

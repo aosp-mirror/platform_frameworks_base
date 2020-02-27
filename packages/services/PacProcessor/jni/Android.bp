@@ -38,6 +38,6 @@ cc_library_shared {
         "-Wunreachable-code",
     ],
     sanitize: {
-        cfi: true,
+       cfi: true,
     },
 }

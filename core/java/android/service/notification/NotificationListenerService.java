@@ -86,8 +86,8 @@ import java.util.Objects;
  * or after {@link #onListenerDisconnected()}.
  * </p>
  * <p> Notification listeners cannot get notification access or be bound by the system on
- * {@linkplain ActivityManager#isLowRamDevice() low-RAM} devices. The system also ignores
- * notification listeners running in a work profile. A
+ * {@linkplain ActivityManager#isLowRamDevice() low-RAM} devices running Android Q (and below).
+ * The system also ignores notification listeners running in a work profile. A
  * {@link android.app.admin.DevicePolicyManager} might block notifications originating from a work
  * profile.</p>
  * <p>
@@ -212,6 +212,32 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_SNOOZED = 18;
     /** Notification was canceled due to timeout */
     public static final int REASON_TIMEOUT = 19;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = "REASON_", value = {
+            REASON_CLICK,
+            REASON_CANCEL,
+            REASON_CANCEL_ALL,
+            REASON_ERROR,
+            REASON_PACKAGE_CHANGED,
+            REASON_USER_STOPPED,
+            REASON_PACKAGE_BANNED,
+            REASON_APP_CANCEL,
+            REASON_APP_CANCEL_ALL,
+            REASON_LISTENER_CANCEL,
+            REASON_LISTENER_CANCEL_ALL,
+            REASON_GROUP_SUMMARY_CANCELED,
+            REASON_GROUP_OPTIMIZATION,
+            REASON_PACKAGE_SUSPENDED,
+            REASON_PROFILE_TURNED_OFF,
+            REASON_UNAUTOBUNDLED,
+            REASON_CHANNEL_BANNED,
+            REASON_SNOOZED,
+            REASON_TIMEOUT
+    })
+    public @interface NotificationCancelReason{};
 
     /**
      * The full trim of the StatusBarNotification including all its features.

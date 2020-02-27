@@ -260,12 +260,12 @@ public class AttentionManagerService extends SystemService {
         final IAttentionCallback iAttentionCallback = new IAttentionCallback.Stub() {
             @Override
             public void onSuccess(@AttentionSuccessCodes int result, long timestamp) {
-                // the callback might have been cancelled already
-                if (!userState.mCurrentAttentionCheck.mIsFulfilled) {
-                    callbackInternal.onSuccess(result, timestamp);
-                    userState.mCurrentAttentionCheck.mIsFulfilled = true;
+                if (userState.mCurrentAttentionCheck.mIsFulfilled) {
+                    return;
                 }
-
+                userState.mCurrentAttentionCheck.mIsFulfilled = true;
+                callbackInternal.onSuccess(result, timestamp);
+                logStats(result);
                 synchronized (mLock) {
                     if (userState.mAttentionCheckCacheBuffer == null) {
                         userState.mAttentionCheckCacheBuffer = new AttentionCheckCacheBuffer();
@@ -273,22 +273,22 @@ public class AttentionManagerService extends SystemService {
                     userState.mAttentionCheckCacheBuffer.add(
                             new AttentionCheckCache(SystemClock.uptimeMillis(), result, timestamp));
                 }
-                FrameworkStatsLog.write(
-                        FrameworkStatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
-                        result);
             }
 
             @Override
             public void onFailure(@AttentionFailureCodes int error) {
-                // the callback might have been cancelled already
-                if (!userState.mCurrentAttentionCheck.mIsFulfilled) {
-                    callbackInternal.onFailure(error);
-                    userState.mCurrentAttentionCheck.mIsFulfilled = true;
+                if (userState.mCurrentAttentionCheck.mIsFulfilled) {
+                    return;
                 }
+                userState.mCurrentAttentionCheck.mIsFulfilled = true;
+                callbackInternal.onFailure(error);
+                logStats(error);
+            }
 
+            private void logStats(int result) {
                 FrameworkStatsLog.write(
                         FrameworkStatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
-                        error);
+                        result);
             }
         };
 

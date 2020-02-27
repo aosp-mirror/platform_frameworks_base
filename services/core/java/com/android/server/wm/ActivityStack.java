@@ -60,18 +60,6 @@ import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
-import static com.android.server.wm.TaskProto.ACTIVITIES;
-import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
-import static com.android.server.wm.TaskProto.BOUNDS;
-import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
-import static com.android.server.wm.TaskProto.DISPLAY_ID;
-import static com.android.server.wm.TaskProto.LAST_NON_FULLSCREEN_BOUNDS;
-import static com.android.server.wm.TaskProto.MIN_HEIGHT;
-import static com.android.server.wm.TaskProto.MIN_WIDTH;
-import static com.android.server.wm.TaskProto.ORIG_ACTIVITY;
-import static com.android.server.wm.TaskProto.REAL_ACTIVITY;
-import static com.android.server.wm.TaskProto.RESIZE_MODE;
-import static com.android.server.wm.TaskProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
@@ -110,19 +98,28 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_ACTIVITY_STACK_MSG;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
-import static com.android.server.wm.BoundsAnimationController.FADE_IN;
-import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
-import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
-import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.TaskProto.ACTIVITIES;
+import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
 import static com.android.server.wm.TaskProto.ADJUSTED_BOUNDS;
 import static com.android.server.wm.TaskProto.ADJUSTED_FOR_IME;
 import static com.android.server.wm.TaskProto.ADJUST_DIVIDER_AMOUNT;
 import static com.android.server.wm.TaskProto.ADJUST_IME_AMOUNT;
 import static com.android.server.wm.TaskProto.ANIMATING_BOUNDS;
+import static com.android.server.wm.TaskProto.BOUNDS;
+import static com.android.server.wm.TaskProto.CREATED_BY_ORGANIZER;
 import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
+import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
+import static com.android.server.wm.TaskProto.DISPLAY_ID;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
+import static com.android.server.wm.TaskProto.LAST_NON_FULLSCREEN_BOUNDS;
 import static com.android.server.wm.TaskProto.MINIMIZE_AMOUNT;
+import static com.android.server.wm.TaskProto.MIN_HEIGHT;
+import static com.android.server.wm.TaskProto.MIN_WIDTH;
+import static com.android.server.wm.TaskProto.ORIG_ACTIVITY;
+import static com.android.server.wm.TaskProto.REAL_ACTIVITY;
+import static com.android.server.wm.TaskProto.RESIZE_MODE;
+import static com.android.server.wm.TaskProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.TaskProto.ROOT_TASK_ID;
 import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
 import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
@@ -135,6 +132,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -200,7 +198,7 @@ import java.util.function.Consumer;
 /**
  * State and management of a single stack of activities.
  */
-class ActivityStack extends Task implements BoundsAnimationTarget {
+class ActivityStack extends Task {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_ATM;
     static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_APP = TAG + POSTFIX_APP;
@@ -325,11 +323,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     // Set when an animation has been requested but has not yet started from the UI thread. This is
     // cleared when the animation actually starts.
     private boolean mBoundsAnimatingRequested = false;
-    private boolean mBoundsAnimatingToFullscreen = false;
-    private boolean mCancelCurrentBoundsAnimation = false;
     private Rect mBoundsAnimationTarget = new Rect();
     private Rect mBoundsAnimationSourceHintBounds = new Rect();
-    private @BoundsAnimationController.AnimationType int mAnimationType;
 
     Rect mPreAnimationBounds = new Rect();
 
@@ -622,7 +617,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 true /*neverRelinquishIdentity*/,
                 _taskDescription != null ? _taskDescription : new ActivityManager.TaskDescription(),
                 id, INVALID_TASK_ID, INVALID_TASK_ID, 0 /*taskAffiliationColor*/,
-                info.applicationInfo.uid, info.packageName, info.resizeMode,
+                info.applicationInfo.uid, info.packageName, null, info.resizeMode,
                 info.supportsPictureInPicture(), false /*_realActivitySuspended*/,
                 false /*userSetupComplete*/, INVALID_MIN_SIZE, INVALID_MIN_SIZE, info,
                 _voiceSession, _voiceInteractor, stack);
@@ -635,15 +630,16 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             String _lastDescription, long lastTimeMoved, boolean neverRelinquishIdentity,
             ActivityManager.TaskDescription _lastTaskDescription, int taskAffiliation,
             int prevTaskId, int nextTaskId, int taskAffiliationColor, int callingUid,
-            String callingPackage, int resizeMode, boolean supportsPictureInPicture,
-            boolean _realActivitySuspended, boolean userSetupComplete, int minWidth, int minHeight,
+            String callingPackage, @Nullable String callingFeatureId, int resizeMode,
+            boolean supportsPictureInPicture, boolean _realActivitySuspended,
+            boolean userSetupComplete, int minWidth, int minHeight,
             ActivityInfo info, IVoiceInteractionSession _voiceSession,
             IVoiceInteractor _voiceInteractor, ActivityStack stack) {
         super(atmService, id, _intent, _affinityIntent, _affinity, _rootAffinity,
                 _realActivity, _origActivity, _rootWasReset, _autoRemoveRecents, _askedCompatMode,
                 _userId, _effectiveUid, _lastDescription, lastTimeMoved, neverRelinquishIdentity,
                 _lastTaskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
-                callingUid, callingPackage, resizeMode, supportsPictureInPicture,
+                callingUid, callingPackage, callingFeatureId, resizeMode, supportsPictureInPicture,
                 _realActivitySuspended, userSetupComplete, minWidth, minHeight, info, _voiceSession,
                 _voiceInteractor, stack);
 
@@ -655,8 +651,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     }
 
     @Override
-    public void resolveOverrideConfiguration(Configuration newParentConfig) {
-        super.resolveOverrideConfiguration(newParentConfig);
+    public void resolveTileOverrideConfiguration(Configuration newParentConfig) {
+        super.resolveTileOverrideConfiguration(newParentConfig);
         if (mTile != null) {
             // If this is a virtual child of a tile, simulate the parent-child relationship
             mTile.updateResolvedConfig(getResolvedOverrideConfiguration());
@@ -729,57 +725,18 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                         newBounds);
                 hasNewOverrideBounds = true;
             }
-
-            // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-            if (overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                    || overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
-                // If entering split screen or if something about the available split area changes,
-                // recalculate the split windows to match the new configuration.
-                if (rotationChanged || windowingModeChanged
-                        || prevDensity != getConfiguration().densityDpi
-                        || prevScreenW != getConfiguration().screenWidthDp
-                        || prevScreenH != getConfiguration().screenHeightDp) {
-                    calculateDockedBoundsForConfigChange(newParentConfig, newBounds);
-                    hasNewOverrideBounds = true;
-                }
-            }
         }
 
         if (windowingModeChanged) {
-            // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-            if (overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                getStackDockedModeBounds(null /* dockedBounds */, null /* currentTempTaskBounds */,
-                        newBounds /* outStackBounds */, mTmpRect2 /* outTempTaskBounds */);
-                // immediately resize so docked bounds are available in onSplitScreenModeActivated
-                setTaskDisplayedBounds(null);
-                setTaskBounds(newBounds);
-                setBounds(newBounds);
-                newBounds.set(newBounds);
-            } else if (overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
-                Rect dockedBounds = display.getRootSplitScreenPrimaryTask().getBounds();
-                final boolean isMinimizedDock =
-                        display.mDisplayContent.getDockedDividerController().isMinimizedDock();
-                if (isMinimizedDock) {
-                    Task topTask = display.getRootSplitScreenPrimaryTask().getTopMostTask();
-                    if (topTask != null) {
-                        dockedBounds = topTask.getBounds();
-                    }
-                }
-                getStackDockedModeBounds(dockedBounds, null /* currentTempTaskBounds */,
-                        newBounds /* outStackBounds */, mTmpRect2 /* outTempTaskBounds */);
-                hasNewOverrideBounds = true;
-            }
+            display.onStackWindowingModeChanged(this);
         }
         if (hasNewOverrideBounds) {
-            if (inSplitScreenPrimaryWindowingMode()) {
-                mStackSupervisor.resizeDockedStackLocked(new Rect(newBounds),
-                        null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                        null /* tempOtherTaskBounds */, null /* tempOtherTaskInsetBounds */,
-                        PRESERVE_WINDOWS, true /* deferResume */);
+            if (inSplitScreenWindowingMode()) {
+                setBounds(newBounds);
             } else if (overrideWindowingMode != WINDOWING_MODE_PINNED) {
                 // For pinned stack, resize is now part of the {@link WindowContainerTransaction}
-                resize(new Rect(newBounds), null /* tempTaskBounds */,
-                        null /* tempTaskInsetBounds */, PRESERVE_WINDOWS, true /* deferResume */);
+                resize(new Rect(newBounds), null /* configBounds */,
+                        PRESERVE_WINDOWS, true /* deferResume */);
             }
         }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
@@ -907,11 +864,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 // warning toast about it.
                 mAtmService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                final ActivityStack primarySplitStack = display.getRootSplitScreenPrimaryTask();
-                primarySplitStack.setWindowingModeInSurfaceTransaction(WINDOWING_MODE_UNDEFINED,
-                        false /* animate */, false /* showRecents */,
-                        false /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */,
-                        primarySplitStack == this ? creating : false);
+                display.onSplitScreenModeDismissed();
             }
         }
 
@@ -933,6 +886,9 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             final ConfigurationContainer parent = getParent();
             likelyResolvedMode = parent != null ? parent.getWindowingMode()
                     : WINDOWING_MODE_FULLSCREEN;
+        }
+        if (currentMode == WINDOWING_MODE_PINNED) {
+            mAtmService.getTaskChangeNotificationController().notifyActivityUnpinned();
         }
         if (sendNonResizeableNotification && likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
                 && topActivity != null && !topActivity.noDisplay
@@ -981,8 +937,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             }
 
             if (!Objects.equals(getRequestedOverrideBounds(), mTmpRect2)) {
-                resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                        false /* preserveWindows */, true /* deferResume */);
+                resize(mTmpRect2, null /*configBounds*/,
+                        false /*preserveWindows*/, true /*deferResume*/);
             }
         } finally {
             if (showRecents && !alreadyInSplitScreenMode && isOnHomeDisplay()
@@ -1147,20 +1103,15 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         return r.getTask().mTaskId != taskId && r.appToken != notTop && r.canBeTopRunning();
     }
 
-    ActivityRecord isInStackLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        return isInStackLocked(r);
-    }
-
     ActivityRecord isInStackLocked(ActivityRecord r) {
         if (r == null) {
             return null;
         }
-        final Task task = r.getTask();
-        final ActivityStack stack = r.getRootTask();
-        if (stack != null && task.mChildren.contains(r) && mChildren.contains(task)) {
-            if (stack != this) Slog.w(TAG,
-                    "Illegal state! task does not point to stack it is in.");
+        final Task task = r.getRootTask();
+        if (task != null && r.isDescendantOf(task)) {
+            if (task != this) Slog.w(TAG, "Illegal state! task does not point to stack it is in. "
+                    + "stack=" + this + " task=" + task + " r=" + r
+                    + " callers=" + Debug.getCallers(15, "\n"));
             return r;
         }
         return null;
@@ -1205,7 +1156,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                     display.getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
             if (topFullScreenStack != null) {
                 final ActivityStack primarySplitScreenStack = display.getRootSplitScreenPrimaryTask();
-                if (display.getIndexOf(topFullScreenStack)
+                if (primarySplitScreenStack != null && display.getIndexOf(topFullScreenStack)
                         > display.getIndexOf(primarySplitScreenStack)) {
                     primarySplitScreenStack.moveToFront(reason + " splitScreenToTop");
                 }
@@ -1236,7 +1187,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
 
         getDisplay().positionStackAtBottom(this, reason);
-        if (task != null) {
+        if (task != null && task != this) {
             positionChildAtBottom(task);
         }
 
@@ -1280,12 +1231,12 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         mCurrentUser = userId;
 
         super.switchUser(userId);
-        forAllTasks((t) -> {
-            if (t.showToCurrentUser()) {
+        forAllLeafTasks((t) -> {
+            if (t.showToCurrentUser() && t != this) {
                 mChildren.remove(t);
                 mChildren.add(t);
             }
-        }, true /* traverseTopToBottom */, this);
+        }, true /* traverseTopToBottom */);
     }
 
     void minimalResumeActivityLocked(ActivityRecord r) {
@@ -2479,16 +2430,16 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             boolean newTask, boolean keepCurTransition, ActivityOptions options) {
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
-        final boolean hasTask = hasChild(rTask);
+        final boolean isOrhasTask = rTask == this || hasChild(rTask);
         // mLaunchTaskBehind tasks get placed at the back of the task stack.
-        if (!r.mLaunchTaskBehind && allowMoveToFront && (!hasTask || newTask)) {
+        if (!r.mLaunchTaskBehind && allowMoveToFront && (!isOrhasTask || newTask)) {
             // Last activity in task had been removed or ActivityManagerService is reusing task.
             // Insert or replace.
             // Might not even be in.
             positionChildAtTop(rTask);
         }
         Task task = null;
-        if (!newTask && hasTask) {
+        if (!newTask && isOrhasTask) {
             final ActivityRecord occludingActivity = getActivity(
                     (ar) -> !ar.finishing && ar.occludesParent(), true, rTask);
             if (occludingActivity != null) {
@@ -2746,7 +2697,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     void finishVoiceTask(IVoiceInteractionSession session) {
         final PooledConsumer c = PooledLambda.obtainConsumer(ActivityStack::finishIfVoiceTask,
                 PooledLambda.__(Task.class), session.asBinder());
-        forAllTasks(c, true /* traverseTopToBottom */, this);
+        forAllLeafTasks(c, true /* traverseTopToBottom */);
         c.recycle();
     }
 
@@ -2841,9 +2792,13 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     boolean navigateUpTo(ActivityRecord srec, Intent destIntent, int resultCode,
             Intent resultData) {
+        if (!srec.attachedToProcess()) {
+            // Nothing to do if the caller is not attached, because this method should be called
+            // from an alive activity.
+            return false;
+        }
         final Task task = srec.getTask();
-
-        if (!mChildren.contains(task) || !task.hasChild(srec)) {
+        if (!srec.isDescendantOf(this)) {
             return false;
         }
 
@@ -2902,14 +2857,14 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         resultData = resultDataHolder[0];
 
         if (parent != null && foundParentInTask) {
+            final int callingUid = srec.info.applicationInfo.uid;
             final int parentLaunchMode = parent.info.launchMode;
             final int destIntentFlags = destIntent.getFlags();
             if (parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE ||
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
                     (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                parent.deliverNewIntentLocked(srec.info.applicationInfo.uid, destIntent,
-                        srec.packageName);
+                parent.deliverNewIntentLocked(callingUid, destIntent, srec.packageName);
             } else {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
@@ -2922,10 +2877,11 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                             .setActivityInfo(aInfo)
                             .setResultTo(parent.appToken)
                             .setCallingPid(-1)
-                            .setCallingUid(parent.launchedFromUid)
-                            .setCallingPackage(parent.launchedFromPackage)
+                            .setCallingUid(callingUid)
+                            .setCallingPackage(srec.packageName)
+                            .setCallingFeatureId(parent.launchedFromFeatureId)
                             .setRealCallingPid(-1)
-                            .setRealCallingUid(parent.launchedFromUid)
+                            .setRealCallingUid(callingUid)
                             .setComponentSpecified(true)
                             .execute();
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
@@ -2955,20 +2911,20 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         getDisplay().mDisplayContent.prepareAppTransition(transit, false);
     }
 
-    final void moveTaskToFrontLocked(Task tr, boolean noAnimation, ActivityOptions options,
+    final void moveTaskToFront(Task tr, boolean noAnimation, ActivityOptions options,
             AppTimeTracker timeTracker, String reason) {
-        moveTaskToFrontLocked(tr, noAnimation, options, timeTracker, !DEFER_RESUME, reason);
+        moveTaskToFront(tr, noAnimation, options, timeTracker, !DEFER_RESUME, reason);
     }
 
-    final void moveTaskToFrontLocked(Task tr, boolean noAnimation, ActivityOptions options,
+    final void moveTaskToFront(Task tr, boolean noAnimation, ActivityOptions options,
             AppTimeTracker timeTracker, boolean deferResume, String reason) {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "moveTaskToFront: " + tr);
 
         final ActivityStack topStack = getDisplay().getTopStack();
-        final ActivityRecord topActivity = topStack != null ? topStack.getTopNonFinishingActivity() : null;
-        final int numTasks = getChildCount();
-        final int index = mChildren.indexOf(tr);
-        if (numTasks == 0 || index < 0)  {
+        final ActivityRecord topActivity = topStack != null
+                ? topStack.getTopNonFinishingActivity() : null;
+
+        if (tr != this && !tr.isDescendantOf(this)) {
             // nothing to do!
             if (noAnimation) {
                 ActivityOptions.abort(options);
@@ -3122,24 +3078,30 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     // TODO: Can only be called from special methods in ActivityStackSupervisor.
     // Need to consolidate those calls points into this resize method so anyone can call directly.
-    void resize(Rect bounds, Rect tempTaskBounds, Rect tempTaskInsetBounds,
-            boolean preserveWindows, boolean deferResume) {
-        if (!updateBoundsAllowed(bounds)) {
+    void resize(Rect displayedBounds, Rect configBounds, boolean preserveWindows,
+            boolean deferResume) {
+        if (!updateBoundsAllowed(displayedBounds)) {
             return;
         }
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "stack.resize_" + getRootTaskId());
         mAtmService.deferWindowLayout();
         try {
+            // TODO: Why not just set this on the stack directly vs. on each tasks?
             // Update override configurations of all tasks in the stack.
-            final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : bounds;
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     ActivityStack::processTaskResizeBounds, PooledLambda.__(Task.class),
-                    taskBounds, tempTaskInsetBounds);
-            forAllTasks(c, true /* traverseTopToBottom */, this);
+                    displayedBounds, configBounds);
+            forAllTasks(c, true /* traverseTopToBottom */);
             c.recycle();
 
-            setBounds(bounds);
+            if (mBoundsAnimating) {
+                // Force to update task surface bounds and relayout windows, since configBounds
+                // remains unchanged during bounds animation.
+                updateSurfaceBounds();
+                getDisplay().setLayoutNeeded();
+                mWmService.requestTraversal();
+            }
 
             if (!deferResume) {
                 ensureVisibleActivitiesConfiguration(topRunningActivity(), preserveWindows);
@@ -3150,15 +3112,16 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
     }
 
-    private static void processTaskResizeBounds(Task task, Rect bounds, Rect insetBounds) {
+    private static void processTaskResizeBounds(
+            Task task, Rect displayedBounds, Rect configBounds) {
         if (!task.isResizeable()) return;
 
-        if (insetBounds != null && !insetBounds.isEmpty()) {
-            task.setOverrideDisplayedBounds(bounds);
-            task.setBounds(insetBounds);
+        if (configBounds != null && !configBounds.isEmpty()) {
+            task.setOverrideDisplayedBounds(displayedBounds);
+            task.setBounds(configBounds);
         } else {
             task.setOverrideDisplayedBounds(null);
-            task.setBounds(bounds);
+            task.setBounds(displayedBounds);
         }
     }
 
@@ -3173,7 +3136,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
         final PooledConsumer c = PooledLambda.obtainConsumer(ActivityStack::setTaskBounds,
                 PooledLambda.__(Task.class), bounds);
-        forAllTasks(c, true /* traverseTopToBottom */, this);
+        forAllLeafTasks(c, true /* traverseTopToBottom */);
         c.recycle();
     }
 
@@ -3189,7 +3152,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
         final PooledConsumer c = PooledLambda.obtainConsumer(ActivityStack::setTaskDisplayedBounds,
                 PooledLambda.__(Task.class), bounds);
-        forAllTasks(c, true /* traverseTopToBottom */, this);
+        forAllLeafTasks(c, true /* traverseTopToBottom */);
         c.recycle();
     }
 
@@ -3285,7 +3248,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             return false;
         }
         final String prefix = "    ";
-        forAllTasks((task) -> {
+        forAllLeafTasks((task) -> {
             if (needSep) {
                 pw.println("");
             }
@@ -3303,7 +3266,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                     false /* traverseTopToBottom */);
             dumpHistoryList(fd, pw, activities, prefix, "Hist", true, !dumpAll, dumpClient,
                     dumpPackage, false, null, task);
-        }, true /* traverseTopToBottom */, this);
+        }, true /* traverseTopToBottom */);
         return true;
     }
 
@@ -3354,19 +3317,33 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
     }
 
-    Task createTask(int taskId, ActivityInfo info, Intent intent, boolean toTop) {
-        return createTask(taskId, info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
+    Task reuseOrCreateTask(ActivityInfo info, Intent intent, boolean toTop) {
+        return reuseOrCreateTask(info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
                 toTop, null /*activity*/, null /*source*/, null /*options*/);
     }
+    // TODO: Can be removed once we change callpoints creating stacks to be creating tasks.
+    /** Either returns this current task to be re-used or creates a new child task. */
+    Task reuseOrCreateTask(ActivityInfo info, Intent intent, IVoiceInteractionSession voiceSession,
+            IVoiceInteractor voiceInteractor, boolean toTop, ActivityRecord activity,
+            ActivityRecord source, ActivityOptions options) {
 
-    Task createTask(int taskId, ActivityInfo info, Intent intent,
-            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            boolean toTop, ActivityRecord activity, ActivityRecord source,
-            ActivityOptions options) {
-        final Task task = Task.create(
-                mAtmService, taskId, info, intent, voiceSession, voiceInteractor, this);
-        // add the task to stack first, mTaskPositioner might need the stack association
-        addChild(task, toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
+        Task task;
+        if (DisplayContent.alwaysCreateStack(getWindowingMode(), getActivityType())) {
+            // This stack will only contain one task, so just return itself since all stacks ara now
+            // tasks and all tasks are now stacks.
+            task = reuseAsLeafTask(voiceSession, voiceInteractor, info, activity);
+        } else {
+            // Create child task since this stack can contain multiple tasks.
+            final int taskId = activity != null
+                    ? mStackSupervisor.getNextTaskIdForUser(activity.mUserId)
+                    : mStackSupervisor.getNextTaskIdForUser();
+            task = Task.create(
+                    mAtmService, taskId, info, intent, voiceSession, voiceInteractor, this);
+
+            // add the task to stack first, mTaskPositioner might need the stack association
+            addChild(task, toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
+        }
+
         int displayId = getDisplayId();
         if (displayId == INVALID_DISPLAY) displayId = DEFAULT_DISPLAY;
         final boolean isLockscreenShown = mAtmService.mStackSupervisor.getKeyguardController()
@@ -3376,6 +3353,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
             task.setBounds(getRequestedOverrideBounds());
         }
+
         return task;
     }
 
@@ -3487,91 +3465,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
     }
 
-    void animateResizePinnedStack(Rect toBounds, Rect sourceHintBounds, int animationDuration,
-            boolean fromFullscreen) {
-        if (!inPinnedWindowingMode()) return;
-
-        /**
-         * TODO(b/146594635): Remove all PIP animation code from WM once SysUI handles animation.
-         * If this PIP Task is controlled by a TaskOrganizer, the animation occurs entirely
-         * on the TaskOrganizer side, so we just hand over the leash without doing any animation.
-         * We have to be careful to not schedule the enter-pip callback as the TaskOrganizer
-         * needs to have flexibility to schedule that at an appropriate point in the animation.
-         */
-        if (isControlledByTaskOrganizer()) return;
-        if (toBounds == null /* toFullscreen */) {
-            final Configuration parentConfig = getParent().getConfiguration();
-            final ActivityRecord top = topRunningNonOverlayTaskActivity();
-            if (top != null && !top.isConfigurationCompatible(parentConfig)) {
-                // The final orientation of this activity will change after moving to full screen.
-                // Start freezing screen here to prevent showing a temporary full screen window.
-                top.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
-                dismissPip();
-                return;
-            }
-        }
-
-        // Get the from-bounds
-        final Rect fromBounds = new Rect();
-        getBounds(fromBounds);
-
-        // Get non-null fullscreen to-bounds for animating if the bounds are null
-        @BoundsAnimationController.SchedulePipModeChangedState int schedulePipModeChangedState =
-                NO_PIP_MODE_CHANGED_CALLBACKS;
-        final boolean toFullscreen = toBounds == null;
-        if (toFullscreen) {
-            if (fromFullscreen) {
-                throw new IllegalArgumentException("Should not defer scheduling PiP mode"
-                        + " change on animation to fullscreen.");
-            }
-            schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_START;
-
-            mWmService.getStackBounds(
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mTmpToBounds);
-            if (!mTmpToBounds.isEmpty()) {
-                // If there is a fullscreen bounds, use that
-                toBounds = new Rect(mTmpToBounds);
-            } else {
-                // Otherwise, use the display bounds
-                toBounds = new Rect();
-                getDisplayContent().getBounds(toBounds);
-            }
-        } else if (fromFullscreen) {
-            schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_END;
-        }
-
-        setAnimationFinalBounds(sourceHintBounds, toBounds, toFullscreen);
-
-        final Rect finalToBounds = toBounds;
-        final @BoundsAnimationController.SchedulePipModeChangedState int
-                finalSchedulePipModeChangedState = schedulePipModeChangedState;
-        final DisplayContent displayContent = getDisplayContent();
-        @BoundsAnimationController.AnimationType int intendedAnimationType =
-                displayContent.mBoundsAnimationController.getAnimationType();
-        if (intendedAnimationType == FADE_IN) {
-            if (fromFullscreen) {
-                setPinnedStackAlpha(0f);
-            }
-            if (toBounds.width() == fromBounds.width()
-                    && toBounds.height() == fromBounds.height()) {
-                intendedAnimationType = BoundsAnimationController.BOUNDS;
-            } else if (!fromFullscreen && !toBounds.equals(fromBounds)) {
-                // intendedAnimationType may have been reset at the end of RecentsAnimation,
-                // force it to BOUNDS type if we know for certain we're animating to
-                // a different bounds, especially for expand and collapse of PiP window.
-                intendedAnimationType = BoundsAnimationController.BOUNDS;
-            }
-        }
-
-        final @BoundsAnimationController.AnimationType int animationType = intendedAnimationType;
-        mCancelCurrentBoundsAnimation = false;
-        displayContent.mBoundsAnimationController.getHandler().post(() -> {
-            displayContent.mBoundsAnimationController.animateBounds(this, fromBounds,
-                    finalToBounds, animationDuration, finalSchedulePipModeChangedState,
-                    fromFullscreen, toFullscreen, animationType);
-        });
-    }
-
     void dismissPip() {
         if (!isActivityTypeStandardOrUndefined()) {
             throw new IllegalArgumentException(
@@ -3580,10 +3473,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         if (getWindowingMode() != WINDOWING_MODE_PINNED) {
             throw new IllegalArgumentException(
                     "Can't exit pinned mode if it's not pinned already.");
-        }
-
-        if (mChildren.size() != 1) {
-            throw new RuntimeException("There should be only one task in a pinned stack.");
         }
 
         // give pinned stack a chance to save current bounds, this should happen before reparent.
@@ -3604,23 +3493,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         });
     }
 
-    private void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds,
-            boolean forceUpdate) {
-        // It is guaranteed that the activities requiring the update will be in the pinned stack at
-        // this point (either reparented before the animation into PiP, or before reparenting after
-        // the animation out of PiP)
-        if (!isAttached()) {
-            return;
-        }
-        final PooledConsumer c = PooledLambda.obtainConsumer(
-                ActivityStackSupervisor::updatePictureInPictureMode, mStackSupervisor,
-                PooledLambda.__(Task.class), targetStackBounds, forceUpdate);
-        forAllTasks(c, true /* traverseTopToBottom */, this);
-        c.recycle();
-    }
-
     void prepareFreezingTaskBounds() {
-        forAllTasks(Task::prepareFreezingBounds, true /* traverseTopToBottom */, this);
+        forAllLeafTasks(Task::prepareFreezingBounds, true /* traverseTopToBottom */);
     }
 
     /**
@@ -3652,7 +3526,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             final PooledConsumer c = PooledLambda.obtainConsumer(Task::alignToAdjustedBounds,
                     PooledLambda.__(Task.class), adjusted ? mAdjustedBounds : getRawBounds(),
                     insetBounds, alignBottom);
-            forAllTasks(c, true /* traverseTopToBottom */, this);
+            forAllLeafTasks(c, true /* traverseTopToBottom */);
             c.recycle();
         }
 
@@ -3715,34 +3589,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     }
 
     /**
-     * Sets the bounds animation target bounds ahead of an animation.  This can't currently be done
-     * in onAnimationStart() since that is started on the UiThread.
-     */
-    private void setAnimationFinalBounds(Rect sourceHintBounds, Rect destBounds,
-            boolean toFullscreen) {
-        if (mAnimationType == BoundsAnimationController.BOUNDS) {
-            mBoundsAnimatingRequested = true;
-        }
-        mBoundsAnimatingToFullscreen = toFullscreen;
-        if (destBounds != null) {
-            mBoundsAnimationTarget.set(destBounds);
-        } else {
-            mBoundsAnimationTarget.setEmpty();
-        }
-        if (sourceHintBounds != null) {
-            mBoundsAnimationSourceHintBounds.set(sourceHintBounds);
-        } else if (!mBoundsAnimating) {
-            // If the bounds are already animating, we don't want to reset the source hint. This is
-            // because the source hint is sent when starting the animation from the client that
-            // requested to enter pip. Other requests can adjust the pip bounds during an animation,
-            // but could accidentally reset the source hint bounds.
-            mBoundsAnimationSourceHintBounds.setEmpty();
-        }
-
-        mPreAnimationBounds.set(getRawBounds());
-    }
-
-    /**
      * @return the final bounds for the bounds animation.
      */
     void getFinalAnimationBounds(Rect outBounds) {
@@ -3771,30 +3617,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     /** Bounds of the stack with other system factors taken into consideration. */
     void getDimBounds(Rect out) {
         getBounds(out);
-    }
-
-    /**
-     * Reset the current animation running on {@link #mBoundsAnimationTarget}.
-     *
-     * @param destinationBounds the final destination bounds
-     */
-    void resetCurrentBoundsAnimation(Rect destinationBounds) {
-        boolean animating = (mBoundsAnimatingRequested || mBoundsAnimating)
-                && !mBoundsAnimationTarget.isEmpty();
-
-        // The final boundary is updated while there is an existing boundary animation. Let's
-        // cancel this animation to prevent the obsolete animation overwritten updated bounds.
-        if (animating && !destinationBounds.equals(mBoundsAnimationTarget)) {
-            final BoundsAnimationController controller =
-                    getDisplayContent().mBoundsAnimationController;
-            controller.getHandler().post(() -> controller.cancel(this));
-        }
-        // Once we've set the bounds based on the rotation of the old bounds in the new
-        // orientation, clear the animation target bounds since they are obsolete, and
-        // cancel any currently running animations
-        mBoundsAnimationTarget.setEmpty();
-        mBoundsAnimationSourceHintBounds.setEmpty();
-        mCancelCurrentBoundsAnimation = true;
     }
 
     /**
@@ -3925,6 +3747,12 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             return;
         }
 
+        if (child == this) {
+            // TODO: Fix call-points
+            moveToFront("positionChildAtTop");
+            return;
+        }
+
         positionChildAt(POSITION_TOP, child, true /* includingParents */);
         child.updateTaskMovement(true);
 
@@ -3979,17 +3807,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         final DisplayContent oldDisplay = oldParent != null
                 ? ((WindowContainer) oldParent).getDisplayContent() : null;
         super.onParentChanged(newParent, oldParent);
-
-        if (display != null && inSplitScreenPrimaryWindowingMode()
-                // only do this for the base stack
-                && !newParent.inSplitScreenPrimaryWindowingMode()) {
-            // If we created a docked stack we want to resize it so it resizes all other stacks
-            // in the system.
-            getStackDockedModeBounds(null /* dockedBounds */, null /* currentTempTaskBounds */,
-                    mTmpRect /* outStackBounds */, mTmpRect2 /* outTempTaskBounds */);
-            mStackSupervisor.resizeDockedStackLocked(getRequestedOverrideBounds(), mTmpRect,
-                    mTmpRect2, null, null, PRESERVE_WINDOWS);
-        }
 
         // Resume next focusable stack after reparenting to another display if we aren't removing
         // the prevous display.
@@ -4350,19 +4167,19 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
      * to the list of to be drawn windows the service is waiting for.
      */
     void beginImeAdjustAnimation() {
-        forAllTasks((t) -> {
+        forAllLeafTasks((t) -> {
             if (t.hasContentToDisplay()) {
                 t.setDragResizing(true, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
                 t.setWaitingForDrawnIfResizingChanged();
             }
-        }, true /* traverseTopToBottom */, this);
+        }, true /* traverseTopToBottom */);
     }
 
     /** Resets the resizing state of all windows. */
     void endImeAdjustAnimation() {
-        forAllTasks((t) -> {
+        forAllLeafTasks((t) -> {
             t.setDragResizing(false, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
-        }, true /* traverseTopToBottom */, this);
+        }, true /* traverseTopToBottom */);
     }
 
     private int getMinTopStackBottom(final Rect displayContentRect, int originalStackBottom) {
@@ -4606,114 +4423,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         return task != null;
     }
 
-    public boolean setPinnedStackSize(Rect stackBounds, Rect tempTaskBounds) {
-        // Hold the lock since this is called from the BoundsAnimator running on the UiThread
-        synchronized (mWmService.mGlobalLock) {
-            if (mCancelCurrentBoundsAnimation) {
-                return false;
-            }
-        }
-
-        try {
-            mWmService.mActivityTaskManager.resizePinnedStack(stackBounds, tempTaskBounds);
-        } catch (RemoteException e) {
-            // I don't believe you.
-        }
-        return true;
-    }
-
-    void onAllWindowsDrawn() {
-        if (!mBoundsAnimating && !mBoundsAnimatingRequested) {
-            return;
-        }
-
-        getDisplayContent().mBoundsAnimationController.onAllWindowsDrawn();
-    }
-
-    @Override  // AnimatesBounds
-    public boolean onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate,
-            @BoundsAnimationController.AnimationType int animationType) {
-        // Hold the lock since this is called from the BoundsAnimator running on the UiThread
-        synchronized (mWmService.mGlobalLock) {
-            if (!isAttached()) {
-                // Don't run the animation if the stack is already detached
-                return false;
-            }
-
-            if (animationType == BoundsAnimationController.BOUNDS) {
-                mBoundsAnimatingRequested = false;
-                mBoundsAnimating = true;
-            }
-            mAnimationType = animationType;
-
-            // If we are changing UI mode, as in the PiP to fullscreen
-            // transition, then we need to wait for the window to draw.
-            if (schedulePipModeChangedCallback) {
-                forAllWindows((w) -> {
-                    w.mWinAnimator.resetDrawState();
-                }, false /* traverseTopToBottom */);
-            }
-        }
-
-        if (inPinnedWindowingMode()) {
-            try {
-                mWmService.mActivityTaskManager.notifyPinnedStackAnimationStarted();
-            } catch (RemoteException e) {
-                // I don't believe you...
-            }
-
-            if ((schedulePipModeChangedCallback || animationType == FADE_IN)) {
-                // We need to schedule the PiP mode change before the animation up. It is possible
-                // in this case for the animation down to not have been completed, so always
-                // force-schedule and update to the client to ensure that it is notified that it
-                // is no longer in picture-in-picture mode
-                updatePictureInPictureModeForPinnedStackAnimation(null, forceUpdate);
-            }
-        }
-        return true;
-    }
-
-    @Override  // AnimatesBounds
-    public void onAnimationEnd(boolean schedulePipModeChangedCallback, Rect finalStackSize,
-            boolean moveToFullscreen) {
-        synchronized (mWmService.mGlobalLock) {
-            if (inPinnedWindowingMode()) {
-                // Update to the final bounds if requested. This is done here instead of in the
-                // bounds animator to allow us to coordinate this after we notify the PiP mode
-                // changed
-
-                if (schedulePipModeChangedCallback) {
-                    // We need to schedule the PiP mode change after the animation down, so use the
-                    // final bounds
-                    updatePictureInPictureModeForPinnedStackAnimation(mBoundsAnimationTarget,
-                            false /* forceUpdate */);
-                }
-
-                if (mAnimationType == BoundsAnimationController.FADE_IN) {
-                    setPinnedStackAlpha(1f);
-                    mWmService.mAtmService.notifyPinnedStackAnimationEnded();
-                    return;
-                }
-
-                if (finalStackSize != null && !mCancelCurrentBoundsAnimation) {
-                    setPinnedStackSize(finalStackSize, null);
-                } else {
-                    // We have been canceled, so the final stack size is null, still run the
-                    // animation-end logic
-                    onPipAnimationEndResize();
-                }
-
-                mWmService.mAtmService.notifyPinnedStackAnimationEnded();
-                if (moveToFullscreen) {
-                    ((ActivityStack) this).dismissPip();
-                }
-            } else {
-                // No PiP animation, just run the normal animation-end logic
-                onPipAnimationEndResize();
-            }
-        }
-    }
-
     /**
      * Sets the current picture-in-picture aspect ratio.
      */
@@ -4761,42 +4470,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         getDisplayContent().getPinnedStackController().setActions(actions);
     }
 
-    /** Called immediately prior to resizing the tasks at the end of the pinned stack animation. */
-    void onPipAnimationEndResize() {
-        mBoundsAnimating = false;
-        forAllTasks(Task::clearPreserveNonFloatingState, false /* traverseTopToBottom */, this);
-        mWmService.requestTraversal();
-    }
-
-    @Override
-    public boolean shouldDeferStartOnMoveToFullscreen() {
-        synchronized (mWmService.mGlobalLock) {
-            if (!isAttached()) {
-                // Unnecessary to pause the animation because the stack is detached.
-                return false;
-            }
-
-            // Workaround for the recents animation -- normally we need to wait for the new activity
-            // to show before starting the PiP animation, but because we start and show the home
-            // activity early for the recents animation prior to the PiP animation starting, there
-            // is no subsequent all-drawn signal. In this case, we can skip the pause when the home
-            // stack is already visible and drawn.
-            final ActivityStack homeStack = mDisplayContent.getRootHomeTask();
-            if (homeStack == null) {
-                return true;
-            }
-            final Task homeTask = homeStack.getTopMostTask();
-            if (homeTask == null) {
-                return true;
-            }
-            final ActivityRecord homeApp = homeTask.getTopVisibleActivity();
-            if (!homeTask.isVisible() || homeApp == null) {
-                return true;
-            }
-            return !homeApp.allDrawn;
-        }
-    }
-
     /**
      * @return True if we are currently animating the pinned stack from fullscreen to non-fullscreen
      *         bounds and we have a deferred PiP mode changed callback set with the animation.
@@ -4816,25 +4489,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     public boolean isForceScaled() {
         return mBoundsAnimating;
-    }
-
-    public boolean isAnimatingBounds() {
-        return mBoundsAnimating;
-    }
-
-    public boolean lastAnimatingBoundsWasToFullscreen() {
-        return mBoundsAnimatingToFullscreen;
-    }
-
-    public boolean isAnimatingBoundsToFullscreen() {
-        return isAnimatingBounds() && lastAnimatingBoundsWasToFullscreen();
-    }
-
-    public boolean pinnedStackResizeDisallowed() {
-        if (mBoundsAnimating && mCancelCurrentBoundsAnimation) {
-            return true;
-        }
-        return false;
     }
 
     /** Returns true if a removal action is still being deferred. */
@@ -4861,21 +4515,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 || activityType == ACTIVITY_TYPE_HOME
                 || activityType == ACTIVITY_TYPE_RECENTS
                 || activityType == ACTIVITY_TYPE_ASSISTANT;
-    }
-
-    @Override
-    public boolean setPinnedStackAlpha(float alpha) {
-        // Hold the lock since this is called from the BoundsAnimator running on the UiThread
-        synchronized (mWmService.mGlobalLock) {
-            final SurfaceControl sc = getSurfaceControl();
-            if (sc == null || !sc.isValid()) {
-                // If the stack is already removed, don't bother updating any stack animation
-                return false;
-            }
-            getPendingTransaction().setAlpha(sc, mCancelCurrentBoundsAnimation ? 1 : alpha);
-            scheduleAnimation();
-            return !mCancelCurrentBoundsAnimation;
-        }
     }
 
     public DisplayInfo getDisplayInfo() {
@@ -4936,6 +4575,12 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     }
 
     @Override
+    public SurfaceControl getParentSurfaceControl() {
+        // Tile is a "virtual" parent, so we need to intercept the parent surface here
+        return mTile != null ? mTile.getSurfaceControl() : super.getParentSurfaceControl();
+    }
+
+    @Override
     void removeImmediately() {
         // TODO(task-hierarchy): remove this override when tiles are in hierarchy
         if (mTile != null) {
@@ -4988,6 +4633,10 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         if (!matchParentBounds()) {
             final Rect bounds = getRequestedOverrideBounds();
             bounds.dumpDebug(proto, BOUNDS);
+        } else if (getStack().getTile() != null) {
+            // use tile's bounds here for cts.
+            final Rect bounds = getStack().getTile().getRequestedOverrideBounds();
+            bounds.dumpDebug(proto, BOUNDS);
         }
         getOverrideDisplayedBounds().dumpDebug(proto, DISPLAYED_BOUNDS);
         mAdjustedBounds.dumpDebug(proto, ADJUSTED_BOUNDS);
@@ -5006,6 +4655,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
             proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
         }
+
+        proto.write(CREATED_BY_ORGANIZER, this instanceof TaskTile);
 
         proto.end(token);
     }

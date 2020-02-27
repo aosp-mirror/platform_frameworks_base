@@ -84,6 +84,7 @@ class RuleIndexingDetailsIdentifier {
                 return getIndexingDetailsForStringAtomicFormula(
                         (AtomicFormula.StringAtomicFormula) formula);
             case IntegrityFormula.LONG_ATOMIC_FORMULA_TAG:
+            case IntegrityFormula.INSTALLER_ALLOWED_BY_MANIFEST_FORMULA_TAG:
             case IntegrityFormula.BOOLEAN_ATOMIC_FORMULA_TAG:
                 // Package name and app certificate related formulas are string atomic formulas.
                 return new RuleIndexingDetails(NOT_INDEXED);

@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -481,12 +482,13 @@ public class AudioPolicy {
      * @hide
      * Removes audio device affinity previously set by
      * {@link #setUserIdDeviceAffinity(int, java.util.List)}.
-     * @param userId userId of the application affected.
+     * @param userId userId of the application affected, as obtained via
+     * {@link UserHandle#getIdentifier}. Not to be confused with application uid.
      * @return true if the change was successful, false otherwise.
      */
     @TestApi
     @SystemApi
-    public boolean removeUserIdDeviceAffinity(int userId) {
+    public boolean removeUserIdDeviceAffinity(@UserIdInt int userId) {
         synchronized (mLock) {
             if (mStatus != POLICY_STATUS_REGISTERED) {
                 throw new IllegalStateException("Cannot use unregistered AudioPolicy");
@@ -512,13 +514,15 @@ public class AudioPolicy {
      * multiple devices in the list doesn't imply the signals will be duplicated on the different
      * audio devices, final routing will depend on the {@link AudioAttributes} of the sounds being
      * played.
-     * @param userId Android user id to affect.
+     * @param userId userId of the application affected, as obtained via
+     * {@link UserHandle#getIdentifier}. Not to be confused with application uid.
      * @param devices list of devices to which the audio stream of the application may be routed.
      * @return true if the change was successful, false otherwise.
      */
     @TestApi
     @SystemApi
-    public boolean setUserIdDeviceAffinity(int userId, @NonNull List<AudioDeviceInfo> devices) {
+    public boolean setUserIdDeviceAffinity(@UserIdInt int userId,
+            @NonNull List<AudioDeviceInfo> devices) {
         Objects.requireNonNull(devices, "Illegal null list of audio devices");
         synchronized (mLock) {
             if (mStatus != POLICY_STATUS_REGISTERED) {

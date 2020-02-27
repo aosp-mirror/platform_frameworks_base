@@ -156,9 +156,7 @@ public class MediaScannerConnection implements ServiceConnection {
             }
             BackgroundThread.getExecutor().execute(() -> {
                 final Uri uri = scanFileQuietly(mProvider, new File(path));
-                if (mClient != null) {
-                    mClient.onScanCompleted(path, uri);
-                }
+                runCallBack(mContext, mClient, path, uri);
             });
         }
     }
@@ -187,9 +185,7 @@ public class MediaScannerConnection implements ServiceConnection {
                     .acquireContentProviderClient(MediaStore.AUTHORITY)) {
                 for (String path : paths) {
                     final Uri uri = scanFileQuietly(client, new File(path));
-                    if (callback != null) {
-                        callback.onScanCompleted(path, uri);
-                    }
+                    runCallBack(context, callback, path, uri);
                 }
             }
         });
@@ -204,6 +200,23 @@ public class MediaScannerConnection implements ServiceConnection {
             Log.w(TAG, "Failed to scan " + file + ": " + e);
         }
         return uri;
+    }
+
+    private static void runCallBack(Context context, OnScanCompletedListener callback,
+            String path, Uri uri) {
+        if (callback != null) {
+            // Ignore exceptions from callback to avoid calling app from crashing.
+            // Don't ignore exceptions for apps targeting 'R' or higher.
+            try {
+                callback.onScanCompleted(path, uri);
+            } catch (Throwable e) {
+                if (context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R) {
+                    throw e;
+                } else {
+                    Log.w(TAG, "Ignoring exception from callback for backward compatibility", e);
+                }
+            }
+        }
     }
 
     @Deprecated

@@ -15,15 +15,27 @@
  */
 package com.android.internal.app;
 
+import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
+import android.app.AppGlobals;
+import android.app.admin.DevicePolicyEventLogger;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.PagerAdapter;
 import com.android.internal.widget.ViewPager;
@@ -51,6 +63,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     private Set<Integer> mLoadedPages;
     private final UserHandle mPersonalProfileUserHandle;
     private final UserHandle mWorkProfileUserHandle;
+    private Injector mInjector;
 
     AbstractMultiProfilePagerAdapter(Context context, int currentPage,
             UserHandle personalProfileUserHandle,
@@ -60,6 +73,33 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         mLoadedPages = new HashSet<>();
         mPersonalProfileUserHandle = personalProfileUserHandle;
         mWorkProfileUserHandle = workProfileUserHandle;
+        UserManager userManager = context.getSystemService(UserManager.class);
+        mInjector = new Injector() {
+            @Override
+            public boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId,
+                    int targetUserId) {
+                return AbstractMultiProfilePagerAdapter.this
+                        .hasCrossProfileIntents(intents, sourceUserId, targetUserId);
+            }
+
+            @Override
+            public boolean isQuietModeEnabled(UserHandle workProfileUserHandle) {
+                return userManager.isQuietModeEnabled(workProfileUserHandle);
+            }
+
+            @Override
+            public void requestQuietModeEnabled(boolean enabled, UserHandle workProfileUserHandle) {
+                userManager.requestQuietModeEnabled(enabled, workProfileUserHandle);
+            }
+        };
+    }
+
+    /**
+     * Overrides the default {@link Injector} for testing purposes.
+     */
+    @VisibleForTesting
+    public void setInjector(Injector injector) {
+        mInjector = injector;
     }
 
     void setOnProfileSelectedListener(OnProfileSelectedListener listener) {
@@ -213,26 +253,143 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     abstract @Nullable ViewGroup getInactiveAdapterView();
 
-    boolean rebuildActiveTab(boolean post) {
-        return rebuildTab(getActiveListAdapter(), post);
+    abstract String getMetricsCategory();
+
+    /**
+     * Rebuilds the tab that is currently visible to the user.
+     * <p>Returns {@code true} if rebuild has completed.
+     */
+    boolean rebuildActiveTab(boolean doPostProcessing) {
+        return rebuildTab(getActiveListAdapter(), doPostProcessing);
     }
 
-    boolean rebuildInactiveTab(boolean post) {
+    /**
+     * Rebuilds the tab that is not currently visible to the user, if such one exists.
+     * <p>Returns {@code true} if rebuild has completed.
+     */
+    boolean rebuildInactiveTab(boolean doPostProcessing) {
         if (getItemCount() == 1) {
             return false;
         }
-        return rebuildTab(getInactiveListAdapter(), post);
+        return rebuildTab(getInactiveListAdapter(), doPostProcessing);
+    }
+
+    private int userHandleToPageIndex(UserHandle userHandle) {
+        if (userHandle == getPersonalListAdapter().mResolverListController.getUserHandle()) {
+            return PROFILE_PERSONAL;
+        } else {
+            return PROFILE_WORK;
+        }
     }
 
     private boolean rebuildTab(ResolverListAdapter activeListAdapter, boolean doPostProcessing) {
         UserHandle listUserHandle = activeListAdapter.getUserHandle();
-        if (UserHandle.myUserId() != listUserHandle.getIdentifier() &&
-                !hasAppsInOtherProfile(activeListAdapter)) {
-            // TODO(arangelov): Show empty state UX here
+        if (listUserHandle == mWorkProfileUserHandle
+                && mInjector.isQuietModeEnabled(mWorkProfileUserHandle)) {
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.RESOLVER_EMPTY_STATE_WORK_APPS_DISABLED)
+                    .setStrings(getMetricsCategory())
+                    .write();
+            showEmptyState(activeListAdapter,
+                    R.drawable.ic_work_apps_off,
+                    R.string.resolver_turn_on_work_apps,
+                    R.string.resolver_turn_on_work_apps_explanation,
+                    (View.OnClickListener) v ->
+                            mInjector.requestQuietModeEnabled(false, mWorkProfileUserHandle));
             return false;
-        } else {
-            return activeListAdapter.rebuildList(doPostProcessing);
         }
+        if (UserHandle.myUserId() != listUserHandle.getIdentifier()) {
+            if (!mInjector.hasCrossProfileIntents(activeListAdapter.getIntents(),
+                    UserHandle.myUserId(), listUserHandle.getIdentifier())) {
+                if (listUserHandle == mPersonalProfileUserHandle) {
+                    DevicePolicyEventLogger.createEvent(
+                                DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL)
+                            .setStrings(getMetricsCategory())
+                            .write();
+                    showEmptyState(activeListAdapter,
+                            R.drawable.ic_sharing_disabled,
+                            R.string.resolver_cant_share_with_personal_apps,
+                            R.string.resolver_cant_share_cross_profile_explanation);
+                } else {
+                    DevicePolicyEventLogger.createEvent(
+                            DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_WORK)
+                            .setStrings(getMetricsCategory())
+                            .write();
+                    showEmptyState(activeListAdapter,
+                            R.drawable.ic_sharing_disabled,
+                            R.string.resolver_cant_share_with_work_apps,
+                            R.string.resolver_cant_share_cross_profile_explanation);
+                }
+                return false;
+            }
+        }
+        showListView(activeListAdapter);
+        return activeListAdapter.rebuildList(doPostProcessing);
+    }
+
+    void showEmptyState(ResolverListAdapter listAdapter) {
+        UserHandle listUserHandle = listAdapter.getUserHandle();
+        if (UserHandle.myUserId() == listUserHandle.getIdentifier()
+                || !hasAppsInOtherProfile(listAdapter)) {
+            if (mWorkProfileUserHandle != null) {
+                DevicePolicyEventLogger.createEvent(
+                        DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_APPS_RESOLVED)
+                        .setStrings(getMetricsCategory())
+                        .write();
+            }
+            showEmptyState(listAdapter,
+                    R.drawable.ic_no_apps,
+                    R.string.resolver_no_apps_available,
+                    R.string.resolver_no_apps_available_explanation);
+        }
+    }
+
+    private void showEmptyState(ResolverListAdapter activeListAdapter,
+            @DrawableRes int iconRes, @StringRes int titleRes, @StringRes int subtitleRes) {
+        showEmptyState(activeListAdapter, iconRes, titleRes, subtitleRes, /* buttonOnClick */ null);
+    }
+
+    private void showEmptyState(ResolverListAdapter activeListAdapter,
+            @DrawableRes int iconRes, @StringRes int titleRes, @StringRes int subtitleRes,
+            View.OnClickListener buttonOnClick) {
+        ProfileDescriptor descriptor = getItem(
+                userHandleToPageIndex(activeListAdapter.getUserHandle()));
+        descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.GONE);
+        View emptyStateView = descriptor.rootView.findViewById(R.id.resolver_empty_state);
+        emptyStateView.setVisibility(View.VISIBLE);
+
+        ImageView icon = emptyStateView.findViewById(R.id.resolver_empty_state_icon);
+        icon.setImageResource(iconRes);
+
+        TextView title = emptyStateView.findViewById(R.id.resolver_empty_state_title);
+        title.setText(titleRes);
+
+        TextView subtitle = emptyStateView.findViewById(R.id.resolver_empty_state_subtitle);
+        subtitle.setText(subtitleRes);
+
+        Button button = emptyStateView.findViewById(R.id.resolver_empty_state_button);
+        button.setVisibility(buttonOnClick != null ? View.VISIBLE : View.GONE);
+        button.setOnClickListener(buttonOnClick);
+    }
+
+    private void showListView(ResolverListAdapter activeListAdapter) {
+        ProfileDescriptor descriptor = getItem(
+                userHandleToPageIndex(activeListAdapter.getUserHandle()));
+        descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.VISIBLE);
+        View emptyStateView = descriptor.rootView.findViewById(R.id.resolver_empty_state);
+        emptyStateView.setVisibility(View.GONE);
+    }
+
+    private boolean hasCrossProfileIntents(List<Intent> intents, int source, int target) {
+        IPackageManager packageManager = AppGlobals.getPackageManager();
+        ContentResolver contentResolver = mContext.getContentResolver();
+        for (Intent intent : intents) {
+            if (IntentForwarderActivity.canForward(intent, source, target, packageManager,
+                    contentResolver) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasAppsInOtherProfile(ResolverListAdapter adapter) {
@@ -266,5 +423,27 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
          * {@link #PROFILE_WORK} if the work profile was selected.
          */
         void onProfileSelected(int profileIndex);
+    }
+
+    /**
+     * Describes an injector to be used for cross profile functionality. Overridable for testing.
+     */
+    @VisibleForTesting
+    public interface Injector {
+        /**
+         * Returns {@code true} if at least one of the provided {@code intents} can be forwarded
+         * from {@code sourceUserId} to {@code targetUserId}.
+         */
+        boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId, int targetUserId);
+
+        /**
+         * Returns whether the given profile is in quiet mode or not.
+         */
+        boolean isQuietModeEnabled(UserHandle workProfileUserHandle);
+
+        /**
+         * Enables or disables quiet mode for a managed profile.
+         */
+        void requestQuietModeEnabled(boolean enabled, UserHandle workProfileUserHandle);
     }
 }

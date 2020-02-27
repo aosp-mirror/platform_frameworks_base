@@ -528,6 +528,12 @@ public class AppTransition implements Dump {
         }
     }
 
+    private void notifyAppTransitionTimeoutLocked() {
+        for (int i = 0; i < mListeners.size(); i++) {
+            mListeners.get(i).onAppTransitionTimeoutLocked();
+        }
+    }
+
     private int notifyAppTransitionStartingLocked(int transit, long duration,
             long statusBarAnimationStartTime, long statusBarAnimationDuration) {
         int redoLayout = 0;
@@ -2300,15 +2306,16 @@ public class AppTransition implements Dump {
             if (dc == null) {
                 return;
             }
+            notifyAppTransitionTimeoutLocked();
             if (isTransitionSet() || !dc.mOpeningApps.isEmpty() || !dc.mClosingApps.isEmpty()
-                    || !dc.mChangingApps.isEmpty()) {
+                    || !dc.mChangingContainers.isEmpty()) {
                 ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                             "*** APP TRANSITION TIMEOUT. displayId=%d isTransitionSet()=%b "
                                     + "mOpeningApps.size()=%d mClosingApps.size()=%d "
                                     + "mChangingApps.size()=%d",
                             dc.getDisplayId(), dc.mAppTransition.isTransitionSet(),
                             dc.mOpeningApps.size(), dc.mClosingApps.size(),
-                            dc.mChangingApps.size());
+                            dc.mChangingContainers.size());
 
                 setTimeout();
                 mService.mWindowPlacerLocked.performSurfacePlacement();

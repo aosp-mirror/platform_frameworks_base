@@ -138,6 +138,9 @@
     <!-- vr test permissions -->
     <uses-permission android:name="android.permission.RESTRICTED_VR_ACCESS" />
 
+    <!-- WindowMetricsTest permissions -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <application android:theme="@style/Theme" android:supportsRtl="true">
         <uses-library android:name="android.test.runner" />
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
@@ -1328,6 +1331,12 @@
             android:name="android.content.FakeProviderRemote"
             android:authorities="android.content.FakeProviderRemote"
             android:process=":FakeProvider">
+        </provider>
+
+        <provider
+            android:name="android.content.SlowProvider"
+            android:authorities="android.content.SlowProvider"
+            android:process=":SlowProvider">
         </provider>
 
         <!-- Application components used for os tests -->

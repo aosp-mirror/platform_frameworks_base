@@ -16,9 +16,11 @@
 
 package com.android.mediaroutertest;
 
-import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_SPEAKER;
-import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_TV;
+import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.media.MediaRoute2Info;
@@ -30,9 +32,13 @@ import android.text.TextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
+import javax.annotation.concurrent.GuardedBy;
 
 public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService {
     private static final String TAG = "SampleMR2ProviderSvc";
+    private static final Object sLock = new Object();
 
     public static final String ROUTE_ID1 = "route_id1";
     public static final String ROUTE_NAME1 = "Sample Route 1";
@@ -51,13 +57,12 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final String ROUTE_NAME_SPECIAL_FEATURE = "Special Feature Route";
 
     public static final int VOLUME_MAX = 100;
+    public static final int SESSION_VOLUME_MAX = 50;
+    public static final int SESSION_VOLUME_INITIAL = 20;
     public static final String ROUTE_ID_FIXED_VOLUME = "route_fixed_volume";
     public static final String ROUTE_NAME_FIXED_VOLUME = "Fixed Volume Route";
     public static final String ROUTE_ID_VARIABLE_VOLUME = "route_variable_volume";
     public static final String ROUTE_NAME_VARIABLE_VOLUME = "Variable Volume Route";
-
-    public static final String ACTION_REMOVE_ROUTE =
-            "com.android.mediarouteprovider.action_remove_route";
 
     public static final String FEATURE_SAMPLE =
             "com.android.mediarouteprovider.FEATURE_SAMPLE";
@@ -68,14 +73,18 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     Map<String, String> mRouteIdToSessionId = new HashMap<>();
     private int mNextSessionId = 1000;
 
+    @GuardedBy("sLock")
+    private static SampleMediaRoute2ProviderService sInstance;
+    private Proxy mProxy;
+
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
                 .addFeature(FEATURE_SAMPLE)
-                .setDeviceType(DEVICE_TYPE_REMOTE_TV)
+                .setType(TYPE_REMOTE_TV)
                 .build();
         MediaRoute2Info route2 = new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2)
                 .addFeature(FEATURE_SAMPLE)
-                .setDeviceType(DEVICE_TYPE_REMOTE_SPEAKER)
+                .setType(TYPE_REMOTE_SPEAKER)
                 .build();
         MediaRoute2Info route3 = new MediaRoute2Info.Builder(
                 ROUTE_ID3_SESSION_CREATION_FAILED, ROUTE_NAME3)
@@ -89,6 +98,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 ROUTE_ID5_TO_TRANSFER_TO, ROUTE_NAME5)
                 .addFeature(FEATURE_SAMPLE)
                 .build();
+
         MediaRoute2Info routeSpecial =
                 new MediaRoute2Info.Builder(ROUTE_ID_SPECIAL_FEATURE, ROUTE_NAME_SPECIAL_FEATURE)
                         .addFeature(FEATURE_SAMPLE)
@@ -111,14 +121,56 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         mRoutes.put(route3.getId(), route3);
         mRoutes.put(route4.getId(), route4);
         mRoutes.put(route5.getId(), route5);
+
         mRoutes.put(routeSpecial.getId(), routeSpecial);
         mRoutes.put(fixedVolumeRoute.getId(), fixedVolumeRoute);
         mRoutes.put(variableVolumeRoute.getId(), variableVolumeRoute);
     }
 
+    public static SampleMediaRoute2ProviderService getInstance() {
+        synchronized (sLock) {
+            return sInstance;
+        }
+    }
+
+    /**
+     * Adds a route and publishes it. It could replace a route in the provider if
+     * they have the same route id.
+     */
+    public void addRoute(@NonNull MediaRoute2Info route) {
+        Objects.requireNonNull(route, "route must not be null");
+        mRoutes.put(route.getOriginalId(), route);
+        publishRoutes();
+    }
+
+    /**
+     * Removes a route and publishes it.
+     */
+    public void removeRoute(@NonNull String routeId) {
+        Objects.requireNonNull(routeId, "routeId must not be null");
+        MediaRoute2Info route = mRoutes.get(routeId);
+        if (route != null) {
+            mRoutes.remove(routeId);
+            publishRoutes();
+        }
+    }
+
     @Override
     public void onCreate() {
+        synchronized (sLock) {
+            sInstance = this;
+        }
         initializeRoutes();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        synchronized (sLock) {
+            if (sInstance == this) {
+                sInstance = null;
+            }
+        }
     }
 
     @Override
@@ -128,25 +180,18 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onControlRequest(String routeId, Intent request) {
-        String action = request.getAction();
-        if (ACTION_REMOVE_ROUTE.equals(action)) {
-            MediaRoute2Info route = mRoutes.get(routeId);
-            if (route != null) {
-                mRoutes.remove(routeId);
-                publishRoutes();
-                mRoutes.put(routeId, route);
-            }
+    public void onSetRouteVolume(long requestId, String routeId, int volume) {
+        Proxy proxy = mProxy;
+        if (proxy != null) {
+            proxy.onSetRouteVolume(routeId, volume, requestId);
+            return;
         }
-    }
 
-    @Override
-    public void onSetVolume(String routeId, int volume) {
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null) {
             return;
         }
-        volume = Math.min(volume, Math.max(0, route.getVolumeMax()));
+        volume = Math.max(0, Math.min(volume, route.getVolumeMax()));
         mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
                 .setVolume(volume)
                 .build());
@@ -154,7 +199,20 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onCreateSession(String packageName, String routeId, long requestId,
+    public void onSetSessionVolume(long requestId, String sessionId, int volume) {
+        RoutingSessionInfo sessionInfo = getSessionInfo(sessionId);
+        if (sessionInfo == null) {
+            return;
+        }
+        volume = Math.max(0, Math.min(volume, sessionInfo.getVolumeMax()));
+        RoutingSessionInfo newSessionInfo = new RoutingSessionInfo.Builder(sessionInfo)
+                .setVolume(volume)
+                .build();
+        notifySessionUpdated(newSessionInfo);
+    }
+
+    @Override
+    public void onCreateSession(long requestId, String packageName, String routeId,
             @Nullable Bundle sessionHints) {
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null || TextUtils.equals(ROUTE_ID3_SESSION_CREATION_FAILED, routeId)) {
@@ -175,7 +233,10 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(sessionId, packageName)
                 .addSelectedRoute(routeId)
                 .addSelectableRoute(ROUTE_ID4_TO_SELECT_AND_DESELECT)
-                .addTransferrableRoute(ROUTE_ID5_TO_TRANSFER_TO)
+                .addTransferableRoute(ROUTE_ID5_TO_TRANSFER_TO)
+                .setVolumeHandling(PLAYBACK_VOLUME_VARIABLE)
+                .setVolumeMax(SESSION_VOLUME_MAX)
+                .setVolume(SESSION_VOLUME_INITIAL)
                 // Set control hints with given sessionHints
                 .setControlHints(sessionHints)
                 .build();
@@ -184,7 +245,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onReleaseSession(String sessionId) {
+    public void onReleaseSession(long requestId, String sessionId) {
         RoutingSessionInfo sessionInfo = getSessionInfo(sessionId);
         if (sessionInfo == null) {
             return;
@@ -204,7 +265,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onSelectRoute(String sessionId, String routeId) {
+    public void onSelectRoute(long requestId, String sessionId, String routeId) {
         RoutingSessionInfo sessionInfo = getSessionInfo(sessionId);
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null || sessionInfo == null) {
@@ -226,7 +287,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onDeselectRoute(String sessionId, String routeId) {
+    public void onDeselectRoute(long requestId, String sessionId, String routeId) {
         RoutingSessionInfo sessionInfo = getSessionInfo(sessionId);
         MediaRoute2Info route = mRoutes.get(routeId);
 
@@ -254,7 +315,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onTransferToRoute(String sessionId, String routeId) {
+    public void onTransferToRoute(long requestId, String sessionId, String routeId) {
         RoutingSessionInfo sessionInfo = getSessionInfo(sessionId);
         MediaRoute2Info route = mRoutes.get(routeId);
 
@@ -281,7 +342,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 .clearSelectedRoutes()
                 .addSelectedRoute(routeId)
                 .removeDeselectableRoute(routeId)
-                .removeTransferrableRoute(routeId)
+                .removeTransferableRoute(routeId)
                 .build();
         notifySessionUpdated(newSessionInfo);
         publishRoutes();
@@ -293,10 +354,18 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         }
 
         String sessionId = mRouteIdToSessionId.get(routeId);
-        onDeselectRoute(sessionId, routeId);
+        onDeselectRoute(REQUEST_ID_NONE, sessionId, routeId);
     }
 
     void publishRoutes() {
         notifyRoutes(mRoutes.values());
+    }
+
+    public void setProxy(@Nullable Proxy proxy) {
+        mProxy = proxy;
+    }
+
+    public static class Proxy {
+        public void onSetRouteVolume(String routeId, int volume, long requestId) {}
     }
 }

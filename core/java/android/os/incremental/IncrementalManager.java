@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.DataLoaderParams;
+import android.content.pm.IDataLoaderStatusListener;
 import android.os.RemoteException;
 import android.util.SparseArray;
 
@@ -48,6 +49,8 @@ import java.nio.file.Paths;
 @SystemService(Context.INCREMENTAL_SERVICE)
 public final class IncrementalManager {
     private static final String TAG = "IncrementalManager";
+
+    private static final String ALLOWED_PROPERTY = "incremental.allowed";
 
     public static final int CREATE_MODE_TEMPORARY_BIND =
             IIncrementalService.CREATE_MODE_TEMPORARY_BIND;
@@ -103,10 +106,11 @@ public final class IncrementalManager {
      */
     @Nullable
     public IncrementalStorage createStorage(@NonNull String path,
-            @NonNull DataLoaderParams params, @CreateMode int createMode,
+            @NonNull DataLoaderParams params, @Nullable IDataLoaderStatusListener listener,
+            @CreateMode int createMode,
             boolean autoStartDataLoader) {
         try {
-            final int id = mService.createStorage(path, params.getData(), createMode);
+            final int id = mService.createStorage(path, params.getData(), listener, createMode);
             if (id < 0) {
                 return null;
             }
@@ -229,16 +233,41 @@ public final class IncrementalManager {
         if (linkedApkStorage == null) {
             throw new IOException("Failed to create linked storage at dir: " + afterCodePathParent);
         }
-        linkedApkStorage.makeDirectory(afterCodePathName);
-        File[] files = beforeCodeFile.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].isFile()) {
-                String fileName = files[i].getName();
-                apkStorage.makeLink(
-                        fileName, linkedApkStorage, afterCodePathName + "/" + fileName);
+        linkFiles(apkStorage, beforeCodeFile, "", linkedApkStorage, afterCodePathName);
+        apkStorage.unBind(beforeCodePath);
+    }
+
+    /**
+     * Recursively set up directories and link all the files from source storage to target storage.
+     *
+     * @param sourceStorage The storage that has all the files and directories underneath.
+     * @param sourceAbsolutePath The absolute path of the directory that holds all files and dirs.
+     * @param sourceRelativePath The relative path on the source directory, e.g., "" or "lib".
+     * @param targetStorage The target storage that will have the same files and directories.
+     * @param targetRelativePath The relative path to the directory on the target storage that
+     *                           should have all the files and dirs underneath,
+     *                           e.g., "packageName-random".
+     * @throws IOException When makeDirectory or makeLink fails on the Incremental File System.
+     */
+    private void linkFiles(IncrementalStorage sourceStorage, File sourceAbsolutePath,
+            String sourceRelativePath, IncrementalStorage targetStorage,
+            String targetRelativePath) throws IOException {
+        targetStorage.makeDirectory(targetRelativePath);
+        final File[] entryList = sourceAbsolutePath.listFiles();
+        for (int i = 0; i < entryList.length; i++) {
+            final File entry = entryList[i];
+            final String entryName = entryList[i].getName();
+            final String sourceEntryRelativePath =
+                    sourceRelativePath.isEmpty() ? entryName : sourceRelativePath + "/" + entryName;
+            final String targetEntryRelativePath = targetRelativePath + "/" + entryName;
+            if (entry.isFile()) {
+                sourceStorage.makeLink(
+                        sourceEntryRelativePath, targetStorage, targetEntryRelativePath);
+            } else if (entry.isDirectory()) {
+                linkFiles(sourceStorage, entry, sourceEntryRelativePath, targetStorage,
+                        targetEntryRelativePath);
             }
         }
-        apkStorage.unBind(beforeCodePath);
     }
 
     /**
@@ -261,12 +290,37 @@ public final class IncrementalManager {
     }
 
     /**
+     * Checks if Incremental feature is enabled on this device.
+     */
+    public static boolean isFeatureEnabled() {
+        return nativeIsEnabled();
+    }
+
+    /**
+     * Checks if Incremental installations are allowed.
+     * A developer can disable Incremental installations by setting the property.
+     */
+    public static boolean isAllowed() {
+        return isFeatureEnabled() && android.os.SystemProperties.getBoolean(ALLOWED_PROPERTY, true);
+    }
+
+    /**
      * Checks if path is mounted on Incremental File System.
      */
     public static boolean isIncrementalPath(@NonNull String path) {
         return nativeIsIncrementalPath(path);
     }
 
+    /**
+     * Returns raw signature for file if it's on Incremental File System.
+     * Unsafe, use only if you are sure what you are doing.
+     */
+    public static @Nullable byte[] unsafeGetFileSignature(@NonNull String path) {
+        return nativeUnsafeGetFileSignature(path);
+    }
+
     /* Native methods */
+    private static native boolean nativeIsEnabled();
     private static native boolean nativeIsIncrementalPath(@NonNull String path);
+    private static native byte[] nativeUnsafeGetFileSignature(@NonNull String path);
 }

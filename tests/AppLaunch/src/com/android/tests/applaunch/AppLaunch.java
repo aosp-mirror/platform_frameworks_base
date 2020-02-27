@@ -296,6 +296,8 @@ public class AppLaunch extends InstrumentationTestCase {
                     AppLaunchResult launchResults = null;
                     if (hasFailureOnFirstLaunch(launch)) {
                         // skip if the app has failures while launched first
+                        Log.w(TAG, "Has failures on first launch: " + launch.getApp());
+                        forceStopApp(launch.getApp());
                         continue;
                     }
                     AtraceLogger atraceLogger = null;

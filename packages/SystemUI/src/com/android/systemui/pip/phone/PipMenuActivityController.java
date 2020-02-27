@@ -22,7 +22,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.IActivityManager;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.content.Intent;
@@ -68,11 +67,8 @@ public class PipMenuActivityController {
 
     public static final int MESSAGE_MENU_STATE_CHANGED = 100;
     public static final int MESSAGE_EXPAND_PIP = 101;
-    public static final int MESSAGE_MINIMIZE_PIP = 102;
     public static final int MESSAGE_DISMISS_PIP = 103;
     public static final int MESSAGE_UPDATE_ACTIVITY_CALLBACK = 104;
-    public static final int MESSAGE_REGISTER_INPUT_CONSUMER = 105;
-    public static final int MESSAGE_UNREGISTER_INPUT_CONSUMER = 106;
     public static final int MESSAGE_SHOW_MENU = 107;
 
     public static final int MENU_STATE_NONE = 0;
@@ -100,11 +96,6 @@ public class PipMenuActivityController {
         void onPipExpand();
 
         /**
-         * Called when the PIP requested to be minimized.
-         */
-        void onPipMinimize();
-
-        /**
          * Called when the PIP requested to be dismissed.
          */
         void onPipDismiss();
@@ -116,7 +107,6 @@ public class PipMenuActivityController {
     }
 
     private Context mContext;
-    private IActivityManager mActivityManager;
     private PipMediaController mMediaController;
     private InputConsumerController mInputConsumerController;
 
@@ -144,10 +134,6 @@ public class PipMenuActivityController {
                 }
                 case MESSAGE_EXPAND_PIP: {
                     mListeners.forEach(l -> l.onPipExpand());
-                    break;
-                }
-                case MESSAGE_MINIMIZE_PIP: {
-                    mListeners.forEach(l -> l.onPipMinimize());
                     break;
                 }
                 case MESSAGE_DISMISS_PIP: {
@@ -194,10 +180,9 @@ public class PipMenuActivityController {
         }
     };
 
-    public PipMenuActivityController(Context context, IActivityManager activityManager,
+    public PipMenuActivityController(Context context,
             PipMediaController mediaController, InputConsumerController inputConsumerController) {
         mContext = context;
-        mActivityManager = activityManager;
         mMediaController = mediaController;
         mInputConsumerController = inputConsumerController;
     }
@@ -280,7 +265,9 @@ public class PipMenuActivityController {
         if (mToActivityMessenger != null) {
             Bundle data = new Bundle();
             data.putInt(EXTRA_MENU_STATE, menuState);
-            data.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
+            if (stackBounds != null) {
+                data.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
+            }
             data.putParcelable(EXTRA_MOVEMENT_BOUNDS, movementBounds);
             data.putBoolean(EXTRA_ALLOW_TIMEOUT, allowMenuTimeout);
             data.putBoolean(EXTRA_WILL_RESIZE_MENU, willResizeMenu);

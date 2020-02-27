@@ -77,8 +77,9 @@ class QuickAccessWalletServiceInfo {
         }
 
         if (!Manifest.permission.BIND_QUICK_ACCESS_WALLET_SERVICE.equals(serviceInfo.permission)) {
-            Log.w(TAG, String.format("QuickAccessWalletService from %s does not have permission %s",
-                    serviceInfo.packageName, Manifest.permission.BIND_QUICK_ACCESS_WALLET_SERVICE));
+            Log.w(TAG, String.format("%s.%s does not require permission %s",
+                    serviceInfo.packageName, serviceInfo.name,
+                    Manifest.permission.BIND_QUICK_ACCESS_WALLET_SERVICE));
             return null;
         }
 

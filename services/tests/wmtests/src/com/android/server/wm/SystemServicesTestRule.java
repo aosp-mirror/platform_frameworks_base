@@ -56,6 +56,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.util.Log;
 import android.view.InputChannel;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -120,11 +121,23 @@ public class SystemServicesTestRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
+                Throwable throwable = null;
                 try {
                     runWithDexmakerShareClassLoader(SystemServicesTestRule.this::setUp);
                     base.evaluate();
+                } catch (Throwable t) {
+                    throwable = t;
                 } finally {
-                    tearDown();
+                    try {
+                        tearDown();
+                    } catch (Throwable t) {
+                        if (throwable != null) {
+                            Log.e("SystemServicesTestRule", "Suppressed: ", throwable);
+                            t.addSuppressed(throwable);
+                        }
+                        throw t;
+                    }
+                    if (throwable != null) throw throwable;
                 }
             }
         };
@@ -439,11 +452,11 @@ public class SystemServicesTestRule implements TestRule {
             doNothing().when(this).updateCpuStats();
 
             // AppOpsService
-            final AppOpsService aos = mock(AppOpsService.class);
-            doReturn(aos).when(this).getAppOpsService();
+            final AppOpsManager aos = mock(AppOpsManager.class);
+            doReturn(aos).when(this).getAppOpsManager();
             // Make sure permission checks aren't overridden.
-            doReturn(AppOpsManager.MODE_DEFAULT).when(aos).noteOperation(anyInt(), anyInt(),
-                    anyString(), nullable(String.class), anyBoolean(), nullable(String.class));
+            doReturn(AppOpsManager.MODE_DEFAULT).when(aos).noteOpNoThrow(anyInt(), anyInt(),
+                    anyString(), nullable(String.class), nullable(String.class));
 
             // UserManagerService
             final UserManagerService ums = mock(UserManagerService.class);

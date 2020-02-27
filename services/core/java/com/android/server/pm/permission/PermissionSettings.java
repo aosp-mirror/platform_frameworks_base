@@ -18,7 +18,7 @@ package com.android.server.pm.permission;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.ComponentParseUtils;
+import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -65,7 +65,7 @@ public class PermissionSettings {
      * name to permission group object.
      */
     @GuardedBy("mLock")
-    final ArrayMap<String, ComponentParseUtils.ParsedPermissionGroup> mPermissionGroups =
+    final ArrayMap<String, ParsedPermissionGroup> mPermissionGroups =
             new ArrayMap<>();
 
     /**

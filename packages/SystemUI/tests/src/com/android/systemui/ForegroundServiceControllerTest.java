@@ -35,7 +35,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
@@ -75,8 +74,8 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        // assume the TestLooper is the main looper for these tests
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        // allow the TestLooper to be asserted as the main thread these tests
+        allowTestableLooperAsMainThread();
 
         MockitoAnnotations.initMocks(this);
         mFsc = new ForegroundServiceController(mEntryManager, mAppOpsController, mMainHandler);
@@ -93,7 +92,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     public void testAppOpsChangedCalledFromBgThread() {
         try {
             // WHEN onAppOpChanged is called from a different thread than the MainLooper
-            com.android.systemui.util.Assert.sMainLooper = Looper.getMainLooper();
+            disallowTestableLooperAsMainThread();
             NotificationEntry entry = createFgEntry();
             mFsc.onAppOpChanged(
                     AppOpsManager.OP_CAMERA,

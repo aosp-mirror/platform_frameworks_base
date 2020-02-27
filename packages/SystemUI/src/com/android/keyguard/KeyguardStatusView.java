@@ -149,7 +149,7 @@ public class KeyguardStatusView extends GridLayout implements
                             new WindowlessWindowManager(context.getResources().getConfiguration(),
                                     surfaceControl, input);
                     mUniversalSmartspaceViewHost = new SurfaceControlViewHost(context,
-                            context.getDisplay(), windowlessWindowManager);
+                            context.getDisplayNoVerify(), windowlessWindowManager);
                     WindowManager.LayoutParams layoutParams =
                             new WindowManager.LayoutParams(
                                     surfaceControl.getWidth(),

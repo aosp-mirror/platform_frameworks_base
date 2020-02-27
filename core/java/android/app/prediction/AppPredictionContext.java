@@ -100,16 +100,6 @@ public final class AppPredictionContext implements Parcelable {
                 && mPackageName.equals(other.mPackageName);
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return new StringBuilder(this.getClass().getSimpleName())
-                .append("[mUiSurface=").append(mUiSurface)
-                .append(",mPackageName=").append(mPackageName)
-                .append(",mPredictedTargetCount=").append(mPredictedTargetCount)
-                .append(",mExtras=").append(mExtras.toString()).append("]").toString();
-    }
-
     @Override
     public int describeContents() {
         return 0;

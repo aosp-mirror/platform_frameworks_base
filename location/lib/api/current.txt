@@ -17,7 +17,6 @@ package com.android.location.provider {
     method @Deprecated protected int onGetStatus(android.os.Bundle);
     method @Deprecated protected long onGetStatusUpdateTime();
     method protected void onInit();
-    method protected void onRequestSetAllowed(boolean);
     method protected boolean onSendExtraCommand(@Nullable String, @Nullable android.os.Bundle);
     method protected abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
     method public void reportLocation(android.location.Location);

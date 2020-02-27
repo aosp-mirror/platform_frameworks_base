@@ -30,10 +30,11 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
@@ -75,9 +76,11 @@ public class TileServicesTest extends SysuiTestCase {
     @Mock
     private AutoTileManager mAutoTileManager;
     @Mock
-    private DumpController mDumpController;
+    private DumpManager mDumpManager;
     @Mock
     private StatusBar mStatusBar;
+    @Mock
+    private QSLogger mQSLogger;
 
     @Before
     public void setUp() throws Exception {
@@ -92,9 +95,10 @@ public class TileServicesTest extends SysuiTestCase {
                 mPluginManager,
                 mTunerService,
                 () -> mAutoTileManager,
-                mDumpController,
+                mDumpManager,
                 mBroadcastDispatcher,
-                Optional.of(mStatusBar));
+                Optional.of(mStatusBar),
+                mQSLogger);
         mTileService = new TestTileServices(host, Looper.getMainLooper(), mBroadcastDispatcher);
     }
 

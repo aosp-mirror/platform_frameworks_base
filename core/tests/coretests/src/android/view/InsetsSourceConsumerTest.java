@@ -77,7 +77,8 @@ public class InsetsSourceConsumerTest {
         instrumentation.runOnMainSync(() -> {
             final Context context = instrumentation.getTargetContext();
             // cannot mock ViewRootImpl since it's final.
-            final ViewRootImpl viewRootImpl = new ViewRootImpl(context, context.getDisplay());
+            final ViewRootImpl viewRootImpl = new ViewRootImpl(context,
+                    context.getDisplayNoVerify());
             try {
                 viewRootImpl.setView(new TextView(context), new LayoutParams(), null);
             } catch (BadTokenException e) {

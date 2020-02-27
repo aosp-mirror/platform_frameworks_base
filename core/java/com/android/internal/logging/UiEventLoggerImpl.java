@@ -41,9 +41,11 @@ public class UiEventLoggerImpl implements UiEventLogger {
     public void logWithInstanceId(UiEventEnum event, int uid, String packageName,
             InstanceId instance) {
         final int eventID = event.getId();
-        if (eventID > 0) {
+        if ((eventID > 0)  && (instance != null)) {
             FrameworkStatsLog.write(FrameworkStatsLog.UI_EVENT_REPORTED, eventID, uid, packageName,
                     instance.getId());
+        } else {
+            log(event, uid, packageName);
         }
     }
 }

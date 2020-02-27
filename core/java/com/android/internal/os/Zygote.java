@@ -24,7 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.net.Credentials;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
-import android.os.Build;
 import android.os.FactoryTest;
 import android.os.IVold;
 import android.os.Process;
@@ -121,6 +120,25 @@ public final class Zygote {
      * <p>This only takes effect if Hidden API access restrictions are enabled as well.
      */
     public static final int DISABLE_TEST_API_ENFORCEMENT_POLICY = 1 << 18;
+
+    public static final int MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20);
+    /**
+     * Enable pointer tagging in this process.
+     * Tags are checked during memory deallocation, but not on access.
+     * TBI stands for Top-Byte-Ignore, an ARM CPU feature.
+     * {@link https://developer.arm.com/docs/den0024/latest/the-memory-management-unit/translation-table-configuration/virtual-address-tagging}
+     */
+    public static final int MEMORY_TAG_LEVEL_TBI = 1 << 19;
+
+    /**
+     * Enable asynchronous memory tag checks in this process.
+     */
+    public static final int MEMORY_TAG_LEVEL_ASYNC = 2 << 19;
+
+    /**
+     * Enable synchronous memory tag checks in this process.
+     */
+    public static final int MEMORY_TAG_LEVEL_SYNC = 3 << 19;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
@@ -272,18 +290,14 @@ public final class Zygote {
     static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
-            int targetSdkVersion, boolean isTopApp, String[] pkgDataInfoList) {
+            boolean isTopApp, String[] pkgDataInfoList) {
         ZygoteHooks.preFork();
 
         int pid = nativeForkAndSpecialize(
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                 fdsToIgnore, startChildZygote, instructionSet, appDataDir, isTopApp,
                 pkgDataInfoList);
-        // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
-            Zygote.disableExecuteOnly(targetSdkVersion);
-            Trace.setTracingEnabled(true, runtimeFlags);
-
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
         }
@@ -333,9 +347,6 @@ public final class Zygote {
         nativeSpecializeAppProcess(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
                 niceName, startChildZygote, instructionSet, appDataDir, isTopApp,
                 pkgDataInfoList);
-
-        // Enable tracing as soon as possible for the child process.
-        Trace.setTracingEnabled(true, runtimeFlags);
 
         // Note that this event ends at the end of handleChildProc.
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -392,11 +403,6 @@ public final class Zygote {
         int pid = nativeForkSystemServer(
                 uid, gid, gids, runtimeFlags, rlimits,
                 permittedCapabilities, effectiveCapabilities);
-
-        // Enable tracing as soon as we enter the system_server.
-        if (pid == 0) {
-            Trace.setTracingEnabled(true, runtimeFlags);
-        }
 
         // Set the Java Language thread priority to the default value for new apps.
         Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
@@ -687,8 +693,6 @@ public final class Zygote {
                                  args.mInstructionSet, args.mAppDataDir, args.mIsTopApp,
                                  args.mPkgDataInfoList);
 
-            disableExecuteOnly(args.mTargetSdkVersion);
-
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
             return ZygoteInit.zygoteInit(args.mTargetSdkVersion,
@@ -766,17 +770,6 @@ public final class Zygote {
                 + ", effective=0x" + Long.toHexString(args.mEffectiveCapabilities));
         }
     }
-
-    /**
-     * Mark execute-only segments of libraries read+execute for apps with targetSdkVersion<Q.
-     */
-    private static void disableExecuteOnly(int targetSdkVersion) {
-        if ((targetSdkVersion < Build.VERSION_CODES.Q) && !nativeDisableExecuteOnly()) {
-            Log.e("Zygote", "Failed to set libraries to read+execute.");
-        }
-    }
-
-    private static native boolean nativeDisableExecuteOnly();
 
     /**
      * @return  Raw file descriptors for the read-end of USAP reporting pipes.

@@ -26,16 +26,21 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.IStatsd;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.StatsFrameworkInitializer;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.StatsdStatsLog;
 
 /**
  * StatsLog provides an API for developers to send events to statsd. The events can be used to
  * define custom metrics inside statsd.
  */
 public final class StatsLog {
+
+    // Load JNI library
+    static {
+        System.loadLibrary("stats_jni");
+    }
     private static final String TAG = "StatsLog";
     private static final boolean DEBUG = false;
     private static final int EXPERIMENT_IDS_FIELD_ID = 1;
@@ -59,17 +64,17 @@ public final class StatsLog {
                 IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging start");
+                        Log.d(TAG, "Failed to find statsd when logging start");
                     }
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(label,
-                        FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__START);
+                        StatsdStatsLog.APP_BREADCRUMB_REPORTED__STATE__START);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
                 if (DEBUG) {
-                    Slog.d(TAG, "Failed to connect to statsd when logging start");
+                    Log.d(TAG, "Failed to connect to statsd when logging start");
                 }
                 return false;
             }
@@ -88,17 +93,17 @@ public final class StatsLog {
                 IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging stop");
+                        Log.d(TAG, "Failed to find statsd when logging stop");
                     }
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(
-                        label, FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
+                        label, StatsdStatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
                 if (DEBUG) {
-                    Slog.d(TAG, "Failed to connect to statsd when logging stop");
+                    Log.d(TAG, "Failed to connect to statsd when logging stop");
                 }
                 return false;
             }
@@ -117,17 +122,17 @@ public final class StatsLog {
                 IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging event");
+                        Log.d(TAG, "Failed to find statsd when logging event");
                     }
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(
-                        label, FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
+                        label, StatsdStatsLog.APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
                 if (DEBUG) {
-                    Slog.d(TAG, "Failed to connect to statsd when logging event");
+                    Log.d(TAG, "Failed to connect to statsd when logging event");
                 }
                 return false;
             }
@@ -162,7 +167,7 @@ public final class StatsLog {
                     | EXPERIMENT_IDS_FIELD_ID,
                     id);
         }
-        FrameworkStatsLog.write(FrameworkStatsLog.BINARY_PUSH_STATE_CHANGED,
+        StatsdStatsLog.write(StatsdStatsLog.BINARY_PUSH_STATE_CHANGED,
                 trainName,
                 trainVersionCode,
                 (options & IStatsd.FLAG_REQUIRE_STAGING) > 0,
@@ -171,57 +176,19 @@ public final class StatsLog {
                 state,
                 proto.getBytes(),
                 0,
-                0);
+                0,
+                false);
         return true;
     }
-
-    /**
-     * Logs an event for watchdog rollbacks.
-     *
-     * @param rollbackType          state of the rollback.
-     * @param packageName           package name being rolled back.
-     * @param packageVersionCode    version of the package being rolled back.
-     * @param rollbackReason        reason the package is being rolled back.
-     * @param failingPackageName    the package name causing the failure.
-     *
-     * @return True if the log request was sent to statsd.
-     *
-     * @hide
-     */
-    @RequiresPermission(allOf = {DUMP, PACKAGE_USAGE_STATS})
-    public static boolean logWatchdogRollbackOccurred(int rollbackType, String packageName,
-            long packageVersionCode, int rollbackReason, String failingPackageName) {
-        synchronized (sLogLock) {
-            try {
-                IStatsd service = getIStatsdLocked();
-                if (service == null) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging event");
-                    }
-                    return false;
-                }
-
-                service.sendWatchdogRollbackOccurredAtom(rollbackType, packageName,
-                        packageVersionCode, rollbackReason, failingPackageName);
-                return true;
-            } catch (RemoteException e) {
-                sService = null;
-                if (DEBUG) {
-                    Slog.d(TAG,
-                            "Failed to connect to StatsCompanionService when logging "
-                                    + "WatchdogRollbackOccurred");
-                }
-                return false;
-            }
-        }
-    }
-
 
     private static IStatsd getIStatsdLocked() throws RemoteException {
         if (sService != null) {
             return sService;
         }
-        sService = IStatsd.Stub.asInterface(ServiceManager.getService("stats"));
+        sService = IStatsd.Stub.asInterface(StatsFrameworkInitializer
+            .getStatsServiceManager()
+            .getStatsdServiceRegisterer()
+            .get());
         return sService;
     }
 

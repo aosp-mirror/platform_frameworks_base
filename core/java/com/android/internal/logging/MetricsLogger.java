@@ -55,8 +55,11 @@ public class MetricsLogger {
     protected void saveLog(LogMaker log) {
         // TODO(b/116684537): Flag guard logging to event log and statsd socket.
         EventLogTags.writeSysuiMultiAction(log.serialize());
-        FrameworkStatsLog.write(FrameworkStatsLog.KEY_VALUE_PAIRS_ATOM,
-                /* UID is retrieved from statsd side */ 0, log.getEntries());
+        if (log.getCategory() != MetricsEvent.RESERVED_FOR_LOGBUILDER_COUNTER
+                && log.getCategory() != MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM) {
+            FrameworkStatsLog.write(FrameworkStatsLog.KEY_VALUE_PAIRS_ATOM,
+                    /* UID is retrieved from statsd side */ 0, log.getEntries());
+        }
     }
 
     public static final int VIEW_UNKNOWN = MetricsEvent.VIEW_UNKNOWN;

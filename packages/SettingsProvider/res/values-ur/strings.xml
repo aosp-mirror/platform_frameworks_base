@@ -20,7 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"ترتیبات کا اسٹوریج"</string>
-    <string name="wifi_softap_config_change" msgid="5338670993556993667">"اپنے ہاٹ اسپاٹ کی ترتیبات میں تبدیلیاں"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7600005249167787750">"آپ کا ہاٹ اسپات بینڈ تبدیل ہو گیا ہے۔"</string>
-    <string name="wifi_softap_config_change_detailed" msgid="2504664754843959730">"‏یہ آلہ صرف 5GHz کے لیے آپ کی ترجیح کو سپورٹ نہیں کرے گا۔ بلکہ 5GHz بینڈ کے دستیاب ہونے پر اس کا استعمال کرے گا۔"</string>
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"ہاٹ اسپاٹ کی ترتیبات تبدیل ہو گئیں"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"تفصیلات دیکھنے کے لیے تھپتھپائیں"</string>
 </resources>

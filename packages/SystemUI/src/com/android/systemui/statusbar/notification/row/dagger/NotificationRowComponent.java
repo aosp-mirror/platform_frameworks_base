@@ -16,15 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row.dagger;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Scope;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -32,8 +25,8 @@ import dagger.Subcomponent;
 /**
  * Dagger subcomponent for Notification related views.
  */
-@Subcomponent(modules = {})
-@NotificationRowComponent.NotificationRowScope
+@Subcomponent(modules = {ActivatableNotificationViewModule.class})
+@NotificationRowScope
 public interface NotificationRowComponent {
     /**
      * Builder for {@link NotificationRowComponent}.
@@ -44,14 +37,6 @@ public interface NotificationRowComponent {
         Builder activatableNotificationView(ActivatableNotificationView view);
         NotificationRowComponent build();
     }
-
-    /**
-     * Scope annotation for singleton items within the StatusBarComponent.
-     */
-    @Documented
-    @Retention(RUNTIME)
-    @Scope
-    @interface NotificationRowScope {}
 
     /**
      * Creates a ActivatableNotificationViewController.

@@ -2,6 +2,7 @@ cc_library_static {
     name: "libservices.core",
     defaults: ["libservices.core-libs"],
 
+    cpp_std: "c++2a",
     cflags: [
         "-Wall",
         "-Werror",
@@ -13,7 +14,6 @@ cc_library_static {
     ],
 
     srcs: [
-        ":graphicsstats_proto",
         ":lib_alarmManagerService_native",
         "BroadcastRadio/JavaRef.cpp",
         "BroadcastRadio/NativeCallbackThread.cpp",
@@ -24,6 +24,7 @@ cc_library_static {
         "BroadcastRadio/regions.cpp",
         "stats/PowerStatsPuller.cpp",
         "stats/SubsystemSleepStatePuller.cpp",
+        "com_android_server_adb_AdbDebuggingManager.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_connectivity_Vpn.cpp",
         "com_android_server_ConsumerIrService.cpp",
@@ -53,10 +54,10 @@ cc_library_static {
         "com_android_server_UsbHostManager.cpp",
         "com_android_server_VibratorService.cpp",
         "com_android_server_PersistentDataBlockService.cpp",
-        "com_android_server_GraphicsStatsService.cpp",
         "com_android_server_am_CachedAppOptimizer.cpp",
         "com_android_server_am_LowMemDetector.cpp",
         "com_android_server_incremental_IncrementalManagerService.cpp",
+        "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
         "onload.cpp",
         ":lib_networkStatsFactory_native",
     ],
@@ -86,6 +87,8 @@ cc_library_static {
 cc_defaults {
     name: "libservices.core-libs",
     shared_libs: [
+        "libadb_pairing_server",
+        "libadb_pairing_connection",
         "libandroid_runtime",
         "libandroidfw",
         "libaudioclient",
@@ -107,8 +110,6 @@ cc_defaults {
         "libinputflinger",
         "libinputflinger_base",
         "libinputservice",
-        "libprotobuf-cpp-lite",
-        "libprotoutil",
         "libstatshidl",
         "libstatspull",
         "libstatssocket",
@@ -129,6 +130,8 @@ cc_defaults {
         "libnetdbpf",
         "libnetdutils",
         "libpsi",
+        "libdataloader",
+        "libincfs",
         "android.hardware.audio.common@2.0",
         "android.hardware.broadcastradio@1.0",
         "android.hardware.broadcastradio@1.1",

@@ -173,6 +173,21 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPulsing_withoutLightSensor_setsAoDDimmingScrimTransparent() throws Exception {
+        mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
+                null /* sensor */, mBroadcastDispatcher, mDozeHost, null /* handler */,
+                DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY,
+                true /* debuggable */);
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE);
+        reset(mDozeHost);
+
+        mScreen.transitionTo(DOZE, DOZE_REQUEST_PULSE);
+
+        verify(mDozeHost).setAodDimmingScrim(eq(0f));
+    }
+
+    @Test
     public void testDockedAod_usesLightSensor() {
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD_DOCKED);

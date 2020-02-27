@@ -229,7 +229,6 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -3601,6 +3600,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 this, in, out, err, args, callback, resultReceiver);
     }
 
+    void setDebugUid(int uid) {
+        mLogger.setDebugUid(uid);
+    }
+
     @VisibleForTesting
     boolean isUidForeground(int uid) {
         synchronized (mUidRulesFirstLock) {
@@ -4588,13 +4591,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final long quota = ((long) msg.arg1 << 32) | (msg.arg2 & 0xFFFFFFFFL);
                     removeInterfaceQuota(iface);
                     setInterfaceQuota(iface, quota);
-                    mNetworkStats.setStatsProviderLimit(iface, quota);
+                    mNetworkStats.setStatsProviderLimitAsync(iface, quota);
                     return true;
                 }
                 case MSG_REMOVE_INTERFACE_QUOTA: {
                     final String iface = (String) msg.obj;
                     removeInterfaceQuota(iface);
-                    mNetworkStats.setStatsProviderLimit(iface, QUOTA_UNLIMITED);
+                    mNetworkStats.setStatsProviderLimitAsync(iface, QUOTA_UNLIMITED);
                     return true;
                 }
                 case MSG_RESET_FIREWALL_RULES_BY_UID: {

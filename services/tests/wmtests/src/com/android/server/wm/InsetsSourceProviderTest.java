@@ -112,11 +112,44 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         statusBar.getFrameLw().set(0, 0, 500, 100);
+
+        // We must not have control or control target before we have the insets source window.
+        mProvider.updateControlForTarget(target, true /* force */);
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+
+        // We can have the control or the control target after we have the insets source window.
         mProvider.setWindow(statusBar, null, null);
         mProvider.updateControlForTarget(target, false /* force */);
         assertNotNull(mProvider.getControl(target));
+        assertNotNull(mProvider.getControlTarget());
+
+        // We must not have control or control target while we are performing seamless rotation.
+        // And the control and the control target must not be updated during that.
+        mProvider.startSeamlessRotation();
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+        mProvider.updateControlForTarget(target, true /* force */);
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+
+        // We can have the control and the control target after seamless rotation.
+        mProvider.finishSeamlessRotation(false /* timeout */);
+        mProvider.updateControlForTarget(target, false /* force */);
+        assertNotNull(mProvider.getControl(target));
+        assertNotNull(mProvider.getControlTarget());
+
+        // We can clear the control and the control target.
         mProvider.updateControlForTarget(null, false /* force */);
         assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+
+        // We must not have control or control target if the insets source window doesn't have a
+        // surface.
+        statusBar.setSurfaceControl(null);
+        mProvider.updateControlForTarget(target, true /* force */);
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
     }
 
     @Test

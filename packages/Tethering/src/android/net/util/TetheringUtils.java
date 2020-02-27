@@ -24,14 +24,6 @@ import java.net.SocketException;
  * {@hide}
  */
 public class TetheringUtils {
-
-    /**
-     * Offload management process need to know conntrack rules to support NAT, but it may not have
-     * permission to create netlink netfilter sockets. Create two netlink netfilter sockets and
-     * share them with offload management process.
-     */
-    public static native boolean configOffload();
-
     /**
      * Configures a socket for receiving ICMPv6 router solicitations and sending advertisements.
      * @param fd the socket's {@link FileDescriptor}.

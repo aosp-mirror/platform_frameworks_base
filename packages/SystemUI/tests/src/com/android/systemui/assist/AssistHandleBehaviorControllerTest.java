@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -37,8 +38,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.phone.NavigationModeController;
@@ -71,7 +72,6 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
     @Mock private AssistHandleReminderExpBehavior mMockReminderExpBehavior;
     @Mock private AssistHandleBehaviorController.BehaviorController mMockTestBehavior;
     @Mock private NavigationModeController mMockNavigationModeController;
-    @Mock private DumpController mMockDumpController;
     @Mock private AssistHandleViewController mMockAssistHandleViewController;
 
     @Before
@@ -79,7 +79,6 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
-        mDependency.injectMockDependency(DumpController.class);
         doAnswer(answerVoid(Runnable::run)).when(mMockHandler).post(any(Runnable.class));
         doAnswer(answerVoid(Runnable::run)).when(mMockHandler)
                 .postDelayed(any(Runnable.class), anyLong());
@@ -100,7 +99,7 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
                         mMockDeviceConfigHelper,
                         behaviorMap,
                         mMockNavigationModeController,
-                        mMockDumpController);
+                        mock(DumpManager.class));
     }
 
     @After

@@ -191,6 +191,16 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Администраторът предостави устройствотото за лична употреба"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Устройството се управлява"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Организацията ви управлява това устройство и може да наблюдава мрежовия трафик. Докоснете за подробности."</string>
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"Настройките за местоположението са променени от администратора ви"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"Докоснете, за да видите настройките за местоположението."</string>
+    <!-- no translation found for country_detector (7023275114706088854) -->
+    <skip />
+    <!-- no translation found for location_service (2439187616018455546) -->
+    <skip />
+    <!-- no translation found for sensor_notification_service (7474531979178682676) -->
+    <skip />
+    <!-- no translation found for twilight_service (8964898045693187224) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"Данните на устройството ви ще бъдат изтрити"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Приложението за администриране не може да се използва. Сега данните на устройството ви ще бъдат изтрити.\n\nАко имате въпроси, свържете се с администратора на организацията си."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Отпечатването е деактивиранo от <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -429,6 +439,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Това привилегировано/системно приложение може по всяко време да прави снимки и да записва видеоклипове посредством системна камера. Необходимо е също на приложението да бъде дадено разрешението android.permission.CAMERA"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролиране на вибрирането"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Разрешава на приложението да контролира устройството за вибрация."</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дава възможност на приложението да осъществява достъп до състоянието на вибриране."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно обаждане до телефонни номера"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Разрешава на приложението да се обажда без ваша намеса до телефонни номера, което може да доведе до неочаквано таксуване или обаждания. Обърнете внимание, че това не му позволява да извършва обаждания до спешните служби. Злонамерените приложения могат да ви въвлекат в разходи, като извършват обаждания без потвърждение от ваша страна."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"достъп до услугата за незабавни съобщения за обаждания"</string>
@@ -543,6 +554,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Опитайте отново."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Няма регистрирани отпечатъци."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Това устройство няма сензор за отпечатъци."</string>
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сензорът е временно деактивиран."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Пръст <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -586,6 +598,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Лицето не може да се потвърди. Опитайте отново."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Не сте настроили отключването с лице."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Отключването с лице не се поддържа на това устройство."</string>
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"Сензорът е временно деактивиран."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1311,6 +1324,12 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"Отстраняване на грешки през USB"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Докоснете, за да изключите"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Изберете, за да деактивирате отстраняването на грешки през USB."</string>
+    <!-- no translation found for adbwifi_active_notification_title (6147343659168302473) -->
+    <skip />
+    <!-- no translation found for adbwifi_active_notification_message (930987922852867972) -->
+    <skip />
+    <!-- no translation found for adbwifi_active_notification_message (8633421848366915478) -->
+    <skip />
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Режимът за тестова среда е активиран"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Възстановете фабричните настройки, за да деактивирате режима за тестова среда."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Серийната конзола е активирана"</string>
@@ -1614,7 +1633,7 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Задният план, който е стартирал услуга на преден план от <xliff:g id="PACKAGENAME">%1$s</xliff:g>, няма да има разрешение при използване в бъдещите компилации R. Моля, вижте go/r-bg-fgs-restriction и подайте сигнал за програмна грешка."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да се увеличи ли силата на звука над препоръчителното ниво?\n\nПродължителното слушане при висока сила на звука може да увреди слуха ви."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Искате ли да използвате пряк път към функцията за достъпност?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Когато прекият път е включен, можете да стартирате дадена функция за достъпност, като натиснете двата бутона за промяна на силата на звука и ги задържите 3 секунди.\n\n Текущата функция за достъпност е:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Можете да промените функцията от „Настройки“ &gt; „Достъпност“."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Когато прекият път е включен, можете да стартирате дадена функция за достъпност, като натиснете двата бутона за силата на звука и ги задържите за 3 секунди."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Редактиране на преките пътища"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Отказ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Изключване на прекия път"</string>
@@ -1853,6 +1872,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Вкл. на служ. потр. профил?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Служебните ви приложения, известия и данни, както и другите функции на служебния потребителски профил ще бъдат включени"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Включване"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Приложението не е достъпно"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"В момента няма достъп до <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Това приложение бе създадено за по-стара версия на Android и може да не работи правилно. Опитайте да проверите за актуализации или се свържете с програмиста."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за актуализация"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови съобщения"</string>
@@ -2008,4 +2029,16 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакетът <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> е поставен в ОГРАНИЧЕНИЯ контейнер"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Лични"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Служебни"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Споделянето със служебни приложения не е възможно"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Споделянето с лични приложения не е възможно"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Системният ви администратор е блокирал споделянето между лични и служебни приложения"</string>
+    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Включете служебните приложения"</string>
+    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Включете служебните приложения, за да имате достъп до тях и служебните контакти"</string>
+    <string name="resolver_no_apps_available" msgid="7710339903040989654">"Няма приложения"</string>
+    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Не успяхме да намерим приложения"</string>
+    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Включване на служебния потребителски профил"</string>
+    <!-- no translation found for permlab_accessCallAudio (1682957511874097664) -->
+    <skip />
+    <!-- no translation found for permdesc_accessCallAudio (8448360894684277823) -->
+    <skip />
 </resources>

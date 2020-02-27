@@ -700,6 +700,30 @@ public abstract class ContentResolver implements ContentInterface {
     /** @hide */
     public static final String REMOTE_CALLBACK_RESULT = "result";
 
+    /**
+     * How long we wait for an attached process to publish its content providers
+     * before we decide it must be hung.
+     * @hide
+     */
+    public static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MILLIS = 10 * 1000;
+
+    /**
+     * How long we wait for an provider to be published. Should be longer than
+     * {@link #CONTENT_PROVIDER_PUBLISH_TIMEOUT_MILLIS}.
+     * @hide
+     */
+    public static final int CONTENT_PROVIDER_READY_TIMEOUT_MILLIS =
+            CONTENT_PROVIDER_PUBLISH_TIMEOUT_MILLIS + 10 * 1000;
+
+    // Timeout given a ContentProvider that has already been started and connected to.
+    private static final int CONTENT_PROVIDER_TIMEOUT_MILLIS = 3 * 1000;
+
+    // Should be >= {@link #CONTENT_PROVIDER_WAIT_TIMEOUT_MILLIS}, because that's how
+    // long ActivityManagerService is giving a content provider to get published if a new process
+    // needs to be started for that.
+    private static final int REMOTE_CONTENT_PROVIDER_TIMEOUT_MILLIS =
+            CONTENT_PROVIDER_READY_TIMEOUT_MILLIS + CONTENT_PROVIDER_TIMEOUT_MILLIS;
+
     public ContentResolver(@Nullable Context context) {
         this(context, null);
     }
@@ -812,10 +836,10 @@ public abstract class ContentResolver implements ContentInterface {
         IContentProvider provider = acquireExistingProvider(url);
         if (provider != null) {
             try {
-                final GetTypeResultListener resultListener = new GetTypeResultListener();
+                final StringResultListener resultListener = new StringResultListener();
                 provider.getTypeAsync(url, new RemoteCallback(resultListener));
-                resultListener.waitForResult();
-                return resultListener.type;
+                resultListener.waitForResult(CONTENT_PROVIDER_TIMEOUT_MILLIS);
+                return resultListener.result;
             } catch (RemoteException e) {
                 // Arbitrary and not worth documenting, as Activity
                 // Manager will kill this process shortly anyway.
@@ -833,13 +857,13 @@ public abstract class ContentResolver implements ContentInterface {
         }
 
         try {
-            GetTypeResultListener resultListener = new GetTypeResultListener();
+            final StringResultListener resultListener = new StringResultListener();
             ActivityManager.getService().getProviderMimeTypeAsync(
                     ContentProvider.getUriWithoutUserId(url),
                     resolveUserId(url),
                     new RemoteCallback(resultListener));
-            resultListener.waitForResult();
-            return resultListener.type;
+            resultListener.waitForResult(REMOTE_CONTENT_PROVIDER_TIMEOUT_MILLIS);
+            return resultListener.result;
         } catch (RemoteException e) {
             // We just failed to send a oneway request to the System Server. Nothing to do.
             return null;
@@ -849,34 +873,48 @@ public abstract class ContentResolver implements ContentInterface {
         }
     }
 
-    private static final int GET_TYPE_TIMEOUT_MILLIS = 3000;
-
-    private static class GetTypeResultListener implements RemoteCallback.OnResultListener {
+    private abstract static class ResultListener<T> implements RemoteCallback.OnResultListener {
         @GuardedBy("this")
         public boolean done;
 
         @GuardedBy("this")
-        public String type;
+        public T result;
 
         @Override
         public void onResult(Bundle result) {
             synchronized (this) {
-                type = result.getString(REMOTE_CALLBACK_RESULT);
+                this.result = getResultFromBundle(result);
                 done = true;
                 notifyAll();
             }
         }
 
-        public void waitForResult() {
+        protected abstract T getResultFromBundle(Bundle result);
+
+        public void waitForResult(long timeout) {
             synchronized (this) {
                 if (!done) {
                     try {
-                        wait(GET_TYPE_TIMEOUT_MILLIS);
+                        wait(timeout);
                     } catch (InterruptedException e) {
                         // Ignore
                     }
                 }
             }
+        }
+    }
+
+    private static class StringResultListener extends ResultListener<String> {
+        @Override
+        protected String getResultFromBundle(Bundle result) {
+            return result.getString(REMOTE_CALLBACK_RESULT);
+        }
+    }
+
+    private static class UriResultListener extends ResultListener<Uri> {
+        @Override
+        protected Uri getResultFromBundle(Bundle result) {
+            return result.getParcelable(REMOTE_CALLBACK_RESULT);
         }
     }
 
@@ -1173,7 +1211,11 @@ public abstract class ContentResolver implements ContentInterface {
         }
 
         try {
-            return provider.canonicalize(mPackageName, mFeatureId, url);
+            final UriResultListener resultListener = new UriResultListener();
+            provider.canonicalizeAsync(mPackageName, mFeatureId, url,
+                    new RemoteCallback(resultListener));
+            resultListener.waitForResult(CONTENT_PROVIDER_TIMEOUT_MILLIS);
+            return resultListener.result;
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.

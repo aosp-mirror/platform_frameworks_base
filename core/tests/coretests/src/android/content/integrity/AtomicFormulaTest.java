@@ -29,6 +29,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 @RunWith(JUnit4.class)
 public class AtomicFormulaTest {
 
@@ -230,7 +233,7 @@ public class AtomicFormulaTest {
     }
 
     @Test
-    public void testFormulaMatches_string_true() {
+    public void testFormulaMatches_string_packageNameFormula_true() {
         StringAtomicFormula stringAtomicFormula =
                 new StringAtomicFormula(
                         AtomicFormula.PACKAGE_NAME, "com.test.app", /* isHashedValue= */
@@ -242,7 +245,7 @@ public class AtomicFormulaTest {
     }
 
     @Test
-    public void testFormulaMatches_string_false() {
+    public void testFormulaMatches_string_packageNameFormula_false() {
         StringAtomicFormula stringAtomicFormula =
                 new StringAtomicFormula(
                         AtomicFormula.PACKAGE_NAME, "com.test.app", /* isHashedValue= */
@@ -253,6 +256,63 @@ public class AtomicFormulaTest {
         assertThat(stringAtomicFormula.matches(appInstallMetadata)).isFalse();
     }
 
+    @Test
+    public void testFormulaMatches_string_multipleAppCertificates_true() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.APP_CERTIFICATE, "cert", /* isHashedValue= */ true);
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder()
+                        .setPackageName("com.test.app")
+                        .setAppCertificates(Arrays.asList("test-cert", "cert"))
+                        .build();
+
+        assertThat(stringAtomicFormula.matches(appInstallMetadata)).isTrue();
+    }
+
+    @Test
+    public void testFormulaMatches_string_multipleAppCertificates_false() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.APP_CERTIFICATE, "cert", /* isHashedValue= */ true);
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder()
+                        .setPackageName("com.test.app")
+                        .setAppCertificates(Arrays.asList("test-cert", "another-cert"))
+                        .build();
+
+        assertThat(stringAtomicFormula.matches(appInstallMetadata)).isFalse();
+    }
+
+    @Test
+    public void testFormulaMatches_string_multipleInstallerCertificates_true() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.INSTALLER_CERTIFICATE, "cert", /* isHashedValue= */ true);
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder()
+                        .setPackageName("com.test.app")
+                        .setAppCertificates(Collections.singletonList("abc"))
+                        .setInstallerCertificates(Arrays.asList("test-cert", "cert"))
+                        .build();
+
+        assertThat(stringAtomicFormula.matches(appInstallMetadata)).isTrue();
+    }
+
+    @Test
+    public void testFormulaMatches_string_multipleInstallerCertificates_false() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.INSTALLER_CERTIFICATE, "cert", /* isHashedValue= */ true);
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder()
+                        .setPackageName("com.test.app")
+                        .setAppCertificates(Collections.singletonList("abc"))
+                        .setInstallerCertificates(Arrays.asList("test-cert", "another-cert"))
+                        .build();
+
+        assertThat(stringAtomicFormula.matches(appInstallMetadata)).isFalse();
+    }
 
     @Test
     public void testIsAppCertificateFormula_string_true() {
@@ -430,8 +490,8 @@ public class AtomicFormulaTest {
     private AppInstallMetadata.Builder getAppInstallMetadataBuilder() {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")
-                .setAppCertificate("abc")
-                .setInstallerCertificate("abc")
+                .setAppCertificates(Collections.singletonList("abc"))
+                .setInstallerCertificates(Collections.singletonList("abc"))
                 .setInstallerName("abc")
                 .setVersionCode(-1)
                 .setIsPreInstalled(true);

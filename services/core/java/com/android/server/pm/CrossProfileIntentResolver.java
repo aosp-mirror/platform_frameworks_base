@@ -18,6 +18,9 @@
 package com.android.server.pm;
 
 
+import android.annotation.NonNull;
+import android.content.IntentFilter;
+
 import com.android.server.IntentResolver;
 import java.util.List;
 
@@ -39,5 +42,10 @@ class CrossProfileIntentResolver
     @Override
     protected void sortResults(List<CrossProfileIntentFilter> results) {
         //We don't sort the results
+    }
+
+    @Override
+    protected IntentFilter getIntentFilter(@NonNull CrossProfileIntentFilter input) {
+        return input;
     }
 }

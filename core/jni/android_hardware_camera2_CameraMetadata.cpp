@@ -89,13 +89,13 @@ status_t CameraMetadata_getNativeMetadata(JNIEnv* env, jobject thiz,
         ALOGE("%s: Invalid output metadata object.", __FUNCTION__);
         return BAD_VALUE;
     }
-    CameraMetadata* nativePtr = reinterpret_cast<CameraMetadata*>(env->GetLongField(thiz,
-            fields.metadata_ptr));
+    auto nativePtr = reinterpret_cast<std::shared_ptr<CameraMetadata> *>(
+            env->GetLongField(thiz, fields.metadata_ptr));
     if (nativePtr == NULL) {
         ALOGE("%s: Invalid native pointer in java metadata object.", __FUNCTION__);
         return BAD_VALUE;
     }
-    *metadata = *nativePtr;
+    *metadata = *(nativePtr->get());
     return OK;
 }
 
@@ -171,12 +171,15 @@ static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jobject t
 
 // Less safe access to native pointer. Does NOT throw any Java exceptions if NULL.
 static CameraMetadata* CameraMetadata_getPointerNoThrow(JNIEnv *env, jobject thiz) {
-
-    if (thiz == NULL) {
-        return NULL;
+    if (thiz == nullptr) {
+        return nullptr;
     }
-
-    return reinterpret_cast<CameraMetadata*>(env->GetLongField(thiz, fields.metadata_ptr));
+    auto metadata = reinterpret_cast<std::shared_ptr<CameraMetadata> *>(
+            env->GetLongField(thiz, fields.metadata_ptr));
+    if (metadata == nullptr) {
+        return nullptr;
+    }
+    return metadata->get();
 }
 
 // Safe access to native pointer from object. Throws if not possible to access.
@@ -205,7 +208,7 @@ static CameraMetadata* CameraMetadata_getPointerThrow(JNIEnv *env, jobject thiz,
 static jlong CameraMetadata_allocate(JNIEnv *env, jobject thiz) {
     ALOGV("%s", __FUNCTION__);
 
-    return reinterpret_cast<jlong>(new CameraMetadata());
+    return reinterpret_cast<jlong>(new std::shared_ptr<CameraMetadata>(new CameraMetadata()));
 }
 
 static jlong CameraMetadata_allocateCopy(JNIEnv *env, jobject thiz,
@@ -214,12 +217,12 @@ static jlong CameraMetadata_allocateCopy(JNIEnv *env, jobject thiz,
 
     CameraMetadata* otherMetadata =
             CameraMetadata_getPointerThrow(env, other, "other");
-
     // In case of exception, return
     if (otherMetadata == NULL) return NULL;
 
-    // Clone native metadata and return new pointer
-    return reinterpret_cast<jlong>(new CameraMetadata(*otherMetadata));
+    // Clone native metadata and return new pointer.
+    auto clonedMetadata = new CameraMetadata(*otherMetadata);
+    return reinterpret_cast<jlong>(new std::shared_ptr<CameraMetadata>(clonedMetadata));
 }
 
 
@@ -256,14 +259,16 @@ static jint CameraMetadata_getEntryCount(JNIEnv *env, jobject thiz) {
 static void CameraMetadata_close(JNIEnv *env, jobject thiz) {
     ALOGV("%s", __FUNCTION__);
 
-    CameraMetadata* metadata = CameraMetadata_getPointerNoThrow(env, thiz);
-
-    if (metadata != NULL) {
-        delete metadata;
-        env->SetLongField(thiz, fields.metadata_ptr, 0);
+    if (thiz != nullptr) {
+        auto metadata = reinterpret_cast<std::shared_ptr<CameraMetadata> *>(
+                env->GetLongField(thiz, fields.metadata_ptr));
+        if (metadata != nullptr) {
+            delete metadata;
+            env->SetLongField(thiz, fields.metadata_ptr, 0);
+        }
     }
 
-    LOG_ALWAYS_FATAL_IF(CameraMetadata_getPointerNoThrow(env, thiz) != NULL,
+    LOG_ALWAYS_FATAL_IF(CameraMetadata_getPointerNoThrow(env, thiz) != nullptr,
                         "Expected the native ptr to be 0 after #close");
 }
 

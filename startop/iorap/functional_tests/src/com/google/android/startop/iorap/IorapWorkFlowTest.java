@@ -67,10 +67,10 @@ public class IorapWorkFlowTest {
   private static final String TEST_ACTIVITY_NAME = "com.android.settings.Settings";
 
   private static final String DB_PATH = "/data/misc/iorapd/sqlite.db";
-  private static final Duration TIMEOUT = Duration.ofSeconds(20L);
+  private static final Duration TIMEOUT = Duration.ofSeconds(300L);
 
   private static final String READAHEAD_INDICATOR =
-      "Description = /data/misc/iorapd/com.android.settings/none/com.android.settings.Settings/compiled_traces/compiled_trace.pb";
+      "Description = /data/misc/iorapd/com.android.settings/-?\\d+/com.android.settings.Settings/compiled_traces/compiled_trace.pb";
 
   private UiDevice mDevice;
 
@@ -88,7 +88,7 @@ public class IorapWorkFlowTest {
     mDevice.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)), TIMEOUT.getSeconds());
   }
 
-  @Test
+  @Test (timeout = 300000)
   public void testApp() throws Exception {
     assertThat(mDevice, notNullValue());
 
@@ -247,7 +247,7 @@ public class IorapWorkFlowTest {
       if (supplier.getAsBoolean()) {
         return true;
       }
-      TimeUnit.SECONDS.sleep(totalSleepTimeSeconds);
+      TimeUnit.SECONDS.sleep(sleepIntervalSeconds);
       totalSleepTimeSeconds += sleepIntervalSeconds;
       if (totalSleepTimeSeconds > timeout.getSeconds()) {
         return false;
@@ -326,14 +326,14 @@ public class IorapWorkFlowTest {
       return false;
     }
 
-    String log = executeShellCommand("logcat -s iorapd -d");
+    String log = executeShellCommand("logcat -d");
 
     Pattern p = Pattern.compile(
-        ".*" + READAHEAD_INDICATOR
-            + ".*Total File Paths=(\\d+) \\(good: (\\d+)%\\)\n"
-            + ".*Total Entries=(\\d+) \\(good: (\\d+)%\\)\n"
-            + ".*Total Bytes=(\\d+) \\(good: (\\d+)%\\).*",
-        Pattern.DOTALL);
+    ".*" + READAHEAD_INDICATOR
+        + ".*Total File Paths=(\\d+) \\(good: (\\d+[.]?\\d*)%\\)\n"
+        + ".*Total Entries=(\\d+) \\(good: (\\d+[.]?\\d*)%\\)\n"
+        + ".*Total Bytes=(\\d+) \\(good: (\\d+[.]?\\d*)%\\).*",
+    Pattern.DOTALL);
     Matcher m = p.matcher(log);
 
     if (!m.matches()) {
@@ -367,7 +367,7 @@ public class IorapWorkFlowTest {
    *
    * <p> This should be run as root.</p>
    */
-  private String executeShellCommand(String cmd) throws Exception {
+  private static String executeShellCommand(String cmd) throws Exception {
     Log.i(TAG, "Execute: " + cmd);
     return UiDevice.getInstance(
         InstrumentationRegistry.getInstrumentation()).executeShellCommand(cmd);

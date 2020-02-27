@@ -35,9 +35,13 @@ public final class GetWalletCardsResponse implements Parcelable {
     /**
      * Construct a new response.
      *
-     * @param walletCards   The list of wallet cards.
+     * @param walletCards   The list of wallet cards. The list may be empty but must NOT be larger
+     *                      than {@link GetWalletCardsRequest#getMaxCards()}. The list may not
+     *                      contain null values.
      * @param selectedIndex The index of the card that should be presented as the initially
-     *                      'selected' card
+     *                      'selected' card. The index must be greater than or equal to zero and
+     *                      less than the size of the list of walletCards (unless the list is empty
+     *                      in which case the value may be 0).
      */
     public GetWalletCardsResponse(@NonNull List<WalletCard> walletCards, int selectedIndex) {
         this.mWalletCards = walletCards;

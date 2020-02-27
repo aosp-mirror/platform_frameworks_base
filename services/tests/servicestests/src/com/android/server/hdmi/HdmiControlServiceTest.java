@@ -34,6 +34,7 @@ import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -123,6 +124,7 @@ public class HdmiControlServiceTest {
     private HdmiPortInfo[] mHdmiPortInfo;
 
     @Mock private IPowerManager mIPowerManagerMock;
+    @Mock private IThermalService mIThermalServiceMock;
 
     @Before
     public void setUp() throws Exception {
@@ -130,7 +132,8 @@ public class HdmiControlServiceTest {
 
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
-        PowerManager powerManager = new PowerManager(mContextSpy, mIPowerManagerMock, null);
+        PowerManager powerManager = new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, null);
         when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 

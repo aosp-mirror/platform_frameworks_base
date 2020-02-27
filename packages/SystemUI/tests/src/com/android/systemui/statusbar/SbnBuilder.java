@@ -140,6 +140,11 @@ public class SbnBuilder {
         return this;
     }
 
+    public SbnBuilder setFlag(Context context, int mask, boolean value) {
+        modifyNotification(context).setFlag(mask, value);
+        return this;
+    }
+
     public Notification.Builder modifyNotification(Context context) {
         if (mNotification != null) {
             mNotificationBuilder = new Notification.Builder(context, mNotification);

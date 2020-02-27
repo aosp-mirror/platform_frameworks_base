@@ -432,7 +432,7 @@ public class Annotation {
             DataFailCause.LIMITED_TO_IPV6,
             DataFailCause.VSNCP_TIMEOUT,
             DataFailCause.VSNCP_GEN_ERROR,
-            DataFailCause.VSNCP_APN_UNATHORIZED,
+            DataFailCause.VSNCP_APN_UNAUTHORIZED,
             DataFailCause.VSNCP_PDN_LIMIT_EXCEEDED,
             DataFailCause.VSNCP_NO_PDN_GATEWAY_ADDRESS,
             DataFailCause.VSNCP_PDN_GATEWAY_UNREACHABLE,
@@ -661,4 +661,16 @@ public class Annotation {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Skip464XlatStatus {}
+
+    /**
+     * Override network type
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "OVERRIDE_NETWORK_TYPE_", value = {
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_NONE,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE})
+    public @interface OverrideNetworkType {}
 }

@@ -75,7 +75,7 @@ public class RebootEscrowDataTest {
 
         assertThat(actual.getSpVersion(), is(expected.getSpVersion()));
         assertThat(actual.getIv(), is(expected.getIv()));
-        assertThat(actual.getKey(), is(expected.getKey()));
+        assertThat(actual.getKey().getKeyBytes(), is(expected.getKey().getKeyBytes()));
         assertThat(actual.getBlob(), is(expected.getBlob()));
         assertThat(actual.getSyntheticPassword(), is(expected.getSyntheticPassword()));
     }

@@ -33,7 +33,4 @@ interface IIncrementalManager {
     boolean startDataLoader(int mountId);
     void showHealthBlockedUI(int mountId);
     void destroyDataLoader(int mountId);
-
-    // fileId is a 16 byte long identifier.
-    void newFileForDataLoader(int mountId, in byte[] fileId, in byte[] metadata);
 }

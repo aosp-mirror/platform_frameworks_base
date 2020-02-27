@@ -29,13 +29,15 @@ interface IBiometricService {
     // Requests authentication. The service choose the appropriate biometric to use, and show
     // the corresponding BiometricDialog.
     void authenticate(IBinder token, long sessionId, int userId,
-            IBiometricServiceReceiver receiver, String opPackageName, in Bundle bundle);
+            IBiometricServiceReceiver receiver, String opPackageName, in Bundle bundle,
+            int callingUid, int callingPid, int callingUserId);
 
-    // Cancel authentication for the given sessionId
-    void cancelAuthentication(IBinder token, String opPackageName);
+    // Cancel authentication for the given session.
+    void cancelAuthentication(IBinder token, String opPackageName, int callingUid, int callingPid,
+            int callingUserId);
 
     // Checks if biometrics can be used.
-    int canAuthenticate(String opPackageName, int userId, int authenticators);
+    int canAuthenticate(String opPackageName, int userId, int callingUserId, int authenticators);
 
     // Checks if any biometrics are enrolled.
     boolean hasEnrolledBiometrics(int userId, String opPackageName);
@@ -47,7 +49,8 @@ interface IBiometricService {
             IBiometricAuthenticator authenticator);
 
     // Register callback for when keyguard biometric eligibility changes.
-    void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);
+    void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback,
+            int callingUserId);
 
     // Explicitly set the active user.
     void setActiveUser(int userId);
@@ -58,4 +61,9 @@ interface IBiometricService {
 
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
     void resetLockout(in byte [] token);
+
+    // Get a list of AuthenticatorIDs for authenticators which have enrolled templates and meet
+    // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore
+    // land as SIDs, and are used during key generation.
+    long[] getAuthenticatorIds();
 }

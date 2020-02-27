@@ -61,7 +61,7 @@ public class ImeInsetsSourceConsumerTest {
                 .setName("testSurface")
                 .build();
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            ViewRootImpl viewRootImpl = new ViewRootImpl(mContext, mContext.getDisplay());
+            ViewRootImpl viewRootImpl = new ViewRootImpl(mContext, mContext.getDisplayNoVerify());
             try {
                 viewRootImpl.setView(new TextView(mContext), new LayoutParams(), null);
             } catch (BadTokenException e) {

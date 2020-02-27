@@ -45,11 +45,10 @@ public class FeatureFlagUtils {
     public static final String NOTIF_CONVO_BYPASS_SHORTCUT_REQ =
             "settings_notif_convo_bypass_shortcut_req";
     /** @hide */
-    public static final String BACKUP_NO_KV_DATA_CHANGE_CALLS =
-            "backup_enable_no_data_notification_calls";
-    /** @hide */
     public static final String SETTINGS_DO_NOT_RESTORE_PRESERVED =
             "settings_do_not_restore_preserved";
+    /** @hide */
+    public static final String SETTINGS_SCHEDULES_FLAG = "settings_schedules";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -57,7 +56,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS = new HashMap<>();
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
-        DEFAULT_FLAGS.put(SETTINGS_FUSE_FLAG, "false");
+        DEFAULT_FLAGS.put(SETTINGS_FUSE_FLAG, "true");
         DEFAULT_FLAGS.put(DYNAMIC_SYSTEM, "false");
         DEFAULT_FLAGS.put(SEAMLESS_TRANSFER, "false");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
@@ -68,14 +67,13 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_controller_loading_enhancement", "false");
         DEFAULT_FLAGS.put("settings_conditionals", "false");
         DEFAULT_FLAGS.put(NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
-
-        // Disabled until backup transports support it.
-        DEFAULT_FLAGS.put(BACKUP_NO_KV_DATA_CHANGE_CALLS, "false");
         // Disabled by default until b/148278926 is resolved. This flags guards a feature
         // introduced in R and will be removed in the next release (b/148367230).
         DEFAULT_FLAGS.put(SETTINGS_DO_NOT_RESTORE_PRESERVED, "false");
 
         DEFAULT_FLAGS.put("settings_tether_all_in_one", "false");
+        DEFAULT_FLAGS.put(SETTINGS_SCHEDULES_FLAG, "false");
+        DEFAULT_FLAGS.put("settings_contextual_home2", "false");
     }
 
     /**

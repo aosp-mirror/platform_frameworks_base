@@ -31,7 +31,10 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.LocalServices;
@@ -43,7 +46,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-// TODO (b/143516163): Fix old test cases and put into presubmit.
+// TODO (b/149818286): Fix old test cases and put the whole test into presubmit.
 public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     private static final String USER_TYPE_EMPTY = "";
@@ -343,6 +346,8 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         assertTrue(alreadySet.contains(UserManager.DISALLOW_BLUETOOTH_SHARING));
     }
 
+    @Presubmit
+    @SmallTest
     public void testCompMigrationUnAffiliated_skipped() throws Exception {
         prepareAdmin1AsDo();
         prepareAdminAnotherPackageAsPo(COPE_PROFILE_USER_ID);
@@ -354,6 +359,8 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         assertTrue(dpms.mOwners.hasDeviceOwner());
     }
 
+    @Presubmit
+    @SmallTest
     public void testCompMigrationAffiliated() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID);

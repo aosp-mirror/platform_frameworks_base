@@ -20,15 +20,13 @@
 
 #include "JankTracker.h"
 #include "utils/Macros.h"
+#include <stats_pull_atom_callback.h>
 
 namespace android {
 namespace uirenderer {
 namespace protos {
 class GraphicsStatsProto;
 }
-
-typedef void (*DumpMemoryFn)(void* buffer, int bufferOffset, int bufferSize, int totalSize,
-                             void* param1, void* param2);
 
 /*
  * The exported entry points used by GraphicsStatsService.java in f/b/services/core
@@ -56,8 +54,8 @@ public:
                                       int64_t startTime, int64_t endTime, const ProfileData* data);
     ANDROID_API static void addToDump(Dump* dump, const std::string& path);
     ANDROID_API static void finishDump(Dump* dump);
-    ANDROID_API static void finishDumpInMemory(Dump* dump, const DumpMemoryFn& reader, void* param1,
-                                               void* param2);
+    ANDROID_API static void finishDumpInMemory(Dump* dump, AStatsEventList* data,
+                                               bool lastFullDay);
 
     // Visible for testing
     static bool parseFromFile(const std::string& path, protos::GraphicsStatsProto* output);

@@ -830,6 +830,23 @@ public final class NetworkCapabilities implements Parcelable {
      * <p>This field keeps track of the UID of the app that created this network and is in charge of
      * its lifecycle. This could be the UID of apps such as the Wifi network suggestor, the running
      * VPN, or Carrier Service app managing a cellular data connection.
+     *
+     * <p>For NetworkCapability instances being sent from ConnectivityService, this value MUST be
+     * reset to Process.INVALID_UID unless all the following conditions are met:
+     *
+     * <ol>
+     *   <li>The destination app is the network owner
+     *   <li>The destination app has the ACCESS_FINE_LOCATION permission granted
+     *   <li>The user's location toggle is on
+     * </ol>
+     *
+     * This is because the owner UID is location-sensitive. The apps that request a network could
+     * know where the device is if they can tell for sure the system has connected to the network
+     * they requested.
+     *
+     * <p>This is populated by the network agents and for the NetworkCapabilities instance sent by
+     * an app to the System Server, the value MUST be reset to Process.INVALID_UID by the system
+     * server.
      */
     private int mOwnerUid = Process.INVALID_UID;
 
@@ -842,7 +859,16 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Retrieves the UID of the owner app.
+     * Retrieves the UID of the app that owns this network.
+     *
+     * <p>For user privacy reasons, this field will only be populated if:
+     *
+     * <ol>
+     *   <li>The calling app is the network owner
+     *   <li>The calling app has the ACCESS_FINE_LOCATION permission granted
+     *   <li>The user's location toggle is on
+     * </ol>
+     *
      */
     public int getOwnerUid() {
         return mOwnerUid;
@@ -880,8 +906,9 @@ public final class NetworkCapabilities implements Parcelable {
      * @param administratorUids the UIDs to be set as administrators of this Network.
      * @hide
      */
+    @NonNull
     @SystemApi
-    public @NonNull NetworkCapabilities setAdministratorUids(
+    public NetworkCapabilities setAdministratorUids(
             @NonNull final List<Integer> administratorUids) {
         mAdministratorUids.clear();
         mAdministratorUids.addAll(administratorUids);

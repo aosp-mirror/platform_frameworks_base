@@ -16,6 +16,8 @@
 
 package com.android.tests.rollback.host;
 
+import static com.android.tests.rollback.host.WatchdogEventLogger.watchdogEventOccurred;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -23,21 +25,17 @@ import static org.junit.Assume.assumeTrue;
 import static org.testng.Assert.assertThrows;
 
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
-import com.android.tradefed.device.LogcatReceiver;
-import com.android.tradefed.result.InputStreamSource;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
+import com.android.tradefed.util.CommandResult;
+import com.android.tradefed.util.CommandStatus;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -78,47 +76,55 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
     private static final String REASON_APP_CRASH = "REASON_APP_CRASH";
     private static final String REASON_NATIVE_CRASH = "REASON_NATIVE_CRASH";
-    private static final String REASON_EXPLICIT_HEALTH_CHECK = "REASON_EXPLICIT_HEALTH_CHECK";
 
     private static final String ROLLBACK_INITIATE = "ROLLBACK_INITIATE";
     private static final String ROLLBACK_BOOT_TRIGGERED = "ROLLBACK_BOOT_TRIGGERED";
+    private static final String ROLLBACK_SUCCESS = "ROLLBACK_SUCCESS";
 
-    private LogcatReceiver mReceiver;
+    private WatchdogEventLogger mLogger = new WatchdogEventLogger();
 
     @Before
     public void setUp() throws Exception {
-        mReceiver =  new LogcatReceiver(getDevice(), "logcat -s WatchdogRollbackLogger",
-                getDevice().getOptions().getMaxLogcatDataSize(), 0);
-        if (!getDevice().isAdbRoot()) {
-            getDevice().enableAdbRoot();
-        }
-        getDevice().remountSystemWritable();
-        getDevice().executeShellCommand(
-                "rm -f /system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex "
-                        + "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
-        getDevice().reboot();
+        deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
+                "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
         runPhase("testCleanUp");
-        mReceiver.start();
+        mLogger.start(getDevice());
     }
 
     @After
     public void tearDown() throws Exception {
-        mReceiver.stop();
-        mReceiver.clear();
+        mLogger.stop();
         runPhase("testCleanUp");
+        deleteFiles("/system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
+                "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex",
+                apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + "*",
+                apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "*");
+    }
 
-        if (!getDevice().isAdbRoot()) {
-            getDevice().enableAdbRoot();
+    /**
+     * Deletes files and reboots the device if necessary.
+     * @param files the paths of files which might contain wildcards
+     */
+    private void deleteFiles(String... files) throws Exception {
+        boolean found = false;
+        for (String file : files) {
+            CommandResult result = getDevice().executeShellV2Command("ls " + file);
+            if (result.getStatus() == CommandStatus.SUCCESS) {
+                found = true;
+                break;
+            }
         }
-        getDevice().remountSystemWritable();
-        getDevice().executeShellCommand(
-                "rm -f /system/apex/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex "
-                        + "/data/apex/active/" + APK_IN_APEX_TESTAPEX_NAME + "*.apex");
-        getDevice().executeShellCommand(
-                "rm -rf " + apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + "*");
-        getDevice().executeShellCommand(
-                "rm -rf " + apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + "*");
-        getDevice().reboot();
+
+        if (found) {
+            if (!getDevice().isAdbRoot()) {
+                getDevice().enableAdbRoot();
+            }
+            getDevice().remountSystemWritable();
+            for (String file : files) {
+                getDevice().executeShellCommand("rm -rf " + file);
+            }
+            getDevice().reboot();
+        }
     }
 
     /**
@@ -134,16 +140,13 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().waitForDeviceAvailable();
 
         runPhase("testBadApkOnly_Phase4");
-        InputStreamSource logcatStream = mReceiver.getLogcatData();
-        try {
-            List<String> watchdogEvents = getWatchdogLoggingEvents(logcatStream);
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
-                    REASON_APP_CRASH, TESTAPP_A));
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
-                    null, null));
-        } finally {
-            logcatStream.close();
-        }
+
+        List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
+                REASON_APP_CRASH, TESTAPP_A));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
+                null, null));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
     }
 
     @Test
@@ -171,16 +174,13 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // verify rollback committed
         runPhase("testNativeWatchdogTriggersRollback_Phase3");
-        InputStreamSource logcatStream = mReceiver.getLogcatData();
-        try {
-            List<String> watchdogEvents = getWatchdogLoggingEvents(logcatStream);
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
-                            REASON_NATIVE_CRASH, null));
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
-                    null, null));
-        } finally {
-            logcatStream.close();
-        }
+
+        List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
+                        REASON_NATIVE_CRASH, null));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
+                null, null));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
     }
 
     @Test
@@ -215,87 +215,13 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // verify all available rollbacks have been committed
         runPhase("testNativeWatchdogTriggersRollbackForAll_Phase4");
-        InputStreamSource logcatStream = mReceiver.getLogcatData();
-        try {
-            List<String> watchdogEvents = getWatchdogLoggingEvents(logcatStream);
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
-                            REASON_NATIVE_CRASH, null));
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
-                    null, null));
-        } finally {
-            logcatStream.close();
-        }
-    }
 
-    /**
-     * Tests failed network health check triggers watchdog staged rollbacks.
-     */
-    @Test
-    public void testNetworkFailedRollback() throws Exception {
-        try {
-            // Disconnect internet so we can test network health triggered rollbacks
-            getDevice().executeShellCommand("svc wifi disable");
-            getDevice().executeShellCommand("svc data disable");
-
-            runPhase("testNetworkFailedRollback_Phase1");
-            // Reboot device to activate staged package
-            getDevice().reboot();
-
-            // Verify rollback was enabled
-            runPhase("testNetworkFailedRollback_Phase2");
-            assertThrows(AssertionError.class, () -> runPhase("testNetworkFailedRollback_Phase3"));
-
-            getDevice().waitForDeviceAvailable();
-            // Verify rollback was executed after health check deadline
-            runPhase("testNetworkFailedRollback_Phase4");
-            InputStreamSource logcatStream = mReceiver.getLogcatData();
-            try {
-                List<String> watchdogEvents = getWatchdogLoggingEvents(logcatStream);
-                assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
-                                REASON_EXPLICIT_HEALTH_CHECK, null));
-                assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
-                        null, null));
-            } finally {
-                logcatStream.close();
-            }
-        } finally {
-            // Reconnect internet again so we won't break tests which assume internet available
-            getDevice().executeShellCommand("svc wifi enable");
-            getDevice().executeShellCommand("svc data enable");
-        }
-    }
-
-    /**
-     * Tests passed network health check does not trigger watchdog staged rollbacks.
-     */
-    @Test
-    public void testNetworkPassedDoesNotRollback() throws Exception {
-        runPhase("testNetworkPassedDoesNotRollback_Phase1");
-        // Reboot device to activate staged package
-        getDevice().reboot();
-
-        // Verify rollback was enabled
-        runPhase("testNetworkPassedDoesNotRollback_Phase2");
-
-        // Connect to internet so network health check passes
-        getDevice().executeShellCommand("svc wifi enable");
-        getDevice().executeShellCommand("svc data enable");
-
-        // Wait for device available because emulator device may restart after turning
-        // on mobile data
-        getDevice().waitForDeviceAvailable();
-
-        // Verify rollback was not executed after health check deadline
-        runPhase("testNetworkPassedDoesNotRollback_Phase3");
-        InputStreamSource logcatStream = mReceiver.getLogcatData();
-        try {
-            List<String> watchdogEvents = getWatchdogLoggingEvents(logcatStream);
-            assertEquals(watchdogEventOccurred(watchdogEvents, null, null,
-                    REASON_EXPLICIT_HEALTH_CHECK, null), false);
-        } finally {
-            logcatStream.close();
-        }
-
+        List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
+                        REASON_NATIVE_CRASH, null));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
+                null, null));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
     }
 
     /**
@@ -361,16 +287,13 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().waitForDeviceAvailable();
         // Verify rollback occurred due to crash of apk-in-apex
         runPhase("testRollbackApexWithApkCrashing_Phase3");
-        InputStreamSource logcatStream = mReceiver.getLogcatData();
-        try {
-            List<String> watchdogEvents = getWatchdogLoggingEvents(logcatStream);
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
-                    REASON_APP_CRASH, TESTAPP_A));
-            assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
-                    null, null));
-        } finally {
-            logcatStream.close();
-        }
+
+        List<String> watchdogEvents = mLogger.getWatchdogLoggingEvents();
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
+                REASON_APP_CRASH, TESTAPP_A));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
+                null, null));
+        assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_SUCCESS, null, null, null));
     }
 
     /**
@@ -527,11 +450,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         }
     }
 
-    private String getNetworkStackPath() throws Exception {
-        // Find the NetworkStack path (can be NetworkStack.apk or NetworkStackNext.apk)
-        return getDevice().executeShellCommand("ls /system/priv-app/NetworkStack*/*.apk");
-    }
-
     private boolean isCheckpointSupported() throws Exception {
         try {
             runPhase("isCheckpointSupported");
@@ -539,58 +457,5 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         } catch (AssertionError ignore) {
             return false;
         }
-    }
-
-    /**
-     * Returns a list of all Watchdog logging events which have occurred.
-     */
-    private List<String> getWatchdogLoggingEvents(InputStreamSource inputStreamSource)
-            throws Exception {
-        List<String> watchdogEvents = new ArrayList<>();
-        InputStream inputStream = inputStreamSource.createInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.contains("Watchdog event occurred")) {
-                watchdogEvents.add(line);
-            }
-        }
-        return watchdogEvents;
-    }
-
-    /**
-     * Returns whether a Watchdog event has occurred that matches the given criteria.
-     *
-     * Check the value of all non-null parameters against the list of Watchdog events that have
-     * occurred, and return {@code true} if an event exists which matches all criteria.
-     */
-    private boolean watchdogEventOccurred(List<String> loggingEvents,
-            String type, String logPackage,
-            String rollbackReason, String failedPackageName) throws Exception {
-        List<String> eventCriteria = new ArrayList<>();
-        if (type != null) {
-            eventCriteria.add("type: " + type);
-        }
-        if (logPackage != null) {
-            eventCriteria.add("logPackage: " + logPackage);
-        }
-        if (rollbackReason != null) {
-            eventCriteria.add("rollbackReason: " + rollbackReason);
-        }
-        if (failedPackageName != null) {
-            eventCriteria.add("failedPackageName: " + failedPackageName);
-        }
-        for (String loggingEvent: loggingEvents) {
-            boolean matchesCriteria = true;
-            for (String criterion: eventCriteria) {
-                if (!loggingEvent.contains(criterion)) {
-                    matchesCriteria = false;
-                }
-            }
-            if (matchesCriteria) {
-                return true;
-            }
-        }
-        return false;
     }
 }

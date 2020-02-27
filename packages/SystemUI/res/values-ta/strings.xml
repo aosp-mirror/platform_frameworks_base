@@ -71,7 +71,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"திரையை நிரப்ப அளவை மாற்று"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"திரையை நிரப்ப இழு"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ஸ்கிரீன்ஷாட்"</string>
-    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"படம் செருகப்பட்டது"</string>
+    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"படம் அனுப்பப்பட்டது"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ஸ்கிரீன்ஷாட் சேமிக்கப்பட்டது"</string>
@@ -80,11 +80,31 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ஸ்கிரீன் ஷாட்டை மீண்டும் எடுக்க முயலவும்"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"போதுமான சேமிப்பிடம் இல்லாததால் ஸ்கிரீன்ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ஸ்கிரீன் ஷாட்டுகளை எடுப்பதை, ஆப்ஸ் அல்லது உங்கள் நிறுவனம் அனுமதிக்கவில்லை"</string>
-    <string name="screenrecord_name" msgid="6286499308042305686">"திரை ரெக்கார்டிங்"</string>
+    <!-- no translation found for screenrecord_name (2596401223859996572) -->
+    <skip />
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"திரை ரெக்கார்டிங் அமர்விற்கான தொடர் அறிவிப்பு"</string>
-    <string name="screenrecord_start_label" msgid="1539048263178882562">"ரெக்கார்டிங்கைத் தொடங்கு"</string>
-    <string name="screenrecord_mic_label" msgid="6134198080740031632">"வாய்ஸ் ஓவரை ரெக்கார்டு செய்"</string>
-    <string name="screenrecord_taps_label" msgid="2518244240225925076">"தட்டல்களைக் காட்டு"</string>
+    <!-- no translation found for screenrecord_start_label (1750350278888217473) -->
+    <skip />
+    <!-- no translation found for screenrecord_description (1123231719680353736) -->
+    <skip />
+    <!-- no translation found for screenrecord_audio_label (6183558856175159629) -->
+    <skip />
+    <!-- no translation found for screenrecord_device_audio_label (9016927171280567791) -->
+    <skip />
+    <!-- no translation found for screenrecord_device_audio_description (4922694220572186193) -->
+    <skip />
+    <!-- no translation found for screenrecord_mic_label (2111264835791332350) -->
+    <skip />
+    <!-- no translation found for screenrecord_device_audio_and_mic_label (1831323771978646841) -->
+    <skip />
+    <!-- no translation found for screenrecord_start (330991441575775004) -->
+    <skip />
+    <!-- no translation found for screenrecord_ongoing_screen_only (4459670242451527727) -->
+    <skip />
+    <!-- no translation found for screenrecord_ongoing_screen_and_audio (5351133763125180920) -->
+    <skip />
+    <!-- no translation found for screenrecord_taps_label (1595690528298857649) -->
+    <skip />
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"நிறுத்த, தட்டவும்"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"நிறுத்து"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"இடைநிறுத்து"</string>
@@ -97,6 +117,8 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"திரை ரெக்கார்டிங் நீக்கப்பட்டது"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"திரை ரெக்கார்டிங்கை நீக்குவதில் பிழை"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"அனுமதிகளைப் பெற இயலவில்லை"</string>
+    <!-- no translation found for screenrecord_start_error (2200660692479682368) -->
+    <skip />
     <string name="usb_preference_title" msgid="1439924437558480718">"USB கோப்பு இடமாற்ற விருப்பங்கள்"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"(MTP) மீடியா பிளேயராக ஏற்று"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"(PTP) கேமராவாக ஏற்று"</string>
@@ -441,19 +463,19 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"சுயவிவரத்தைக் காட்டு"</string>
     <string name="user_add_user" msgid="4336657383006913022">"பயனரைச் சேர்"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"புதியவர்"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"வேறொருவர்"</string>
-    <string name="guest_new_guest" msgid="962155336259570156">"வேறொருவரைச் சேர்"</string>
-    <string name="guest_exit_guest" msgid="4030840507598850886">"அழைக்கப்பட்டவரை அகற்று"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"அழைக்கப்பட்டவரை அகற்றவா?"</string>
+    <string name="guest_nickname" msgid="1863770639799615889">"கெஸ்ட்"</string>
+    <string name="guest_new_guest" msgid="962155336259570156">"கெஸ்ட்டைச் சேர்"</string>
+    <string name="guest_exit_guest" msgid="4030840507598850886">"கெஸ்ட்டை அகற்று"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"கெஸ்ட்டை அகற்றவா?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா பயன்பாடுகளும், தரவும் நீக்கப்படும்."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"அகற்று"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"நல்வரவு!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"மீண்டும் தொடங்கு"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"தொடரவும்"</string>
-    <string name="guest_notification_title" msgid="4434456703930764167">"வேறொருவர்"</string>
-    <string name="guest_notification_text" msgid="4202692942089571351">"பயன்பாடுகளையும் தரவையும் நீக்க, விருந்தினர் பயனரை அகற்றவும்"</string>
-    <string name="guest_notification_remove_action" msgid="4153019027696868099">"அழைக்கப்பட்டவரை அகற்றவா?"</string>
+    <string name="guest_notification_title" msgid="4434456703930764167">"கெஸ்ட்"</string>
+    <string name="guest_notification_text" msgid="4202692942089571351">"பயன்பாடுகளையும் தரவையும் நீக்க, கெஸ்ட் பயனரை அகற்றவும்"</string>
+    <string name="guest_notification_remove_action" msgid="4153019027696868099">"கெஸ்ட்டை அகற்றவா?"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"பயனரை வெளியேற்று"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"தற்போதைய பயனரிலிருந்து வெளியேறு"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"பயனரை வெளியேற்று"</string>
@@ -477,6 +499,8 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"அறிவிப்புகளை நிர்வகி"</string>
+    <!-- no translation found for manage_notifications_history_text (57055985396576230) -->
+    <skip />
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"ஒலியில்லாத அறிவிப்புகள்"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"உரையாடல்கள்"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ஒலியில்லாத அழைப்புகள் அனைத்தையும் அழிக்கும்"</string>
@@ -676,6 +700,10 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ஒலியோ அதிர்வோ இல்லாமல் முழு கவனம் செலுத்த உதவும்."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ஒலியோ அதிர்வோ ஏற்படுத்தி உங்கள் கவனத்தை ஈர்க்கும்."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"இந்த உள்ளடக்கத்திற்கான மிதக்கும் ஷார்ட்கட் மூலம் உங்கள் கவனத்தைப் பெற்றிருக்கும்."</string>
+    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
+    <skip />
+    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"இந்த அறிவுப்புக் குழுக்களை இங்கே உள்ளமைக்க இயலாது"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ப்ராக்ஸியான அறிவிப்பு"</string>
@@ -698,17 +726,25 @@
     <string name="notification_done" msgid="6215117625922713976">"முடிந்தது"</string>
     <string name="inline_undo" msgid="9026953267645116526">"செயல்தவிர்"</string>
     <string name="demote" msgid="6225813324237153980">"இந்த அறிவிப்பை உரையாடல் அல்லாததாகக் குறிக்கவும்"</string>
-    <string name="notification_conversation_favorite" msgid="8252976467488182853">"பிடித்தது"</string>
-    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"பிடித்ததிலிருந்து அகற்று"</string>
-    <string name="notification_conversation_mute" msgid="477431709687199671">"அறிவிப்பைக் காட்டாதே"</string>
-    <string name="notification_conversation_unmute" msgid="410885000669775294">"அறிவிப்பைக் காட்டு"</string>
-    <string name="notification_conversation_bubble" msgid="4598142032706190028">"குமிழாகக் காட்டு"</string>
-    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"குமிழ்களை ஆஃப் செய்"</string>
+    <!-- no translation found for notification_conversation_favorite (1905240206975921907) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unfavorite (181383708304763807) -->
+    <skip />
+    <!-- no translation found for notification_conversation_mute (268951550222925548) -->
+    <skip />
+    <string name="notification_conversation_unmute" msgid="2692255619510896710">"விழிப்பூட்டுகிறது"</string>
+    <!-- no translation found for notification_conversation_bubble (2242180995373949022) -->
+    <skip />
+    <!-- no translation found for notification_conversation_unbubble (6908427185031099868) -->
+    <skip />
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"முகப்புத் திரையில் சேர்"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"அறிவிப்பை உறக்கநிலையாக்கும் விருப்பங்கள்"</string>
-    <string name="notification_menu_snooze_action" msgid="8411152711279433989">"சற்றே பொறு"</string>
+    <!-- no translation found for notification_menu_snooze_action (5415729610393475019) -->
+    <skip />
+    <!-- no translation found for notification_menu_settings_action (7085494017202764285) -->
+    <skip />
     <string name="snooze_undo" msgid="60890935148417175">"செயல்தவிர்"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"உறக்கநிலையில் வைத்திருந்த நேரம்: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
@@ -780,6 +816,8 @@
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"டேட்டா சேமிப்பான் முடக்கப்பட்டது"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"ஆன்"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"ஆஃப்"</string>
+    <!-- no translation found for tile_unavailable (3095879009136616920) -->
+    <skip />
     <string name="nav_bar" msgid="4642708685386136807">"வழிசெலுத்தல் பட்டி"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"தளவமைப்பு"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"கூடுதல் இடப்புற பட்டன் வகை"</string>
@@ -964,6 +1002,19 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Magnification Overlay Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"பெரிதாக்கல் சாளரம்"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"பெரிதாக்கல் சாளரக் கட்டுப்பாடுகள்"</string>
-    <!-- no translation found for quick_controls_title (525285759614231333) -->
+    <string name="quick_controls_title" msgid="525285759614231333">"விரைவுக் கட்டுப்பாடுகள்"</string>
+    <string name="controls_providers_title" msgid="8844124515157926071">"கட்டுப்பாடுகளைச் சேர்த்தல்"</string>
+    <string name="controls_providers_subtitle" msgid="8187768950110836569">"எந்த ஆப்ஸிலிருந்து கட்டுப்பாடுகளைச் சேர்க்க வேண்டும் என்பதைத் தேர்ந்தெடுங்கள்"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
+      <item quantity="other">தற்போது பிடித்தவை: <xliff:g id="NUMBER_1">%s</xliff:g>.</item>
+      <item quantity="one">தற்போது பிடித்தது: <xliff:g id="NUMBER_0">%s</xliff:g>.</item>
+    </plurals>
+    <string name="controls_favorite_default_title" msgid="967742178688938137">"கட்டுப்பாடுகள்"</string>
+    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"விரைவு அணுகலுக்கான கட்டுப்பாடுகளைத் தேர்ந்தெடுங்கள்"</string>
+    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
+    <skip />
+    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
     <skip />
 </resources>

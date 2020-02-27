@@ -49,7 +49,6 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
-#include <link.h>
 #include <malloc.h>
 #include <mntent.h>
 #include <paths.h>
@@ -59,7 +58,6 @@
 #include <sys/capability.h>
 #include <sys/cdefs.h>
 #include <sys/eventfd.h>
-#include <sys/mman.h>
 #include <sys/personality.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
@@ -72,25 +70,23 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <android-base/file.h>
 #include <android-base/logging.h>
 #include <android-base/properties.h>
-#include <android-base/file.h>
 #include <android-base/stringprintf.h>
-#include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 #include <bionic/malloc.h>
-#include <bionic/page.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <cutils/sockets.h>
 #include <private/android_filesystem_config.h>
-#include <utils/String8.h>
-#include <utils/Trace.h>
-#include <selinux/android.h>
-#include <seccomp_policy.h>
-#include <stats_event_list.h>
 #include <processgroup/processgroup.h>
 #include <processgroup/sched_policy.h>
+#include <seccomp_policy.h>
+#include <selinux/android.h>
+#include <stats_socket.h>
+#include <utils/String8.h>
+#include <utils/Trace.h>
 
 #include "core_jni_helpers.h"
 #include <nativehelper/JNIHelp.h>
@@ -109,10 +105,12 @@ namespace {
 using namespace std::placeholders;
 
 using android::String8;
+using android::base::ReadFileToString;
 using android::base::StringAppendF;
 using android::base::StringPrintf;
 using android::base::WriteStringToFile;
 using android::base::GetBoolProperty;
+using android::base::GetProperty;
 
 #define CREATE_ERROR(...) StringPrintf("%s:%d: ", __FILE__, __LINE__). \
                               append(StringPrintf(__VA_ARGS__))
@@ -177,6 +175,12 @@ static constexpr int DEFAULT_DATA_DIR_PERMISSION = 0751;
  */
 static const std::string ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY =
     "persist.zygote.app_data_isolation";
+
+/**
+ * Property to enable app data isolation for sdcard obb or data in vold.
+ */
+static const std::string ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
+    "persist.sys.vold_app_data_isolation_enabled";
 
 static constexpr const uint64_t UPPER_HALF_WORD_MASK = 0xFFFF'FFFF'0000'0000;
 static constexpr const uint64_t LOWER_HALF_WORD_MASK = 0x0000'0000'FFFF'FFFF;
@@ -349,6 +353,8 @@ static const std::array<const std::string, MOUNT_EXTERNAL_COUNT> ExternalStorage
 enum RuntimeFlags : uint32_t {
   DEBUG_ENABLE_JDWP = 1,
   PROFILE_FROM_SHELL = 1 << 15,
+  MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20),
+  MEMORY_TAG_LEVEL_TBI = 1 << 19,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {
@@ -605,12 +611,27 @@ static void EnableDebugger() {
   }
 }
 
+static bool IsFilesystemSupported(const std::string& fsType) {
+    std::string supported;
+    if (!ReadFileToString("/proc/filesystems", &supported)) {
+        ALOGE("Failed to read supported filesystems");
+        return false;
+    }
+    return supported.find(fsType + "\n") != std::string::npos;
+}
+
 static void PreApplicationInit() {
   // The child process sets this to indicate it's not the zygote.
   android_mallopt(M_SET_ZYGOTE_CHILD, nullptr, 0);
 
   // Set the jemalloc decay time to 1.
   mallopt(M_DECAY_TIME, 1);
+
+  // Maybe initialize GWP-ASan here. Must be called after
+  // mallopt(M_SET_ZYGOTE_CHILD).
+  bool ForceEnableGwpAsan = false;
+  android_mallopt(M_INITIALIZE_GWP_ASAN, &ForceEnableGwpAsan,
+                  sizeof(ForceEnableGwpAsan));
 }
 
 static void SetUpSeccompFilter(uid_t uid, bool is_child_zygote) {
@@ -776,6 +797,31 @@ static void MountAppDataTmpFs(const std::string& target_dir,
     fail_fn(CREATE_ERROR("Failed to mount tmpfs to %s: %s",
                          target_dir.c_str(), strerror(errno)));
   }
+}
+
+static void BindMountObbPackage(std::string_view package_name, int userId, fail_fn_t fail_fn) {
+
+  // TODO(148772775): Pass primary volume name from zygote argument to here
+  std::string source;
+  if (IsFilesystemSupported("sdcardfs")) {
+    source = StringPrintf("/mnt/runtime/default/emulated/%d/Android/obb/%s",
+        userId, package_name.data());
+  } else {
+    source = StringPrintf("/mnt/pass_through/%d/emulated/%d/Android/obb/%s",
+        userId, userId, package_name.data());
+  }
+  std::string target(
+      StringPrintf("/storage/emulated/%d/Android/obb/%s", userId, package_name.data()));
+
+  if (access(source.c_str(), F_OK) != 0) {
+    fail_fn(CREATE_ERROR("Cannot access source %s: %s", source.c_str(), strerror(errno)));
+  }
+
+  if (access(target.c_str(), F_OK) != 0) {
+    fail_fn(CREATE_ERROR("Cannot access target %s: %s", target.c_str(), strerror(errno)));
+  }
+
+  BindMount(source, target, fail_fn);
 }
 
 // Create a private mount namespace and bind mount appropriate emulated
@@ -1072,7 +1118,7 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
   // Close any logging related FDs before we start evaluating the list of
   // file descriptors.
   __android_log_close();
-  stats_log_close();
+  AStatsSocket_close();
 
   // If this is the first fork for this zygote, create the open FD table.  If
   // it isn't, we just need to check whether the list of open files has changed
@@ -1490,8 +1536,67 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
     std::string mirrorCurPackageProfile = StringPrintf("/data_mirror/cur_profiles/%d/%s",
         user_id, packageName.c_str());
 
+    if (access(mirrorCurPackageProfile.c_str(), F_OK) != 0) {
+      ALOGW("Can't access app profile directory: %s", mirrorCurPackageProfile.c_str());
+      continue;
+    }
+
     PrepareDir(actualCurPackageProfile, DEFAULT_DATA_DIR_PERMISSION, uid, uid, fail_fn);
     BindMount(mirrorCurPackageProfile, actualCurPackageProfile, fail_fn);
+  }
+}
+
+// Bind mount all obb directories that are visible to this app.
+// If app data isolation is not enabled for this process, bind mount the whole obb
+// directory instead.
+static void BindMountAppObbDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
+    uid_t uid, const char* process_name, jstring managed_nice_name, fail_fn_t fail_fn) {
+
+  auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
+  const userid_t user_id = multiuser_get_user_id(uid);
+
+  // If FUSE is not ready for this user, skip it
+  // TODO(148772775): Pass primary volume name from zygote argument to here
+  std::string tmp = GetProperty("vold.fuse_running_users", "");
+  std::istringstream fuse_running_users(tmp);
+  bool user_found = false;
+  std::string s;
+  std::string user_id_str = std::to_string(user_id);
+  while (!user_found && std::getline(fuse_running_users, s, ',')) {
+    if (user_id_str == s) {
+      user_found = true;
+    }
+  }
+  if (!user_found) {
+    ALOGI("User %d is not running fuse yet, fuse_running_users=%s", user_id, tmp.c_str());
+    return;
+  }
+
+  // Fuse is ready, so we can start using fuse path.
+  int size = (pkg_data_info_list != nullptr) ? env->GetArrayLength(pkg_data_info_list) : 0;
+
+  if (size == 0) {
+    // App data isolation is not enabled for this process, so we bind mount to whole obb/ dir.
+    std::string source;
+    if (IsFilesystemSupported("sdcardfs")) {
+      source = StringPrintf("/mnt/runtime/default/emulated/%d/Android/obb", user_id);
+    } else {
+      source = StringPrintf("/mnt/pass_through/%d/emulated/%d/Android/obb", user_id, user_id);
+    }
+    std::string target(StringPrintf("/storage/emulated/%d/Android/obb", user_id));
+
+    if (access(source.c_str(), F_OK) != 0) {
+      fail_fn(CREATE_ERROR("Error accessing %s: %s", source.c_str(), strerror(errno)));
+    }
+    BindMount(source, target, fail_fn);
+    return;
+  }
+
+  // Bind mount each package obb directory
+  for (int i = 0; i < size; i += 3) {
+    jstring package_str = (jstring) (env->GetObjectArrayElement(pkg_data_info_list, i));
+    std::string packageName = extract_fn(package_str).value();
+    BindMountObbPackage(packageName, user_id, fail_fn);
   }
 }
 
@@ -1541,6 +1646,12 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       && GetBoolProperty(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true)) {
     isolateAppData(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
     isolateJitProfile(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
+  }
+
+  if ((mount_external != MOUNT_EXTERNAL_INSTALLER) &&
+        GetBoolProperty(kPropFuse, false) &&
+        GetBoolProperty(ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false)) {
+    BindMountAppObbDirs(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
 
   // If this zygote isn't root, it won't be able to create a process group,
@@ -1616,6 +1727,16 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
     }
   }
 
+  HeapTaggingLevel heap_tagging_level;
+  switch (runtime_flags & RuntimeFlags::MEMORY_TAG_LEVEL_MASK) {
+    case RuntimeFlags::MEMORY_TAG_LEVEL_TBI:
+      heap_tagging_level = M_HEAP_TAGGING_LEVEL_TBI;
+      break;
+    default:
+      heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
+  }
+  android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &heap_tagging_level, sizeof(heap_tagging_level));
+
   if (NeedsNoRandomizeWorkaround()) {
     // Work around ARM kernel ASLR lossage (http://b/5817320).
     int old_personality = personality(0xffffffff);
@@ -1628,7 +1749,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   SetCapabilities(permitted_capabilities, effective_capabilities, permitted_capabilities, fail_fn);
 
   __android_log_close();
-  stats_log_close();
+  AStatsSocket_close();
 
   const char* se_info_ptr = se_info.has_value() ? se_info.value().c_str() : nullptr;
   const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
@@ -1880,25 +2001,6 @@ static void UnmountStorageOnInit(JNIEnv* env) {
   }
 
   UnmountTree("/storage");
-}
-
-static int DisableExecuteOnly(struct dl_phdr_info* info,
-                              size_t size [[maybe_unused]],
-                              void* data [[maybe_unused]]) {
-  // Search for any execute-only segments and mark them read+execute.
-  for (int i = 0; i < info->dlpi_phnum; i++) {
-    const auto& phdr = info->dlpi_phdr[i];
-    if ((phdr.p_type == PT_LOAD) && (phdr.p_flags == PF_X)) {
-      auto addr = reinterpret_cast<void*>(info->dlpi_addr + PAGE_START(phdr.p_vaddr));
-      size_t len = PAGE_OFFSET(phdr.p_vaddr) + phdr.p_memsz;
-      if (mprotect(addr, len, PROT_READ | PROT_EXEC) == -1) {
-        ALOGE("mprotect(%p, %zu, PROT_READ | PROT_EXEC) failed: %m", addr, len);
-        return -1;
-      }
-    }
-  }
-  // Return non-zero to exit dl_iterate_phdr.
-  return 0;
 }
 
 }  // anonymous namespace
@@ -2263,14 +2365,6 @@ static void com_android_internal_os_Zygote_nativeEmptyUsapPool(JNIEnv* env, jcla
   }
 }
 
-/**
- * @param env  Managed runtime environment
- * @return  True if disable was successful.
- */
-static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* env, jclass) {
-  return dl_iterate_phdr(DisableExecuteOnly, nullptr) == 0;
-}
-
 static void com_android_internal_os_Zygote_nativeBlockSigTerm(JNIEnv* env, jclass) {
   auto fail_fn = std::bind(ZygoteFailure, env, "usap", nullptr, _1);
   BlockSignal(SIGTERM, fail_fn);
@@ -2352,8 +2446,6 @@ static const JNINativeMethod gMethods[] = {
         {"nativeGetUsapPoolCount", "()I",
          (void*)com_android_internal_os_Zygote_nativeGetUsapPoolCount},
         {"nativeEmptyUsapPool", "()V", (void*)com_android_internal_os_Zygote_nativeEmptyUsapPool},
-        {"nativeDisableExecuteOnly", "()Z",
-         (void*)com_android_internal_os_Zygote_nativeDisableExecuteOnly},
         {"nativeBlockSigTerm", "()V", (void*)com_android_internal_os_Zygote_nativeBlockSigTerm},
         {"nativeUnblockSigTerm", "()V", (void*)com_android_internal_os_Zygote_nativeUnblockSigTerm},
         {"nativeBoostUsapPriority", "()V",

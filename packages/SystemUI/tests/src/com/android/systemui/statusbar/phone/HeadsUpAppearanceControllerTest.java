@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.widget.TextView;
@@ -69,7 +68,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        allowTestableLooperAsMainThread();
         NotificationTestHelper testHelper = new NotificationTestHelper(getContext(), mDependency);
         mFirst = testHelper.createRow();
         mDependency.injectTestDependency(DarkIconDispatcher.class, mDarkIconDispatcher);

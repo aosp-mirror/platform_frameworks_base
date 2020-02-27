@@ -16,14 +16,12 @@
 
 package android.view;
 
-import static android.view.WindowInsets.Type.ime;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Insets;
+import android.os.CancellationSignal;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
 import android.view.animation.Interpolator;
 
 import java.lang.annotation.Retention;
@@ -148,21 +146,23 @@ public interface WindowInsetsController {
      * @param types The {@link InsetsType}s the application has requested to control.
      * @param durationMillis Duration of animation in
      *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}, or -1 if the
-     *                       animation doesn't have a predetermined duration.T his value will be
-     *                       passed to {@link InsetsAnimation#getDurationMillis()}
+     *                       animation doesn't have a predetermined duration. This value will be
+     *                       passed to {@link WindowInsetsAnimation#getDurationMillis()}
      * @param interpolator The interpolator used for this animation, or {@code null} if this
      *                     animation doesn't follow an interpolation curve. This value will be
-     *                     passed to {@link InsetsAnimation#getInterpolator()} and used to calculate
-     *                     {@link InsetsAnimation#getInterpolatedFraction()}.
+     *                     passed to {@link WindowInsetsAnimation#getInterpolator()} and used to
+     *                     calculate {@link WindowInsetsAnimation#getInterpolatedFraction()}.
      * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
      *                 windows are ready to be controlled, among other callbacks.
-     *
-     * @see InsetsAnimation#getFraction()
-     * @see InsetsAnimation#getInterpolatedFraction()
-     * @see InsetsAnimation#getInterpolator()
-     * @see InsetsAnimation#getDurationMillis()
+     * @return A cancellation signal that the caller can use to cancel the request to obtain
+     *         control, or once they have control, to cancel the control.
+     * @see WindowInsetsAnimation#getFraction()
+     * @see WindowInsetsAnimation#getInterpolatedFraction()
+     * @see WindowInsetsAnimation#getInterpolator()
+     * @see WindowInsetsAnimation#getDurationMillis()
      */
-    void controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,
+    @NonNull
+    CancellationSignal controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,
             @Nullable Interpolator interpolator,
             @NonNull WindowInsetsAnimationControlListener listener);
 

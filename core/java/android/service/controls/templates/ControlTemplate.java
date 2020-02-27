@@ -57,6 +57,9 @@ public abstract class ControlTemplate {
         }
     };
 
+    /**
+     * Object returned when there is an unparcelling error.
+     */
     public static final @NonNull ControlTemplate ERROR_TEMPLATE = new ControlTemplate("") {
         @Override
         public int getTemplateType() {
@@ -74,14 +77,15 @@ public abstract class ControlTemplate {
             TYPE_TOGGLE,
             TYPE_RANGE,
             TYPE_THUMBNAIL,
-            TYPE_DISCRETE_TOGGLE,
-            TYPE_COORD_RANGE,
             TYPE_TOGGLE_RANGE,
             TYPE_TEMPERATURE,
             TYPE_STATELESS
     })
     public @interface TemplateType {}
 
+    /**
+     * Type identifier of {@link #ERROR_TEMPLATE}.
+     */
     public static final @TemplateType int TYPE_ERROR = -1;
 
     /**
@@ -105,19 +109,18 @@ public abstract class ControlTemplate {
     public static final @TemplateType int TYPE_THUMBNAIL = 3;
 
     /**
-     * Type identifier of {@link DiscreteToggleTemplate}.
+     * Type identifier of {@link ToggleRangeTemplate}.
      */
-    public static final @TemplateType int TYPE_DISCRETE_TOGGLE = 4;
-
-    /**
-     * @hide
-     */
-    public static final @TemplateType int TYPE_COORD_RANGE = 5;
-
     public static final @TemplateType int TYPE_TOGGLE_RANGE = 6;
 
+    /**
+     * Type identifier of {@link TemperatureControlTemplate}.
+     */
     public static final @TemplateType int TYPE_TEMPERATURE = 7;
 
+    /**
+     * Type identifier of {@link StatelessTemplate}.
+     */
     public static final @TemplateType int TYPE_STATELESS = 8;
 
     private @NonNull final String mTemplateId;
@@ -190,10 +193,6 @@ public abstract class ControlTemplate {
                     return new RangeTemplate(bundle);
                 case TYPE_THUMBNAIL:
                     return new ThumbnailTemplate(bundle);
-                case TYPE_DISCRETE_TOGGLE:
-                    return new DiscreteToggleTemplate(bundle);
-                case TYPE_COORD_RANGE:
-                    return new CoordinatedRangeTemplate(bundle);
                 case TYPE_TOGGLE_RANGE:
                     return new ToggleRangeTemplate(bundle);
                 case TYPE_TEMPERATURE:

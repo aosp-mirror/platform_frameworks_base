@@ -1551,14 +1551,15 @@ public class WifiManagerTest {
      */
     @Test
     public void testGetAllMatchingWifiConfigs() throws Exception {
-        Map<String, List<ScanResult>> fqdns = new HashMap<>();
-        fqdns.put("www.test.com", new ArrayList<>());
-        when(mWifiService.getAllMatchingFqdnsForScanResults(any(List.class))).thenReturn(fqdns);
+        Map<String, List<ScanResult>> passpointProfiles = new HashMap<>();
+        passpointProfiles.put("www.test.com_987a69bca26", new ArrayList<>());
+        when(mWifiService.getAllMatchingPasspointProfilesForScanResults(
+                any(List.class))).thenReturn(passpointProfiles);
         InOrder inOrder = inOrder(mWifiService);
 
         mWifiManager.getAllMatchingWifiConfigs(new ArrayList<>());
 
-        inOrder.verify(mWifiService).getAllMatchingFqdnsForScanResults(any(List.class));
+        inOrder.verify(mWifiService).getAllMatchingPasspointProfilesForScanResults(any(List.class));
         inOrder.verify(mWifiService).getWifiConfigsForPasspointProfiles(any(List.class));
     }
 
@@ -2379,5 +2380,36 @@ public class WifiManagerTest {
         mLooper.dispatchAll();
         verify(mWifiConnectedNetworkScorer).start(0);
         verify(mWifiConnectedNetworkScorer).stop(10);
+    }
+
+    @Test
+    public void testScanThrottle() throws Exception {
+        mWifiManager.setScanThrottleEnabled(true);
+        verify(mWifiService).setScanThrottleEnabled(true);
+
+        when(mWifiService.isScanThrottleEnabled()).thenReturn(false);
+        assertFalse(mWifiManager.isScanThrottleEnabled());
+        verify(mWifiService).isScanThrottleEnabled();
+    }
+
+    @Test
+    public void testAutoWakeup() throws Exception {
+        mWifiManager.setAutoWakeupEnabled(true);
+        verify(mWifiService).setAutoWakeupEnabled(true);
+
+        when(mWifiService.isAutoWakeupEnabled()).thenReturn(false);
+        assertFalse(mWifiManager.isAutoWakeupEnabled());
+        verify(mWifiService).isAutoWakeupEnabled();
+    }
+
+
+    @Test
+    public void testScanAvailable() throws Exception {
+        mWifiManager.setScanAlwaysAvailable(true);
+        verify(mWifiService).setScanAlwaysAvailable(true);
+
+        when(mWifiService.isScanAlwaysAvailable()).thenReturn(false);
+        assertFalse(mWifiManager.isScanAlwaysAvailable());
+        verify(mWifiService).isScanAlwaysAvailable();
     }
 }

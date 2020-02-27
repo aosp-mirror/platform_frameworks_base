@@ -20,7 +20,12 @@ import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCU
 import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_NOT_RESPONDING;
 import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_EXPLICIT_HEALTH_CHECK;
 import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH_DURING_BOOT;
 import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,7 +38,6 @@ import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
@@ -58,8 +62,8 @@ public final class WatchdogRollbackLogger {
     private static String getLoggingParentName(Context context, @NonNull String packageName) {
         PackageManager packageManager = context.getPackageManager();
         try {
-            ApplicationInfo ai = packageManager.getApplicationInfo(packageName,
-                    PackageManager.GET_META_DATA);
+            int flags = PackageManager.MATCH_APEX | PackageManager.GET_META_DATA;
+            ApplicationInfo ai = packageManager.getPackageInfo(packageName, flags).applicationInfo;
             if (ai.metaData == null) {
                 return null;
             }
@@ -94,6 +98,22 @@ public final class WatchdogRollbackLogger {
         }
         return loggingParent;
     }
+
+
+    /**
+     * Gets the set of parent packages for a given set of failed package names. In the case that
+     * multiple sessions have failed, we want to log failure for each of the parent packages.
+     * Even if multiple failed packages have the same parent, we only log the parent package once.
+     */
+    private static Set<VersionedPackage> getLogPackages(Context context,
+            @NonNull List<String> failedPackageNames) {
+        Set<VersionedPackage> parentPackages = new ArraySet<>();
+        for (String failedPackageName: failedPackageNames) {
+            parentPackages.add(getLogPackage(context, new VersionedPackage(failedPackageName, 0)));
+        }
+        return parentPackages;
+    }
+
 
     static void logRollbackStatusOnBoot(Context context, int rollbackId,
             List<RollbackInfo> recentlyCommittedRollbacks) {
@@ -139,18 +159,41 @@ public final class WatchdogRollbackLogger {
             return;
         }
 
+        // If no logging packages are found, use a null package to ensure the rollback status
+        // is still logged.
+        if (oldLoggingPackages.isEmpty()) {
+            oldLoggingPackages.add(null);
+        }
+
         for (VersionedPackage oldLoggingPackage : oldLoggingPackages) {
             if (sessionInfo.isStagedSessionApplied()) {
                 logEvent(oldLoggingPackage,
-                        FrameworkStatsLog
-                                .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
+                        WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
                         WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN, "");
             } else if (sessionInfo.isStagedSessionFailed()) {
                 logEvent(oldLoggingPackage,
-                        FrameworkStatsLog
-                                .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                        WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
                         WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN, "");
             }
+        }
+    }
+
+    /**
+     * Logs that one or more apexd reverts have occurred, along with the crashing native process
+     * that caused apexd to revert during boot.
+     *
+     * @param context the context to use when determining the log packages
+     * @param failedPackageNames a list of names of packages which were reverted
+     * @param failingNativeProcess the crashing native process which caused a revert
+     */
+    public static void logApexdRevert(Context context, @NonNull List<String> failedPackageNames,
+            @NonNull String failingNativeProcess) {
+        Set<VersionedPackage> logPackages = getLogPackages(context, failedPackageNames);
+        for (VersionedPackage logPackage: logPackages) {
+            logEvent(logPackage,
+                    WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
+                    WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH_DURING_BOOT,
+                    failingNativeProcess);
         }
     }
 
@@ -169,12 +212,25 @@ public final class WatchdogRollbackLogger {
                 + " rollbackReason: " + rollbackReasonToString(rollbackReason)
                 + " failedPackageName: " + failingPackageName);
         if (logPackage != null) {
-            StatsLog.logWatchdogRollbackOccurred(type, logPackage.getPackageName(),
-                    logPackage.getVersionCode(), rollbackReason, failingPackageName);
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                    type,
+                    logPackage.getPackageName(),
+                    logPackage.getVersionCode(),
+                    rollbackReason,
+                    failingPackageName,
+                    new byte[]{});
         } else {
             // In the case that the log package is null, still log an empty string as an
             // indication that retrieving the logging parent failed.
-            StatsLog.logWatchdogRollbackOccurred(type, "", 0, rollbackReason, failingPackageName);
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                    type,
+                    "",
+                    0,
+                    rollbackReason,
+                    failingPackageName,
+                    new byte[]{});
         }
     }
 
@@ -196,14 +252,13 @@ public final class WatchdogRollbackLogger {
 
     private static String rollbackTypeToString(int type) {
         switch (type) {
-            case FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
+            case WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
                 return "ROLLBACK_INITIATE";
-            case FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
+            case WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
                 return "ROLLBACK_SUCCESS";
-            case FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE:
+            case WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE:
                 return "ROLLBACK_FAILURE";
-            case FrameworkStatsLog
-                        .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED:
+            case WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED:
                 return "ROLLBACK_BOOT_TRIGGERED";
             default:
                 return "UNKNOWN";
@@ -212,16 +267,16 @@ public final class WatchdogRollbackLogger {
 
     private static String rollbackReasonToString(int reason) {
         switch (reason) {
-            case FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH:
+            case WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH:
                 return "REASON_NATIVE_CRASH";
-            case FrameworkStatsLog
-                    .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_EXPLICIT_HEALTH_CHECK:
+            case WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_EXPLICIT_HEALTH_CHECK:
                 return "REASON_EXPLICIT_HEALTH_CHECK";
-            case FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_CRASH:
+            case WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_CRASH:
                 return "REASON_APP_CRASH";
-            case FrameworkStatsLog
-                        .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_NOT_RESPONDING:
+            case WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_NOT_RESPONDING:
                 return "REASON_APP_NOT_RESPONDING";
+            case WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH_DURING_BOOT:
+                return "REASON_NATIVE_CRASH_DURING_BOOT";
             default:
                 return "UNKNOWN";
         }

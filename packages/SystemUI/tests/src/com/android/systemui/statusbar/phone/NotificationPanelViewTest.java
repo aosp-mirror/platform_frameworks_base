@@ -138,6 +138,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private NotificationEntryManager mNotificationEntryManager;
     @Mock
+    private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private DozeLog mDozeLog;
@@ -221,7 +223,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mMetricsLogger, mActivityManager, mZenModeController, mConfigurationController,
-                mFlingAnimationUtilsBuilder);
+                mFlingAnimationUtilsBuilder, mStatusBarTouchableRegionManager);
         mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
                 mNotificationShelf, mNotificationAreaController, mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);

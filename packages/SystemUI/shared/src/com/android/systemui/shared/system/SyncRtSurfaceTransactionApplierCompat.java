@@ -24,6 +24,7 @@ import android.os.Handler.Callback;
 import android.os.Message;
 import android.os.Trace;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewRootImpl;
 
@@ -39,7 +40,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
 
     private static final int MSG_UPDATE_SEQUENCE_NUMBER = 0;
 
-    private final Surface mTargetSurface;
+    private final SurfaceControl mBarrierSurfaceControl;
     private final ViewRootImpl mTargetViewRootImpl;
     private final Handler mApplyHandler;
 
@@ -52,7 +53,8 @@ public class SyncRtSurfaceTransactionApplierCompat {
      */
     public SyncRtSurfaceTransactionApplierCompat(View targetView) {
         mTargetViewRootImpl = targetView != null ? targetView.getViewRootImpl() : null;
-        mTargetSurface = mTargetViewRootImpl != null ? mTargetViewRootImpl.mSurface : null;
+        mBarrierSurfaceControl = mTargetViewRootImpl != null
+            ? mTargetViewRootImpl.getRenderSurfaceControl() : null;
 
         mApplyHandler = new Handler(new Callback() {
             @Override
@@ -91,7 +93,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
         mTargetViewRootImpl.registerRtFrameCallback(new HardwareRenderer.FrameDrawingCallback() {
             @Override
             public void onFrameDraw(long frame) {
-                if (mTargetSurface == null || !mTargetSurface.isValid()) {
+                if (mBarrierSurfaceControl == null || !mBarrierSurfaceControl.isValid()) {
                     Message.obtain(mApplyHandler, MSG_UPDATE_SEQUENCE_NUMBER, toApplySeqNo, 0)
                             .sendToTarget();
                     return;
@@ -102,7 +104,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
                     SyncRtSurfaceTransactionApplierCompat.SurfaceParams surfaceParams =
                             params[i];
                     SurfaceControlCompat surface = surfaceParams.surface;
-                    t.deferTransactionUntil(surface, mTargetSurface, frame);
+                    t.deferTransactionUntil(surface, mBarrierSurfaceControl, frame);
                     applyParams(t, surfaceParams);
                 }
                 t.setEarlyWakeup();

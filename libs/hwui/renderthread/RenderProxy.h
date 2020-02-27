@@ -18,6 +18,7 @@
 #define RENDERPROXY_H_
 
 #include <SkBitmap.h>
+#include <android/native_window.h>
 #include <cutils/compiler.h>
 #include <utils/Functor.h>
 
@@ -69,7 +70,7 @@ public:
     ANDROID_API bool loadSystemProperties();
     ANDROID_API void setName(const char* name);
 
-    ANDROID_API void setSurface(const sp<Surface>& surface, bool enableTimeout = true);
+    ANDROID_API void setSurface(ANativeWindow* window, bool enableTimeout = true);
     ANDROID_API void allocateBuffers();
     ANDROID_API bool pause();
     ANDROID_API void setStopped(bool stopped);
@@ -140,7 +141,7 @@ public:
      */
     ANDROID_API void setRenderAheadDepth(int renderAhead);
 
-    ANDROID_API static int copySurfaceInto(sp<Surface>& surface, int left, int top, int right,
+    ANDROID_API static int copySurfaceInto(ANativeWindow* window, int left, int top, int right,
                                            int bottom, SkBitmap* bitmap);
     ANDROID_API static void prepareToDraw(Bitmap& bitmap);
 

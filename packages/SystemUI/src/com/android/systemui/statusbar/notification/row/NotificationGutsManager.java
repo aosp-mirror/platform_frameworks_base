@@ -34,6 +34,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
@@ -42,8 +43,10 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -56,6 +59,7 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -64,16 +68,12 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import dagger.Lazy;
 
 /**
  * Handles various NotificationGuts related tasks, such as binding guts to a row, opening and
  * closing guts, and keeping track of the currently exposed notification guts.
  */
-@Singleton
 public class NotificationGutsManager implements Dumpable, NotificationLifetimeExtender {
     private static final String TAG = "NotificationGutsManager";
 
@@ -110,7 +110,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final Handler mMainHandler;
     private Runnable mOpenRunnable;
 
-    @Inject
+    /**
+     * Injected constructor. See {@link NotificationsModule}.
+     */
     public NotificationGutsManager(Context context, VisualStabilityManager visualStabilityManager,
             Lazy<StatusBar> statusBarLazy, @Main Handler mainHandler,
             AccessibilityManager accessibilityManager,
@@ -384,8 +386,13 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 guts.resetFalsingCheck();
                 mOnSettingsClickListener.onSettingsClick(sbn.getKey());
                 startAppNotificationSettingsActivity(packageName, appUid, channel, row);
+                notificationInfoView.closeControls(v, false);
             };
         }
+        ConversationIconFactory iconFactoryLoader = new ConversationIconFactory(mContext,
+                launcherApps, pmUser, IconDrawableFactory.newInstance(mContext),
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_guts_conversation_icon_size));
 
         notificationInfoView.bindNotification(
                 shortcutManager,
@@ -399,8 +406,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 onSettingsClick,
                 onAppSettingsClick,
                 onSnoozeClickListener,
+                iconFactoryLoader,
                 mDeviceProvisionedController.isDeviceProvisioned());
-
     }
 
     /**

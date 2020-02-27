@@ -17,7 +17,6 @@ package com.android.systemui.bubbles;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -50,9 +49,9 @@ public class BadgedImageView extends ImageView {
     // Flyout gets shown before the dot
     private int mCurrentDotState = DOT_STATE_SUPPRESSED_FOR_FLYOUT;
 
-    private Bubble mBubble;
+    private BubbleViewProvider mBubble;
 
-    private int mIconBitmapSize;
+    private int mBubbleBitmapSize;
     private DotRenderer mDotRenderer;
     private DotRenderer.DrawParams mDrawParams;
     private boolean mOnLeft;
@@ -78,18 +77,18 @@ public class BadgedImageView extends ImageView {
     public BadgedImageView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mIconBitmapSize = getResources().getDimensionPixelSize(R.dimen.bubble_icon_bitmap_size);
+        mBubbleBitmapSize = getResources().getDimensionPixelSize(R.dimen.bubble_bitmap_size);
         mDrawParams = new DotRenderer.DrawParams();
 
         Path iconPath = PathParser.createPathFromPathData(
                 getResources().getString(com.android.internal.R.string.config_icon_mask));
-        mDotRenderer = new DotRenderer(mIconBitmapSize, iconPath, DEFAULT_PATH_SIZE);
+        mDotRenderer = new DotRenderer(mBubbleBitmapSize, iconPath, DEFAULT_PATH_SIZE);
     }
 
     /**
      * Updates the view with provided info.
      */
-    public void update(Bubble bubble) {
+    public void update(BubbleViewProvider bubble) {
         mBubble = bubble;
         setImageBitmap(bubble.getBadgedImage());
         setDotState(DOT_STATE_SUPPRESSED_FOR_FLYOUT);
@@ -147,7 +146,7 @@ public class BadgedImageView extends ImageView {
      * @param iconPath The new icon path to use when calculating dot position.
      */
     void drawDot(Path iconPath) {
-        mDotRenderer = new DotRenderer(mIconBitmapSize, iconPath, DEFAULT_PATH_SIZE);
+        mDotRenderer = new DotRenderer(mBubbleBitmapSize, iconPath, DEFAULT_PATH_SIZE);
         invalidate();
     }
 

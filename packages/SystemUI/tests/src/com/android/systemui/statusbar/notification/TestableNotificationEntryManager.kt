@@ -22,11 +22,8 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder
-import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationGroupManager
 import com.android.systemui.util.leak.LeakDetector
-
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -53,11 +50,9 @@ class TestableNotificationEntryManager(
     }
 
     fun setUpForTest(
-        presenter: NotificationPresenter?,
-        listContainer: NotificationListContainer?,
-        headsUpManager: HeadsUpManagerPhone?
+        presenter: NotificationPresenter?
     ) {
-        super.setUpWithPresenter(presenter, listContainer, headsUpManager)
+        super.setUpWithPresenter(presenter)
     }
 
     fun setActiveNotificationList(activeList: List<NotificationEntry>) {

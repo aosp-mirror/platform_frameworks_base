@@ -17,27 +17,49 @@
 package android.widget;
 
 /**
- * Keeps the flags related to the Widget namespace in {@link DeviceConfig}.
+ * Flags in the {@link android.provider.DeviceConfig#NAMESPACE_WIDGET "widget" namespace}.
  *
  * @hide
  */
 public final class WidgetFlags {
 
     /**
-     * Whether the cursor control feature set is enabled.
-     * TODO: Makes this flag key visible to webview/chrome.
+     * Whether starting a cursor drag from anywhere in the text should be enabled.
      */
-    public static final String ENABLE_CURSOR_CONTROL =
-            "CursorControlFeature__enable_cursor_control";
+    public static final String ENABLE_CURSOR_DRAG_FROM_ANYWHERE =
+            "CursorControlFeature__enable_cursor_drag_from_anywhere";
 
     /**
-     * The key name used in app core settings for enable cursor control.
+     * The key used in app core settings for the flag {@link #ENABLE_CURSOR_DRAG_FROM_ANYWHERE}.
      */
-    public static final String KEY_ENABLE_CURSOR_CONTROL = "widget__enable_cursor_control";
+    public static final String KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE =
+            "widget__enable_cursor_drag_from_anywhere";
+
+    /**
+     * Default value for the flag {@link #ENABLE_CURSOR_DRAG_FROM_ANYWHERE}.
+     */
+    public static final boolean ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT = true;
+
+    /**
+     * Whether additional gestures should be enabled for the insertion cursor handle (e.g.
+     * long-press or double-tap on the handle to trigger selection).
+     */
+    public static final String ENABLE_INSERTION_HANDLE_GESTURES =
+            "CursorControlFeature__enable_insertion_handle_gestures";
+
+    /**
+     * The key used in app core settings for the flag {@link #ENABLE_INSERTION_HANDLE_GESTURES}.
+     */
+    public static final String KEY_ENABLE_INSERTION_HANDLE_GESTURES =
+            "widget__enable_insertion_handle_gestures";
+
+    /**
+     * Default value for the flag {@link #ENABLE_INSERTION_HANDLE_GESTURES}.
+     */
+    public static final boolean ENABLE_INSERTION_HANDLE_GESTURES_DEFAULT = false;
 
     /**
      * The flag of delta height applies to the insertion handle when cursor control flag is enabled.
-     * The default value is 25.
      */
     public static final String INSERTION_HANDLE_DELTA_HEIGHT =
             "CursorControlFeature__insertion_handle_delta_height";
@@ -49,8 +71,13 @@ public final class WidgetFlags {
             "widget__insertion_handle_delta_height";
 
     /**
+     * Default value for the flag {@link #INSERTION_HANDLE_DELTA_HEIGHT}.
+     */
+    public static final int INSERTION_HANDLE_DELTA_HEIGHT_DEFAULT = 25;
+
+    /**
      * The flag of opacity applies to the insertion handle when cursor control flag is enabled.
-     * The opacity value is in the range of {0..100}. The default value is 50.
+     * The opacity value is in the range of {0..100}.
      */
     public static final String INSERTION_HANDLE_OPACITY =
             "CursorControlFeature__insertion_handle_opacity";
@@ -60,6 +87,11 @@ public final class WidgetFlags {
      */
     public static final String KEY_INSERTION_HANDLE_OPACITY =
             "widget__insertion_handle_opacity";
+
+    /**
+     * Default value for the flag {@link #INSERTION_HANDLE_OPACITY}.
+     */
+    public static final int INSERTION_HANDLE_OPACITY_DEFAULT = 50;
 
     /**
      * The flag of enabling the new magnifier.
@@ -72,8 +104,12 @@ public final class WidgetFlags {
     public static final String KEY_ENABLE_NEW_MAGNIFIER = "widget__enable_new_magnifier";
 
     /**
+     * Default value for the flag {@link #ENABLE_NEW_MAGNIFIER}.
+     */
+    public static final boolean ENABLE_NEW_MAGNIFIER_DEFAULT = false;
+
+    /**
      * The flag of zoom factor applies to the new magnifier.
-     * The default value is 1.5f.
      */
     public static final String MAGNIFIER_ZOOM_FACTOR =
             "CursorControlFeature__magnifier_zoom_factor";
@@ -84,8 +120,12 @@ public final class WidgetFlags {
     public static final String KEY_MAGNIFIER_ZOOM_FACTOR = "widget__magnifier_zoom_factor";
 
     /**
+     * Default value for the flag {@link #MAGNIFIER_ZOOM_FACTOR}.
+     */
+    public static final float MAGNIFIER_ZOOM_FACTOR_DEFAULT = 1.5f;
+
+    /**
      * The flag of aspect ratio (width/height) applies to the new magnifier.
-     * The default value is 5.5f.
      */
     public static final String MAGNIFIER_ASPECT_RATIO =
             "CursorControlFeature__magnifier_aspect_ratio";
@@ -94,6 +134,11 @@ public final class WidgetFlags {
      * The key name used in app core settings for {@link #MAGNIFIER_ASPECT_RATIO}.
      */
     public static final String KEY_MAGNIFIER_ASPECT_RATIO = "widget__magnifier_aspect_ratio";
+
+    /**
+     * Default value for the flag {@link #MAGNIFIER_ASPECT_RATIO}.
+     */
+    public static final float MAGNIFIER_ASPECT_RATIO_DEFAULT = 5.5f;
 
     private WidgetFlags() {
     }

@@ -16,6 +16,10 @@
 
 package android.app;
 
+import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__DEFAULT;
+import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
+import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -48,6 +52,8 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -63,6 +69,7 @@ import com.android.internal.app.IAppOpsAsyncNotedCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.MessageSamplingConfig;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.ZygoteInit;
 import com.android.internal.util.ArrayUtils;
@@ -90,15 +97,77 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * AppOps are mappings of [package/uid, op-name] -> [mode]. The list of existing appops is defined
- * by the system and cannot be amended by apps. Only system apps can change appop-modes.
+ * App-ops are used for two purposes: Access control and tracking.
  *
- * <p>Beside a mode the system tracks when an op was {@link #noteOp noted}. The tracked data can
- * only be read by system components.
+ * <p>App-ops cover a wide variety of functionality from helping with runtime permissions access
+ * control and tracking to battery consumption tracking.
  *
- * <p>Installed apps can usually only listen to changes and events on their own ops. E.g.
- * {@link AppOpsCollector} allows to get a callback each time an app called {@link #noteOp} or
- * {@link #startOp} for an op belonging to the app.
+ * <h2>Access control</h2>
+ *
+ * <p>App-ops can either be controlled for each uid or for each package. Which one is used depends
+ * on the API provider maintaining this app-op. For any security or privacy related app-op the
+ * provider needs to control the app-op for per uid as all security and privacy is based on uid in
+ * Android.
+ *
+ * <p>To control access the app-op can be set to a mode to:
+ * <dl>
+ *     <dt>{@link #MODE_DEFAULT}
+ *     <dd>Default behavior, might differ from app-op or app-op
+ *     <dt>{@link #MODE_ALLOWED}
+ *     <dd>Allow the access
+ *     <dt>{@link #MODE_IGNORED}
+ *     <dd>Don't allow the access, i.e. don't perform the requested action or return no or dummy
+ *     data
+ *     <dt>{@link #MODE_ERRORED}
+ *     <dd>Throw a {@link SecurityException} on access. This can be suppressed by using a
+ *     {@code ...noThrow} method to check the mode
+ * </dl>
+ *
+ * <p>API providers need to check the mode returned by {@link #noteOp} if they are are allowing
+ * access to operations gated by the app-op. {@link #unsafeCheckOp} should be used to check the
+ * mode if no access is granted. E.g. this can be used for displaying app-op state in the UI or
+ * when checking the state before later calling {@link #noteOp} anyway.
+ *
+ * <p>If an operation refers to a time span (e.g. a audio-recording session) the API provider
+ * should use {@link #startOp} and {@link #finishOp} instead of {@link #noteOp}.
+ *
+ * <h3>Runtime permissions and app-ops</h3>
+ *
+ * <p>Each platform defined runtime permission (beside background modifiers) has an associated app
+ * op which is used for tracking but also to allow for silent failures. I.e. if the runtime
+ * permission is denied the caller gets a {@link SecurityException}, but if the permission is
+ * granted and the app-op is {@link #MODE_IGNORED} then the callers gets dummy behavior, e.g.
+ * location callbacks would not happen.
+ *
+ * <h3>App-op permissions</h3>
+ *
+ * <p>App-ops permissions are platform defined permissions that can be overridden. The security
+ * check for app-op permissions should by {@link #MODE_DEFAULT default} check the permission grant
+ * state. If the app-op state is set to {@link #MODE_ALLOWED} or {@link #MODE_IGNORED} the app-op
+ * state should be checked instead of the permission grant state.
+ *
+ * <p>This functionality allows to grant access by default to apps fulfilling the requirements for
+ * a certain permission level. Still the behavior can be overridden when needed.
+ *
+ * <h2>Tracking</h2>
+ *
+ * <p>App-ops track many important events, including all accesses to runtime permission protected
+ * APIs. This is done by tracking when an app-op was {@link #noteOp noted} or
+ * {@link #startOp started}. The tracked data can only be read by system components.
+ *
+ * <p><b>Only {@link #noteOp}/{@link #startOp} are tracked; {@link #unsafeCheckOp} is not tracked.
+ * Hence it is important to eventually call {@link #noteOp} or {@link #startOp} when providing
+ * access to protected operations or data.</b>
+ *
+ * <p>Some apps are forwarding access to other apps. E.g. an app might get the location from the
+ * system's location provider and then send the location further to a 3rd app. In this case the
+ * app passing on the data needs to call {@link #noteProxyOp} to signal the access proxying. This
+ * might also make sense inside of a single app if the access is forwarded between two features of
+ * the app.
+ *
+ * <p>An app can register an {@link AppOpsCollector} to get informed about what accesses the
+ * system is tracking for it. As each runtime permission has an associated app-op this API is
+ * particularly useful for an app that want to find unexpected private data accesses.
  */
 @SystemService(Context.APP_OPS_SERVICE)
 public class AppOpsManager {
@@ -114,32 +183,17 @@ public class AppOpsManager {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     public static final long CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE = 148180766L;
 
-    /**
-     * <p>App ops allows callers to:</p>
-     *
-     * <ul>
-     * <li> Note when operations are happening, and find out if they are allowed for the current
-     * caller.</li>
-     * <li> Disallow specific apps from doing specific operations.</li>
-     * <li> Collect all of the current information about operations that have been executed or
-     * are not being allowed.</li>
-     * <li> Monitor for changes in whether an operation is allowed.</li>
-     * </ul>
-     *
-     * <p>Each operation is identified by a single integer; these integers are a fixed set of
-     * operations, enumerated by the OP_* constants.
-     *
-     * <p></p>When checking operations, the result is a "mode" integer indicating the current
-     * setting for the operation under that caller: MODE_ALLOWED, MODE_IGNORED (don't execute
-     * the operation but fake its behavior enough so that the caller doesn't crash),
-     * MODE_ERRORED (throw a SecurityException back to the caller; the normal operation calls
-     * will do this for you).
-     */
-
     final Context mContext;
 
     @UnsupportedAppUsage
     final IAppOpsService mService;
+
+    /**
+     * Service for the application context, to be used by static methods via
+     * {@link #getService()}
+     */
+    @GuardedBy("sLock")
+    static IAppOpsService sService;
 
     @GuardedBy("mModeWatchers")
     private final ArrayMap<OnOpChangedListener, IAppOpsCallback> mModeWatchers =
@@ -158,6 +212,50 @@ public class AppOpsManager {
     /** Current {@link AppOpsCollector}. Change via {@link #setNotedAppOpsCollector} */
     @GuardedBy("sLock")
     private static @Nullable AppOpsCollector sNotedAppOpsCollector;
+
+    /**
+     * Additional collector that collect accesses and forwards a few of them them via
+     * {@link IAppOpsService#reportRuntimeAppOpAccessMessageAndGetConfig}.
+     */
+    private static AppOpsCollector sMessageCollector =
+            new AppOpsCollector() {
+                @Override
+                public void onNoted(@NonNull SyncNotedAppOp op) {
+                    reportStackTraceIfNeeded(op);
+                }
+
+                @Override
+                public void onAsyncNoted(@NonNull AsyncNotedAppOp asyncOp) {
+                    // collected directly in AppOpsService
+                }
+
+                @Override
+                public void onSelfNoted(@NonNull SyncNotedAppOp op) {
+                    reportStackTraceIfNeeded(op);
+                }
+
+                private void reportStackTraceIfNeeded(@NonNull SyncNotedAppOp op) {
+                    if (sConfig.getSampledOpCode() == OP_NONE
+                            && sConfig.getExpirationTimeSinceBootMillis()
+                            >= SystemClock.elapsedRealtime()) {
+                        return;
+                    }
+
+                    MessageSamplingConfig config = sConfig;
+                    if (leftCircularDistance(strOpToOp(op.getOp()), config.getSampledOpCode(),
+                            _NUM_OP) <= config.getAcceptableLeftDistance()
+                            || config.getExpirationTimeSinceBootMillis()
+                            < SystemClock.elapsedRealtime()) {
+                        String stackTrace = getFormattedStackTrace();
+                        try {
+                            sConfig = getService().reportRuntimeAppOpAccessMessageAndGetConfig(
+                                    ActivityThread.currentOpPackageName(), op, stackTrace);
+                        } catch (RemoteException e) {
+                            e.rethrowFromSystemServer();
+                        }
+                    }
+                }
+            };
 
     static IBinder sClientId;
 
@@ -550,7 +648,6 @@ public class AppOpsManager {
     })
     public @interface OpFlags {}
 
-
     /** @hide */
     public static final String getFlagName(@OpFlags int flag) {
         switch (flag) {
@@ -568,6 +665,18 @@ public class AppOpsManager {
                 return "unknown";
         }
     }
+
+    /**
+     * Strategies used for message sampling
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"RUNTIME_APP_OPS_ACCESS__SAMPLING_STRATEGY__"}, value = {
+            RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__DEFAULT,
+            RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM,
+            RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED
+    })
+    public @interface SamplingStrategy {}
 
     private static final int UID_STATE_OFFSET = 31;
     private static final int FLAGS_MASK = 0xFFFFFFFF;
@@ -924,10 +1033,14 @@ public class AppOpsManager {
      * @hide
      */
     public static final int OP_ACTIVATE_PLATFORM_VPN = 94;
+    /** @hide */
+    public static final int OP_LOADER_USAGE_STATS = 95;
+    /** @hide Access telephony call audio */
+    public static final int OP_ACCESS_CALL_AUDIO = 96;
 
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 95;
+    public static final int _NUM_OP = 97;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1022,7 +1135,7 @@ public class AppOpsManager {
     /** Required to draw on top of other apps. */
     public static final String OPSTR_SYSTEM_ALERT_WINDOW
             = "android:system_alert_window";
-    /** Required to write/modify/update system settingss. */
+    /** Required to write/modify/update system settings. */
     public static final String OPSTR_WRITE_SETTINGS
             = "android:write_settings";
     /** @hide Get device accounts. */
@@ -1218,12 +1331,18 @@ public class AppOpsManager {
     @SystemApi
     public static final String OPSTR_MANAGE_EXTERNAL_STORAGE =
             "android:manage_external_storage";
+    /** @hide Access telephony call audio */
+    @SystemApi
+    public static final String OPSTR_ACCESS_CALL_AUDIO = "android:access_call_audio";
 
     /** @hide Communicate cross-profile within the same profile group. */
     @SystemApi
     public static final String OPSTR_INTERACT_ACROSS_PROFILES = "android:interact_across_profiles";
     /** @hide Start Platform VPN without user intervention */
     public static final String OPSTR_ACTIVATE_PLATFORM_VPN = "android:activate_platform_vpn";
+    /** @hide */
+    @SystemApi
+    public static final String OPSTR_LOADER_USAGE_STATS = "android:loader_usage_stats";
 
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
@@ -1302,7 +1421,9 @@ public class AppOpsManager {
             OP_MANAGE_IPSEC_TUNNELS,
             OP_INSTANT_APP_START_FOREGROUND,
             OP_MANAGE_EXTERNAL_STORAGE,
-            OP_INTERACT_ACROSS_PROFILES
+            OP_INTERACT_ACROSS_PROFILES,
+            OP_LOADER_USAGE_STATS,
+            OP_ACCESS_CALL_AUDIO,
     };
 
     /**
@@ -1409,6 +1530,8 @@ public class AppOpsManager {
             OP_MANAGE_EXTERNAL_STORAGE,         // MANAGE_EXTERNAL_STORAGE
             OP_INTERACT_ACROSS_PROFILES,        //INTERACT_ACROSS_PROFILES
             OP_ACTIVATE_PLATFORM_VPN,           // ACTIVATE_PLATFORM_VPN
+            OP_LOADER_USAGE_STATS,              // LOADER_USAGE_STATS
+            OP_ACCESS_CALL_AUDIO,               // ACCESS_CALL_AUDIO
     };
 
     /**
@@ -1510,6 +1633,8 @@ public class AppOpsManager {
             OPSTR_MANAGE_EXTERNAL_STORAGE,
             OPSTR_INTERACT_ACROSS_PROFILES,
             OPSTR_ACTIVATE_PLATFORM_VPN,
+            OPSTR_LOADER_USAGE_STATS,
+            OPSTR_ACCESS_CALL_AUDIO,
     };
 
     /**
@@ -1612,6 +1737,8 @@ public class AppOpsManager {
             "MANAGE_EXTERNAL_STORAGE",
             "INTERACT_ACROSS_PROFILES",
             "ACTIVATE_PLATFORM_VPN",
+            "LOADER_USAGE_STATS",
+            "ACCESS_CALL_AUDIO",
     };
 
     /**
@@ -1715,6 +1842,8 @@ public class AppOpsManager {
             Manifest.permission.MANAGE_EXTERNAL_STORAGE,
             android.Manifest.permission.INTERACT_ACROSS_PROFILES,
             null, // no permission for OP_ACTIVATE_PLATFORM_VPN
+            android.Manifest.permission.LOADER_USAGE_STATS,
+            Manifest.permission.ACCESS_CALL_AUDIO,
     };
 
     /**
@@ -1818,6 +1947,8 @@ public class AppOpsManager {
             null, // MANAGE_EXTERNAL_STORAGE
             null, // INTERACT_ACROSS_PROFILES
             null, // ACTIVATE_PLATFORM_VPN
+            null, // LOADER_USAGE_STATS
+            null, // ACCESS_CALL_AUDIO
     };
 
     /**
@@ -1920,6 +2051,8 @@ public class AppOpsManager {
             false, // MANAGE_EXTERNAL_STORAGE
             false, // INTERACT_ACROSS_PROFILES
             false, // ACTIVATE_PLATFORM_VPN
+            false, // LOADER_USAGE_STATS
+            false, // ACCESS_CALL_AUDIO
     };
 
     /**
@@ -2021,6 +2154,8 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // MANAGE_EXTERNAL_STORAGE
             AppOpsManager.MODE_DEFAULT, // INTERACT_ACROSS_PROFILES
             AppOpsManager.MODE_IGNORED, // ACTIVATE_PLATFORM_VPN
+            AppOpsManager.MODE_DEFAULT, // LOADER_USAGE_STATS
+            AppOpsManager.MODE_DEFAULT, // ACCESS_CALL_AUDIO
     };
 
     /**
@@ -2126,6 +2261,8 @@ public class AppOpsManager {
             false, // MANAGE_EXTERNAL_STORAGE
             false, // INTERACT_ACROSS_PROFILES
             false, // ACTIVATE_PLATFORM_VPN
+            false, // LOADER_USAGE_STATS
+            false, // ACCESS_CALL_AUDIO
     };
 
     /**
@@ -2210,6 +2347,10 @@ public class AppOpsManager {
             throw new IllegalStateException("notedAppOps collection code assumes < 128 appops");
         }
     }
+
+    /** Config used to control app ops access messages sampling */
+    private static MessageSamplingConfig sConfig =
+            new MessageSamplingConfig(OP_NONE, 0, 0);
 
     /** @hide */
     public static final String KEY_HISTORICAL_OPS = "historical_ops";
@@ -3916,7 +4057,10 @@ public class AppOpsManager {
         }
 
         /**
-         * The features that have been used when checking the op
+         * The features that have been used when checking the op keyed by id of the feature.
+         *
+         * @see Context#createFeatureContext(String)
+         * @see #noteOp(String, int, String, String, String)
          */
         @DataClass.Generated.Member
         public @NonNull Map<String,OpFeatureEntry> getFeatures() {
@@ -6025,7 +6169,7 @@ public class AppOpsManager {
      */
     public interface OnOpActiveChangedListener {
         /**
-         * Called when the active state of an app op changes.
+         * Called when the active state of an app-op changes.
          *
          * @param op The operation that changed.
          * @param packageName The package performing the operation.
@@ -6316,7 +6460,7 @@ public class AppOpsManager {
     @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
-    public void setUidMode(String appOp, int uid, @Mode int mode) {
+    public void setUidMode(@NonNull String appOp, int uid, @Mode int mode) {
         try {
             mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
         } catch (RemoteException e) {
@@ -6371,7 +6515,8 @@ public class AppOpsManager {
     @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
-    public void setMode(String op, int uid, String packageName, @Mode int mode) {
+    public void setMode(@NonNull String op, int uid, @Nullable String packageName,
+            @Mode int mode) {
         try {
             mService.setMode(strOpToOp(op), uid, packageName, mode);
         } catch (RemoteException e) {
@@ -6414,16 +6559,17 @@ public class AppOpsManager {
     }
 
     /**
-     * Gets the app op name associated with a given permission.
-     * The app op name is one of the public constants defined
+     * Gets the app-op name associated with a given permission.
+     *
+     * <p>The app-op name is one of the public constants defined
      * in this class such as {@link #OPSTR_COARSE_LOCATION}.
      * This API is intended to be used for mapping runtime
-     * permissions to the corresponding app op.
+     * permissions to the corresponding app-op.
      *
      * @param permission The permission.
-     * @return The app op associated with the permission or null.
+     * @return The app-op associated with the permission or {@code null}.
      */
-    public static String permissionToOp(String permission) {
+    public static @Nullable String permissionToOp(@NonNull String permission) {
         final Integer opCode = sPermToOp.get(permission);
         if (opCode == null) {
             return null;
@@ -6541,7 +6687,7 @@ public class AppOpsManager {
     }
 
     /**
-     * Start watching for changes to the active state of app ops. An app op may be
+     * Start watching for changes to the active state of app-ops. An app-op may be
      * long running and it has a clear start and stop delimiters. If an op is being
      * started or stopped by any package you will get a callback. To change the
      * watched ops for a registered callback you need to unregister and register it
@@ -6600,7 +6746,7 @@ public class AppOpsManager {
     }
 
     /**
-     * Stop watching for changes to the active state of an app op. An app op may be
+     * Stop watching for changes to the active state of an app-op. An app-op may be
      * long running and it has a clear start and stop delimiters. Unregistering a
      * non-registered callback has no effect.
      *
@@ -6764,11 +6910,7 @@ public class AppOpsManager {
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
      */
     public int unsafeCheckOpRaw(@NonNull String op, int uid, @NonNull String packageName) {
-        try {
-            return mService.checkOperationRaw(strOpToOp(op), uid, packageName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return unsafeCheckOpRawNoThrow(op, uid, packageName);
     }
 
     /**
@@ -6777,8 +6919,17 @@ public class AppOpsManager {
      * {@link #MODE_FOREGROUND}.
      */
     public int unsafeCheckOpRawNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
+        return unsafeCheckOpRawNoThrow(strOpToOp(op), uid, packageName);
+    }
+
+    /**
+     * Returns the <em>raw</em> mode associated with the op.
+     * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     * @hide
+     */
+    public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
         try {
-            return mService.checkOperationRaw(strOpToOp(op), uid, packageName);
+            return mService.checkOperationRaw(op, uid, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6831,7 +6982,8 @@ public class AppOpsManager {
      * @param op The operation to note.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The feature in the app or {@code null} for default feature
+     * @param featureId The {@link Context#createFeatureContext feature} in the package or {@code
+     * null} for default feature
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -6906,6 +7058,8 @@ public class AppOpsManager {
      * @param op The operation to note.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
+     * @param featureId The {@link Context#createFeatureContext feature} in the package or {@code
+     * null} for default feature
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -6913,8 +7067,8 @@ public class AppOpsManager {
      * causing the app to crash).
      */
     public int noteOpNoThrow(@NonNull String op, int uid, @NonNull String packageName,
-            @Nullable String feature, @Nullable String message) {
-        return noteOpNoThrow(strOpToOp(op), uid, packageName, feature, message);
+            @Nullable String featureId, @Nullable String message) {
+        return noteOpNoThrow(strOpToOp(op), uid, packageName, featureId, message);
     }
 
     /**
@@ -7183,11 +7337,9 @@ public class AppOpsManager {
     }
 
     /**
-     * Do a quick check to validate if a package name belongs to a UID.
-     *
-     * @throws SecurityException if the package name doesn't belong to the given
-     *             UID, or if ownership cannot be verified.
+     * @deprecated Use {@link PackageManager#getPackageUid} instead
      */
+    @Deprecated
     public void checkPackage(int uid, @NonNull String packageName) {
         try {
             if (mService.checkPackage(uid, packageName) != MODE_ALLOWED) {
@@ -7251,6 +7403,17 @@ public class AppOpsManager {
         }
     }
 
+    /** @hide */
+    private static IAppOpsService getService() {
+        synchronized (sLock) {
+            if (sService == null) {
+                sService = IAppOpsService.Stub.asInterface(
+                        ServiceManager.getService(Context.APP_OPS_SERVICE));
+            }
+            return sService;
+        }
+    }
+
     /**
      * @deprecated use {@link #startOp(String, int, String, String, String)} instead
      */
@@ -7295,7 +7458,8 @@ public class AppOpsManager {
      * @param op The operation to start.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The feature in the app or {@code null} for default feature
+     * @param featureId The {@link Context#createFeatureContext feature} in the package or {@code
+     * null} for default feature
      * @param message Description why op was started
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -7486,7 +7650,8 @@ public class AppOpsManager {
     }
 
     /**
-     * Checks whether the given op for a package is active.
+     * Checks whether the given op for a package is active, i.e. did someone call {@link #startOp}
+     * without {@link #finishOp} yet.
      * <p>
      * If you don't hold the {@code android.Manifest.permission#WATCH_APPOPS}
      * permission you can query only for your UID.
@@ -7597,6 +7762,7 @@ public class AppOpsManager {
                 sNotedAppOpsCollector.onSelfNoted(new SyncNotedAppOp(op, featureId));
             }
         }
+        sMessageCollector.onSelfNoted(new SyncNotedAppOp(op, featureId));
     }
 
     /**
@@ -7747,6 +7913,10 @@ public class AppOpsManager {
                         }
                     }
                 }
+                for (int code = notedAppOps.nextSetBit(0); code != -1;
+                        code = notedAppOps.nextSetBit(code + 1)) {
+                    sMessageCollector.onNoted(new SyncNotedAppOp(code, featureId));
+                }
             }
         }
     }
@@ -7807,24 +7977,23 @@ public class AppOpsManager {
      * @hide
      */
     public static boolean isCollectingNotedAppOps() {
-        synchronized (sLock) {
-            return sNotedAppOpsCollector != null;
-        }
+        return sNotedAppOpsCollector != null;
     }
 
     /**
-     * Callback an app can choose to {@link #setNotedAppOpsCollector register} to monitor it's noted
-     * appops. I.e. each time any app calls {@link #noteOp} or {@link #startOp} one of the callback
-     * methods of this object is called.
+     * Callback an app can {@link #setNotedAppOpsCollector register} to monitor the app-ops the
+     * system has tracked for it. I.e. each time any app calls {@link #noteOp} or {@link #startOp}
+     * one of the callback methods of this object is called.
      *
-     * <p><b>Only appops related to dangerous permissions are collected.</b>
+     * <p><b>There will be a callback for all app-ops related to runtime permissions, but not
+     * necessarily for all other app-ops.
      *
      * <pre>
      * setNotedAppOpsCollector(new AppOpsCollector() {
      *     ArraySet<Pair<String, String>> opsNotedForThisProcess = new ArraySet<>();
      *
      *     private synchronized void addAccess(String op, String accessLocation) {
-     *         // Ops are often noted when permission protected APIs were called.
+     *         // Ops are often noted when runtime permission protected APIs were called.
      *         // In this case permissionToOp() allows to resolve the permission<->op
      *         opsNotedForThisProcess.add(new Pair(accessType, accessLocation));
      *     }
@@ -7866,20 +8035,21 @@ public class AppOpsManager {
         }
 
         /**
-         * Called when an app-op was noted for this package inside of a two-way binder-call.
+         * Called when an app-op was {@link #noteOp noted} for this package inside of a synchronous
+         * API call, i.e. a API call that returned data or waited until the action was performed.
          *
-         * <p>Called on the calling thread just after executing the binder-call. This allows
-         * the app to e.g. collect stack traces to figure out where the access came from.
+         * <p>Called on the calling thread before the API returns. This allows the app to e.g.
+         * collect stack traces to figure out where the access came from.
          *
          * @param op The op noted
          */
         public abstract void onNoted(@NonNull SyncNotedAppOp op);
 
         /**
-         * Called when this app noted an app-op for its own package.
+         * Called when this app noted an app-op for its own package,
          *
-         * <p>Called on the thread the noted the op. This allows the app to e.g. collect stack
-         * traces to figure out where the access came from.
+         * <p>This is very similar to {@link #onNoted} only that the tracking was not caused by the
+         * API provider in a separate process, but by one in the app's own process.
          *
          * @param op The op noted
          */
@@ -7943,10 +8113,13 @@ public class AppOpsManager {
 
         StringBuilder sb = new StringBuilder();
         for (int i = firstInteresting; i <= lastInteresting; i++) {
-            sb.append(trace[i]);
-            if (i != lastInteresting) {
+            if (i != firstInteresting) {
                 sb.append('\n');
             }
+            if (sb.length() + trace[i].toString().length() > 600) {
+                break;
+            }
+            sb.append(trace[i]);
         }
 
         return sb.toString();
@@ -8068,6 +8241,22 @@ public class AppOpsManager {
     public void clearHistory() {
         try {
             mService.clearHistory();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Pulls current AppOps access report and picks package and op to watch for next access report
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
+    public @Nullable RuntimeAppOpAccessMessage collectRuntimeAppOpAccessMessage() {
+        try {
+            return mService.collectRuntimeAppOpAccessMessage();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8281,5 +8470,13 @@ public class AppOpsManager {
         }
 
         return AppOpsManager.MODE_DEFAULT;
+    }
+
+    /**
+     * Calculate left circular distance for two numbers modulo size.
+     * @hide
+     */
+    public static int leftCircularDistance(int from, int to, int size) {
+        return (to + size - from) % size;
     }
 }

@@ -33,7 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * @hide
  */
 public abstract class GnssNavigationMessageProvider
-        extends RemoteListenerHelper<IGnssNavigationMessageListener> {
+        extends RemoteListenerHelper<Void, IGnssNavigationMessageListener> {
     private static final String TAG = "GnssNavigationMessageProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 

@@ -247,6 +247,14 @@ public final class PictureInPictureParams implements Parcelable {
         return mSourceRectHint != null && !mSourceRectHint.isEmpty();
     }
 
+    /**
+     * @return True if no parameters are set
+     * @hide
+     */
+    public boolean empty() {
+        return !hasSourceBoundsHint() && !hasSetActions() && !hasSetAspectRatio();
+    }
+
     @Override
     public int describeContents() {
         return 0;

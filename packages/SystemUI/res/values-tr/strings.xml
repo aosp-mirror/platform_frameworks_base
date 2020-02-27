@@ -71,7 +71,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Yakınlaştır (ekranı kaplasın)"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Genişlet (ekran kapansın)"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Ekran görüntüsü"</string>
-    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"Resim eklendi"</string>
+    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"bir resim gönderildi"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Ekran görüntüsü kaydediliyor..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Ekran görüntüsü kaydediliyor..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Ekran görüntüsü kaydedildi"</string>
@@ -80,11 +80,19 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Tekrar ekran görüntüsü almayı deneyin"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Depolama alanı sınırlı olduğundan ekran görüntüsü kaydedilemiyor"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Uygulama veya kuruluşunuz, ekran görüntüsü alınmasına izin vermiyor."</string>
-    <string name="screenrecord_name" msgid="6286499308042305686">"Ekran Kaydı"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Ekran Kaydedici"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
-    <string name="screenrecord_start_label" msgid="1539048263178882562">"Kaydı Başlat"</string>
-    <string name="screenrecord_mic_label" msgid="6134198080740031632">"Seslendirme kaydet"</string>
-    <string name="screenrecord_taps_label" msgid="2518244240225925076">"Dokunmaları göster"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Kayıt Başlatılsın mı?"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Kayıt sırasında Android Sistemi, ekranınızda görünen veya cihazınızda oynatılan hassas bilgileri yakalayabilir. Buna şifreler, ödeme bilgileri, fotoğraflar, mesajlar ve sesler dahildir."</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ses kaydet"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Cihaz sesi"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Müzik, aramalar, zil sesleri gibi cihazınızdan sesler"</string>
+    <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Cihaz sesi ve mikrofonu"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Başlat"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Ekran kaydediliyor"</string>
+    <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Ekran ve ses kaydediliyor"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Dokunmaları ekranda göster"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Durdurmak için dokunun"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Durdur"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Duraklat"</string>
@@ -97,6 +105,7 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"Ekran kaydı silindi"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Ekran kaydı silinirken hata oluştu"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"İzinler alınamadı"</string>
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"Ekran kaydı başlatılırken hata oluştu"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"USB dosya aktarım seçenekleri"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"Medya oynatıcı olarak ekle (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"Kamera olarak ekle (PTP)"</string>
@@ -477,6 +486,7 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Bir daha gösterme"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tümünü temizle"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Yönet"</string>
+    <string name="manage_notifications_history_text" msgid="57055985396576230">"Geçmiş"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Sessiz bildirimler"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Görüşmeler"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Sessiz bildirimlerin tümünü temizle"</string>
@@ -676,6 +686,10 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ses veya titreşim olmadan odaklanmanıza yardımcı olur."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Ses veya titreşimle dikkatinizi çeker."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Kayan kısayolla dikkatinizi bu içerik üzerinde tutar."</string>
+    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
+    <skip />
+    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirimler değiştirilemez."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Bu bildirim grubu burada yapılandırılamaz"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Proxy uygulanan bildirim"</string>
@@ -698,17 +712,18 @@
     <string name="notification_done" msgid="6215117625922713976">"Bitti"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Geri al"</string>
     <string name="demote" msgid="6225813324237153980">"Bu bildirimi ileti dizisi değil olarak işaretle"</string>
-    <string name="notification_conversation_favorite" msgid="8252976467488182853">"Favori"</string>
-    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"Favorilerden kaldır"</string>
-    <string name="notification_conversation_mute" msgid="477431709687199671">"Kapat"</string>
-    <string name="notification_conversation_unmute" msgid="410885000669775294">"Aç"</string>
-    <string name="notification_conversation_bubble" msgid="4598142032706190028">"Balon olarak göster"</string>
-    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"Balonları kapat"</string>
+    <string name="notification_conversation_favorite" msgid="1905240206975921907">"Önemli görüşme"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Önemli bir görüşme değil"</string>
+    <string name="notification_conversation_mute" msgid="268951550222925548">"Sesi kapatıldı"</string>
+    <string name="notification_conversation_unmute" msgid="2692255619510896710">"Uyarı"</string>
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"Balon olarak göster"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Balonları kaldır"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Ana ekrana ekle"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"Bildirim kontrolleri"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"bildirim erteleme seçenekleri"</string>
-    <string name="notification_menu_snooze_action" msgid="8411152711279433989">"Ertele"</string>
+    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Bana hatırlat"</string>
+    <string name="notification_menu_settings_action" msgid="7085494017202764285">"Ayarlar"</string>
     <string name="snooze_undo" msgid="60890935148417175">"GERİ AL"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> süreyle ertelendi"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
@@ -780,6 +795,7 @@
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Veri Tasarrufu kapalı"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Açık"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Kapalı"</string>
+    <string name="tile_unavailable" msgid="3095879009136616920">"Kullanılamıyor"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Gezinme çubuğu"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Düzen"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Ekstra sol düğme türü"</string>
@@ -965,4 +981,18 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Büyütme Penceresi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Büyütme Penceresi Kontrolleri"</string>
     <string name="quick_controls_title" msgid="525285759614231333">"Hızlı Kontroller"</string>
+    <string name="controls_providers_title" msgid="8844124515157926071">"Kontrol Ekle"</string>
+    <string name="controls_providers_subtitle" msgid="8187768950110836569">"Hangi uygulamadan kontrol ekleneceğini seçin"</string>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> mevcut favori.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> mevcut favori.</item>
+    </plurals>
+    <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
+    <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Hızlı erişim için kontrolleri seçin"</string>
+    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
+    <skip />
+    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <skip />
 </resources>

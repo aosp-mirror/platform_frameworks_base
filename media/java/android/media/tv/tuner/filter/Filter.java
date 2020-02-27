@@ -23,9 +23,11 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerConstants.Result;
+import android.media.tv.tuner.TunerUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Tuner data filter.
@@ -176,7 +178,10 @@ public class Filter implements AutoCloseable {
 
     private long mNativeContext;
     private FilterCallback mCallback;
+    private Executor mExecutor;
     private final int mId;
+    private int mMainType;
+    private int mSubtype;
 
     private native int nativeConfigureFilter(
             int type, int subType, FilterConfiguration settings);
@@ -196,9 +201,25 @@ public class Filter implements AutoCloseable {
     private void onFilterStatus(int status) {
     }
 
+    private void onFilterEvent(FilterEvent[] events) {
+        if (mCallback != null && mExecutor != null) {
+            mExecutor.execute(() -> mCallback.onFilterEvent(this, events));
+        }
+    }
+
     /** @hide */
-    public void setCallback(FilterCallback cb) {
+    public void setMainType(@Type int mainType) {
+        mMainType = mainType;
+    }
+    /** @hide */
+    public void setSubtype(@Subtype int subtype) {
+        mSubtype = subtype;
+    }
+
+    /** @hide */
+    public void setCallback(FilterCallback cb, Executor executor) {
         mCallback = cb;
+        mExecutor = executor;
     }
     /** @hide */
     public FilterCallback getCallback() {
@@ -213,10 +234,13 @@ public class Filter implements AutoCloseable {
      */
     @Result
     public int configure(@NonNull FilterConfiguration config) {
-        int subType = -1;
+        // TODO: validate main type, subtype, config, settings
+        int subType;
         Settings s = config.getSettings();
         if (s != null) {
             subType = s.getType();
+        } else {
+            subType = TunerUtils.getFilterSubtype(mMainType, mSubtype);
         }
         return nativeConfigureFilter(config.getType(), subType, config);
     }

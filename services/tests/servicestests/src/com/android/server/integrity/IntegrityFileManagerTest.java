@@ -141,10 +141,10 @@ public class IntegrityFileManagerTest {
         AppInstallMetadata appInstallMetadata =
                 new AppInstallMetadata.Builder()
                         .setPackageName(packageName)
-                        .setAppCertificate(packageCert)
+                        .setAppCertificates(Collections.singletonList(packageCert))
                         .setVersionCode(version)
                         .setInstallerName("abc")
-                        .setInstallerCertificate("abc")
+                        .setInstallerCertificates(Collections.singletonList("abc"))
                         .setIsPreInstalled(true)
                         .build();
         List<Rule> rulesFetched = mIntegrityFileManager.readRules(appInstallMetadata);
@@ -182,10 +182,10 @@ public class IntegrityFileManagerTest {
         AppInstallMetadata appInstallMetadata =
                 new AppInstallMetadata.Builder()
                         .setPackageName(installedPackageName)
-                        .setAppCertificate(installedAppCertificate)
+                        .setAppCertificates(Collections.singletonList(installedAppCertificate))
                         .setVersionCode(250)
                         .setInstallerName("abc")
-                        .setInstallerCertificate("abc")
+                        .setInstallerCertificates(Collections.singletonList("abc"))
                         .setIsPreInstalled(true)
                         .build();
         List<Rule> rulesFetched = mIntegrityFileManager.readRules(appInstallMetadata);

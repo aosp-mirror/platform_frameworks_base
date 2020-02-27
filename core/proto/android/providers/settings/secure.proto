@@ -80,6 +80,11 @@ message SecureSettingsProto {
     }
     optional Accessibility accessibility = 2;
 
+    message AdaptiveSleep {
+        optional SettingProto enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional AdaptiveSleep adaptive_sleep = 78;
+
     // Origins for which browsers should allow geolocation by default.
     // The value is a space-separated list of origins.
     optional SettingProto allowed_geolocation_origins = 3;
@@ -574,5 +579,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 78;
+    // Next tag = 79;
 }

@@ -16,8 +16,6 @@
 
 package com.android.server.backup;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import androidx.test.InstrumentationRegistry;
@@ -33,18 +31,15 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class UserBackupPreferencesTest {
     private static final String EXCLUDED_PACKAGE_1 = "package1";
-    private static final String EXCLUDED_PACKAGE_2 = "package2";
     private static final List<String> EXCLUDED_KEYS_1 = Arrays.asList("key1", "key2");
-    private static final List<String> EXCLUDED_KEYS_2 = Arrays.asList("key1");
+    private static final List<String> EXCLUDED_KEYS_2 = Arrays.asList("key3");
 
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
@@ -60,27 +55,13 @@ public class UserBackupPreferencesTest {
     }
 
     @Test
-    public void testGetExcludedKeysForPackages_returnsExcludedKeys() {
+    public void testGetExcludedKeysForPackage_returnsExcludedKeys() {
         mExcludedRestoreKeysStorage.addExcludedKeys(EXCLUDED_PACKAGE_1, EXCLUDED_KEYS_1);
-        mExcludedRestoreKeysStorage.addExcludedKeys(EXCLUDED_PACKAGE_2, EXCLUDED_KEYS_2);
+        mExcludedRestoreKeysStorage.addExcludedKeys(EXCLUDED_PACKAGE_1, EXCLUDED_KEYS_2);
 
-        Map<String, Set<String>> excludedKeys =
-                mExcludedRestoreKeysStorage.getExcludedRestoreKeysForPackages(EXCLUDED_PACKAGE_1);
-        assertTrue(excludedKeys.containsKey(EXCLUDED_PACKAGE_1));
-        assertFalse(excludedKeys.containsKey(EXCLUDED_PACKAGE_2));
-        assertEquals(new HashSet<>(EXCLUDED_KEYS_1), excludedKeys.get(EXCLUDED_PACKAGE_1));
-    }
-
-    @Test
-    public void testGetExcludedKeysForPackages_withEmpty_list_returnsAllExcludedKeys() {
-        mExcludedRestoreKeysStorage.addExcludedKeys(EXCLUDED_PACKAGE_1, EXCLUDED_KEYS_1);
-        mExcludedRestoreKeysStorage.addExcludedKeys(EXCLUDED_PACKAGE_2, EXCLUDED_KEYS_2);
-
-        Map<String, Set<String>> excludedKeys =
-                mExcludedRestoreKeysStorage.getAllExcludedRestoreKeys();
-        assertTrue(excludedKeys.containsKey(EXCLUDED_PACKAGE_1));
-        assertTrue(excludedKeys.containsKey(EXCLUDED_PACKAGE_2));
-        assertEquals(new HashSet<>(EXCLUDED_KEYS_1), excludedKeys.get(EXCLUDED_PACKAGE_1));
-        assertEquals(new HashSet<>(EXCLUDED_KEYS_2), excludedKeys.get(EXCLUDED_PACKAGE_2));
+        Set<String> excludedKeys =
+                mExcludedRestoreKeysStorage.getExcludedRestoreKeysForPackage(EXCLUDED_PACKAGE_1);
+        assertTrue(excludedKeys.containsAll(EXCLUDED_KEYS_1));
+        assertTrue(excludedKeys.containsAll(EXCLUDED_KEYS_2));
     }
 }

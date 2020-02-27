@@ -153,11 +153,11 @@ public class EglHelper {
         return true;
     }
 
-    private boolean checkExtensionCapability(String extName) {
+    boolean checkExtensionCapability(String extName) {
         return mExts.contains(extName);
     }
 
-    private int getWcgCapability() {
+    int getWcgCapability() {
         if (checkExtensionCapability(EXT_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH)) {
             return EGL_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH_EXT;
         }
@@ -212,7 +212,7 @@ public class EglHelper {
             if (wcg && checkExtensionCapability(KHR_GL_COLOR_SPACE) && wcgCapability > 0) {
                 attrs = new int[] {EGL_GL_COLORSPACE_KHR, wcgCapability, EGL_NONE};
             }
-            mEglSurface = eglCreateWindowSurface(mEglDisplay, mEglConfig, surfaceHolder, attrs, 0);
+            mEglSurface = askCreatingEglWindowSurface(surfaceHolder, attrs, 0 /* offset */);
         } else {
             Log.w(TAG, "Create EglSurface failed: hasEglDisplay=" + hasEglDisplay()
                     + ", has valid surface=" + surfaceHolder.getSurface().isValid());
@@ -235,6 +235,10 @@ public class EglHelper {
         return true;
     }
 
+    EGLSurface askCreatingEglWindowSurface(SurfaceHolder holder, int[] attrs, int offset) {
+        return eglCreateWindowSurface(mEglDisplay, mEglConfig, holder, attrs, offset);
+    }
+
     /**
      * Destroy EglSurface.
      */
@@ -242,7 +246,7 @@ public class EglHelper {
         if (hasEglSurface()) {
             eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
             eglDestroySurface(mEglDisplay, mEglSurface);
-            mEglSurface = null;
+            mEglSurface = EGL_NO_SURFACE;
         }
     }
 
@@ -296,7 +300,7 @@ public class EglHelper {
     public void destroyEglContext() {
         if (hasEglContext()) {
             eglDestroyContext(mEglDisplay, mEglContext);
-            mEglContext = null;
+            mEglContext = EGL_NO_CONTEXT;
         }
     }
 
@@ -340,9 +344,14 @@ public class EglHelper {
             destroyEglContext();
         }
         if (hasEglDisplay()) {
-            eglTerminate(mEglDisplay);
+            terminateEglDisplay();
         }
         mEglReady = false;
+    }
+
+    void terminateEglDisplay() {
+        eglTerminate(mEglDisplay);
+        mEglDisplay = EGL_NO_DISPLAY;
     }
 
     /**

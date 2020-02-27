@@ -17,6 +17,7 @@
 package android.os.incremental;
 
 import android.content.pm.DataLoaderParamsParcel;
+import android.content.pm.IDataLoaderStatusListener;
 import android.os.incremental.IncrementalNewFileParams;
 
 /** @hide */
@@ -33,7 +34,7 @@ interface IIncrementalService {
      * Opens or creates a storage given a target path and data loader params. Returns the storage ID.
      */
     int openStorage(in @utf8InCpp String path);
-    int createStorage(in @utf8InCpp String path, in DataLoaderParamsParcel params, int createMode);
+    int createStorage(in @utf8InCpp String path, in DataLoaderParamsParcel params, in IDataLoaderStatusListener listener, int createMode);
     int createLinkedStorage(in @utf8InCpp String path, int otherStorageId, int createMode);
 
     /**
@@ -103,4 +104,9 @@ interface IIncrementalService {
      * Deletes a storage given its ID. Deletes its bind mounts and unmount it. Stop its data loader.
      */
     void deleteStorage(int storageId);
+
+    /**
+     * Setting up native library directories and extract native libs onto a storage.
+     */
+    boolean configureNativeBinaries(int storageId, in @utf8InCpp String apkFullPath, in @utf8InCpp String libDirRelativePath, in @utf8InCpp String abi);
 }

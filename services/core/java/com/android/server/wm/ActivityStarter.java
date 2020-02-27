@@ -97,7 +97,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -318,6 +317,7 @@ class ActivityStarter {
         int callingPid = DEFAULT_CALLING_PID;
         int callingUid = DEFAULT_CALLING_UID;
         String callingPackage;
+        @Nullable String callingFeatureId;
         int realCallingPid = DEFAULT_REAL_CALLING_PID;
         int realCallingUid = DEFAULT_REAL_CALLING_UID;
         int startFlags;
@@ -335,6 +335,7 @@ class ActivityStarter {
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
         boolean allowBackgroundActivityStart;
+        boolean isDream;
 
         /**
          * If set to {@code true}, allows this activity start to look into
@@ -367,6 +368,7 @@ class ActivityStarter {
             callingPid = DEFAULT_CALLING_PID;
             callingUid = DEFAULT_CALLING_UID;
             callingPackage = null;
+            callingFeatureId = null;
             realCallingPid = DEFAULT_REAL_CALLING_PID;
             realCallingUid = DEFAULT_REAL_CALLING_UID;
             startFlags = 0;
@@ -385,6 +387,7 @@ class ActivityStarter {
             filterCallingUid = UserHandle.USER_NULL;
             originatingPendingIntent = null;
             allowBackgroundActivityStart = false;
+            isDream = false;
         }
 
         /**
@@ -405,6 +408,7 @@ class ActivityStarter {
             callingPid = request.callingPid;
             callingUid = request.callingUid;
             callingPackage = request.callingPackage;
+            callingFeatureId = request.callingFeatureId;
             realCallingPid = request.realCallingPid;
             realCallingUid = request.realCallingUid;
             startFlags = request.startFlags;
@@ -424,6 +428,7 @@ class ActivityStarter {
             filterCallingUid = request.filterCallingUid;
             originatingPendingIntent = request.originatingPendingIntent;
             allowBackgroundActivityStart = request.allowBackgroundActivityStart;
+            isDream = request.isDream;
         }
 
         /**
@@ -693,9 +698,10 @@ class ActivityStarter {
         }
 
         final IIntentSender target = mService.getIntentSenderLocked(
-                ActivityManager.INTENT_SENDER_ACTIVITY, "android" /* packageName */, appCallingUid,
-                mRequest.userId, null /* token */, null /* resultWho*/, 0 /* requestCode*/,
-                new Intent[] { mRequest.intent }, new String[] { mRequest.resolvedType },
+                ActivityManager.INTENT_SENDER_ACTIVITY, "android" /* packageName */,
+                null /* featureId */, appCallingUid, mRequest.userId, null /* token */,
+                null /* resultWho*/, 0 /* requestCode*/, new Intent[]{mRequest.intent},
+                new String[]{mRequest.resolvedType},
                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT,
                 null /* bOptions */);
 
@@ -807,6 +813,7 @@ class ActivityStarter {
         int callingPid = request.callingPid;
         int callingUid = request.callingUid;
         String callingPackage = request.callingPackage;
+        String callingFeatureId = request.callingFeatureId;
         final int realCallingPid = request.realCallingPid;
         final int realCallingUid = request.realCallingUid;
         final int startFlags = request.startFlags;
@@ -882,6 +889,7 @@ class ActivityStarter {
                 // we want the final activity to consider it to have been launched by the
                 // previous app activity.
                 callingPackage = sourceRecord.launchedFromPackage;
+                callingFeatureId = sourceRecord.launchedFromFeatureId;
             }
         }
 
@@ -949,8 +957,8 @@ class ActivityStarter {
         }
 
         boolean abort = !mSupervisor.checkStartAnyActivityPermission(intent, aInfo, resultWho,
-                requestCode, callingPid, callingUid, callingPackage, request.ignoreTargetSecurity,
-                inTask != null, callerApp, resultRecord, resultStack);
+                requestCode, callingPid, callingUid, callingPackage, callingFeatureId,
+                request.ignoreTargetSecurity, inTask != null, callerApp, resultRecord, resultStack);
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
         abort |= !mService.getPermissionPolicyInternal().checkStartActivity(intent, callingUid,
@@ -964,7 +972,7 @@ class ActivityStarter {
                 restrictedBgActivity = shouldAbortBackgroundActivityStart(callingUid,
                         callingPid, callingPackage, realCallingUid, realCallingPid, callerApp,
                         request.originatingPendingIntent, request.allowBackgroundActivityStart,
-                        intent);
+                        request.isDream, intent);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             }
@@ -990,7 +998,8 @@ class ActivityStarter {
             }
         }
 
-        mInterceptor.setStates(userId, realCallingPid, realCallingUid, startFlags, callingPackage);
+        mInterceptor.setStates(userId, realCallingPid, realCallingUid, startFlags, callingPackage,
+                callingFeatureId);
         if (mInterceptor.intercept(intent, rInfo, aInfo, resolvedType, inTask, callingPid,
                 callingUid, checkedOptions)) {
             // activity start was intercepted, e.g. because the target user is currently in quiet
@@ -1023,7 +1032,7 @@ class ActivityStarter {
             if (mService.getPackageManagerInternalLocked().isPermissionsReviewRequired(
                     aInfo.packageName, userId)) {
                 final IIntentSender target = mService.getIntentSenderLocked(
-                        ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
+                        ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage, callingFeatureId,
                         callingUid, userId, null, null, 0, new Intent[]{intent},
                         new String[]{resolvedType}, PendingIntent.FLAG_CANCEL_CURRENT
                                 | PendingIntent.FLAG_ONE_SHOT, null);
@@ -1081,7 +1090,7 @@ class ActivityStarter {
         // app [on install success].
         if (rInfo != null && rInfo.auxiliaryInfo != null) {
             intent = createLaunchIntent(rInfo.auxiliaryInfo, request.ephemeralIntent,
-                    callingPackage, verificationBundle, resolvedType, userId);
+                    callingPackage, callingFeatureId, verificationBundle, resolvedType, userId);
             resolvedType = null;
             callingUid = realCallingUid;
             callingPid = realCallingPid;
@@ -1090,9 +1099,10 @@ class ActivityStarter {
         }
 
         final ActivityRecord r = new ActivityRecord(mService, callerApp, callingPid, callingUid,
-                callingPackage, intent, resolvedType, aInfo, mService.getGlobalConfiguration(),
-                resultRecord, resultWho, requestCode, request.componentSpecified,
-                voiceSession != null, mSupervisor, checkedOptions, sourceRecord);
+                callingPackage, callingFeatureId, intent, resolvedType, aInfo,
+                mService.getGlobalConfiguration(), resultRecord, resultWho, requestCode,
+                request.componentSpecified, voiceSession != null, mSupervisor, checkedOptions,
+                sourceRecord);
         mLastStartActivityRecord = r;
 
         if (r.appTimeTracker == null && sourceRecord != null) {
@@ -1172,11 +1182,16 @@ class ActivityStarter {
     boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
             final String callingPackage, int realCallingUid, int realCallingPid,
             WindowProcessController callerApp, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart, Intent intent) {
+            boolean allowBackgroundActivityStart, boolean isDream, Intent intent) {
         // don't abort for the most important UIDs
         final int callingAppId = UserHandle.getAppId(callingUid);
         if (callingUid == Process.ROOT_UID || callingAppId == Process.SYSTEM_UID
                 || callingAppId == Process.NFC_UID) {
+            return false;
+        }
+
+        // don't abort if this is the dream activity
+        if (isDream) {
             return false;
         }
         // don't abort if the callingUid has a visible window or is a persistent system process
@@ -1302,21 +1317,22 @@ class ActivityStarter {
      * Creates a launch intent for the given auxiliary resolution data.
      */
     private @NonNull Intent createLaunchIntent(@Nullable AuxiliaryResolveInfo auxiliaryResponse,
-            Intent originalIntent, String callingPackage, Bundle verificationBundle,
-            String resolvedType, int userId) {
+            Intent originalIntent, String callingPackage, @Nullable String callingFeatureId,
+            Bundle verificationBundle, String resolvedType, int userId) {
         if (auxiliaryResponse != null && auxiliaryResponse.needsPhaseTwo) {
             // request phase two resolution
             PackageManagerInternal packageManager = mService.getPackageManagerInternalLocked();
             boolean isRequesterInstantApp = packageManager.isInstantApp(callingPackage, userId);
             packageManager.requestInstantAppResolutionPhaseTwo(
                     auxiliaryResponse, originalIntent, resolvedType, callingPackage,
-                    isRequesterInstantApp, verificationBundle, userId);
+                    callingFeatureId, isRequesterInstantApp, verificationBundle, userId);
         }
         return InstantAppResolver.buildEphemeralInstallerIntent(
                 originalIntent,
                 InstantAppResolver.sanitizeIntent(originalIntent),
                 auxiliaryResponse == null ? null : auxiliaryResponse.failureIntent,
                 callingPackage,
+                callingFeatureId,
                 verificationBundle,
                 resolvedType,
                 userId,
@@ -1365,7 +1381,7 @@ class ActivityStarter {
                     break;
                 case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
                     final ActivityStack homeStack =
-                            startedActivityStack.getDisplay().getRootHomeTask();
+                            startedActivityStack.getDisplay().getOrCreateRootHomeTask();
                     if (homeStack != null && homeStack.shouldBeVisible(null /* starting */)) {
                         mService.mWindowManager.showRecentApps();
                     }
@@ -1549,9 +1565,8 @@ class ActivityStarter {
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.mUserId);
         mService.getPackageManagerInternalLocked().grantImplicitAccess(
                 mStartActivity.mUserId, mIntent,
-                mCallingUid,
-                UserHandle.getAppId(mStartActivity.info.applicationInfo.uid)
-        );
+                UserHandle.getAppId(mStartActivity.info.applicationInfo.uid), mCallingUid,
+                true /*direct*/);
         if (newTask) {
             EventLogTags.writeWmCreateTask(mStartActivity.mUserId,
                     mStartActivity.getTask().mTaskId);
@@ -2357,7 +2372,7 @@ class ActivityStarter {
                     // task on top there.
                     // Defer resuming the top activity while moving task to top, since the
                     // current task-top activity may not be the activity that should be resumed.
-                    mTargetStack.moveTaskToFrontLocked(intentTask, mNoAnimation, mOptions,
+                    mTargetStack.moveTaskToFront(intentTask, mNoAnimation, mOptions,
                             mStartActivity.appTimeTracker, DEFER_RESUME,
                             "bringingFoundTaskToFront");
                     mMovedToFront = !isSplitScreenTopStack;
@@ -2387,13 +2402,11 @@ class ActivityStarter {
 
     private void setNewTask(Task taskToAffiliate) {
         final boolean toTop = !mLaunchTaskBehind && !mAvoidMoveToFront;
-        final Task task = mTargetStack.createTask(
-                mSupervisor.getNextTaskIdForUser(mStartActivity.mUserId),
+        final Task task = mTargetStack.reuseOrCreateTask(
                 mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                 mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
         addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
-        updateBounds(mStartActivity.getTask(), mLaunchParams.mBounds);
 
         if (DEBUG_TASKS) {
             Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
@@ -2414,21 +2427,6 @@ class ActivityStarter {
         activity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
                 mStartActivity.launchedFromPackage);
         mIntentDelivered = true;
-    }
-
-    @VisibleForTesting
-    void updateBounds(Task task, Rect bounds) {
-        if (bounds.isEmpty()) {
-            return;
-        }
-
-        final Task rootTask = task.getRootTask();
-        if (rootTask != null && rootTask.inPinnedWindowingMode()) {
-            mService.animateResizePinnedStack(rootTask.mTaskId, bounds, -1);
-        } else {
-            // TODO: I don't believe it is possible to reach this else condition anymore...
-            task.setBounds(bounds);
-        }
     }
 
     private void addOrReparentStartingActivity(Task parent, String reason) {
@@ -2575,6 +2573,11 @@ class ActivityStarter {
         return this;
     }
 
+    ActivityStarter setCallingFeatureId(String callingFeatureId) {
+        mRequest.callingFeatureId = callingFeatureId;
+        return this;
+    }
+
     /**
      * Sets the pid of the caller who requested to launch the activity.
      *
@@ -2670,6 +2673,11 @@ class ActivityStarter {
 
     ActivityStarter setAllowBackgroundActivityStart(boolean allowBackgroundActivityStart) {
         mRequest.allowBackgroundActivityStart = allowBackgroundActivityStart;
+        return this;
+    }
+
+    ActivityStarter setIsDream(boolean isDream) {
+        mRequest.isDream = isDream;
         return this;
     }
 

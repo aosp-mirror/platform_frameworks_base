@@ -15,6 +15,7 @@
  */
 package com.android.perftests.blob;
 
+import android.app.blob.BlobHandle;
 import android.app.blob.BlobStoreManager;
 import android.content.Context;
 import android.perftests.utils.ManualBenchmarkState;
@@ -38,6 +39,7 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -102,7 +104,8 @@ public class BlobStorePerfTests {
 
                 durations.clear();
                 collectDigestDurationsFromTrace(parser, durations);
-                // TODO: get and delete blobId before next iteration.
+
+                deleteBlob(blobData.getBlobHandle());
             }
         } finally {
             mAtraceUtils.stopTrace();
@@ -133,6 +136,16 @@ public class BlobStorePerfTests {
             // Ignore commit callback result.
             callback.get();
         }
+    }
+
+    private void deleteBlob(BlobHandle blobHandle) throws Exception {
+        runShellCommand(String.format(
+                "cmd blob_store delete-blob --algo %s --digest %s --label %s --expiry %d --tag %s",
+                blobHandle.algorithm,
+                Base64.getEncoder().encode(blobHandle.digest),
+                blobHandle.label,
+                blobHandle.expiryTimeMillis,
+                blobHandle.tag));
     }
 
     private String runShellCommand(String cmd) {

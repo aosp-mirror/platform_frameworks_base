@@ -221,10 +221,8 @@ public class SoundTriggerModule {
     /**
      * Set a model specific {@link ModelParams} with the given value. This
      * parameter will keep its value for the duration the model is loaded regardless of starting
-     * and
-     * stopping recognition. Once the model is unloaded, the value will be lost.
-     * {@link SoundTriggerModule#queryParameter(int, int)} should be checked first before calling
-     * this method.
+     * and stopping recognition. Once the model is unloaded, the value will be lost.
+     * {@link #queryParameter} should be checked first before calling this method.
      *
      * @param soundModelHandle handle of model to apply parameter
      * @param modelParam       {@link ModelParams}
@@ -251,22 +249,14 @@ public class SoundTriggerModule {
      * for the duration the model is loaded regardless of starting and stopping recognition.
      * Once the model is unloaded, the value will be lost. If the value is not set, a default
      * value is returned. See {@link ModelParams} for parameter default values.
-     * {@link SoundTriggerModule#queryParameter(int, int)} should be checked first before
+     * {@link #queryParameter} should be checked first before
      * calling this method. Otherwise, an exception can be thrown.
      *
      * @param soundModelHandle handle of model to get parameter
      * @param modelParam       {@link ModelParams}
      * @return value of parameter
-     * @throws UnsupportedOperationException if hal or model do not support this API.
-     *                                       {@link SoundTriggerModule#queryParameter(int, int)}
-     *                                       should
-     *                                       be checked first.
-     * @throws IllegalArgumentException      if invalid model handle or parameter is passed.
-     *                                       {@link SoundTriggerModule#queryParameter(int, int)}
-     *                                       should be checked first.
      */
-    public synchronized int getParameter(int soundModelHandle, @ModelParams int modelParam)
-            throws UnsupportedOperationException, IllegalArgumentException {
+    public synchronized int getParameter(int soundModelHandle, @ModelParams int modelParam) {
         try {
             return mService.getModelParameter(soundModelHandle,
                     ConversionUtil.api2aidlModelParameter(modelParam));
@@ -276,9 +266,8 @@ public class SoundTriggerModule {
     }
 
     /**
-     * Determine if parameter control is supported for the given model handle.
-     * This method should be checked prior to calling {@link SoundTriggerModule#setParameter} or
-     * {@link SoundTriggerModule#getParameter}.
+     * Query the parameter support and range for a given {@link ModelParams}.
+     * This method should be check prior to calling {@link #setParameter} or {@link #getParameter}.
      *
      * @param soundModelHandle handle of model to get parameter
      * @param modelParam       {@link ModelParams}

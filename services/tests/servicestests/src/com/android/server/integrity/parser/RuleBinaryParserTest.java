@@ -58,7 +58,7 @@ public class RuleBinaryParserTest {
             getBits(COMPOUND_FORMULA_END, SEPARATOR_BITS);
     private static final String ATOMIC_FORMULA_START_BITS =
             getBits(ATOMIC_FORMULA_START, SEPARATOR_BITS);
-    private static final int INVALID_FORMULA_SEPARATOR_VALUE = 3;
+    private static final int INVALID_FORMULA_SEPARATOR_VALUE = (1 << SEPARATOR_BITS) - 1;
     private static final String INVALID_FORMULA_SEPARATOR_BITS =
             getBits(INVALID_FORMULA_SEPARATOR_VALUE, SEPARATOR_BITS);
 
@@ -73,7 +73,7 @@ public class RuleBinaryParserTest {
     private static final String APP_CERTIFICATE = getBits(AtomicFormula.APP_CERTIFICATE, KEY_BITS);
     private static final String VERSION_CODE = getBits(AtomicFormula.VERSION_CODE, KEY_BITS);
     private static final String PRE_INSTALLED = getBits(AtomicFormula.PRE_INSTALLED, KEY_BITS);
-    private static final int INVALID_KEY_VALUE = 6;
+    private static final int INVALID_KEY_VALUE = 8;
     private static final String INVALID_KEY = getBits(INVALID_KEY_VALUE, KEY_BITS);
 
     private static final String EQ = getBits(AtomicFormula.EQ, OPERATOR_BITS);

@@ -280,6 +280,11 @@ LIBANDROID {
     android_res_nquery; # introduced=29
     android_res_nresult; # introduced=29
     android_res_nsend; # introduced=29
+    AThermal_acquireManager; # introduced=30
+    AThermal_releaseManager; # introduced=30
+    AThermal_getCurrentThermalStatus; # introduced=30
+    AThermal_registerThermalStatusListener; # introduced=30
+    AThermal_unregisterThermalStatusListener; # introduced=30
   local:
     *;
 };

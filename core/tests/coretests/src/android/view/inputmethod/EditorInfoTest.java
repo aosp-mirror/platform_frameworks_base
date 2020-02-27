@@ -20,11 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.UserHandle;
-import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 
@@ -41,6 +41,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class EditorInfoTest {
     private static final int TEST_USER_ID = 42;
+    private static final int LONG_EXP_TEXT_LENGTH = EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH * 2;
 
     /**
      * Makes sure that {@code null} {@link EditorInfo#targetInputMethodUser} can be copied via
@@ -79,8 +80,8 @@ public class EditorInfoTest {
     }
 
     @Test
-    public void testNullTextInputComposeInitialSurroundingText() {
-        final Spannable testText = null;
+    public void setInitialText_nullInputText_throwsException() {
+        final CharSequence testText = null;
         final EditorInfo editorInfo = new EditorInfo();
 
         try {
@@ -92,56 +93,75 @@ public class EditorInfoTest {
     }
 
     @Test
-    public void testNonNullTextInputComposeInitialSurroundingText() {
-        final Spannable testText = createTestText(/* prependLength= */ 0,
-                EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH);
-        final EditorInfo editorInfo = new EditorInfo();
+    public void setInitialText_cursorAtHead_dividesByCursorPosition() {
+        final CharSequence testText = createTestText(EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH);
 
-        // Cursor at position 0.
-        int selectionLength = 0;
+        final EditorInfo editorInfo = new EditorInfo();
+        final int selectionLength = 0;
         editorInfo.initialSelStart = 0;
         editorInfo.initialSelEnd = editorInfo.initialSelStart + selectionLength;
-        int expectedTextBeforeCursorLength = 0;
-        int expectedTextAfterCursorLength = testText.length();
+        final int expectedTextBeforeCursorLength = 0;
+        final int expectedTextAfterCursorLength = testText.length();
 
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
                 expectedTextAfterCursorLength);
+    }
 
-        // Cursor at the end.
+    @Test
+    public void setInitialText_cursorAtTail_dividesByCursorPosition() {
+        final CharSequence testText = createTestText(EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH);
+        final EditorInfo editorInfo = new EditorInfo();
+        final int selectionLength = 0;
         editorInfo.initialSelStart = testText.length() - selectionLength;
         editorInfo.initialSelEnd = testText.length();
-        expectedTextBeforeCursorLength = testText.length();
-        expectedTextAfterCursorLength = 0;
+        final int expectedTextBeforeCursorLength = testText.length();
+        final int expectedTextAfterCursorLength = 0;
 
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
                 expectedTextAfterCursorLength);
+    }
 
-        // Cursor at the middle.
-        selectionLength = 2;
+    @Test
+    public void setInitialText_cursorAtMiddle_dividesByCursorPosition() {
+        final CharSequence testText = createTestText(EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH);
+        final EditorInfo editorInfo = new EditorInfo();
+        final int selectionLength = 2;
         editorInfo.initialSelStart = testText.length() / 2;
         editorInfo.initialSelEnd = editorInfo.initialSelStart + selectionLength;
-        expectedTextBeforeCursorLength = editorInfo.initialSelStart;
-        expectedTextAfterCursorLength = testText.length() - editorInfo.initialSelEnd;
+        final int expectedTextBeforeCursorLength = editorInfo.initialSelStart;
+        final int expectedTextAfterCursorLength = testText.length() - editorInfo.initialSelEnd;
 
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
                 expectedTextAfterCursorLength);
+    }
 
-        // Accidentally swap selection start and end.
+    @Test
+    public void setInitialText_incorrectCursorOrder_correctsThenDivide() {
+        final CharSequence testText = createTestText(EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH);
+        final EditorInfo editorInfo = new EditorInfo();
+        final int selectionLength = 2;
         editorInfo.initialSelEnd = testText.length() / 2;
         editorInfo.initialSelStart = editorInfo.initialSelEnd + selectionLength;
+        final int expectedTextBeforeCursorLength = testText.length() / 2;
+        final int expectedTextAfterCursorLength = testText.length() - testText.length() / 2
+                - selectionLength;
 
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
                 expectedTextAfterCursorLength);
+    }
 
-        // Invalid cursor position.
+    @Test
+    public void setInitialText_invalidCursorPosition_returnsNull() {
+        final CharSequence testText = createTestText(EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH);
+        final EditorInfo editorInfo = new EditorInfo();
         editorInfo.initialSelStart = -1;
 
         editorInfo.setInitialSurroundingText(testText);
@@ -153,64 +173,33 @@ public class EditorInfoTest {
     }
 
     @Test
-    public void testTooLongTextInputComposeInitialSurroundingText() {
-        final Spannable testText = createTestText(/* prependLength= */ 0,
-                EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH + 2);
+    public void setOverSizeInitialText_cursorAtMiddle_dividesProportionately() {
+        final CharSequence testText = createTestText(EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH + 2);
         final EditorInfo editorInfo = new EditorInfo();
-
-        // Cursor at position 0.
-        int selectionLength = 0;
-        editorInfo.initialSelStart = 0;
-        editorInfo.initialSelEnd = 0 + selectionLength;
-        int expectedTextBeforeCursorLength = 0;
-        int expectedTextAfterCursorLength = editorInfo.MEMORY_EFFICIENT_TEXT_LENGTH;
-
-        editorInfo.setInitialSurroundingText(testText);
-
-        assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
-                expectedTextAfterCursorLength);
-
-        // Cursor at the end.
-        editorInfo.initialSelStart = testText.length() - selectionLength;
-        editorInfo.initialSelEnd = testText.length();
-        expectedTextBeforeCursorLength = editorInfo.MEMORY_EFFICIENT_TEXT_LENGTH;
-        expectedTextAfterCursorLength = 0;
-
-        editorInfo.setInitialSurroundingText(testText);
-
-        assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
-                expectedTextAfterCursorLength);
-
-        // Cursor at the middle.
-        selectionLength = 2;
+        final int selectionLength = 2;
         editorInfo.initialSelStart = testText.length() / 2;
         editorInfo.initialSelEnd = editorInfo.initialSelStart + selectionLength;
-        expectedTextBeforeCursorLength = Math.min(editorInfo.initialSelStart,
+        final int expectedTextBeforeCursorLength = Math.min(editorInfo.initialSelStart,
                 (int) (0.8 * (EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH - selectionLength)));
-        expectedTextAfterCursorLength = EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH
+        final int expectedTextAfterCursorLength = EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH
                 - expectedTextBeforeCursorLength - selectionLength;
 
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
                 expectedTextAfterCursorLength);
+    }
 
-        // Accidentally swap selection start and end.
-        editorInfo.initialSelEnd = testText.length() / 2;
-        editorInfo.initialSelStart = editorInfo.initialSelEnd + selectionLength;
-
-        editorInfo.setInitialSurroundingText(testText);
-
-        assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
-                expectedTextAfterCursorLength);
-
-        // Selection too long, selected text should be dropped.
-        selectionLength = EditorInfo.MAX_INITIAL_SELECTION_LENGTH + 1;
+    @Test
+    public void setOverSizeInitialText_overSizeSelection_dropsSelection() {
+        final CharSequence testText = createTestText(EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH + 2);
+        final EditorInfo editorInfo = new EditorInfo();
+        final int selectionLength = EditorInfo.MAX_INITIAL_SELECTION_LENGTH + 1;
         editorInfo.initialSelStart = testText.length() / 2;
         editorInfo.initialSelEnd = editorInfo.initialSelStart + selectionLength;
-        expectedTextBeforeCursorLength = Math.min(editorInfo.initialSelStart,
+        final int expectedTextBeforeCursorLength = Math.min(editorInfo.initialSelStart,
                 (int) (0.8 * EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH));
-        expectedTextAfterCursorLength = testText.length() - editorInfo.initialSelEnd;
+        final int expectedTextAfterCursorLength = testText.length() - editorInfo.initialSelEnd;
 
         editorInfo.setInitialSurroundingText(testText);
 
@@ -219,34 +208,59 @@ public class EditorInfoTest {
     }
 
     @Test
-    public void testTooLongSubTextInputComposeInitialSurroundingText() {
-        final int prependLength = 5;
-        final int subTextLength = EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH;
-        final Spannable fullText = createTestText(prependLength, subTextLength);
+    public void setInitialSubText_trimmedSubText_dividesByOriginalCursorPosition() {
+        final String prefixString = "prefix";
+        final CharSequence subText = createTestText(EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH);
+        final CharSequence originalText = TextUtils.concat(prefixString, subText);
         final EditorInfo editorInfo = new EditorInfo();
-        // Cursor at the middle.
-        final int selectionLength = 2;
-        editorInfo.initialSelStart = fullText.length() / 2;
-        editorInfo.initialSelEnd = editorInfo.initialSelStart + selectionLength;
-        // #prependLength characters will be trimmed out.
-        final Spannable expectedTextBeforeCursor = createExpectedText(/* startNumber= */0,
-                editorInfo.initialSelStart - prependLength);
-        final Spannable expectedSelectedText = createExpectedText(
-                editorInfo.initialSelStart - prependLength, selectionLength);
-        final Spannable expectedTextAfterCursor = createExpectedText(
-                editorInfo.initialSelEnd - prependLength,
-                fullText.length() - editorInfo.initialSelEnd);
+        final int selLength = 2;
+        editorInfo.initialSelStart = originalText.length() / 2;
+        editorInfo.initialSelEnd = editorInfo.initialSelStart + selLength;
+        final CharSequence expectedTextBeforeCursor = createExpectedText(/* startNumber= */0,
+                editorInfo.initialSelStart - prefixString.length());
+        final CharSequence expectedSelectedText = createExpectedText(
+                editorInfo.initialSelStart - prefixString.length(), selLength);
+        final CharSequence expectedTextAfterCursor = createExpectedText(
+                editorInfo.initialSelEnd - prefixString.length(),
+                originalText.length() - editorInfo.initialSelEnd);
 
-        editorInfo.setInitialSurroundingSubText(fullText.subSequence(prependLength,
-                fullText.length()), prependLength);
+        editorInfo.setInitialSurroundingSubText(subText, prefixString.length());
 
         assertTrue(TextUtils.equals(expectedTextBeforeCursor,
-                editorInfo.getInitialTextBeforeCursor(editorInfo.MEMORY_EFFICIENT_TEXT_LENGTH,
-                        InputConnection.GET_TEXT_WITH_STYLES)));
+                editorInfo.getInitialTextBeforeCursor(LONG_EXP_TEXT_LENGTH, anyInt())));
         assertTrue(TextUtils.equals(expectedSelectedText,
-                editorInfo.getInitialSelectedText(InputConnection.GET_TEXT_WITH_STYLES)));
+                editorInfo.getInitialSelectedText(anyInt())));
         assertTrue(TextUtils.equals(expectedTextAfterCursor,
-                editorInfo.getInitialTextAfterCursor(editorInfo.MEMORY_EFFICIENT_TEXT_LENGTH,
+                editorInfo.getInitialTextAfterCursor(LONG_EXP_TEXT_LENGTH, anyInt())));
+    }
+
+    @Test
+    public void initialSurroundingText_wrapIntoParcel_staysIntact() {
+        // EditorInfo.InitialSurroundingText is not visible to test class. But all its key elements
+        // must stay intact for its getter methods to return correct value and it will be wrapped
+        // into its outer class for parcel transfer, therefore we can verify its parcel
+        // wrapping/unwrapping logic through its outer class.
+        final CharSequence testText = createTestText(EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH);
+        final EditorInfo sourceEditorInfo = new EditorInfo();
+        final int selectionLength = 2;
+        sourceEditorInfo.initialSelStart = testText.length() / 2;
+        sourceEditorInfo.initialSelEnd = sourceEditorInfo.initialSelStart + selectionLength;
+        sourceEditorInfo.setInitialSurroundingText(testText);
+
+        final EditorInfo targetEditorInfo = cloneViaParcel(sourceEditorInfo);
+
+        assertTrue(TextUtils.equals(
+                sourceEditorInfo.getInitialTextBeforeCursor(LONG_EXP_TEXT_LENGTH,
+                        InputConnection.GET_TEXT_WITH_STYLES),
+                targetEditorInfo.getInitialTextBeforeCursor(LONG_EXP_TEXT_LENGTH,
+                        InputConnection.GET_TEXT_WITH_STYLES)));
+        assertTrue(TextUtils.equals(
+                sourceEditorInfo.getInitialSelectedText(InputConnection.GET_TEXT_WITH_STYLES),
+                targetEditorInfo.getInitialSelectedText(InputConnection.GET_TEXT_WITH_STYLES)));
+        assertTrue(TextUtils.equals(
+                sourceEditorInfo.getInitialTextAfterCursor(LONG_EXP_TEXT_LENGTH,
+                        InputConnection.GET_TEXT_WITH_STYLES),
+                targetEditorInfo.getInitialTextAfterCursor(LONG_EXP_TEXT_LENGTH,
                         InputConnection.GET_TEXT_WITH_STYLES)));
     }
 
@@ -254,12 +268,12 @@ public class EditorInfoTest {
             @Nullable Integer expectBeforeCursorLength, @Nullable Integer expectSelectionLength,
             @Nullable Integer expectAfterCursorLength) {
         final CharSequence textBeforeCursor =
-                editorInfo.getInitialTextBeforeCursor(editorInfo.MEMORY_EFFICIENT_TEXT_LENGTH,
+                editorInfo.getInitialTextBeforeCursor(LONG_EXP_TEXT_LENGTH,
                         InputConnection.GET_TEXT_WITH_STYLES);
         final CharSequence selectedText =
                 editorInfo.getInitialSelectedText(InputConnection.GET_TEXT_WITH_STYLES);
         final CharSequence textAfterCursor =
-                editorInfo.getInitialTextAfterCursor(editorInfo.MEMORY_EFFICIENT_TEXT_LENGTH,
+                editorInfo.getInitialTextAfterCursor(LONG_EXP_TEXT_LENGTH,
                         InputConnection.GET_TEXT_WITH_STYLES);
 
         if (expectBeforeCursorLength == null) {
@@ -281,19 +295,15 @@ public class EditorInfoTest {
         }
     }
 
-    private static Spannable createTestText(int prependLength, int surroundingLength) {
+    private static CharSequence createTestText(int surroundingLength) {
         final SpannableStringBuilder builder = new SpannableStringBuilder();
-        for (int i = 0; i < prependLength; i++) {
-            builder.append("a");
-        }
-
         for (int i = 0; i < surroundingLength; i++) {
             builder.append(Integer.toString(i % 10));
         }
         return builder;
     }
 
-    private static Spannable createExpectedText(int startNumber, int length) {
+    private static CharSequence createExpectedText(int startNumber, int length) {
         final SpannableStringBuilder builder = new SpannableStringBuilder();
         for (int i = startNumber; i < startNumber + length; i++) {
             builder.append(Integer.toString(i % 10));

@@ -87,11 +87,15 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     private static final long SYSTEM_CLOCK_PARANOIA_THRESHOLD_MILLIS = 2 * 1000;
 
     /**
-     * The number of previous telephony suggestions to keep for each ID (for use during debugging).
+     * The number of suggestions to keep. These are logged in bug reports to assist when debugging
+     * issues with detection.
      */
-    private static final int KEEP_SUGGESTION_HISTORY_SIZE = 30;
+    private static final int KEEP_SUGGESTION_HISTORY_SIZE = 10;
 
-    // A log for changes made to the system clock and why.
+    /**
+     * A log that records the decisions / decision metadata that affected the device's system clock
+     * time. This is logged in bug reports to assist with debugging issues with detection.
+     */
     @NonNull
     private final LocalLog mTimeChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
 
@@ -140,7 +144,18 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         if (!validateSuggestionTime(timeSuggestion.getUtcTime(), timeSuggestion)) {
             return;
         }
-        mLastNetworkSuggestion.set(timeSuggestion);
+
+        // The caller submits suggestions with the best available information when there are network
+        // changes. The best available information may have been cached and if they were all stored
+        // this would lead to duplicates showing up in the suggestion history. The suggestions may
+        // be made for different reasons but there is not a significant benefit to storing the same
+        // suggestion information again. doAutoTimeDetection() should still be called: this ensures
+        // the suggestion and device state are always re-evaluated, which might produce a different
+        // detected time if, for example, the age of all suggestions are considered.
+        NetworkTimeSuggestion lastNetworkSuggestion = mLastNetworkSuggestion.get();
+        if (lastNetworkSuggestion == null || !lastNetworkSuggestion.equals(timeSuggestion)) {
+            mLastNetworkSuggestion.set(timeSuggestion);
+        }
 
         // Now perform auto time detection. The new suggestion may be used to modify the system
         // clock.

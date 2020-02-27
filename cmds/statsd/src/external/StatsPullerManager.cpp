@@ -19,8 +19,6 @@
 
 #include "StatsPullerManager.h"
 
-#include <android/os/IPullAtomCallback.h>
-#include <android/os/IStatsCompanionService.h>
 #include <cutils/log.h>
 #include <math.h>
 #include <stdint.h>
@@ -87,7 +85,10 @@ void StatsPullerManager::updateAlarmLocked() {
         return;
     }
 
-    sp<IStatsCompanionService> statsCompanionServiceCopy = mStatsCompanionService;
+    // TODO(b/149254662): Why are we creating a copy here? This is different
+    // from the other places where we create a copy because we don't reassign
+    // mStatsCompanionService so a destructor can't implicitly be called...
+    shared_ptr<IStatsCompanionService> statsCompanionServiceCopy = mStatsCompanionService;
     if (statsCompanionServiceCopy != nullptr) {
         statsCompanionServiceCopy->setPullingAlarm(mNextPullTimeNs / 1000000);
     } else {
@@ -97,9 +98,11 @@ void StatsPullerManager::updateAlarmLocked() {
 }
 
 void StatsPullerManager::SetStatsCompanionService(
-        sp<IStatsCompanionService> statsCompanionService) {
+        shared_ptr<IStatsCompanionService> statsCompanionService) {
+    // TODO(b/149254662): Why are we using AutoMutex instead of lock_guard?
+    // Additionally, do we need the temporary shared_ptr to prevent deadlocks?
     AutoMutex _l(mLock);
-    sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
+    shared_ptr<IStatsCompanionService> tmpForLock = mStatsCompanionService;
     mStatsCompanionService = statsCompanionService;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
         pulledAtom.second->SetStatsCompanionService(statsCompanionService);
@@ -250,10 +253,11 @@ int StatsPullerManager::ClearPullerCacheIfNecessary(int64_t timestampNs) {
 void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t atomTag,
                                                   const int64_t coolDownNs, const int64_t timeoutNs,
                                                   const vector<int32_t>& additiveFields,
-                                                  const sp<IPullAtomCallback>& callback) {
+                                                  const shared_ptr<IPullAtomCallback>& callback) {
     AutoMutex _l(mLock);
     VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
-    // TODO: linkToDeath with the callback so that we can remove it and delete the puller.
+    // TODO(b/146439412): linkToDeath with the callback so that we can remove it
+    // and delete the puller.
     StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
     kAllPullAtomInfo[{.atomTag = atomTag}] =
             new StatsCallbackPuller(atomTag, callback, coolDownNs, timeoutNs, additiveFields);

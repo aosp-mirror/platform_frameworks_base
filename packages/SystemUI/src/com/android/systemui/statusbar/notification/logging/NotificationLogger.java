@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -50,13 +51,11 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Handles notification logging, in particular, logging which notifications are visible and which
  * are not.
  */
-@Singleton
 public class NotificationLogger implements StateListener {
     private static final String TAG = "NotificationLogger";
 
@@ -192,7 +191,9 @@ public class NotificationLogger implements StateListener {
         }
     }
 
-    @Inject
+    /**
+     * Injected constructor. See {@link NotificationsModule}.
+     */
     public NotificationLogger(NotificationListener notificationListener,
             @UiBackground Executor uiBgExecutor,
             NotificationEntryManager entryManager,

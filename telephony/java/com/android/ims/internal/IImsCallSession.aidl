@@ -18,7 +18,6 @@ package com.android.ims.internal;
 
 import android.os.Message;
 import android.telephony.ims.aidl.IImsCallSessionListener;
-
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 import com.android.ims.internal.IImsVideoCallProvider;
@@ -149,6 +148,22 @@ interface IImsCallSession {
      * @see Listener#callSessionStartFailed
      */
     void reject(int reason);
+
+    /**
+     * Transfer an established call to given number
+     *
+     * @param number number to transfer the call
+     * @param isConfirmationRequired if {@code True}, indicates Assured transfer,
+     * if {@code False} it indicates Blind transfer.
+     */
+    void transfer(String number, boolean isConfirmationRequired);
+
+    /**
+     * Transfer an established call to another call session
+     *
+     * @param transferToSession The other ImsCallSession to transfer the ongoing session to.
+     */
+    void consultativeTransfer(in IImsCallSession transferToSession);
 
     /**
      * Terminates a call.

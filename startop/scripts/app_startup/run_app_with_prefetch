@@ -35,6 +35,7 @@ EOF
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$DIR/../iorap/common"
 
+report_fully_drawn="n"
 needs_trace_file="n"
 input_file=""
 package=""
@@ -68,6 +69,10 @@ parse_arguments() {
         ;;
       -r|--readahead)
         mode="$2"
+        shift
+        ;;
+      -rfd|--reportfullydrawn)
+        report_fully_drawn="y"
         shift
         ;;
       -c|--count)
@@ -403,7 +408,11 @@ parse_metrics_header() {
   join_by ',' "${all_metrics[@]}"
 }
 
-metrics_header="$("$DIR/parse_metrics" --package "$package" --activity "$activity" --simulate | parse_metrics_header)"
+if [[ $report_fully_drawn == y ]]; then
+  metrics_header="$("$DIR/parse_metrics" --package "$package" --activity "$activity" --simulate --reportfullydrawn | parse_metrics_header)"
+else
+  metrics_header="$("$DIR/parse_metrics" --package "$package" --activity "$activity" --simulate | parse_metrics_header)"
+fi
 
 # TODO: This loop logic could probably be moved into app_startup_runner.py
 for ((i=0;i<count;++i)) do
@@ -411,6 +420,9 @@ for ((i=0;i<count;++i)) do
   verbose_print "====         ITERATION $i             ===="
   verbose_print "=========================================="
   if [[ $mode != "warm" ]]; then
+    # The package must be killed **before** we drop caches, otherwise pages will stay resident.
+    verbose_print "Kill package for non-warm start."
+    remote_pkill "$package"
     verbose_print "Drop caches for non-warm start."
     # Drop all caches to get cold starts.
     adb shell "echo 3 > /proc/sys/vm/drop_caches"
@@ -423,7 +435,12 @@ for ((i=0;i<count;++i)) do
   pre_launch_timestamp="$(logcat_save_timestamp)"
 
   # TODO: multiple metrics output.
+
+if [[ $report_fully_drawn == y ]]; then
+  total_time="$(timeout $timeout "$DIR/launch_application" "$package" "$activity" | "$DIR/parse_metrics" --package "$package" --activity "$activity" --timestamp "$pre_launch_timestamp" --reportfullydrawn | parse_metrics_output)"
+else
   total_time="$(timeout $timeout "$DIR/launch_application" "$package" "$activity" | "$DIR/parse_metrics" --package "$package" --activity "$activity" --timestamp "$pre_launch_timestamp" | parse_metrics_output)"
+fi
 
   if [[ $? -ne 0 ]]; then
     echo "WARNING: Skip bad result, try iteration again." >&2

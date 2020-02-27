@@ -63,8 +63,8 @@
         <attr name="badgeMargin" format="dimension" />
     </declare-styleable>
     <declare-styleable name="UserDetailItemView">
-        <attr name="regularFontFamily" format="string" />
-        <attr name="activatedFontFamily" format="string" />
+        <attr name="regularTextAppearance" format="string" />
+        <attr name="activatedTextAppearance" format="string" />
     </declare-styleable>
     <declare-styleable name="DateView">
         <attr name="datePattern" format="string" />

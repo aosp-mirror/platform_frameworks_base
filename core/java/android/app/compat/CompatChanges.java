@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.compat.Compatibility;
 import android.content.Context;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -70,11 +71,14 @@ public final class CompatChanges {
             @NonNull UserHandle user) {
         IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
+        final long token = Binder.clearCallingIdentity();
         try {
             return platformCompat.isChangeEnabledByPackageName(changeId, packageName,
                     user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -99,10 +103,13 @@ public final class CompatChanges {
     public static boolean isChangeEnabled(long changeId, int uid) {
         IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
+        final long token = Binder.clearCallingIdentity();
         try {
             return platformCompat.isChangeEnabledByUid(changeId, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 }

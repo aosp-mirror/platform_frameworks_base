@@ -18,6 +18,7 @@ package android.view.inline;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Size;
 
@@ -40,25 +41,15 @@ public final class InlinePresentationSpec implements Parcelable {
     private final Size mMaxSize;
 
     /**
-     * The fully qualified resource name of the UI style resource identifier, defaults to {@code
-     * null}.
-     *
-     * <p> The value can be obtained by calling {@code Resources#getResourceName(int)}.
+     * The extras encoding the UI style information. Defaults to {@code null} in which case the
+     * default system UI style will be used.
      */
     @Nullable
-    private final String mStyle;
+    private final Bundle mStyle;
 
-    private static String defaultStyle() {
+    private static Bundle defaultStyle() {
         return null;
     }
-
-    /**
-     * @hide
-     */
-    public @Nullable String getStyle() {
-        return mStyle;
-    }
-
 
     /** @hide */
     @DataClass.Suppress({"setMaxSize", "setMinSize"})
@@ -84,7 +75,7 @@ public final class InlinePresentationSpec implements Parcelable {
     /* package-private */ InlinePresentationSpec(
             @NonNull Size minSize,
             @NonNull Size maxSize,
-            @Nullable String style) {
+            @Nullable Bundle style) {
         this.mMinSize = minSize;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mMinSize);
@@ -110,6 +101,15 @@ public final class InlinePresentationSpec implements Parcelable {
     @DataClass.Generated.Member
     public @NonNull Size getMaxSize() {
         return mMaxSize;
+    }
+
+    /**
+     * The extras encoding the UI style information. Defaults to null in which case the default
+     * system UI style will be used.
+     */
+    @DataClass.Generated.Member
+    public @Nullable Bundle getStyle() {
+        return mStyle;
     }
 
     @Override
@@ -167,7 +167,7 @@ public final class InlinePresentationSpec implements Parcelable {
         dest.writeByte(flg);
         dest.writeSize(mMinSize);
         dest.writeSize(mMaxSize);
-        if (mStyle != null) dest.writeString(mStyle);
+        if (mStyle != null) dest.writeBundle(mStyle);
     }
 
     @Override
@@ -184,7 +184,7 @@ public final class InlinePresentationSpec implements Parcelable {
         byte flg = in.readByte();
         Size minSize = (Size) in.readSize();
         Size maxSize = (Size) in.readSize();
-        String style = (flg & 0x4) == 0 ? null : in.readString();
+        Bundle style = (flg & 0x4) == 0 ? null : in.readBundle();
 
         this.mMinSize = minSize;
         com.android.internal.util.AnnotationValidations.validate(
@@ -220,7 +220,7 @@ public final class InlinePresentationSpec implements Parcelable {
 
         private @NonNull Size mMinSize;
         private @NonNull Size mMaxSize;
-        private @Nullable String mStyle;
+        private @Nullable Bundle mStyle;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -244,13 +244,11 @@ public final class InlinePresentationSpec implements Parcelable {
         }
 
         /**
-         * The fully qualified resource name of the UI style resource identifier, defaults to {@code
-         * null}.
-         *
-         * <p> The value can be obtained by calling {@code Resources#getResourceName(int)}.
+         * The extras encoding the UI style information. Defaults to null in which case the default
+         * system UI style will be used.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setStyle(@Nullable String value) {
+        public @NonNull Builder setStyle(@Nullable Bundle value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x4;
             mStyle = value;
@@ -281,10 +279,10 @@ public final class InlinePresentationSpec implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1577145109444L,
+            time = 1582078731418L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/view/inline/InlinePresentationSpec.java",
-            inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.Nullable java.lang.String mStyle\nprivate static  java.lang.String defaultStyle()\npublic @android.annotation.Nullable java.lang.String getStyle()\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.Nullable android.os.Bundle mStyle\nprivate static  android.os.Bundle defaultStyle()\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

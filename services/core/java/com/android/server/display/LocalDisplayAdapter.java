@@ -35,9 +35,9 @@ import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
-import android.view.Surface;
 import android.view.SurfaceControl;
 
+import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A display adapter for the local displays managed by Surface Flinger.
+ * A display adapter for the local displays managed by SurfaceFlinger.
  * <p>
  * Display adapters are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>
@@ -128,10 +128,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             LocalDisplayDevice device = mDevices.get(physicalDisplayId);
             if (device == null) {
                 // Display was added.
-                final boolean isInternal = mDevices.size() == 0;
+                final boolean isDefaultDisplay = mDevices.size() == 0;
                 device = new LocalDisplayDevice(displayToken, physicalDisplayId, info,
                         configs, activeConfig, configSpecs, colorModes, activeColorMode,
-                        hdrCapabilities, isInternal);
+                        hdrCapabilities, isDefaultDisplay);
                 mDevices.put(physicalDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
             } else if (device.updateDisplayProperties(configs, activeConfig,
@@ -174,12 +174,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private final LogicalLight mBacklight;
         private final SparseArray<DisplayModeRecord> mSupportedModes = new SparseArray<>();
         private final ArrayList<Integer> mSupportedColorModes = new ArrayList<>();
-        private final boolean mIsInternal;
+        private final boolean mIsDefaultDisplay;
 
         private DisplayDeviceInfo mInfo;
         private boolean mHavePendingChanges;
         private int mState = Display.STATE_UNKNOWN;
-        private int mBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+        private float mBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         private int mDefaultModeId;
         private int mActiveModeId;
         private boolean mActiveModeInvalid;
@@ -206,15 +206,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 SurfaceControl.DisplayInfo info, SurfaceControl.DisplayConfig[] configs,
                 int activeConfigId, SurfaceControl.DesiredDisplayConfigSpecs configSpecs,
                 int[] colorModes, int activeColorMode, Display.HdrCapabilities hdrCapabilities,
-                boolean isInternal) {
+                boolean isDefaultDisplay) {
             super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + physicalDisplayId);
             mPhysicalDisplayId = physicalDisplayId;
-            mIsInternal = isInternal;
+            mIsDefaultDisplay = isDefaultDisplay;
             mDisplayInfo = info;
             updateDisplayProperties(configs, activeConfigId, configSpecs, colorModes,
                     activeColorMode, hdrCapabilities);
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
-            if (mIsInternal) {
+            if (mIsDefaultDisplay) {
                 LightsManager lights = LocalServices.getService(LightsManager.class);
                 mBacklight = lights.getLight(LightsManager.LIGHT_ID_BACKLIGHT);
             } else {
@@ -513,6 +513,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.densityDpi = (int) (mDisplayInfo.density * 160 + 0.5f);
                 mInfo.xDpi = config.xDpi;
                 mInfo.yDpi = config.yDpi;
+                mInfo.deviceProductInfo = mDisplayInfo.deviceProductInfo;
 
                 // Assume that all built-in displays that have secure output (eg. HDCP) also
                 // support compositing from gralloc protected buffers.
@@ -522,11 +523,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
 
                 final Resources res = getOverlayContext().getResources();
-                if (mIsInternal) {
-                    mInfo.name = res.getString(
-                            com.android.internal.R.string.display_manager_built_in_display_name);
-                    mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
-                            | DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+
+                if (mIsDefaultDisplay) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY;
+
                     if (res.getBoolean(com.android.internal.R.bool.config_mainBuiltInDisplayIsRound)
                             || (Build.IS_EMULATOR
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
@@ -538,28 +538,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     }
                     mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
                             mInfo.width, mInfo.height);
-                    mInfo.type = Display.TYPE_BUILT_IN;
-                    mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
                 } else {
-                    mInfo.displayCutout = null;
-                    mInfo.type = Display.TYPE_HDMI;
-                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
-                    mInfo.name = getContext().getResources().getString(
-                            com.android.internal.R.string.display_manager_hdmi_display_name);
-                    mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
-
-                    // For demonstration purposes, allow rotation of the external display.
-                    // In the future we might allow the user to configure this directly.
-                    if ("portrait".equals(SystemProperties.get("persist.demo.hdmirotation"))) {
-                        mInfo.rotation = Surface.ROTATION_270;
-                    }
-
-                    // For demonstration purposes, allow rotation of the external display
-                    // to follow the built-in display.
-                    if (SystemProperties.getBoolean("persist.demo.hdmirotates", false)) {
-                        mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
-                    }
-
                     if (!res.getBoolean(
                                 com.android.internal.R.bool.config_localDisplaysMirrorContent)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
@@ -569,17 +548,33 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
                     }
                 }
+
+                if (mDisplayInfo.isInternal) {
+                    mInfo.type = Display.TYPE_INTERNAL;
+                    mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+                    mInfo.name = res.getString(
+                            com.android.internal.R.string.display_manager_built_in_display_name);
+                } else {
+                    mInfo.type = Display.TYPE_EXTERNAL;
+                    mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
+                    mInfo.name = getContext().getResources().getString(
+                            com.android.internal.R.string.display_manager_hdmi_display_name);
+                }
             }
             return mInfo;
         }
 
         @Override
-        public Runnable requestDisplayStateLocked(final int state, final int brightness) {
+        public Runnable requestDisplayStateLocked(final int state, final float brightnessState) {
             // Assume that the brightness is off if the display is being turned off.
-            assert state != Display.STATE_OFF || brightness == PowerManager.BRIGHTNESS_OFF;
-
+            assert state != Display.STATE_OFF || BrightnessSynchronizer.floatEquals(
+                    brightnessState, PowerManager.BRIGHTNESS_OFF_FLOAT);
             final boolean stateChanged = (mState != state);
-            final boolean brightnessChanged = (mBrightness != brightness) && mBacklight != null;
+            final boolean brightnessChanged = (!BrightnessSynchronizer.floatEquals(
+                    mBrightnessState, brightnessState))
+                    && mBacklight != null;
             if (stateChanged || brightnessChanged) {
                 final long physicalDisplayId = mPhysicalDisplayId;
                 final IBinder token = getDisplayTokenLocked();
@@ -591,7 +586,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
 
                 if (brightnessChanged) {
-                    mBrightness = brightness;
+                    mBrightnessState = brightnessState;
                 }
 
                 // Defer actually setting the display state until after we have exited
@@ -630,10 +625,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             vrModeChange = true;
                         }
 
-
                         // Apply brightness changes given that we are in a non-suspended state.
                         if (brightnessChanged || vrModeChange) {
-                            setDisplayBrightness(brightness);
+                            setDisplayBrightness(brightnessState);
                         }
 
                         // Enter the final desired state, possibly suspended.
@@ -694,7 +688,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         }
                     }
 
-                    private void setDisplayBrightness(int brightness) {
+                    private void setDisplayBrightness(float brightness) {
                         if (DEBUG) {
                             Slog.d(TAG, "setDisplayBrightness("
                                     + "id=" + physicalDisplayId
@@ -704,17 +698,24 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayBrightness("
                                 + "id=" + physicalDisplayId + ", brightness=" + brightness + ")");
                         try {
-                            if (mHalBrightnessSupport) {
-                                mBacklight.setBrightnessFloat(
-                                        displayBrightnessToHalBrightness(brightness));
-                            } else {
-                                mBacklight.setBrightness(brightness);
+                            // TODO: make it float
+                            if (isHalBrightnessRangeSpecified()) {
+                                brightness = displayBrightnessToHalBrightness(
+                                        BrightnessSynchronizer.brightnessFloatToInt(getContext(),
+                                                brightness));
                             }
+                            mBacklight.setBrightness(brightness);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
-                                    "ScreenBrightness", brightness);
+                                    "ScreenBrightness",
+                                    BrightnessSynchronizer.brightnessFloatToInt(
+                                            getContext(), brightness));
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
+                    }
+
+                    private boolean isHalBrightnessRangeSpecified() {
+                        return !(mSystemBrightnessToNits == null || mNitsToHalBrightness == null);
                     }
 
                     /**
@@ -723,7 +724,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                      * a display device configuration file.
                      */
                     private float displayBrightnessToHalBrightness(int brightness) {
-                        if (mSystemBrightnessToNits == null || mNitsToHalBrightness == null) {
+                        if (!isHalBrightnessRangeSpecified()) {
                             return PowerManager.BRIGHTNESS_INVALID_FLOAT;
                         }
 
@@ -887,12 +888,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mActiveColorMode=" + mActiveColorMode);
             pw.println("mDefaultModeId=" + mDefaultModeId);
             pw.println("mState=" + Display.stateToString(mState));
-            pw.println("mBrightness=" + mBrightness);
+            pw.println("mBrightnessState=" + mBrightnessState);
             pw.println("mBacklight=" + mBacklight);
             pw.println("mAllmSupported=" + mAllmSupported);
             pw.println("mAllmRequested=" + mAllmRequested);
-            pw.println("mGameContentTypeSupported" + mGameContentTypeSupported);
-            pw.println("mGameContentTypeRequested" + mGameContentTypeRequested);
+            pw.println("mGameContentTypeSupported=" + mGameContentTypeSupported);
+            pw.println("mGameContentTypeRequested=" + mGameContentTypeRequested);
             pw.println("mDisplayInfo=" + mDisplayInfo);
             pw.println("mDisplayConfigs=");
             for (int i = 0; i < mDisplayConfigs.length; i++) {
@@ -902,14 +903,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             for (int i = 0; i < mSupportedModes.size(); i++) {
                 pw.println("  " + mSupportedModes.valueAt(i));
             }
-            pw.print("mSupportedColorModes=[");
-            for (int i = 0; i < mSupportedColorModes.size(); i++) {
-                if (i != 0) {
-                    pw.print(", ");
-                }
-                pw.print(mSupportedColorModes.get(i));
-            }
-            pw.println("]");
+            pw.print("mSupportedColorModes=" + mSupportedColorModes.toString());
         }
 
         private int findDisplayConfigIdLocked(int modeId) {

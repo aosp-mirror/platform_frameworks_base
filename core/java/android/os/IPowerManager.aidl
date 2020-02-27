@@ -49,6 +49,7 @@ interface IPowerManager
     void goToSleep(long time, int reason, int flags);
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void nap(long time);
+    float getBrightnessConstraint(int constraint);
     @UnsupportedAppUsage
     boolean isInteractive();
     boolean isPowerSaveMode();

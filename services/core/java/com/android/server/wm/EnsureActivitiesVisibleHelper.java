@@ -76,7 +76,7 @@ class EnsureActivitiesVisibleHelper {
         // to be visible (such as performing Recents animation).
         final boolean resumeTopActivity = mTop != null && !mTop.mLaunchTaskBehind
                 && mContiner.isTopActivityFocusable()
-                && mContiner.isInStackLocked(starting) == null;
+                && (starting == null || !starting.isDescendantOf(mContiner));
 
         final PooledConsumer f = PooledLambda.obtainConsumer(
                 EnsureActivitiesVisibleHelper::setActivityVisibilityState, this,

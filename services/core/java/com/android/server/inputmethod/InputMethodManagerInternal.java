@@ -18,12 +18,12 @@ package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.content.ComponentName;
-import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
+import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.LocalServices;
 
 import java.util.Collections;
@@ -52,7 +52,7 @@ public abstract class InputMethodManagerInternal {
     /**
      * Hides the current input method, if visible.
      */
-    public abstract void hideCurrentInputMethod();
+    public abstract void hideCurrentInputMethod(@SoftInputShowHideReason int reason);
 
     /**
      * Returns the list of installed input methods for the specified user.
@@ -74,13 +74,11 @@ public abstract class InputMethodManagerInternal {
      * Called by the Autofill Frameworks to request an {@link InlineSuggestionsRequest} from
      * the input method.
      *
-     * @param componentName {@link ComponentName} of current app/activity.
-     * @param autofillId {@link AutofillId} of currently focused field.
+     * @param requestInfo information needed to create an {@link InlineSuggestionsRequest}.
      * @param cb {@link IInlineSuggestionsRequestCallback} used to pass back the request object.
      */
     public abstract void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
-            ComponentName componentName, AutofillId autofillId,
-            IInlineSuggestionsRequestCallback cb);
+            InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb);
 
     /**
      * Force switch to the enabled input method by {@code imeId} for current user. If the input
@@ -109,7 +107,7 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void hideCurrentInputMethod() {
+                public void hideCurrentInputMethod(@SoftInputShowHideReason int reason) {
                 }
 
                 @Override
@@ -124,7 +122,7 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void onCreateInlineSuggestionsRequest(int userId,
-                        ComponentName componentName, AutofillId autofillId,
+                        InlineSuggestionsRequestInfo requestInfo,
                         IInlineSuggestionsRequestCallback cb) {
                 }
 

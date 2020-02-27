@@ -179,6 +179,10 @@ public final class GnssMeasurementCorrections implements Parcelable {
      * Gets the environment bearing in degrees clockwise from true north, in the direction of user
      * motion. Environment bearing is provided when it is known with high probability that
      * velocity is aligned with an environment feature (such as edge of a building, or road).
+     *
+     * {@link #hasEnvironmentBearing} should be called to check the environment bearing is available
+     * before calling this method. The value is undefined if {@link #hasEnvironmentBearing} returns
+     * false.
      */
     @FloatRange(from = 0.0f, to = 360.0f)
     public float getEnvironmentBearingDegrees() {
@@ -186,7 +190,15 @@ public final class GnssMeasurementCorrections implements Parcelable {
     }
 
     /**
-     * Gets the environment bearing uncertainty in degrees.
+     * Gets the environment bearing uncertainty in degrees. It represents the standard deviation of
+     * the physical structure in the circle of position uncertainty. The uncertainty can take values
+     * between 0 and 180 degrees. The {@link #hasEnvironmentBearing} becomes false as the
+     * uncertainty value passes a predefined threshold depending on the physical structure around
+     * the user.
+     *
+     * {@link #hasEnvironmentBearing} should be called to check the environment bearing is available
+     * before calling this method. The value is undefined if {@link #hasEnvironmentBearing} returns
+     * false.
      */
     @FloatRange(from = 0.0f, to = 180.0f)
     public float getEnvironmentBearingUncertaintyDegrees() {
@@ -358,6 +370,8 @@ public final class GnssMeasurementCorrections implements Parcelable {
          * user motion. Environment bearing is provided when it is known with high probability
          * that velocity is aligned with an environment feature (such as edge of a building, or
          * road).
+         *
+         * Both the bearing and uncertainty must be set for the environment bearing to be valid.
          */
         @NonNull public Builder setEnvironmentBearingDegrees(
                 @FloatRange(from = 0.0f, to = 360.0f)
@@ -369,6 +383,8 @@ public final class GnssMeasurementCorrections implements Parcelable {
 
         /**
          * Sets the environment bearing uncertainty in degrees.
+         *
+         * Both the bearing and uncertainty must be set for the environment bearing to be valid.
          */
         @NonNull public Builder setEnvironmentBearingUncertaintyDegrees(
                 @FloatRange(from = 0.0f, to = 180.0f)

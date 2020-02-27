@@ -1080,12 +1080,8 @@ public class UserBackupManagerService {
         }
     }
 
-    public Map<String, Set<String>> getExcludedRestoreKeys(String... packages) {
-        return mBackupPreferences.getExcludedRestoreKeysForPackages(packages);
-    }
-
-    public Map<String, Set<String>> getAllExcludedRestoreKeys() {
-        return mBackupPreferences.getAllExcludedRestoreKeys();
+    public Set<String> getExcludedRestoreKeys(String packageName) {
+        return mBackupPreferences.getExcludedRestoreKeysForPackage(packageName);
     }
 
     /** Used for generating random salts or passwords. */
@@ -3356,8 +3352,7 @@ public class UserBackupManagerService {
                                 restoreSet,
                                 packageName,
                                 token,
-                                listener,
-                                getExcludedRestoreKeys(packageName));
+                                listener);
                 mBackupHandler.sendMessage(msg);
             } catch (Exception e) {
                 // Calling into the transport broke; back off and proceed with the installation.

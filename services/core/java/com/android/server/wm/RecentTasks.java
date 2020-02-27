@@ -42,6 +42,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
@@ -155,6 +156,7 @@ class RecentTasks {
      */
     private int mRecentsUid = -1;
     private ComponentName mRecentsComponent = null;
+    private @Nullable String mFeatureId;
 
     /**
      * Mapping of user id -> whether recent tasks have been loaded for that user.
@@ -415,6 +417,13 @@ class RecentTasks {
      */
     ComponentName getRecentsComponent() {
         return mRecentsComponent;
+    }
+
+    /**
+     * @return the featureId for the recents component.
+     */
+    @Nullable String getRecentsComponentFeatureId() {
+        return mFeatureId;
     }
 
     /**

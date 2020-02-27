@@ -140,7 +140,7 @@ public class WifiNetworkSuggestionTest {
         assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
                 .get(WifiConfiguration.KeyMgmt.OWE));
         assertNull(suggestion.wifiConfiguration.preSharedKey);
-        assertTrue(suggestion.wifiConfiguration.requirePMF);
+        assertTrue(suggestion.wifiConfiguration.requirePmf);
         assertFalse(suggestion.isUserAllowedToManuallyConnect);
         assertTrue(suggestion.isInitialAutoJoinEnabled);
     }
@@ -163,7 +163,7 @@ public class WifiNetworkSuggestionTest {
                 .get(WifiConfiguration.KeyMgmt.SAE));
         assertEquals("\"" + TEST_PRESHARED_KEY + "\"",
                 suggestion.wifiConfiguration.preSharedKey);
-        assertTrue(suggestion.wifiConfiguration.requirePMF);
+        assertTrue(suggestion.wifiConfiguration.requirePmf);
         assertTrue(suggestion.isUserAllowedToManuallyConnect);
         assertFalse(suggestion.isInitialAutoJoinEnabled);
     }
@@ -191,7 +191,7 @@ public class WifiNetworkSuggestionTest {
                 .get(WifiConfiguration.GroupCipher.GCMP_256));
         assertTrue(suggestion.wifiConfiguration.allowedGroupManagementCiphers
                 .get(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256));
-        assertTrue(suggestion.wifiConfiguration.requirePMF);
+        assertTrue(suggestion.wifiConfiguration.requirePmf);
         assertNull(suggestion.wifiConfiguration.preSharedKey);
         // allowedSuiteBCiphers are set according to the loaded certificate and cannot be tested
         // here.

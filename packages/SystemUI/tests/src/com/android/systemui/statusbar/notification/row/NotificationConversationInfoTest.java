@@ -21,6 +21,8 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.print.PrintManager.PRINT_SPOOLER_PACKAGE_NAME;
+import static android.provider.Settings.Global.NOTIFICATION_BUBBLES;
+import static android.provider.Settings.Secure.BUBBLE_IMPORTANT_CONVERSATIONS;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -51,21 +53,23 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -75,6 +79,7 @@ import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -111,7 +116,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     private NotificationEntry mBubbleEntry;
     @Mock
     private ShortcutInfo mShortcutInfo;
-    private Drawable mImage;
+    @Mock
+    private Bitmap mImage;
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
@@ -131,6 +137,10 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     private ShortcutManager mShortcutManager;
     @Mock
     private NotificationGuts mNotificationGuts;
+    @Mock
+    private ShadeController mShadeController;
+    @Mock
+    private ConversationIconFactory mIconFactory;
 
     @Before
     public void setUp() throws Exception {
@@ -139,12 +149,12 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mDependency.injectTestDependency(BubbleController.class, mBubbleController);
+        mDependency.injectTestDependency(ShadeController.class, mShadeController);
         // Inflate the layout
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         mNotificationInfo = (NotificationConversationInfo) layoutInflater.inflate(
                 R.layout.notification_conversation_info,
                 null);
-        mNotificationInfo.mShowHomeScreen = true;
         mNotificationInfo.setGutsParent(mNotificationGuts);
         doAnswer((Answer<Object>) invocation -> {
             mNotificationInfo.handleCloseControls(true, false);
@@ -173,9 +183,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         when(mShortcutInfo.getShortLabel()).thenReturn("Convo name");
         List<ShortcutInfo> shortcuts = Arrays.asList(mShortcutInfo);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcuts);
-        mImage = mContext.getDrawable(R.drawable.ic_star);
-        when(mLauncherApps.getShortcutBadgedIconDrawable(eq(mShortcutInfo),
-                anyInt())).thenReturn(mImage);
+        when(mIconFactory.getConversationBitmap(any(ShortcutInfo.class), anyString(), anyInt()))
+                .thenReturn(mImage);
 
         mNotificationChannel = new NotificationChannel(
                 TEST_CHANNEL, TEST_CHANNEL_NAME, IMPORTANCE_LOW);
@@ -221,9 +230,10 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
         final ImageView view = mNotificationInfo.findViewById(R.id.conversation_icon);
-        assertEquals(mImage, view.getDrawable());
+        assertEquals(mImage, ((BitmapDrawable) view.getDrawable()).getBitmap());
     }
 
     @Test
@@ -241,6 +251,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
         final TextView textView = mNotificationInfo.findViewById(R.id.pkg_name);
         assertTrue(textView.getText().toString().contains("App Name"));
@@ -287,6 +298,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
         assertTrue(textView.getText().toString().contains(group.getName()));
@@ -309,6 +321,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
@@ -330,11 +343,10 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(GONE, nameView.getVisibility());
-        final TextView dividerView = mNotificationInfo.findViewById(R.id.pkg_divider);
-        assertEquals(GONE, dividerView.getVisibility());
     }
 
     @Test
@@ -360,12 +372,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(VISIBLE, nameView.getVisibility());
         assertTrue(nameView.getText().toString().contains("Proxied"));
-        final TextView dividerView = mNotificationInfo.findViewById(R.id.pkg_divider);
-        assertEquals(VISIBLE, dividerView.getVisibility());
     }
 
     @Test
@@ -386,6 +397,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 },
                 null,
                 null,
+                mIconFactory,
                 true);
 
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
@@ -408,6 +420,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertTrue(settingsButton.getVisibility() != View.VISIBLE);
@@ -431,6 +444,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 },
                 null,
                 null,
+                mIconFactory,
                 false);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertTrue(settingsButton.getVisibility() != View.VISIBLE);
@@ -438,6 +452,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
 
     @Test
     public void testBindNotification_bubbleActionVisibleWhenCanBubble()  {
+        Settings.Global.putInt(mContext.getContentResolver(), NOTIFICATION_BUBBLES, 1);
         mNotificationInfo.bindNotification(
                 mShortcutManager,
                 mLauncherApps,
@@ -450,6 +465,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
 
         View bubbleView = mNotificationInfo.findViewById(R.id.bubble);
@@ -457,7 +473,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBindNotification_bubbleActionVisibleWhenCannotBubble()  {
+    public void testBindNotification_bubbleAction_noBubbleMetadata()  {
+        Settings.Global.putInt(mContext.getContentResolver(), NOTIFICATION_BUBBLES, 1);
         mNotificationInfo.bindNotification(
                 mShortcutManager,
                 mLauncherApps,
@@ -470,6 +487,29 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
+                true);
+
+        View bubbleView = mNotificationInfo.findViewById(R.id.bubble);
+        assertEquals(View.GONE, bubbleView.getVisibility());
+    }
+
+    @Test
+    public void testBindNotification_bubbleActionGloballyOff()  {
+        Settings.Global.putInt(mContext.getContentResolver(), NOTIFICATION_BUBBLES, 0);
+        mNotificationInfo.bindNotification(
+                mShortcutManager,
+                mLauncherApps,
+                mMockPackageManager,
+                mMockINotificationManager,
+                mVisualStabilityManager,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mBubbleEntry,
+                null,
+                null,
+                null,
+                mIconFactory,
                 true);
 
         View bubbleView = mNotificationInfo.findViewById(R.id.bubble);
@@ -492,8 +532,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
-
 
         // Promote it
         mNotificationInfo.findViewById(R.id.home).performClick();
@@ -502,6 +542,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         verify(mShortcutManager, times(1)).requestPinShortcut(mShortcutInfo, null);
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
+        verify(mShadeController).animateCollapsePanels();
     }
 
     @Test
@@ -522,8 +563,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 (View v, int hours) -> {
                     latch.countDown();
                 },
+                mIconFactory,
                 true);
-
 
         // Promote it
         mNotificationInfo.findViewById(R.id.snooze).performClick();
@@ -536,6 +577,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
 
     @Test
     public void testBubble_promotesBubble() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(), NOTIFICATION_BUBBLES, 1);
         mNotificationChannel.setAllowBubbles(false);
         mConversationChannel.setAllowBubbles(false);
 
@@ -551,6 +593,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
 
         assertFalse(mBubbleEntry.isBubble());
@@ -569,6 +612,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
 
     @Test
     public void testBubble_demotesBubble() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(), NOTIFICATION_BUBBLES, 1);
         mBubbleEntry.getSbn().getNotification().flags |= FLAG_BUBBLE;
 
         mNotificationInfo.bindNotification(
@@ -583,6 +627,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
 
         assertTrue(mBubbleEntry.isBubble());
@@ -601,6 +646,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
 
     @Test
     public void testBubble_noChannelChange() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(), NOTIFICATION_BUBBLES, 1);
         mNotificationInfo.bindNotification(
                 mShortcutManager,
                 mLauncherApps,
@@ -613,6 +659,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
 
         assertFalse(mBubbleEntry.isBubble());
@@ -628,7 +675,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFavorite_favorite() throws Exception {
+    public void testFavorite_favorite_noBubble() throws Exception {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                BUBBLE_IMPORTANT_CONVERSATIONS, 0);
+        mNotificationChannel.setAllowBubbles(false);
+        mConversationChannel.setAllowBubbles(false);
         mNotificationInfo.bindNotification(
                 mShortcutManager,
                 mLauncherApps,
@@ -641,12 +692,12 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
 
-
-        Button fave = mNotificationInfo.findViewById(R.id.fave);
-        assertEquals(mContext.getString(R.string.notification_conversation_favorite),
-                fave.getText().toString());
+        ImageButton fave = mNotificationInfo.findViewById(R.id.fave);
+        assertEquals(mContext.getString(R.string.notification_conversation_unfavorite),
+                fave.getContentDescription().toString());
 
         fave.performClick();
         mTestableLooper.processAllMessages();
@@ -656,6 +707,44 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), anyInt(), captor.capture());
         assertTrue(captor.getValue().isImportantConversation());
+        assertFalse(captor.getValue().canBubble());
+        verify(mBubbleController, never()).onUserCreatedBubbleFromNotification(mEntry);
+    }
+
+    @Test
+    public void testFavorite_favorite_bubble() throws Exception {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                BUBBLE_IMPORTANT_CONVERSATIONS, 1);
+        mNotificationChannel.setAllowBubbles(false);
+        mConversationChannel.setAllowBubbles(false);
+        mNotificationInfo.bindNotification(
+                mShortcutManager,
+                mLauncherApps,
+                mMockPackageManager,
+                mMockINotificationManager,
+                mVisualStabilityManager,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                null,
+                null,
+                null,
+                mIconFactory,
+                true);
+
+        ImageButton fave = mNotificationInfo.findViewById(R.id.fave);
+        assertEquals(mContext.getString(R.string.notification_conversation_unfavorite),
+                fave.getContentDescription().toString());
+
+        fave.performClick();
+        mTestableLooper.processAllMessages();
+
+        ArgumentCaptor<NotificationChannel> captor =
+                ArgumentCaptor.forClass(NotificationChannel.class);
+        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
+                anyString(), anyInt(), captor.capture());
+        assertTrue(captor.getValue().isImportantConversation());
+        assertTrue(captor.getValue().canBubble());
     }
 
     @Test
@@ -675,11 +764,12 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
 
-        Button fave = mNotificationInfo.findViewById(R.id.fave);
-        assertEquals(mContext.getString(R.string.notification_conversation_unfavorite),
-                fave.getText().toString());
+        ImageButton fave = mNotificationInfo.findViewById(R.id.fave);
+        assertEquals(mContext.getString(R.string.notification_conversation_favorite),
+                fave.getContentDescription().toString());
 
         fave.performClick();
         mTestableLooper.processAllMessages();
@@ -689,34 +779,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), anyInt(), captor.capture());
         assertFalse(captor.getValue().isImportantConversation());
-    }
-
-    @Test
-    public void testDemote() throws Exception {
-        mNotificationInfo.bindNotification(
-                mShortcutManager,
-                mLauncherApps,
-                mMockPackageManager,
-                mMockINotificationManager,
-                mVisualStabilityManager,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mEntry,
-                null,
-                null,
-                null,
-                true);
-
-
-        ImageButton demote = mNotificationInfo.findViewById(R.id.demote);
-        demote.performClick();
-        mTestableLooper.processAllMessages();
-
-        ArgumentCaptor<NotificationChannel> captor =
-                ArgumentCaptor.forClass(NotificationChannel.class);
-        verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
-                anyString(), anyInt(), captor.capture());
-        assertTrue(captor.getValue().isDemoted());
     }
 
     @Test
@@ -736,11 +798,12 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
 
-        Button mute = mNotificationInfo.findViewById(R.id.mute);
-        assertEquals(mContext.getString(R.string.notification_conversation_mute),
-                mute.getText().toString());
+        ImageButton mute = mNotificationInfo.findViewById(R.id.mute);
+        assertEquals(mContext.getString(R.string.notification_conversation_unmute),
+                mute.getContentDescription().toString());
 
         mute.performClick();
         mTestableLooper.processAllMessages();
@@ -771,12 +834,12 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
 
-
-        Button mute = mNotificationInfo.findViewById(R.id.mute);
-        assertEquals(mContext.getString(R.string.notification_conversation_unmute),
-                mute.getText().toString());
+        ImageButton mute = mNotificationInfo.findViewById(R.id.mute);
+        assertEquals(mContext.getString(R.string.notification_conversation_mute),
+                mute.getContentDescription().toString());
 
         mute.performClick();
         mTestableLooper.processAllMessages();
@@ -802,7 +865,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
+
         verify(mMockINotificationManager, times(1)).createConversationNotificationChannelForPackage(
                 anyString(), anyInt(), anyString(), any(), eq(CONVERSATION_ID));
     }
@@ -822,7 +887,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
+
         verify(mMockINotificationManager, never()).createConversationNotificationChannelForPackage(
                 anyString(), anyInt(), anyString(), any(), eq(CONVERSATION_ID));
     }
@@ -843,6 +910,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 null,
                 null,
                 null,
+                mIconFactory,
                 true);
 
         mNotificationInfo.findViewById(R.id.mute).performClick();

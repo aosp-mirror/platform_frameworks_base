@@ -96,6 +96,7 @@ public class LatencyTester extends SystemUI {
     private void fakeWakeAndUnlock() {
         mBiometricUnlockController.onBiometricAcquired(BiometricSourceType.FINGERPRINT);
         mBiometricUnlockController.onBiometricAuthenticated(
-                KeyguardUpdateMonitor.getCurrentUser(), BiometricSourceType.FINGERPRINT);
+                KeyguardUpdateMonitor.getCurrentUser(), BiometricSourceType.FINGERPRINT,
+                true /* isStrongBiometric */);
     }
 }

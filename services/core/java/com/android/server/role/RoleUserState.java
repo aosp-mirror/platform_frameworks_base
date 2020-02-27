@@ -364,12 +364,12 @@ public class RoleUserState {
                     (Map<String, Set<String>>) (Map<String, ?>) snapshotRolesLocked());
         }
 
-        mPersistence.write(roles, UserHandle.of(mUserId));
+        mPersistence.writeAsUser(roles, UserHandle.of(mUserId));
     }
 
     private void readFile() {
         synchronized (mLock) {
-            RolesState roles = mPersistence.read(UserHandle.of(mUserId));
+            RolesState roles = mPersistence.readAsUser(UserHandle.of(mUserId));
             if (roles == null) {
                 readLegacyFileLocked();
                 scheduleWriteFileLocked();
@@ -545,7 +545,7 @@ public class RoleUserState {
                 throw new IllegalStateException("This RoleUserState has already been destroyed");
             }
             mWriteHandler.removeCallbacksAndMessages(null);
-            mPersistence.delete(UserHandle.of(mUserId));
+            mPersistence.deleteAsUser(UserHandle.of(mUserId));
             mDestroyed = true;
         }
     }

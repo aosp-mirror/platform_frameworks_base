@@ -59,6 +59,8 @@ import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -78,11 +80,13 @@ import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IVold;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -119,6 +123,7 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
 
+import dalvik.annotation.compat.VersionCodes;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
@@ -139,9 +144,13 @@ import java.util.Map;
 public final class ProcessList {
     static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
 
-    // A device config to control the minimum target SDK to enable app data isolation
+    // A system property to control if app data isolation is enabled.
     static final String ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.zygote.app_data_isolation";
+
+    // A system property to control if obb app data isolation is enabled in vold.
+    static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
+            "persist.sys.vold_app_data_isolation_enabled";
 
     // A device config to control the minimum target SDK to enable app data isolation
     static final String ANDROID_APP_DATA_ISOLATION_MIN_SDK = "android_app_data_isolation_min_sdk";
@@ -327,6 +336,23 @@ public final class ProcessList {
      */
     private static final int PROC_KILL_TIMEOUT = 2000; // 2 seconds;
 
+    /**
+     * Native heap allocations will now have a non-zero tag in the most significant byte.
+     * @see <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged
+     * Pointers</a>
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = VersionCodes.Q)
+    private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
+
+    /**
+     * Apps have no access to the private data directories of any other app, even if the other
+     * app has made them world-readable.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = VersionCodes.Q)
+    private static final long APP_DATA_DIRECTORY_ISOLATION = 143937733; // See b/143937733
+
     ActivityManagerService mService = null;
 
     // To kill process groups asynchronously
@@ -366,6 +392,8 @@ public final class ProcessList {
     private boolean mOomLevelsSet = false;
 
     private boolean mAppDataIsolationEnabled = false;
+
+    private boolean mVoldAppDataIsolationEnabled = false;
 
     private ArrayList<String> mAppDataIsolationWhitelistedApps;
 
@@ -679,6 +707,8 @@ public final class ProcessList {
         // want some apps enabled while some apps disabled
         mAppDataIsolationEnabled =
                 SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
+        mVoldAppDataIsolationEnabled = SystemProperties.getBoolean(
+                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
         mAppDataIsolationWhitelistedApps = new ArrayList<>(
                 SystemConfig.getInstance().getAppDataIsolationWhitelistedApps());
 
@@ -1577,7 +1607,19 @@ public final class ProcessList {
             // For DownloadProviders and MTP: To grant access to /sdcard/Android/
             // And a special case for the FUSE daemon since it runs an MTP server and should have
             // access to Android/
+            // Note that we must add in the user id, because sdcardfs synthesizes this permission
+            // based on the user
             gidList.add(UserHandle.getUid(UserHandle.getUserId(uid), Process.SDCARD_RW_GID));
+
+            // For devices without sdcardfs, these GIDs are needed instead; note that we
+            // consciously don't add the user_id in the GID, since these apps are anyway
+            // isolated to only their own user
+            gidList.add(Process.EXT_DATA_RW_GID);
+            gidList.add(Process.EXT_OBB_RW_GID);
+        }
+        if (mountExternal == Zygote.MOUNT_EXTERNAL_INSTALLER) {
+            // For devices without sdcardfs, this GID is needed to allow installers access to OBBs
+            gidList.add(Process.EXT_OBB_RW_GID);
         }
         if (mountExternal == Zygote.MOUNT_EXTERNAL_PASS_THROUGH) {
             // For the FUSE daemon: To grant access to the lower filesystem.
@@ -1754,6 +1796,13 @@ public final class ProcessList {
             // Property defaults to true currently.
             if (!TextUtils.isEmpty(useAppImageCache) && !useAppImageCache.equals("false")) {
                 runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
+            }
+
+            // Enable heap pointer tagging, unless disabled by the app manifest, target sdk level,
+            // or the compat feature.
+            if (app.info.allowsNativeHeapPointerTagging()
+                    && mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
+                runtimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
             }
 
             String invokeWith = null;
@@ -2029,7 +2078,14 @@ public final class ProcessList {
         }
         final int minTargetSdk = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ANDROID_APP_DATA_ISOLATION_MIN_SDK, Build.VERSION_CODES.R);
-        return app.info.targetSdkVersion >= minTargetSdk;
+        if (app.info.targetSdkVersion < minTargetSdk) {
+            return false;
+        }
+
+        // TODO(b/147266020): Remove non-standard gating above & switch to isChangeEnabled.
+        mPlatformCompat.reportChange(APP_DATA_DIRECTORY_ISOLATION, app.info);
+
+        return true;
     }
 
     private Map<String, Pair<String, Long>> getPackageAppDataInfoMap(PackageManagerInternal pmInt,
@@ -2082,6 +2138,13 @@ public final class ProcessList {
                         app.info.packageName, app.userId);
                 pkgDataInfoMap = getPackageAppDataInfoMap(pmInt, sharedPackages.length == 0
                         ? new String[]{app.info.packageName} : sharedPackages, uid);
+
+                if (mVoldAppDataIsolationEnabled) {
+                    StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                                StorageManagerInternal.class);
+                    storageManagerInternal.prepareObbDirs(UserHandle.getUserId(uid),
+                            pkgDataInfoMap.keySet(), app.processName);
+                }
             } else {
                 pkgDataInfoMap = null;
             }

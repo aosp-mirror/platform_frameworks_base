@@ -157,7 +157,7 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
     private void addMediaDevice(CachedBluetoothDevice cachedDevice) {
         MediaDevice mediaDevice = findMediaDevice(MediaDeviceUtils.getId(cachedDevice));
         if (mediaDevice == null) {
-            mediaDevice = new BluetoothMediaDevice(mContext, cachedDevice);
+            mediaDevice = new BluetoothMediaDevice(mContext, cachedDevice, null, null, null);
             cachedDevice.registerCallback(mDeviceAttributeChangeCallback);
             mLastAddedDevice = mediaDevice;
             mMediaDevices.add(mediaDevice);

@@ -61,8 +61,10 @@ public class ThumbnailData {
         insets = new Rect(snapshot.getContentInsets());
         orientation = snapshot.getOrientation();
         rotation = snapshot.getRotation();
-        reducedResolution = snapshot.isReducedResolution();
-        scale = snapshot.getScale();
+        reducedResolution = snapshot.isLowResolution();
+        // TODO(b/149579527): Pass task size instead of computing scale.
+        // Assume width and height were scaled the same; compute scale only for width
+        scale = (float) thumbnail.getWidth() / snapshot.getTaskSize().x;
         isRealSnapshot = snapshot.isRealSnapshot();
         isTranslucent = snapshot.isTranslucent();
         windowingMode = snapshot.getWindowingMode();

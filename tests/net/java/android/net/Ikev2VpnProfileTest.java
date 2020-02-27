@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 
 import android.test.mock.MockContext;
 
@@ -232,10 +231,12 @@ public class Ikev2VpnProfileTest {
         builder.setAuthDigitalSignature(mUserCert, mPrivateKey, mServerRootCa);
         final VpnProfile profile = builder.build().toVpnProfile();
 
+        final String expectedSecret = Ikev2VpnProfile.PREFIX_INLINE
+                + Ikev2VpnProfile.encodeForIpsecSecret(mPrivateKey.getEncoded());
         verifyVpnProfileCommon(profile);
         assertEquals(Ikev2VpnProfile.certificateToPemString(mUserCert), profile.ipsecUserCert);
         assertEquals(
-                Ikev2VpnProfile.encodeForIpsecSecret(mPrivateKey.getEncoded()),
+                expectedSecret,
                 profile.ipsecSecret);
         assertEquals(Ikev2VpnProfile.certificateToPemString(mServerRootCa), profile.ipsecCaCert);
 

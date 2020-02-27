@@ -20,7 +20,6 @@
 #include <GLES/gl.h>
 #include <cutils/properties.h>
 #include <log/log.h>
-#include <private/gui/SyncFeatures.h>
 #include <sync/sync.h>
 #include <utils/Trace.h>
 
@@ -79,6 +78,9 @@ static struct {
     bool displayP3 = false;
     bool contextPriority = false;
     bool surfacelessContext = false;
+    bool nativeFenceSync = false;
+    bool fenceSync = false;
+    bool waitSync = false;
 } EglExtensions;
 
 EglManager::EglManager()
@@ -226,6 +228,9 @@ void EglManager::initExtensions() {
     EglExtensions.displayP3 = extensions.has("EGL_EXT_gl_colorspace_display_p3_passthrough");
     EglExtensions.contextPriority = extensions.has("EGL_IMG_context_priority");
     EglExtensions.surfacelessContext = extensions.has("EGL_KHR_surfaceless_context");
+    EglExtensions.nativeFenceSync = extensions.has("EGL_ANDROID_native_fence_sync");
+    EglExtensions.fenceSync = extensions.has("EGL_KHR_fence_sync");
+    EglExtensions.waitSync = extensions.has("EGL_KHR_wait_sync");
 }
 
 bool EglManager::hasEglContext() {
@@ -527,8 +532,7 @@ status_t EglManager::fenceWait(int fence) {
         return INVALID_OPERATION;
     }
 
-    if (SyncFeatures::getInstance().useWaitSync() &&
-        SyncFeatures::getInstance().useNativeFenceSync()) {
+    if (EglExtensions.waitSync && EglExtensions.nativeFenceSync) {
         // Block GPU on the fence.
         // Create an EGLSyncKHR from the current fence.
         int fenceFd = ::dup(fence);
@@ -572,7 +576,7 @@ status_t EglManager::createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence,
         return INVALID_OPERATION;
     }
 
-    if (SyncFeatures::getInstance().useNativeFenceSync()) {
+    if (EglExtensions.nativeFenceSync) {
         EGLSyncKHR sync = eglCreateSyncKHR(mEglDisplay, EGL_SYNC_NATIVE_FENCE_ANDROID, nullptr);
         if (sync == EGL_NO_SYNC_KHR) {
             ALOGE("EglManager::createReleaseFence: error creating EGL fence: %#x", eglGetError());
@@ -589,7 +593,7 @@ status_t EglManager::createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence,
         }
         *nativeFence = fenceFd;
         *eglFence = EGL_NO_SYNC_KHR;
-    } else if (useFenceSync && SyncFeatures::getInstance().useFenceSync()) {
+    } else if (useFenceSync && EglExtensions.fenceSync) {
         if (*eglFence != EGL_NO_SYNC_KHR) {
             // There is already a fence for the current slot.  We need to
             // wait on that before replacing it with another fence to

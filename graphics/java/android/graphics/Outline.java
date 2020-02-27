@@ -280,7 +280,10 @@ public final class Outline {
      * {@link android.os.Build.VERSION_CODES#Q}, it is no longer required to be
      * convex.
      *
-     * @deprecated The path is no longer required to be convex. Use {@link #setPath} instead.
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, the restriction
+     * that the path must be convex is removed. However, the API is misnamed until
+     * {@link android.os.Build.VERSION_CODES#R}, when {@link #setPath} is
+     * introduced. Use {@link #setPath} instead.
      */
     @Deprecated
     public void setConvexPath(@NonNull Path convexPath) {

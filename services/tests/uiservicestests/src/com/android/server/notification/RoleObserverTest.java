@@ -35,6 +35,7 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IUriGrantsManager;
+import android.app.StatsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.role.RoleManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -54,6 +55,8 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Pair;
 
+import androidx.test.InstrumentationRegistry;
+
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.server.LocalServices;
@@ -64,6 +67,7 @@ import com.android.server.notification.NotificationManagerService.NotificationLi
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -115,6 +119,10 @@ public class RoleObserverTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        // Shell permisssions will override permissions of our app, so add all necessary permissions
+        // for this test here:
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
+                "android.permission.READ_CONTACTS");
 
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mock(WindowManagerInternal.class));
@@ -142,13 +150,20 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(UsageStatsManagerInternal.class),
                     mock(DevicePolicyManagerInternal.class), mock(IUriGrantsManager.class),
                     mock(UriGrantsManagerInternal.class),
-                    mock(AppOpsManager.class), mUm, mock(NotificationHistoryManager.class));
+                    mock(AppOpsManager.class), mUm, mock(NotificationHistoryManager.class),
+                    mock(StatsManager.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
             }
         }
         mService.setPreferencesHelper(mPreferencesHelper);
+    }
+
+    @After
+    public void tearDown() {
+        InstrumentationRegistry.getInstrumentation()
+                .getUiAutomation().dropShellPermissionIdentity();
     }
 
     @Test

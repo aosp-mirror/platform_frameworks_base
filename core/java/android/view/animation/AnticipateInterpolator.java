@@ -20,18 +20,18 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.animation.HasNativeInterpolator;
+import android.graphics.animation.NativeInterpolator;
+import android.graphics.animation.NativeInterpolatorFactory;
 import android.util.AttributeSet;
 
 import com.android.internal.R;
-import com.android.internal.view.animation.HasNativeInterpolator;
-import com.android.internal.view.animation.NativeInterpolatorFactory;
-import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
 
 /**
  * An interpolator where the change starts backward then flings forward.
  */
 @HasNativeInterpolator
-public class AnticipateInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
+public class AnticipateInterpolator extends BaseInterpolator implements NativeInterpolator {
     private final float mTension;
 
     public AnticipateInterpolator() {
@@ -73,6 +73,6 @@ public class AnticipateInterpolator extends BaseInterpolator implements NativeIn
     /** @hide */
     @Override
     public long createNativeInterpolator() {
-        return NativeInterpolatorFactoryHelper.createAnticipateInterpolator(mTension);
+        return NativeInterpolatorFactory.createAnticipateInterpolator(mTension);
     }
 }

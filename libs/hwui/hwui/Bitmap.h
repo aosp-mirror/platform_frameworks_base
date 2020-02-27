@@ -169,6 +169,12 @@ private:
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes,
            BitmapPalette palette);
+
+    // Common code for the two public facing createFrom(AHardwareBuffer*, ...)
+    // methods.
+    // bufferDesc is only used to compute rowBytes.
+    static sk_sp<Bitmap> createFrom(AHardwareBuffer* hardwareBuffer, const SkImageInfo& info,
+                                    const AHardwareBuffer_Desc& bufferDesc, BitmapPalette palette);
 #endif
 
     virtual ~Bitmap();

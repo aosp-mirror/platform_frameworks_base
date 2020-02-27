@@ -20,7 +20,6 @@ cc_library_shared {
         ":IDropBoxManagerService.aidl",
         "src/content/ComponentName.cpp",
         "src/os/DropBoxManager.cpp",
-        "src/os/StatsDimensionsValue.cpp",
     ],
 
     shared_libs: [

@@ -150,6 +150,7 @@ class RebootEscrowManager {
     private RebootEscrowKey getAndClearRebootEscrowKey() {
         IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
         if (rebootEscrow == null) {
+            Slog.w(TAG, "Had reboot escrow data for users, but RebootEscrow HAL is unavailable");
             return null;
         }
 
@@ -197,11 +198,12 @@ class RebootEscrowManager {
 
             mCallbacks.onRebootEscrowRestored(escrowData.getSpVersion(),
                     escrowData.getSyntheticPassword(), userId);
+            Slog.i(TAG, "Restored reboot escrow data for user " + userId);
             return true;
         } catch (IOException e) {
             Slog.w(TAG, "Could not load reboot escrow data for user " + userId, e);
+            return false;
         }
-        return false;
     }
 
     void callToRebootEscrowIfNeeded(@UserIdInt int userId, byte spVersion,
@@ -212,16 +214,13 @@ class RebootEscrowManager {
 
         IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
         if (rebootEscrow == null) {
-            mRebootEscrowWanted = false;
-            setRebootEscrowReady(false);
+            Slog.w(TAG, "Reboot escrow requested, but RebootEscrow HAL is unavailable");
             return;
         }
 
         RebootEscrowKey escrowKey = generateEscrowKeyIfNeeded();
         if (escrowKey == null) {
             Slog.e(TAG, "Could not generate escrow key");
-            mRebootEscrowWanted = false;
-            setRebootEscrowReady(false);
             return;
         }
 
@@ -250,6 +249,7 @@ class RebootEscrowManager {
             try {
                 key = RebootEscrowKey.generate();
             } catch (IOException e) {
+                Slog.w(TAG, "Could not generate reboot escrow key");
                 return null;
             }
 
@@ -286,6 +286,7 @@ class RebootEscrowManager {
 
         IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
         if (rebootEscrow == null) {
+            Slog.w(TAG, "Escrow marked as ready, but RebootEscrow HAL is unavailable");
             return false;
         }
 
@@ -295,6 +296,7 @@ class RebootEscrowManager {
         }
 
         if (escrowKey == null) {
+            Slog.e(TAG, "Escrow key is null, but escrow was marked as ready");
             return false;
         }
 
@@ -302,8 +304,9 @@ class RebootEscrowManager {
         try {
             rebootEscrow.storeKey(escrowKey.getKeyBytes());
             armedRebootEscrow = true;
+            Slog.i(TAG, "Reboot escrow key stored with RebootEscrow HAL");
         } catch (RemoteException e) {
-            Slog.w(TAG, "Failed escrow secret to RebootEscrow HAL", e);
+            Slog.e(TAG, "Failed escrow secret to RebootEscrow HAL", e);
         }
         return armedRebootEscrow;
     }

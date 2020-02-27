@@ -25,7 +25,9 @@ import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -133,6 +135,8 @@ public class AccessibilitySecurityPolicyTest {
         mA11ySecurityPolicy = new AccessibilitySecurityPolicy(mMockContext, mMockA11yUserManager);
         mA11ySecurityPolicy.setAccessibilityWindowManager(mMockA11yWindowManager);
         mA11ySecurityPolicy.setAppWidgetManager(mMockAppWidgetManager);
+
+        when(mMockA11yWindowManager.resolveParentWindowIdLocked(anyInt())).then(returnsFirstArg());
     }
 
     @Test
