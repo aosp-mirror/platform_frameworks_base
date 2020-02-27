@@ -296,6 +296,12 @@ final class MultiClientInputMethodClientCallbackAdaptor {
             // no-op for multi-session since IME is responsible controlling navigation bar buttons.
             reportNotSupported();
         }
+
+        @Override
+        public void removeImeSurface() {
+            // no-op for multi-session
+            reportNotSupported();
+        }
     }
 
     private static final class MultiClientInputMethodSessionImpl
