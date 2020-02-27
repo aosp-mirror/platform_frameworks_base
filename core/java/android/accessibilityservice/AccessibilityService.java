@@ -2400,6 +2400,10 @@ public abstract class AccessibilityService extends Service {
 
         /**
          * Gets the {@link HardwareBuffer} representing a memory buffer of the screenshot.
+         * <p>
+         * <strong>Note:</strong> The application should call {@link HardwareBuffer#close()} when
+         * the buffer is no longer needed to free the underlying resources.
+         * </p>
          *
          * @return the hardware buffer
          */

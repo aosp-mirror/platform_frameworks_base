@@ -1023,18 +1023,21 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                                 displaySize.x, displaySize.y, false,
                                 rotation);
                 final GraphicBuffer graphicBuffer = screenshotBuffer.getGraphicBuffer();
-                final HardwareBuffer hardwareBuffer =
-                        HardwareBuffer.createFromGraphicBuffer(graphicBuffer);
-                final ParcelableColorSpace colorSpace =
-                        new ParcelableColorSpace(screenshotBuffer.getColorSpace());
+                try (HardwareBuffer hardwareBuffer =
+                        HardwareBuffer.createFromGraphicBuffer(graphicBuffer)) {
+                    final ParcelableColorSpace colorSpace =
+                            new ParcelableColorSpace(screenshotBuffer.getColorSpace());
 
-                // Send back the result.
-                final Bundle payload = new Bundle();
-                payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
-                        hardwareBuffer);
-                payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
-                payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP, SystemClock.uptimeMillis());
-                callback.sendResult(payload);
+                    // Send back the result.
+                    final Bundle payload = new Bundle();
+                    payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
+                            hardwareBuffer);
+                    payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
+                    payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP,
+                            SystemClock.uptimeMillis());
+                    callback.sendResult(payload);
+                    hardwareBuffer.close();
+                }
             }, null).recycleOnUse());
         } finally {
             Binder.restoreCallingIdentity(identity);
