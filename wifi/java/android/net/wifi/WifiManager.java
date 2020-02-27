@@ -4430,10 +4430,11 @@ public class WifiManager {
     }
 
     /**
-     * Disable an ephemeral network.
+     * Temporarily disable a network. Should always trigger with user disconnect network.
      *
-     * @param ssid in the format of WifiConfiguration's SSID.
-     *
+     * @param network Input can be SSID or FQDN. And caller must ensure that the SSID passed thru
+     *                this API matched the WifiConfiguration.SSID rules, and thus be surrounded by
+     *                quotes.
      * @hide
      */
     @SystemApi
@@ -4441,12 +4442,12 @@ public class WifiManager {
             android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_STACK
     })
-    public void disableEphemeralNetwork(@NonNull String ssid) {
-        if (TextUtils.isEmpty(ssid)) {
+    public void disableEphemeralNetwork(@NonNull String network) {
+        if (TextUtils.isEmpty(network)) {
             throw new IllegalArgumentException("SSID cannot be null or empty!");
         }
         try {
-            mService.disableEphemeralNetwork(ssid, mContext.getOpPackageName());
+            mService.disableEphemeralNetwork(network, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
