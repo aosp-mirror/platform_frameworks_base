@@ -60,6 +60,7 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -119,7 +120,6 @@ public class AppIntegrityManagerServiceImplTest {
     private static final String PLAY_STORE_PKG = "com.android.vending";
     private static final String ADB_INSTALLER = "adb";
     private static final String PLAY_STORE_CERT = "play_store_cert";
-    private static final String ADB_CERT = "";
 
     @org.junit.Rule
     public MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -137,11 +137,12 @@ public class AppIntegrityManagerServiceImplTest {
     @Mock
     Handler mHandler;
 
+    private final Context mRealContext = InstrumentationRegistry.getTargetContext();
+
     private PackageManager mSpyPackageManager;
     private File mTestApk;
     private File mTestApkTwoCerts;
 
-    private final Context mRealContext = InstrumentationRegistry.getTargetContext();
     // under test
     private AppIntegrityManagerServiceImpl mService;
 
@@ -163,8 +164,7 @@ public class AppIntegrityManagerServiceImplTest {
                         mPackageManagerInternal,
                         mRuleEvaluationEngine,
                         mIntegrityFileManager,
-                        mHandler,
-                        /* checkIntegrityForRuleProviders= */ true);
+                        mHandler);
 
         mSpyPackageManager = spy(mRealContext.getPackageManager());
         // setup mocks to prevent NPE
@@ -172,6 +172,9 @@ public class AppIntegrityManagerServiceImplTest {
         when(mMockContext.getResources()).thenReturn(mMockResources);
         when(mMockResources.getStringArray(anyInt())).thenReturn(new String[]{});
         when(mIntegrityFileManager.initialized()).thenReturn(true);
+        // These are needed to override the Settings.Global.get result.
+        when(mMockContext.getContentResolver()).thenReturn(mRealContext.getContentResolver());
+        setIntegrityCheckIncludesRuleProvider(true);
     }
 
     @After
@@ -201,6 +204,7 @@ public class AppIntegrityManagerServiceImplTest {
     @Test
     public void updateRuleSet_notSystemApp() throws Exception {
         whitelistUsAsRuleProvider();
+        makeUsSystemApp(false);
         Rule rule =
                 new Rule(
                         new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
@@ -411,14 +415,7 @@ public class AppIntegrityManagerServiceImplTest {
     public void verifierAsInstaller_skipIntegrityVerification() throws Exception {
         whitelistUsAsRuleProvider();
         makeUsSystemApp();
-        mService =
-                new AppIntegrityManagerServiceImpl(
-                        mMockContext,
-                        mPackageManagerInternal,
-                        mRuleEvaluationEngine,
-                        mIntegrityFileManager,
-                        mHandler,
-                        /* checkIntegrityForRuleProviders= */ false);
+        setIntegrityCheckIncludesRuleProvider(false);
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mMockContext, atLeastOnce())
@@ -460,12 +457,21 @@ public class AppIntegrityManagerServiceImplTest {
     }
 
     private void makeUsSystemApp() throws Exception {
+        makeUsSystemApp(true);
+    }
+
+    private void makeUsSystemApp(boolean isSystemApp) throws Exception {
         PackageInfo packageInfo =
                 mRealContext.getPackageManager().getPackageInfo(TEST_FRAMEWORK_PACKAGE, 0);
-        packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        if (isSystemApp) {
+            packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        } else {
+            packageInfo.applicationInfo.flags &= ~ApplicationInfo.FLAG_SYSTEM;
+        }
         doReturn(packageInfo)
                 .when(mSpyPackageManager)
                 .getPackageInfo(eq(TEST_FRAMEWORK_PACKAGE), anyInt());
+        when(mMockContext.getPackageManager()).thenReturn(mSpyPackageManager);
     }
 
     private Intent makeVerificationIntent() throws Exception {
@@ -491,5 +497,14 @@ public class AppIntegrityManagerServiceImplTest {
                 mMockContext.getPackageManager().getPackageUid(installer, /* flags= */ 0));
         intent.putExtra(Intent.EXTRA_LONG_VERSION_CODE, VERSION_CODE);
         return intent;
+    }
+
+    private void setIntegrityCheckIncludesRuleProvider(boolean shouldInclude) throws Exception {
+        int value = shouldInclude ? 1 : 0;
+        Settings.Global.putInt(mRealContext.getContentResolver(),
+                Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER, value);
+        assertThat(Settings.Global.getInt(mRealContext.getContentResolver(),
+                Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER, -1) == 1).isEqualTo(
+                shouldInclude);
     }
 }
