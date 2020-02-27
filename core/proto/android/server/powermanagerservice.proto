@@ -225,9 +225,10 @@ message PowerServiceSettingsAndConfigurationDumpProto {
     message ScreenBrightnessSettingLimitsProto {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional int32 setting_minimum = 1;
-        optional int32 setting_maximum = 2;
-        optional int32 setting_default = 3;
+        reserved 1, 2, 3; // setting_minimum, setting_maximum, setting_default
+        optional float setting_minimum_float = 4;
+        optional float setting_maximum_float = 5;
+        optional float setting_default_float = 6;
     }
 
     // True to decouple auto-suspend mode from the display state.
