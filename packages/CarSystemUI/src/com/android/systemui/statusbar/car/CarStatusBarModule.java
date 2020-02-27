@@ -82,6 +82,7 @@ import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -197,6 +198,7 @@ public class CarStatusBarModule {
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
+            PhoneStatusBarPolicy phoneStatusBarPolicy,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             CarServiceProvider carServiceProvider,
@@ -278,6 +280,7 @@ public class CarStatusBarModule {
                 keyguardDismissUtil,
                 extensionController,
                 userInfoControllerImpl,
+                phoneStatusBarPolicy,
                 dismissCallbackRegistry,
                 statusBarTouchableRegionManager,
                 carServiceProvider,

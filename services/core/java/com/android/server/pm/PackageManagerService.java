@@ -5459,7 +5459,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     return null;
                 }
                 PackageUserState state = ps.readUserState(userId);
-                return PackageInfoUtils.generateProviderInfo(pkg, p, flags, state, userId, ps);
+                final ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(
+                        pkg, flags, state, userId, ps);
+                if (appInfo == null) {
+                    return null;
+                }
+                return PackageInfoUtils.generateProviderInfo(
+                        pkg, p, flags, state, appInfo, userId, ps);
             }
         }
         return null;
