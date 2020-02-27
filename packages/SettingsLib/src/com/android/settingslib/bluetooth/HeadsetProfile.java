@@ -125,7 +125,10 @@ public class HeadsetProfile implements LocalBluetoothProfile {
         if (mBluetoothAdapter == null) {
             return false;
         }
-        return mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_PHONE_CALL);
+
+        return device == null
+                ? mBluetoothAdapter.removeActiveDevice(ACTIVE_DEVICE_PHONE_CALL)
+                : mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_PHONE_CALL);
     }
 
     public BluetoothDevice getActiveDevice() {
