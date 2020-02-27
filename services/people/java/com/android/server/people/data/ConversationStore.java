@@ -31,6 +31,10 @@ import com.android.server.people.ConversationInfosProto;
 
 import com.google.android.collect.Lists;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,6 +51,8 @@ class ConversationStore {
     private static final String TAG = ConversationStore.class.getSimpleName();
 
     private static final String CONVERSATIONS_FILE_NAME = "conversations";
+
+    private static final int CONVERSATION_INFOS_END_TOKEN = -1;
 
     // Shortcut ID -> Conversation Info
     @GuardedBy("this")
@@ -193,6 +199,51 @@ class ConversationStore {
         mNotifChannelIdToShortcutIdMap.clear();
         mPhoneNumberToShortcutIdMap.clear();
         mConversationInfosProtoDiskReadWriter.deleteConversationsFile();
+    }
+
+    @Nullable
+    synchronized byte[] getBackupPayload() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream conversationInfosOut = new DataOutputStream(baos);
+        for (ConversationInfo conversationInfo : mConversationInfoMap.values()) {
+            byte[] backupPayload = conversationInfo.getBackupPayload();
+            if (backupPayload == null) {
+                continue;
+            }
+            try {
+                conversationInfosOut.writeInt(backupPayload.length);
+                conversationInfosOut.write(backupPayload);
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to write conversation info to backup payload.", e);
+                return null;
+            }
+        }
+        try {
+            conversationInfosOut.writeInt(CONVERSATION_INFOS_END_TOKEN);
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to write conversation infos end token to backup payload.", e);
+            return null;
+        }
+        return baos.toByteArray();
+    }
+
+    synchronized void restore(@NonNull byte[] payload) {
+        DataInputStream in = new DataInputStream(new ByteArrayInputStream(payload));
+        try {
+            for (int conversationInfoSize = in.readInt();
+                    conversationInfoSize != CONVERSATION_INFOS_END_TOKEN;
+                    conversationInfoSize = in.readInt()) {
+                byte[] conversationInfoPayload = new byte[conversationInfoSize];
+                in.readFully(conversationInfoPayload, 0, conversationInfoSize);
+                ConversationInfo conversationInfo = ConversationInfo.readFromBackupPayload(
+                        conversationInfoPayload);
+                if (conversationInfo != null) {
+                    addOrUpdate(conversationInfo);
+                }
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to read conversation info from payload.", e);
+        }
     }
 
     @MainThread
