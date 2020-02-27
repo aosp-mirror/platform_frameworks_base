@@ -40,4 +40,8 @@ public class PipAppHelper extends FlickerAppHelper {
         }
     }
 
+    public void closePipWindow(UiDevice device) {
+        AutomationUtils.closePipWindow(device);
+    }
+
 }
