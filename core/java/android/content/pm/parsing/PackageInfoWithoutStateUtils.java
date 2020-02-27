@@ -407,7 +407,6 @@ public class PackageInfoWithoutStateUtils {
         ai.requestedVrComponent = a.getRequestedVrComponent();
         ai.rotationAnimation = a.getRotationAnimation();
         ai.colorMode = a.getColorMode();
-        ai.preferMinimalPostProcessing = a.isPreferMinimalPostProcessing();
         ai.windowLayout = a.getWindowLayout();
         ai.metaData = a.getMetaData();
         ai.applicationInfo = applicationInfo;

@@ -2765,7 +2765,7 @@ public interface WindowManager extends ViewManager {
          * setting in the system settings menu. In that case, this field is ignored and the display
          * will remain in its current mode.
          *
-         * @see android.content.pm.ActivityInfo#preferMinimalPostProcessing
+         * @see android.content.pm.ActivityInfo#FLAG_PREFER_MINIMAL_POST_PROCESSING
          * @see android.view.Display#isMinimalPostProcessingSupported
          * @see android.view.Window#setPreferMinimalPostProcessing
          */

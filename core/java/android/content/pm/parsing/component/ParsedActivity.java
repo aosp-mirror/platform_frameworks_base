@@ -80,8 +80,6 @@ public class ParsedActivity extends ParsedMainComponent {
     int rotationAnimation = -1;
     int colorMode;
 
-    boolean preferMinimalPostProcessing;
-
     @Nullable
     ActivityInfo.WindowLayout windowLayout;
 
@@ -137,7 +135,6 @@ public class ParsedActivity extends ParsedMainComponent {
         activity.setDirectBootAware(false);
         activity.rotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
         activity.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
-        activity.preferMinimalPostProcessing = ActivityInfo.MINIMAL_POST_PROCESSING_DEFAULT;
         if (hardwareAccelerated) {
             activity.setFlags(activity.getFlags() | ActivityInfo.FLAG_HARDWARE_ACCELERATED);
         }
@@ -287,7 +284,6 @@ public class ParsedActivity extends ParsedMainComponent {
         dest.writeString(this.requestedVrComponent);
         dest.writeInt(this.rotationAnimation);
         dest.writeInt(this.colorMode);
-        dest.writeBoolean(this.preferMinimalPostProcessing);
         dest.writeBundle(this.metaData);
 
         if (windowLayout != null) {
@@ -330,7 +326,6 @@ public class ParsedActivity extends ParsedMainComponent {
         this.requestedVrComponent = in.readString();
         this.rotationAnimation = in.readInt();
         this.colorMode = in.readInt();
-        this.preferMinimalPostProcessing = in.readBoolean();
         this.metaData = in.readBundle();
         if (in.readBoolean()) {
             windowLayout = new ActivityInfo.WindowLayout(in);
@@ -438,10 +433,6 @@ public class ParsedActivity extends ParsedMainComponent {
 
     public int getColorMode() {
         return colorMode;
-    }
-
-    public boolean isPreferMinimalPostProcessing() {
-        return preferMinimalPostProcessing;
     }
 
     @Nullable

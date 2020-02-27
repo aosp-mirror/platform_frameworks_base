@@ -1254,7 +1254,7 @@ public abstract class Window {
      * <p>The ability to switch to a mode with minimal post proessing may be disabled by a user
      * setting in the system settings menu. In that case, this method does nothing.
      *
-     * @see android.content.pm.ActivityInfo#preferMinimalPostProcessing
+     * @see android.content.pm.ActivityInfo#FLAG_PREFER_MINIMAL_POST_PROCESSING
      * @see android.view.Display#isMinimalPostProcessingSupported
      * @see android.view.WindowManager.LayoutParams#preferMinimalPostProcessing
      *
