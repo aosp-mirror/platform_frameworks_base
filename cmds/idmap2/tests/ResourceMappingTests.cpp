@@ -22,7 +22,9 @@
 #include <utility>
 #include <vector>
 
+#include "R.h"
 #include "TestHelpers.h"
+#include "androidfw/ResourceTypes.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "idmap2/LogInfo.h"
@@ -30,6 +32,8 @@
 
 using android::Res_value;
 using android::idmap2::utils::ExtractOverlayManifestInfo;
+
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace android::idmap2 {
 
@@ -106,20 +110,20 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsLegacy) {
   info.target_name = "TestResources";
   info.resource_mapping = 0U;  // no xml
   auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay.apk", info,
-                                          PolicyFlags::POLICY_PUBLIC,
+                                          PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ false);
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   auto& res = *resources;
   ASSERT_EQ(res.GetTargetToOverlayMap().size(), 4U);
-  ASSERT_RESULT(MappingExists(res, 0x7f010000, Res_value::TYPE_REFERENCE, 0x7f010000,
-                              false /* rewrite */));  // integer/int1
-  ASSERT_RESULT(MappingExists(res, 0x7f02000c, Res_value::TYPE_REFERENCE, 0x7f020000,
-                              false /* rewrite */));  // string/str1
-  ASSERT_RESULT(MappingExists(res, 0x7f02000e, Res_value::TYPE_REFERENCE, 0x7f020001,
-                              false /* rewrite */));  // string/str3
-  ASSERT_RESULT(MappingExists(res, 0x7f02000f, Res_value::TYPE_REFERENCE, 0x7f020002,
-                              false /* rewrite */));  // string/str4
+  ASSERT_RESULT(MappingExists(res, R::target::integer::int1, Res_value::TYPE_REFERENCE,
+                              R::overlay::integer::int1, false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::str1, Res_value::TYPE_REFERENCE,
+                              R::overlay::string::str1, false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::str3, Res_value::TYPE_REFERENCE,
+                              R::overlay::string::str3, false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::str4, Res_value::TYPE_REFERENCE,
+                              R::overlay::string::str4, false /* rewrite */));
 }
 
 TEST(ResourceMappingTests, ResourcesFromApkAssetsNonMatchingNames) {
@@ -128,18 +132,18 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsNonMatchingNames) {
   info.target_name = "TestResources";
   info.resource_mapping = 0x7f030003;  // xml/overlays_swap
   auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay.apk", info,
-                                          PolicyFlags::POLICY_PUBLIC,
+                                          PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ false);
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   auto& res = *resources;
   ASSERT_EQ(res.GetTargetToOverlayMap().size(), 3U);
-  ASSERT_RESULT(MappingExists(res, 0x7f02000c, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f020002,
-                              true /* rewrite */));  // string/str1 -> string/str4
-  ASSERT_RESULT(MappingExists(res, 0x7f02000e, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f020000,
-                              true /* rewrite */));  // string/str3 -> string/str1
-  ASSERT_RESULT(MappingExists(res, 0x7f02000f, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f020001,
-                              true /* rewrite */));  // string/str4 -> string/str3
+  ASSERT_RESULT(MappingExists(res, R::target::string::str1, Res_value::TYPE_DYNAMIC_REFERENCE,
+                              R::overlay::string::str4, true /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::str3, Res_value::TYPE_DYNAMIC_REFERENCE,
+                              R::overlay::string::str1, true /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::str4, Res_value::TYPE_DYNAMIC_REFERENCE,
+                              R::overlay::string::str3, true /* rewrite */));
 }
 
 TEST(ResourceMappingTests, DoNotRewriteNonOverlayResourceId) {
@@ -148,17 +152,17 @@ TEST(ResourceMappingTests, DoNotRewriteNonOverlayResourceId) {
   info.target_name = "TestResources";
   info.resource_mapping = 0x7f030001;  // xml/overlays_different_packages
   auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay.apk", info,
-                                          PolicyFlags::POLICY_PUBLIC,
+                                          PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ false);
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   auto& res = *resources;
   ASSERT_EQ(res.GetTargetToOverlayMap().size(), 2U);
   ASSERT_EQ(res.GetOverlayToTargetMap().size(), 1U);
-  ASSERT_RESULT(MappingExists(res, 0x7f02000c, Res_value::TYPE_REFERENCE, 0x0104000a,
-                              false /* rewrite */));  // string/str1 -> android:string/ok
-  ASSERT_RESULT(MappingExists(res, 0x7f02000e, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f020001,
-                              true /* rewrite */));  // string/str3 -> string/str4
+  ASSERT_RESULT(MappingExists(res, R::target::string::str1, Res_value::TYPE_REFERENCE, 0x0104000a,
+                              false /* rewrite */));  // -> android:string/ok
+  ASSERT_RESULT(MappingExists(res, R::target::string::str3, Res_value::TYPE_DYNAMIC_REFERENCE,
+                              0x7f020001, true /* rewrite */));
 }
 
 TEST(ResourceMappingTests, InlineResources) {
@@ -167,7 +171,7 @@ TEST(ResourceMappingTests, InlineResources) {
   info.target_name = "TestResources";
   info.resource_mapping = 0x7f030002;  // xml/overlays_inline
   auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay.apk", info,
-                                          PolicyFlags::POLICY_PUBLIC,
+                                          PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ false);
 
   constexpr size_t overlay_string_pool_size = 8U;
@@ -175,108 +179,120 @@ TEST(ResourceMappingTests, InlineResources) {
   auto& res = *resources;
   ASSERT_EQ(res.GetTargetToOverlayMap().size(), 2U);
   ASSERT_EQ(res.GetOverlayToTargetMap().size(), 0U);
-  ASSERT_RESULT(MappingExists(res, 0x7f02000c, Res_value::TYPE_STRING,
+  ASSERT_RESULT(MappingExists(res, R::target::string::str1, Res_value::TYPE_STRING,
                               overlay_string_pool_size + 0U,
-                              false /* rewrite */));  // string/str1 -> "Hello World"
-  ASSERT_RESULT(MappingExists(res, 0x7f010000, Res_value::TYPE_INT_DEC, 73U,
-                              false /* rewrite */));  // string/str1 -> "Hello World"
+                              false /* rewrite */));  // -> "Hello World"
+  ASSERT_RESULT(MappingExists(res, R::target::integer::int1, Res_value::TYPE_INT_DEC, 73U,
+                              false /* rewrite */));  // -> 73
 }
 
 TEST(ResourceMappingTests, CreateIdmapFromApkAssetsPolicySystemPublic) {
   auto resources =
       TestGetResourceMapping("/target/target.apk", "/system-overlay/system-overlay.apk",
-                             PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_PUBLIC,
+                             PolicyFlags::SYSTEM_PARTITION | PolicyFlags::PUBLIC,
                              /* enforce_overlayable */ true);
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   auto& res = *resources;
   ASSERT_EQ(res.GetTargetToOverlayMap().size(), 3U);
-  ASSERT_RESULT(MappingExists(res, 0x7f020008, Res_value::TYPE_REFERENCE, 0x7f010000,
-                              false /* rewrite */));  // string/policy_public
-  ASSERT_RESULT(MappingExists(res, 0x7f02000a, Res_value::TYPE_REFERENCE, 0x7f010001,
-                              false /* rewrite */));  // string/policy_system
-  ASSERT_RESULT(MappingExists(res, 0x7f02000b, Res_value::TYPE_REFERENCE, 0x7f010002,
-                              false /* rewrite */));  // string/policy_system_vendor
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_public, Res_value::TYPE_REFERENCE,
+                              R::system_overlay::string::policy_public, false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_system, Res_value::TYPE_REFERENCE,
+                              R::system_overlay::string::policy_system, false /* rewrite */));
+  ASSERT_RESULT(
+      MappingExists(res, R::target::string::policy_system_vendor, Res_value::TYPE_REFERENCE,
+                    R::system_overlay::string::policy_system_vendor, false /* rewrite */));
 }
 
 // Resources that are not declared as overlayable and resources that a protected by policies the
 // overlay does not fulfill must not map to overlay resources.
 TEST(ResourceMappingTests, CreateIdmapFromApkAssetsPolicySystemPublicInvalid) {
-  auto resources = TestGetResourceMapping(
-      "/target/target.apk", "/system-overlay-invalid/system-overlay-invalid.apk",
-      PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_PUBLIC,
-      /* enforce_overlayable */ true);
+  auto resources = TestGetResourceMapping("/target/target.apk",
+                                          "/system-overlay-invalid/system-overlay-invalid.apk",
+                                          PolicyFlags::SYSTEM_PARTITION | PolicyFlags::PUBLIC,
+                                          /* enforce_overlayable */ true);
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   auto& res = *resources;
   ASSERT_EQ(res.GetTargetToOverlayMap().size(), 3U);
-  ASSERT_RESULT(MappingExists(res, 0x7f020008, Res_value::TYPE_REFERENCE, 0x7f010005,
-                              false /* rewrite */));  // string/policy_public
-  ASSERT_RESULT(MappingExists(res, 0x7f02000a, Res_value::TYPE_REFERENCE, 0x7f010007,
-                              false /* rewrite */));  // string/policy_system
-  ASSERT_RESULT(MappingExists(res, 0x7f02000b, Res_value::TYPE_REFERENCE, 0x7f010008,
-                              false /* rewrite */));  // string/policy_system_vendor
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_public, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::policy_public,
+                              false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_system, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::policy_system,
+                              false /* rewrite */));
+  ASSERT_RESULT(
+      MappingExists(res, R::target::string::policy_system_vendor, Res_value::TYPE_REFERENCE,
+                    R::system_overlay_invalid::string::policy_system_vendor, false /* rewrite */));
 }
 
 // Resources that are not declared as overlayable and resources that a protected by policies the
 // overlay does not fulfilled can map to overlay resources when overlayable enforcement is turned
 // off.
 TEST(ResourceMappingTests, ResourcesFromApkAssetsPolicySystemPublicInvalidIgnoreOverlayable) {
-  auto resources = TestGetResourceMapping(
-      "/target/target.apk", "/system-overlay-invalid/system-overlay-invalid.apk",
-      PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_PUBLIC,
-      /* enforce_overlayable */ false);
+  auto resources = TestGetResourceMapping("/target/target.apk",
+                                          "/system-overlay-invalid/system-overlay-invalid.apk",
+                                          PolicyFlags::SYSTEM_PARTITION | PolicyFlags::PUBLIC,
+                                          /* enforce_overlayable */ false);
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   auto& res = *resources;
-  ASSERT_EQ(res.GetTargetToOverlayMap().size(), 9U);
-  ASSERT_RESULT(MappingExists(res, 0x7f020003, Res_value::TYPE_REFERENCE, 0x7f010000,
-                              false /* rewrite */));  // string/not_overlayable
-  ASSERT_RESULT(MappingExists(res, 0x7f020004, Res_value::TYPE_REFERENCE, 0x7f010001,
-                              false /* rewrite */));  // string/other
-  ASSERT_RESULT(MappingExists(res, 0x7f020005, Res_value::TYPE_REFERENCE, 0x7f010002,
-                              false /* rewrite */));  // string/policy_odm
-  ASSERT_RESULT(MappingExists(res, 0x7f020006, Res_value::TYPE_REFERENCE, 0x7f010003,
-                              false /* rewrite */));  // string/policy_oem
-  ASSERT_RESULT(MappingExists(res, 0x7f020007, Res_value::TYPE_REFERENCE, 0x7f010004,
-                              false /* rewrite */));  // string/policy_product
-  ASSERT_RESULT(MappingExists(res, 0x7f020008, Res_value::TYPE_REFERENCE, 0x7f010005,
-                              false /* rewrite */));  // string/policy_public
-  ASSERT_RESULT(MappingExists(res, 0x7f020009, Res_value::TYPE_REFERENCE, 0x7f010006,
-                              false /* rewrite */));  // string/policy_signature
-  ASSERT_RESULT(MappingExists(res, 0x7f02000a, Res_value::TYPE_REFERENCE, 0x7f010007,
-                              false /* rewrite */));  // string/policy_system
-  ASSERT_RESULT(MappingExists(res, 0x7f02000b, Res_value::TYPE_REFERENCE, 0x7f010008,
-                              false /* rewrite */));  // string/policy_system_vendor
+  ASSERT_EQ(res.GetTargetToOverlayMap().size(), 10U);
+  ASSERT_RESULT(MappingExists(res, R::target::string::not_overlayable, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::not_overlayable,
+                              false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::other, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::other, false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_actor, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::policy_actor,
+                              false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_odm, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::policy_odm, false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_oem, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::policy_oem, false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_product, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::policy_product,
+                              false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_public, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::policy_public,
+                              false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_signature, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::policy_signature,
+                              false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::policy_system, Res_value::TYPE_REFERENCE,
+                              R::system_overlay_invalid::string::policy_system,
+                              false /* rewrite */));
+  ASSERT_RESULT(
+      MappingExists(res, R::target::string::policy_system_vendor, Res_value::TYPE_REFERENCE,
+                    R::system_overlay_invalid::string::policy_system_vendor, false /* rewrite */));
 }
 
 // Overlays that do not target an <overlayable> tag can overlay resources defined within any
 // <overlayable> tag.
 TEST(ResourceMappingTests, ResourcesFromApkAssetsNoDefinedOverlayableAndNoTargetName) {
   auto resources = TestGetResourceMapping("/target/target.apk", "/overlay/overlay-no-name.apk",
-                                          PolicyFlags::POLICY_PUBLIC,
+                                          PolicyFlags::PUBLIC,
                                           /* enforce_overlayable */ false);
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   auto& res = *resources;
   ASSERT_EQ(res.GetTargetToOverlayMap().size(), 4U);
-  ASSERT_RESULT(MappingExists(res, 0x7f010000, Res_value::TYPE_REFERENCE, 0x7f010000,
-                              false /* rewrite */));  // integer/int1
-  ASSERT_RESULT(MappingExists(res, 0x7f02000c, Res_value::TYPE_REFERENCE, 0x7f020000,
-                              false /* rewrite */));  // string/str1
-  ASSERT_RESULT(MappingExists(res, 0x7f02000e, Res_value::TYPE_REFERENCE, 0x7f020001,
-                              false /* rewrite */));  // string/str3
-  ASSERT_RESULT(MappingExists(res, 0x7f02000f, Res_value::TYPE_REFERENCE, 0x7f020002,
-                              false /* rewrite */));  // string/str4
+  ASSERT_RESULT(MappingExists(res, R::target::integer::int1, Res_value::TYPE_REFERENCE,
+                              R::overlay::integer::int1, false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::str1, Res_value::TYPE_REFERENCE,
+                              R::overlay::string::str1, false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::str3, Res_value::TYPE_REFERENCE,
+                              R::overlay::string::str3, false /* rewrite */));
+  ASSERT_RESULT(MappingExists(res, R::target::string::str4, Res_value::TYPE_REFERENCE,
+                              R::overlay::string::str4, false /* rewrite */));
 }
 
 // Overlays that are neither pre-installed nor signed with the same signature as the target cannot
 // overlay packages that have not defined overlayable resources.
 TEST(ResourceMappingTests, ResourcesFromApkAssetsDefaultPoliciesPublicFail) {
-  auto resources =
-      TestGetResourceMapping("/target/target-no-overlayable.apk", "/overlay/overlay-no-name.apk",
-                             PolicyFlags::POLICY_PUBLIC,
-                             /* enforce_overlayable */ true);
+  auto resources = TestGetResourceMapping("/target/target-no-overlayable.apk",
+                                          "/overlay/overlay-no-name.apk", PolicyFlags::PUBLIC,
+                                          /* enforce_overlayable */ true);
 
   ASSERT_TRUE(resources) << resources.GetErrorMessage();
   ASSERT_EQ(resources->GetTargetToOverlayMap().size(), 0U);
@@ -293,33 +309,44 @@ TEST(ResourceMappingTests, ResourcesFromApkAssetsDefaultPolicies) {
 
     ASSERT_TRUE(resources) << resources.GetErrorMessage();
     auto& res = *resources;
-    ASSERT_EQ(resources->GetTargetToOverlayMap().size(), 9U);
-    ASSERT_RESULT(MappingExists(res, 0x7f020003, Res_value::TYPE_REFERENCE, 0x7f010000,
-                                false /* rewrite */));  // string/not_overlayable
-    ASSERT_RESULT(MappingExists(res, 0x7f020004, Res_value::TYPE_REFERENCE, 0x7f010001,
-                                false /* rewrite */));  // string/other
-    ASSERT_RESULT(MappingExists(res, 0x7f020005, Res_value::TYPE_REFERENCE, 0x7f010002,
-                                false /* rewrite */));  // string/policy_odm
-    ASSERT_RESULT(MappingExists(res, 0x7f020006, Res_value::TYPE_REFERENCE, 0x7f010003,
-                                false /* rewrite */));  // string/policy_oem
-    ASSERT_RESULT(MappingExists(res, 0x7f020007, Res_value::TYPE_REFERENCE, 0x7f010004,
-                                false /* rewrite */));  // string/policy_product
-    ASSERT_RESULT(MappingExists(res, 0x7f020008, Res_value::TYPE_REFERENCE, 0x7f010005,
-                                false /* rewrite */));  // string/policy_public
-    ASSERT_RESULT(MappingExists(res, 0x7f020009, Res_value::TYPE_REFERENCE, 0x7f010006,
-                                false /* rewrite */));  // string/policy_signature
-    ASSERT_RESULT(MappingExists(res, 0x7f02000a, Res_value::TYPE_REFERENCE, 0x7f010007,
-                                false /* rewrite */));  // string/policy_system
-    ASSERT_RESULT(MappingExists(res, 0x7f02000b, Res_value::TYPE_REFERENCE, 0x7f010008,
-                                false /* rewrite */));  // string/policy_system_vendor
+    ASSERT_EQ(resources->GetTargetToOverlayMap().size(), 10U);
+    ASSERT_RESULT(MappingExists(res, R::target::string::not_overlayable, Res_value::TYPE_REFERENCE,
+                                R::system_overlay_invalid::string::not_overlayable,
+                                false /* rewrite */));
+    ASSERT_RESULT(MappingExists(res, R::target::string::other, Res_value::TYPE_REFERENCE,
+                                R::system_overlay_invalid::string::other, false /* rewrite */));
+    ASSERT_RESULT(MappingExists(res, R::target::string::policy_actor, Res_value::TYPE_REFERENCE,
+                                R::system_overlay_invalid::string::policy_actor,
+                                false /* rewrite */));
+    ASSERT_RESULT(MappingExists(res, R::target::string::policy_odm, Res_value::TYPE_REFERENCE,
+                                R::system_overlay_invalid::string::policy_odm,
+                                false /* rewrite */));
+    ASSERT_RESULT(MappingExists(res, R::target::string::policy_oem, Res_value::TYPE_REFERENCE,
+                                R::system_overlay_invalid::string::policy_oem,
+                                false /* rewrite */));
+    ASSERT_RESULT(MappingExists(res, R::target::string::policy_product, Res_value::TYPE_REFERENCE,
+                                R::system_overlay_invalid::string::policy_product,
+                                false /* rewrite */));
+    ASSERT_RESULT(MappingExists(res, R::target::string::policy_public, Res_value::TYPE_REFERENCE,
+                                R::system_overlay_invalid::string::policy_public,
+                                false /* rewrite */));
+    ASSERT_RESULT(MappingExists(res, R::target::string::policy_signature, Res_value::TYPE_REFERENCE,
+                                R::system_overlay_invalid::string::policy_signature,
+                                false /* rewrite */));
+    ASSERT_RESULT(MappingExists(res, R::target::string::policy_system, Res_value::TYPE_REFERENCE,
+                                R::system_overlay_invalid::string::policy_system,
+                                false /* rewrite */));
+    ASSERT_RESULT(MappingExists(
+        res, R::target::string::policy_system_vendor, Res_value::TYPE_REFERENCE,
+        R::system_overlay_invalid::string::policy_system_vendor, false /* rewrite */));
   };
 
-  CheckEntries(PolicyFlags::POLICY_SIGNATURE);
-  CheckEntries(PolicyFlags::POLICY_PRODUCT_PARTITION);
-  CheckEntries(PolicyFlags::POLICY_SYSTEM_PARTITION);
-  CheckEntries(PolicyFlags::POLICY_VENDOR_PARTITION);
-  CheckEntries(PolicyFlags::POLICY_ODM_PARTITION);
-  CheckEntries(PolicyFlags::POLICY_OEM_PARTITION);
+  CheckEntries(PolicyFlags::SIGNATURE);
+  CheckEntries(PolicyFlags::PRODUCT_PARTITION);
+  CheckEntries(PolicyFlags::SYSTEM_PARTITION);
+  CheckEntries(PolicyFlags::VENDOR_PARTITION);
+  CheckEntries(PolicyFlags::ODM_PARTITION);
+  CheckEntries(PolicyFlags::OEM_PARTITION);
 }
 
 }  // namespace android::idmap2

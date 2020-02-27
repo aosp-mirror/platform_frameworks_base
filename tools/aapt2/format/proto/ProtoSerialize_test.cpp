@@ -28,6 +28,8 @@ using ::testing::NotNull;
 using ::testing::SizeIs;
 using ::testing::StrEq;
 
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
+
 namespace aapt {
 
 class MockFileCollection : public io::IFileCollection {
@@ -171,7 +173,7 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
   EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://theme"));
   EXPECT_THAT(result_overlayable_item.overlayable->source.path, Eq("res/values/overlayable.xml"));
   EXPECT_THAT(result_overlayable_item.overlayable->source.line, Eq(40));
-  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kNone));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(PolicyFlags::NONE));
   EXPECT_THAT(result_overlayable_item.source.path, Eq("res/values/overlayable.xml"));
   EXPECT_THAT(result_overlayable_item.source.line, Eq(42));
 }
@@ -516,23 +518,28 @@ TEST(ProtoSerializeTest, SerializeDeserializeConfiguration) {
 TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   OverlayableItem overlayable_item_foo(std::make_shared<Overlayable>(
       "CustomizableResources", "overlay://customization"));
-  overlayable_item_foo.policies |= OverlayableItem::Policy::kSystem;
-  overlayable_item_foo.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item_foo.policies |= PolicyFlags::SYSTEM_PARTITION;
+  overlayable_item_foo.policies |= PolicyFlags::PRODUCT_PARTITION;
 
   OverlayableItem overlayable_item_bar(std::make_shared<Overlayable>(
       "TaskBar", "overlay://theme"));
-  overlayable_item_bar.policies |= OverlayableItem::Policy::kPublic;
-  overlayable_item_bar.policies |= OverlayableItem::Policy::kVendor;
+  overlayable_item_bar.policies |= PolicyFlags::PUBLIC;
+  overlayable_item_bar.policies |= PolicyFlags::VENDOR_PARTITION;
 
   OverlayableItem overlayable_item_baz(std::make_shared<Overlayable>(
       "FontPack", "overlay://theme"));
-  overlayable_item_baz.policies |= OverlayableItem::Policy::kPublic;
+  overlayable_item_baz.policies |= PolicyFlags::PUBLIC;
 
   OverlayableItem overlayable_item_boz(std::make_shared<Overlayable>(
       "IconPack", "overlay://theme"));
-  overlayable_item_boz.policies |= OverlayableItem::Policy::kSignature;
-  overlayable_item_boz.policies |= OverlayableItem::Policy::kOdm;
-  overlayable_item_boz.policies |= OverlayableItem::Policy::kOem;
+  overlayable_item_boz.policies |= PolicyFlags::SIGNATURE;
+  overlayable_item_boz.policies |= PolicyFlags::ODM_PARTITION;
+  overlayable_item_boz.policies |= PolicyFlags::OEM_PARTITION;
+
+  OverlayableItem overlayable_item_actor_config(std::make_shared<Overlayable>(
+      "ActorConfig", "overlay://theme"));
+  overlayable_item_actor_config.policies |= PolicyFlags::SIGNATURE;
+  overlayable_item_actor_config.policies |= PolicyFlags::ACTOR_SIGNATURE;
 
   OverlayableItem overlayable_item_biz(std::make_shared<Overlayable>(
       "Other", "overlay://customization"));
@@ -546,6 +553,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
           .SetOverlayable("com.app.a:bool/baz", overlayable_item_baz)
           .SetOverlayable("com.app.a:bool/boz", overlayable_item_boz)
           .SetOverlayable("com.app.a:bool/biz", overlayable_item_biz)
+          .SetOverlayable("com.app.a:bool/actor_config", overlayable_item_actor_config)
           .AddValue("com.app.a:bool/fiz", ResourceUtils::TryParseBool("true"))
           .Build();
 
@@ -565,8 +573,8 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   OverlayableItem& overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(overlayable_item.overlayable->name, Eq("CustomizableResources"));
   EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://customization"));
-  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kSystem
-                                              | OverlayableItem::Policy::kProduct));
+  EXPECT_THAT(overlayable_item.policies, Eq(PolicyFlags::SYSTEM_PARTITION
+                                              | PolicyFlags::PRODUCT_PARTITION));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/bar"));
   ASSERT_TRUE(search_result);
@@ -574,8 +582,8 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(overlayable_item.overlayable->name, Eq("TaskBar"));
   EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
-  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic
-                                              | OverlayableItem::Policy::kVendor));
+  EXPECT_THAT(overlayable_item.policies, Eq(PolicyFlags::PUBLIC
+                                              | PolicyFlags::VENDOR_PARTITION));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/baz"));
   ASSERT_TRUE(search_result);
@@ -583,7 +591,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(overlayable_item.overlayable->name, Eq("FontPack"));
   EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
-  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic));
+  EXPECT_THAT(overlayable_item.policies, Eq(PolicyFlags::PUBLIC));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/boz"));
   ASSERT_TRUE(search_result);
@@ -591,16 +599,25 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(overlayable_item.overlayable->name, Eq("IconPack"));
   EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
-  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature
-                                            | OverlayableItem::Policy::kOdm
-                                            | OverlayableItem::Policy::kOem));
+  EXPECT_THAT(overlayable_item.policies, Eq(PolicyFlags::SIGNATURE
+                                            | PolicyFlags::ODM_PARTITION
+                                            | PolicyFlags::OEM_PARTITION));
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/actor_config"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("ActorConfig"));
+  EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(overlayable_item.policies, Eq(PolicyFlags::SIGNATURE
+                                            | PolicyFlags::ACTOR_SIGNATURE));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/biz"));
   ASSERT_TRUE(search_result);
   ASSERT_TRUE(search_result.value().entry->overlayable_item);
   overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(overlayable_item.overlayable->name, Eq("Other"));
-  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kNone));
+  EXPECT_THAT(overlayable_item.policies, Eq(PolicyFlags::NONE));
   EXPECT_THAT(overlayable_item.comment, Eq("comment"));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/fiz"));
