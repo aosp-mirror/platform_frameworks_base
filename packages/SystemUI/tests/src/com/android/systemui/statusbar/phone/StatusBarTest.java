@@ -402,6 +402,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mExtensionController,
                 mUserInfoControllerImpl,
                 mPhoneStatusBarPolicy,
+                mKeyguardIndicationController,
                 mDismissCallbackRegistry,
                 mStatusBarTouchableRegionManager);
 

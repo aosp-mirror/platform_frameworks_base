@@ -16,7 +16,15 @@
 
 package com.android.systemui.statusbar.phone;
 
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
+import android.view.View;
+
+import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.R;
+import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.policy.AccessibilityController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -25,11 +33,43 @@ import javax.inject.Singleton;
 @Singleton
 public class LockscreenLockIconController {
 
-    private final LockIcon mLockIcon;
+    private final LockscreenGestureLogger mLockscreenGestureLogger;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final LockPatternUtils mLockPatternUtils;
+    private final ShadeController mShadeController;
+    private final AccessibilityController mAccessibilityController;
+    private final KeyguardIndicationController mKeyguardIndicationController;
+    private LockIcon mLockIcon;
 
     @Inject
-    public LockscreenLockIconController(SuperStatusBarViewFactory superStatusBarViewFactory) {
-        mLockIcon = superStatusBarViewFactory.getLockIcon();
+    public LockscreenLockIconController(LockscreenGestureLogger lockscreenGestureLogger,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            LockPatternUtils lockPatternUtils,
+            ShadeController shadeController,
+            AccessibilityController accessibilityController,
+            KeyguardIndicationController keyguardIndicationController) {
+        mLockscreenGestureLogger = lockscreenGestureLogger;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mLockPatternUtils = lockPatternUtils;
+        mShadeController = shadeController;
+        mAccessibilityController = accessibilityController;
+        mKeyguardIndicationController = keyguardIndicationController;
+
+        mKeyguardIndicationController.setLockIconController(this);
+    }
+
+    /**
+     * Associate the controller with a {@link LockIcon}
+     */
+    public void attach(LockIcon lockIcon) {
+        mLockIcon = lockIcon;
+
+        mLockIcon.setOnClickListener(this::handleClick);
+        mLockIcon.setOnLongClickListener(this::handleLongClick);
+    }
+
+    public LockIcon getView() {
+        return mLockIcon;
     }
 
     /**
@@ -85,5 +125,33 @@ public class LockscreenLockIconController {
         if (mLockIcon != null) {
             mLockIcon.onBouncerPreHideAnimation();
         }
+    }
+
+    /**
+     * If we're currently presenting an authentication error message.
+     */
+    public void setTransientBiometricsError(boolean transientBiometricsError) {
+        if (mLockIcon != null) {
+            mLockIcon.setTransientBiometricsError(transientBiometricsError);
+        }
+    }
+
+    private boolean handleLongClick(View view) {
+        mLockscreenGestureLogger.write(MetricsProto.MetricsEvent.ACTION_LS_LOCK,
+                0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
+        mKeyguardIndicationController.showTransientIndication(
+                R.string.keyguard_indication_trust_disabled);
+        mKeyguardUpdateMonitor.onLockIconPressed();
+        mLockPatternUtils.requireCredentialEntry(KeyguardUpdateMonitor.getCurrentUser());
+
+        return true;
+    }
+
+
+    private void handleClick(View view) {
+        if (!mAccessibilityController.isAccessibilityEnabled()) {
+            return;
+        }
+        mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
     }
 }

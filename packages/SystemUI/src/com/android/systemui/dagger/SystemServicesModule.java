@@ -34,6 +34,7 @@ import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.ServiceManager;
@@ -49,6 +50,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
@@ -119,6 +121,13 @@ public class SystemServicesModule {
     @Provides
     static IActivityManager provideIActivityManager() {
         return ActivityManager.getService();
+    }
+
+    @Provides
+    @Singleton
+    static IBatteryStats provideIBatteryStats() {
+        return IBatteryStats.Stub.asInterface(
+                ServiceManager.getService(BatteryStats.SERVICE_NAME));
     }
 
     @Provides
