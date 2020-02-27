@@ -18,7 +18,10 @@ package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
 
@@ -467,6 +470,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
         };
         switch (inflationFlag) {
+            case FLAG_CONTENT_VIEW_CONTRACTED:
+                getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_CONTRACTED,
+                        freeViewRunnable);
+                break;
+            case FLAG_CONTENT_VIEW_EXPANDED:
+                getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_EXPANDED,
+                        freeViewRunnable);
+                break;
             case FLAG_CONTENT_VIEW_HEADS_UP:
                 getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_HEADSUP,
                         freeViewRunnable);
