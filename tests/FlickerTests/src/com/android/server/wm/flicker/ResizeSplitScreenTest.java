@@ -95,7 +95,7 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
         Rect displayBounds = getDisplayBounds();
         checkResults(result -> {
             LayersTrace entries = LayersTrace.parseFrom(result.getLayersTrace(),
-                    result.getLayersTracePath());
+                    result.getLayersTracePath(), result.getLayersTraceChecksum());
 
             assertThat(entries.getEntries()).isNotEmpty();
             Rect startingDividerBounds = entries.getEntries().get(0).getVisibleBounds
@@ -124,7 +124,7 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
         Rect displayBounds = getDisplayBounds();
         checkResults(result -> {
             LayersTrace entries = LayersTrace.parseFrom(result.getLayersTrace(),
-                    result.getLayersTracePath());
+                    result.getLayersTracePath(), result.getLayersTraceChecksum());
 
             assertThat(entries.getEntries()).isNotEmpty();
             Rect endingDividerBounds = entries.getEntries().get(
