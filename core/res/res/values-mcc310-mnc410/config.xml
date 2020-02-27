@@ -23,31 +23,6 @@
     <!-- Configure mobile network MTU. Carrier specific value is set here.
     -->
     <integer name="config_mobile_mtu">1410</integer>
-    <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
-    <string-array name="config_twoDigitNumberPattern">
-        <item>"0"</item>
-        <item>"00"</item>
-        <item>"*0"</item>
-        <item>"*1"</item>
-        <item>"*2"</item>
-        <item>"*3"</item>
-        <item>"*4"</item>
-        <item>"*5"</item>
-        <item>"*6"</item>
-        <item>"*7"</item>
-        <item>"*8"</item>
-        <item>"*9"</item>
-        <item>"#0"</item>
-        <item>"#1"</item>
-        <item>"#2"</item>
-        <item>"#3"</item>
-        <item>"#4"</item>
-        <item>"#5"</item>
-        <item>"#6"</item>
-        <item>"#7"</item>
-        <item>"#8"</item>
-        <item>"#9"</item>
-    </string-array>
 
     <!-- Enable 5 bar signal strength icon -->
     <bool name="config_inflateSignalStrength">true</bool>
