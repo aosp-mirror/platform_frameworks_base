@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -183,7 +184,8 @@ public class NotificationMediaManager implements Dumpable {
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController,
-            @Main Executor mainExecutor) {
+            @Main Executor mainExecutor,
+            DeviceConfigProxy deviceConfig) {
         mContext = context;
         mMediaArtworkProcessor = mediaArtworkProcessor;
         mKeyguardBypassController = keyguardBypassController;
@@ -221,7 +223,7 @@ public class NotificationMediaManager implements Dumpable {
                 DeviceConfig.getProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.COMPACT_MEDIA_SEEKBAR_ENABLED));
 
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+        deviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                 mContext.getMainExecutor(),
                 mPropertiesChangedListener);
     }

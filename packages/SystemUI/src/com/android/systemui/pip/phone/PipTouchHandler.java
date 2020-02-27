@@ -48,6 +48,7 @@ import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 
 import java.io.PrintWriter;
@@ -164,7 +165,8 @@ public class PipTouchHandler {
             InputConsumerController inputConsumerController,
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            DeviceConfigProxy deviceConfig) {
         // Initialize the Pip input consumer
         mContext = context;
         mActivityManager = activityManager;
@@ -179,7 +181,8 @@ public class PipTouchHandler {
         mMotionHelper = new PipMotionHelper(mContext, activityTaskManager, pipTaskOrganizer,
                 mMenuController, mSnapAlgorithm, mFlingAnimationUtils, floatingContentCoordinator);
         mPipResizeGestureHandler =
-                new PipResizeGestureHandler(context, pipBoundsHandler, this, mMotionHelper);
+                new PipResizeGestureHandler(context, pipBoundsHandler, this, mMotionHelper,
+                        deviceConfig);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         mMovementBounds, true /* allowMenuTimeout */, willResizeMenu()));
