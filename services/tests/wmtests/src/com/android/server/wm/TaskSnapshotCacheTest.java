@@ -49,6 +49,10 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
     @Mock
     TaskSnapshot mSnapshot;
 
+    public TaskSnapshotCacheTest() {
+        super(0.8f, 0.5f);
+    }
+
     @Override
     @Before
     public void setUp() {

@@ -23,8 +23,14 @@ import static android.graphics.GraphicBuffer.USAGE_SW_READ_RARELY;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.ComponentName;
+import android.content.ContextWrapper;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorSpace;
@@ -39,6 +45,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
+import java.util.function.Predicate;
 
 /**
  * Base class for tests that use a {@link TaskSnapshotPersister}.
@@ -49,14 +56,35 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     static final File FILES_DIR = getInstrumentation().getTargetContext().getFilesDir();
     static final long MOCK_SNAPSHOT_ID = 12345678;
 
+    private ContextWrapper mContextSpy;
+    private Resources mResourcesSpy;
     TaskSnapshotPersister mPersister;
     TaskSnapshotLoader mLoader;
     int mTestUserId;
+    float mHighResScale;
+    float mLowResScale;
+
+    TaskSnapshotPersisterTestBase(float highResScale, float lowResScale) {
+        super();
+        mHighResScale = highResScale;
+        mLowResScale = lowResScale;
+    }
 
     @Before
     public void setUp() {
         final UserManager um = UserManager.get(getInstrumentation().getTargetContext());
         mTestUserId = um.getUserHandle();
+
+        mContextSpy = spy(new ContextWrapper(mWm.mContext));
+        mResourcesSpy = spy(mContextSpy.getResources());
+        when(mContextSpy.getResources()).thenReturn(mResourcesSpy);
+        when(mResourcesSpy.getFloat(
+                com.android.internal.R.dimen.config_highResTaskSnapshotScale))
+                .thenReturn(mHighResScale);
+        when(mResourcesSpy.getFloat(
+                com.android.internal.R.dimen.config_lowResTaskSnapshotScale))
+                .thenReturn(mLowResScale);
+
         mPersister = new TaskSnapshotPersister(mWm, userId -> FILES_DIR);
         mLoader = new TaskSnapshotLoader(mPersister);
         mPersister.start();
@@ -82,6 +110,13 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     TaskSnapshot createSnapshot() {
         return new TaskSnapshotBuilder()
                 .build();
+    }
+
+    protected static void assertTrueForFiles(File[] files, Predicate<File> predicate,
+            String message) {
+        for (File file : files) {
+            assertTrue(file.getName() + message, predicate.test(file));
+        }
     }
 
     /**
