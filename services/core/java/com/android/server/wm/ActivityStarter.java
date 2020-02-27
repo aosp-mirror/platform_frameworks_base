@@ -1819,12 +1819,12 @@ class ActivityStarter {
      */
     private int deliverToCurrentTopIfNeeded(ActivityStack topStack) {
         final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
-        final boolean dontStart = top != null
+        final boolean dontStart = top != null && mStartActivity.resultTo == null
                 && top.mActivityComponent.equals(mStartActivity.mActivityComponent)
                 && top.mUserId == mStartActivity.mUserId
                 && top.attachedToProcess()
                 && ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
-                    || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK))
+                || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK))
                 // This allows home activity to automatically launch on secondary display when
                 // display added, if home was the top activity on default display, instead of
                 // sending new intent to the home activity on default display.
@@ -2055,6 +2055,8 @@ class ActivityStarter {
                 && !isLaunchModeOneOf(LAUNCH_SINGLE_TASK, LAUNCH_SINGLE_INSTANCE)
                 && (mLaunchFlags & FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
 
+        sendNewTaskResultRequestIfNeeded();
+
         if ((mLaunchFlags & FLAG_ACTIVITY_NEW_DOCUMENT) != 0 && r.resultTo == null) {
             mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
         }
@@ -2236,8 +2238,6 @@ class ActivityStarter {
                 mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
             }
         }
-
-        sendNewTaskResultRequestIfNeeded();
     }
 
     private void computeSourceStack() {
