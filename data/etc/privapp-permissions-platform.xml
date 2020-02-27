@@ -389,6 +389,8 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_NOTIFICATIONS"/>
         <!-- Permission required for CompanionDeviceManager CTS test. -->
         <permission name="android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS" />
+        <!-- Permission required for testing registering pull atom callbacks. -->
+        <permission name="android.permission.REGISTER_STATS_PULL_ATOM"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

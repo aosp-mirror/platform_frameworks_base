@@ -272,6 +272,9 @@
     <!-- Permission needed to read wifi network credentials for CtsNetTestCases -->
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL" />
 
+    <!-- Permission needed to test registering pull atom callbacks -->
+    <uses-permission android:name="android.permission.REGISTER_STATS_PULL_ATOM" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
