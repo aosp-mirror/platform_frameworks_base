@@ -55,7 +55,7 @@ oneway interface IInputMethod {
 
     void showSoftInput(in IBinder showInputToken, int flags, in ResultReceiver resultReceiver);
 
-    void hideSoftInput(int flags, in ResultReceiver resultReceiver);
+    void hideSoftInput(in IBinder hideInputToken, int flags, in ResultReceiver resultReceiver);
 
     void changeInputMethodSubtype(in InputMethodSubtype subtype);
 }
