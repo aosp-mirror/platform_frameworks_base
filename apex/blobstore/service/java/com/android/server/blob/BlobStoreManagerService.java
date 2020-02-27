@@ -343,7 +343,7 @@ public class BlobStoreManagerService extends SystemService {
         return session;
     }
 
-    private void deleteSessionInternal(long sessionId,
+    private void abandonSessionInternal(long sessionId,
             int callingUid, String callingPackage) {
         synchronized (mBlobsLock) {
             final BlobStoreSession session = openSessionInternal(sessionId,
@@ -351,7 +351,7 @@ public class BlobStoreManagerService extends SystemService {
             session.open();
             session.abandon();
             if (LOGV) {
-                Slog.v(TAG, "Deleted session with id " + sessionId
+                Slog.v(TAG, "Abandoned session with id " + sessionId
                         + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
             }
             writeBlobSessionsAsync();
@@ -1167,7 +1167,7 @@ public class BlobStoreManagerService extends SystemService {
         }
 
         @Override
-        public void deleteSession(@IntRange(from = 1) long sessionId,
+        public void abandonSession(@IntRange(from = 1) long sessionId,
                 @NonNull String packageName) {
             Preconditions.checkArgumentPositive(sessionId,
                     "sessionId must be positive: " + sessionId);
@@ -1176,7 +1176,7 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            deleteSessionInternal(sessionId, callingUid, packageName);
+            abandonSessionInternal(sessionId, callingUid, packageName);
         }
 
         @Override
