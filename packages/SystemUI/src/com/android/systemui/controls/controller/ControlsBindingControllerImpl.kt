@@ -186,6 +186,18 @@ open class ControlsBindingControllerImpl @Inject constructor(
         }
     }
 
+    override fun onComponentRemoved(componentName: ComponentName) {
+        backgroundExecutor.execute {
+            synchronized(componentMap) {
+                val removed = componentMap.remove(Key(componentName, currentUser))
+                removed?.let {
+                    it.unbindService()
+                    tokenMap.remove(it.token)
+                }
+            }
+        }
+    }
+
     override fun toString(): String {
         return StringBuilder("  ControlsBindingController:\n").apply {
             append("    refreshing=${refreshing.get()}\n")

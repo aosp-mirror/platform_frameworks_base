@@ -37,6 +37,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlStatus
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
@@ -122,6 +123,7 @@ class ControlsControllerImpl @Inject constructor (
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == Intent.ACTION_USER_SWITCHED) {
                 userChanging = true
+                listingController.removeCallback(listingCallback)
                 val newUser =
                         UserHandle.of(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, sendingUserId))
                 if (currentUser == newUser) {
@@ -148,6 +150,34 @@ class ControlsControllerImpl @Inject constructor (
             }
             if (available) {
                 loadFavorites()
+            }
+        }
+    }
+
+    // Handling of removed components
+
+    /**
+     * Check if any component has been removed and if so, remove all its favorites.
+     *
+     * If some component has been removed, the new set of favorites will also be saved.
+     */
+    private val listingCallback = object : ControlsListingController.ControlsListingCallback {
+        override fun onServicesUpdated(candidates: List<ControlsServiceInfo>) {
+            executor.execute {
+                val candidateComponents = candidates.map(ControlsServiceInfo::componentName)
+                synchronized(currentFavorites) {
+                    val components = currentFavorites.keys.toSet() // create a copy
+                    components.forEach {
+                        if (it !in candidateComponents) {
+                            currentFavorites.remove(it)
+                            bindingController.onComponentRemoved(it)
+                        }
+                    }
+                    // Check if something has been removed, if so, store the new list
+                    if (components.size > currentFavorites.size) {
+                        persistenceWrapper.storeFavorites(favoritesAsListLocked())
+                    }
+                }
             }
         }
     }
@@ -186,6 +216,7 @@ class ControlsControllerImpl @Inject constructor (
                 currentFavorites.getOrPut(it.component, { mutableListOf() }).add(it)
             }
         }
+        listingController.addCallback(listingCallback)
     }
 
     override fun loadForComponent(

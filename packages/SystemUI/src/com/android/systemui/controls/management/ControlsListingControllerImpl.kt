@@ -146,7 +146,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
      * @return a list of components that satisfy the requirements to be a
      *         [ControlsProviderService]
      */
-    override fun getCurrentServices(): List<CandidateInfo> =
+    override fun getCurrentServices(): List<ControlsServiceInfo> =
             availableServices.map { ControlsServiceInfo(context, it) }
 
     /**
