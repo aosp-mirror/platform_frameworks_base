@@ -250,7 +250,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
         verify(mAm, times(1)).setExactAndAllowWhileIdle(
                 anyInt(), captor.capture(), any(PendingIntent.class));
-        long actualSnoozedUntilDuration = captor.getValue() - SystemClock.elapsedRealtime();
+        long actualSnoozedUntilDuration = captor.getValue() - System.currentTimeMillis();
         assertTrue(Math.abs(actualSnoozedUntilDuration - 1000) < 250);
         assertTrue(mSnoozeHelper.isSnoozed(
                 UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));

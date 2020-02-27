@@ -8069,7 +8069,6 @@ public class NotificationManagerService extends SystemService {
         if (DBG) {
             Slog.d(TAG, String.format("unsnooze event(%s, %s)", key, listenerName));
         }
-        mSnoozeHelper.cleanupPersistedContext(key);
         mSnoozeHelper.repost(key, muteOnReturn);
         handleSavePolicyFile();
     }
