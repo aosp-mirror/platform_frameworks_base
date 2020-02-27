@@ -126,7 +126,10 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
     uint32_t pid = cred->pid;
 
     int64_t oldestTimestamp;
-    if (!mQueue->push(std::make_unique<LogEvent>(msg, len, uid, pid), &oldestTimestamp)) {
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(uid, pid);
+    logEvent->parseBuffer(msg, len);
+
+    if (!mQueue->push(std::move(logEvent), &oldestTimestamp)) {
         StatsdStats::getInstance().noteEventQueueOverflow(oldestTimestamp);
     }
 
