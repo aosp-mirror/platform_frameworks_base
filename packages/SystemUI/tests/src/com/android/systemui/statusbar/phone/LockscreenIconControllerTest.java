@@ -29,8 +29,10 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.policy.AccessibilityController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +59,10 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
     private KeyguardIndicationController mKeyguardIndicationController;
     @Mock
     private LockIcon mLockIcon; // TODO: make this not a mock once inject is removed.
+    @Mock
+    private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private ConfigurationController mConfigurationController;
 
     @Before
     public void setUp() {
@@ -64,7 +70,8 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
 
         mLockIconController = new LockscreenLockIconController(
                 mLockscreenGestureLogger, mKeyguardUpdateMonitor, mLockPatternUtils,
-                mShadeController, mAccessibilityController, mKeyguardIndicationController);
+                mShadeController, mAccessibilityController, mKeyguardIndicationController,
+                mStatusBarStateController, mConfigurationController);
 
         mLockIconController.attach(mLockIcon);
     }

@@ -22,7 +22,6 @@ import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -32,7 +31,6 @@ import android.os.Trace;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -45,13 +43,11 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.phone.ScrimController.ScrimVisibility;
 import com.android.systemui.statusbar.policy.AccessibilityController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -65,7 +61,6 @@ import javax.inject.Named;
  * Manages the different states and animations of the unlock icon.
  */
 public class LockIcon extends KeyguardAffordanceView implements
-        StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
         KeyguardStateController.Callback, NotificationWakeUpCoordinator.WakeUpListener,
         ViewTreeObserver.OnPreDrawListener, OnHeadsUpChangedListener {
 
@@ -73,8 +68,6 @@ public class LockIcon extends KeyguardAffordanceView implements
     private static final int STATE_LOCK_OPEN = 1;
     private static final int STATE_SCANNING_FACE = 2;
     private static final int STATE_BIOMETRICS_ERROR = 3;
-    private final ConfigurationController mConfigurationController;
-    private final StatusBarStateController mStatusBarStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final AccessibilityController mAccessibilityController;
     private final DockManager mDockManager;
@@ -102,6 +95,7 @@ public class LockIcon extends KeyguardAffordanceView implements
     private boolean mKeyguardJustShown;
     private boolean mUpdatePending;
     private boolean mBouncerPreHideAnimation;
+    private int mStatusBarState = StatusBarState.SHADE;
 
     private final KeyguardStateController.Callback mKeyguardMonitorCallback =
             new KeyguardStateController.Callback() {
@@ -176,8 +170,6 @@ public class LockIcon extends KeyguardAffordanceView implements
 
     @Inject
     public LockIcon(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            StatusBarStateController statusBarStateController,
-            ConfigurationController configurationController,
             AccessibilityController accessibilityController,
             KeyguardBypassController bypassController,
             NotificationWakeUpCoordinator wakeUpCoordinator,
@@ -188,8 +180,6 @@ public class LockIcon extends KeyguardAffordanceView implements
         mContext = context;
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mAccessibilityController = accessibilityController;
-        mConfigurationController = configurationController;
-        mStatusBarStateController = statusBarStateController;
         mBypassController = bypassController;
         mWakeUpCoordinator = wakeUpCoordinator;
         mKeyguardStateController = keyguardStateController;
@@ -200,8 +190,6 @@ public class LockIcon extends KeyguardAffordanceView implements
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mStatusBarStateController.addCallback(this);
-        mConfigurationController.addCallback(this);
         mKeyguardStateController.addCallback(mKeyguardMonitorCallback);
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mWakeUpCoordinator.addListener(this);
@@ -209,30 +197,18 @@ public class LockIcon extends KeyguardAffordanceView implements
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
         }
-        onThemeChanged();
         update();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mStatusBarStateController.removeCallback(this);
-        mConfigurationController.removeCallback(this);
         mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
         mKeyguardStateController.removeCallback(mKeyguardMonitorCallback);
         mWakeUpCoordinator.removeListener(this);
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
         }
-    }
-
-    @Override
-    public void onThemeChanged() {
-        TypedArray typedArray = mContext.getTheme().obtainStyledAttributes(
-                null, new int[]{ R.attr.wallpaperTextColor }, 0, 0);
-        mIconColor = typedArray.getColor(0, Color.WHITE);
-        typedArray.recycle();
-        updateDarkTint();
     }
 
     /**
@@ -336,7 +312,7 @@ public class LockIcon extends KeyguardAffordanceView implements
                 || mShowingLaunchAffordance;
         if (mBypassController.getBypassEnabled() && !mBouncerShowingScrimmed) {
             if ((mHeadsUpManager.isHeadsUpGoingAway() || mHeadsUpManager.hasPinnedHeadsUp()
-                    || mStatusBarStateController.getState() == StatusBarState.KEYGUARD)
+                    || mStatusBarState == StatusBarState.KEYGUARD)
                     && !mWakeUpCoordinator.getNotificationsFullyHidden()) {
                 invisible = true;
             }
@@ -473,6 +449,11 @@ public class LockIcon extends KeyguardAffordanceView implements
         update();
     }
 
+    void setIconColor(int iconColor) {
+        mIconColor = iconColor;
+        updateDarkTint();
+    }
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ERROR, UNLOCK, LOCK, SCANNING})
     @interface LockAnimIndex {}
@@ -532,12 +513,6 @@ public class LockIcon extends KeyguardAffordanceView implements
         }
     }
 
-    @Override
-    public void onDozeAmountChanged(float linear, float eased) {
-        mDozeAmount = eased;
-        updateDarkTint();
-    }
-
     /**
      * When keyguard is in pulsing (AOD2) state.
      * @param pulsing {@code true} when pulsing.
@@ -547,36 +522,9 @@ public class LockIcon extends KeyguardAffordanceView implements
         update();
     }
 
-    /**
-     * Sets the dozing state of the keyguard.
-     */
-    @Override
-    public void onDozingChanged(boolean dozing) {
-        mDozing = dozing;
-        update();
-    }
-
     private void updateDarkTint() {
         int color = ColorUtils.blendARGB(mIconColor, Color.WHITE, mDozeAmount);
         setImageTintList(ColorStateList.valueOf(color));
-    }
-
-    @Override
-    public void onDensityOrFontScaleChanged() {
-        ViewGroup.LayoutParams lp = getLayoutParams();
-        if (lp == null) {
-            return;
-        }
-        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_lock_width);
-        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_lock_height);
-        setLayoutParams(lp);
-        update(true /* force */);
-    }
-
-    @Override
-    public void onLocaleListChanged() {
-        setContentDescription(getContext().getText(R.string.accessibility_unlock_button));
-        update(true /* force */);
     }
 
     /**
@@ -613,5 +561,21 @@ public class LockIcon extends KeyguardAffordanceView implements
             mWakeAndUnlockRunning = false;
             update();
         }
+    }
+
+    void setDozing(boolean dozing) {
+        mDozing = dozing;
+        update();
+    }
+
+    void setDozeAmount(float dozeAmount) {
+        mDozeAmount = dozeAmount;
+        updateDarkTint();
+    }
+
+    /** Set the StatusBarState. */
+    public void setStatusBarState(int statusBarState) {
+        mStatusBarState = statusBarState;
+        updateIconVisibility();
     }
 }
