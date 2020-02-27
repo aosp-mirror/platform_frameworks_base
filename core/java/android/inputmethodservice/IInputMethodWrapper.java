@@ -219,22 +219,29 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_REVOKE_SESSION:
                 inputMethod.revokeSession((InputMethodSession)msg.obj);
                 return;
-            case DO_SHOW_SOFT_INPUT:
-                SomeArgs args = (SomeArgs)msg.obj;
+            case DO_SHOW_SOFT_INPUT: {
+                final SomeArgs args = (SomeArgs)msg.obj;
                 inputMethod.showSoftInputWithToken(
                         msg.arg1, (ResultReceiver) args.arg2, (IBinder) args.arg1);
+                args.recycle();
                 return;
-            case DO_HIDE_SOFT_INPUT:
-                inputMethod.hideSoftInput(msg.arg1, (ResultReceiver)msg.obj);
+            }
+            case DO_HIDE_SOFT_INPUT: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                inputMethod.hideSoftInputWithToken(msg.arg1, (ResultReceiver) args.arg2,
+                        (IBinder) args.arg1);
+                args.recycle();
                 return;
+            }
             case DO_CHANGE_INPUTMETHOD_SUBTYPE:
                 inputMethod.changeInputMethodSubtype((InputMethodSubtype)msg.obj);
                 return;
             case DO_CREATE_INLINE_SUGGESTIONS_REQUEST:
-                args = (SomeArgs) msg.obj;
+                final SomeArgs args = (SomeArgs) msg.obj;
                 inputMethod.onCreateInlineSuggestionsRequest(
                         (InlineSuggestionsRequestInfo) args.arg1,
                         (IInlineSuggestionsRequestCallback) args.arg2);
+                args.recycle();
                 return;
 
         }
@@ -380,9 +387,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIO(DO_HIDE_SOFT_INPUT,
-                flags, resultReceiver));
+    public void hideSoftInput(IBinder hideInputToken, int flags, ResultReceiver resultReceiver) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_HIDE_SOFT_INPUT,
+                flags, hideInputToken, resultReceiver));
     }
 
     @BinderThread
