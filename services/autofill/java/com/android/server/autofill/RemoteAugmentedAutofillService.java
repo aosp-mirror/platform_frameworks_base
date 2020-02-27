@@ -47,6 +47,7 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.inputmethod.InlineSuggestionsRequest;
+import android.view.inputmethod.InlineSuggestionsResponse;
 
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.AndroidFuture;
@@ -243,20 +244,27 @@ final class RemoteAugmentedAutofillService
         }
         mCallbacks.setLastResponse(sessionId);
 
+        final InlineSuggestionsResponse inlineSuggestionsResponse =
+                InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
+                        request, inlineSuggestionsData, focusedId, mContext,
+                        dataset -> {
+                            mCallbacks.logAugmentedAutofillSelected(sessionId,
+                                    dataset.getId());
+                            try {
+                                client.autofill(sessionId, dataset.getFieldIds(),
+                                        dataset.getFieldValues());
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Encounter exception autofilling the values");
+                            }
+                        }, onErrorCallback, remoteRenderService);
+
+        if (inlineSuggestionsResponse == null) {
+            Slog.w(TAG, "InlineSuggestionFactory created null response");
+            return;
+        }
+
         try {
-            inlineSuggestionsCallback.onInlineSuggestionsResponse(
-                    InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
-                            request, inlineSuggestionsData, focusedId, mContext,
-                            dataset -> {
-                                mCallbacks.logAugmentedAutofillSelected(sessionId,
-                                        dataset.getId());
-                                try {
-                                    client.autofill(sessionId, dataset.getFieldIds(),
-                                            dataset.getFieldValues());
-                                } catch (RemoteException e) {
-                                    Slog.w(TAG, "Encounter exception autofilling the values");
-                                }
-                            }, onErrorCallback, remoteRenderService));
+            inlineSuggestionsCallback.onInlineSuggestionsResponse(inlineSuggestionsResponse);
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception sending inline suggestions response back to IME.");
         }
