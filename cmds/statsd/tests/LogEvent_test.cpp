@@ -54,8 +54,9 @@ TEST(LogEventTest, TestPrimitiveParsing) {
     size_t size;
     uint8_t* buf = AStatsEvent_getBuffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
-    EXPECT_TRUE(logEvent.isValid());
+    LogEvent logEvent(/*uid=*/1000, /*pid=*/1001);
+    EXPECT_TRUE(logEvent.parseBuffer(buf, size));
+
     EXPECT_EQ(100, logEvent.GetTagId());
     EXPECT_EQ(1000, logEvent.GetUid());
     EXPECT_EQ(1001, logEvent.GetPid());
@@ -102,8 +103,9 @@ TEST(LogEventTest, TestStringAndByteArrayParsing) {
     size_t size;
     uint8_t* buf = AStatsEvent_getBuffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
-    EXPECT_TRUE(logEvent.isValid());
+    LogEvent logEvent(/*uid=*/ 1000, /*pid=*/ 1001);
+    EXPECT_TRUE(logEvent.parseBuffer(buf, size));
+
     EXPECT_EQ(100, logEvent.GetTagId());
     EXPECT_EQ(1000, logEvent.GetUid());
     EXPECT_EQ(1001, logEvent.GetPid());
@@ -137,8 +139,9 @@ TEST(LogEventTest, TestEmptyString) {
     size_t size;
     uint8_t* buf = AStatsEvent_getBuffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
-    EXPECT_TRUE(logEvent.isValid());
+    LogEvent logEvent(/*uid=*/ 1000, /*pid=*/ 1001);
+    EXPECT_TRUE(logEvent.parseBuffer(buf, size));
+
     EXPECT_EQ(100, logEvent.GetTagId());
     EXPECT_EQ(1000, logEvent.GetUid());
     EXPECT_EQ(1001, logEvent.GetPid());
@@ -165,8 +168,9 @@ TEST(LogEventTest, TestByteArrayWithNullCharacter) {
     size_t size;
     uint8_t* buf = AStatsEvent_getBuffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
-    EXPECT_TRUE(logEvent.isValid());
+    LogEvent logEvent(/*uid=*/ 1000, /*pid=*/ 1001);
+    EXPECT_TRUE(logEvent.parseBuffer(buf, size));
+
     EXPECT_EQ(100, logEvent.GetTagId());
     EXPECT_EQ(1000, logEvent.GetUid());
     EXPECT_EQ(1001, logEvent.GetPid());
@@ -200,8 +204,9 @@ TEST(LogEventTest, TestAttributionChain) {
     size_t size;
     uint8_t* buf = AStatsEvent_getBuffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
-    EXPECT_TRUE(logEvent.isValid());
+    LogEvent logEvent(/*uid=*/ 1000, /*pid=*/ 1001);
+    EXPECT_TRUE(logEvent.parseBuffer(buf, size));
+
     EXPECT_EQ(100, logEvent.GetTagId());
     EXPECT_EQ(1000, logEvent.GetUid());
     EXPECT_EQ(1001, logEvent.GetPid());
