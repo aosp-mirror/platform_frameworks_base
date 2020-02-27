@@ -3827,6 +3827,18 @@ public abstract class ContentResolver implements ContentInterface {
         return queryArgs;
     }
 
+    /** @hide */
+    public static @NonNull Bundle includeSqlSelectionArgs(@NonNull Bundle queryArgs,
+            @Nullable String selection, @Nullable String[] selectionArgs) {
+        if (selection != null) {
+            queryArgs.putString(QUERY_ARG_SQL_SELECTION, selection);
+        }
+        if (selectionArgs != null) {
+            queryArgs.putStringArray(QUERY_ARG_SQL_SELECTION_ARGS, selectionArgs);
+        }
+        return queryArgs;
+    }
+
     /**
      * Returns structured sort args formatted as an SQL sort clause.
      *
