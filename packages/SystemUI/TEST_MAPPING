@@ -35,5 +35,18 @@
         }
       ]
     }
+  ],
+  "auto-end-to-end-postsubmit": [
+    {
+      "name": "AndroidAutoUiTests",
+      "options" : [
+        {
+          "include-filter": "android.test.functional.auto.apps.HomeHelperTest"
+        },
+        {
+          "include-filter": "android.test.functional.auto.apps.NotificationHelperTest"
+        }
+      ]
+    }
   ]
 }
