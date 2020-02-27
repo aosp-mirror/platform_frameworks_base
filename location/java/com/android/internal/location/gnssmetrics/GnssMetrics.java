@@ -624,7 +624,7 @@ public class GnssMetrics {
 
     private void registerGnssStats() {
         mPullAtomCallback = new StatsPullAtomCallbackImpl();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 FrameworkStatsLog.GNSS_STATS,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(), mPullAtomCallback);

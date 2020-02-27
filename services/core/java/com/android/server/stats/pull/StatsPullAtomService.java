@@ -182,7 +182,7 @@ public class StatsPullAtomService extends SystemService {
      * How long to wait on an individual subsystem to return its stats.
      */
     private static final long EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS = 2000;
-    private static final long NS_PER_SEC = 1000000000;
+    private static final long MILLIS_PER_SEC = 1000;
     private static final long MILLI_AMP_HR_TO_NANO_AMP_SECS = 1_000_000L * 3600L;
 
     private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
@@ -680,7 +680,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3, 4, 5})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -772,7 +772,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3, 4, 5, 6})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -810,7 +810,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3, 4, 5})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -848,7 +848,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3, 4, 5, 6})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -886,7 +886,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -955,7 +955,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerKernelWakelock() {
         int tagId = FrameworkStatsLog.KERNEL_WAKELOCK;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
                 BackgroundThread.getExecutor(),
@@ -986,7 +986,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -1017,7 +1017,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -1046,7 +1046,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {4})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -1078,7 +1078,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -1105,7 +1105,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -1130,7 +1130,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerWifiActivityInfo() {
         int tagId = FrameworkStatsLog.WIFI_ACTIVITY_INFO;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1182,7 +1182,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerModemActivityInfo() {
         int tagId = FrameworkStatsLog.MODEM_ACTIVITY_INFO;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1220,7 +1220,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerBluetoothActivityInfo() {
         int tagId = FrameworkStatsLog.BLUETOOTH_ACTIVITY_INFO;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 /* metadata */ null,
                 BackgroundThread.getExecutor(),
@@ -1249,10 +1249,10 @@ public class StatsPullAtomService extends SystemService {
     private void registerSystemElapsedRealtime() {
         int tagId = FrameworkStatsLog.SYSTEM_ELAPSED_REALTIME;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
-                .setCoolDownNs(NS_PER_SEC)
-                .setTimeoutNs(NS_PER_SEC / 2)
+                .setCoolDownMillis(MILLIS_PER_SEC)
+                .setTimeoutMillis(MILLIS_PER_SEC / 2)
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -1271,7 +1271,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerSystemUptime() {
         int tagId = FrameworkStatsLog.SYSTEM_UPTIME;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1293,7 +1293,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {4, 5, 6, 7, 8})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -1336,7 +1336,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerProcessMemoryHighWaterMark() {
         int tagId = FrameworkStatsLog.PROCESS_MEMORY_HIGH_WATER_MARK;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1389,7 +1389,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerProcessMemorySnapshot() {
         int tagId = FrameworkStatsLog.PROCESS_MEMORY_SNAPSHOT;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1449,7 +1449,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerSystemIonHeapSize() {
         int tagId = FrameworkStatsLog.SYSTEM_ION_HEAP_SIZE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1472,7 +1472,7 @@ public class StatsPullAtomService extends SystemService {
             return;
         }
         int tagId = FrameworkStatsLog.ION_HEAP_SIZE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
                 BackgroundThread.getExecutor(),
@@ -1492,7 +1492,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerProcessSystemIonHeapSize() {
         int tagId = FrameworkStatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1518,7 +1518,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerTemperature() {
         int tagId = FrameworkStatsLog.TEMPERATURE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1556,7 +1556,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerCoolingDevice() {
         int tagId = FrameworkStatsLog.COOLING_DEVICE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1596,7 +1596,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {4, 5, 6, 8, 12})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -1639,7 +1639,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerBinderCallsStatsExceptions() {
         int tagId = FrameworkStatsLog.BINDER_CALLS_EXCEPTIONS;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1674,7 +1674,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {5, 6, 7, 8, 9})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -1716,7 +1716,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerDiskStats() {
         int tagId = FrameworkStatsLog.DISK_STATS;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1782,7 +1782,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerDirectoryUsage() {
         int tagId = FrameworkStatsLog.DIRECTORY_USAGE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1823,7 +1823,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerAppSize() {
         int tagId = FrameworkStatsLog.APP_SIZE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1867,7 +1867,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerCategorySize() {
         int tagId = FrameworkStatsLog.CATEGORY_SIZE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1971,7 +1971,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerNumFingerprintsEnrolled() {
         int tagId = FrameworkStatsLog.NUM_FINGERPRINTS_ENROLLED;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -1981,7 +1981,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerNumFacesEnrolled() {
         int tagId = FrameworkStatsLog.NUM_FACES_ENROLLED;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2039,7 +2039,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerProcStats() {
         int tagId = FrameworkStatsLog.PROC_STATS;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2049,7 +2049,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerProcStatsPkgProc() {
         int tagId = FrameworkStatsLog.PROC_STATS_PKG_PROC;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2120,9 +2120,9 @@ public class StatsPullAtomService extends SystemService {
         int tagId = FrameworkStatsLog.DISK_IO;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3, 4, 5, 6, 7, 8, 9, 10, 11})
-                .setCoolDownNs(3 * NS_PER_SEC)
+                .setCoolDownMillis(3 * MILLIS_PER_SEC)
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -2155,7 +2155,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerPowerProfile() {
         int tagId = FrameworkStatsLog.POWER_PROFILE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
                 BackgroundThread.getExecutor(),
@@ -2180,9 +2180,9 @@ public class StatsPullAtomService extends SystemService {
         int tagId = FrameworkStatsLog.PROCESS_CPU_TIME;
         // Min cool-down is 5 sec, in line with what ActivityManagerService uses.
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
-                .setCoolDownNs(5 * NS_PER_SEC)
+                .setCoolDownMillis(5 * MILLIS_PER_SEC)
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -2217,7 +2217,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {7, 9, 11, 13, 15, 17, 19, 21})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -2310,7 +2310,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerDeviceCalculatedPowerUse() {
         int tagId = FrameworkStatsLog.DEVICE_CALCULATED_POWER_USE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2330,7 +2330,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerDeviceCalculatedPowerBlameUid() {
         int tagId = FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_UID;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2360,7 +2360,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerDeviceCalculatedPowerBlameOther() {
         int tagId = FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2396,7 +2396,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {1, 2, 3, 4})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -2447,7 +2447,7 @@ public class StatsPullAtomService extends SystemService {
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {1, 2, 3, 4})
                 .build();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
                 BackgroundThread.getExecutor(),
@@ -2485,7 +2485,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerBuildInformation() {
         int tagId = FrameworkStatsLog.BUILD_INFORMATION;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2512,7 +2512,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerRoleHolder() {
         int tagId = FrameworkStatsLog.ROLE_HOLDER;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2570,7 +2570,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerDangerousPermissionState() {
         int tagId = FrameworkStatsLog.DANGEROUS_PERMISSION_STATE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2660,7 +2660,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerTimeZoneDataInfo() {
         int tagId = FrameworkStatsLog.TIME_ZONE_DATA_INFO;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2687,7 +2687,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerExternalStorageInfo() {
         int tagId = FrameworkStatsLog.EXTERNAL_STORAGE_INFO;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2737,7 +2737,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerAppsOnExternalStorageInfo() {
         int tagId = FrameworkStatsLog.APPS_ON_EXTERNAL_STORAGE_INFO;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2793,7 +2793,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerFaceSettings() {
         int tagId = FrameworkStatsLog.FACE_SETTINGS;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2847,7 +2847,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerAppOps() {
         int tagId = FrameworkStatsLog.APP_OPS;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2857,7 +2857,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerRuntimeAppOpAccessMessage() {
         int tagId = FrameworkStatsLog.RUNTIME_APP_OP_ACCESS;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -2927,7 +2927,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerAppFeaturesOps() {
         int tagId = FrameworkStatsLog.APP_FEATURES_OPS;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -3080,7 +3080,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerNotificationRemoteViews() {
         int tagId = FrameworkStatsLog.NOTIFICATION_REMOTE_VIEWS;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -3124,7 +3124,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerDangerousPermissionStateSampled() {
         int tagId = FrameworkStatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -3134,7 +3134,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerBatteryLevel() {
         int tagId = FrameworkStatsLog.BATTERY_LEVEL;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -3144,7 +3144,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerRemainingBatteryCapacity() {
         int tagId = FrameworkStatsLog.REMAINING_BATTERY_CAPACITY;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -3154,7 +3154,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerFullBatteryCapacity() {
         int tagId = FrameworkStatsLog.FULL_BATTERY_CAPACITY;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -3164,7 +3164,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerBatteryVoltage() {
         int tagId = FrameworkStatsLog.BATTERY_VOLTAGE;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
@@ -3174,7 +3174,7 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerBatteryCycleCount() {
         int tagId = FrameworkStatsLog.BATTERY_CYCLE_COUNT;
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),

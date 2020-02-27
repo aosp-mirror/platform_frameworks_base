@@ -136,25 +136,25 @@ public class StatsManagerService extends IStatsManagerService.Stub {
     }
 
     private static class PullerValue {
-        private final long mCoolDownNs;
-        private final long mTimeoutNs;
+        private final long mCoolDownMillis;
+        private final long mTimeoutMillis;
         private final int[] mAdditiveFields;
         private final IPullAtomCallback mCallback;
 
-        PullerValue(long coolDownNs, long timeoutNs, int[] additiveFields,
+        PullerValue(long coolDownMillis, long timeoutMillis, int[] additiveFields,
                 IPullAtomCallback callback) {
-            mCoolDownNs = coolDownNs;
-            mTimeoutNs = timeoutNs;
+            mCoolDownMillis = coolDownMillis;
+            mTimeoutMillis = timeoutMillis;
             mAdditiveFields = additiveFields;
             mCallback = callback;
         }
 
-        public long getCoolDownNs() {
-            return mCoolDownNs;
+        public long getCoolDownMillis() {
+            return mCoolDownMillis;
         }
 
-        public long getTimeoutNs() {
-            return mTimeoutNs;
+        public long getTimeoutMillis() {
+            return mTimeoutMillis;
         }
 
         public int[] getAdditiveFields() {
@@ -169,12 +169,13 @@ public class StatsManagerService extends IStatsManagerService.Stub {
     private final ArrayMap<PullerKey, PullerValue> mPullers = new ArrayMap<>();
 
     @Override
-    public void registerPullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
+    public void registerPullAtomCallback(int atomTag, long coolDownMillis, long timeoutMillis,
             int[] additiveFields, IPullAtomCallback pullerCallback) {
         enforceRegisterStatsPullAtomPermission();
         int callingUid = Binder.getCallingUid();
         PullerKey key = new PullerKey(callingUid, atomTag);
-        PullerValue val = new PullerValue(coolDownNs, timeoutNs, additiveFields, pullerCallback);
+        PullerValue val =
+                new PullerValue(coolDownMillis, timeoutMillis, additiveFields, pullerCallback);
 
         // Always cache the puller in StatsManagerService. If statsd is down, we will register the
         // puller when statsd comes back up.
@@ -189,8 +190,8 @@ public class StatsManagerService extends IStatsManagerService.Stub {
 
         final long token = Binder.clearCallingIdentity();
         try {
-            statsd.registerPullAtomCallback(
-                    callingUid, atomTag, coolDownNs, timeoutNs, additiveFields, pullerCallback);
+            statsd.registerPullAtomCallback(callingUid, atomTag, coolDownMillis, timeoutMillis,
+                    additiveFields, pullerCallback);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to access statsd to register puller for atom " + atomTag);
         } finally {
@@ -596,8 +597,8 @@ public class StatsManagerService extends IStatsManagerService.Stub {
         for (Map.Entry<PullerKey, PullerValue> entry : pullersCopy.entrySet()) {
             PullerKey key = entry.getKey();
             PullerValue value = entry.getValue();
-            statsd.registerPullAtomCallback(key.getUid(), key.getAtom(), value.getCoolDownNs(),
-                    value.getTimeoutNs(), value.getAdditiveFields(), value.getCallback());
+            statsd.registerPullAtomCallback(key.getUid(), key.getAtom(), value.getCoolDownMillis(),
+                    value.getTimeoutMillis(), value.getAdditiveFields(), value.getCallback());
         }
     }
 
