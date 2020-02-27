@@ -28,6 +28,7 @@
 
 #include "../metrics/metrics_test_helper.h"
 #include "src/stats_log_util.h"
+#include "stats_event.h"
 #include "tests/statsd_test_util.h"
 
 #ifdef __ANDROID__
