@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.concurrent.Executor;
 
@@ -91,7 +92,8 @@ public interface StatusBarDependenciesModule {
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController,
-            @Main Executor mainExecutor) {
+            @Main Executor mainExecutor,
+            DeviceConfigProxy deviceConfigProxy) {
         return new NotificationMediaManager(
                 context,
                 statusBarLazy,
@@ -99,7 +101,8 @@ public interface StatusBarDependenciesModule {
                 notificationEntryManager,
                 mediaArtworkProcessor,
                 keyguardBypassController,
-                mainExecutor);
+                mainExecutor,
+                deviceConfigProxy);
     }
 
     /** */

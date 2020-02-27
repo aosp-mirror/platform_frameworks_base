@@ -31,14 +31,12 @@ import android.net.IConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.KeyChain;
-import android.security.KeyChain.KeyChainConnection;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -55,6 +53,7 @@ import com.android.systemui.settings.CurrentUserTracker;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -85,7 +84,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private final DevicePolicyManager mDevicePolicyManager;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
-    private final Handler mBgHandler;
+    private final Executor mBgExecutor;
 
     @GuardedBy("mCallbacks")
     private final ArrayList<SecurityControllerCallback> mCallbacks = new ArrayList<>();
@@ -101,16 +100,14 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     /**
      */
     @Inject
-    public SecurityControllerImpl(Context context, @Background Handler bgHandler,
-            BroadcastDispatcher broadcastDispatcher) {
-        this(context, bgHandler, broadcastDispatcher, null);
-    }
-
-    public SecurityControllerImpl(Context context, Handler bgHandler,
-            BroadcastDispatcher broadcastDispatcher, SecurityControllerCallback callback) {
+    public SecurityControllerImpl(
+            Context context,
+            @Background Handler bgHandler,
+            BroadcastDispatcher broadcastDispatcher,
+            @Background Executor bgExecutor
+    ) {
         super(broadcastDispatcher);
         mContext = context;
-        mBgHandler = bgHandler;
         mDevicePolicyManager = (DevicePolicyManager)
                 context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mConnectivityManager = (ConnectivityManager)
@@ -118,10 +115,8 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         mConnectivityManagerService = IConnectivityManager.Stub.asInterface(
                 ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
         mPackageManager = context.getPackageManager();
-        mUserManager = (UserManager)
-                context.getSystemService(Context.USER_SERVICE);
-
-        addCallback(callback);
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mBgExecutor = bgExecutor;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
@@ -305,7 +300,23 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     }
 
     private void refreshCACerts(int userId) {
-        new CACertLoader().execute(userId);
+        mBgExecutor.execute(() -> {
+            Pair<Integer, Boolean> idWithCert = null;
+            try (KeyChain.KeyChainConnection conn = KeyChain.bindAsUser(mContext,
+                    UserHandle.of(userId))) {
+                boolean hasCACerts = !(conn.getService().getUserCaAliases().getList().isEmpty());
+                idWithCert = new Pair<Integer, Boolean>(userId, hasCACerts);
+            } catch (RemoteException | InterruptedException | AssertionError e) {
+                Log.i(TAG, "failed to get CA certs", e);
+                idWithCert = new Pair<Integer, Boolean>(userId, null);
+            } finally {
+                if (DEBUG) Log.d(TAG, "Refreshing CA Certs " + idWithCert);
+                if (idWithCert != null && idWithCert.second != null) {
+                    mHasCACerts.put(idWithCert.first, idWithCert.second);
+                    fireCallbacks();
+                }
+            }
+        });
     }
 
     private String getNameForVpnConfig(VpnConfig cfg, UserHandle user) {
@@ -408,28 +419,4 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
             }
         }
     };
-
-    protected class CACertLoader extends AsyncTask<Integer, Void, Pair<Integer, Boolean> > {
-
-        @Override
-        protected Pair<Integer, Boolean> doInBackground(Integer... userId) {
-            try (KeyChainConnection conn = KeyChain.bindAsUser(mContext,
-                                                               UserHandle.of(userId[0]))) {
-                boolean hasCACerts = !(conn.getService().getUserCaAliases().getList().isEmpty());
-                return new Pair<Integer, Boolean>(userId[0], hasCACerts);
-            } catch (RemoteException | InterruptedException | AssertionError e) {
-                Log.i(TAG, "failed to get CA certs", e);
-                return new Pair<Integer, Boolean>(userId[0], null);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Pair<Integer, Boolean> result) {
-            if (DEBUG) Log.d(TAG, "onPostExecute " + result);
-            if (result.second != null) {
-                mHasCACerts.put(result.first, result.second);
-                fireCallbacks();
-            }
-        }
-    }
 }
