@@ -25,10 +25,10 @@ import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -62,10 +62,15 @@ public final class SmartReplyConstants {
 
     private final Handler mHandler;
     private final Context mContext;
+    private final DeviceConfigProxy mDeviceConfig;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
     @Inject
-    public SmartReplyConstants(@Main Handler handler, Context context) {
+    public SmartReplyConstants(
+            @Main Handler handler,
+            Context context,
+            DeviceConfigProxy deviceConfig
+    ) {
         mHandler = handler;
         mContext = context;
         final Resources resources = mContext.getResources();
@@ -86,31 +91,35 @@ public final class SmartReplyConstants {
         mDefaultOnClickInitDelay = resources.getInteger(
                 R.integer.config_smart_replies_in_notifications_onclick_init_delay);
 
+        mDeviceConfig = deviceConfig;
         registerDeviceConfigListener();
         updateConstants();
     }
 
     private void registerDeviceConfigListener() {
-        DeviceConfig.addOnPropertiesChangedListener(
+        mDeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 this::postToHandler,
-                (properties) -> onDeviceConfigPropertiesChanged(properties.getNamespace()));
+                mOnPropertiesChangedListener);
     }
 
     private void postToHandler(Runnable r) {
         this.mHandler.post(r);
     }
 
-    @VisibleForTesting
-    void onDeviceConfigPropertiesChanged(String namespace) {
-        if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
-            Log.e(TAG, "Received update from DeviceConfig for unrelated namespace: "
-                    + namespace);
-            return;
-        }
-
-        updateConstants();
-    }
+    private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
+            new DeviceConfig.OnPropertiesChangedListener() {
+                @Override
+                public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                    if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(properties.getNamespace())) {
+                        Log.e(TAG,
+                                "Received update from DeviceConfig for unrelated namespace: "
+                                        + properties.getNamespace());
+                        return;
+                    }
+                    updateConstants();
+                }
+            };
 
     private void updateConstants() {
         synchronized (SmartReplyConstants.this) {
@@ -120,7 +129,7 @@ public final class SmartReplyConstants {
             mRequiresTargetingP = readDeviceConfigBooleanOrDefaultIfEmpty(
                     SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P,
                     mDefaultRequiresP);
-            mMaxSqueezeRemeasureAttempts = DeviceConfig.getInt(
+            mMaxSqueezeRemeasureAttempts = mDeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.SSIN_MAX_SQUEEZE_REMEASURE_ATTEMPTS,
                     mDefaultMaxSqueezeRemeasureAttempts);
@@ -130,24 +139,24 @@ public final class SmartReplyConstants {
             mShowInHeadsUp = readDeviceConfigBooleanOrDefaultIfEmpty(
                     SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP,
                     mDefaultShowInHeadsUp);
-            mMinNumSystemGeneratedReplies = DeviceConfig.getInt(
+            mMinNumSystemGeneratedReplies = mDeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.SSIN_MIN_NUM_SYSTEM_GENERATED_REPLIES,
                     mDefaultMinNumSystemGeneratedReplies);
-            mMaxNumActions = DeviceConfig.getInt(
+            mMaxNumActions = mDeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.SSIN_MAX_NUM_ACTIONS,
                     mDefaultMaxNumActions);
-            mOnClickInitDelay = DeviceConfig.getInt(
+            mOnClickInitDelay = mDeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.SSIN_ONCLICK_INIT_DELAY,
                     mDefaultOnClickInitDelay);
         }
     }
 
-    private static boolean readDeviceConfigBooleanOrDefaultIfEmpty(String propertyName,
+    private boolean readDeviceConfigBooleanOrDefaultIfEmpty(String propertyName,
             boolean defaultValue) {
-        String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_SYSTEMUI, propertyName);
+        String value = mDeviceConfig.getProperty(DeviceConfig.NAMESPACE_SYSTEMUI, propertyName);
         if (TextUtils.isEmpty(value)) {
             return defaultValue;
         }
