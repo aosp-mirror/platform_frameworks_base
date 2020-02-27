@@ -24,6 +24,7 @@ import android.content.LocusIdProto;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutInfo.ShortcutFlags;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -31,6 +32,10 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.util.Preconditions;
 import com.android.server.people.ConversationInfoProto;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -280,6 +285,25 @@ public class ConversationInfo {
         }
     }
 
+    @Nullable
+    byte[] getBackupPayload() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+        try {
+            out.writeUTF(mShortcutId);
+            out.writeUTF(mLocusId != null ? mLocusId.getId() : "");
+            out.writeUTF(mContactUri != null ? mContactUri.toString() : "");
+            out.writeUTF(mNotificationChannelId != null ? mNotificationChannelId : "");
+            out.writeInt(mShortcutFlags);
+            out.writeInt(mConversationFlags);
+            out.writeUTF(mContactPhoneNumber != null ? mContactPhoneNumber : "");
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to write fields to backup payload.", e);
+            return null;
+        }
+        return baos.toByteArray();
+    }
+
     /** Reads from {@link ProtoInputStream} and constructs a {@link ConversationInfo}. */
     @NonNull
     static ConversationInfo readFromProto(@NonNull ProtoInputStream protoInputStream)
@@ -327,6 +351,37 @@ public class ConversationInfo {
                     Slog.w(TAG, "Could not read undefined field: "
                             + protoInputStream.getFieldNumber());
             }
+        }
+        return builder.build();
+    }
+
+    @Nullable
+    static ConversationInfo readFromBackupPayload(@NonNull byte[] payload) {
+        ConversationInfo.Builder builder = new ConversationInfo.Builder();
+        DataInputStream in = new DataInputStream(new ByteArrayInputStream(payload));
+        try {
+            builder.setShortcutId(in.readUTF());
+            String locusId = in.readUTF();
+            if (!TextUtils.isEmpty(locusId)) {
+                builder.setLocusId(new LocusId(locusId));
+            }
+            String contactUri = in.readUTF();
+            if (!TextUtils.isEmpty(contactUri)) {
+                builder.setContactUri(Uri.parse(contactUri));
+            }
+            String notificationChannelId = in.readUTF();
+            if (!TextUtils.isEmpty(notificationChannelId)) {
+                builder.setNotificationChannelId(notificationChannelId);
+            }
+            builder.setShortcutFlags(in.readInt());
+            builder.setConversationFlags(in.readInt());
+            String contactPhoneNumber = in.readUTF();
+            if (!TextUtils.isEmpty(contactPhoneNumber)) {
+                builder.setContactPhoneNumber(contactPhoneNumber);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to read conversation info fields from backup payload.", e);
+            return null;
         }
         return builder.build();
     }
