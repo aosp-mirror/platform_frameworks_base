@@ -22,21 +22,21 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.os.SystemConfigManager;
 import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.util.ArrayUtils;
-import com.android.server.SystemConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Utilities for handling carrier applications.
@@ -53,19 +53,19 @@ public final class CarrierAppUtils {
      * Handle preinstalled carrier apps which should be disabled until a matching SIM is inserted.
      *
      * Evaluates the list of applications in
-     * {@link SystemConfig#getDisabledUntilUsedPreinstalledCarrierApps()}. We want to disable each
-     * such application which is present on the system image until the user inserts a SIM which
-     * causes that application to gain carrier privilege (indicating a "match"), without interfering
-     * with the user if they opt to enable/disable the app explicitly.
+     * {@link SystemConfigManager#getDisabledUntilUsedPreinstalledCarrierApps()}. We want to disable
+     * each such application which is present on the system image until the user inserts a SIM
+     * which causes that application to gain carrier privilege (indicating a "match"), without
+     * interfering with the user if they opt to enable/disable the app explicitly.
      *
      * So, for each such app, we either disable until used IFF the app is not carrier privileged AND
      * in the default state (e.g. not explicitly DISABLED/DISABLED_BY_USER/ENABLED), or we enable if
      * the app is carrier privileged and in either the default state or DISABLED_UNTIL_USED.
      *
      * In addition, there is a list of carrier-associated applications in
-     * {@link SystemConfig#getDisabledUntilUsedPreinstalledCarrierAssociatedApps}. Each app in this
-     * list is associated with a carrier app. When the given carrier app is enabled/disabled per the
-     * above, the associated applications are enabled/disabled to match.
+     * {@link SystemConfigManager#getDisabledUntilUsedPreinstalledCarrierAssociatedApps}. Each app
+     * in this list is associated with a carrier app. When the given carrier app is enabled/disabled
+     * per the above, the associated applications are enabled/disabled to match.
      *
      * When enabling a carrier app we also grant it default permissions.
      *
@@ -78,10 +78,10 @@ public final class CarrierAppUtils {
         if (DEBUG) {
             Log.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
-        SystemConfig config = SystemConfig.getInstance();
-        ArraySet<String> systemCarrierAppsDisabledUntilUsed =
+        SystemConfigManager config = context.getSystemService(SystemConfigManager.class);
+        Set<String> systemCarrierAppsDisabledUntilUsed =
                 config.getDisabledUntilUsedPreinstalledCarrierApps();
-        ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed =
+        Map<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed =
                 config.getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
         ContentResolver contentResolver = getContentResolverForUser(context, userId);
         disableCarrierAppsUntilPrivileged(callingPackage, telephonyManager, contentResolver,
@@ -105,11 +105,11 @@ public final class CarrierAppUtils {
         if (DEBUG) {
             Log.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
-        SystemConfig config = SystemConfig.getInstance();
-        ArraySet<String> systemCarrierAppsDisabledUntilUsed =
+        SystemConfigManager config = context.getSystemService(SystemConfigManager.class);
+        Set<String> systemCarrierAppsDisabledUntilUsed =
                 config.getDisabledUntilUsedPreinstalledCarrierApps();
 
-        ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed =
+        Map<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed =
                 config.getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
         ContentResolver contentResolver = getContentResolverForUser(context, userId);
         disableCarrierAppsUntilPrivileged(callingPackage, null /* telephonyManager */,
@@ -139,8 +139,8 @@ public final class CarrierAppUtils {
     @VisibleForTesting
     public static void disableCarrierAppsUntilPrivileged(String callingPackage,
             @Nullable TelephonyManager telephonyManager, ContentResolver contentResolver,
-            int userId, ArraySet<String> systemCarrierAppsDisabledUntilUsed,
-            ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed,
+            int userId, Set<String> systemCarrierAppsDisabledUntilUsed,
+            Map<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed,
             Context context) {
         PackageManager packageManager = context.getPackageManager();
         PermissionManager permissionManager =
@@ -340,26 +340,22 @@ public final class CarrierAppUtils {
      */
     public static List<ApplicationInfo> getDefaultCarrierAppCandidates(
             int userId, Context context) {
-        ArraySet<String> systemCarrierAppsDisabledUntilUsed =
-                SystemConfig.getInstance().getDisabledUntilUsedPreinstalledCarrierApps();
+        Set<String> systemCarrierAppsDisabledUntilUsed =
+                context.getSystemService(SystemConfigManager.class)
+                        .getDisabledUntilUsedPreinstalledCarrierApps();
         return getDefaultCarrierAppCandidatesHelper(userId, systemCarrierAppsDisabledUntilUsed,
                 context);
     }
 
     private static List<ApplicationInfo> getDefaultCarrierAppCandidatesHelper(
-            int userId, ArraySet<String> systemCarrierAppsDisabledUntilUsed, Context context) {
-        if (systemCarrierAppsDisabledUntilUsed == null) {
+            int userId, Set<String> systemCarrierAppsDisabledUntilUsed, Context context) {
+        if (systemCarrierAppsDisabledUntilUsed == null
+                || systemCarrierAppsDisabledUntilUsed.isEmpty()) {
             return null;
         }
 
-        int size = systemCarrierAppsDisabledUntilUsed.size();
-        if (size == 0) {
-            return null;
-        }
-
-        List<ApplicationInfo> apps = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            String packageName = systemCarrierAppsDisabledUntilUsed.valueAt(i);
+        List<ApplicationInfo> apps = new ArrayList<>(systemCarrierAppsDisabledUntilUsed.size());
+        for (String packageName : systemCarrierAppsDisabledUntilUsed) {
             ApplicationInfo ai =
                     getApplicationInfoIfSystemApp(userId, packageName, context);
             if (ai != null) {
@@ -370,14 +366,14 @@ public final class CarrierAppUtils {
     }
 
     private static Map<String, List<ApplicationInfo>> getDefaultCarrierAssociatedAppsHelper(
-            int userId, ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed,
+            int userId, Map<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed,
             Context context) {
         int size = systemCarrierAssociatedAppsDisabledUntilUsed.size();
         Map<String, List<ApplicationInfo>> associatedApps = new ArrayMap<>(size);
-        for (int i = 0; i < size; i++) {
-            String carrierAppPackage = systemCarrierAssociatedAppsDisabledUntilUsed.keyAt(i);
-            List<String> associatedAppPackages =
-                    systemCarrierAssociatedAppsDisabledUntilUsed.valueAt(i);
+        for (Map.Entry<String, List<String>> entry
+                : systemCarrierAssociatedAppsDisabledUntilUsed.entrySet()) {
+            String carrierAppPackage = entry.getKey();
+            List<String> associatedAppPackages = entry.getValue();
             for (int j = 0; j < associatedAppPackages.size(); j++) {
                 ApplicationInfo ai =
                         getApplicationInfoIfSystemApp(
