@@ -94,7 +94,8 @@ public class DebugTest {
      */
     @Test
     public void openAppToSplitScreen() {
-        CommonTransitions.appToSplitScreen(testApp, uiDevice).includeJankyRuns().recordAllRuns()
+        CommonTransitions.appToSplitScreen(testApp, uiDevice,
+                Surface.ROTATION_0).includeJankyRuns().recordAllRuns()
                 .build().run();
     }
 
