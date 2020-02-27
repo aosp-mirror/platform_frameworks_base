@@ -54,7 +54,6 @@ import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
-import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -65,7 +64,7 @@ import javax.inject.Named;
 /**
  * Manages the different states and animations of the unlock icon.
  */
-public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChangedListener,
+public class LockIcon extends KeyguardAffordanceView implements
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
         KeyguardStateController.Callback, NotificationWakeUpCoordinator.WakeUpListener,
         ViewTreeObserver.OnPreDrawListener, OnHeadsUpChangedListener {
@@ -234,11 +233,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mIconColor = typedArray.getColor(0, Color.WHITE);
         typedArray.recycle();
         updateDarkTint();
-    }
-
-    @Override
-    public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
-        update();
     }
 
     /**
