@@ -395,6 +395,7 @@ message Atom {
         SnapshotMergeReported snapshot_merge_reported = 255;
         ForegroundServiceAppOpSessionEnded foreground_service_app_op_session_ended =
             256  [(module) = "framework"];
+        DisplayJankReported display_jank_reported = 257;
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
@@ -8236,6 +8237,22 @@ message FrameTimingHistogram {
     // contents
     // It's required that len(time_millis) == len(frame_count)
     repeated int64 frame_counts = 2;
+}
+
+/**
+ * Janky event as reported by SurfaceFlinger.
+ * This event is intended to be consumed by a Perfetto subscriber for
+ * automated trace collection.
+ *
+ * Logged from:
+ *    frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp
+ */
+message DisplayJankReported {
+    // Informational field for how long the janky event lasted in milliseconds
+    optional int64 event_duration_millis = 1;
+    // Number of frame deadlines missed, where SurfaceFlinger failed to update
+    // the display on time.
+    optional int32 present_deadlines_missed = 2;
 }
 
 /**
