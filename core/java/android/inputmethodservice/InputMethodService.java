@@ -814,6 +814,13 @@ public class InputMethodService extends AbstractInputMethodService {
         onPreRenderedWindowVisibilityChanged(false /* setVisible */);
     }
 
+    private void removeImeSurface() {
+        if (!mShowInputRequested && !mWindowVisible) {
+            // hiding a window removes its surface.
+            mWindow.hide();
+        }
+    }
+
     private void setImeWindowStatus(int visibilityFlags, int backDisposition) {
         mPrivOps.setImeWindowStatus(visibilityFlags, backDisposition);
     }
@@ -931,6 +938,14 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         public final void notifyImeHidden() {
             InputMethodService.this.notifyImeHidden();
+        }
+
+        /**
+         * Notify IME that surface can be now removed.
+         * @hide
+         */
+        public final void removeImeSurface() {
+            InputMethodService.this.removeImeSurface();
         }
     }
     
