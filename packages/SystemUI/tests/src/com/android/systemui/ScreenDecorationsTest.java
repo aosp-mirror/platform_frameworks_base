@@ -456,4 +456,52 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         assertThat(rectsToRegion(Collections.singletonList(rect)).getBounds(), is(rect));
     }
 
+    @Test
+    public void testRegistration_From_NoOverlay_To_HasOverlays() {
+        doReturn(false).when(mScreenDecorations).hasOverlays();
+        mScreenDecorations.start();
+        verify(mTunerService, times(0)).addTunable(any(), any());
+        verify(mTunerService, times(1)).removeTunable(any());
+        assertThat(mScreenDecorations.mIsRegistered, is(false));
+        reset(mTunerService);
+
+        doReturn(true).when(mScreenDecorations).hasOverlays();
+        mScreenDecorations.onConfigurationChanged(new Configuration());
+        verify(mTunerService, times(1)).addTunable(any(), any());
+        verify(mTunerService, times(0)).removeTunable(any());
+        assertThat(mScreenDecorations.mIsRegistered, is(true));
+    }
+
+    @Test
+    public void testRegistration_From_HasOverlays_To_HasOverlays() {
+        doReturn(true).when(mScreenDecorations).hasOverlays();
+
+        mScreenDecorations.start();
+        verify(mTunerService, times(1)).addTunable(any(), any());
+        verify(mTunerService, times(0)).removeTunable(any());
+        assertThat(mScreenDecorations.mIsRegistered, is(true));
+        reset(mTunerService);
+
+        mScreenDecorations.onConfigurationChanged(new Configuration());
+        verify(mTunerService, times(0)).addTunable(any(), any());
+        verify(mTunerService, times(0)).removeTunable(any());
+        assertThat(mScreenDecorations.mIsRegistered, is(true));
+    }
+
+    @Test
+    public void testRegistration_From_HasOverlays_To_NoOverlay() {
+        doReturn(true).when(mScreenDecorations).hasOverlays();
+
+        mScreenDecorations.start();
+        verify(mTunerService, times(1)).addTunable(any(), any());
+        verify(mTunerService, times(0)).removeTunable(any());
+        assertThat(mScreenDecorations.mIsRegistered, is(true));
+        reset(mTunerService);
+
+        doReturn(false).when(mScreenDecorations).hasOverlays();
+        mScreenDecorations.onConfigurationChanged(new Configuration());
+        verify(mTunerService, times(0)).addTunable(any(), any());
+        verify(mTunerService, times(1)).removeTunable(any());
+        assertThat(mScreenDecorations.mIsRegistered, is(false));
+    }
 }
