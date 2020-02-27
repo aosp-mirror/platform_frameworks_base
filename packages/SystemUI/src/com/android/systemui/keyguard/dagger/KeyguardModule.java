@@ -31,6 +31,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.concurrent.Executor;
 
@@ -62,7 +63,8 @@ public class KeyguardModule {
             DumpManager dumpManager,
             PowerManager powerManager,
             TrustManager trustManager,
-            @UiBackground Executor uiBgExecutor) {
+            @UiBackground Executor uiBgExecutor,
+            DeviceConfigProxy deviceConfig) {
         return new KeyguardViewMediator(
                 context,
                 falsingManager,
@@ -75,6 +77,7 @@ public class KeyguardModule {
                 dumpManager,
                 uiBgExecutor,
                 powerManager,
-                trustManager);
+                trustManager,
+                deviceConfig);
     }
 }
