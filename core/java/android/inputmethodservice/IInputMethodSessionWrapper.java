@@ -53,6 +53,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_FINISH_SESSION = 110;
     private static final int DO_VIEW_CLICKED = 115;
     private static final int DO_NOTIFY_IME_HIDDEN = 120;
+    private static final int DO_REMOVE_IME_SURFACE = 130;
 
     @UnsupportedAppUsage
     HandlerCaller mCaller;
@@ -136,6 +137,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 mInputMethodSession.notifyImeHidden();
                 return;
             }
+            case DO_REMOVE_IME_SURFACE: {
+                mInputMethodSession.removeImeSurface();
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -181,6 +186,11 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     @Override
     public void notifyImeHidden() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_NOTIFY_IME_HIDDEN));
+    }
+
+    @Override
+    public void removeImeSurface() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_REMOVE_IME_SURFACE));
     }
 
     @Override
