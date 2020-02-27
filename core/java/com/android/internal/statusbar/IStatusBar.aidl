@@ -226,4 +226,12 @@ oneway interface IStatusBar
      * display.
      */
     void suppressAmbientDisplay(boolean suppress);
+
+    /**
+     * Requests {@link WindowMagnification} to set window magnification connection through
+     * {@link AccessibilityManager#setWindowMagnificationConnection(IWindowMagnificationConnection)}
+     *
+     * @param connect {@code true} if needs connection, otherwise set the connection to null.
+     */
+    void requestWindowMagnificationConnection(boolean connect);
 }

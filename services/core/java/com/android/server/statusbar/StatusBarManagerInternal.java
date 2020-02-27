@@ -137,4 +137,10 @@ public interface StatusBarManagerInternal {
 
     /** @see com.android.internal.statusbar.IStatusBar#hideToast(String, IBinder)  */
     void hideToast(String packageName, IBinder token);
+
+    /**
+     * @see com.android.internal.statusbar.IStatusBar#requestWindowMagnificationConnection(boolean
+     * request)
+     */
+    void requestWindowMagnificationConnection(boolean request);
 }

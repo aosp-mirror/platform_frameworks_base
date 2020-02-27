@@ -454,4 +454,11 @@ public class CommandQueueTest extends SysuiTestCase {
         waitForIdleSync();
         verify(mCallbacks).suppressAmbientDisplay(true);
     }
+
+    @Test
+    public void testRequestWindowMagnificationConnection() {
+        mCommandQueue.requestWindowMagnificationConnection(true);
+        waitForIdleSync();
+        verify(mCallbacks).requestWindowMagnificationConnection(true);
+    }
 }
