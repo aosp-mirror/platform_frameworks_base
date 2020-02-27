@@ -73,9 +73,6 @@ public class BubbleExperimentConfig {
 
     private static final String WHITELISTED_AUTO_BUBBLE_APPS = "whitelisted_auto_bubble_apps";
 
-    private static final String ALLOW_BUBBLE_OVERFLOW = "allow_bubble_overflow";
-    private static final boolean ALLOW_BUBBLE_OVERFLOW_DEFAULT = false;
-
     /**
      * When true, if a notification has the information necessary to bubble (i.e. valid
      * contentIntent and an icon or image), then a {@link android.app.Notification.BubbleMetadata}
@@ -128,16 +125,6 @@ public class BubbleExperimentConfig {
             }
         }
         return false;
-    }
-
-    /**
-     * When true, show a menu when a bubble is long-pressed, which will allow the user to take
-     * actions on that bubble.
-     */
-    static boolean allowBubbleOverflow(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                ALLOW_BUBBLE_OVERFLOW,
-                ALLOW_BUBBLE_OVERFLOW_DEFAULT ? 1 : 0) != 0;
     }
 
     /**
