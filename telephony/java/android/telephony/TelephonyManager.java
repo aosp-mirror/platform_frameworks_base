@@ -11054,7 +11054,6 @@ public class TelephonyManager {
      * @param enabled True if enabling the data, otherwise disabling.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setPolicyDataEnabled(boolean enabled) {
         try {
