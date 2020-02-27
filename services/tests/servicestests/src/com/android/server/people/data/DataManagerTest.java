@@ -653,6 +653,33 @@ public final class DataManagerTest {
         assertTrue(activeTimeSlots.isEmpty());
     }
 
+    @Test
+    public void testBackupAndRestoration()
+            throws IntentFilter.MalformedMimeTypeException {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                null);
+        AppTarget appTarget = new AppTarget.Builder(new AppTargetId(TEST_SHORTCUT_ID), shortcut)
+                .build();
+        AppTargetEvent appTargetEvent =
+                new AppTargetEvent.Builder(appTarget, AppTargetEvent.ACTION_LAUNCH)
+                        .setLaunchLocation(ChooserActivity.LAUNCH_LOCATON_DIRECT_SHARE)
+                        .build();
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SEND, "image/jpg");
+
+        mDataManager.reportShareTargetEvent(appTargetEvent, intentFilter);
+        byte[] payload = mDataManager.getBackupPayload(USER_ID_PRIMARY);
+
+        DataManager dataManager = new DataManager(mContext, mInjector);
+        dataManager.onUserUnlocked(USER_ID_PRIMARY);
+        dataManager.restore(USER_ID_PRIMARY, payload);
+        ConversationInfo conversationInfo = dataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
+                .getConversationStore()
+                .getConversation(TEST_SHORTCUT_ID);
+        assertNotNull(conversationInfo);
+        assertEquals(conversationInfo.getShortcutId(), TEST_SHORTCUT_ID);
+    }
+
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
         LocalServices.removeServiceForTest(clazz);
         LocalServices.addService(clazz, mock);

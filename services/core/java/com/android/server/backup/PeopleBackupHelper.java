@@ -50,7 +50,7 @@ class PeopleBackupHelper extends BlobBackupHelper {
         if (DEBUG) {
             Slog.d(TAG, "Handling backup of " + key);
         }
-        return ps.backupConversationInfos(mUserId);
+        return ps.getBackupPayload(mUserId);
     }
 
     @Override
@@ -63,6 +63,6 @@ class PeopleBackupHelper extends BlobBackupHelper {
         if (DEBUG) {
             Slog.d(TAG, "Handling restore of " + key);
         }
-        ps.restoreConversationInfos(mUserId, key, payload);
+        ps.restore(mUserId, payload);
     }
 }
