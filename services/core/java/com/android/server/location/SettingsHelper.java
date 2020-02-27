@@ -18,6 +18,7 @@ package com.android.server.location;
 
 import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
+import static android.provider.Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING;
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS;
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST;
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS;
@@ -277,6 +278,19 @@ public class SettingsHelper {
             return Settings.Global.getLong(mContext.getContentResolver(),
                     LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
                     DEFAULT_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Retrieve the gnss measurements full tracking enabled setting.
+     */
+    public boolean isGnssMeasurementsFullTrackingEnabled() {
+        long identity = Binder.clearCallingIdentity();
+        try {
+            return Settings.Global.getInt(mContext.getContentResolver(),
+                    ENABLE_GNSS_RAW_MEAS_FULL_TRACKING, 0) == 1;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

@@ -33,12 +33,7 @@ import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManagerInternal;
 import android.os.Binder;
-import android.os.IBinder;
-import android.os.IInterface;
-import android.os.Process;
 import android.os.RemoteException;
-import android.stats.location.LocationStatsEnums;
-import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -46,8 +41,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
-import com.android.server.LocationManagerServiceUtils.LinkedListener;
-import com.android.server.LocationManagerServiceUtils.LinkedListenerBase;
 import com.android.server.location.AppForegroundHelper;
 import com.android.server.location.AppOpsHelper;
 import com.android.server.location.CallerIdentity;
@@ -58,35 +51,33 @@ import com.android.server.location.GnssLocationProvider;
 import com.android.server.location.GnssMeasurementCorrectionsProvider;
 import com.android.server.location.GnssMeasurementsProvider;
 import com.android.server.location.GnssNavigationMessageProvider;
-import com.android.server.location.GnssStatusListenerHelper;
+import com.android.server.location.GnssStatusProvider;
 import com.android.server.location.LocationUsageLogger;
-import com.android.server.location.RemoteListenerHelper;
 import com.android.server.location.SettingsHelper;
+import com.android.server.location.UserInfoHelper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /** Manages Gnss providers and related Gnss functions for LocationManagerService. */
 public class GnssManagerService {
 
-    private static final String TAG = "GnssManagerService";
+    public static final String TAG = "GnssManager";
+    public static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
     public static boolean isGnssSupported() {
         return GnssLocationProvider.isSupported();
     }
 
     private final Context mContext;
-    private final AppOpsHelper mAppOpsHelper;
     private final SettingsHelper mSettingsHelper;
+    private final AppOpsHelper mAppOpsHelper;
     private final AppForegroundHelper mAppForegroundHelper;
-    private final LocationUsageLogger mLocationUsageLogger;
+    private final LocationManagerInternal mLocationManagerInternal;
 
     private final GnssLocationProvider mGnssLocationProvider;
-    private final GnssStatusListenerHelper mGnssStatusProvider;
+    private final GnssStatusProvider mGnssStatusProvider;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
     private final GnssMeasurementCorrectionsProvider mGnssMeasurementCorrectionsProvider;
     private final GnssAntennaInfoProvider mGnssAntennaInfoProvider;
@@ -98,59 +89,40 @@ public class GnssManagerService {
     private final INetInitiatedListener mNetInitiatedListener;
     private final IGpsGeofenceHardware mGpsGeofenceProxy;
 
-    @GuardedBy("mGnssMeasurementsListeners")
-    private final ArrayMap<IBinder, LinkedListener<GnssRequest, IGnssMeasurementsListener>>
-            mGnssMeasurementsListeners = new ArrayMap<>();
-
-    @GuardedBy("mGnssAntennaInfoListeners")
-    private final ArrayMap<IBinder,
-            LinkedListener<Void, IGnssAntennaInfoListener>>
-            mGnssAntennaInfoListeners = new ArrayMap<>();
-
-    @GuardedBy("mGnssNavigationMessageListeners")
-    private final ArrayMap<IBinder, LinkedListener<Void, IGnssNavigationMessageListener>>
-            mGnssNavigationMessageListeners = new ArrayMap<>();
-
-    @GuardedBy("mGnssStatusListeners")
-    private final ArrayMap<IBinder, LinkedListener<Void, IGnssStatusListener>>
-            mGnssStatusListeners = new ArrayMap<>();
-
-    @GuardedBy("this")
-    @Nullable private LocationManagerInternal mLocationManagerInternal;
-
     private final Object mGnssBatchingLock = new Object();
 
     @GuardedBy("mGnssBatchingLock")
-    @Nullable private IBatchedLocationCallback mGnssBatchingCallback;
-
+    private @Nullable IBatchedLocationCallback mGnssBatchingCallback;
     @GuardedBy("mGnssBatchingLock")
-    @Nullable
-    private LinkedListener<Void, IBatchedLocationCallback> mGnssBatchingDeathCallback;
-
+    private @Nullable CallerIdentity mGnssBatchingIdentity;
+    @GuardedBy("mGnssBatchingLock")
+    private @Nullable Binder.DeathRecipient mGnssBatchingDeathRecipient;
     @GuardedBy("mGnssBatchingLock")
     private boolean mGnssBatchingInProgress = false;
 
-    public GnssManagerService(Context context, AppOpsHelper appOpsHelper,
-            SettingsHelper settingsHelper, AppForegroundHelper appForegroundHelper,
-            LocationUsageLogger locationUsageLogger) {
-        this(context, appOpsHelper, settingsHelper, appForegroundHelper, locationUsageLogger, null);
+    public GnssManagerService(Context context, UserInfoHelper userInfoHelper,
+            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
+            AppForegroundHelper appForegroundHelper, LocationUsageLogger locationUsageLogger) {
+        this(context, userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper,
+                locationUsageLogger, null);
     }
 
-    // Can use this constructor to inject GnssLocationProvider for testing
     @VisibleForTesting
-    GnssManagerService(Context context, AppOpsHelper appOpsHelper, SettingsHelper settingsHelper,
+    GnssManagerService(Context context, UserInfoHelper userInfoHelper,
+            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
             AppForegroundHelper appForegroundHelper, LocationUsageLogger locationUsageLogger,
             GnssLocationProvider gnssLocationProvider) {
         Preconditions.checkState(isGnssSupported());
 
         mContext = context;
-        mAppOpsHelper = appOpsHelper;
         mSettingsHelper = settingsHelper;
+        mAppOpsHelper = appOpsHelper;
         mAppForegroundHelper = appForegroundHelper;
-        mLocationUsageLogger = locationUsageLogger;
+        mLocationManagerInternal = LocalServices.getService(LocationManagerInternal.class);
 
         if (gnssLocationProvider == null) {
-            gnssLocationProvider = new GnssLocationProvider(mContext);
+            gnssLocationProvider = new GnssLocationProvider(mContext, userInfoHelper,
+                    mSettingsHelper, mAppOpsHelper, mAppForegroundHelper, locationUsageLogger);
         }
 
         mGnssLocationProvider = gnssLocationProvider;
@@ -170,17 +142,9 @@ public class GnssManagerService {
 
     /** Called when system is ready. */
     public synchronized void onSystemReady() {
-        if (mLocationManagerInternal != null) {
-            return;
-        }
-
         mAppOpsHelper.onSystemReady();
         mSettingsHelper.onSystemReady();
         mAppForegroundHelper.onSystemReady();
-
-        mLocationManagerInternal = LocalServices.getService(LocationManagerInternal.class);
-
-        mAppForegroundHelper.addListener(this::onAppForegroundChanged);
     }
 
     /** Retrieve the GnssLocationProvider. */
@@ -220,8 +184,8 @@ public class GnssManagerService {
      * Get size of GNSS batch (GNSS location results are batched together for power savings).
      */
     public int getGnssBatchSize(String packageName) {
-        mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         synchronized (mGnssBatchingLock) {
             return mGnssBatchingProvider.getBatchSize();
@@ -234,8 +198,8 @@ public class GnssManagerService {
      */
     public boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName,
             String featureId) {
-        mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
         if (!mAppOpsHelper.checkLocationAccess(identity)) {
@@ -259,25 +223,28 @@ public class GnssManagerService {
      */
     public boolean addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
             @Nullable String featureId) {
-        mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
 
         synchronized (mGnssBatchingLock) {
-            mGnssBatchingCallback = callback;
-            mGnssBatchingDeathCallback =
-                    new LinkedListener<>(
-                            /* request= */ null,
-                            callback,
-                            identity,
-                            (IBatchedLocationCallback listener) -> {
-                                stopGnssBatch();
-                                removeGnssBatchingCallback();
-                            });
+            Binder.DeathRecipient deathRecipient = () -> {
+                synchronized (mGnssBatchingLock) {
+                    stopGnssBatch();
+                    removeGnssBatchingCallback();
+                }
+            };
 
-            return mGnssBatchingDeathCallback.linkToListenerDeathNotificationLocked(
-                    callback.asBinder());
+            try {
+                callback.asBinder().linkToDeath(mGnssBatchingDeathRecipient, 0);
+                mGnssBatchingCallback = callback;
+                mGnssBatchingIdentity = identity;
+                mGnssBatchingDeathRecipient = deathRecipient;
+                return true;
+            } catch (RemoteException e) {
+                return false;
+            }
         }
     }
 
@@ -287,8 +254,8 @@ public class GnssManagerService {
      * @param packageName name of requesting package
      */
     public void flushGnssBatch(String packageName) {
-        mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         synchronized (mGnssBatchingLock) {
             mGnssBatchingProvider.flush();
@@ -299,13 +266,17 @@ public class GnssManagerService {
      * Removes GNSS batching callback.
      */
     public void removeGnssBatchingCallback() {
-        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
 
         synchronized (mGnssBatchingLock) {
-            mGnssBatchingDeathCallback.unlinkFromListenerDeathNotificationLocked(
-                    mGnssBatchingCallback.asBinder());
+            if (mGnssBatchingCallback == null) {
+                return;
+            }
+
+            mGnssBatchingCallback.asBinder().unlinkToDeath(mGnssBatchingDeathRecipient, 0);
             mGnssBatchingCallback = null;
-            mGnssBatchingDeathCallback = null;
+            mGnssBatchingIdentity = null;
+            mGnssBatchingDeathRecipient = null;
         }
     }
 
@@ -313,7 +284,7 @@ public class GnssManagerService {
      * Stop GNSS batch collection.
      */
     public boolean stopGnssBatch() {
-        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
 
         synchronized (mGnssBatchingLock) {
             mGnssBatchingInProgress = false;
@@ -321,192 +292,37 @@ public class GnssManagerService {
         }
     }
 
-    private void onAppForegroundChanged(int uid, boolean foreground) {
-        synchronized (mGnssMeasurementsListeners) {
-            updateListenersOnForegroundChangedLocked(
-                    mGnssMeasurementsListeners,
-                    mGnssMeasurementsProvider,
-                    IGnssMeasurementsListener.Stub::asInterface,
-                    uid,
-                    foreground);
-        }
-        synchronized (mGnssNavigationMessageListeners) {
-            updateListenersOnForegroundChangedLocked(
-                    mGnssNavigationMessageListeners,
-                    mGnssNavigationMessageProvider,
-                    IGnssNavigationMessageListener.Stub::asInterface,
-                    uid,
-                    foreground);
-        }
-        synchronized (mGnssStatusListeners) {
-            updateListenersOnForegroundChangedLocked(
-                    mGnssStatusListeners,
-                    mGnssStatusProvider,
-                    IGnssStatusListener.Stub::asInterface,
-                    uid,
-                    foreground);
-        }
-        synchronized (mGnssAntennaInfoListeners) {
-            updateListenersOnForegroundChangedLocked(
-                    mGnssAntennaInfoListeners,
-                    mGnssAntennaInfoProvider,
-                    IGnssAntennaInfoListener.Stub::asInterface,
-                    uid,
-                    foreground);
-        }
-    }
-
-    private <TRequest, TListener extends IInterface> void updateListenersOnForegroundChangedLocked(
-            Map<IBinder, LinkedListener<TRequest, TListener>> gnssDataListeners,
-            RemoteListenerHelper<TRequest, TListener> gnssDataProvider,
-            Function<IBinder, TListener> mapBinderToListener,
-            int uid,
-            boolean foreground) {
-        for (Map.Entry<IBinder, LinkedListener<TRequest, TListener>> entry :
-                gnssDataListeners.entrySet()) {
-            LinkedListener<TRequest, TListener> linkedListener = entry.getValue();
-            CallerIdentity callerIdentity = linkedListener.getCallerIdentity();
-            TRequest request = linkedListener.getRequest();
-            if (callerIdentity.uid != uid) {
-                continue;
-            }
-
-            TListener listener = mapBinderToListener.apply(entry.getKey());
-            if (foreground || isThrottlingExempt(callerIdentity)) {
-                gnssDataProvider.addListener(request, listener, callerIdentity);
-            } else {
-                gnssDataProvider.removeListener(listener);
-            }
-        }
-    }
-
-    private <TListener extends IInterface, TRequest> boolean addGnssDataListenerLocked(
-            @Nullable TRequest request,
-            TListener listener,
-            String packageName,
-            @Nullable String featureId,
-            RemoteListenerHelper<TRequest, TListener> gnssDataProvider,
-            ArrayMap<IBinder,
-                    LinkedListener<TRequest, TListener>> gnssDataListeners,
-            Consumer<TListener> binderDeathCallback) {
-        mContext.enforceCallingPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
-
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
-        if (!mAppOpsHelper.checkLocationAccess(identity)) {
-            return false;
-        }
-
-        LinkedListener<TRequest, TListener> linkedListener = new LinkedListener<>(request, listener,
-                identity, binderDeathCallback);
-        IBinder binder = listener.asBinder();
-        if (!linkedListener.linkToListenerDeathNotificationLocked(binder)) {
-            return false;
-        }
-
-        gnssDataListeners.put(binder, linkedListener);
-        if (gnssDataProvider == mGnssMeasurementsProvider
-                || gnssDataProvider == mGnssStatusProvider) {
-            mLocationUsageLogger.logLocationApiUsage(
-                    LocationStatsEnums.USAGE_STARTED,
-                    gnssDataProvider == mGnssMeasurementsProvider
-                            ? LocationStatsEnums.API_ADD_GNSS_MEASUREMENTS_LISTENER
-                            : LocationStatsEnums.API_REGISTER_GNSS_STATUS_CALLBACK,
-                    packageName,
-                    /* LocationRequest= */ null,
-                    /* hasListener= */ true,
-                    /* hasIntent= */ false,
-                    /* geofence= */ null,
-                    mAppForegroundHelper.getImportance(identity.uid));
-        }
-        if (mAppForegroundHelper.isAppForeground(identity.uid)
-                || isThrottlingExempt(identity)) {
-            gnssDataProvider.addListener(request, listener, identity);
-        }
-        return true;
-    }
-
-    private <TRequest, TListener extends IInterface> void removeGnssDataListenerLocked(
-            TListener listener,
-            RemoteListenerHelper<TRequest, TListener> gnssDataProvider,
-            ArrayMap<IBinder, LinkedListener<TRequest, TListener>> gnssDataListeners) {
-        if (gnssDataProvider == null) {
-            Log.e(
-                    TAG,
-                    "Can not remove GNSS data listener. GNSS data provider "
-                            + "not available.");
-            return;
-        }
-
-        IBinder binder = listener.asBinder();
-        LinkedListener<TRequest, TListener> linkedListener =
-                gnssDataListeners.remove(binder);
-        if (linkedListener == null) {
-            return;
-        }
-        if (gnssDataProvider == mGnssMeasurementsProvider
-                || gnssDataProvider == mGnssStatusProvider) {
-            mLocationUsageLogger.logLocationApiUsage(
-                    LocationStatsEnums.USAGE_ENDED,
-                    gnssDataProvider == mGnssMeasurementsProvider
-                            ? LocationStatsEnums.API_ADD_GNSS_MEASUREMENTS_LISTENER
-                            : LocationStatsEnums.API_REGISTER_GNSS_STATUS_CALLBACK,
-                    linkedListener.getCallerIdentity().packageName,
-                    /* LocationRequest= */ null,
-                    /* hasListener= */ true,
-                    /* hasIntent= */ false,
-                    /* geofence= */ null,
-                    mAppForegroundHelper.getImportance(Binder.getCallingUid()));
-        }
-        linkedListener.unlinkFromListenerDeathNotificationLocked(binder);
-        gnssDataProvider.removeListener(listener);
-    }
-
     /**
      * Registers listener for GNSS status changes.
      */
-    public boolean registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
+    public void registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
             @Nullable String featureId) {
-        synchronized (mGnssStatusListeners) {
-            return addGnssDataListenerLocked(
-                    /* request= */ null,
-                    listener,
-                    packageName,
-                    featureId,
-                    mGnssStatusProvider,
-                    mGnssStatusListeners,
-                    this::unregisterGnssStatusCallback);
-        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
+
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        mGnssStatusProvider.addListener(identity, listener);
     }
 
     /**
      * Unregisters listener for GNSS status changes.
      */
     public void unregisterGnssStatusCallback(IGnssStatusListener listener) {
-        synchronized (mGnssStatusListeners) {
-            removeGnssDataListenerLocked(listener, mGnssStatusProvider, mGnssStatusListeners);
-        }
+        mGnssStatusProvider.removeListener(listener);
     }
 
     /**
      * Adds a GNSS measurements listener.
      */
-    public boolean addGnssMeasurementsListener(@Nullable GnssRequest request,
+    public void addGnssMeasurementsListener(@Nullable GnssRequest request,
             IGnssMeasurementsListener listener, String packageName,
             @Nullable String featureId) {
-        if (request != null && request.isFullTracking()) {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.LOCATION_HARDWARE,
-                    null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
+        if (request.isFullTracking()) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
         }
-        synchronized (mGnssMeasurementsListeners) {
-            return addGnssDataListenerLocked(
-                    request,
-                    listener,
-                    packageName,
-                    featureId,
-                    mGnssMeasurementsProvider,
-                    mGnssMeasurementsListeners,
-                    this::removeGnssMeasurementsListener);
-        }
+
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        mGnssMeasurementsProvider.addListener(request, identity, listener);
     }
 
     /**
@@ -514,8 +330,8 @@ public class GnssManagerService {
      */
     public void injectGnssMeasurementCorrections(
             GnssMeasurementCorrections measurementCorrections, String packageName) {
-        mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         mGnssMeasurementCorrectionsProvider.injectGnssMeasurementCorrections(
                 measurementCorrections);
@@ -525,10 +341,7 @@ public class GnssManagerService {
      * Removes a GNSS measurements listener.
      */
     public void removeGnssMeasurementsListener(IGnssMeasurementsListener listener) {
-        synchronized (mGnssMeasurementsListeners) {
-            removeGnssDataListenerLocked(listener, mGnssMeasurementsProvider,
-                    mGnssMeasurementsListeners);
-        }
+        mGnssMeasurementsProvider.removeListener(listener);
     }
 
     /**
@@ -537,19 +350,12 @@ public class GnssManagerService {
      * @param listener    called when GNSS antenna info is received
      * @param packageName name of requesting package
      */
-    public boolean addGnssAntennaInfoListener(
-            IGnssAntennaInfoListener listener, String packageName,
+    public void addGnssAntennaInfoListener(IGnssAntennaInfoListener listener, String packageName,
             @Nullable String featureId) {
-        synchronized (mGnssAntennaInfoListeners) {
-            return addGnssDataListenerLocked(
-                    /* request= */ null,
-                    listener,
-                    packageName,
-                    featureId,
-                    mGnssAntennaInfoProvider,
-                    mGnssAntennaInfoListeners,
-                    this::removeGnssAntennaInfoListener);
-        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
+
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        mGnssAntennaInfoProvider.addListener(identity, listener);
     }
 
     /**
@@ -558,38 +364,25 @@ public class GnssManagerService {
      * @param listener called when GNSS antenna info is received
      */
     public void removeGnssAntennaInfoListener(IGnssAntennaInfoListener listener) {
-        synchronized (mGnssAntennaInfoListeners) {
-            removeGnssDataListenerLocked(
-                    listener, mGnssAntennaInfoProvider, mGnssAntennaInfoListeners);
-        }
+        mGnssAntennaInfoProvider.removeListener(listener);
     }
 
     /**
      * Adds a GNSS navigation message listener.
      */
-    public boolean addGnssNavigationMessageListener(
-            IGnssNavigationMessageListener listener, String packageName,
-            @Nullable String featureId) {
-        synchronized (mGnssNavigationMessageListeners) {
-            return addGnssDataListenerLocked(
-                    /* request= */ null,
-                    listener,
-                    packageName,
-                    featureId,
-                    mGnssNavigationMessageProvider,
-                    mGnssNavigationMessageListeners,
-                    this::removeGnssNavigationMessageListener);
-        }
+    public void addGnssNavigationMessageListener(IGnssNavigationMessageListener listener,
+            String packageName, @Nullable String featureId) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
+
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        mGnssNavigationMessageProvider.addListener(identity, listener);
     }
 
     /**
      * Removes a GNSS navigation message listener.
      */
     public void removeGnssNavigationMessageListener(IGnssNavigationMessageListener listener) {
-        synchronized (mGnssNavigationMessageListeners) {
-            removeGnssDataListenerLocked(
-                    listener, mGnssNavigationMessageProvider, mGnssNavigationMessageListeners);
-        }
+        mGnssNavigationMessageProvider.removeListener(listener);
     }
 
     /**
@@ -607,44 +400,27 @@ public class GnssManagerService {
      * Report location results to GNSS batching listener.
      */
     public void onReportLocation(List<Location> locations) {
-        IBatchedLocationCallback gnssBatchingCallback;
-        LinkedListener<Void, IBatchedLocationCallback> gnssBatchingDeathCallback;
+        IBatchedLocationCallback callback;
+        CallerIdentity identity;
         synchronized (mGnssBatchingLock) {
-            gnssBatchingCallback = mGnssBatchingCallback;
-            gnssBatchingDeathCallback = mGnssBatchingDeathCallback;
+            callback = mGnssBatchingCallback;
+            identity = mGnssBatchingIdentity;
         }
 
-        if (gnssBatchingCallback == null || gnssBatchingDeathCallback == null) {
+        if (callback == null || identity == null) {
             return;
         }
 
-        int userId = gnssBatchingDeathCallback.getCallerIdentity().userId;
-        if (!mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER, userId)) {
+        if (!mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER, identity.userId)) {
             Log.w(TAG, "reportLocationBatch() called without user permission");
             return;
         }
 
         try {
-            gnssBatchingCallback.onLocationBatch(locations);
+            callback.onLocationBatch(locations);
         } catch (RemoteException e) {
-            Log.e(TAG, "reportLocationBatch() failed", e);
+            // ignore
         }
-    }
-
-    private boolean isThrottlingExempt(CallerIdentity callerIdentity) {
-        if (callerIdentity.uid == Process.SYSTEM_UID) {
-            return true;
-        }
-
-        if (mSettingsHelper.getBackgroundThrottlePackageWhitelist().contains(
-                callerIdentity.packageName)) {
-            return true;
-        }
-
-        synchronized (this) {
-            Preconditions.checkState(mLocationManagerInternal != null);
-        }
-        return mLocationManagerInternal.isProviderPackage(callerIdentity.packageName);
     }
 
     /**
@@ -660,31 +436,24 @@ public class GnssManagerService {
             return;
         }
 
-        ipw.println("GnssMeasurement Listeners:");
+        ipw.println("Antenna Info Provider:");
         ipw.increaseIndent();
-        synchronized (mGnssMeasurementsListeners) {
-            for (LinkedListenerBase listener : mGnssMeasurementsListeners.values()) {
-                ipw.println(listener);
-            }
-        }
+        mGnssAntennaInfoProvider.dump(fd, ipw, args);
         ipw.decreaseIndent();
 
-        ipw.println("GnssNavigationMessage Listeners:");
+        ipw.println("Measurement Provider:");
         ipw.increaseIndent();
-        synchronized (mGnssNavigationMessageListeners) {
-            for (LinkedListenerBase listener : mGnssNavigationMessageListeners.values()) {
-                ipw.println(listener);
-            }
-        }
+        mGnssMeasurementsProvider.dump(fd, ipw, args);
         ipw.decreaseIndent();
 
-        ipw.println("GnssStatus Listeners:");
+        ipw.println("Navigation Message Provider:");
         ipw.increaseIndent();
-        synchronized (mGnssStatusListeners) {
-            for (LinkedListenerBase listener : mGnssStatusListeners.values()) {
-                ipw.println(listener);
-            }
-        }
+        mGnssNavigationMessageProvider.dump(fd, ipw, args);
+        ipw.decreaseIndent();
+
+        ipw.println("Status Provider:");
+        ipw.increaseIndent();
+        mGnssStatusProvider.dump(fd, ipw, args);
         ipw.decreaseIndent();
 
         synchronized (mGnssBatchingLock) {

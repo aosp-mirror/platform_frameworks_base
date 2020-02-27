@@ -144,8 +144,8 @@ public class GnssMeasurementCorrectionsProvider {
         }
     }
 
-    private static native boolean native_is_measurement_corrections_supported();
+    static native boolean native_is_measurement_corrections_supported();
 
-    private static native boolean native_inject_gnss_measurement_corrections(
+    static native boolean native_inject_gnss_measurement_corrections(
             GnssMeasurementCorrections measurementCorrections);
 }
