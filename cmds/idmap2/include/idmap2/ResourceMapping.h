@@ -30,6 +30,8 @@
 
 using android::idmap2::utils::OverlayManifestInfo;
 
+using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
+
 namespace android::idmap2 {
 
 struct TargetValue {

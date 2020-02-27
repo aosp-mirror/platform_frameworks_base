@@ -25,6 +25,7 @@
     <string name="policy_signature">policy_signature</string>
     <string name="policy_odm">policy_odm</string>
     <string name="policy_oem">policy_oem</string>
+    <string name="policy_actor">policy_actor</string>
 
     <!-- Requests to overlay a resource that is not declared as overlayable. -->
     <string name="not_overlayable">not_overlayable</string>
