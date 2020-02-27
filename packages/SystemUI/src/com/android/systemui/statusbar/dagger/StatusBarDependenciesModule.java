@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -138,7 +139,8 @@ public interface StatusBarDependenciesModule {
             KeyguardBypassController bypassController,
             BubbleController bubbleController,
             DynamicPrivacyController privacyController,
-            ForegroundServiceSectionController fgsSectionController) {
+            ForegroundServiceSectionController fgsSectionController,
+            DynamicChildBindController dynamicChildBindController) {
         return new NotificationViewHierarchyManager(
                 context,
                 mainHandler,
@@ -150,7 +152,8 @@ public interface StatusBarDependenciesModule {
                 bypassController,
                 bubbleController,
                 privacyController,
-                fgsSectionController);
+                fgsSectionController,
+                dynamicChildBindController);
     }
 
     /**
