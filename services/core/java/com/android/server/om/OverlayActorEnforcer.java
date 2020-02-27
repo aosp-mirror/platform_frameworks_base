@@ -17,7 +17,6 @@
 package com.android.server.om;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayableInfo;
 import android.content.pm.ApplicationInfo;
@@ -46,7 +45,7 @@ public class OverlayActorEnforcer {
     // By default, the reason is not logged to prevent leaks of why it failed
     private static final boolean DEBUG_REASON = false;
 
-    private final VerifyCallback mVerifyCallback;
+    private final OverlayableInfoCallback mOverlayableCallback;
 
     /**
      * @return nullable actor result with {@link ActorState} failure status
@@ -80,8 +79,8 @@ public class OverlayActorEnforcer {
         return Pair.create(packageName, ActorState.ALLOWED);
     }
 
-    public OverlayActorEnforcer(@NonNull VerifyCallback verifyCallback) {
-        mVerifyCallback = verifyCallback;
+    public OverlayActorEnforcer(@NonNull OverlayableInfoCallback overlayableCallback) {
+        mOverlayableCallback = overlayableCallback;
     }
 
     void enforceActor(@NonNull OverlayInfo overlayInfo, @NonNull String methodName,
@@ -117,7 +116,7 @@ public class OverlayActorEnforcer {
                 return ActorState.ALLOWED;
         }
 
-        String[] callingPackageNames = mVerifyCallback.getPackagesForUid(callingUid);
+        String[] callingPackageNames = mOverlayableCallback.getPackagesForUid(callingUid);
         if (ArrayUtils.isEmpty(callingPackageNames)) {
             return ActorState.NO_PACKAGES_FOR_UID;
         }
@@ -132,12 +131,12 @@ public class OverlayActorEnforcer {
 
         if (TextUtils.isEmpty(targetOverlayableName)) {
             try {
-                if (mVerifyCallback.doesTargetDefineOverlayable(targetPackageName, userId)) {
+                if (mOverlayableCallback.doesTargetDefineOverlayable(targetPackageName, userId)) {
                     return ActorState.MISSING_TARGET_OVERLAYABLE_NAME;
                 } else {
                     // If there's no overlayable defined, fallback to the legacy permission check
                     try {
-                        mVerifyCallback.enforcePermission(
+                        mOverlayableCallback.enforcePermission(
                                 android.Manifest.permission.CHANGE_OVERLAY_PACKAGES, methodName);
 
                         // If the previous method didn't throw, check passed
@@ -153,7 +152,7 @@ public class OverlayActorEnforcer {
 
         OverlayableInfo targetOverlayable;
         try {
-            targetOverlayable = mVerifyCallback.getOverlayableForTarget(targetPackageName,
+            targetOverlayable = mOverlayableCallback.getOverlayableForTarget(targetPackageName,
                     targetOverlayableName, userId);
         } catch (IOException e) {
             return ActorState.UNABLE_TO_GET_TARGET;
@@ -167,7 +166,7 @@ public class OverlayActorEnforcer {
         if (TextUtils.isEmpty(actor)) {
             // If there's no actor defined, fallback to the legacy permission check
             try {
-                mVerifyCallback.enforcePermission(
+                mOverlayableCallback.enforcePermission(
                         android.Manifest.permission.CHANGE_OVERLAY_PACKAGES, methodName);
 
                 // If the previous method didn't throw, check passed
@@ -177,7 +176,7 @@ public class OverlayActorEnforcer {
             }
         }
 
-        Map<String, Map<String, String>> namedActors = mVerifyCallback.getNamedActors();
+        Map<String, Map<String, String>> namedActors = mOverlayableCallback.getNamedActors();
         Pair<String, ActorState> actorUriPair = getPackageNameForActor(actor, namedActors);
         ActorState actorUriState = actorUriPair.second;
         if (actorUriState != ActorState.ALLOWED) {
@@ -185,7 +184,7 @@ public class OverlayActorEnforcer {
         }
 
         String packageName = actorUriPair.first;
-        PackageInfo packageInfo = mVerifyCallback.getPackageInfo(packageName, userId);
+        PackageInfo packageInfo = mOverlayableCallback.getPackageInfo(packageName, userId);
         if (packageInfo == null) {
             return ActorState.MISSING_APP_INFO;
         }
@@ -211,7 +210,7 @@ public class OverlayActorEnforcer {
      * For easier logging/debugging, a set of all possible failure/success states when running
      * enforcement.
      */
-    enum ActorState {
+    public enum ActorState {
         ALLOWED,
         INVALID_ACTOR,
         MISSING_NAMESPACE,
@@ -227,54 +226,5 @@ public class OverlayActorEnforcer {
         NO_NAMED_ACTORS,
         UNABLE_TO_GET_TARGET,
         MISSING_LEGACY_PERMISSION
-    }
-
-    /**
-     * Delegate to the system for querying information about packages.
-     */
-    public interface VerifyCallback {
-
-        /**
-         * Read from the APK and AndroidManifest of a package to return the overlayable defined for
-         * a given name.
-         *
-         * @throws IOException if the target can't be read
-         */
-        @Nullable
-        OverlayableInfo getOverlayableForTarget(@NonNull String packageName,
-                @Nullable String targetOverlayableName, int userId)
-                throws IOException;
-
-        /**
-         * @see android.content.pm.PackageManager#getPackagesForUid(int)
-         */
-        @Nullable
-        String[] getPackagesForUid(int uid);
-
-        /**
-         * @param userId user to filter package visibility by
-         * @see android.content.pm.PackageManager#getPackageInfo(String, int)
-         */
-        @Nullable
-        PackageInfo getPackageInfo(@NonNull String packageName, int userId);
-
-        /**
-         * @return map of system pre-defined, uniquely named actors; keys are namespace,
-         * value maps actor name to package name
-         */
-        @NonNull
-        Map<String, Map<String, String>> getNamedActors();
-
-        /**
-         * @return true if the target package has declared an overlayable
-         */
-        boolean doesTargetDefineOverlayable(String targetPackageName, int userId)
-                throws RemoteException, IOException;
-
-        /**
-         * @throws SecurityException containing message if the caller doesn't have the given
-         *                           permission
-         */
-        void enforcePermission(String permission, String message) throws SecurityException;
     }
 }

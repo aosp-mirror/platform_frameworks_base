@@ -24,6 +24,7 @@ import android.os.Process
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import java.lang.UnsupportedOperationException
 
 class OverlayActorEnforcerTests {
     companion object {
@@ -159,7 +160,7 @@ class OverlayActorEnforcerTests {
         private val hasPermission: Boolean = false,
         private val overlayableInfo: OverlayableInfo? = null,
         private vararg val packageNames: String = arrayOf("com.test.actor.one")
-    ) : OverlayActorEnforcer.VerifyCallback {
+    ) : OverlayableInfoCallback {
 
         override fun getNamedActors() = if (isActor) {
             mapOf(NAMESPACE to mapOf(ACTOR_NAME to ACTOR_PKG_NAME))
@@ -169,7 +170,7 @@ class OverlayActorEnforcerTests {
 
         override fun getOverlayableForTarget(
             packageName: String,
-            targetOverlayableName: String?,
+            targetOverlayableName: String,
             userId: Int
         ) = overlayableInfo
 
@@ -192,6 +193,10 @@ class OverlayActorEnforcerTests {
             if (!hasPermission) {
                 throw SecurityException()
             }
+        }
+
+        override fun signaturesMatching(pkgName1: String, pkgName2: String, userId: Int): Boolean {
+            throw UnsupportedOperationException()
         }
     }
 }

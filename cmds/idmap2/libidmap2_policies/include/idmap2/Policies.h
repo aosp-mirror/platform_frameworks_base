@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-#include <string>
-#include <vector>
-
-#include "Result.h"
-#include "androidfw/ResourceTypes.h"
-#include "androidfw/StringPiece.h"
-
 #ifndef IDMAP2_INCLUDE_IDMAP2_POLICIES_H_
 #define IDMAP2_INCLUDE_IDMAP2_POLICIES_H_
 
-namespace android::idmap2 {
+#include <array>
+#include <string>
+#include <vector>
 
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
+
+using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
+
+namespace android::idmap2::policy {
+
+constexpr const char* kPolicyActor = "actor";
 constexpr const char* kPolicyOdm = "odm";
 constexpr const char* kPolicyOem = "oem";
 constexpr const char* kPolicyProduct = "product";
@@ -34,15 +38,16 @@ constexpr const char* kPolicySignature = "signature";
 constexpr const char* kPolicySystem = "system";
 constexpr const char* kPolicyVendor = "vendor";
 
-using PolicyFlags = ResTable_overlayable_policy_header::PolicyFlags;
-using PolicyBitmask = uint32_t;
-
-// Parses the string representations of policies into a bitmask.
-Result<PolicyBitmask> PoliciesToBitmask(const std::vector<std::string>& policies);
-
-// Retrieves the string representations of policies in the bitmask.
-std::vector<std::string> BitmaskToPolicies(const PolicyBitmask& bitmask);
-
-}  // namespace android::idmap2
+inline static const std::array<std::pair<StringPiece, PolicyFlags>, 8> kPolicyStringToFlag = {
+    std::pair{kPolicyActor, PolicyFlags::ACTOR_SIGNATURE},
+    {kPolicyOdm, PolicyFlags::ODM_PARTITION},
+    {kPolicyOem, PolicyFlags::OEM_PARTITION},
+    {kPolicyProduct, PolicyFlags::PRODUCT_PARTITION},
+    {kPolicyPublic, PolicyFlags::PUBLIC},
+    {kPolicySignature, PolicyFlags::SIGNATURE},
+    {kPolicySystem, PolicyFlags::SYSTEM_PARTITION},
+    {kPolicyVendor, PolicyFlags::VENDOR_PARTITION},
+};
+}  // namespace android::idmap2::policy
 
 #endif  // IDMAP2_INCLUDE_IDMAP2_POLICIES_H_
