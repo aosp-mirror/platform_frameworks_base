@@ -2068,19 +2068,16 @@ public class NotificationManagerService extends SystemService {
 
     @Override
     public void onStart() {
-        SnoozeHelper snoozeHelper = new SnoozeHelper(getContext(), new SnoozeHelper.Callback() {
-            @Override
-            public void repost(int userId, NotificationRecord r) {
-                try {
-                    if (DBG) {
-                        Slog.d(TAG, "Reposting " + r.getKey());
-                    }
-                    enqueueNotificationInternal(r.getSbn().getPackageName(), r.getSbn().getOpPkg(),
-                            r.getSbn().getUid(), r.getSbn().getInitialPid(), r.getSbn().getTag(),
-                            r.getSbn().getId(),  r.getSbn().getNotification(), userId);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Cannot un-snooze notification", e);
+        SnoozeHelper snoozeHelper = new SnoozeHelper(getContext(), (userId, r, muteOnReturn) -> {
+            try {
+                if (DBG) {
+                    Slog.d(TAG, "Reposting " + r.getKey());
                 }
+                enqueueNotificationInternal(r.getSbn().getPackageName(), r.getSbn().getOpPkg(),
+                        r.getSbn().getUid(), r.getSbn().getInitialPid(), r.getSbn().getTag(),
+                        r.getSbn().getId(),  r.getSbn().getNotification(), userId, true);
+            } catch (Exception e) {
+                Slog.e(TAG, "Cannot un-snooze notification", e);
             }
         }, mUserProfiles);
 
@@ -3983,7 +3980,7 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info =
                             mAssistants.checkServiceTokenLocked(token);
-                    unsnoozeNotificationInt(key, info);
+                    unsnoozeNotificationInt(key, info, false);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -4006,7 +4003,7 @@ public class NotificationManagerService extends SystemService {
                     if (!info.isSystem) {
                         throw new SecurityException("Not allowed to unsnooze before deadline");
                     }
-                    unsnoozeNotificationInt(key, info);
+                    unsnoozeNotificationInt(key, info, true);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -5525,6 +5522,13 @@ public class NotificationManagerService extends SystemService {
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
             int incomingUserId) {
+        enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
+        incomingUserId, false);
+    }
+
+    void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
+        final int callingPid, final String tag, final int id, final Notification notification,
+        int incomingUserId, boolean postSilently) {
         if (DBG) {
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id
                     + " notification=" + notification);
@@ -5605,6 +5609,7 @@ public class NotificationManagerService extends SystemService {
                 user, null, System.currentTimeMillis());
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
         r.setIsAppImportanceLocked(mPreferencesHelper.getIsAppImportanceLocked(pkg, callingUid));
+        r.setPostSilently(postSilently);
 
         if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
             final boolean fgServiceShown = channel.isFgServiceShown();
@@ -7040,6 +7045,11 @@ public class NotificationManagerService extends SystemService {
             return true;
         }
 
+        // Suppressed because a user manually unsnoozed something (or similar)
+        if (record.shouldPostSilently()) {
+            return true;
+        }
+
         // muted by listener
         final String disableEffects = disableNotificationEffects(record);
         if (disableEffects != null) {
@@ -8054,13 +8064,13 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new SnoozeNotificationRunnable(key, duration, snoozeCriterionId));
     }
 
-    void unsnoozeNotificationInt(String key, ManagedServiceInfo listener) {
+    void unsnoozeNotificationInt(String key, ManagedServiceInfo listener, boolean muteOnReturn) {
         String listenerName = listener == null ? null : listener.component.toShortString();
         if (DBG) {
             Slog.d(TAG, String.format("unsnooze event(%s, %s)", key, listenerName));
         }
         mSnoozeHelper.cleanupPersistedContext(key);
-        mSnoozeHelper.repost(key);
+        mSnoozeHelper.repost(key, muteOnReturn);
         handleSavePolicyFile();
     }
 

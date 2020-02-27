@@ -846,6 +846,18 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testPostSilently() throws Exception {
+        NotificationRecord r = getBuzzyNotification();
+        r.setPostSilently(true);
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verifyNeverBeep();
+        assertFalse(r.isInterruptive());
+        assertEquals(-1, r.getLastAudiblyAlertedMs());
+    }
+
+    @Test
     public void testGroupAlertSummarySilenceChild() throws Exception {
         NotificationRecord child = getBeepyNotificationRecord("a", GROUP_ALERT_SUMMARY);
 

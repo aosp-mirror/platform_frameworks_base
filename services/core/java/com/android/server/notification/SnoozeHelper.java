@@ -332,14 +332,14 @@ public class SnoozeHelper {
         records.put(record.getKey(), record);
     }
 
-    protected void repost(String key) {
+    protected void repost(String key, boolean muteOnReturn) {
         Integer userId = mUsers.get(key);
         if (userId != null) {
-            repost(key, userId);
+            repost(key, userId, muteOnReturn);
         }
     }
 
-    protected void repost(String key, int userId) {
+    protected void repost(String key, int userId, boolean muteOnReturn) {
         final String pkg = mPackages.remove(key);
         ArrayMap<String, NotificationRecord> records =
                 mSnoozedNotifications.get(getPkgKey(userId, pkg));
@@ -356,7 +356,7 @@ public class SnoozeHelper {
             MetricsLogger.action(record.getLogMaker()
                     .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED)
                     .setType(MetricsProto.MetricsEvent.TYPE_OPEN));
-            mCallback.repost(userId, record);
+            mCallback.repost(userId, record, muteOnReturn);
         }
     }
 
@@ -388,7 +388,7 @@ public class SnoozeHelper {
                 MetricsLogger.action(record.getLogMaker()
                         .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED)
                         .setType(MetricsProto.MetricsEvent.TYPE_OPEN));
-                mCallback.repost(userId, record);
+                mCallback.repost(userId, record, false);
             }
         }
     }
@@ -601,7 +601,7 @@ public class SnoozeHelper {
     }
 
     protected interface Callback {
-        void repost(int userId, NotificationRecord r);
+        void repost(int userId, NotificationRecord r, boolean muteOnReturn);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -612,7 +612,7 @@ public class SnoozeHelper {
             }
             if (REPOST_ACTION.equals(intent.getAction())) {
                 repost(intent.getStringExtra(EXTRA_KEY), intent.getIntExtra(EXTRA_USER_ID,
-                        UserHandle.USER_SYSTEM));
+                        UserHandle.USER_SYSTEM), false);
             }
         }
     };

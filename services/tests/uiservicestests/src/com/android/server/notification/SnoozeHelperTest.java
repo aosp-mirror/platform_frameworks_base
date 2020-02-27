@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -363,8 +364,8 @@ public class SnoozeHelperTest extends UiServiceTestCase {
 
         mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), "one", 1);
 
-        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
-        verify(mCallback, never()).repost(UserHandle.USER_SYSTEM, r);
+        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM, false);
+        verify(mCallback, never()).repost(UserHandle.USER_SYSTEM, r, false);
     }
 
     @Test
@@ -374,8 +375,8 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "one", UserHandle.ALL);
         mSnoozeHelper.snooze(r2, 1000);
         reset(mAm);
-        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
-        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
+        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM, false);
+        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r, false);
         ArgumentCaptor<PendingIntent> captor = ArgumentCaptor.forClass(PendingIntent.class);
         verify(mAm).cancel(captor.capture());
         assertEquals(r.getKey(), captor.getValue().getIntent().getStringExtra(EXTRA_KEY));
@@ -388,8 +389,8 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "one", UserHandle.ALL);
         mSnoozeHelper.snooze(r2, 1000);
         reset(mAm);
-        mSnoozeHelper.repost(r.getKey());
-        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
+        mSnoozeHelper.repost(r.getKey(), false);
+        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r, false);
         verify(mAm).cancel(any(PendingIntent.class));
     }
 
@@ -400,10 +401,10 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         r.getNotification().category = "NEW CATEGORY";
 
         mSnoozeHelper.update(UserHandle.USER_SYSTEM, r);
-        verify(mCallback, never()).repost(anyInt(), any(NotificationRecord.class));
+        verify(mCallback, never()).repost(anyInt(), any(NotificationRecord.class), anyBoolean());
 
-        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
-        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
+        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM, false);
+        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r, false);
     }
 
     @Test
@@ -420,10 +421,20 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.update(UserHandle.USER_SYSTEM, r);
 
         // verify callback is called when repost (snooze is expired)
-        verify(mCallback, never()).repost(anyInt(), any(NotificationRecord.class));
-        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
-        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
+        verify(mCallback, never()).repost(anyInt(), any(NotificationRecord.class), anyBoolean());
+        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM, false);
+        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r, false);
         assertFalse(r.isCanceled);
+    }
+
+    @Test
+    public void testReport_passesFlag() throws Exception {
+        // snooze a notification
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r , 1000);
+
+        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM, true);
+        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r, true);
     }
 
     @Test
@@ -523,7 +534,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.snooze(r2, 1000);
         mSnoozeHelper.repostGroupSummary("pkg", UserHandle.USER_SYSTEM, "group1");
 
-        verify(mCallback, never()).repost(UserHandle.USER_SYSTEM, r);
+        verify(mCallback, never()).repost(eq(UserHandle.USER_SYSTEM), eq(r), anyBoolean());
     }
 
     @Test
@@ -542,8 +553,8 @@ public class SnoozeHelperTest extends UiServiceTestCase {
 
         mSnoozeHelper.repostGroupSummary("pkg", UserHandle.USER_SYSTEM, r.getGroupKey());
 
-        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
-        verify(mCallback, never()).repost(UserHandle.USER_SYSTEM, r2);
+        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r, false);
+        verify(mCallback, never()).repost(UserHandle.USER_SYSTEM, r2, false);
 
         assertEquals(1, mSnoozeHelper.getSnoozed().size());
         assertEquals(1, mSnoozeHelper.getSnoozed(UserHandle.USER_SYSTEM, "pkg").size());
