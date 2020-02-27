@@ -36,18 +36,7 @@ cc_library {
     ],
     host_supported: true,
     srcs: [
-        "libidmap2/BinaryStreamVisitor.cpp",
-        "libidmap2/CommandLineOptions.cpp",
-        "libidmap2/FileUtils.cpp",
-        "libidmap2/Idmap.cpp",
-        "libidmap2/Policies.cpp",
-        "libidmap2/PrettyPrintVisitor.cpp",
-        "libidmap2/RawPrintVisitor.cpp",
-        "libidmap2/ResourceMapping.cpp",
-        "libidmap2/ResourceUtils.cpp",
-        "libidmap2/Result.cpp",
-        "libidmap2/XmlParser.cpp",
-        "libidmap2/ZipFile.cpp",
+        "libidmap2/**/*.cpp",
     ],
     export_include_dirs: ["include"],
     target: {
@@ -61,6 +50,7 @@ cc_library {
                 "libcutils",
                 "libutils",
                 "libziparchive",
+                "libidmap2_policies",
             ],
         },
         host: {
@@ -73,6 +63,37 @@ cc_library {
                 "libcutils",
                 "libutils",
                 "libziparchive",
+                "libidmap2_policies",
+            ],
+        },
+    },
+}
+
+cc_library {
+    name: "libidmap2_policies",
+    defaults: [
+        "idmap2_defaults",
+    ],
+    host_supported: true,
+    export_include_dirs: ["libidmap2_policies/include"],
+    target: {
+        windows: {
+            enabled: true,
+        },
+        android: {
+            static: {
+                enabled: false,
+            },
+            shared_libs: [
+                "libandroidfw",
+            ],
+        },
+        host: {
+            shared: {
+                enabled: false,
+            },
+            static_libs: [
+                "libandroidfw",
             ],
         },
     },
@@ -118,6 +139,7 @@ cc_test {
                 "libutils",
                 "libz",
                 "libziparchive",
+                "libidmap2_policies",
             ],
         },
         host: {
@@ -129,6 +151,7 @@ cc_test {
                 "liblog",
                 "libutils",
                 "libziparchive",
+                "libidmap2_policies",
             ],
             shared_libs: [
                 "libz",
@@ -162,6 +185,7 @@ cc_binary {
                 "libidmap2",
                 "libutils",
                 "libziparchive",
+                "libidmap2_policies",
             ],
         },
         host: {
@@ -173,12 +197,14 @@ cc_binary {
                 "liblog",
                 "libutils",
                 "libziparchive",
+                "libidmap2_policies",
             ],
             shared_libs: [
                 "libz",
             ],
         },
     },
+
 }
 
 cc_binary {
@@ -199,6 +225,7 @@ cc_binary {
         "libidmap2",
         "libutils",
         "libziparchive",
+        "libidmap2_policies",
     ],
     static_libs: [
         "libidmap2daidl",
@@ -228,6 +255,19 @@ filegroup {
     name: "idmap2_aidl",
     srcs: [
         "idmap2d/aidl/android/os/IIdmap2.aidl",
+    ],
+    path: "idmap2d/aidl",
+}
+
+aidl_interface {
+    name: "overlayable_policy_aidl",
+    srcs: [":overlayable_policy_aidl_files"],
+}
+
+filegroup {
+    name: "overlayable_policy_aidl_files",
+    srcs: [
+        "idmap2d/aidl/android/os/OverlayablePolicy.aidl",
     ],
     path: "idmap2d/aidl",
 }
