@@ -16,12 +16,10 @@
 
 package android.view;
 
-import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsState.toPublicType;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.util.MutableShort;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
@@ -137,6 +135,10 @@ public class InsetsSourceConsumer {
         setRequestedVisible(false);
     }
 
+    void hide(boolean animationFinished) {
+        hide();
+    }
+
     /**
      * Called when current window gains focus
      */
@@ -197,6 +199,13 @@ public class InsetsSourceConsumer {
      * Notify listeners that window is now hidden.
      */
     void notifyHidden() {
+        // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
+    }
+
+    /**
+     * Remove surface on which this consumer type is drawn.
+     */
+    public void removeSurface() {
         // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
     }
 
