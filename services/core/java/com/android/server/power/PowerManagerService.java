@@ -4213,15 +4213,15 @@ public final class PowerManagerService extends SystemService
                                     .SCREEN_BRIGHTNESS_SETTING_LIMITS);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.ScreenBrightnessSettingLimitsProto
-                            .SETTING_MINIMUM,
+                            .SETTING_MINIMUM_FLOAT,
                     mScreenBrightnessSettingMinimum);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.ScreenBrightnessSettingLimitsProto
-                            .SETTING_MAXIMUM,
+                            .SETTING_MAXIMUM_FLOAT,
                     mScreenBrightnessSettingMaximum);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.ScreenBrightnessSettingLimitsProto
-                            .SETTING_DEFAULT,
+                            .SETTING_DEFAULT_FLOAT,
                     mScreenBrightnessSettingDefault);
             proto.end(screenBrightnessSettingLimitsToken);
 
