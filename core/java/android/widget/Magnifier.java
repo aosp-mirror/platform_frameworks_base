@@ -353,8 +353,9 @@ public final class Magnifier {
 
             // Gets the startX for new style, which should be bounded by the horizontal bounds.
             // Also calculates the left/right cut width for pixel copy.
-            leftBound += mViewCoordinatesInSurface[0];
-            rightBound += mViewCoordinatesInSurface[0];
+            leftBound = Math.max(leftBound + mViewCoordinatesInSurface[0], 0);
+            rightBound = Math.min(
+                rightBound + mViewCoordinatesInSurface[0], mContentCopySurface.mWidth);
             mLeftCutWidth = Math.max(0, leftBound - startX);
             mRightCutWidth = Math.max(0, startX + mSourceWidth - rightBound);
             startX = Math.max(startX, leftBound);
