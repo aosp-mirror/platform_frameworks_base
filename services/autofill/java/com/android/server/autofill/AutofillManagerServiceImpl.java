@@ -1650,11 +1650,15 @@ final class AutofillManagerServiceImpl
         mRemoteInlineSuggestionRenderService = getRemoteInlineSuggestionRenderServiceLocked();
     }
 
-    RemoteInlineSuggestionRenderService getRemoteInlineSuggestionRenderServiceLocked() {
-        final ComponentName componentName = RemoteInlineSuggestionRenderService
-                .getServiceComponentName(getContext(), mUserId);
-
+    @Nullable RemoteInlineSuggestionRenderService getRemoteInlineSuggestionRenderServiceLocked() {
         if (mRemoteInlineSuggestionRenderService == null) {
+            final ComponentName componentName = RemoteInlineSuggestionRenderService
+                .getServiceComponentName(getContext(), mUserId);
+            if (componentName == null) {
+                Slog.w(TAG, "No valid component found for InlineSuggestionRenderService");
+                return null;
+            }
+
             mRemoteInlineSuggestionRenderService = new RemoteInlineSuggestionRenderService(
                     getContext(), componentName, InlineSuggestionRenderService.SERVICE_INTERFACE,
                     mUserId, new InlineSuggestionRenderCallbacksImpl(),
