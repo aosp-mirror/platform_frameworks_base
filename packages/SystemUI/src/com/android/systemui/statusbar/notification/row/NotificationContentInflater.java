@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.row;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 
 import android.annotation.NonNull;
@@ -191,6 +192,18 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private void freeNotificationView(NotificationEntry entry, ExpandableNotificationRow row,
             @InflationFlag int inflateFlag) {
         switch (inflateFlag) {
+            case FLAG_CONTENT_VIEW_CONTRACTED:
+                if (row.getPrivateLayout().isContentViewInactive(VISIBLE_TYPE_CONTRACTED)) {
+                    row.getPrivateLayout().setContractedChild(null);
+                    mRemoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED);
+                }
+                break;
+            case FLAG_CONTENT_VIEW_EXPANDED:
+                if (row.getPrivateLayout().isContentViewInactive(VISIBLE_TYPE_EXPANDED)) {
+                    row.getPrivateLayout().setExpandedChild(null);
+                    mRemoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED);
+                }
+                break;
             case FLAG_CONTENT_VIEW_HEADS_UP:
                 if (row.getPrivateLayout().isContentViewInactive(VISIBLE_TYPE_HEADSUP)) {
                     row.getPrivateLayout().setHeadsUpChild(null);
@@ -204,8 +217,6 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     mRemoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC);
                 }
                 break;
-            case FLAG_CONTENT_VIEW_CONTRACTED:
-            case FLAG_CONTENT_VIEW_EXPANDED:
             default:
                 break;
         }
