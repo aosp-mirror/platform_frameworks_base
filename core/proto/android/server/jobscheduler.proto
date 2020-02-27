@@ -670,7 +670,7 @@ message StateControllerProto {
 
             repeated ExecutionStats execution_stats = 4;
 
-            optional AlarmListener in_quota_alarm_listener = 5;
+            reserved 5; // in_quota_alarm_listener
         }
         repeated PackageStats package_stats = 5;
 
@@ -683,7 +683,25 @@ message StateControllerProto {
         }
         repeated UidPackageMapping uid_to_package_cache = 7;
 
-        // Next tag: 8
+        message InQuotaAlarmListener {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            // The time at which the alarm is set to go off, in the elapsed realtime timebase.
+            optional int64 trigger_time_elapsed = 1;
+
+            message Alarm {
+                option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+                optional Package pkg = 1;
+
+                // The time at which the package will be in quota, in the elapsed realtime timebase.
+                optional int64 in_quota_time_elapsed = 2;
+            }
+            repeated Alarm alarms = 2;
+        }
+        optional InQuotaAlarmListener in_quota_alarm_listener = 8;
+
+        // Next tag: 9
     }
     message StorageController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
