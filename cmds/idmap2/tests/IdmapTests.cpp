@@ -22,6 +22,8 @@
 #include <utility>
 #include <vector>
 
+#include "R.h"
+#include "TestConstants.h"
 #include "TestHelpers.h"
 #include "android-base/macros.h"
 #include "androidfw/ApkAssets.h"
@@ -35,6 +37,8 @@
 using android::Res_value;
 using ::testing::IsNull;
 using ::testing::NotNull;
+
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace android::idmap2 {
 
@@ -168,7 +172,7 @@ TEST(IdmapTests, CreateIdmapHeaderFromApkAssets) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  auto idmap_result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+  auto idmap_result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::PUBLIC,
                                            /* enforce_overlayable */ true);
   ASSERT_TRUE(idmap_result) << idmap_result.GetErrorMessage();
   auto& idmap = *idmap_result;
@@ -177,8 +181,8 @@ TEST(IdmapTests, CreateIdmapHeaderFromApkAssets) {
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
   ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x03U);
-  ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0x76a20829);
-  ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0xc054fb26);
+  ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), android::idmap2::TestConstants::TARGET_CRC);
+  ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), android::idmap2::TestConstants::OVERLAY_CRC);
   ASSERT_EQ(idmap->GetHeader()->GetTargetPath().to_string(), target_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);
 }
@@ -220,7 +224,7 @@ TEST(IdmapTests, CreateIdmapDataFromApkAssets) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  auto idmap_result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+  auto idmap_result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::PUBLIC,
                                            /* enforce_overlayable */ true);
   ASSERT_TRUE(idmap_result) << idmap_result.GetErrorMessage();
   auto& idmap = *idmap_result;
@@ -234,17 +238,21 @@ TEST(IdmapTests, CreateIdmapDataFromApkAssets) {
 
   const auto& target_entries = data->GetTargetEntries();
   ASSERT_EQ(target_entries.size(), 4U);
-  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f010000, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f010000);
-  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f02000c, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f020000);
-  ASSERT_TARGET_ENTRY(target_entries[2], 0x7f02000e, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f020001);
-  ASSERT_TARGET_ENTRY(target_entries[3], 0x7f02000f, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f020002);
+  ASSERT_TARGET_ENTRY(target_entries[0], R::target::integer::int1,
+                      Res_value::TYPE_DYNAMIC_REFERENCE, R::overlay::integer::int1);
+  ASSERT_TARGET_ENTRY(target_entries[1], R::target::string::str1, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      R::overlay::string::str1);
+  ASSERT_TARGET_ENTRY(target_entries[2], R::target::string::str3, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      R::overlay::string::str3);
+  ASSERT_TARGET_ENTRY(target_entries[3], R::target::string::str4, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      R::overlay::string::str4);
 
   const auto& overlay_entries = data->GetOverlayEntries();
   ASSERT_EQ(target_entries.size(), 4U);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[0], 0x7f010000, 0x7f010000);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[1], 0x7f020000, 0x7f02000c);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[2], 0x7f020001, 0x7f02000e);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[3], 0x7f020002, 0x7f02000f);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[0], R::overlay::integer::int1, R::target::integer::int1);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[1], R::overlay::string::str1, R::target::string::str1);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[2], R::overlay::string::str3, R::target::string::str3);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[3], R::overlay::string::str4, R::target::string::str4);
 }
 
 TEST(IdmapTests, CreateIdmapDataFromApkAssetsSharedLibOverlay) {
@@ -257,7 +265,7 @@ TEST(IdmapTests, CreateIdmapDataFromApkAssetsSharedLibOverlay) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  auto idmap_result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+  auto idmap_result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::PUBLIC,
                                            /* enforce_overlayable */ true);
   ASSERT_TRUE(idmap_result) << idmap_result.GetErrorMessage();
   auto& idmap = *idmap_result;
@@ -271,17 +279,25 @@ TEST(IdmapTests, CreateIdmapDataFromApkAssetsSharedLibOverlay) {
 
   const auto& target_entries = data->GetTargetEntries();
   ASSERT_EQ(target_entries.size(), 4U);
-  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f010000, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00010000);
-  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f02000c, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00020000);
-  ASSERT_TARGET_ENTRY(target_entries[2], 0x7f02000e, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00020001);
-  ASSERT_TARGET_ENTRY(target_entries[3], 0x7f02000f, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00020002);
+  ASSERT_TARGET_ENTRY(target_entries[0], R::target::integer::int1,
+                      Res_value::TYPE_DYNAMIC_REFERENCE, R::overlay_shared::integer::int1);
+  ASSERT_TARGET_ENTRY(target_entries[1], R::target::string::str1, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      R::overlay_shared::string::str1);
+  ASSERT_TARGET_ENTRY(target_entries[2], R::target::string::str3, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      R::overlay_shared::string::str3);
+  ASSERT_TARGET_ENTRY(target_entries[3], R::target::string::str4, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      R::overlay_shared::string::str4);
 
   const auto& overlay_entries = data->GetOverlayEntries();
   ASSERT_EQ(target_entries.size(), 4U);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[0], 0x00010000, 0x7f010000);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[1], 0x00020000, 0x7f02000c);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[2], 0x00020001, 0x7f02000e);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[3], 0x00020002, 0x7f02000f);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[0], R::overlay_shared::integer::int1,
+                       R::target::integer::int1);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[1], R::overlay_shared::string::str1,
+                       R::target::string::str1);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[2], R::overlay_shared::string::str3,
+                       R::target::string::str3);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[3], R::overlay_shared::string::str4,
+                       R::target::string::str4);
 }
 
 TEST(IdmapTests, CreateIdmapDataDoNotRewriteNonOverlayResourceId) {
@@ -290,7 +306,7 @@ TEST(IdmapTests, CreateIdmapDataDoNotRewriteNonOverlayResourceId) {
   info.target_name = "TestResources";
   info.resource_mapping = 0x7f030001;  // xml/overlays_different_packages
   auto idmap_data = TestIdmapDataFromApkAssets("/target/target.apk", "/overlay/overlay.apk", info,
-                                               PolicyFlags::POLICY_PUBLIC,
+                                               PolicyFlags::PUBLIC,
                                                /* enforce_overlayable */ false);
 
   ASSERT_TRUE(idmap_data) << idmap_data.GetErrorMessage();
@@ -298,14 +314,14 @@ TEST(IdmapTests, CreateIdmapDataDoNotRewriteNonOverlayResourceId) {
 
   const auto& target_entries = data->GetTargetEntries();
   ASSERT_EQ(target_entries.size(), 2U);
-  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f02000c, Res_value::TYPE_REFERENCE,
-                      0x0104000a);  // string/str1 -> android:string/ok
-  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f02000e, Res_value::TYPE_DYNAMIC_REFERENCE,
-                      0x7f020001);  // string/str3 -> string/str4
+  ASSERT_TARGET_ENTRY(target_entries[0], R::target::string::str1, Res_value::TYPE_REFERENCE,
+                      0x0104000a);  // -> android:string/ok
+  ASSERT_TARGET_ENTRY(target_entries[1], R::target::string::str3, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      R::overlay::string::str3);
 
   const auto& overlay_entries = data->GetOverlayEntries();
   ASSERT_EQ(overlay_entries.size(), 1U);
-  ASSERT_OVERLAY_ENTRY(overlay_entries[0], 0x7f020001, 0x7f02000e);  // string/str3 <- string/str4
+  ASSERT_OVERLAY_ENTRY(overlay_entries[0], R::overlay::string::str3, R::target::string::str3);
 }
 
 TEST(IdmapTests, CreateIdmapDataInlineResources) {
@@ -314,7 +330,7 @@ TEST(IdmapTests, CreateIdmapDataInlineResources) {
   info.target_name = "TestResources";
   info.resource_mapping = 0x7f030002;  // xml/overlays_inline
   auto idmap_data = TestIdmapDataFromApkAssets("/target/target.apk", "/overlay/overlay.apk", info,
-                                               PolicyFlags::POLICY_PUBLIC,
+                                               PolicyFlags::PUBLIC,
                                                /* enforce_overlayable */ false);
 
   ASSERT_TRUE(idmap_data) << idmap_data.GetErrorMessage();
@@ -323,10 +339,10 @@ TEST(IdmapTests, CreateIdmapDataInlineResources) {
   constexpr size_t overlay_string_pool_size = 8U;
   const auto& target_entries = data->GetTargetEntries();
   ASSERT_EQ(target_entries.size(), 2U);
-  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f010000, Res_value::TYPE_INT_DEC,
-                      73U);  // integer/int1 -> 73
-  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f02000c, Res_value::TYPE_STRING,
-                      overlay_string_pool_size + 0U);  // string/str1 -> "Hello World"
+  ASSERT_TARGET_ENTRY(target_entries[0], R::target::integer::int1, Res_value::TYPE_INT_DEC,
+                      73U);  // -> 73
+  ASSERT_TARGET_ENTRY(target_entries[1], R::target::string::str1, Res_value::TYPE_STRING,
+                      overlay_string_pool_size + 0U);  // -> "Hello World"
 
   const auto& overlay_entries = data->GetOverlayEntries();
   ASSERT_EQ(overlay_entries.size(), 0U);
@@ -346,7 +362,7 @@ TEST(IdmapTests, FailToCreateIdmapFromApkAssetsIfPathTooLong) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  const auto result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+  const auto result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::PUBLIC,
                                            /* enforce_overlayable */ true);
   ASSERT_FALSE(result);
 }
@@ -362,7 +378,7 @@ TEST(IdmapTests, IdmapHeaderIsUpToDate) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  auto result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+  auto result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::PUBLIC,
                                      /* enforce_overlayable */ true);
   ASSERT_TRUE(result);
   const auto idmap = std::move(*result);

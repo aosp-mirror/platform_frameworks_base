@@ -21,6 +21,8 @@
 
 using android::ConfigDescription;
 
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
+
 namespace aapt {
 
 void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool, IDiagnostics* diag) {
@@ -299,26 +301,29 @@ static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item
   pb::OverlayableItem* pb_overlayable_item = pb_entry->mutable_overlayable_item();
   pb_overlayable_item->set_overlayable_idx(i);
 
-  if (overlayable_item.policies & OverlayableItem::Policy::kPublic) {
+  if (overlayable_item.policies & PolicyFlags::PUBLIC) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::PUBLIC);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kProduct) {
+  if (overlayable_item.policies & PolicyFlags::PRODUCT_PARTITION) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::PRODUCT);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kSystem) {
+  if (overlayable_item.policies & PolicyFlags::SYSTEM_PARTITION) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::SYSTEM);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kVendor) {
+  if (overlayable_item.policies & PolicyFlags::VENDOR_PARTITION) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::VENDOR);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kSignature) {
+  if (overlayable_item.policies & PolicyFlags::SIGNATURE) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::SIGNATURE);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kOdm) {
+  if (overlayable_item.policies & PolicyFlags::ODM_PARTITION) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::ODM);
   }
-  if (overlayable_item.policies & OverlayableItem::Policy::kOem) {
+  if (overlayable_item.policies & PolicyFlags::OEM_PARTITION) {
     pb_overlayable_item->add_policy(pb::OverlayableItem::OEM);
+  }
+  if (overlayable_item.policies & PolicyFlags::ACTOR_SIGNATURE) {
+    pb_overlayable_item->add_policy(pb::OverlayableItem::ACTOR);
   }
 
   if (source_pool != nullptr) {

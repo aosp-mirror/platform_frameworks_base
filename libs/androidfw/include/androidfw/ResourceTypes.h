@@ -22,6 +22,7 @@
 
 #include <androidfw/Asset.h>
 #include <androidfw/LocaleData.h>
+#include <androidfw/StringPiece.h>
 #include <utils/Errors.h>
 #include <utils/String16.h>
 #include <utils/Vector.h>
@@ -34,6 +35,7 @@
 
 #include <android/configuration.h>
 
+#include <array>
 #include <memory>
 
 namespace android {
@@ -1676,41 +1678,63 @@ struct ResTable_overlayable_header
  */
 struct ResTable_overlayable_policy_header
 {
-  struct ResChunk_header header;
-
+  /**
+   * Flags for a bitmask for all possible overlayable policy options.
+   *
+   * Any changes to this set should also update aidl/android/os/OverlayablePolicy.aidl
+   */
   enum PolicyFlags : uint32_t {
+    // Base
+    NONE = 0x00000000,
+
     // Any overlay can overlay these resources.
-    POLICY_PUBLIC = 0x00000001,
+    PUBLIC = 0x00000001,
 
     // The overlay must reside of the system partition or must have existed on the system partition
     // before an upgrade to overlay these resources.
-    POLICY_SYSTEM_PARTITION = 0x00000002,
+    SYSTEM_PARTITION = 0x00000002,
 
     // The overlay must reside of the vendor partition or must have existed on the vendor partition
     // before an upgrade to overlay these resources.
-    POLICY_VENDOR_PARTITION = 0x00000004,
+    VENDOR_PARTITION = 0x00000004,
 
     // The overlay must reside of the product partition or must have existed on the product
     // partition before an upgrade to overlay these resources.
-    POLICY_PRODUCT_PARTITION = 0x00000008,
+    PRODUCT_PARTITION = 0x00000008,
 
-    // The overlay must be signed with the same signature as the actor of the target resource,
-    // which can be separate or the same as the target package with the resource.
-    POLICY_SIGNATURE = 0x00000010,
+    // The overlay must be signed with the same signature as the package containing the target
+    // resource
+    SIGNATURE = 0x00000010,
 
     // The overlay must reside of the odm partition or must have existed on the odm
     // partition before an upgrade to overlay these resources.
-    POLICY_ODM_PARTITION = 0x00000020,
+    ODM_PARTITION = 0x00000020,
 
     // The overlay must reside of the oem partition or must have existed on the oem
     // partition before an upgrade to overlay these resources.
-    POLICY_OEM_PARTITION = 0x00000040,
+    OEM_PARTITION = 0x00000040,
+
+    // The overlay must be signed with the same signature as the actor declared for the target
+    // resource
+    ACTOR_SIGNATURE = 0x00000080,
   };
-  uint32_t policy_flags;
+
+  using PolicyBitmask = uint32_t;
+
+  struct ResChunk_header header;
+
+  PolicyFlags policy_flags;
 
   // The number of ResTable_ref that follow this header.
   uint32_t entry_count;
 };
+
+inline ResTable_overlayable_policy_header::PolicyFlags& operator |=(
+    ResTable_overlayable_policy_header::PolicyFlags& first,
+    ResTable_overlayable_policy_header::PolicyFlags second) {
+  first = static_cast<ResTable_overlayable_policy_header::PolicyFlags>(first | second);
+  return first;
+}
 
 #pragma pack(push, 1)
 struct Idmap_header {

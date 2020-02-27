@@ -138,6 +138,7 @@ public final class OverlayInfo implements Parcelable {
      *
      * @hide
      */
+    @NonNull
     public final String packageName;
 
     /**
@@ -145,6 +146,7 @@ public final class OverlayInfo implements Parcelable {
      *
      * @hide
      */
+    @NonNull
     public final String targetPackageName;
 
     /**
@@ -165,6 +167,7 @@ public final class OverlayInfo implements Parcelable {
      * Full path to the base APK for this overlay package
      * @hide
      */
+    @NonNull
     public final String baseCodePath;
 
     /**
@@ -292,6 +295,7 @@ public final class OverlayInfo implements Parcelable {
         return targetOverlayableName;
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void ensureValidState() {
         if (packageName == null) {
             throw new IllegalArgumentException("packageName must not be null");
