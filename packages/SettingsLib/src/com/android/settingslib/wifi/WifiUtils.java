@@ -68,7 +68,8 @@ public class WifiUtils {
             for (int reason = 0; reason <= getMaxNetworkSelectionDisableReason(); reason++) {
                 if (networkStatus.getDisableReasonCounter(reason) != 0) {
                     summary.append(" ")
-                            .append(NetworkSelectionStatus.getNetworkDisableReasonString(reason))
+                            .append(NetworkSelectionStatus
+                                    .getNetworkSelectionDisableReasonString(reason))
                             .append("=")
                             .append(networkStatus.getDisableReasonCounter(reason));
                 }
