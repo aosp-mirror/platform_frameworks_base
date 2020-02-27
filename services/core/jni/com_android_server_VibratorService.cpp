@@ -355,10 +355,11 @@ static jintArray vibratorGetSupportedEffects(JNIEnv *env, jclass) {
 }
 
 static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jlong strength,
-                                   jobject vibration) {
+                                   jobject vibration, jboolean withCallback) {
     if (auto hal = getHal<aidl::IVibrator>()) {
         int32_t lengthMs;
-        sp<AidlVibratorCallback> effectCallback = new AidlVibratorCallback(env, vibration);
+        sp<AidlVibratorCallback> effectCallback =
+                (withCallback != JNI_FALSE ? new AidlVibratorCallback(env, vibration) : nullptr);
         aidl::Effect effectType(static_cast<aidl::Effect>(effect));
         aidl::EffectStrength effectStrength(static_cast<aidl::EffectStrength>(strength));
 
@@ -478,24 +479,24 @@ static void vibratorAlwaysOnDisable(JNIEnv* env, jclass, jlong id) {
 }
 
 static const JNINativeMethod method_table[] = {
-    { "vibratorExists", "()Z", (void*)vibratorExists },
-    { "vibratorInit", "()V", (void*)vibratorInit },
-    { "vibratorOn", "(J)V", (void*)vibratorOn },
-    { "vibratorOff", "()V", (void*)vibratorOff },
-    { "vibratorSupportsAmplitudeControl", "()Z", (void*)vibratorSupportsAmplitudeControl},
-    { "vibratorSetAmplitude", "(I)V", (void*)vibratorSetAmplitude},
-    { "vibratorPerformEffect", "(JJLcom/android/server/VibratorService$Vibration;)J",
-            (void*)vibratorPerformEffect},
-    { "vibratorPerformComposedEffect",
-            "([Landroid/os/VibrationEffect$Composition$PrimitiveEffect;Lcom/android/server/VibratorService$Vibration;)V",
-            (void*)vibratorPerformComposedEffect},
-    { "vibratorGetSupportedEffects", "()[I",
-            (void*)vibratorGetSupportedEffects},
-    { "vibratorSupportsExternalControl", "()Z", (void*)vibratorSupportsExternalControl},
-    { "vibratorSetExternalControl", "(Z)V", (void*)vibratorSetExternalControl},
-    { "vibratorGetCapabilities", "()J", (void*)vibratorGetCapabilities},
-    { "vibratorAlwaysOnEnable", "(JJJ)V", (void*)vibratorAlwaysOnEnable},
-    { "vibratorAlwaysOnDisable", "(J)V", (void*)vibratorAlwaysOnDisable},
+        {"vibratorExists", "()Z", (void*)vibratorExists},
+        {"vibratorInit", "()V", (void*)vibratorInit},
+        {"vibratorOn", "(J)V", (void*)vibratorOn},
+        {"vibratorOff", "()V", (void*)vibratorOff},
+        {"vibratorSupportsAmplitudeControl", "()Z", (void*)vibratorSupportsAmplitudeControl},
+        {"vibratorSetAmplitude", "(I)V", (void*)vibratorSetAmplitude},
+        {"vibratorPerformEffect", "(JJLcom/android/server/VibratorService$Vibration;Z)J",
+         (void*)vibratorPerformEffect},
+        {"vibratorPerformComposedEffect",
+         "([Landroid/os/VibrationEffect$Composition$PrimitiveEffect;Lcom/android/server/"
+         "VibratorService$Vibration;)V",
+         (void*)vibratorPerformComposedEffect},
+        {"vibratorGetSupportedEffects", "()[I", (void*)vibratorGetSupportedEffects},
+        {"vibratorSupportsExternalControl", "()Z", (void*)vibratorSupportsExternalControl},
+        {"vibratorSetExternalControl", "(Z)V", (void*)vibratorSetExternalControl},
+        {"vibratorGetCapabilities", "()J", (void*)vibratorGetCapabilities},
+        {"vibratorAlwaysOnEnable", "(JJJ)V", (void*)vibratorAlwaysOnEnable},
+        {"vibratorAlwaysOnDisable", "(J)V", (void*)vibratorAlwaysOnDisable},
 };
 
 int register_android_server_VibratorService(JNIEnv *env) {
