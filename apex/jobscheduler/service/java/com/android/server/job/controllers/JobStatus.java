@@ -1271,7 +1271,8 @@ public final class JobStatus {
         // sessions (exempt from dynamic restrictions), we need the additional check to ensure
         // that NEVER jobs don't run.
         // TODO: cleanup quota and standby bucket management so we don't need the additional checks
-        if ((!mReadyWithinQuota && !mReadyDynamicSatisfied) || standbyBucket == NEVER_INDEX) {
+        if ((!mReadyWithinQuota && !mReadyDynamicSatisfied)
+                || getEffectiveStandbyBucket() == NEVER_INDEX) {
             return false;
         }
         // Deadline constraint trumps other constraints besides quota and dynamic (except for
