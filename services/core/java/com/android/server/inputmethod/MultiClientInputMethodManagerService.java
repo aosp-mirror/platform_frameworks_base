@@ -1500,7 +1500,8 @@ public final class MultiClientInputMethodManagerService {
         @BinderThread
         @Override
         public boolean hideSoftInput(
-                IInputMethodClient client, int flags, ResultReceiver resultReceiver) {
+                IInputMethodClient client, IBinder windowToken, int flags,
+                ResultReceiver resultReceiver) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int userId = UserHandle.getUserId(callingUid);

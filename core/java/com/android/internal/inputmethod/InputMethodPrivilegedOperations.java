@@ -371,18 +371,20 @@ public final class InputMethodPrivilegedOperations {
     /**
      * Calls {@link IInputMethodPrivilegedOperations#applyImeVisibility(IBinder, boolean)}.
      *
-     * @param showInputToken dummy token that maps to window requesting
-     *        {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)}
+     * @param showOrHideInputToken dummy token that maps to window requesting
+     *        {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} or
+     *        {@link android.view.inputmethod.InputMethodManager#hideSoftInputFromWindow
+     *        (IBinder, int)}
      * @param setVisible {@code true} to set IME visible, else hidden.
      */
     @AnyThread
-    public void applyImeVisibility(IBinder showInputToken, boolean setVisible) {
+    public void applyImeVisibility(IBinder showOrHideInputToken, boolean setVisible) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
-            ops.applyImeVisibility(showInputToken, setVisible);
+            ops.applyImeVisibility(showOrHideInputToken, setVisible);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
