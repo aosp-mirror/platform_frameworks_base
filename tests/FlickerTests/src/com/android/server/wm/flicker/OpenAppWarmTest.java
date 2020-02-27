@@ -19,6 +19,8 @@ package com.android.server.wm.flicker;
 import static com.android.server.wm.flicker.CommonTransitions.openAppWarm;
 import static com.android.server.wm.flicker.WmTraceSubject.assertThat;
 
+import android.view.Surface;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
@@ -76,10 +78,20 @@ public class OpenAppWarmTest extends NonRotationTestBase {
 
     @Test
     public void checkVisibility_wallpaperLayerBecomesInvisible() {
-        checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer("Wallpaper")
-                .then()
-                .hidesLayer("Wallpaper")
-                .forAllEntries());
+        if (mBeginRotation == Surface.ROTATION_0) {
+            checkResults(result -> LayersTraceSubject.assertThat(result)
+                    .showsLayer("Wallpaper")
+                    .then()
+                    .replaceVisibleLayer("Wallpaper", mTestApp.getPackage())
+                    .forAllEntries());
+        } else {
+            checkResults(result -> LayersTraceSubject.assertThat(result)
+                    .showsLayer("Wallpaper")
+                    .then()
+                    .replaceVisibleLayer("Wallpaper", "Screenshot")
+                    .then()
+                    .showsLayer(mTestApp.getPackage())
+                    .forAllEntries());
+        }
     }
 }
