@@ -23,9 +23,12 @@ import static org.mockito.Mockito.when;
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayInfo.State;
+import android.content.om.OverlayableInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.util.ArraySet;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.content.om.OverlayConfig;
 
@@ -35,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -281,8 +285,8 @@ class OverlayManagerServiceImplTestsBase {
         }
     }
 
-    static final class DummyPackageManagerHelper implements
-            OverlayManagerServiceImpl.PackageManagerHelper {
+    static final class DummyPackageManagerHelper implements PackageManagerHelper,
+            OverlayableInfoCallback {
         private final DummyDeviceState mState;
 
         private DummyPackageManagerHelper(DummyDeviceState state) {
@@ -319,6 +323,35 @@ class OverlayManagerServiceImplTestsBase {
                     .filter(p -> p.targetPackageName != null)
                     .map(p -> getPackageInfo(p.packageName, p.userId))
                     .collect(Collectors.toList());
+        }
+
+        @Nullable
+        @Override
+        public OverlayableInfo getOverlayableForTarget(@NonNull String packageName,
+                @NonNull String targetOverlayableName, int userId) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Nullable
+        @Override
+        public String[] getPackagesForUid(int uid) {
+            throw new UnsupportedOperationException();
+        }
+
+        @NonNull
+        @Override
+        public Map<String, Map<String, String>> getNamedActors() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean doesTargetDefineOverlayable(String targetPackageName, int userId) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void enforcePermission(String permission, String message) throws SecurityException {
+            throw new UnsupportedOperationException();
         }
     }
 

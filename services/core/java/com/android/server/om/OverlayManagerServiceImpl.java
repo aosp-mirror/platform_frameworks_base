@@ -18,7 +18,6 @@ package com.android.server.om;
 
 import static android.content.om.OverlayInfo.STATE_DISABLED;
 import static android.content.om.OverlayInfo.STATE_ENABLED;
-import static android.content.om.OverlayInfo.STATE_ENABLED_IMMUTABLE;
 import static android.content.om.OverlayInfo.STATE_MISSING_TARGET;
 import static android.content.om.OverlayInfo.STATE_NO_IDMAP;
 import static android.content.om.OverlayInfo.STATE_OVERLAY_IS_BEING_REPLACED;
@@ -805,12 +804,5 @@ final class OverlayManagerServiceImpl {
          * add or remove target packages of overlays.
          **/
         void onOverlaysChanged(@NonNull String targetPackage, int userId);
-    }
-
-    interface PackageManagerHelper {
-        PackageInfo getPackageInfo(@NonNull String packageName, int userId);
-        boolean signaturesMatching(@NonNull String packageName1, @NonNull String packageName2,
-                                   int userId);
-        List<PackageInfo> getOverlayPackages(int userId);
     }
 }
