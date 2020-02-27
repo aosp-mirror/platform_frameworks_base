@@ -1074,7 +1074,15 @@ public class JobSchedulerService extends com.android.server.SystemService
                     uId, null, jobStatus.getBatteryName(),
                     FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED,
                     JobProtoEnums.STOP_REASON_CANCELLED, jobStatus.getStandbyBucket(),
-                    jobStatus.getJobId());
+                    jobStatus.getJobId(),
+                    jobStatus.hasChargingConstraint(),
+                    jobStatus.hasBatteryNotLowConstraint(),
+                    jobStatus.hasStorageNotLowConstraint(),
+                    jobStatus.hasTimingDelayConstraint(),
+                    jobStatus.hasDeadlineConstraint(),
+                    jobStatus.hasIdleConstraint(),
+                    jobStatus.hasConnectivityConstraint(),
+                    jobStatus.hasContentTriggerConstraint());
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
