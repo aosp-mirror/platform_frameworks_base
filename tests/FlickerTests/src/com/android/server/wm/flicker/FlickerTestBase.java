@@ -89,7 +89,7 @@ public class FlickerTestBase {
                         }
                         if (result.screenCaptureVideoExists()) {
                             Log.e(TAG, "Screen capture video saved to " + result
-                                    .screenCaptureVideo.toString());
+                                    .screenCaptureVideoPath().toString());
                         }
                     }
                 });
