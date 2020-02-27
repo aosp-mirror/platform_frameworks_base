@@ -4471,6 +4471,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public void setCheckPermissionDelegate(CheckPermissionDelegate delegate) {
             synchronized (mLock) {
+                if (delegate != null || mCheckPermissionDelegate != null) {
+                    PackageManager.invalidatePackageInfoCache();
+                }
                 mCheckPermissionDelegate = delegate;
             }
         }
