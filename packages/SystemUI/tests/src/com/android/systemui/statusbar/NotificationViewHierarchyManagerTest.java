@@ -41,11 +41,11 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -106,17 +106,14 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mock(KeyguardBypassController.class),
                 mock(BubbleController.class),
                 mock(DynamicPrivacyController.class),
-                mock(ForegroundServiceSectionController.class));
+                mock(ForegroundServiceSectionController.class),
+                mock(DynamicChildBindController.class));
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
     }
 
     private NotificationEntry createEntry() throws Exception {
         ExpandableNotificationRow row = mHelper.createRow();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setSbn(row.getEntry().getSbn())
-                .build();
-        entry.setRow(row);
-        return entry;
+        return row.getEntry();
     }
 
     @Test
