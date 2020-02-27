@@ -118,7 +118,7 @@ import java.util.function.Supplier;
  *   mutually-exclusive to ensure @WorkerThread methods and @ExtThread ones never call into each
  *   other.
  */
-class RollbackManagerServiceImpl extends IRollbackManager.Stub {
+class RollbackManagerServiceImpl extends IRollbackManager.Stub implements RollbackManagerInternal {
     /**
      * Denotes that the annotated methods is intended for external entities and should be called on
      * an external thread. By 'external' we mean any thread that is not the handler thread.
@@ -923,6 +923,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         return rollback.enableForPackage(packageName, newPackage.versionCode,
                 pkgInfo.getLongVersionCode(), isApex, appInfo.sourceDir,
                 appInfo.splitSourceDirs, rollbackDataPolicy);
+    }
+
+    @ExtThread
+    @Override
+    public void snapshotAndRestoreUserData(String packageName, List<UserHandle> users, int appId,
+            long ceDataInode, String seInfo, int token) {
+        assertNotInWorkerThread();
+        snapshotAndRestoreUserData(packageName, UserHandle.fromUserHandles(users), appId,
+                ceDataInode, seInfo, token);
     }
 
     @ExtThread
