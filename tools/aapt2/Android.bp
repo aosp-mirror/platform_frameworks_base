@@ -59,6 +59,7 @@ cc_defaults {
         "libprotobuf-cpp-full",
         "libz",
         "libbuildversion",
+        "libidmap2_policies",
     ],
     stl: "libc++_static",
     group_static_libs: true,

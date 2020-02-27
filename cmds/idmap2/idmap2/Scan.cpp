@@ -20,7 +20,6 @@
 #include <memory>
 #include <ostream>
 #include <set>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -34,24 +33,23 @@
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
 #include "idmap2/XmlParser.h"
-#include "idmap2/ZipFile.h"
 
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Error;
 using android::idmap2::Idmap;
-using android::idmap2::kPolicyOdm;
-using android::idmap2::kPolicyOem;
-using android::idmap2::kPolicyProduct;
-using android::idmap2::kPolicyPublic;
-using android::idmap2::kPolicySystem;
-using android::idmap2::kPolicyVendor;
-using android::idmap2::PolicyBitmask;
-using android::idmap2::PolicyFlags;
 using android::idmap2::Result;
 using android::idmap2::Unit;
+using android::idmap2::policy::kPolicyOdm;
+using android::idmap2::policy::kPolicyOem;
+using android::idmap2::policy::kPolicyProduct;
+using android::idmap2::policy::kPolicyPublic;
+using android::idmap2::policy::kPolicySystem;
+using android::idmap2::policy::kPolicyVendor;
 using android::idmap2::utils::ExtractOverlayManifestInfo;
 using android::idmap2::utils::FindFiles;
 using android::idmap2::utils::OverlayManifestInfo;
+
+using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
 
 namespace {
 
