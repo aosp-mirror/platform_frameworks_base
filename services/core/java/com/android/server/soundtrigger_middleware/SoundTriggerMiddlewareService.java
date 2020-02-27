@@ -172,10 +172,11 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
 
             publishBinderService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE,
                     new SoundTriggerMiddlewareService(
-                            new SoundTriggerMiddlewareValidation(
-                                    new SoundTriggerMiddlewareImpl(factories,
-                                            new AudioSessionProviderImpl()),
-                                    getContext())));
+                            new SoundTriggerMiddlewareLogging(
+                                    new SoundTriggerMiddlewareValidation(
+                                            new SoundTriggerMiddlewareImpl(factories,
+                                                    new AudioSessionProviderImpl()),
+                                            getContext()))));
         }
     }
 }
