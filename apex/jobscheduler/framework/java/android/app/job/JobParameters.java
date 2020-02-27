@@ -54,7 +54,8 @@ public class JobParameters implements Parcelable {
      *
      * @hide
      */
-    public static final int REASON_RESTRAINED = JobProtoEnums.STOP_REASON_RESTRAINED; // 6.
+    public static final int REASON_RESTRICTED_BUCKET =
+            JobProtoEnums.STOP_REASON_RESTRICTED_BUCKET; // 6.
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
@@ -72,7 +73,7 @@ public class JobParameters implements Parcelable {
             REASON_TIMEOUT,
             REASON_DEVICE_IDLE,
             REASON_DEVICE_THERMAL,
-            REASON_RESTRAINED,
+            REASON_RESTRICTED_BUCKET,
     };
 
     /**
@@ -88,7 +89,7 @@ public class JobParameters implements Parcelable {
             case REASON_TIMEOUT: return "timeout";
             case REASON_DEVICE_IDLE: return "device_idle";
             case REASON_DEVICE_THERMAL: return "thermal";
-            case REASON_RESTRAINED: return "restrained";
+            case REASON_RESTRICTED_BUCKET: return "restricted_bucket";
             default: return "unknown:" + reasonCode;
         }
     }
