@@ -63,7 +63,7 @@ import javax.inject.Inject;
 /**
  * A service which records the device screen and optionally microphone input.
  */
-public class RecordingService extends Service {
+public class RecordingService extends Service implements MediaRecorder.OnInfoListener {
     public static final int REQUEST_CODE = 2;
 
     private static final int NOTIFICATION_ID = 1;
@@ -85,6 +85,8 @@ public class RecordingService extends Service {
     private static final int VIDEO_FRAME_RATE = 30;
     private static final int AUDIO_BIT_RATE = 16;
     private static final int AUDIO_SAMPLE_RATE = 44100;
+    private static final int MAX_DURATION_MS = 60 * 60 * 1000;
+    private static final long MAX_FILESIZE_BYTES = 5000000000L;
 
     private final RecordingController mController;
     private MediaProjection mMediaProjection;
@@ -250,6 +252,8 @@ public class RecordingService extends Service {
             mMediaRecorder.setVideoSize(screenWidth, screenHeight);
             mMediaRecorder.setVideoFrameRate(VIDEO_FRAME_RATE);
             mMediaRecorder.setVideoEncodingBitRate(VIDEO_BIT_RATE);
+            mMediaRecorder.setMaxDuration(MAX_DURATION_MS);
+            mMediaRecorder.setMaxFileSize(MAX_FILESIZE_BYTES);
 
             // Set up audio
             if (mUseAudio) {
@@ -274,6 +278,7 @@ public class RecordingService extends Service {
                     null,
                     null);
 
+            mMediaRecorder.setOnInfoListener(this);
             mMediaRecorder.start();
             mController.updateState(true);
         } catch (IOException e) {
@@ -453,5 +458,11 @@ public class RecordingService extends Service {
     private static Intent getDeleteIntent(Context context, String path) {
         return new Intent(context, RecordingService.class).setAction(ACTION_DELETE)
                 .putExtra(EXTRA_PATH, path);
+    }
+
+    @Override
+    public void onInfo(MediaRecorder mr, int what, int extra) {
+        Log.d(TAG, "Media recorder info: " + what);
+        onStartCommand(getStopIntent(this), 0, 0);
     }
 }
