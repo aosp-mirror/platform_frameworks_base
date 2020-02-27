@@ -23,6 +23,8 @@ import static android.app.usage.UsageStatsManager.REASON_MAIN_MASK;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_PREDICTED;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_DEFAULT_APP_UPDATE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY;
 import static android.app.usage.UsageStatsManager.REASON_SUB_MASK;
 import static android.app.usage.UsageStatsManager.REASON_SUB_PREDICTED_RESTORED;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_ACTIVE_TIMEOUT;
@@ -73,7 +75,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManager;
-import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -304,10 +305,7 @@ public class AppStandbyController implements AppStandbyInternal {
     private final AppStandbyHandler mHandler;
     private final Context mContext;
 
-    // TODO: Provide a mechanism to set an external bucketing service
-
     private AppWidgetManager mAppWidgetManager;
-    private ConnectivityManager mConnectivityManager;
     private PackageManager mPackageManager;
     Injector mInjector;
 
@@ -411,7 +409,6 @@ public class AppStandbyController implements AppStandbyInternal {
             settingsObserver.updateSettings();
 
             mAppWidgetManager = mContext.getSystemService(AppWidgetManager.class);
-            mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
 
             mInjector.registerDisplayListener(mDisplayListener, mHandler);
             synchronized (mAppIdleLock) {
@@ -1519,6 +1516,38 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
+    /**
+     * Remove an app from the {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
+     * bucket if it was forced into the bucket by the system because it was buggy.
+     */
+    @VisibleForTesting
+    void maybeUnrestrictBuggyApp(String packageName, int userId) {
+        synchronized (mAppIdleLock) {
+            final long elapsedRealtime = mInjector.elapsedRealtime();
+            final AppIdleHistory.AppUsageHistory app =
+                    mAppIdleHistory.getAppUsageHistory(packageName, userId, elapsedRealtime);
+            if (app.currentBucket != STANDBY_BUCKET_RESTRICTED
+                    || (app.bucketingReason & REASON_MAIN_MASK) != REASON_MAIN_FORCED_BY_SYSTEM) {
+                return;
+            }
+
+            final int newBucket;
+            final int newReason;
+            if ((app.bucketingReason & REASON_SUB_MASK) == REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY) {
+                // If bugginess was the only reason the app should be restricted, then lift it out.
+                newBucket = STANDBY_BUCKET_RARE;
+                newReason = REASON_MAIN_DEFAULT | REASON_SUB_DEFAULT_APP_UPDATE;
+            } else {
+                // There's another reason the app was restricted. Remove the buggy bit and call
+                // it a day.
+                newBucket = STANDBY_BUCKET_RESTRICTED;
+                newReason = app.bucketingReason & ~REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY;
+            }
+            mAppIdleHistory.setAppStandbyBucket(
+                    packageName, userId, elapsedRealtime, newBucket, newReason);
+        }
+    }
+
     private class PackageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1528,10 +1557,14 @@ public class AppStandbyController implements AppStandbyInternal {
                 clearCarrierPrivilegedApps();
             }
             if ((Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
-                    Intent.ACTION_PACKAGE_ADDED.equals(action))
-                    && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                clearAppIdleForPackage(intent.getData().getSchemeSpecificPart(),
-                        getSendingUserId());
+                    Intent.ACTION_PACKAGE_ADDED.equals(action))) {
+                final String pkgName = intent.getData().getSchemeSpecificPart();
+                final int userId = getSendingUserId();
+                if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    maybeUnrestrictBuggyApp(pkgName, userId);
+                } else {
+                    clearAppIdleForPackage(pkgName, userId);
+                }
             }
         }
     }
