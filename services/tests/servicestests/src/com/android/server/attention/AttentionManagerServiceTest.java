@@ -71,7 +71,7 @@ public class AttentionManagerServiceTest {
     @Mock
     private AttentionHandler mMockHandler;
     @Mock
-    private IAttentionCallback mMockIAttentionCallback;
+    private UserState mMockUserState;
     @Mock
     private IPowerManager mMockIPowerManager;
     @Mock
@@ -117,7 +117,7 @@ public class AttentionManagerServiceTest {
     @Test
     public void testCancelAttentionCheck_noCrashWhenCallbackMismatched() {
         mSpyUserState.mCurrentAttentionCheck =
-                new AttentionCheck(mMockAttentionCallbackInternal, mMockIAttentionCallback);
+                new AttentionCheck(mMockAttentionCallbackInternal, mMockUserState);
         doReturn(mSpyUserState).when(mSpyAttentionManager).peekCurrentUserStateLocked();
         mSpyAttentionManager.cancelAttentionCheck(null);
     }
@@ -125,7 +125,7 @@ public class AttentionManagerServiceTest {
     @Test
     public void testCancelAttentionCheck_cancelCallbackWhenMatched() {
         mSpyUserState.mCurrentAttentionCheck =
-                new AttentionCheck(mMockAttentionCallbackInternal, mMockIAttentionCallback);
+                new AttentionCheck(mMockAttentionCallbackInternal, mMockUserState);
         doReturn(mSpyUserState).when(mSpyAttentionManager).peekCurrentUserStateLocked();
         mSpyAttentionManager.cancelAttentionCheck(mMockAttentionCallbackInternal);
         verify(mSpyAttentionManager).cancel(any());
