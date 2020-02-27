@@ -857,11 +857,21 @@ public final class WindowInsets {
     /**
      * Returns a copy of this instance inset in the given directions.
      *
+     * This is intended for dispatching insets to areas of the window that are smaller than the
+     * current area.
+     *
+     * <p>Example:
+     * <pre>
+     * childView.dispatchApplyWindowInsets(insets.inset(childMargins));
+     * </pre>
+     *
+     * @param insets the amount of insets to remove from all sides.
+     *
      * @see #inset(int, int, int, int)
-     * @hide
      */
     @NonNull
-    public WindowInsets inset(Insets insets) {
+    public WindowInsets inset(@NonNull Insets insets) {
+        Objects.requireNonNull(insets);
         return inset(insets.left, insets.top, insets.right, insets.bottom);
     }
 
@@ -883,6 +893,8 @@ public final class WindowInsets {
      * @param bottom the amount of insets to remove from the bottom. Must be non-negative.
      *
      * @return the inset insets
+     *
+     * @see #inset(Insets)
      */
     @NonNull
     public WindowInsets inset(@IntRange(from = 0) int left, @IntRange(from = 0) int top,
