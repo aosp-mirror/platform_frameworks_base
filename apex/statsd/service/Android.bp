@@ -31,6 +31,8 @@ java_library {
         "android_module_lib_stubs_current",
     ],
 
+    plugins: ["java_api_finder"],
+
     apex_available: [
         "com.android.os.statsd",
         "test_com.android.os.statsd",
