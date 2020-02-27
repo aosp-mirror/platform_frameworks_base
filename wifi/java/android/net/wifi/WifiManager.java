@@ -1880,9 +1880,11 @@ public class WifiManager {
      * NOTE:
      * <li> These networks are just a suggestion to the platform. The platform will ultimately
      * decide on which network the device connects to. </li>
-     * <li> When an app is uninstalled, all its suggested networks are discarded. If the device is
-     * currently connected to a suggested network which is being removed then the device will
-     * disconnect from that network.</li>
+     * <li> When an app is uninstalled or disabled, all its suggested networks are discarded.
+     * If the device is currently connected to a suggested network which is being removed then the
+     * device will disconnect from that network.</li>
+     * <li> If user reset network settings, all added suggestions will be discarded. Apps can use
+     * {@link #getNetworkSuggestions()} to check if their suggestions are in the device.</li>
      * <li> In-place modification of existing suggestions are allowed.
      * If the provided suggestions {@link WifiNetworkSuggestion#equals(Object)} any previously
      * provided suggestions by the app. Previous suggestions will be updated</li>
