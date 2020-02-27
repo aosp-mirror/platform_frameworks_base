@@ -621,9 +621,6 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void setUpOverflow() {
-        if (!BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
-            return;
-        }
         int overflowBtnIndex = 0;
         if (mBubbleOverflow == null) {
             mBubbleOverflow = new BubbleOverflow(mContext);
@@ -834,8 +831,7 @@ public class BubbleStackView extends FrameLayout {
     @Nullable
     Bubble getExpandedBubble() {
         if (mExpandedBubble == null
-                || (BubbleExperimentConfig.allowBubbleOverflow(mContext)
-                    && mExpandedBubble.getIconView() == mBubbleOverflow.getBtn()
+                || (mExpandedBubble.getIconView() == mBubbleOverflow.getBtn()
                     && mExpandedBubble.getKey() == BubbleOverflow.KEY)) {
             return null;
         }
@@ -886,9 +882,6 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void updateOverflowBtnVisibility(boolean apply) {
-        if (!BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
-            return;
-        }
         if (mIsExpanded) {
             if (DEBUG_BUBBLE_STACK_VIEW) {
                 Log.d(TAG, "Show overflow button.");
@@ -1020,8 +1013,7 @@ public class BubbleStackView extends FrameLayout {
         float y = event.getRawY();
         if (mIsExpanded) {
             if (isIntersecting(mBubbleContainer, x, y)) {
-                if (BubbleExperimentConfig.allowBubbleOverflow(mContext)
-                        && isIntersecting(mBubbleOverflow.getBtn(), x, y)) {
+                if (isIntersecting(mBubbleOverflow.getBtn(), x, y)) {
                     return mBubbleOverflow.getBtn();
                 }
                 // Could be tapping or dragging a bubble while expanded
@@ -1674,11 +1666,8 @@ public class BubbleStackView extends FrameLayout {
      * @return the number of bubbles in the stack view.
      */
     public int getBubbleCount() {
-        if (BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
-            // Subtract 1 for the overflow button which is always in the bubble container.
-            return mBubbleContainer.getChildCount() - 1;
-        }
-        return mBubbleContainer.getChildCount();
+        // Subtract 1 for the overflow button that is always in the bubble container.
+        return mBubbleContainer.getChildCount() - 1;
     }
 
     /**
