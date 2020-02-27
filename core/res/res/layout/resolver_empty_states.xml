@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/resolver_empty_state"
     android:layout_width="match_parent"
@@ -28,25 +28,31 @@
         android:id="@+id/resolver_empty_state_icon"
         android:layout_marginTop="48dp"
         android:layout_width="24dp"
-        android:layout_height="24dp"/>
+        android:layout_height="24dp"
+        android:layout_centerHorizontal="true" />
     <TextView
         android:id="@+id/resolver_empty_state_title"
+        android:layout_below="@+id/resolver_empty_state_icon"
         android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@string/config_headlineFontFamilyMedium"
         android:textColor="@color/resolver_empty_state_text"
-        android:textSize="14sp"/>
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true" />
     <TextView
         android:id="@+id/resolver_empty_state_subtitle"
+        android:layout_below="@+id/resolver_empty_state_title"
         android:layout_marginTop="4dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/resolver_empty_state_text"
-        android:textSize="12sp"
-        android:gravity="center_horizontal" />
+        android:textSize="14sp"
+        android:gravity="center_horizontal"
+        android:layout_centerHorizontal="true" />
     <Button
         android:id="@+id/resolver_empty_state_button"
+        android:layout_below="@+id/resolver_empty_state_subtitle"
         android:layout_marginTop="16dp"
         android:text="@string/resolver_switch_on_work"
         android:layout_width="wrap_content"
@@ -54,5 +60,16 @@
         android:background="@null"
         android:fontFamily="@string/config_headlineFontFamilyMedium"
         android:textSize="14sp"
-        android:textColor="@color/resolver_tabs_active_color"/>
-</LinearLayout>
+        android:textColor="@color/resolver_tabs_active_color"
+        android:layout_centerHorizontal="true" />
+    <ProgressBar
+        android:id="@+id/resolver_empty_state_progress"
+        style="@style/Widget.Material.Light.ProgressBar"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/resolver_empty_state_subtitle"
+        android:indeterminateTint="@color/resolver_tabs_active_color"/>
+</RelativeLayout>
