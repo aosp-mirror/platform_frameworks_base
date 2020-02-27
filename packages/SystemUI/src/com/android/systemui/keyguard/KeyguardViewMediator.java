@@ -96,6 +96,7 @@ import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.InjectionInflationController;
 
 import java.io.FileDescriptor;
@@ -377,6 +378,17 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
     private boolean mWakeAndUnlocking;
     private IKeyguardDrawnCallback mDrawnCallback;
     private CharSequence mCustomMessage;
+
+    private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
+            new DeviceConfig.OnPropertiesChangedListener() {
+            @Override
+            public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                if (properties.getKeyset().contains(NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN)) {
+                    mShowHomeOverLockscreen = properties.getBoolean(
+                            NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN, true /* defaultValue */);
+                }
+            }
+    };
 
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -692,6 +704,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         }
     };
 
+    private DeviceConfigProxy mDeviceConfig;
+
     /**
      * Injected constructor. See {@link KeyguardModule}.
      */
@@ -705,7 +719,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
             DismissCallbackRegistry dismissCallbackRegistry,
             KeyguardUpdateMonitor keyguardUpdateMonitor, DumpManager dumpManager,
             @UiBackground Executor uiBgExecutor, PowerManager powerManager,
-            TrustManager trustManager) {
+            TrustManager trustManager,
+            DeviceConfigProxy deviceConfig) {
         super(context);
         mFalsingManager = falsingManager;
         mLockPatternUtils = lockPatternUtils;
@@ -718,20 +733,15 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         mPM = powerManager;
         mTrustManager = trustManager;
         dumpManager.registerDumpable(getClass().getName(), this);
-        mShowHomeOverLockscreen = DeviceConfig.getBoolean(
+        mDeviceConfig = deviceConfig;
+        mShowHomeOverLockscreen = mDeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN,
                 /* defaultValue = */ true);
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post,
-                new DeviceConfig.OnPropertiesChangedListener() {
-                    @Override
-                    public void onPropertiesChanged(DeviceConfig.Properties properties) {
-                        if (properties.getKeyset().contains(NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN)) {
-                            mShowHomeOverLockscreen = properties.getBoolean(
-                                    NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN, true /* defaultValue */);
-                        }
-                    }
-                });
+        mDeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                mHandler::post,
+                mOnPropertiesChangedListener);
     }
 
     public void userActivity() {
