@@ -282,6 +282,13 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
+     * Release session to stop playing media on MediaDevice.
+     */
+    public boolean releaseSession() {
+        return mInfoMediaManager.releaseSession();
+    }
+
+    /**
      * Get the MediaDevice list that has been selected to current media.
      *
      * @return list of MediaDevice
