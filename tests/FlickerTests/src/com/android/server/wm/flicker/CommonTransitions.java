@@ -175,11 +175,15 @@ class CommonTransitions {
                 .repeat(ITERATIONS);
     }
 
-    static TransitionBuilder appToSplitScreen(IAppHelper testApp, UiDevice device) {
+    static TransitionBuilder appToSplitScreen(IAppHelper testApp, UiDevice device,
+            int beginRotation) {
+        final String testTag = "appToSplitScreen_" + testApp.getLauncherName() + "_"
+                + rotationToString(beginRotation);
         return TransitionRunner.newBuilder()
-                .withTag("appToSplitScreen_" + testApp.getLauncherName())
+                .withTag(testTag)
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
+                .runBeforeAll(() -> setRotation(device, beginRotation))
                 .runBefore(testApp::open)
                 .runBefore(device::waitForIdle)
                 .runBefore(() -> sleep(500))
