@@ -579,23 +579,7 @@ public final class QuotaController extends StateController {
             Slog.wtf(TAG, "Told app removed but given null package name.");
             return;
         }
-        final int userId = UserHandle.getUserId(uid);
-        mTrackedJobs.delete(userId, packageName);
-        Timer timer = mPkgTimers.get(userId, packageName);
-        if (timer != null) {
-            if (timer.isActive()) {
-                Slog.wtf(TAG, "onAppRemovedLocked called before Timer turned off.");
-                timer.dropEverythingLocked();
-            }
-            mPkgTimers.delete(userId, packageName);
-        }
-        mTimingSessions.delete(userId, packageName);
-        QcAlarmListener alarmListener = mInQuotaAlarmListeners.get(userId, packageName);
-        if (alarmListener != null) {
-            mAlarmManager.cancel(alarmListener);
-            mInQuotaAlarmListeners.delete(userId, packageName);
-        }
-        mExecutionStatsCache.delete(userId, packageName);
+        clearAppStats(packageName, UserHandle.getUserId(uid));
         mForegroundUids.delete(uid);
         mUidToPackageCache.remove(uid);
     }
@@ -608,6 +592,26 @@ public final class QuotaController extends StateController {
         mInQuotaAlarmListeners.delete(userId);
         mExecutionStatsCache.delete(userId);
         mUidToPackageCache.clear();
+    }
+
+    /** Drop all historical stats and stop tracking any active sessions for the specified app. */
+    public void clearAppStats(@NonNull String packageName, int userId) {
+        mTrackedJobs.delete(userId, packageName);
+        Timer timer = mPkgTimers.get(userId, packageName);
+        if (timer != null) {
+            if (timer.isActive()) {
+                Slog.e(TAG, "clearAppStats called before Timer turned off.");
+                timer.dropEverythingLocked();
+            }
+            mPkgTimers.delete(userId, packageName);
+        }
+        mTimingSessions.delete(userId, packageName);
+        QcAlarmListener alarmListener = mInQuotaAlarmListeners.get(userId, packageName);
+        if (alarmListener != null) {
+            mAlarmManager.cancel(alarmListener);
+            mInQuotaAlarmListeners.delete(userId, packageName);
+        }
+        mExecutionStatsCache.delete(userId, packageName);
     }
 
     private boolean isUidInForeground(int uid) {
