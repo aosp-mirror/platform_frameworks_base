@@ -70,6 +70,7 @@ class GnssVisibilityControl {
     // Wakelocks
     private static final String WAKELOCK_KEY = TAG;
     private static final long WAKELOCK_TIMEOUT_MILLIS = 60 * 1000;
+    private static final long EMERGENCY_EXTENSION_FOR_MISMATCH = 128 * 1000;
     private final PowerManager.WakeLock mWakeLock;
 
     private final AppOpsManager mAppOps;
@@ -601,7 +602,7 @@ class GnssVisibilityControl {
             isPermissionMismatched = true;
         }
 
-        if (!mNiHandler.getInEmergency()) {
+        if (!mNiHandler.getInEmergency(EMERGENCY_EXTENSION_FOR_MISMATCH)) {
             Log.w(TAG, "Emergency state mismatch. Device currently not in user initiated emergency"
                     + " session. Notification: " + nfwNotification);
             isPermissionMismatched = true;
