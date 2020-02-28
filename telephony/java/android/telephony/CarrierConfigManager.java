@@ -3555,6 +3555,15 @@ public class CarrierConfigManager {
             "carrier_certificate_string_array";
 
     /**
+     * Flag specifying whether the incoming call number should be formatted to national number
+     * for Japan. @return {@code true} convert to the national format, {@code false} otherwise.
+     * e.g. "+819012345678" -> "09012345678"
+     * @hide
+     */
+    public static final String KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL =
+            "format_incoming_number_to_national_for_jp_bool";
+
+    /**
      * DisconnectCause array to play busy tone. Value should be array of
      * {@link android.telephony.DisconnectCause}.
      */
@@ -4100,6 +4109,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_WPS_OVER_IMS_BOOL, true);
         sDefaults.putAll(Ims.getDefaults());
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, null);
+         sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
