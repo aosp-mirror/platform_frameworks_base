@@ -551,7 +551,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 super.onAnimationEnd(animation);
                 mScreenshotView.setScaleX(cornerScale);
                 mScreenshotView.setScaleY(cornerScale);
-                mScreenshotView.setX(finalPos.x - height * cornerScale / 2f);
+                mScreenshotView.setX(finalPos.x - width * cornerScale / 2f);
                 mScreenshotView.setY(finalPos.y - height * cornerScale / 2f);
                 Rect bounds = new Rect();
                 mScreenshotView.getBoundsOnScreen(bounds);
