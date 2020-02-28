@@ -4429,9 +4429,9 @@ public class WifiManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void setMeteredOverridePasspoint(@NonNull String fqdn, int meteredOverride) {
+    public void setPasspointMeteredOverride(@NonNull String fqdn, int meteredOverride) {
         try {
-            mService.setMeteredOverridePasspoint(fqdn, meteredOverride);
+            mService.setPasspointMeteredOverride(fqdn, meteredOverride);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
