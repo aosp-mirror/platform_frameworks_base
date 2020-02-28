@@ -19,30 +19,30 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
+import com.android.systemui.statusbar.AutoHideUiElement;
 
-/** A controller to control all auto-hide things. */
+import java.util.Set;
+
+import javax.inject.Inject;
+
+/** A controller to control all auto-hide things. Also see {@link AutoHideUiElement}. */
 public class AutoHideController {
     private static final String TAG = "AutoHideController";
+    private static final long AUTO_HIDE_TIMEOUT_MS = 2250;
 
     private final IWindowManager mWindowManagerService;
-
     private final Handler mHandler;
-    private final NotificationRemoteInputManager mRemoteInputManager;
-    private StatusBar mStatusBar;
-    private NavigationBarFragment mNavigationBar;
+    private final Set<AutoHideUiElement> mElements;
 
     private int mDisplayId;
 
     private boolean mAutoHideSuspended;
-
-    private static final long AUTO_HIDE_TIMEOUT_MS = 2250;
 
     private final Runnable mAutoHide = () -> {
         if (isAnyTransientBarShown()) {
@@ -50,25 +50,33 @@ public class AutoHideController {
         }
     };
 
-    /**
-     * Injected constructor. See {@link StatusBarPhoneModule}.
-     */
+    @Inject
     public AutoHideController(Context context, @Main Handler handler,
-            NotificationRemoteInputManager notificationRemoteInputManager,
             IWindowManager iWindowManager) {
         mHandler = handler;
-        mRemoteInputManager = notificationRemoteInputManager;
         mWindowManagerService = iWindowManager;
+        mElements = new ArraySet<>();
 
         mDisplayId = context.getDisplayId();
     }
 
-    void setStatusBar(StatusBar statusBar) {
-        mStatusBar = statusBar;
+    /**
+     * Adds an {@link AutoHideUiElement} whose behavior should be controlled by the
+     * {@link AutoHideController}.
+     */
+    public void addAutoHideUiElement(AutoHideUiElement element) {
+        if (element != null) {
+            mElements.add(element);
+        }
     }
 
-    void setNavigationBar(NavigationBarFragment navigationBar) {
-        mNavigationBar = navigationBar;
+    /**
+     * Remove an {@link AutoHideUiElement} that was previously added.
+     */
+    public void removeAutoHideUiElement(AutoHideUiElement element) {
+        if (element != null) {
+            mElements.remove(element);
+        }
     }
 
     private void hideTransientBars() {
@@ -77,11 +85,9 @@ public class AutoHideController {
         } catch (RemoteException ex) {
             Log.w(TAG, "Cannot get WindowManager");
         }
-        if (mStatusBar != null) {
-            mStatusBar.clearTransient();
-        }
-        if (mNavigationBar != null) {
-            mNavigationBar.clearTransient();
+
+        for (AutoHideUiElement element : mElements) {
+            element.hide();
         }
     }
 
@@ -104,7 +110,8 @@ public class AutoHideController {
         mAutoHideSuspended = isAnyTransientBarShown();
     }
 
-    void touchAutoHide() {
+    /** Schedules or cancels auto hide behavior based on current system bar state. */
+    public void touchAutoHide() {
         // update transient bar auto hide
         if (isAnyTransientBarShown()) {
             scheduleAutoHide();
@@ -114,13 +121,15 @@ public class AutoHideController {
     }
 
     private Runnable getCheckBarModesRunnable() {
-        if (mStatusBar != null) {
-            return () -> mStatusBar.checkBarModes();
-        } else if (mNavigationBar != null) {
-            return () -> mNavigationBar.checkNavBarModes();
-        } else {
+        if (mElements.isEmpty()) {
             return null;
         }
+
+        return () -> {
+            for (AutoHideUiElement element : mElements) {
+                element.synchronizeState();
+            }
+        };
     }
 
     private void cancelAutoHide() {
@@ -134,14 +143,15 @@ public class AutoHideController {
     }
 
     void checkUserAutoHide(MotionEvent event) {
-        boolean shouldAutoHide = isAnyTransientBarShown()
+        boolean shouldHide = isAnyTransientBarShown()
                 && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar.
                 && event.getX() == 0 && event.getY() == 0;
-        if (mStatusBar != null) {
-            // a touch outside both bars
-            shouldAutoHide &= !mRemoteInputManager.getController().isRemoteInputActive();
+
+        for (AutoHideUiElement element : mElements) {
+            shouldHide &= element.shouldHideOnTouch();
         }
-        if (shouldAutoHide) {
+
+        if (shouldHide) {
             userAutoHide();
         }
     }
@@ -152,7 +162,11 @@ public class AutoHideController {
     }
 
     private boolean isAnyTransientBarShown() {
-        return (mStatusBar != null && mStatusBar.isTransientShown())
-                || mNavigationBar != null && mNavigationBar.isTransientShown();
+        for (AutoHideUiElement element : mElements) {
+            if (element.isVisible()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
