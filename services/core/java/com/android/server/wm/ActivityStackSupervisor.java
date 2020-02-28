@@ -1092,8 +1092,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final boolean uidPresentOnDisplay = displayContent.isUidPresent(callingUid);
 
         final int displayOwnerUid = displayContent.mDisplay.getOwnerUid();
-        if (displayContent.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID
-                && displayOwnerUid != aInfo.applicationInfo.uid) {
+        if (displayContent.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID) {
             // Limit launching on virtual displays, because their contents can be read from Surface
             // by apps that created them.
             if ((aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
