@@ -3472,6 +3472,30 @@ public class CarrierConfigManager {
     public static final String KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL =
             "prevent_clir_activation_and_deactivation_code_bool";
 
+    /**
+     * The list of originating address of missed incoming call SMS. If the SMS has originator
+     * matched, the SMS will be treated as special SMS for notifying missed incoming call to the
+     * user.
+     *
+     * @hide
+     */
+    public static final String KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY =
+            "missed_incoming_call_sms_originator_string_array";
+
+    /**
+     * The patterns of missed incoming call sms. This is the regular expression used for
+     * matching the missed incoming call's date, time, and caller id. The pattern should match
+     * fields for at least month, day, hour, and minute. Year is optional although it is encouraged.
+     *
+     * An usable pattern should look like this:
+     * ^(?<month>0[1-9]|1[012])\/(?<day>0[1-9]|1[0-9]|2[0-9]|3[0-1]) (?<hour>[0-1][0-9]|2[0-3]):
+     * (?<minute>[0-5][0-9])\s*(?<callerId>[0-9]+)\s*$
+     *
+     * @hide
+     */
+    public static final String KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY =
+            "missed_incoming_call_sms_pattern_string_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -3966,6 +3990,9 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, 0);
+        sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
+                new String[0]);
+        sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
     }
 
     /**
