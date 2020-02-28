@@ -346,10 +346,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     public void changeTiles(List<String> previousTiles, List<String> newTiles) {
-        final int NP = previousTiles.size();
-        final int NA = newTiles.size();
+        final List<String> copy = new ArrayList<>(previousTiles);
+        final int NP = copy.size();
         for (int i = 0; i < NP; i++) {
-            String tileSpec = previousTiles.get(i);
+            String tileSpec = copy.get(i);
             if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
             if (!newTiles.contains(tileSpec)) {
                 ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
