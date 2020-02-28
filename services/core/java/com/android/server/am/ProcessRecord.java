@@ -251,6 +251,7 @@ class ProcessRecord implements WindowProcessListener {
     int adjSourceProcState;     // Debugging: proc state of adjSource's process.
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     Runnable crashHandler;      // Optional local handler to be invoked in the process crash.
+    boolean bindMountPending;   // True if Android/obb and Android/data need to be bind mount .
 
     // Cache of last retrieve memory info and uptime, to throttle how frequently
     // apps can requyest it.
