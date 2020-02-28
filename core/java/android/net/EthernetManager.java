@@ -28,6 +28,7 @@ import android.os.RemoteException;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * A class representing the IP configuration of the Ethernet network.
@@ -248,18 +249,19 @@ public class EthernetManager {
      * @param callback A callback to be called once the request has been fulfilled.
      */
     @NonNull
-    public TetheredInterfaceRequest requestTetheredInterface(
-            @NonNull TetheredInterfaceCallback callback) {
+    public TetheredInterfaceRequest requestTetheredInterface(@NonNull final Executor executor,
+            @NonNull final TetheredInterfaceCallback callback) {
         Objects.requireNonNull(callback, "Callback must be non-null");
+        Objects.requireNonNull(executor, "Executor must be non-null");
         final ITetheredInterfaceCallback cbInternal = new ITetheredInterfaceCallback.Stub() {
             @Override
             public void onAvailable(String iface) {
-                callback.onAvailable(iface);
+                executor.execute(() -> callback.onAvailable(iface));
             }
 
             @Override
             public void onUnavailable() {
-                callback.onUnavailable();
+                executor.execute(() -> callback.onUnavailable());
             }
         };
 
