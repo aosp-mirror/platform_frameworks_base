@@ -19,6 +19,9 @@ package com.android.internal.os;
 import static android.system.OsConstants.S_IRWXG;
 import static android.system.OsConstants.S_IRWXO;
 
+import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__SECONDARY_ZYGOTE_INIT_START;
+import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__ZYGOTE_INIT_START;
+
 import android.app.ApplicationLoaders;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.SharedLibraryInfo;
@@ -52,7 +55,7 @@ import android.util.TimingsTraceLog;
 import android.webkit.WebViewFactory;
 import android.widget.TextView;
 
-import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 
 import dalvik.system.DexFile;
@@ -856,11 +859,10 @@ public class ZygoteInit {
 
         Runnable caller;
         try {
-            // Report Zygote start time to tron unless it is a runtime restart
-            if (!"1".equals(SystemProperties.get("sys.boot_completed"))) {
-                MetricsLogger.histogram(null, "boot_zygote_init",
-                        (int) SystemClock.elapsedRealtime());
-            }
+            // Store now for StatsLogging later.
+            final long startTime = SystemClock.elapsedRealtime();
+            final boolean isRuntimeRestarted = "1".equals(
+                    SystemProperties.get("sys.boot_completed"));
 
             String bootTimeTag = Process.is64Bit() ? "Zygote64Timing" : "Zygote32Timing";
             TimingsTraceLog bootTimingsTraceLog = new TimingsTraceLog(bootTimeTag,
@@ -887,6 +889,17 @@ public class ZygoteInit {
             }
 
             final boolean isPrimaryZygote = zygoteSocketName.equals(Zygote.PRIMARY_SOCKET_NAME);
+            if (!isRuntimeRestarted) {
+                if (isPrimaryZygote) {
+                    FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
+                            BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__ZYGOTE_INIT_START,
+                            startTime);
+                } else if (zygoteSocketName.equals(Zygote.SECONDARY_SOCKET_NAME)) {
+                    FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
+                            BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__SECONDARY_ZYGOTE_INIT_START,
+                            startTime);
+                }
+            }
 
             if (abiList == null) {
                 throw new RuntimeException("No ABI list supplied.");
