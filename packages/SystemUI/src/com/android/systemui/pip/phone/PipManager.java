@@ -69,7 +69,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private IActivityManager mActivityManager;
     private Handler mHandler = new Handler();
 
-    private final PinnedStackListener mPinnedStackListener = new PipManagerPinnedStackListener();
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsetBounds = new Rect();
     private final Rect mTmpNormalBounds = new Rect();
@@ -211,7 +210,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mActivityManager = ActivityManager.getService();
 
         try {
-            WindowManagerWrapper.getInstance().addPinnedStackListener(mPinnedStackListener);
+            WindowManagerWrapper.getInstance().addPinnedStackListener(
+                    new PipManagerPinnedStackListener());
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
@@ -341,7 +341,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     private void updateMovementBounds(Rect animatingBounds, boolean fromImeAdjustment,
             boolean fromShelfAdjustment) {
-        mPipTaskOrganizer.onDisplayInfoChanged(mTmpDisplayInfo);
         // Populate inset / normal bounds and DisplayInfo from mPipBoundsHandler before
         // passing to mTouchHandler, mTouchHandler would rely on the bounds calculated by
         // mPipBoundsHandler with up-to-dated information
@@ -350,6 +349,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 animatingBounds, fromImeAdjustment, fromShelfAdjustment,
                 mTmpDisplayInfo.rotation);
+        mPipTaskOrganizer.onDisplayInfoChanged(mTmpDisplayInfo);
     }
 
     public void dump(PrintWriter pw) {
