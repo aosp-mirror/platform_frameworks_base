@@ -196,7 +196,8 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         public void onEntryRemoved(
                 @Nullable NotificationEntry entry,
                 NotificationVisibility visibility,
-                boolean removedByUser) {
+                boolean removedByUser,
+                int reason) {
             // Removes any alerts pending on this entry. Note that this will not stop any inflation
             // tasks started by a transfer, so this should only be used as clean-up for when
             // inflation is stopped and the pending alert no longer needs to happen.
