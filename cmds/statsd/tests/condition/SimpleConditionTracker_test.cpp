@@ -297,7 +297,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
         std::vector<int> uids = {111, 222, 333};
 
         LogEvent event(/*uid=*/-1, /*pid=*/-1);
-        makeWakeLockEvent(&event, /*atomId=*/ 1, /*timestamp=*/ 0, uids, "wl1", /*acquire=*/ 1);
+        makeWakeLockEvent(&event, /*atomId=*/1, /*timestamp=*/0, uids, "wl1", /*acquire=*/1);
 
         // one matched start
         vector<MatchingState> matcherState;
@@ -334,7 +334,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
 
         // another wake lock acquired by this uid
         LogEvent event2(/*uid=*/-1, /*pid=*/-1);
-        makeWakeLockEvent(&event2, /*atomId=*/ 1, /*timestamp=*/ 0, uids, "wl2", /*acquire=*/ 1);
+        makeWakeLockEvent(&event2, /*atomId=*/1, /*timestamp=*/0, uids, "wl2", /*acquire=*/1);
         matcherState.clear();
         matcherState.push_back(MatchingState::kMatched);
         matcherState.push_back(MatchingState::kNotMatched);
@@ -373,7 +373,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
         EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
 
         LogEvent event4(/*uid=*/-1, /*pid=*/-1);
-        makeWakeLockEvent(&event, /*atomId=*/1, /*timestamp=*/ 0, uids, "wl2", /*acquire=*/0);
+        makeWakeLockEvent(&event4, /*atomId=*/1, /*timestamp=*/0, uids, "wl2", /*acquire=*/0);
         matcherState.clear();
         matcherState.push_back(MatchingState::kNotMatched);
         matcherState.push_back(MatchingState::kMatched);
