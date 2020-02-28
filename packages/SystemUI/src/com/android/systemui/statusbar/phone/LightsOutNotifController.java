@@ -172,7 +172,7 @@ public class LightsOutNotifController {
 
         @Override
         public void onEntryRemoved(@Nullable NotificationEntry entry,
-                NotificationVisibility visibility, boolean removedByUser) {
+                NotificationVisibility visibility, boolean removedByUser, int reason) {
             updateLightsOutView();
         }
     };

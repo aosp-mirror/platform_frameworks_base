@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Importance;
+import android.content.pm.ShortcutInfo;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 
@@ -53,6 +54,7 @@ public class RankingBuilder {
     private boolean mCanBubble = false;
     private boolean mIsVisuallyInterruptive = false;
     private boolean mIsConversation = false;
+    private ShortcutInfo mShortcutInfo = null;
 
     public RankingBuilder() {
     }
@@ -79,6 +81,7 @@ public class RankingBuilder {
         mCanBubble = ranking.canBubble();
         mIsVisuallyInterruptive = ranking.visuallyInterruptive();
         mIsConversation = ranking.isConversation();
+        mShortcutInfo = ranking.getShortcutInfo();
     }
 
     public Ranking build() {
@@ -104,7 +107,8 @@ public class RankingBuilder {
                 mSmartReplies,
                 mCanBubble,
                 mIsVisuallyInterruptive,
-                mIsConversation);
+                mIsConversation,
+                mShortcutInfo);
         return ranking;
     }
 
@@ -186,6 +190,11 @@ public class RankingBuilder {
 
     public RankingBuilder setIsConversation(boolean isConversation) {
         mIsConversation = isConversation;
+        return this;
+    }
+
+    public RankingBuilder setShortcutInfo(ShortcutInfo shortcutInfo) {
+        mShortcutInfo = shortcutInfo;
         return this;
     }
 

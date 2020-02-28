@@ -30,6 +30,8 @@ import android.app.trust.TrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.IPackageManager;
+import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
 import android.media.AudioManager;
@@ -167,6 +169,12 @@ public class SystemServicesModule {
         return LatencyTracker.getInstance(context);
     }
 
+    @Singleton
+    @Provides
+    static LauncherApps provideLauncherApps(Context context) {
+        return context.getSystemService(LauncherApps.class);
+    }
+
     @SuppressLint("MissingPermission")
     @Singleton
     @Provides
@@ -180,6 +188,12 @@ public class SystemServicesModule {
     @Provides
     static NotificationManager provideNotificationManager(Context context) {
         return context.getSystemService(NotificationManager.class);
+    }
+
+    @Singleton
+    @Provides
+    static PackageManager providePackageManager(Context context) {
+        return context.getPackageManager();
     }
 
     @Singleton

@@ -477,7 +477,7 @@ public class NotificationEntryManager implements
 
                 mLogger.logNotifRemoved(entry.getKey(), removedByUser);
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
-                    listener.onEntryRemoved(entry, visibility, removedByUser);
+                    listener.onEntryRemoved(entry, visibility, removedByUser, reason);
                 }
                 for (NotifCollectionListener listener : mNotifCollectionListeners) {
                     // NEM doesn't have a good knowledge of reasons so defaulting to unknown.
