@@ -2075,6 +2075,17 @@ public final class Call {
 
     /**
      * Returns the child {@link Call} in a generic conference that is currently active.
+     *
+     * A "generic conference" is the mechanism used to support two simultaneous calls on a device
+     * in CDMA networks. It is effectively equivalent to having one call active and one call on hold
+     * in GSM or IMS calls. This method returns the currently active call.
+     *
+     * In a generic conference, the network exposes the conference to us as a single call, and we
+     * switch between talking to the two participants using a CDMA flash command. Since the network
+     * exposes no additional information about the call, the only way we know which caller we're
+     * currently talking to is by keeping track of the flash commands that we've sent to the
+     * network.
+     *
      * For calls that are not generic conferences, or when the generic conference has more than
      * 2 children, returns {@code null}.
      * @see Details#PROPERTY_GENERIC_CONFERENCE
