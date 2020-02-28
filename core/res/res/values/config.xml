@@ -4414,4 +4414,13 @@
 
     <!-- Whether to default to an expanded list of users on the lock screen user switcher. -->
     <bool name="config_expandLockScreenUserSwitcher">false</bool>
+
+    <!-- Toasts posted from these packages will be shown to the current user, regardless of the user
+         the process belongs to. This is useful for packages that run under a single user but serve
+         multiple users, e.g. the system.
+         These packages MUST be able to add flag SYSTEM_FLAG_SHOW_FOR_ALL_USERS to a window. -->
+    <string-array name="config_toastCrossUserPackages" translatable="false">
+        <item>android</item>
+        <item>com.android.systemui</item>
+    </string-array>
 </resources>

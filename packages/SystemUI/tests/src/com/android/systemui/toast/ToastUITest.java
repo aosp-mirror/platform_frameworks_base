@@ -105,6 +105,33 @@ public class ToastUITest extends SysuiTestCase {
         assertThat(windowParams.packageName).isEqualTo(mContext.getPackageName());
         assertThat(windowParams.getTitle()).isEqualTo("Toast");
         assertThat(windowParams.token).isEqualTo(WINDOW_TOKEN_1);
+        assertThat(windowParams.privateFlags
+                & WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS).isEqualTo(0);
+    }
+
+    @Test
+    public void testShowToast_forAndroidPackage_addsAllUserFlag() throws Exception {
+        mToastUI.showToast("android", TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG, null);
+
+        verify(mWindowManager).addView(any(), mParamsCaptor.capture());
+        ViewGroup.LayoutParams params = mParamsCaptor.getValue();
+        assertThat(params).isInstanceOf(WindowManager.LayoutParams.class);
+        WindowManager.LayoutParams windowParams = (WindowManager.LayoutParams) params;
+        assertThat(windowParams.privateFlags
+                & WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS).isNotEqualTo(0);
+    }
+
+    @Test
+    public void testShowToast_forSystemUiPackage_addsAllUserFlag() throws Exception {
+        mToastUI.showToast("com.android.systemui", TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
+                null);
+
+        verify(mWindowManager).addView(any(), mParamsCaptor.capture());
+        ViewGroup.LayoutParams params = mParamsCaptor.getValue();
+        assertThat(params).isInstanceOf(WindowManager.LayoutParams.class);
+        WindowManager.LayoutParams windowParams = (WindowManager.LayoutParams) params;
+        assertThat(windowParams.privateFlags
+                & WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS).isNotEqualTo(0);
     }
 
     @Test
