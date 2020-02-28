@@ -515,7 +515,7 @@ public class NotificationEntryManager implements
                 // always cancelled. We only remove them if they were dismissed by the user.
                 return;
             }
-            List<NotificationEntry> childEntries = entry.getChildren();
+            List<NotificationEntry> childEntries = entry.getAttachedNotifChildren();
             if (childEntries == null) {
                 return;
             }

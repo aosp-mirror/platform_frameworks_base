@@ -143,7 +143,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     public void testPerhapsShowBlockingHelper_notShownForMultiChannelGroup() throws Exception {
         ExpandableNotificationRow groupRow = createBlockableGroupRowSpy(10);
         int i = 0;
-        for (ExpandableNotificationRow childRow : groupRow.getNotificationChildren()) {
+        for (ExpandableNotificationRow childRow : groupRow.getAttachedChildren()) {
             modifyRanking(childRow.getEntry())
                     .setChannel(
                             new NotificationChannel(

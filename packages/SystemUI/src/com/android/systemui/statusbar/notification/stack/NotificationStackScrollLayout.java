@@ -2377,7 +2377,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
                 if (row.isSummaryWithChildren() && row.areChildrenExpanded()) {
                     List<ExpandableNotificationRow> notificationChildren =
-                            row.getNotificationChildren();
+                            row.getAttachedChildren();
                     for (int childIndex = 0; childIndex < notificationChildren.size();
                             childIndex++) {
                         ExpandableNotificationRow rowChild = notificationChildren.get(childIndex);
@@ -4638,7 +4638,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
                 row.setHeadsUpAnimatingAway(false);
                 if (row.isSummaryWithChildren()) {
-                    for (ExpandableNotificationRow child : row.getNotificationChildren()) {
+                    for (ExpandableNotificationRow child : row.getAttachedChildren()) {
                         child.setHeadsUpAnimatingAway(false);
                     }
                 }
@@ -5598,7 +5598,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         && (!hasClipBounds || mTmpRect.height() > 0)) {
                     parentVisible = true;
                 }
-                List<ExpandableNotificationRow> children = row.getNotificationChildren();
+                List<ExpandableNotificationRow> children = row.getAttachedChildren();
                 if (children != null) {
                     for (ExpandableNotificationRow childRow : children) {
                         if (includeChildInDismissAll(row, selection)) {
@@ -6388,7 +6388,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 if (parent != null && parent.areChildrenExpanded()
                         && (parent.areGutsExposed()
                         || mSwipeHelper.getExposedMenuView() == parent
-                        || (parent.getNotificationChildren().size() == 1
+                        || (parent.getAttachedChildren().size() == 1
                         && parent.getEntry().isClearable()))) {
                     // In this case the group is expanded and showing the menu for the
                     // group, further interaction should apply to the group, not any

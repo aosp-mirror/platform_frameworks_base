@@ -41,7 +41,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
-import android.view.NotificationHeaderView;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -302,7 +301,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testGetNumUniqueChildren_multiChannel() {
         List<ExpandableNotificationRow> childRows =
-                mGroupRow.getChildrenContainer().getNotificationChildren();
+                mGroupRow.getChildrenContainer().getAttachedChildren();
         // Give each child a unique channel id/name.
         int i = 0;
         for (ExpandableNotificationRow childRow : childRows) {

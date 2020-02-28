@@ -208,6 +208,7 @@ public class PreparationCoordinator implements Coordinator {
             ListEntry entry = entries.get(i);
             if (entry instanceof GroupEntry) {
                 GroupEntry groupEntry = (GroupEntry) entry;
+                groupEntry.setUntruncatedChildCount(groupEntry.getChildren().size());
                 inflateRequiredGroupViews(groupEntry);
             } else {
                 NotificationEntry notifEntry = (NotificationEntry) entry;

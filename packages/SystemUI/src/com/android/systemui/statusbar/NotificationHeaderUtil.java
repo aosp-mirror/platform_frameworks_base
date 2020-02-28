@@ -148,7 +148,7 @@ public class NotificationHeaderUtil {
     }
 
     public void updateChildrenHeaderAppearance() {
-        List<ExpandableNotificationRow> notificationChildren = mRow.getNotificationChildren();
+        List<ExpandableNotificationRow> notificationChildren = mRow.getAttachedChildren();
         if (notificationChildren == null) {
             return;
         }

@@ -590,7 +590,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         // handling reset for child notifications
         if (this instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) this;
-            List<ExpandableNotificationRow> children = row.getNotificationChildren();
+            List<ExpandableNotificationRow> children = row.getAttachedChildren();
             if (row.isSummaryWithChildren() && children != null) {
                 for (ExpandableNotificationRow childRow : children) {
                     childRow.resetViewState();

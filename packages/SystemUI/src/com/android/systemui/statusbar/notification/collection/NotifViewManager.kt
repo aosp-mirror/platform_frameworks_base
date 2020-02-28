@@ -113,7 +113,7 @@ class NotifViewManager @Inject constructor(
                     } else if (entries[idx] is GroupEntry) {
                         // A top-level entry exists. If it's a group, diff the children
                         val groupChildren = (entries[idx] as GroupEntry).children
-                        listItem.notificationChildren?.forEach { listChild ->
+                        listItem.attachedChildren?.forEach { listChild ->
                             if (!groupChildren.contains(listChild.entry)) {
                                 listItem.removeChildNotification(listChild)
 
@@ -155,8 +155,8 @@ class NotifViewManager @Inject constructor(
                 for ((idx, childEntry) in entry.children.withIndex()) {
                     val childListItem = rowRegistry.requireView(childEntry)
                     // Child hasn't been added yet. add it!
-                    if (listItem.notificationChildren == null ||
-                            !listItem.notificationChildren.contains(childListItem)) {
+                    if (listItem.attachedChildren == null ||
+                            !listItem.attachedChildren.contains(childListItem)) {
                         // TODO: old code here just Log.wtf()'d here. This might wreak havoc
                         if (childListItem.view.parent != null) {
                             throw IllegalStateException("trying to add a notification child that " +
@@ -179,6 +179,7 @@ class NotifViewManager @Inject constructor(
                                 stabilityManager,
                                 null /*TODO: stability callback */
                         )
+                listItem.setUntruncatedChildCount(entry.untruncatedChildCount)
             }
         }
 

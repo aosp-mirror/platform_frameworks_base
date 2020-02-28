@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.statusbar.notification.collection.coordinator.PreparationCoordinator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +37,7 @@ public class GroupEntry extends ListEntry {
 
     private final List<NotificationEntry> mUnmodifiableChildren =
             Collections.unmodifiableList(mChildren);
+    private int mUntruncatedChildCount;
 
     @VisibleForTesting
     public GroupEntry(String key) {
@@ -60,6 +62,24 @@ public class GroupEntry extends ListEntry {
     @VisibleForTesting
     public void setSummary(@Nullable NotificationEntry summary) {
         mSummary = summary;
+    }
+
+    /**
+     * @see #getUntruncatedChildCount()
+     */
+    public void setUntruncatedChildCount(int childCount) {
+        mUntruncatedChildCount = childCount;
+    }
+
+    /**
+     * Get the untruncated number of children from the data model, including those that will not
+     * have views bound. This includes children that {@link PreparationCoordinator} will filter out
+     * entirely when they are beyond the last visible child.
+     *
+     * TODO: This should move to some shared class between the model and view hierarchy
+     */
+    public int getUntruncatedChildCount() {
+        return mUntruncatedChildCount;
     }
 
     void clearChildren() {
