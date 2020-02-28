@@ -16,9 +16,11 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <stdio.h>
+
 #include <thread>
 
-#include <stdio.h>
+#include "stats_event.h"
 
 namespace android {
 namespace os {
@@ -29,6 +31,25 @@ using namespace testing;
 
 using std::unique_ptr;
 
+namespace {
+
+std::unique_ptr<LogEvent> makeLogEvent(uint64_t timestampNs) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, 10);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/-1, /*pid=*/-1);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+} // anonymous namespace
+
 #ifdef __ANDROID__
 TEST(LogEventQueue_test, TestGoodConsumer) {
     LogEventQueue queue(50);
@@ -36,8 +57,7 @@ TEST(LogEventQueue_test, TestGoodConsumer) {
     std::thread writer([&queue, timeBaseNs] {
         for (int i = 0; i < 100; i++) {
             int64_t oldestEventNs;
-            bool success = queue.push(std::make_unique<LogEvent>(10, timeBaseNs + i * 1000),
-                                      &oldestEventNs);
+            bool success = queue.push(makeLogEvent(timeBaseNs + i * 1000), &oldestEventNs);
             EXPECT_TRUE(success);
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
@@ -63,8 +83,7 @@ TEST(LogEventQueue_test, TestSlowConsumer) {
         int failure_count = 0;
         int64_t oldestEventNs;
         for (int i = 0; i < 100; i++) {
-            bool success = queue.push(std::make_unique<LogEvent>(10, timeBaseNs + i * 1000),
-                                      &oldestEventNs);
+            bool success = queue.push(makeLogEvent(timeBaseNs + i * 1000), &oldestEventNs);
             if (!success) failure_count++;
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
