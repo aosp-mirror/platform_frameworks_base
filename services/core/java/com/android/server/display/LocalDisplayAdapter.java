@@ -181,6 +181,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mState = Display.STATE_UNKNOWN;
         private float mBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         private int mDefaultModeId;
+        private int mDefaultConfigGroup;
         private int mActiveModeId;
         private boolean mActiveModeInvalid;
         private DisplayModeDirector.DesiredDisplayModeSpecs mDisplayModeSpecs =
@@ -332,15 +333,18 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             // For a new display, we need to initialize the default mode ID.
             if (mDefaultModeId == NO_DISPLAY_MODE_ID) {
                 mDefaultModeId = activeRecord.mMode.getModeId();
+                mDefaultConfigGroup = configs[activeConfigId].configGroup;
             } else if (modesAdded && mActiveModeId != activeRecord.mMode.getModeId()) {
                 Slog.d(TAG, "New display modes are added and the active mode has changed, "
                         + "use active mode as default mode.");
                 mActiveModeId = activeRecord.mMode.getModeId();
                 mDefaultModeId = activeRecord.mMode.getModeId();
-            } else if (findDisplayConfigIdLocked(mDefaultModeId) < 0) {
+                mDefaultConfigGroup = configs[activeConfigId].configGroup;
+            } else if (findDisplayConfigIdLocked(mDefaultModeId, mDefaultConfigGroup) < 0) {
                 Slog.w(TAG, "Default display mode no longer available, using currently"
                         + " active mode as default.");
                 mDefaultModeId = activeRecord.mMode.getModeId();
+                mDefaultConfigGroup = configs[activeConfigId].configGroup;
             }
 
             // Determine whether the display mode specs' base mode is still there.
@@ -754,7 +758,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 // a valid mode.
                 return;
             }
-            int baseConfigId = findDisplayConfigIdLocked(displayModeSpecs.baseModeId);
+
+            // Find the config Id based on the desired mode specs. In case there is more than one
+            // config matching the mode spec, prefer the one that is in the default config group.
+            // For now the default config group is taken from the active config when we got the
+            // hotplug event for the display. In the future we might want to change the default
+            // config based on vendor requirements.
+            // Note: We prefer the default config group over the current one as this is the config
+            // group the vendor prefers.
+            int baseConfigId = findDisplayConfigIdLocked(displayModeSpecs.baseModeId,
+                    mDefaultConfigGroup);
             if (baseConfigId < 0) {
                 // When a display is hotplugged, it's possible for a mode to be removed that was
                 // previously valid. Because of the way display changes are propagated through the
@@ -906,17 +919,26 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.print("mSupportedColorModes=" + mSupportedColorModes.toString());
         }
 
-        private int findDisplayConfigIdLocked(int modeId) {
+        private int findDisplayConfigIdLocked(int modeId, int configGroup) {
+            int matchingConfigId = SurfaceControl.DisplayConfig.INVALID_DISPLAY_CONFIG_ID;
             DisplayModeRecord record = mSupportedModes.get(modeId);
             if (record != null) {
                 for (int i = 0; i < mDisplayConfigs.length; i++) {
                     SurfaceControl.DisplayConfig config = mDisplayConfigs[i];
                     if (record.hasMatchingMode(config)) {
-                        return i;
+                        if (matchingConfigId
+                                == SurfaceControl.DisplayConfig.INVALID_DISPLAY_CONFIG_ID) {
+                            matchingConfigId = i;
+                        }
+
+                        // Prefer to return a config that matches the configGroup
+                        if (config.configGroup == configGroup) {
+                            return i;
+                        }
                     }
                 }
             }
-            return -1;
+            return matchingConfigId;
         }
 
         private int findMatchingModeIdLocked(int configId) {
