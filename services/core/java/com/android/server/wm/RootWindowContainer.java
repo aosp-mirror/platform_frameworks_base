@@ -1980,7 +1980,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean switchUser(int userId, UserState uss) {
-        final int focusStackId = getTopDisplayFocusedStack().getRootTaskId();
+        final ActivityStack topFocusedStack = getTopDisplayFocusedStack();
+        final int focusStackId = topFocusedStack != null
+                ? topFocusedStack.getRootTaskId() : INVALID_TASK_ID;
         // We dismiss the docked stack whenever we switch users.
         final ActivityStack dockedStack = getDefaultDisplay().getRootSplitScreenPrimaryTask();
         if (dockedStack != null) {
@@ -3455,7 +3457,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     ArrayList<ActivityRecord> getDumpActivities(String name, boolean dumpVisibleStacksOnly,
             boolean dumpFocusedStackOnly) {
         if (dumpFocusedStackOnly) {
-            return getTopDisplayFocusedStack().getDumpActivitiesLocked(name);
+            final ActivityStack topFocusedStack = getTopDisplayFocusedStack();
+            if (topFocusedStack != null) {
+                return topFocusedStack.getDumpActivitiesLocked(name);
+            } else {
+                return new ArrayList<>();
+            }
         } else {
             ArrayList<ActivityRecord> activities = new ArrayList<>();
             int numDisplays = getChildCount();
