@@ -3636,16 +3636,16 @@ class Task extends WindowContainer<WindowContainer> {
         sTaskFactory = factory;
     }
 
+    static Task create(ActivityTaskManagerService service, int taskId, int activityType,
+            ActivityInfo info, Intent intent) {
+        return getTaskFactory().create(service, taskId, activityType, info, intent);
+    }
+
     static Task create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
             Intent intent, IVoiceInteractionSession voiceSession,
             IVoiceInteractor voiceInteractor, ActivityStack stack) {
         return getTaskFactory().create(
                 service, taskId, info, intent, voiceSession, voiceInteractor, stack);
-    }
-
-    static Task create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
-            Intent intent, TaskDescription taskDescription, ActivityStack stack) {
-        return getTaskFactory().create(service, taskId, info, intent, taskDescription, stack);
     }
 
     static Task restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
@@ -3659,18 +3659,16 @@ class Task extends WindowContainer<WindowContainer> {
      * {@link #setTaskFactory(TaskFactory)}.
      */
     static class TaskFactory {
+        Task create(ActivityTaskManagerService service, int taskId, int activityType,
+                ActivityInfo info, Intent intent) {
+            return new ActivityStack(service, taskId, activityType, info, intent);
+        }
 
         Task create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
                 Intent intent, IVoiceInteractionSession voiceSession,
                 IVoiceInteractor voiceInteractor, ActivityStack stack) {
             return new ActivityStack(service, taskId, info, intent, voiceSession, voiceInteractor,
                     null /*taskDescription*/, stack);
-        }
-
-        Task create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
-                Intent intent, TaskDescription taskDescription, ActivityStack stack) {
-            return new ActivityStack(service, taskId, info, intent, null /*voiceSession*/,
-                    null /*voiceInteractor*/, taskDescription, stack);
         }
 
         /**
