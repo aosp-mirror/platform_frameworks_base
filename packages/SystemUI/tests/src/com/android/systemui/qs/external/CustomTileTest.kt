@@ -125,4 +125,12 @@ class CustomTileTest : SysuiTestCase() {
         customTile.handleUpdateState(state, null)
         assertFalse(state.value)
     }
+
+    @Test
+    fun testNoCrashOnNullDrawable() {
+        customTile.qsTile.icon = mock(Icon::class.java)
+        `when`(customTile.qsTile.icon.loadDrawable(any(Context::class.java)))
+                .thenReturn(null)
+        customTile.handleUpdateState(customTile.newTileState(), null)
+    }
 }
