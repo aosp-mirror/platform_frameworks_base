@@ -32,5 +32,7 @@ parcelable SoundModel {
      * was build for */
     String vendorUuid;
     /** Opaque data transparent to Android framework */
-    byte[] data;
+    FileDescriptor data;
+    /** Size of the above data, in bytes. */
+    int dataSize;
 }
