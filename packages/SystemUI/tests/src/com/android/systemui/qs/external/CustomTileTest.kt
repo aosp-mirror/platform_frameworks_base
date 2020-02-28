@@ -33,6 +33,7 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.QSTileHost
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -84,13 +85,26 @@ class CustomTileTest : SysuiTestCase() {
                 .thenReturn(mServiceInfo)
         mServiceInfo.applicationInfo = mApplicationInfo
 
-        customTile = CustomTile.create(mTileHost, TILE_SPEC)
+        customTile = CustomTile.create(mTileHost, TILE_SPEC, mContext)
+    }
+
+    @Test
+    fun testCorrectUser() {
+        assertEquals(0, customTile.user)
+
+        val userContext = mock(Context::class.java)
+        `when`(userContext.packageManager).thenReturn(mPackageManager)
+        `when`(userContext.userId).thenReturn(10)
+
+        val tile = CustomTile.create(mTileHost, TILE_SPEC, userContext)
+
+        assertEquals(10, tile.user)
     }
 
     @Test
     fun testToggleableTileHasBooleanState() {
         `when`(mTileServiceManager.isToggleableTile).thenReturn(true)
-        customTile = CustomTile.create(mTileHost, TILE_SPEC)
+        customTile = CustomTile.create(mTileHost, TILE_SPEC, mContext)
 
         assertTrue(customTile.state is QSTile.BooleanState)
         assertTrue(customTile.newTileState() is QSTile.BooleanState)
@@ -105,7 +119,7 @@ class CustomTileTest : SysuiTestCase() {
     @Test
     fun testValueUpdatedInBooleanTile() {
         `when`(mTileServiceManager.isToggleableTile).thenReturn(true)
-        customTile = CustomTile.create(mTileHost, TILE_SPEC)
+        customTile = CustomTile.create(mTileHost, TILE_SPEC, mContext)
         customTile.qsTile.icon = mock(Icon::class.java)
         `when`(customTile.qsTile.icon.loadDrawable(any(Context::class.java)))
                 .thenReturn(mock(Drawable::class.java))
