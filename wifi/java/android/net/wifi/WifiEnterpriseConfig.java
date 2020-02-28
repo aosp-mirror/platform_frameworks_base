@@ -482,7 +482,7 @@ public class WifiEnterpriseConfig implements Parcelable {
             return false;
         }
 
-        if (mEapMethod != Eap.TLS && mPhase2Method != Phase2.NONE) {
+        if (mEapMethod != Eap.TLS && mEapMethod != Eap.UNAUTH_TLS && mPhase2Method != Phase2.NONE) {
             boolean is_autheap = mEapMethod == Eap.TTLS && mPhase2Method == Phase2.GTC;
             String prefix = is_autheap ? Phase2.AUTHEAP_PREFIX : Phase2.AUTH_PREFIX;
             String value = convertToQuotedString(prefix + Phase2.strings[mPhase2Method]);
