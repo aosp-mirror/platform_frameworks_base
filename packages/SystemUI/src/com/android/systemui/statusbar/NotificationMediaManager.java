@@ -214,7 +214,8 @@ public class NotificationMediaManager implements Dumpable {
             public void onEntryRemoved(
                     NotificationEntry entry,
                     NotificationVisibility visibility,
-                    boolean removedByUser) {
+                    boolean removedByUser,
+                    int reason) {
                 onNotificationRemoved(entry.getKey());
             }
         });

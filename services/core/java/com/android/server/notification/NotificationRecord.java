@@ -1344,6 +1344,10 @@ public final class NotificationRecord {
         mShortcutInfo = shortcutInfo;
     }
 
+    public ShortcutInfo getShortcutInfo() {
+        return mShortcutInfo;
+    }
+
     /**
      * Whether this notification is a conversation notification.
      */

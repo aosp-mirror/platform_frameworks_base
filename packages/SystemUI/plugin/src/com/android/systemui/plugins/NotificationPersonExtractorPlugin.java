@@ -68,14 +68,14 @@ public interface NotificationPersonExtractorPlugin extends Plugin {
         public final String key;
         public final CharSequence name;
         public final Drawable avatar;
-        public final PendingIntent clickIntent;
+        public final Runnable clickRunnable;
 
         public PersonData(String key, CharSequence name, Drawable avatar,
-                PendingIntent clickIntent) {
+                Runnable clickRunnable) {
             this.key = key;
             this.name = name;
             this.avatar = avatar;
-            this.clickIntent = clickIntent;
+            this.clickRunnable = clickRunnable;
         }
     }
 }

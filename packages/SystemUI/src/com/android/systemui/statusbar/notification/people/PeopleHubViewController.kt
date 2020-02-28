@@ -102,30 +102,19 @@ private class PeopleHubDataListenerImpl(
 @Singleton
 class PeopleHubViewModelFactoryDataSourceImpl @Inject constructor(
     private val activityStarter: ActivityStarter,
-    private val dataSource: DataSource<@JvmSuppressWildcards PeopleHubModel>,
-    private val settingChangeSource: DataSource<@JvmSuppressWildcards Boolean>
+    private val dataSource: DataSource<@JvmSuppressWildcards PeopleHubModel>
 ) : DataSource<PeopleHubViewModelFactory> {
 
     override fun registerListener(listener: DataListener<PeopleHubViewModelFactory>): Subscription {
-        var stripEnabled = false
         var model: PeopleHubModel? = null
 
         fun updateListener() {
             // don't invoke listener until we've received our first model
             model?.let { model ->
-                val factory =
-                        if (stripEnabled) PeopleHubViewModelFactoryImpl(model, activityStarter)
-                        else EmptyViewModelFactory
+                val factory = PeopleHubViewModelFactoryImpl(model, activityStarter)
                 listener.onDataChanged(factory)
             }
         }
-
-        val settingSub = settingChangeSource.registerListener(object : DataListener<Boolean> {
-            override fun onDataChanged(data: Boolean) {
-                stripEnabled = data
-                updateListener()
-            }
-        })
         val dataSub = dataSource.registerListener(object : DataListener<PeopleHubModel> {
             override fun onDataChanged(data: PeopleHubModel) {
                 model = data
@@ -134,7 +123,6 @@ class PeopleHubViewModelFactoryDataSourceImpl @Inject constructor(
         })
         return object : Subscription {
             override fun unsubscribe() {
-                settingSub.unsubscribe()
                 dataSub.unsubscribe()
             }
         }
@@ -155,11 +143,7 @@ private class PeopleHubViewModelFactoryImpl(
     override fun createWithAssociatedClickView(view: View): PeopleHubViewModel {
         val personViewModels = model.people.asSequence().map { personModel ->
             val onClick = {
-                activityStarter.startPendingIntentDismissingKeyguard(
-                        personModel.clickIntent,
-                        null,
-                        view
-                )
+                personModel.clickRunnable.run()
             }
             PersonViewModel(personModel.name, personModel.avatar, onClick)
         }

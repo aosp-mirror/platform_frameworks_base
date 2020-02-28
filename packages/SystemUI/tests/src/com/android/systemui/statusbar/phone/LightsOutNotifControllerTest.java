@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 
 import static junit.framework.Assert.assertFalse;
@@ -205,7 +206,8 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
         // WHEN all active notifications are removed
         when(mEntryManager.hasActiveNotifications()).thenReturn(false);
         assertFalse(mLightsOutNotifController.shouldShowDot());
-        mEntryListener.onEntryRemoved(mock(NotificationEntry.class), null, false);
+        mEntryListener.onEntryRemoved(
+                mock(NotificationEntry.class), null, false, REASON_CANCEL_ALL);
 
         // THEN we shouldn't see the dot view
         assertIsShowingDot(false);
