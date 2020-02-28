@@ -163,6 +163,7 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -1074,7 +1075,27 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         });
 
-        mAutoHideController.setStatusBar(this);
+        mAutoHideController.addAutoHideUiElement(new AutoHideUiElement() {
+            @Override
+            public void synchronizeState() {
+                checkBarModes();
+            }
+
+            @Override
+            public boolean shouldHideOnTouch() {
+                return !mRemoteInputManager.getController().isRemoteInputActive();
+            }
+
+            @Override
+            public boolean isVisible() {
+                return isTransientShown();
+            }
+
+            @Override
+            public void hide() {
+                clearTransient();
+            }
+        });
 
         ScrimView scrimBehind = mNotificationShadeWindowView.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = mNotificationShadeWindowView.findViewById(R.id.scrim_in_front);
@@ -2228,7 +2249,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         clearTransient();
     }
 
-    void clearTransient() {
+    private void clearTransient() {
         if (mTransientShown) {
             mTransientShown = false;
             handleTransientChanged();
@@ -4262,7 +4283,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mGutsManager;
     }
 
-    boolean isTransientShown() {
+    private boolean isTransientShown() {
         return mTransientShown;
     }
 
