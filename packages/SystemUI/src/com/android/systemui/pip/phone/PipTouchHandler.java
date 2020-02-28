@@ -166,7 +166,8 @@ public class PipTouchHandler {
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
             FloatingContentCoordinator floatingContentCoordinator,
-            DeviceConfigProxy deviceConfig) {
+            DeviceConfigProxy deviceConfig,
+            PipSnapAlgorithm pipSnapAlgorithm) {
         // Initialize the Pip input consumer
         mContext = context;
         mActivityManager = activityManager;
@@ -174,7 +175,7 @@ public class PipTouchHandler {
         mMenuController = menuController;
         mMenuController.addListener(new PipMenuListener());
         mDismissViewController = new PipDismissViewController(context);
-        mSnapAlgorithm = new PipSnapAlgorithm(mContext);
+        mSnapAlgorithm = pipSnapAlgorithm;
         mFlingAnimationUtils = new FlingAnimationUtils(context.getResources().getDisplayMetrics(),
                 2.5f);
         mGesture = new DefaultPipTouchGesture();

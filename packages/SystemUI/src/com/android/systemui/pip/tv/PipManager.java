@@ -228,13 +228,14 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     }
 
     @Inject
-    public PipManager(Context context, BroadcastDispatcher broadcastDispatcher) {
+    public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
+            PipBoundsHandler pipBoundsHandler) {
         if (mInitialized) {
             return;
         }
         mInitialized = true;
         mContext = context;
-        mPipBoundsHandler = new PipBoundsHandler(context);
+        mPipBoundsHandler = pipBoundsHandler;
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
