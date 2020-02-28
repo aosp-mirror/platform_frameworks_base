@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsState.toPublicType;
 
 import android.annotation.IntDef;
@@ -57,9 +58,10 @@ public class InsetsSourceConsumer {
 
     protected final InsetsController mController;
     protected boolean mRequestedVisible;
+    protected final InsetsState mState;
+    protected final @InternalInsetsType int mType;
+
     private final Supplier<Transaction> mTransactionSupplier;
-    private final @InternalInsetsType int mType;
-    private final InsetsState mState;
     private @Nullable InsetsSourceControl mSourceControl;
     private boolean mHasWindowFocus;
 
@@ -135,7 +137,7 @@ public class InsetsSourceConsumer {
         setRequestedVisible(false);
     }
 
-    void hide(boolean animationFinished) {
+    void hide(boolean animationFinished, @AnimationType int animationType) {
         hide();
     }
 
