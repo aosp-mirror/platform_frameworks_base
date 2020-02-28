@@ -53,7 +53,9 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.Uri;
+import android.net.wifi.SoftApConfiguration;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
@@ -10264,7 +10266,8 @@ public final class Settings {
        /**
         * Setting to allow scans to be enabled even wifi is turned off for connectivity.
         * @hide
-        * @deprecated To be removed.
+        * @deprecated To be removed. Use {@link WifiManager#setScanAlwaysAvailable(boolean)} for
+        * setting the value and {@link WifiManager#isScanAlwaysAvailable()} for query.
         */
        public static final String WIFI_SCAN_ALWAYS_AVAILABLE =
                 "wifi_scan_always_enabled";
@@ -10284,7 +10287,9 @@ public final class Settings {
          *
          * Type: int (0 for false, 1 for true)
          * @hide
-         * @deprecated To be removed.
+         * @deprecated To be removed. Use {@link SoftApConfiguration.Builder#
+         * setAutoShutdownEnabled(boolean)} for setting the value and {@link SoftApConfiguration#
+         * isAutoShutdownEnabled()} for query.
          */
         public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
 
@@ -10293,7 +10298,8 @@ public final class Settings {
          *
          * Type: int (0 for false, 1 for true)
          * @hide
-         * @deprecated Use {@link WifiManager#isAutoWakeupEnabled()} instead.
+         * @deprecated Use {@link WifiManager#setAutoWakeupEnabled(boolean)} for setting the value
+         * and {@link WifiManager#isAutoWakeupEnabled()} for query.
          */
         @Deprecated
         @SystemApi
@@ -10373,7 +10379,8 @@ public final class Settings {
          *
          * Type: int (0 for false, 1 for true)
          * @hide
-         * @deprecated To be removed.
+         * @deprecated Use {@link WifiManager#setScanThrottleEnabled(boolean)} for setting the value
+         * and {@link WifiManager#isScanThrottleEnabled()} for query.
          */
         public static final String WIFI_SCAN_THROTTLE_ENABLED = "wifi_scan_throttle_enabled";
 
@@ -10476,7 +10483,8 @@ public final class Settings {
         * Setting to enable verbose logging in Wi-Fi; disabled by default, and setting to 1
         * will enable it. In the future, additional values may be supported.
         * @hide
-        * @deprecated To be removed.
+        * @deprecated Use {@link WifiManager#setVerboseLoggingEnabled(boolean)} for setting the
+        * value and {@link WifiManager#isVerboseLoggingEnabled()} for query.
         */
        public static final String WIFI_VERBOSE_LOGGING_ENABLED =
                "wifi_verbose_logging_enabled";
@@ -10545,7 +10553,9 @@ public final class Settings {
        /**
         * The Wi-Fi peer-to-peer device name
         * @hide
-        * @deprecated To be removed.
+        * @deprecated Use {@link WifiP2pManager#setDeviceName(WifiP2pManager.Channel, String,
+        * WifiP2pManager.ActionListener)} for setting the value and
+        * {@link android.net.wifi.p2p.WifiP2pDevice#deviceName} for query.
         */
        public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
 
