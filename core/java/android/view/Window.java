@@ -712,13 +712,14 @@ public abstract class Window {
          * {@link View#setOnApplyWindowInsetsListener(OnApplyWindowInsetsListener)} through the view
          * hierarchy.
          *
+         * @param view The view for which to apply insets. Must not be directly modified.
          * @param insets The root level insets that are about to be dispatched
          * @return A pair, with the first element containing the insets to apply as margin to the
          * root-level content views, and the second element determining what should be
          * dispatched to the content view.
          */
         @NonNull
-        Pair<Insets, WindowInsets> onContentApplyWindowInsets(
+        Pair<Insets, WindowInsets> onContentApplyWindowInsets(@NonNull View view,
                 @NonNull WindowInsets insets);
     }
 
