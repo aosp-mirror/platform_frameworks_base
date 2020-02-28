@@ -48,6 +48,8 @@
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.google.android.startop.iorap.tests" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
+        <!-- test-timeout unit is ms, value = 30 min -->
+        <option name="test-timeout" value="1800000" />
     </test>
 
 </configuration>
