@@ -123,7 +123,7 @@ public class InsetsAnimationControlImplTest {
         mController = new InsetsAnimationControlImpl(controls,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
                 mMockController, 10 /* durationMs */, new LinearInterpolator(),
-                false /* fade */, LAYOUT_INSETS_DURING_ANIMATION_SHOWN, 0 /* animationType */);
+                false /* fade */, 0 /* animationType */);
     }
 
     @Test
@@ -182,7 +182,7 @@ public class InsetsAnimationControlImplTest {
 
     @Test
     public void testCancelled() {
-        mController.onCancelled();
+        mController.cancel();
         try {
             mController.setInsetsAndAlpha(Insets.NONE, 1f /*alpha */, 0f /* fraction */);
             fail("Expected exception to be thrown");

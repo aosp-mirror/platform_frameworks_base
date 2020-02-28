@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.view.InsetsController.LayoutInsetsDuringAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 
 /**
@@ -37,7 +36,7 @@ public interface InsetsAnimationControlCallbacks {
     void startAnimation(InsetsAnimationControlImpl controller,
             WindowInsetsAnimationControlListener listener, int types,
             WindowInsetsAnimation animation,
-            Bounds bounds, @LayoutInsetsDuringAnimation int layoutDuringAnimation);
+            Bounds bounds);
 
     /**
      * Schedule the apply by posting the animation callback.
@@ -46,10 +45,10 @@ public interface InsetsAnimationControlCallbacks {
 
     /**
      * Finish the final steps after the animation.
-     * @param controller The controller used to control the animation.
+     * @param runner The runner used to run the animation.
      * @param shown {@code true} if the insets are shown.
      */
-    void notifyFinished(InsetsAnimationControlImpl controller, boolean shown);
+    void notifyFinished(InsetsAnimationControlRunner runner, boolean shown);
 
     /**
      * Apply the new params to the surface.

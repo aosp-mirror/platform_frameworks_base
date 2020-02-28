@@ -504,6 +504,7 @@ public final class WindowManagerGlobal {
     }
 
     void doRemoveView(ViewRootImpl root) {
+        boolean allViewsRemoved;
         synchronized (mLock) {
             final int index = mRoots.indexOf(root);
             if (index >= 0) {
@@ -512,9 +513,16 @@ public final class WindowManagerGlobal {
                 final View view = mViews.remove(index);
                 mDyingViews.remove(view);
             }
+            allViewsRemoved = mRoots.isEmpty();
         }
         if (ThreadedRenderer.sTrimForeground && ThreadedRenderer.isAvailable()) {
             doTrimForeground();
+        }
+
+        // If we don't have any views anymore in our process, we no longer need the
+        // InsetsAnimationThread to save some resources.
+        if (allViewsRemoved) {
+            InsetsAnimationThread.release();
         }
     }
 

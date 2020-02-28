@@ -36,6 +36,7 @@ import android.util.IntArray;
 import android.util.SparseArray;
 import android.view.InsetsAnimationControlCallbacks;
 import android.view.InsetsAnimationControlImpl;
+import android.view.InsetsAnimationControlRunner;
 import android.view.InsetsController;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -44,6 +45,7 @@ import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.ViewRootImpl;
 import android.view.WindowInsetsAnimation;
+import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimationControlListener;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -327,7 +329,7 @@ class InsetsPolicy {
         InsetsPolicyAnimationControlCallbacks mControlCallbacks;
 
         InsetsPolicyAnimationControlListener(boolean show, Runnable finishCallback) {
-            super(show);
+            super(show, true /* useSfVsync */);
             mFinishCallback = finishCallback;
             mControlCallbacks = new InsetsPolicyAnimationControlCallbacks(this);
         }
@@ -360,8 +362,6 @@ class InsetsPolicy {
                         mFocusedWin.getDisplayContent().getBounds(), getState(),
                         mListener, typesReady, this, mListener.getDurationMs(),
                         InsetsController.INTERPOLATOR, true,
-                        show ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN
-                                : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN,
                         show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE);
                 SurfaceAnimationThread.getHandler().post(
                         () -> mListener.onReady(mAnimationControl, typesReady));
@@ -377,7 +377,7 @@ class InsetsPolicy {
             }
 
             @Override
-            public void notifyFinished(InsetsAnimationControlImpl controller, boolean shown) {
+            public void notifyFinished(InsetsAnimationControlRunner runner, boolean shown) {
                 // Nothing's needed here. Finish steps is handled in the listener
                 // onAnimationFinished callback.
             }
@@ -406,14 +406,14 @@ class InsetsPolicy {
                     applyParams(t, surfaceParams, mTmpFloat9);
                 }
                 t.apply();
+                t.close();
             }
 
             @Override
             public void startAnimation(InsetsAnimationControlImpl controller,
                     WindowInsetsAnimationControlListener listener, int types,
                     WindowInsetsAnimation animation,
-                    WindowInsetsAnimation.Bounds bounds,
-                    int layoutDuringAnimation) {
+                    Bounds bounds) {
             }
         }
     }
