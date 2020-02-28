@@ -29,6 +29,7 @@ import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -2172,7 +2173,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 displayConfig.uiMode, displayConfig.orientation, frame, displayFrame, insets,
                 surfaceInsets, stableInsets, isVoiceInteraction, inFreeformWindowingMode(), this);
         if (a != null) {
-            if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + this);
+            if (a != null) {
+                // Setup the maximum app transition duration to prevent malicious app may set a long
+                // animation duration or infinite repeat counts for the app transition through
+                // ActivityOption#makeCustomAnimation or WindowManager#overridePendingTransition.
+                a.restrictDuration(MAX_APP_TRANSITION_DURATION);
+            }
+            if (DEBUG_ANIM) {
+                logWithStack(TAG, "Loaded animation " + a + " for " + this
+                        + ", duration: " + ((a != null) ? a.getDuration() : 0));
+            }
             final int containingWidth = frame.width();
             final int containingHeight = frame.height();
             a.initialize(containingWidth, containingHeight, width, height);
