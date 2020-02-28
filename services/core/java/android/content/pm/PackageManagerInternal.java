@@ -845,20 +845,6 @@ public abstract class PackageManagerInternal {
             "android.content.pm.extra.ENABLE_ROLLBACK_TOKEN";
 
     /**
-     * Extra field name for the installFlags of a request to enable rollback
-     * for a package.
-     */
-    public static final String EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS =
-            "android.content.pm.extra.ENABLE_ROLLBACK_INSTALL_FLAGS";
-
-    /**
-     * Extra field name for the user id an install is associated with when
-     * enabling rollback.
-     */
-    public static final String EXTRA_ENABLE_ROLLBACK_USER =
-            "android.content.pm.extra.ENABLE_ROLLBACK_USER";
-
-    /**
      * Extra field name for the session id of a request to enable rollback
      * for a package.
      */

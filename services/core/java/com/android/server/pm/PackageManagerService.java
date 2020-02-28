@@ -1983,9 +1983,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         Intent rollbackTimeoutIntent = new Intent(
                                 Intent.ACTION_CANCEL_ENABLE_ROLLBACK);
                         rollbackTimeoutIntent.putExtra(
-                                PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
-                                enableRollbackToken);
-                        rollbackTimeoutIntent.putExtra(
                                 PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
                                 sessionId);
                         rollbackTimeoutIntent.addFlags(
@@ -14556,16 +14553,9 @@ public class PackageManagerService extends IPackageManager.Stub
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
                             enableRollbackToken);
                     enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS,
-                            installFlags);
-                    enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER,
-                            getRollbackUser().getIdentifier());
-                    enableRollbackIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
                             mSessionId);
-                    enableRollbackIntent.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
-                            PACKAGE_MIME_TYPE);
+                    enableRollbackIntent.setType(PACKAGE_MIME_TYPE);
                     enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                     // Allow the broadcast to be sent before boot complete.
