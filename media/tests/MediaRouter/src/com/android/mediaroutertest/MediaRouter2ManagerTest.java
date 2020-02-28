@@ -123,7 +123,7 @@ public class MediaRouter2ManagerTest {
 
     @Test
     public void testOnRoutesRemovedAndAdded() throws Exception {
-        RouteCallback routeCallback = new RouteCallback();
+        RouteCallback routeCallback = new RouteCallback() {};
         mRouteCallbacks.add(routeCallback);
         mRouter2.registerRouteCallback(mExecutor, routeCallback,
                 new RouteDiscoveryPreference.Builder(FEATURES_ALL, true).build());
@@ -201,7 +201,7 @@ public class MediaRouter2ManagerTest {
 
         addManagerCallback(new MediaRouter2Manager.Callback());
         //TODO: remove this when it's not necessary.
-        addRouterCallback(new MediaRouter2.RouteCallback());
+        addRouterCallback(new MediaRouter2.RouteCallback() {});
         addTransferCallback(new MediaRouter2.TransferCallback() {
             @Override
             public void onTransferred(MediaRouter2.RoutingController oldController,
@@ -228,7 +228,7 @@ public class MediaRouter2ManagerTest {
         CountDownLatch latch = new CountDownLatch(1);
 
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
-        addRouterCallback(new RouteCallback());
+        addRouterCallback(new RouteCallback() {});
         addManagerCallback(new MediaRouter2Manager.Callback() {
             @Override
             public void onSessionCreated(MediaRouter2Manager.RoutingController controller) {
@@ -263,7 +263,7 @@ public class MediaRouter2ManagerTest {
     @Test
     public void testSelectAndTransferAndRelease() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
-        addRouterCallback(new RouteCallback());
+        addRouterCallback(new RouteCallback() {});
 
         CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
 
@@ -346,7 +346,7 @@ public class MediaRouter2ManagerTest {
     @Test
     public void testSetSessionVolume() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
-        addRouterCallback(new RouteCallback());
+        addRouterCallback(new RouteCallback() {});
 
         CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
         CountDownLatch volumeChangedLatch = new CountDownLatch(2);
@@ -471,7 +471,7 @@ public class MediaRouter2ManagerTest {
         CountDownLatch featuresLatch = new CountDownLatch(1);
 
         // A dummy callback is required to send route feature info.
-        RouteCallback routeCallback = new RouteCallback();
+        RouteCallback routeCallback = new RouteCallback() {};
         MediaRouter2Manager.Callback managerCallback = new MediaRouter2Manager.Callback() {
             @Override
             public void onRoutesAdded(List<MediaRoute2Info> routes) {
