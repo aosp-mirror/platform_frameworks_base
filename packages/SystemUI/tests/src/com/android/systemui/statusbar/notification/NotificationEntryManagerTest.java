@@ -143,7 +143,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                     IMPORTANCE_DEFAULT,
                     null, null,
                     null, null, null, true, sentiment, false, -1, false, null, null, false, false,
-                    false);
+                    false, null);
             return true;
         }).when(mRankingMap).getRanking(eq(key), any(Ranking.class));
     }
@@ -162,7 +162,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                     null, null,
                     null, null, null, true,
                     Ranking.USER_SENTIMENT_NEUTRAL, false, -1,
-                    false, smartActions, null, false, false, false);
+                    false, smartActions, null, false, false, false, null);
             return true;
         }).when(mRankingMap).getRanking(eq(key), any(Ranking.class));
     }
@@ -254,7 +254,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         verify(mPresenter).updateNotificationViews();
         verify(mEntryListener).onEntryRemoved(
-                eq(mEntry), any(), eq(false) /* removedByUser */);
+                eq(mEntry), any(), eq(false) /* removedByUser */, eq(UNDEFINED_DISMISS_REASON));
         verify(mRow).setRemoved();
 
         assertNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
@@ -266,7 +266,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager.removeNotification("not_a_real_key", mRankingMap, UNDEFINED_DISMISS_REASON);
 
         verify(mEntryListener, never()).onEntryRemoved(
-                eq(mEntry), any(), eq(false) /* removedByUser */);
+                eq(mEntry), any(), eq(false) /* removedByUser */, eq(UNDEFINED_DISMISS_REASON));
     }
 
     @Test
@@ -275,7 +275,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager.removeNotification(mSbn.getKey(), mRankingMap, UNDEFINED_DISMISS_REASON);
 
         verify(mEntryListener, never()).onEntryRemoved(
-                eq(mEntry), any(), eq(false /* removedByUser */));
+                eq(mEntry), any(), eq(false /* removedByUser */), eq(UNDEFINED_DISMISS_REASON));
     }
 
     @Test
@@ -356,7 +356,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(extender).setShouldManageLifetime(mEntry, true);
         // THEN the notification is retained
         assertNotNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
-        verify(mEntryListener, never()).onEntryRemoved(eq(mEntry), any(), eq(false));
+        verify(mEntryListener, never()).onEntryRemoved(
+                eq(mEntry), any(), eq(false), eq(UNDEFINED_DISMISS_REASON));
     }
 
     @Test
@@ -374,7 +375,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         // THEN the notification is removed
         assertNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
-        verify(mEntryListener).onEntryRemoved(eq(mEntry), any(), eq(false));
+        verify(mEntryListener).onEntryRemoved(
+                eq(mEntry), any(), eq(false), eq(UNDEFINED_DISMISS_REASON));
     }
 
     @Test
@@ -447,7 +449,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         // THEN the interceptor intercepts & the entry is not removed & no listeners are called
         assertNotNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
         verify(mEntryListener, never()).onEntryRemoved(eq(mEntry),
-                any(NotificationVisibility.class), anyBoolean());
+                any(NotificationVisibility.class), anyBoolean(), eq(UNDEFINED_DISMISS_REASON));
     }
 
     @Test
@@ -466,7 +468,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         // THEN the interceptor intercepts & the entry is not removed & no listeners are called
         assertNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
         verify(mEntryListener, atLeastOnce()).onEntryRemoved(eq(mEntry),
-                any(NotificationVisibility.class), anyBoolean());
+                any(NotificationVisibility.class), anyBoolean(), eq(UNDEFINED_DISMISS_REASON));
     }
 
     private NotificationEntry createNotification() {
