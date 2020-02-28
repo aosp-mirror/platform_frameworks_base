@@ -16,6 +16,7 @@
 
 package com.android.systemui.pip;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.content.ComponentName;
@@ -44,8 +45,11 @@ import org.junit.runner.RunWith;
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class PipBoundsHandlerTest extends SysuiTestCase {
-    private static final int ROUNDING_ERROR_MARGIN = 10;
+    private static final int ROUNDING_ERROR_MARGIN = 16;
+    private static final float ASPECT_RATIO_ERROR_MARGIN = 0.01f;
     private static final float DEFAULT_ASPECT_RATIO = 1f;
+    private static final float MIN_ASPECT_RATIO = 0.5f;
+    private static final float MAX_ASPECT_RATIO = 2f;
     private static final Rect EMPTY_CURRENT_BOUNDS = null;
 
     private PipBoundsHandler mPipBoundsHandler;
@@ -53,8 +57,8 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mPipBoundsHandler = new PipBoundsHandler(mContext);
         initializeMockResources();
+        mPipBoundsHandler = new PipBoundsHandler(mContext);
 
         mPipBoundsHandler.onDisplayInfoChanged(mDefaultDisplayInfo);
     }
@@ -62,7 +66,8 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
     private void initializeMockResources() {
         final TestableResources res = mContext.getOrCreateTestableResources();
         res.addOverride(
-                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio, 1f);
+                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio,
+                DEFAULT_ASPECT_RATIO);
         res.addOverride(
                 com.android.internal.R.integer.config_defaultPictureInPictureGravity,
                 Gravity.END | Gravity.BOTTOM);
@@ -72,14 +77,86 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
                 com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets,
                 "16x16");
         res.addOverride(
-                com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio, 0.5f);
+                com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio,
+                MIN_ASPECT_RATIO);
         res.addOverride(
-                com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio, 2f);
+                com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio,
+                MAX_ASPECT_RATIO);
 
         mDefaultDisplayInfo = new DisplayInfo();
         mDefaultDisplayInfo.displayId = 1;
         mDefaultDisplayInfo.logicalWidth = 1000;
         mDefaultDisplayInfo.logicalHeight = 1500;
+    }
+
+    @Test
+    public void getDefaultAspectRatio() {
+        assertEquals("Default aspect ratio matches resources",
+                DEFAULT_ASPECT_RATIO, mPipBoundsHandler.getDefaultAspectRatio(),
+                ASPECT_RATIO_ERROR_MARGIN);
+    }
+
+    @Test
+    public void onConfigurationChanged_reloadResources() {
+        final float newDefaultAspectRatio = (DEFAULT_ASPECT_RATIO + MAX_ASPECT_RATIO) / 2;
+        final TestableResources res = mContext.getOrCreateTestableResources();
+        res.addOverride(com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio,
+                newDefaultAspectRatio);
+
+        mPipBoundsHandler.onConfigurationChanged();
+
+        assertEquals("Default aspect ratio should be reloaded",
+                mPipBoundsHandler.getDefaultAspectRatio(), newDefaultAspectRatio,
+                ASPECT_RATIO_ERROR_MARGIN);
+    }
+
+    @Test
+    public void getDestinationBounds_returnBoundsMatchesAspectRatio() {
+        final float[] aspectRatios = new float[] {
+                (MIN_ASPECT_RATIO + DEFAULT_ASPECT_RATIO) / 2,
+                DEFAULT_ASPECT_RATIO,
+                (MAX_ASPECT_RATIO + DEFAULT_ASPECT_RATIO) / 2
+        };
+        for (float aspectRatio : aspectRatios) {
+            final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
+                    aspectRatio, EMPTY_CURRENT_BOUNDS);
+            final float actualAspectRatio =
+                    destinationBounds.width() / (destinationBounds.height() * 1f);
+            assertEquals("Destination bounds matches the given aspect ratio",
+                    aspectRatio, actualAspectRatio, ASPECT_RATIO_ERROR_MARGIN);
+        }
+    }
+
+    @Test
+    public void getDestinationBounds_invalidAspectRatio_returnsDefaultAspectRatio() {
+        final float[] invalidAspectRatios = new float[] {
+                MIN_ASPECT_RATIO / 2,
+                MAX_ASPECT_RATIO * 2
+        };
+        for (float aspectRatio : invalidAspectRatios) {
+            final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
+                    aspectRatio, EMPTY_CURRENT_BOUNDS);
+            final float actualAspectRatio =
+                    destinationBounds.width() / (destinationBounds.height() * 1f);
+            assertEquals("Destination bounds fallbacks to default aspect ratio",
+                    mPipBoundsHandler.getDefaultAspectRatio(), actualAspectRatio,
+                    ASPECT_RATIO_ERROR_MARGIN);
+        }
+    }
+
+    @Test
+    public void  getDestinationBounds_withCurrentBounds_returnBoundsMatchesAspectRatio() {
+        final float aspectRatio = (DEFAULT_ASPECT_RATIO + MAX_ASPECT_RATIO) / 2;
+        final Rect currentBounds = new Rect(0, 0, 0, 100);
+        currentBounds.right = (int) (currentBounds.height() * aspectRatio) + currentBounds.left;
+
+        final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
+                aspectRatio, currentBounds);
+
+        final float actualAspectRatio =
+                destinationBounds.width() / (destinationBounds.height() * 1f);
+        assertEquals("Destination bounds matches the given aspect ratio",
+                aspectRatio, actualAspectRatio, ASPECT_RATIO_ERROR_MARGIN);
     }
 
     @Test
@@ -93,7 +170,7 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
                 DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS);
 
         oldPosition.offset(0, -shelfHeight);
-        assertBoundsWithMargin("PiP bounds offset by shelf height", oldPosition, newPosition);
+        assertBoundsWithMargin("offsetBounds by shelf", oldPosition, newPosition);
     }
 
     @Test
@@ -107,7 +184,7 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
                 DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS);
 
         oldPosition.offset(0, -imeHeight);
-        assertBoundsWithMargin("PiP bounds offset by IME height", oldPosition, newPosition);
+        assertBoundsWithMargin("offsetBounds by IME", oldPosition, newPosition);
     }
 
     @Test
@@ -122,11 +199,11 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
         final Rect newPosition = mPipBoundsHandler.getDestinationBounds(
                 DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS);
 
-        assertBoundsWithMargin("Last position is restored", oldPosition, newPosition);
+        assertBoundsWithMargin("restoreLastPosition", oldPosition, newPosition);
     }
 
     @Test
-    public void onResetReentryBounds_componentMatch_useDefaultBounds() {
+    public void onResetReentryBounds_useDefaultBounds() {
         final ComponentName componentName = new ComponentName(mContext, "component1");
         final Rect defaultBounds = mPipBoundsHandler.getDestinationBounds(
                 DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS);
@@ -138,7 +215,7 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
         final Rect actualBounds = mPipBoundsHandler.getDestinationBounds(
                 DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS);
 
-        assertBoundsWithMargin("Use default bounds", defaultBounds, actualBounds);
+        assertBoundsWithMargin("useDefaultBounds", defaultBounds, actualBounds);
     }
 
     @Test
@@ -154,11 +231,15 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
         final Rect actualBounds = mPipBoundsHandler.getDestinationBounds(
                 DEFAULT_ASPECT_RATIO, EMPTY_CURRENT_BOUNDS);
 
-        assertBoundsWithMargin("Last position is restored", newBounds, actualBounds);
+        assertBoundsWithMargin("restoreLastPosition", newBounds, actualBounds);
     }
 
-    private void assertBoundsWithMargin(String msg, Rect expected, Rect actual) {
-        expected.inset(-ROUNDING_ERROR_MARGIN, -ROUNDING_ERROR_MARGIN);
-        assertTrue(msg, expected.contains(actual));
+    private void assertBoundsWithMargin(String from, Rect expected, Rect actual) {
+        final Rect expectedWithMargin = new Rect(expected);
+        expectedWithMargin.inset(-ROUNDING_ERROR_MARGIN, -ROUNDING_ERROR_MARGIN);
+        assertTrue(from + ": expect " + expected
+                + " contains " + actual
+                + " with error margin " + ROUNDING_ERROR_MARGIN,
+                expectedWithMargin.contains(actual));
     }
 }
