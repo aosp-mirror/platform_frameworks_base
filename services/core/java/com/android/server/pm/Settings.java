@@ -33,6 +33,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.compat.ChangeIdStateCache;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -441,6 +442,7 @@ public final class Settings {
 
     private static void invalidatePackageCache() {
         PackageManager.invalidatePackageInfoCache();
+        ChangeIdStateCache.invalidate();
     }
 
     PackageSetting getPackageLPr(String pkgName) {

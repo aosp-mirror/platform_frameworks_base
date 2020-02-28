@@ -1689,8 +1689,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         mRelinquished = true;
-        return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir,
-                localObserver, params, mInstallerUid, mInstallSource, user, mSigningDetails);
+        return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir, localObserver,
+                sessionId, params, mInstallerUid, mInstallSource, user, mSigningDetails);
     }
 
     private static void maybeRenameFile(File from, File to) throws PackageManagerException {

@@ -1967,6 +1967,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 case ENABLE_ROLLBACK_TIMEOUT: {
                     final int enableRollbackToken = msg.arg1;
+                    final int sessionId = msg.arg2;
                     final InstallParams params = mPendingEnableRollback.get(enableRollbackToken);
                     if (params != null) {
                         final InstallArgs args = params.mArgs;
@@ -1982,8 +1983,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         Intent rollbackTimeoutIntent = new Intent(
                                 Intent.ACTION_CANCEL_ENABLE_ROLLBACK);
                         rollbackTimeoutIntent.putExtra(
-                                PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
-                                enableRollbackToken);
+                                PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
+                                sessionId);
                         rollbackTimeoutIntent.addFlags(
                                 Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                         mContext.sendBroadcastAsUser(rollbackTimeoutIntent, UserHandle.SYSTEM,
@@ -11780,14 +11781,22 @@ public class PackageManagerService extends IPackageManager.Stub
         final String pkgName = pkg.getPackageName();
         if (mCustomResolverComponentName != null &&
                 mCustomResolverComponentName.getPackageName().equals(pkg.getPackageName())) {
-            setUpCustomResolverActivity(pkg);
+            setUpCustomResolverActivity(pkg, pkgSetting);
         }
 
         if (pkg.getPackageName().equals("android")) {
             synchronized (mLock) {
                 // Set up information for our fall-back user intent resolution activity.
                 mPlatformPackage = pkg;
+
+                // The instance stored in PackageManagerService is special cased to be non-user
+                // specific, so initialize all the needed fields here.
                 mAndroidApplication = pkg.toAppInfoWithoutState();
+                mAndroidApplication.flags = PackageInfoUtils.appInfoFlags(pkg, pkgSetting);
+                mAndroidApplication.privateFlags =
+                        PackageInfoUtils.appInfoPrivateFlags(pkg, pkgSetting);
+                mAndroidApplication.initForUser(UserHandle.USER_SYSTEM);
+
                 if (!mResolverReplaced) {
                     mResolveActivity.applicationInfo = mAndroidApplication;
                     mResolveActivity.name = ResolverActivity.class.getName();
@@ -11949,11 +11958,20 @@ public class PackageManagerService extends IPackageManager.Stub
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    private void setUpCustomResolverActivity(AndroidPackage pkg) {
+    private void setUpCustomResolverActivity(AndroidPackage pkg, PackageSetting pkgSetting) {
         synchronized (mLock) {
             mResolverReplaced = true;
+
+            // The instance created in PackageManagerService is special cased to be non-user
+            // specific, so initialize all the needed fields here.
+            ApplicationInfo appInfo = pkg.toAppInfoWithoutState();
+            appInfo.flags = PackageInfoUtils.appInfoFlags(pkg, pkgSetting);
+            appInfo.privateFlags =
+                    PackageInfoUtils.appInfoPrivateFlags(pkg, pkgSetting);
+            appInfo.initForUser(UserHandle.USER_SYSTEM);
+
             // Set up information for custom user intent resolution activity.
-            mResolveActivity.applicationInfo = pkg.toAppInfoWithoutState();
+            mResolveActivity.applicationInfo = appInfo;
             mResolveActivity.name = mCustomResolverComponentName.getClassName();
             mResolveActivity.packageName = pkg.getPackageName();
             mResolveActivity.processName = pkg.getProcessName();
@@ -14243,6 +14261,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final long requiredInstalledVersionCode;
         final boolean forceQueryableOverride;
         final int mDataLoaderType;
+        final int mSessionId;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
@@ -14266,6 +14285,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.requiredInstalledVersionCode = requiredInstalledVersionCode;
             this.forceQueryableOverride = false;
             this.mDataLoaderType = dataLoaderType;
+            this.mSessionId = -1;
         }
 
         InstallParams(ActiveInstallSession activeInstallSession) {
@@ -14301,6 +14321,7 @@ public class PackageManagerService extends IPackageManager.Stub
             forceQueryableOverride = sessionParams.forceQueryableOverride;
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
+            mSessionId = activeInstallSession.getSessionId();
         }
 
         @Override
@@ -14532,13 +14553,9 @@ public class PackageManagerService extends IPackageManager.Stub
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
                             enableRollbackToken);
                     enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS,
-                            installFlags);
-                    enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER,
-                            getRollbackUser().getIdentifier());
-                    enableRollbackIntent.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
-                            PACKAGE_MIME_TYPE);
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
+                            mSessionId);
+                    enableRollbackIntent.setType(PACKAGE_MIME_TYPE);
                     enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                     // Allow the broadcast to be sent before boot complete.
@@ -14564,6 +14581,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                     final Message msg = mHandler.obtainMessage(
                                             ENABLE_ROLLBACK_TIMEOUT);
                                     msg.arg1 = enableRollbackToken;
+                                    msg.arg2 = mSessionId;
                                     mHandler.sendMessageDelayed(msg, rollbackTimeout);
                                 }
                             }, null, 0, null, null);
@@ -24573,6 +24591,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private final String mPackageName;
         private final File mStagedDir;
         private final IPackageInstallObserver2 mObserver;
+        private final int mSessionId;
         private final PackageInstaller.SessionParams mSessionParams;
         private final int mInstallerUid;
         @NonNull private final InstallSource mInstallSource;
@@ -24580,11 +24599,12 @@ public class PackageManagerService extends IPackageManager.Stub
         private final SigningDetails mSigningDetails;
 
         ActiveInstallSession(String packageName, File stagedDir, IPackageInstallObserver2 observer,
-                PackageInstaller.SessionParams sessionParams, int installerUid,
+                int sessionId, PackageInstaller.SessionParams sessionParams, int installerUid,
                 InstallSource installSource, UserHandle user, SigningDetails signingDetails) {
             mPackageName = packageName;
             mStagedDir = stagedDir;
             mObserver = observer;
+            mSessionId = sessionId;
             mSessionParams = sessionParams;
             mInstallerUid = installerUid;
             mInstallSource = Preconditions.checkNotNull(installSource);
@@ -24602,6 +24622,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public IPackageInstallObserver2 getObserver() {
             return mObserver;
+        }
+
+        public int getSessionId() {
+            return mSessionId;
         }
 
         public PackageInstaller.SessionParams getSessionParams() {

@@ -236,17 +236,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // Update duration extension multiplier for emergency REQUEST_LOCATION.
     private static final int EMERGENCY_LOCATION_UPDATE_DURATION_MULTIPLIER = 3;
 
-    /** simpler wrapper for ProviderRequest + Worksource */
-    private static class GpsRequest {
-        public ProviderRequest request;
-        public WorkSource source;
-
-        public GpsRequest(ProviderRequest request, WorkSource source) {
-            this.request = request;
-            this.source = source;
-        }
-    }
-
     // Threadsafe class to hold stats reported in the Extras Bundle
     private static class LocationExtras {
         private int mSvCount;
@@ -370,9 +359,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     // Current request from underlying location clients.
     private ProviderRequest mProviderRequest;
-    // The WorkSource associated with the most recent client request (i.e, most recent call to
-    // setRequest).
-    private WorkSource mWorkSource = null;
     // True if gps should be disabled because of PowerManager controls
     private boolean mDisableGpsForPowerManager = false;
 
@@ -396,7 +382,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private final Looper mLooper;
     private final LocationExtras mLocationExtras = new LocationExtras();
-    private final GnssStatusListenerHelper mGnssStatusListenerHelper;
+    private final GnssStatusProvider mGnssStatusListenerHelper;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
     private final GnssMeasurementCorrectionsProvider mGnssMeasurementCorrectionsProvider;
     private final GnssAntennaInfoProvider mGnssAntennaInfoProvider;
@@ -456,7 +442,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // GNSS Metrics
     private GnssMetrics mGnssMetrics;
 
-    public GnssStatusListenerHelper getGnssStatusProvider() {
+    public GnssStatusProvider getGnssStatusProvider() {
         return mGnssStatusListenerHelper;
     }
 
@@ -631,7 +617,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    public GnssLocationProvider(Context context) {
+    public GnssLocationProvider(Context context, UserInfoHelper userInfoHelper,
+            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
+            AppForegroundHelper appForegroundHelper, LocationUsageLogger logger) {
         super(FgThread.getExecutor(), context);
 
         ensureInitialized();
@@ -679,40 +667,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 mSuplEsEnabled);
         sendMessage(INITIALIZE_HANDLER, 0, null);
 
-        mGnssStatusListenerHelper = new GnssStatusListenerHelper(mContext, mHandler) {
-            @Override
-            protected boolean isAvailableInPlatform() {
-                return isSupported();
-            }
-
-            @Override
-            protected boolean isGpsEnabled() {
-                return GnssLocationProvider.this.isGpsEnabled();
-            }
-        };
-
-        mGnssMeasurementsProvider = new GnssMeasurementsProvider(mContext, mHandler) {
-            @Override
-            protected boolean isGpsEnabled() {
-                return GnssLocationProvider.this.isGpsEnabled();
-            }
-        };
-
+        mGnssStatusListenerHelper = new GnssStatusProvider(userInfoHelper, settingsHelper,
+                appOpsHelper, appForegroundHelper, logger);
+        mGnssMeasurementsProvider = new GnssMeasurementsProvider(userInfoHelper,
+                settingsHelper, appOpsHelper, appForegroundHelper, logger);
         mGnssMeasurementCorrectionsProvider = new GnssMeasurementCorrectionsProvider(mHandler);
-
-        mGnssAntennaInfoProvider = new GnssAntennaInfoProvider(mContext, mHandler) {
-            @Override
-            protected boolean isGpsEnabled() {
-                return GnssLocationProvider.this.isGpsEnabled();
-            }
-        };
-
-        mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(mContext, mHandler) {
-            @Override
-            protected boolean isGpsEnabled() {
-                return GnssLocationProvider.this.isGpsEnabled();
-            }
-        };
+        mGnssAntennaInfoProvider = new GnssAntennaInfoProvider(userInfoHelper, settingsHelper,
+                appOpsHelper, appForegroundHelper);
+        mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(userInfoHelper,
+                settingsHelper, appOpsHelper, appForegroundHelper);
 
         mGnssMetrics = new GnssMetrics(mContext, mBatteryStats);
         mNtpTimeHelper = new NtpTimeHelper(mContext, mLooper, this);
@@ -807,10 +770,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         locationRequest.setProvider(provider);
 
-        // Ignore location settings if in emergency mode.
-        if (isUserEmergency && mNIHandler.getInEmergency()) {
-            locationRequest.setLocationSettingsIgnored(true);
-            durationMillis *= EMERGENCY_LOCATION_UPDATE_DURATION_MULTIPLIER;
+        // Ignore location settings if in emergency mode. This is only allowed for
+        // isUserEmergency request (introduced in HAL v2.0), or DBH request in HAL v1.1.
+        if (mNIHandler.getInEmergency()) {
+            GnssConfiguration.HalInterfaceVersion halVersion =
+                    mGnssConfiguration.getHalInterfaceVersion();
+            if (isUserEmergency || (halVersion.mMajor < 2 && !independentFromGnss)) {
+                locationRequest.setLocationSettingsIgnored(true);
+                durationMillis *= EMERGENCY_LOCATION_UPDATE_DURATION_MULTIPLIER;
+            }
         }
 
         Log.i(TAG,
@@ -1004,9 +972,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         mC2KServerHost, mC2KServerPort);
             }
 
-            mGnssMeasurementsProvider.onGpsEnabledChanged();
-            mGnssNavigationMessageProvider.onGpsEnabledChanged();
-            mGnssAntennaInfoProvider.onGpsEnabledChanged();
             mGnssBatchingProvider.enable();
             if (mGnssVisibilityControl != null) {
                 mGnssVisibilityControl.onGpsEnabledChanged(/* isEnabled= */ true);
@@ -1032,10 +997,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mGnssBatchingProvider.disable();
         // do this before releasing wakelock
         native_cleanup();
-
-        mGnssAntennaInfoProvider.onGpsEnabledChanged();
-        mGnssMeasurementsProvider.onGpsEnabledChanged();
-        mGnssNavigationMessageProvider.onGpsEnabledChanged();
     }
 
     private void updateEnabled() {
@@ -1072,26 +1033,25 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void onSetRequest(ProviderRequest request) {
-        sendMessage(SET_REQUEST, 0, new GpsRequest(request, request.workSource));
+        sendMessage(SET_REQUEST, 0, request);
     }
 
-    private void handleSetRequest(ProviderRequest request, WorkSource source) {
+    private void handleSetRequest(ProviderRequest request) {
         mProviderRequest = request;
-        mWorkSource = source;
         updateEnabled();
         updateRequirements();
     }
 
     // Called when the requirements for GPS may have changed
     private void updateRequirements() {
-        if (mProviderRequest == null || mWorkSource == null) {
+        if (mProviderRequest == null || mProviderRequest.workSource == null) {
             return;
         }
 
         if (DEBUG) Log.d(TAG, "setRequest " + mProviderRequest);
         if (mProviderRequest.reportLocation && isGpsEnabled()) {
             // update client uids
-            updateClientUids(mWorkSource);
+            updateClientUids(mProviderRequest.workSource);
 
             mFixInterval = (int) mProviderRequest.interval;
             mLowPowerMode = mProviderRequest.lowPowerMode;
@@ -1528,19 +1488,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 meanCn0 += gnssStatus.getCn0DbHz(i);
                 mGnssMetrics.logConstellationType(gnssStatus.getConstellationType(i));
             }
-            if (VERBOSE) {
-                Log.v(TAG, "svid: " + gnssStatus.getSvid(i)
-                        + " cn0: " + gnssStatus.getCn0DbHz(i)
-                        + " basebandCn0: " + gnssStatus.getBasebandCn0DbHz(i)
-                        + " elev: " + gnssStatus.getElevationDegrees(i)
-                        + " azimuth: " + gnssStatus.getAzimuthDegrees(i)
-                        + " carrier frequency: " + gnssStatus.getCn0DbHz(i)
-                        + (gnssStatus.hasEphemerisData(i) ? " E" : "  ")
-                        + (gnssStatus.hasAlmanacData(i) ? " A" : "  ")
-                        + (gnssStatus.usedInFix(i) ? "U" : "")
-                        + (gnssStatus.hasCarrierFrequencyHz(i) ? "F" : "")
-                        + (gnssStatus.hasBasebandCn0DbHz(i) ? "B" : ""));
-            }
         }
         if (usedInFixCount > 0) {
             meanCn0 /= usedInFixCount;
@@ -1596,13 +1543,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 requestUtcTime();
             }
 
-            mGnssMeasurementsProvider.onCapabilitiesUpdated(
-                    hasCapability(GPS_CAPABILITY_MEASUREMENTS));
-            mGnssNavigationMessageProvider.onCapabilitiesUpdated(
-                    hasCapability(GPS_CAPABILITY_NAV_MESSAGES));
             restartRequests();
-            mGnssAntennaInfoProvider.onCapabilitiesUpdated(
-                    hasCapability(GPS_CAPABILITY_ANTENNA_INFO));
 
             mGnssCapabilitiesProvider.setTopHalCapabilities(mTopHalCapabilities);
         });
@@ -1624,9 +1565,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         Log.i(TAG, "restartRequests");
 
         restartLocationRequest();
-        mGnssAntennaInfoProvider.resumeIfStarted();
-        mGnssMeasurementsProvider.resumeIfStarted();
-        mGnssNavigationMessageProvider.resumeIfStarted();
         mGnssBatchingProvider.resumeIfStarted();
         mGnssGeofenceProvider.resumeIfStarted();
     }
@@ -2057,8 +1995,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             int message = msg.what;
             switch (message) {
                 case SET_REQUEST:
-                    GpsRequest gpsRequest = (GpsRequest) msg.obj;
-                    handleSetRequest(gpsRequest.request, gpsRequest.source);
+                    handleSetRequest((ProviderRequest) msg.obj);
                     break;
                 case INJECT_NTP_TIME:
                     mNtpTimeHelper.retrieveAndInjectNtpTime();
@@ -2147,20 +2084,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    private abstract class LocationChangeListener implements LocationListener {
+    private abstract static class LocationChangeListener implements LocationListener {
         private int mNumLocationUpdateRequest;
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-        }
     }
 
     private final class NetworkLocationListener extends LocationChangeListener {
@@ -2217,12 +2142,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         s.append(" ago)").append('\n');
         s.append("mFixInterval=").append(mFixInterval).append('\n');
         s.append("mLowPowerMode=").append(mLowPowerMode).append('\n');
-        s.append("mGnssAntennaInfoProvider.isRegistered()=")
-                .append(mGnssAntennaInfoProvider.isRegistered()).append('\n');
-        s.append("mGnssMeasurementsProvider.isRegistered()=")
-                .append(mGnssMeasurementsProvider.isRegistered()).append('\n');
-        s.append("mGnssNavigationMessageProvider.isRegistered()=")
-                .append(mGnssNavigationMessageProvider.isRegistered()).append('\n');
         s.append("mDisableGpsForPowerManager=").append(mDisableGpsForPowerManager).append('\n');
         s.append("mTopHalCapabilities=0x").append(Integer.toHexString(mTopHalCapabilities));
         s.append(" ( ");

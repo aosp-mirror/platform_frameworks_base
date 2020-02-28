@@ -838,7 +838,8 @@ public final class OomAdjuster {
                     // definition not re-use the same process again, and it is
                     // good to avoid having whatever code was running in them
                     // left sitting around after no longer needed.
-                    app.kill("isolated not needed", ApplicationExitInfo.REASON_OTHER, true);
+                    app.kill("isolated not needed", ApplicationExitInfo.REASON_OTHER,
+                            ApplicationExitInfo.SUBREASON_ISOLATED_NOT_NEEDED, true);
                 } else {
                     // Keeping this process, update its uid.
                     updateAppUidRecLocked(app);
@@ -1109,6 +1110,7 @@ public final class OomAdjuster {
         app.adjTarget = null;
         app.empty = false;
         app.setCached(false);
+        app.shouldNotFreeze = false;
 
         final int appUid = app.info.uid;
         final int logUid = mService.mCurOomAdjUid;
@@ -1542,22 +1544,23 @@ public final class OomAdjuster {
                     }
 
                     boolean trackedProcState = false;
-                    if ((cr.flags& Context.BIND_WAIVE_PRIORITY) == 0) {
-                        ProcessRecord client = cr.binding.client;
-                        if (computeClients) {
-                            computeOomAdjLocked(client, cachedAdj, topApp, doingAll, now,
-                                    cycleReEval, true);
-                        } else {
-                            client.setCurRawAdj(client.setAdj);
-                            client.setCurRawProcState(client.setProcState);
-                        }
 
+                    ProcessRecord client = cr.binding.client;
+                    if (computeClients) {
+                        computeOomAdjLocked(client, cachedAdj, topApp, doingAll, now,
+                                cycleReEval, true);
+                    } else {
+                        client.setCurRawAdj(client.setAdj);
+                        client.setCurRawProcState(client.setProcState);
+                    }
+
+                    int clientAdj = client.getCurRawAdj();
+                    int clientProcState = client.getCurRawProcState();
+
+                    if ((cr.flags & Context.BIND_WAIVE_PRIORITY) == 0) {
                         if (shouldSkipDueToCycle(app, client, procState, adj, cycleReEval)) {
                             continue;
                         }
-
-                        int clientAdj = client.getCurRawAdj();
-                        int clientProcState = client.getCurRawProcState();
 
                         if (clientProcState == PROCESS_STATE_FOREGROUND_SERVICE) {
                             procStateFromFGSClient = true;
@@ -1761,6 +1764,19 @@ public final class OomAdjuster {
                                         + " adj=" + adj + " procState="
                                         + ProcessList.makeProcStateString(procState));
                             }
+                        }
+                    } else { // BIND_WAIVE_PRIORITY == true
+                        // BIND_WAIVE_PRIORITY bindings are special when it comes to the
+                        // freezer. Processes bound via WPRI are expected to be running,
+                        // but they are not promoted in the LRU list to keep them out of
+                        // cached. As a result, they can freeze based on oom_adj alone.
+                        // Normally, bindToDeath would fire when a cached app would die
+                        // in the background, but nothing will fire when a running process
+                        // pings a frozen process. Accordingly, any cached app that is
+                        // bound by an unfrozen app via a WPRI binding has to remain
+                        // unfrozen.
+                        if (clientAdj < ProcessList.CACHED_APP_MIN_ADJ) {
+                            app.shouldNotFreeze = true;
                         }
                     }
                     if ((cr.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
@@ -2141,7 +2157,8 @@ public final class OomAdjuster {
             }
             if (app.waitingToKill != null && app.curReceivers.isEmpty()
                     && app.setSchedGroup == ProcessList.SCHED_GROUP_BACKGROUND) {
-                app.kill(app.waitingToKill, ApplicationExitInfo.REASON_OTHER, true);
+                app.kill(app.waitingToKill, ApplicationExitInfo.REASON_USER_REQUESTED,
+                        ApplicationExitInfo.SUBREASON_UNKNOWN, true);
                 success = false;
             } else {
                 int processGroup;

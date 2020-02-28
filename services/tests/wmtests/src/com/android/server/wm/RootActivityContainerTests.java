@@ -250,13 +250,12 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(stack).build();
 
-        // Under split screen primary we should be focusable when not minimized
-        mRootWindowContainer.setDockedStackMinimized(false);
+        // Created stacks are focusable by default.
         assertTrue(stack.isTopActivityFocusable());
         assertTrue(activity.isFocusable());
 
-        // Under split screen primary we should not be focusable when minimized
-        mRootWindowContainer.setDockedStackMinimized(true);
+        // If the stack is made unfocusable, its activities should inherit that.
+        stack.setFocusable(false);
         assertFalse(stack.isTopActivityFocusable());
         assertFalse(activity.isFocusable());
 
@@ -304,33 +303,6 @@ public class RootActivityContainerTests extends ActivityTestsBase {
 
         // Assert that the primary stack is returned.
         assertEquals(primaryStack, result);
-    }
-
-    /**
-     * Verify split-screen primary stack & task can resized by
-     * {@link android.app.IActivityTaskManager#resizeDockedStack} as expect.
-     */
-    @Test
-    public void testResizeDockedStackForSplitScreenPrimary() {
-        final Rect configSize = new Rect(0, 0, 1000, 1000);
-        final Rect displayedSize = new Rect(0, 0, 300, 300);
-
-        // Create primary split-screen stack with a task.
-        final ActivityStack primaryStack = new StackBuilder(mRootWindowContainer)
-                .setActivityType(ACTIVITY_TYPE_STANDARD)
-                .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
-                .setOnTop(true)
-                .build();
-        final Task task = primaryStack.getTopMostTask();
-
-        // Resize dock stack.
-        mService.resizeDockedStack(displayedSize, configSize, null, null, null);
-
-        // Verify dock stack & its task bounds if is equal as resized result.
-        assertEquals(displayedSize, primaryStack.getDisplayedBounds());
-        assertEquals(displayedSize, primaryStack.getDisplayedBounds());
-        assertEquals(configSize, primaryStack.getBounds());
-        assertEquals(configSize, task.getBounds());
     }
 
     /**

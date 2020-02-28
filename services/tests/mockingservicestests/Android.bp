@@ -29,6 +29,8 @@ android_test {
         "platform-test-annotations",
         "truth-prebuilt",
         "testables",
+        // TODO: remove once Android migrates to JUnit 4.12, which provides assertThrows
+        "testng",
     ],
 
     libs: [

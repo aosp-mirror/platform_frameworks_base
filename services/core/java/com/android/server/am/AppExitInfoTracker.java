@@ -348,6 +348,7 @@ public final class AppExitInfoTracker {
         } else {
             // always override the existing info since we are now more informational.
             info.setReason(raw.getReason());
+            info.setSubReason(raw.getSubReason());
             info.setStatus(0);
             info.setTimestamp(System.currentTimeMillis());
             info.setDescription(raw.getDescription());
@@ -708,7 +709,7 @@ public final class AppExitInfoTracker {
 
     void dumpHistoryProcessExitInfo(PrintWriter pw, String packageName) {
         pw.println("ACTIVITY MANAGER LRU PROCESSES (dumpsys activity exit-info)");
-        SimpleDateFormat sdf = new SimpleDateFormat();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         synchronized (mLock) {
             pw.println("Last Timestamp of Persistence Into Persistent Storage: "
                     + sdf.format(new Date(mLastAppExitInfoPersistTimestamp)));

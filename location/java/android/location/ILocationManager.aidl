@@ -57,10 +57,6 @@ interface ILocationManager
             in PendingIntent intent, String packageName, String featureId);
     void removeGeofence(in Geofence fence, in PendingIntent intent, String packageName);
 
-    boolean registerGnssStatusCallback(IGnssStatusListener callback, String packageName,
-            String featureId);
-    void unregisterGnssStatusCallback(IGnssStatusListener callback);
-
     boolean geocoderIsPresent();
     String getFromLocation(double latitude, double longitude, int maxResults,
         in GeocoderParams params, out List<Address> addrs);
@@ -69,31 +65,30 @@ interface ILocationManager
         double upperRightLatitude, double upperRightLongitude, int maxResults,
         in GeocoderParams params, out List<Address> addrs);
 
-    boolean addGnssMeasurementsListener(in GnssRequest request,
-            in IGnssMeasurementsListener listener,
-            String packageName, String featureId);
-    void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections,
-            in String packageName);
     long getGnssCapabilities();
-    void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
-
-    boolean addGnssAntennaInfoListener(in IGnssAntennaInfoListener listener,
-             String packageName, String featureId);
-    void removeGnssAntennaInfoListener(in IGnssAntennaInfoListener listener);
-
-    boolean addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener,
-             String packageName, String featureId);
-    void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
-
     int getGnssYearOfHardware();
     String getGnssHardwareModelName();
 
+    void registerGnssStatusCallback(in IGnssStatusListener callback, String packageName, String featureId);
+    void unregisterGnssStatusCallback(in IGnssStatusListener callback);
+
+    void addGnssMeasurementsListener(in GnssRequest request, in IGnssMeasurementsListener listener, String packageName, String featureId);
+    void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
+
+    void addGnssAntennaInfoListener(in IGnssAntennaInfoListener listener, String packageName, String featureId);
+    void removeGnssAntennaInfoListener(in IGnssAntennaInfoListener listener);
+
+    void addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener, String packageName, String featureId);
+    void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
+
+    void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections, String packageName);
+
     int getGnssBatchSize(String packageName);
-    boolean addGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName, String featureId);
+    void addGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName, String featureId);
     void removeGnssBatchingCallback();
-    boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName, String featureId);
+    void startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName, String featureId);
     void flushGnssBatch(String packageName);
-    boolean stopGnssBatch();
+    void stopGnssBatch();
     void injectLocation(in Location location);
 
     List<String> getAllProviders();

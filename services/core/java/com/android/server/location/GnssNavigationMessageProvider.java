@@ -16,14 +16,14 @@
 
 package com.android.server.location;
 
-import android.content.Context;
 import android.location.GnssNavigationMessage;
 import android.location.IGnssNavigationMessageListener;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.location.gnss.GnssManagerService;
+import com.android.server.location.util.listeners.GnssListenerManager;
 
 /**
  * An base implementation for GPS navigation messages provider.
@@ -32,113 +32,75 @@ import com.android.internal.annotations.VisibleForTesting;
  *
  * @hide
  */
-public abstract class GnssNavigationMessageProvider
-        extends RemoteListenerHelper<Void, IGnssNavigationMessageListener> {
-    private static final String TAG = "GnssNavigationMessageProvider";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+public class GnssNavigationMessageProvider extends
+        GnssListenerManager<Void, IGnssNavigationMessageListener, Void> {
 
     private final GnssNavigationMessageProviderNative mNative;
-    private boolean mCollectionStarted;
 
-    protected GnssNavigationMessageProvider(Context context, Handler handler) {
-        this(context, handler, new GnssNavigationMessageProviderNative());
+    public GnssNavigationMessageProvider(UserInfoHelper userInfoHelper,
+            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
+            AppForegroundHelper appForegroundHelper) {
+        this(userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper,
+                new GnssNavigationMessageProviderNative());
     }
 
     @VisibleForTesting
-    public GnssNavigationMessageProvider(Context context, Handler handler,
-            GnssNavigationMessageProviderNative aNative) {
-        super(context, handler, TAG);
+    public GnssNavigationMessageProvider(UserInfoHelper userInfoHelper,
+            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
+            AppForegroundHelper appForegroundHelper, GnssNavigationMessageProviderNative aNative) {
+        super(userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper);
         mNative = aNative;
     }
 
-    void resumeIfStarted() {
-        if (DEBUG) {
-            Log.d(TAG, "resumeIfStarted");
-        }
-        if (mCollectionStarted) {
-            mNative.startNavigationMessageCollection();
-        }
+    @Override
+    public void addListener(CallerIdentity identity, IGnssNavigationMessageListener listener) {
+        super.addListener(identity, listener);
     }
 
     @Override
-    protected boolean isAvailableInPlatform() {
-        return mNative.isNavigationMessageSupported();
-    }
-
-    @Override
-    protected int registerWithService() {
-        boolean result = mNative.startNavigationMessageCollection();
-        if (result) {
-            mCollectionStarted = true;
-            return RemoteListenerHelper.RESULT_SUCCESS;
-        } else {
-            return RemoteListenerHelper.RESULT_INTERNAL_ERROR;
-        }
-    }
-
-    @Override
-    protected void unregisterFromService() {
-        boolean stopped = mNative.stopNavigationMessageCollection();
-        if (stopped) {
-            mCollectionStarted = false;
-        }
-    }
-
-    public void onNavigationMessageAvailable(final GnssNavigationMessage event) {
-        foreach((IGnssNavigationMessageListener listener, CallerIdentity callerIdentity) -> {
-                    listener.onGnssNavigationMessageReceived(event);
+    protected boolean registerService(Void ignored) {
+        if (mNative.isNavigationMessageSupported()) {
+            if (mNative.startNavigationMessageCollection()) {
+                if (GnssManagerService.D) {
+                    Log.d(GnssManagerService.TAG, "starting gnss navigation messages");
                 }
-        );
-    }
+                return true;
+            }
 
-    /** Handle GNSS capabilities update from the GNSS HAL implementation */
-    public void onCapabilitiesUpdated(boolean isGnssNavigationMessageSupported) {
-        setSupported(isGnssNavigationMessageSupported);
-        updateResult();
-    }
-
-    public void onGpsEnabledChanged() {
-        tryUpdateRegistrationWithService();
-        updateResult();
+            Log.e(GnssManagerService.TAG, "error starting gnss navigation messages");
+        }
+        return false;
     }
 
     @Override
-    protected ListenerOperation<IGnssNavigationMessageListener> getHandlerOperation(int result) {
-        int status;
-        switch (result) {
-            case RESULT_SUCCESS:
-                status = GnssNavigationMessage.Callback.STATUS_READY;
-                break;
-            case RESULT_NOT_AVAILABLE:
-            case RESULT_NOT_SUPPORTED:
-            case RESULT_INTERNAL_ERROR:
-                status = GnssNavigationMessage.Callback.STATUS_NOT_SUPPORTED;
-                break;
-            case RESULT_GPS_LOCATION_DISABLED:
-                status = GnssNavigationMessage.Callback.STATUS_LOCATION_DISABLED;
-                break;
-            case RESULT_UNKNOWN:
-                return null;
-            default:
-                Log.v(TAG, "Unhandled addListener result: " + result);
-                return null;
+    protected void unregisterService() {
+        if (mNative.isNavigationMessageSupported()) {
+            if (mNative.stopNavigationMessageCollection()) {
+                if (GnssManagerService.D) {
+                    Log.d(GnssManagerService.TAG, "stopping gnss navigation messages");
+                }
+            } else {
+                Log.e(GnssManagerService.TAG, "error stopping gnss navigation messages");
+            }
         }
-        return new StatusChangedOperation(status);
     }
 
-    private static class StatusChangedOperation
-            implements ListenerOperation<IGnssNavigationMessageListener> {
-        private final int mStatus;
+    /**
+     * Called by GnssLocationProvider.
+     */
+    public void onNavigationMessageAvailable(GnssNavigationMessage event) {
+        deliverToListeners((listener) -> {
+            try {
+                listener.onGnssNavigationMessageReceived(event);
+            } catch (RemoteException e) {
+                // ignore - the listener will get cleaned up later anyways
+            }
+        }, registration -> mAppOpsHelper.noteLocationAccess(registration.getIdentity()));
+    }
 
-        public StatusChangedOperation(int status) {
-            mStatus = status;
-        }
-
-        @Override
-        public void execute(IGnssNavigationMessageListener listener,
-                CallerIdentity callerIdentity) throws RemoteException {
-            listener.onStatusChanged(mStatus);
-        }
+    @Override
+    protected boolean isServiceSupported() {
+        return mNative.isNavigationMessageSupported();
     }
 
     @VisibleForTesting
@@ -156,9 +118,9 @@ public abstract class GnssNavigationMessageProvider
         }
     }
 
-    private static native boolean native_is_navigation_message_supported();
+    static native boolean native_is_navigation_message_supported();
 
-    private static native boolean native_start_navigation_message_collection();
+    static native boolean native_start_navigation_message_collection();
 
-    private static native boolean native_stop_navigation_message_collection();
+    static native boolean native_stop_navigation_message_collection();
 }

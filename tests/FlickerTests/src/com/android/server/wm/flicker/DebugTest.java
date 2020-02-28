@@ -94,7 +94,8 @@ public class DebugTest {
      */
     @Test
     public void openAppToSplitScreen() {
-        CommonTransitions.appToSplitScreen(testApp, uiDevice).includeJankyRuns().recordAllRuns()
+        CommonTransitions.appToSplitScreen(testApp, uiDevice,
+                Surface.ROTATION_0).includeJankyRuns().recordAllRuns()
                 .build().run();
     }
 
@@ -116,7 +117,7 @@ public class DebugTest {
         ImeAppHelper bottomApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
         CommonTransitions.resizeSplitScreen(testApp, bottomApp, uiDevice, Surface.ROTATION_0,
                 new Rational(1, 3), new Rational(2, 3))
-                .includeJankyRuns().recordEachRun().build().run();
+                .includeJankyRuns().build().run();
     }
 
     // IME tests
@@ -128,7 +129,7 @@ public class DebugTest {
     public void editTextSetFocus() {
         ImeAppHelper testApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
         CommonTransitions.editTextSetFocus(testApp, uiDevice, Surface.ROTATION_0)
-                .includeJankyRuns().recordEachRun()
+                .includeJankyRuns()
                 .build().run();
     }
 
@@ -139,7 +140,7 @@ public class DebugTest {
     public void editTextLoseFocusToHome() {
         ImeAppHelper testApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
         CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0)
-                .includeJankyRuns().recordEachRun()
+                .includeJankyRuns()
                 .build().run();
     }
 
@@ -150,7 +151,7 @@ public class DebugTest {
     public void editTextLoseFocusToApp() {
         ImeAppHelper testApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
         CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0)
-                .includeJankyRuns().recordEachRun()
+                .includeJankyRuns()
                 .build().run();
     }
 
@@ -162,7 +163,7 @@ public class DebugTest {
     @Test
     public void enterPipMode() {
         PipAppHelper testApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.enterPipMode(testApp, uiDevice).includeJankyRuns().recordEachRun()
+        CommonTransitions.enterPipMode(testApp, uiDevice, Surface.ROTATION_0).includeJankyRuns()
                 .build().run();
     }
 
@@ -172,7 +173,8 @@ public class DebugTest {
     @Test
     public void exitPipModeToHome() {
         PipAppHelper testApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.exitPipModeToHome(testApp, uiDevice).includeJankyRuns().recordEachRun()
+        CommonTransitions.exitPipModeToHome(testApp, uiDevice, Surface.ROTATION_0)
+                .includeJankyRuns()
                 .build().run();
     }
 
@@ -182,7 +184,7 @@ public class DebugTest {
     @Test
     public void exitPipModeToApp() {
         PipAppHelper testApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.exitPipModeToApp(testApp, uiDevice).includeJankyRuns().recordEachRun()
+        CommonTransitions.exitPipModeToApp(testApp, uiDevice, Surface.ROTATION_0).includeJankyRuns()
                 .build().run();
     }
 }

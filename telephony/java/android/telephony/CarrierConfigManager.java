@@ -320,6 +320,34 @@ public class CarrierConfigManager {
             "only_auto_select_in_home_network";
 
     /**
+     * Flag indicating whether to show single operator row in the choose network setting.
+     *
+     * The device configuration value {@code config_enableNewAutoSelectNetworkUI} ultimately
+     * controls whether this carrier configuration option is used.  Where
+     * {@code config_enableNewAutoSelectNetworkUI} is false, the value of the
+     * {@link #KEY_SHOW_SINGLE_OPERATOR_ROW_IN_CHOOSE_NETWORK_SETTING_BOOL} carrier configuration
+     * option is ignored.
+     *
+     * If {@code true}, default value, merge the duplicate networks which with the same plmn, keep
+     * the one that with the higher signal strength level.
+     * If {@code false}, show all operators without merging.
+     * @hide
+     */
+    public static final String KEY_SHOW_SINGLE_OPERATOR_ROW_IN_CHOOSE_NETWORK_SETTING_BOOL =
+            "show_single_operator_row_in_choose_network_setting_bool";
+
+    /**
+     * Flag indicating whether to display SPN as network name for home network in choose
+     * network setting.
+     *
+     * If {@code true}, display SPN as network name in choose network setting.
+     * If {@code false}, display PLMN in choose network setting.
+     * @hide
+     */
+    public static final String KEY_SHOW_SPN_FOR_HOME_IN_CHOOSE_NETWORK_SETTING_BOOL =
+            "show_spn_for_home_in_choose_network_setting_bool";
+
+    /**
      * Control whether users receive a simplified network settings UI and improved network
      * selection.
      */
@@ -3637,6 +3665,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_HAS_IN_CALL_NOISE_SUPPRESSION_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL, false);
         sDefaults.putBoolean(KEY_ONLY_AUTO_SELECT_IN_HOME_NETWORK_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_SINGLE_OPERATOR_ROW_IN_CHOOSE_NETWORK_SETTING_BOOL, true);
+        sDefaults.putBoolean(KEY_SHOW_SPN_FOR_HOME_IN_CHOOSE_NETWORK_SETTING_BOOL, false);
         sDefaults.putBoolean(KEY_SIMPLIFIED_NETWORK_SETTINGS_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_SIM_LOCK_SETTINGS_BOOL, false);
 

@@ -610,21 +610,24 @@ public final class PermissionManager {
     private static final class PackageNamePermissionQuery {
         final String permName;
         final String pkgName;
+        final int uid;
 
-        PackageNamePermissionQuery(@Nullable String permName, @Nullable String pkgName) {
+        PackageNamePermissionQuery(@Nullable String permName, @Nullable String pkgName, int uid) {
             this.permName = permName;
             this.pkgName = pkgName;
+            this.uid = uid;
         }
 
         @Override
         public String toString() {
-            return String.format("PackageNamePermissionQuery(pkgName=\"%s\", permName=\"%s\")",
-                    pkgName, permName);
+            return String.format(
+                    "PackageNamePermissionQuery(pkgName=\"%s\", permName=\"%s, uid=%s\")",
+                    pkgName, permName, uid);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(permName) * 13 + Objects.hashCode(pkgName);
+            return Objects.hash(permName, pkgName, uid);
         }
 
         @Override
@@ -639,15 +642,17 @@ public final class PermissionManager {
                 return false;
             }
             return Objects.equals(permName, other.permName)
-                    && Objects.equals(pkgName, other.pkgName);
+                    && Objects.equals(pkgName, other.pkgName)
+                    && uid == other.uid;
         }
     }
 
     /* @hide */
-    private static int checkPackageNamePermissionUncached(String permName, String pkgName) {
+    private static int checkPackageNamePermissionUncached(
+            String permName, String pkgName, int uid) {
         try {
             return ActivityThread.getPermissionManager().checkPermission(
-                    permName, pkgName, UserHandle.myUserId());
+                    permName, pkgName, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -660,7 +665,8 @@ public final class PermissionManager {
                     16, CACHE_KEY_PACKAGE_INFO) {
                 @Override
                 protected Integer recompute(PackageNamePermissionQuery query) {
-                    return checkPackageNamePermissionUncached(query.permName, query.pkgName);
+                    return checkPackageNamePermissionUncached(
+                            query.permName, query.pkgName, query.uid);
                 }
             };
 
@@ -669,9 +675,9 @@ public final class PermissionManager {
      *
      * @hide
      */
-    public static int checkPackageNamePermission(String permName, String pkgName) {
+    public static int checkPackageNamePermission(String permName, String pkgName, int uid) {
         return sPackageNamePermissionCache.query(
-                new PackageNamePermissionQuery(permName, pkgName));
+                new PackageNamePermissionQuery(permName, pkgName, uid));
     }
 
     /**

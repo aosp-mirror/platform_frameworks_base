@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -42,6 +43,7 @@ import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.concurrent.Executor;
 
@@ -91,7 +93,8 @@ public interface StatusBarDependenciesModule {
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController,
-            @Main Executor mainExecutor) {
+            @Main Executor mainExecutor,
+            DeviceConfigProxy deviceConfigProxy) {
         return new NotificationMediaManager(
                 context,
                 statusBarLazy,
@@ -99,7 +102,8 @@ public interface StatusBarDependenciesModule {
                 notificationEntryManager,
                 mediaArtworkProcessor,
                 keyguardBypassController,
-                mainExecutor);
+                mainExecutor,
+                deviceConfigProxy);
     }
 
     /** */
@@ -135,7 +139,8 @@ public interface StatusBarDependenciesModule {
             KeyguardBypassController bypassController,
             BubbleController bubbleController,
             DynamicPrivacyController privacyController,
-            ForegroundServiceSectionController fgsSectionController) {
+            ForegroundServiceSectionController fgsSectionController,
+            DynamicChildBindController dynamicChildBindController) {
         return new NotificationViewHierarchyManager(
                 context,
                 mainHandler,
@@ -147,7 +152,8 @@ public interface StatusBarDependenciesModule {
                 bypassController,
                 bubbleController,
                 privacyController,
-                fgsSectionController);
+                fgsSectionController,
+                dynamicChildBindController);
     }
 
     /**

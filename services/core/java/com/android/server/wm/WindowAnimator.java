@@ -50,7 +50,6 @@ public class WindowAnimator {
     final WindowManagerPolicy mPolicy;
 
     /** Is any window animating? */
-    private boolean mAnimating;
     private boolean mLastRootAnimating;
 
     final Choreographer.FrameCallback mAnimationFrameCallback;
@@ -135,7 +134,6 @@ public class WindowAnimator {
         synchronized (mService.mGlobalLock) {
             mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
             mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
-            mAnimating = false;
             if (DEBUG_WINDOW_TRACE) {
                 Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
             }
@@ -160,15 +158,10 @@ public class WindowAnimator {
                     final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
 
                     dc.checkAppWindowsReadyToShow();
-                    orAnimating(dc.getDockedDividerController().animate(mCurrentTime));
                     if (accessibilityController != null) {
                         accessibilityController.drawMagnifiedRegionBorderIfNeededLocked(displayId,
                                 mTransaction);
                     }
-                }
-
-                if (!mAnimating) {
-                    cancelAnimation();
                 }
 
                 if (mService.mWatermark != null) {
@@ -220,7 +213,7 @@ public class WindowAnimator {
             executeAfterPrepareSurfacesRunnables();
 
             if (DEBUG_WINDOW_TRACE) {
-                Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
+                Slog.i(TAG, "!!! animate: exit"
                         + " mBulkUpdateParams=" + Integer.toHexString(mBulkUpdateParams)
                         + " hasPendingLayoutChanges=" + hasPendingLayoutChanges);
             }
@@ -302,24 +295,12 @@ public class WindowAnimator {
     private class DisplayContentsAnimator {
     }
 
-    boolean isAnimating() {
-        return mAnimating;
-    }
-
     boolean isAnimationScheduled() {
         return mAnimationFrameCallbackScheduled;
     }
 
     Choreographer getChoreographer() {
         return mChoreographer;
-    }
-
-    void setAnimating(boolean animating) {
-        mAnimating = animating;
-    }
-
-    void orAnimating(boolean animating) {
-        mAnimating |= animating;
     }
 
     /**

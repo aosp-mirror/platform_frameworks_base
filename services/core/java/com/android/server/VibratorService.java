@@ -183,7 +183,8 @@ public class VibratorService extends IVibratorService.Stub
     static native boolean vibratorSupportsAmplitudeControl();
     static native void vibratorSetAmplitude(int amplitude);
     static native int[] vibratorGetSupportedEffects();
-    static native long vibratorPerformEffect(long effect, long strength, Vibration vibration);
+    static native long vibratorPerformEffect(long effect, long strength, Vibration vibration,
+            boolean withCallback);
     static native void vibratorPerformComposedEffect(
             VibrationEffect.Composition.PrimitiveEffect[] effect, Vibration vibration);
     static native boolean vibratorSupportsExternalControl();
@@ -1334,7 +1335,8 @@ public class VibratorService extends IVibratorService.Stub
             // Input devices don't support prebaked effect, so skip trying it with them.
             if (!usingInputDeviceVibrators) {
                 long duration = vibratorPerformEffect(prebaked.getId(),
-                        prebaked.getEffectStrength(), vib);
+                        prebaked.getEffectStrength(), vib,
+                        hasCapability(IVibrator.CAP_PERFORM_CALLBACK));
                 long timeout = duration;
                 if (hasCapability(IVibrator.CAP_PERFORM_CALLBACK)) {
                     timeout *= ASYNC_TIMEOUT_MULTIPLIER;

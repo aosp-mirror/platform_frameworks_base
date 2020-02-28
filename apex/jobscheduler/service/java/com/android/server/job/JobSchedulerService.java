@@ -1074,7 +1074,15 @@ public class JobSchedulerService extends com.android.server.SystemService
                     uId, null, jobStatus.getBatteryName(),
                     FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED,
                     JobProtoEnums.STOP_REASON_CANCELLED, jobStatus.getStandbyBucket(),
-                    jobStatus.getJobId());
+                    jobStatus.getJobId(),
+                    jobStatus.hasChargingConstraint(),
+                    jobStatus.hasBatteryNotLowConstraint(),
+                    jobStatus.hasStorageNotLowConstraint(),
+                    jobStatus.hasTimingDelayConstraint(),
+                    jobStatus.hasDeadlineConstraint(),
+                    jobStatus.hasIdleConstraint(),
+                    jobStatus.hasConnectivityConstraint(),
+                    jobStatus.hasContentTriggerConstraint());
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -1955,9 +1963,19 @@ public class JobSchedulerService extends com.android.server.SystemService
                 continue;
             }
             if (!running.isReady()) {
-                serviceContext.cancelExecutingJobLocked(
-                        JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED,
-                        "cancelled due to unsatisfied constraints");
+                // If a restricted job doesn't have dynamic constraints satisfied, assume that's
+                // the reason the job is being stopped, instead of because of other constraints
+                // not being satisfied.
+                if (running.getEffectiveStandbyBucket() == RESTRICTED_INDEX
+                        && !running.areDynamicConstraintsSatisfied()) {
+                    serviceContext.cancelExecutingJobLocked(
+                            JobParameters.REASON_RESTRICTED_BUCKET,
+                            "cancelled due to restricted bucket");
+                } else {
+                    serviceContext.cancelExecutingJobLocked(
+                            JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED,
+                            "cancelled due to unsatisfied constraints");
+                }
             } else {
                 final JobRestriction restriction = checkIfRestricted(running);
                 if (restriction != null) {
@@ -3013,6 +3031,10 @@ public class JobSchedulerService extends com.android.server.SystemService
             // can't happen
         }
         return 0;
+    }
+
+    void resetExecutionQuota(@NonNull String pkgName, int userId) {
+        mQuotaController.clearAppStats(pkgName, userId);
     }
 
     void resetScheduleQuota() {

@@ -125,10 +125,6 @@ public class RecentsAnimationController implements DeathRecipient {
     // enabled for it to start intercepting touch events.
     private boolean mInputConsumerEnabled;
 
-    // Whether or not the recents animation should cause the primary split-screen stack to be
-    // minimized
-    private boolean mSplitScreenMinimized;
-
     private final Rect mTmpRect = new Rect();
 
     private boolean mLinkedToDeathOfRunner;
@@ -270,23 +266,6 @@ public class RecentsAnimationController implements DeathRecipient {
                     final InputMonitor inputMonitor = mDisplayContent.getInputMonitor();
                     inputMonitor.updateInputWindowsLw(true /*force*/);
                     mService.scheduleAnimationLocked();
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
-        public void setSplitScreenMinimized(boolean minimized) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                synchronized (mService.getWindowManagerLock()) {
-                    if (mCanceled) {
-                        return;
-                    }
-
-                    mSplitScreenMinimized = minimized;
-                    mService.checkSplitScreenMinimizedChanged(true /* animate */);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -738,10 +717,6 @@ public class RecentsAnimationController implements DeathRecipient {
         }
     }
 
-    boolean isSplitScreenMinimized() {
-        return mSplitScreenMinimized;
-    }
-
     boolean isWallpaperVisible(WindowState w) {
         return w != null && w.mAttrs.type == TYPE_BASE_APPLICATION &&
                 ((w.mActivityRecord != null && mTargetActivityRecord == w.mActivityRecord)
@@ -944,7 +919,6 @@ public class RecentsAnimationController implements DeathRecipient {
         pw.print(innerPrefix); pw.println("mPendingAnimations=" + mPendingAnimations.size());
         pw.print(innerPrefix); pw.println("mCanceled=" + mCanceled);
         pw.print(innerPrefix); pw.println("mInputConsumerEnabled=" + mInputConsumerEnabled);
-        pw.print(innerPrefix); pw.println("mSplitScreenMinimized=" + mSplitScreenMinimized);
         pw.print(innerPrefix); pw.println("mTargetActivityRecord=" + mTargetActivityRecord);
         pw.print(innerPrefix); pw.println("isTargetOverWallpaper=" + isTargetOverWallpaper());
         pw.print(innerPrefix); pw.println("mRequestDeferCancelUntilNextTransition="

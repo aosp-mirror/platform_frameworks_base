@@ -17,7 +17,6 @@
 package android.view;
 
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.toPublicType;
 
 import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
@@ -99,6 +98,15 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         }
     }
 
+    @Override
+    void hide(boolean animationFinished) {
+        super.hide();
+        if (animationFinished) {
+            // remove IME surface as IME has finished hide animation.
+            removeSurface();
+        }
+    }
+
     /**
      * Request {@link InputMethodManager} to show the IME.
      * @return @see {@link android.view.InsetsSourceConsumer.ShowResult}.
@@ -125,6 +133,11 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     @Override
     void notifyHidden() {
         getImm().notifyImeHidden();
+    }
+
+    @Override
+    public void removeSurface() {
+        getImm().removeImeSurface();
     }
 
     @Override

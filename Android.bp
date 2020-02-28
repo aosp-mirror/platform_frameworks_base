@@ -481,6 +481,7 @@ java_library {
         "framework-platform-compat-config",
         "libcore-platform-compat-config",
         "services-platform-compat-config",
+        "documents-ui-compat-config",
     ],
     static_libs: [
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed

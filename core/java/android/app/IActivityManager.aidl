@@ -528,29 +528,6 @@ interface IActivityManager {
     boolean unlockUser(int userid, in byte[] token, in byte[] secret,
             in IProgressListener listener);
     void killPackageDependents(in String packageName, int userId);
-    /**
-     * Resizes the docked stack, and all other stacks as the result of the dock stack bounds change.
-     *
-     * @param dockedBounds The bounds for the docked stack.
-     * @param tempDockedTaskBounds The temporary bounds for the tasks in the docked stack, which
-     *                             might be different from the stack bounds to allow more
-     *                             flexibility while resizing, or {@code null} if they should be the
-     *                             same as the stack bounds.
-     * @param tempDockedTaskInsetBounds The temporary bounds for the tasks to calculate the insets.
-     *                                  When resizing, we usually "freeze" the layout of a task. To
-     *                                  achieve that, we also need to "freeze" the insets, which
-     *                                  gets achieved by changing task bounds but not bounds used
-     *                                  to calculate the insets in this transient state
-     * @param tempOtherTaskBounds The temporary bounds for the tasks in all other stacks, or
-     *                            {@code null} if they should be the same as the stack bounds.
-     * @param tempOtherTaskInsetBounds Like {@code tempDockedTaskInsetBounds}, but for the other
-     *                                 stacks.
-     * @throws RemoteException
-     */
-    @UnsupportedAppUsage
-    void resizeDockedStack(in Rect dockedBounds, in Rect tempDockedTaskBounds,
-            in Rect tempDockedTaskInsetBounds,
-            in Rect tempOtherTaskBounds, in Rect tempOtherTaskInsetBounds);
     @UnsupportedAppUsage
     void removeStack(int stackId);
     void makePackageIdle(String packageName, int userId);

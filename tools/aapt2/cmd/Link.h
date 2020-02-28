@@ -45,6 +45,7 @@ struct LinkOptions {
   bool auto_add_overlay = false;
   bool override_styles_instead_of_overlaying = false;
   OutputFormat output_format = OutputFormat::kApk;
+  Maybe<std::string> rename_resources_package;
 
   // Java/Proguard options.
   Maybe<std::string> generate_java_class_path;
@@ -256,6 +257,8 @@ class LinkCommand : public Command {
         &options_.override_styles_instead_of_overlaying);
     AddOptionalFlag("--rename-manifest-package", "Renames the package in AndroidManifest.xml.",
         &options_.manifest_fixer_options.rename_manifest_package);
+    AddOptionalFlag("--rename-resources-package", "Renames the package in resources table",
+        &options_.rename_resources_package);
     AddOptionalFlag("--rename-instrumentation-target-package",
         "Changes the name of the target package for instrumentation. Most useful\n"
             "when used in conjunction with --rename-manifest-package.",

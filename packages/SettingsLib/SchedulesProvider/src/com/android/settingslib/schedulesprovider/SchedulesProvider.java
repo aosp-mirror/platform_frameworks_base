@@ -21,19 +21,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This provider is a bridge for client apps to provide the schedule data.
- * Client provider needs to implement their {@link #getScheduleInfoList()} and returns a list of
- * {@link ScheduleInfo}.
+ * A bridge for client apps to provide the schedule data. Client provider needs to implement
+ * {@link #getScheduleInfoList()} returning a list of {@link ScheduleInfo}.
  */
 public abstract class SchedulesProvider extends ContentProvider {
     public static final String METHOD_GENERATE_SCHEDULE_INFO_LIST = "generateScheduleInfoList";
@@ -46,9 +45,8 @@ public abstract class SchedulesProvider extends ContentProvider {
     }
 
     @Override
-    public final Cursor query(
-            Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sortOrder) {
+    public final Cursor query(Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sortOrder) {
         throw new UnsupportedOperationException("Query operation is not supported currently.");
     }
 
@@ -74,18 +72,24 @@ public abstract class SchedulesProvider extends ContentProvider {
     }
 
     /**
-     * Return the list of the schedule information.
-     *
-     * @return a list of the {@link ScheduleInfo}.
+     * Returns the list of the schedule information.
      */
     public abstract ArrayList<ScheduleInfo> getScheduleInfoList();
 
     /**
-     * Returns a bundle which contains a list of {@link ScheduleInfo} and data types:
-     * scheduleInfoList : ArrayList<ScheduleInfo>
+     * Returns a bundle which contains a list of {@link ScheduleInfo}s:
+     *
+     * <ul>
+     *   <li>scheduleInfoList: ArrayList<ScheduleInfo>
+     * </ul>
      */
     @Override
     public Bundle call(@NonNull String method, @Nullable String arg, @Nullable Bundle extras) {
+        if (!TextUtils.equals(getCallingPackage(),
+                getContext().getText(R.string.config_schedules_provider_caller_package))) {
+            return null;
+        }
+
         final Bundle bundle = new Bundle();
         if (METHOD_GENERATE_SCHEDULE_INFO_LIST.equals(method)) {
             final ArrayList<ScheduleInfo> scheduleInfoList = filterInvalidData(
@@ -98,36 +102,40 @@ public abstract class SchedulesProvider extends ContentProvider {
     }
 
     /**
-     * To filter the invalid schedule info.
+     * Filters our invalid schedule infos from {@code schedulesInfoList}.
      *
-     * @param scheduleInfoList The list of the {@link ScheduleInfo}.
-     * @return The valid list of the {@link ScheduleInfo}.
+     * @return valid {@link SchedulesInfo}s if {@code schedulesInfoList} is not null. Otherwise,
+     * null.
      */
-    private ArrayList<ScheduleInfo> filterInvalidData(ArrayList<ScheduleInfo> scheduleInfoList) {
+    @Nullable
+    private ArrayList<ScheduleInfo> filterInvalidData(
+            @Nullable ArrayList<ScheduleInfo> scheduleInfoList) {
         if (scheduleInfoList == null) {
             Log.d(TAG, "package : " + getContext().getPackageName() + " has no scheduling data.");
             return null;
         }
         // Dump invalid data in debug mode.
         if (SystemProperties.getInt("ro.debuggable", 0) == 1) {
-            new Thread(() -> {
-                dumpInvalidData(scheduleInfoList);
-            }).start();
+            dumpInvalidData(scheduleInfoList);
         }
-        final List<ScheduleInfo> filteredList = scheduleInfoList
+        return scheduleInfoList
                 .stream()
-                .filter(scheduleInfo -> scheduleInfo.isValid())
-                .collect(Collectors.toList());
-
-        return new ArrayList<>(filteredList);
+                .filter(ScheduleInfo::isValid)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private void dumpInvalidData(ArrayList<ScheduleInfo> scheduleInfoList) {
-        Log.d(TAG, "package : " + getContext().getPackageName()
-                + " provided some scheduling data are invalid.");
-        scheduleInfoList
+        final boolean hasInvalidData = scheduleInfoList
                 .stream()
-                .filter(scheduleInfo -> !scheduleInfo.isValid())
-                .forEach(scheduleInfo -> Log.d(TAG, scheduleInfo.toString()));
+                .anyMatch(scheduleInfo -> !scheduleInfo.isValid());
+
+        if (hasInvalidData) {
+            Log.w(TAG, "package : " + getContext().getPackageName()
+                    + " provided some scheduling data that are invalid.");
+            scheduleInfoList
+                    .stream()
+                    .filter(scheduleInfo -> !scheduleInfo.isValid())
+                    .forEach(scheduleInfo -> Log.w(TAG, scheduleInfo.toString()));
+        }
     }
 }

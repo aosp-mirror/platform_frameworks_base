@@ -70,7 +70,9 @@ public final class GnssRequest implements Parcelable {
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("GnssRequest[");
-        s.append("FullTracking=").append(mFullTracking);
+        if (mFullTracking) {
+            s.append("FullTracking");
+        }
         s.append(']');
         return s.toString();
     }

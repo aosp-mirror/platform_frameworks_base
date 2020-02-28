@@ -911,10 +911,12 @@ public final class CachedAppOptimizer {
                 pid = proc.pid;
                 name = proc.processName;
 
-                if (proc.curAdj <= ProcessList.CACHED_APP_MIN_ADJ) {
+                if (proc.curAdj < ProcessList.CACHED_APP_MIN_ADJ
+                        || proc.shouldNotFreeze) {
                     if (DEBUG_FREEZER) {
                         Slog.d(TAG_AM, "Skipping freeze for process " + pid
-                                + " " + name + " (not cached)");
+                                + " " + name + " curAdj = " + proc.curAdj
+                                + ", shouldNotFreeze = " + proc.shouldNotFreeze);
                     }
                     return;
                 }

@@ -1271,7 +1271,8 @@ public final class JobStatus {
         // sessions (exempt from dynamic restrictions), we need the additional check to ensure
         // that NEVER jobs don't run.
         // TODO: cleanup quota and standby bucket management so we don't need the additional checks
-        if ((!mReadyWithinQuota && !mReadyDynamicSatisfied) || standbyBucket == NEVER_INDEX) {
+        if ((!mReadyWithinQuota && !mReadyDynamicSatisfied)
+                || getEffectiveStandbyBucket() == NEVER_INDEX) {
             return false;
         }
         // Deadline constraint trumps other constraints besides quota and dynamic (except for
@@ -1292,6 +1293,11 @@ public final class JobStatus {
     static final int SOFT_OVERRIDE_CONSTRAINTS =
             CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW | CONSTRAINT_STORAGE_NOT_LOW
                     | CONSTRAINT_TIMING_DELAY | CONSTRAINT_IDLE;
+
+    /** Returns true whenever all dynamically set constraints are satisfied. */
+    public boolean areDynamicConstraintsSatisfied() {
+        return mReadyDynamicSatisfied;
+    }
 
     /**
      * @return Whether the constraints set on this job are satisfied.

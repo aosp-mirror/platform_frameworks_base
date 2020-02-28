@@ -63,11 +63,7 @@ cc_library_shared {
     shared_libs: [
         "libnativehelper", // Has stable abi - should not be copied into apex.
         "liblog",  // Has a stable abi - should not be copied into apex.
-    ],
-    static_libs: [
-        //TODO: make shared - need libstatssocket to also live in the apex.
         "libstatssocket",
-        "libcutils", // TODO: remove - needed by libstatssocket
     ],
     //TODO: is libc++_static correct?
     stl: "libc++_static",
