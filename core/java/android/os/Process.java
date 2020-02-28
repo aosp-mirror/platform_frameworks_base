@@ -529,6 +529,40 @@ public class Process {
     private static int sPidFdSupported = PIDFD_UNKNOWN;
 
     /**
+     * Value used to indicate that there is no special information about an application launch.  App
+     * launches with this policy will occur through the primary or secondary Zygote with no special
+     * treatment.
+     *
+     * @hide
+     */
+    public static final int ZYGOTE_POLICY_FLAG_EMPTY = 0;
+
+    /**
+     * Flag used to indicate that an application launch is user-visible and latency sensitive.  Any
+     * launch with this policy will use a Unspecialized App Process Pool if the target Zygote
+     * supports it.
+     *
+     * @hide
+     */
+    public static final int ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE = 1 << 0;
+
+    /**
+     * Flag used to indicate that the launch is one in a series of app launches that will be
+     * performed in quick succession.  For future use.
+     *
+     * @hide
+     */
+    public static final int ZYGOTE_POLICY_FLAG_BATCH_LAUNCH = 1 << 1;
+
+    /**
+     * Flag used to indicate that the current launch event is for a system process.  All system
+     * processes are equally important, so none of them should be prioritized over the others.
+     *
+     * @hide
+     */
+    public static final int ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS = 1 << 2;
+
+    /**
      * State associated with the zygote process.
      * @hide
      */
@@ -567,6 +601,7 @@ public class Process {
      * @param appDataDir null-ok the data directory of the app.
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
+     * @param zygotePolicyFlags Flags used to determine how to launch the application
      * @param isTopApp whether the process starts for high priority application.
      * @param disabledCompatChanges null-ok list of disabled compat changes for the process being
      *                             started.
@@ -590,6 +625,7 @@ public class Process {
                                            @Nullable String appDataDir,
                                            @Nullable String invokeWith,
                                            @Nullable String packageName,
+                                           int zygotePolicyFlags,
                                            boolean isTopApp,
                                            @Nullable long[] disabledCompatChanges,
                                            @Nullable Map<String, Pair<String, Long>>
@@ -598,7 +634,7 @@ public class Process {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    /*useUsapPool=*/ true, isTopApp, disabledCompatChanges,
+                    zygotePolicyFlags, isTopApp, disabledCompatChanges,
                     pkgDataInfoMap, zygoteArgs);
     }
 
@@ -622,8 +658,8 @@ public class Process {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    /*useUsapPool=*/ false, /*isTopApp=*/ false, disabledCompatChanges,
-                    /* pkgDataInfoMap */ null, zygoteArgs);
+                    /*zygotePolicyFlags=*/ ZYGOTE_POLICY_FLAG_EMPTY, /*isTopApp=*/ false,
+                disabledCompatChanges, /* pkgDataInfoMap */ null, zygoteArgs);
     }
 
     /**
