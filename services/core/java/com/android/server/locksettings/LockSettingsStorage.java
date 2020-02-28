@@ -18,8 +18,12 @@ package com.android.server.locksettings;
 
 import static android.content.Context.USER_SERVICE;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+import static com.android.internal.widget.LockPatternUtils.USER_FRP;
+
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
+import android.app.backup.BackupManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -29,6 +33,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 
@@ -87,6 +93,13 @@ class LockSettingsStorage {
 
     private static final Object DEFAULT = new Object();
 
+    private static final String[] SETTINGS_TO_BACKUP = new String[] {
+            Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
+            Settings.Secure.LOCK_SCREEN_OWNER_INFO,
+            Settings.Secure.LOCK_PATTERN_VISIBLE,
+            LockPatternUtils.LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS
+    };
+
     private final DatabaseHelper mOpenHelper;
     private final Context mContext;
     private final Cache mCache = new Cache();
@@ -136,10 +149,12 @@ class LockSettingsStorage {
         mOpenHelper.setCallback(callback);
     }
 
+    @VisibleForTesting(visibility = PACKAGE)
     public void writeKeyValue(String key, String value, int userId) {
         writeKeyValue(mOpenHelper.getWritableDatabase(), key, value, userId);
     }
 
+    @VisibleForTesting
     public void writeKeyValue(SQLiteDatabase db, String key, String value, int userId) {
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_KEY, key);
@@ -159,6 +174,7 @@ class LockSettingsStorage {
 
     }
 
+    @VisibleForTesting
     public String readKeyValue(String key, String defaultValue, int userId) {
         int version;
         synchronized (mCache) {
@@ -182,6 +198,28 @@ class LockSettingsStorage {
         }
         mCache.putKeyValueIfUnchanged(key, result, userId, version);
         return result == DEFAULT ? defaultValue : (String) result;
+    }
+
+    @VisibleForTesting
+    public void removeKey(String key, int userId) {
+        removeKey(mOpenHelper.getWritableDatabase(), key, userId);
+    }
+
+    private void removeKey(SQLiteDatabase db, String key, int userId) {
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_KEY, key);
+        cv.put(COLUMN_USERID, userId);
+
+        db.beginTransaction();
+        try {
+            db.delete(TABLE, COLUMN_KEY + "=? AND " + COLUMN_USERID + "=?",
+                    new String[] {key, Integer.toString(userId)});
+            db.setTransactionSuccessful();
+            mCache.removeKey(key, userId);
+        } finally {
+            db.endTransaction();
+        }
+
     }
 
     public void prefetchUser(int userId) {
@@ -537,6 +575,55 @@ class LockSettingsStorage {
         }
     }
 
+    public void setBoolean(String key, boolean value, int userId) {
+        setString(key, value ? "1" : "0", userId);
+    }
+
+    public void setLong(String key, long value, int userId) {
+        setString(key, Long.toString(value), userId);
+    }
+
+    public void setInt(String key, int value, int userId) {
+        setString(key, Integer.toString(value), userId);
+    }
+
+    public void setString(String key, String value, int userId) {
+        Preconditions.checkArgument(userId != USER_FRP, "cannot store lock settings for FRP user");
+
+        writeKeyValue(key, value, userId);
+        if (ArrayUtils.contains(SETTINGS_TO_BACKUP, key)) {
+            BackupManager.dataChanged("com.android.providers.settings");
+        }
+    }
+
+    public boolean getBoolean(String key, boolean defaultValue, int userId) {
+        String value = getString(key, null, userId);
+        return TextUtils.isEmpty(value)
+                ? defaultValue : (value.equals("1") || value.equals("true"));
+    }
+
+    public long getLong(String key, long defaultValue, int userId) {
+        String value = getString(key, null, userId);
+        return TextUtils.isEmpty(value) ? defaultValue : Long.parseLong(value);
+    }
+
+    public int getInt(String key, int defaultValue, int userId) {
+        String value = getString(key, null, userId);
+        return TextUtils.isEmpty(value) ? defaultValue : Integer.parseInt(value);
+    }
+
+    public String getString(String key, String defaultValue, int userId) {
+        if (userId == USER_FRP) {
+            return null;
+        }
+
+        if (LockPatternUtils.LEGACY_LOCK_PATTERN_ENABLED.equals(key)) {
+            key = Settings.Secure.LOCK_PATTERN_ENABLED;
+        }
+
+        return readKeyValue(key, defaultValue, userId);
+    }
+
     @VisibleForTesting
     void closeDatabase() {
         mOpenHelper.close();
@@ -764,6 +851,10 @@ class LockSettingsStorage {
             putIfUnchanged(CacheKey.TYPE_KEY_VALUE, key, value, userId, version);
         }
 
+        void removeKey(String key, int userId) {
+            remove(CacheKey.TYPE_KEY_VALUE, key, userId);
+        }
+
         byte[] peekFile(String fileName) {
             return copyOf((byte[]) peek(CacheKey.TYPE_FILE, fileName, -1 /* userId */));
         }
@@ -788,6 +879,9 @@ class LockSettingsStorage {
             return contains(CacheKey.TYPE_FETCHED, "", userId);
         }
 
+        private synchronized void remove(int type, String key, int userId) {
+            mCache.remove(mCacheKey.set(type, key, userId));
+        }
 
         private synchronized void put(int type, String key, Object value, int userId) {
             // Create a new CachKey here because it may be saved in the map if the key is absent.
