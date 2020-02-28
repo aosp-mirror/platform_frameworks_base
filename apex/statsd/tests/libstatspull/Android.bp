@@ -48,9 +48,13 @@ cc_library_shared {
         "-Werror",
     ],
     shared_libs: [
-        "libbinder",
+        "libbinder_ndk",
+        "statsd-aidl-ndk_platform",
+    ],
+    static_libs: [
+        "libstatspull_private",
+        "libstatssocket_private",
         "libutils",
-        "libstatspull",
-        "libstatssocket",
+        "libcutils",
     ],
 }
