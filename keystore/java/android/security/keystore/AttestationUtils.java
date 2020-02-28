@@ -74,7 +74,8 @@ public abstract class AttestationUtils {
     public static final int ID_TYPE_MEID = 3;
 
     /**
-     * Specifies that the device should attest its MEIDs. For use with {@link #attestDeviceIds}.
+     * Specifies that the device should sign the attestation record using its device-unique
+     * attestation certificate. For use with {@link #attestDeviceIds}.
      *
      * @see #attestDeviceIds
      */
