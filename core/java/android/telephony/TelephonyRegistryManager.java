@@ -18,7 +18,6 @@ package android.telephony;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Binder;
@@ -61,7 +60,6 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
-@SystemApi
 public class TelephonyRegistryManager {
 
     private static final String TAG = "TelephonyRegistryManager";
@@ -250,7 +248,6 @@ public class TelephonyRegistryManager {
      * @param incomingNumber incoming phone number.
      * @hide
      */
-    @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyCallStateChangedForAllSubscriptions(@CallState int state,
