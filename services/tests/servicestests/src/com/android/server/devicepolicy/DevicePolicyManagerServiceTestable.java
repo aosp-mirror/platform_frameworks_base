@@ -66,7 +66,6 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
      * Overrides {@link #Owners} for dependency injection.
      */
     public static class OwnersTestable extends Owners {
-        public static final String LEGACY_FILE = "legacy.xml";
 
         public OwnersTestable(MockSystemServices services) {
             super(services.userManager, services.userManagerInternal,
