@@ -43,10 +43,7 @@ import java.util.concurrent.Executor;
  * Manages RCS User Capability Exchange for the subscription specified.
  *
  * @see ImsRcsManager#getUceAdapter() for information on creating an instance of this class.
- * @hide
  */
-@SystemApi
-@TestApi
 public class RcsUceAdapter {
     private static final String TAG = "RcsUceAdapter";
 
@@ -216,6 +213,7 @@ public class RcsUceAdapter {
         }
     }
 
+    private final Context mContext;
     private final int mSubId;
 
     /**
@@ -223,7 +221,8 @@ public class RcsUceAdapter {
      * {@link ImsRcsManager#getUceAdapter()} to instantiate this manager class.
      * @hide
      */
-    RcsUceAdapter(int subId) {
+    RcsUceAdapter(Context context, int subId) {
+        mContext = context;
         mSubId = subId;
     }
 
@@ -291,7 +290,8 @@ public class RcsUceAdapter {
         };
 
         try {
-            imsRcsController.requestCapabilities(mSubId, contactNumbers, internalCallback);
+            imsRcsController.requestCapabilities(mSubId, mContext.getOpPackageName(),
+                    null /*featureId*/, contactNumbers, internalCallback);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#requestCapabilities", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -341,7 +341,7 @@ public class RcsUceAdapter {
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
      */
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public boolean isUceSettingEnabled() throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();
         if (imsRcsController == null) {
@@ -349,9 +349,10 @@ public class RcsUceAdapter {
             throw new ImsException("Can not find remote IMS service",
                     ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
-
         try {
-            return imsRcsController.isUceSettingEnabled(mSubId);
+            // Telephony.SimInfo#IMS_RCS_UCE_ENABLED can also be used to listen to changes to this.
+            return imsRcsController.isUceSettingEnabled(mSubId, mContext.getOpPackageName(),
+                    null /*featureId*/);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#isUceSettingEnabled", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -362,6 +363,10 @@ public class RcsUceAdapter {
     /**
      * Change the user’s setting for whether or not UCE is enabled for the associated subscription.
      * <p>
+     * If an application Requires UCE, they may launch an Activity using the Intent
+     * {@link ImsRcsManager#ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN}, which will ask the user if
+     * they wish to enable this feature.
+     * <p>
      * Note: This setting does not affect whether or not the device publishes its service
      * capabilities if the subscription supports presence publication.
      *
@@ -371,7 +376,10 @@ public class RcsUceAdapter {
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @hide
      */
+    @SystemApi
+    @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setUceSettingEnabled(boolean isEnabled) throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();

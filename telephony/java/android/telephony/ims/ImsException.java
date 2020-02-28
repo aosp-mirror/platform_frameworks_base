@@ -47,11 +47,12 @@ public final class ImsException extends Exception {
     public static final int CODE_ERROR_SERVICE_UNAVAILABLE = 1;
 
     /**
-     * This device or carrier configuration does not support IMS for this subscription.
+     * This device or carrier configuration does not support this feature for this subscription.
      * <p>
-     * This is a permanent configuration error and there should be no retry. Usually this is
-     * because {@link PackageManager#FEATURE_TELEPHONY_IMS} is not available
-     * or the device has no ImsService implementation to service this request.
+     * This is a permanent configuration error and there should be no retry until the subscription
+     * changes if this operation is denied due to a carrier configuration. If this is due to a
+     * device configuration, the feature {@link PackageManager#FEATURE_TELEPHONY_IMS} is not
+     * available or the device has no ImsService implementation to service this request.
      */
     public static final int CODE_ERROR_UNSUPPORTED_OPERATION = 2;
 

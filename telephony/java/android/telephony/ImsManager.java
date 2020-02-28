@@ -104,10 +104,7 @@ public class ImsManager {
      * @param subscriptionId The ID of the subscription that this ImsRcsManager will use.
      * @throws IllegalArgumentException if the subscription is invalid.
      * @return a ImsRcsManager instance with the specific subscription ID.
-     * @hide
      */
-    @SystemApi
-    @TestApi
     @NonNull
     public ImsRcsManager getImsRcsManager(int subscriptionId) {
         if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
