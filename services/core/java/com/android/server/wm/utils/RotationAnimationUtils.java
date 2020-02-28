@@ -26,6 +26,8 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import java.util.Arrays;
+
 
 /** Helper functions for the {@link com.android.server.wm.ScreenRotationAnimation} class*/
 public class RotationAnimationUtils {
@@ -35,31 +37,35 @@ public class RotationAnimationUtils {
      * luminance at the borders of the bitmap
      * @return the average luminance of all the pixels at the borders of the bitmap
      */
-    public static float getAvgBorderLuma(GraphicBuffer graphicBuffer, ColorSpace colorSpace) {
+    public static float getMedianBorderLuma(GraphicBuffer graphicBuffer, ColorSpace colorSpace) {
         Bitmap hwBitmap = Bitmap.wrapHardwareBuffer(graphicBuffer, colorSpace);
         if (hwBitmap == null) {
             return 0;
         }
 
         Bitmap swaBitmap = hwBitmap.copy(Bitmap.Config.ARGB_8888, false);
-        float totalLuma = 0;
         int height = swaBitmap.getHeight();
         int width = swaBitmap.getWidth();
+        float[] borderLumas = new float[2 * width + 2 * height];
         int i;
-        for (i = 0; i < width; i++) {
-            totalLuma += swaBitmap.getColor(i, 0).luminance();
-            totalLuma += swaBitmap.getColor(i, height - 1).luminance();
+        int index = 0;
+        for (i = 0; i < width; i++, index += 2) {
+            borderLumas[index] = swaBitmap.getColor(i, 0).luminance();
+            borderLumas[index + 1] = swaBitmap.getColor(i, height - 1).luminance();
         }
-        for (i = 0; i < height; i++) {
-            totalLuma += swaBitmap.getColor(0, i).luminance();
-            totalLuma += swaBitmap.getColor(width - 1, i).luminance();
+        for (i = 0; i < height; i++, index += 2) {
+            borderLumas[index] = swaBitmap.getColor(0, i).luminance();
+            borderLumas[index + 1] = swaBitmap.getColor(width - 1, i).luminance();
         }
-        return totalLuma / (2 * width + 2 * height);
+        // Oh, is this too simple and inefficient for you?
+        // How about implementing a O(n) solution? https://en.wikipedia.org/wiki/Median_of_medians
+        Arrays.sort(borderLumas);
+        return borderLumas[borderLumas.length / 2];
     }
 
     /**
      * Gets the average border luma by taking a screenshot of the {@param surfaceControl}.
-     * @see #getAvgBorderLuma(GraphicBuffer, ColorSpace)
+     * @see #getMedianBorderLuma(GraphicBuffer, ColorSpace)
      */
     public static float getLumaOfSurfaceControl(Display display, SurfaceControl surfaceControl) {
         if (surfaceControl ==  null) {
@@ -75,7 +81,7 @@ public class RotationAnimationUtils {
             return 0;
         }
 
-        return RotationAnimationUtils.getAvgBorderLuma(buffer.getGraphicBuffer(),
+        return RotationAnimationUtils.getMedianBorderLuma(buffer.getGraphicBuffer(),
                 buffer.getColorSpace());
     }
 
