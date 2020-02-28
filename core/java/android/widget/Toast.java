@@ -651,7 +651,7 @@ public class Toast {
                 }
             };
 
-            presenter.startLayoutParams(mParams);
+            presenter.startLayoutParams(mParams, packageName);
         }
 
         private List<Callback> getCallbacks() {
