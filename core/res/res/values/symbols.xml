@@ -3903,4 +3903,6 @@
   <java-symbol type="bool" name="config_expandLockScreenUserSwitcher" />
 
   <java-symbol type="string" name="loading" />
+
+  <java-symbol type="array" name="config_toastCrossUserPackages" />
 </resources>
