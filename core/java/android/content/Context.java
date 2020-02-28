@@ -2543,12 +2543,13 @@ public abstract class Context {
      *
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      * @see android.app.BroadcastOptions
+     * @hide
      */
-    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
+    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent, int initialCode,
             @Nullable String receiverPermission, @Nullable String receiverAppOp,
-            @Nullable Bundle options, @Nullable BroadcastReceiver resultReceiver,
-            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
-            @Nullable Bundle initialExtras) {
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            @Nullable String initialData, @Nullable Bundle initialExtras,
+            @Nullable Bundle options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
