@@ -685,7 +685,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
 
         // Removes the notification
-        mEntryListener.onEntryRemoved(mRow.getEntry(), null, false);
+        mEntryListener.onEntryRemoved(mRow.getEntry(), null, false, REASON_APP_CANCEL);
         assertFalse(mBubbleController.hasBubbles());
     }
 
@@ -827,7 +827,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.handleDismissalInterception(groupSummary.getEntry());
 
         // WHEN the summary is cancelled by the app
-        mEntryListener.onEntryRemoved(groupSummary.getEntry(), null, true);
+        mEntryListener.onEntryRemoved(groupSummary.getEntry(), null, false, REASON_APP_CANCEL);
 
         // THEN the summary and its children are removed from bubble data
         assertFalse(mBubbleData.hasBubbleWithKey(groupedBubble.getEntry().getKey()));

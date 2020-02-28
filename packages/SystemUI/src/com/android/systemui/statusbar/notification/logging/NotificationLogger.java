@@ -213,7 +213,8 @@ public class NotificationLogger implements StateListener {
             public void onEntryRemoved(
                     NotificationEntry entry,
                     NotificationVisibility visibility,
-                    boolean removedByUser) {
+                    boolean removedByUser,
+                    int reason) {
                 if (removedByUser && visibility != null) {
                     logNotificationClear(entry.getKey(), entry.getSbn(), visibility);
                 }

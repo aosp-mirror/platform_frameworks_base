@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import static org.junit.Assert.assertFalse;
@@ -254,7 +255,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
-        mNotificationEntryListener.onEntryRemoved(childEntry, null, false);
+        mNotificationEntryListener.onEntryRemoved(
+                childEntry, null, false, UNDEFINED_DISMISS_REASON);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
     }

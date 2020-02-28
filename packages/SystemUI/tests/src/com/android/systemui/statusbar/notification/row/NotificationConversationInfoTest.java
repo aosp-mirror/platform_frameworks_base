@@ -198,7 +198,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 .build();
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 notification, UserHandle.CURRENT, null, 0);
-        mEntry = new NotificationEntryBuilder().setSbn(mSbn).build();
+        mEntry = new NotificationEntryBuilder().setSbn(mSbn).setShortcutInfo(mShortcutInfo).build();
 
         PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0,
                 new Intent(mContext, BubblesTestActivity.class), 0);
@@ -207,7 +207,10 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                         .createIntentBubble(bubbleIntent,
                                 Icon.createWithResource(mContext, R.drawable.android)).build())
                 .build();
-        mBubbleEntry = new NotificationEntryBuilder().setSbn(mBubbleSbn).build();
+        mBubbleEntry = new NotificationEntryBuilder()
+                .setSbn(mBubbleSbn)
+                .setShortcutInfo(mShortcutInfo)
+                .build();
 
         mConversationChannel = new NotificationChannel(
                 TEST_CHANNEL + " : " + CONVERSATION_ID, TEST_CHANNEL_NAME, IMPORTANCE_LOW);
