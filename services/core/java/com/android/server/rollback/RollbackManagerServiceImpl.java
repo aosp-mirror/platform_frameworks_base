@@ -20,7 +20,6 @@ import android.Manifest;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
@@ -201,18 +200,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 if (Intent.ACTION_PACKAGE_ENABLE_ROLLBACK.equals(intent.getAction())) {
                     int token = intent.getIntExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN, -1);
-                    int installFlags = intent.getIntExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS, 0);
-                    int user = intent.getIntExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER, 0);
-
-                    File newPackageCodePath = new File(intent.getData().getPath());
+                    int sessionId = intent.getIntExtra(
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID, -1);
 
                     queueSleepIfNeeded();
 
                     getHandler().post(() -> {
-                        boolean success =
-                                enableRollback(installFlags, newPackageCodePath, user, token);
+                        boolean success = enableRollback(sessionId);
                         int ret = PackageManagerInternal.ENABLE_ROLLBACK_SUCCEEDED;
                         if (!success) {
                             ret = PackageManagerInternal.ENABLE_ROLLBACK_FAILED;
@@ -238,19 +232,16 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (Intent.ACTION_CANCEL_ENABLE_ROLLBACK.equals(intent.getAction())) {
-                    int token = intent.getIntExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN, -1);
+                    int sessionId = intent.getIntExtra(
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID, -1);
                     if (LOCAL_LOGV) {
-                        Slog.v(TAG, "broadcast=ACTION_CANCEL_ENABLE_ROLLBACK token=" + token);
+                        Slog.v(TAG, "broadcast=ACTION_CANCEL_ENABLE_ROLLBACK id=" + sessionId);
                     }
                     synchronized (mLock) {
-                        for (int i = 0; i < mRollbacks.size(); ++i) {
-                            Rollback rollback = mRollbacks.get(i);
-                            if (rollback.hasToken(token) && rollback.isEnabling()) {
-                                mRollbacks.remove(i);
-                                rollback.delete(mAppDataRollbackHelper);
-                                break;
-                            }
+                        Rollback rollback = getRollbackForSessionLocked(sessionId);
+                        if (rollback != null && rollback.isEnabling()) {
+                            mRollbacks.remove(rollback);
+                            rollback.delete(mAppDataRollbackHelper);
                         }
                     }
                 }
@@ -684,24 +675,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         return mHandlerThread.getThreadHandler();
     }
 
-    // Returns true if <code>session</code> has installFlags and code path
-    // matching the installFlags and new package code path given to
-    // enableRollback.
-    @WorkerThread
-    private boolean sessionMatchesForEnableRollback(PackageInstaller.SessionInfo session,
-            int installFlags, File newPackageCodePath) {
-        if (session == null || session.resolvedBaseCodePath == null) {
-            return false;
-        }
-
-        File packageCodePath = new File(session.resolvedBaseCodePath).getParentFile();
-        if (newPackageCodePath.equals(packageCodePath) && installFlags == session.installFlags) {
-            return true;
-        }
-
-        return false;
-    }
-
     @AnyThread
     private Context getContextAsUser(UserHandle user) {
         try {
@@ -716,58 +689,26 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      * staged for install with rollback enabled. Called before the package has
      * been installed.
      *
-     * @param installFlags information about what is being installed.
-     * @param newPackageCodePath path to the package about to be installed.
-     * @param user the user that owns the install session to enable rollback on.
-     * @param token the distinct rollback token sent by package manager.
+     * @param sessionId the id of the install session
      * @return true if enabling the rollback succeeds, false otherwise.
      */
     @WorkerThread
-    private boolean enableRollback(
-            int installFlags, File newPackageCodePath, @UserIdInt int user, int token) {
+    private boolean enableRollback(int sessionId) {
         if (LOCAL_LOGV) {
-            Slog.v(TAG, "enableRollback user=" + user + " token=" + token
-                    + " path=" + newPackageCodePath.getAbsolutePath());
+            Slog.v(TAG, "enableRollback sessionId=" + sessionId);
         }
 
-        // Find the session id associated with this install.
-        // TODO: It would be nice if package manager or package installer told
-        // us the session directly, rather than have to search for it
-        // ourselves.
-
-        // getAllSessions only returns sessions for the associated user.
-        // Create a context with the right user so we can find the matching
-        // session.
-        final Context context = getContextAsUser(UserHandle.of(user));
-        if (context == null) {
-            Slog.e(TAG, "Unable to create context for install session user.");
+        PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
+        PackageInstaller.SessionInfo packageSession = installer.getSessionInfo(sessionId);
+        if (packageSession == null) {
+            Slog.e(TAG, "Unable to find session for enabled rollback.");
             return false;
         }
 
-        PackageInstaller.SessionInfo parentSession = null;
-        PackageInstaller.SessionInfo packageSession = null;
-        PackageInstaller installer = context.getPackageManager().getPackageInstaller();
-        for (PackageInstaller.SessionInfo info : installer.getAllSessions()) {
-            if (info.isMultiPackage()) {
-                for (int childId : info.getChildSessionIds()) {
-                    PackageInstaller.SessionInfo child = installer.getSessionInfo(childId);
-                    if (sessionMatchesForEnableRollback(child, installFlags, newPackageCodePath)) {
-                        // TODO: Check we only have one matching session?
-                        parentSession = info;
-                        packageSession = child;
-                        break;
-                    }
-                }
-            } else if (sessionMatchesForEnableRollback(info, installFlags, newPackageCodePath)) {
-                // TODO: Check we only have one matching session?
-                parentSession = info;
-                packageSession = info;
-                break;
-            }
-        }
-
-        if (parentSession == null || packageSession == null) {
-            Slog.e(TAG, "Unable to find session for enabled rollback.");
+        PackageInstaller.SessionInfo parentSession = packageSession.hasParentSessionId()
+                ? installer.getSessionInfo(packageSession.getParentSessionId()) : packageSession;
+        if (parentSession == null) {
+            Slog.e(TAG, "Unable to find parent session for enabled rollback.");
             return false;
         }
 
@@ -804,7 +745,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 newRollback = createNewRollbackLocked(parentSession);
             }
         }
-        newRollback.addToken(token);
 
         return enableRollbackForPackageSession(newRollback, packageSession);
     }
