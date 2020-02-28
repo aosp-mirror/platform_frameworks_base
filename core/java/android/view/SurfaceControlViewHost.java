@@ -201,7 +201,7 @@ public class SurfaceControlViewHost {
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
                         WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSPARENT);
-        relayout(width, height);
+        relayout(lp);
     }
 
     /**
