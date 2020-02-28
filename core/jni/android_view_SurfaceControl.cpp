@@ -91,6 +91,7 @@ static struct {
     jfieldID refreshRate;
     jfieldID appVsyncOffsetNanos;
     jfieldID presentationDeadlineNanos;
+    jfieldID configGroup;
 } gDisplayConfigClassInfo;
 
 static struct {
@@ -874,6 +875,7 @@ static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz, jobject t
                           config.appVsyncOffset);
         env->SetLongField(object, gDisplayConfigClassInfo.presentationDeadlineNanos,
                           config.presentationDeadline);
+        env->SetIntField(object, gDisplayConfigClassInfo.configGroup, config.configGroup);
         env->SetObjectArrayElement(configArray, static_cast<jsize>(c), object);
         env->DeleteLocalRef(object);
     }
@@ -1614,6 +1616,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetFieldIDOrDie(env, configClazz, "appVsyncOffsetNanos", "J");
     gDisplayConfigClassInfo.presentationDeadlineNanos =
             GetFieldIDOrDie(env, configClazz, "presentationDeadlineNanos", "J");
+    gDisplayConfigClassInfo.configGroup = GetFieldIDOrDie(env, configClazz, "configGroup", "I");
 
     jclass rectClazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.bottom = GetFieldIDOrDie(env, rectClazz, "bottom", "I");
