@@ -73,6 +73,7 @@ import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
+import android.view.autofill.AutofillId;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
@@ -825,7 +826,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mInlineSuggestionSession.invalidateSession();
         }
         mInlineSuggestionSession = new InlineSuggestionSession(requestInfo.getComponentName(),
-                callback, this::getEditorInfoPackageName,
+                callback, this::getEditorInfoPackageName, this::getEditorInfoAutofillId,
                 () -> onCreateInlineSuggestionsRequest(requestInfo.getUiExtras()),
                 this::getHostInputToken, this::onInlineSuggestionsResponse);
     }
@@ -834,6 +835,14 @@ public class InputMethodService extends AbstractInputMethodService {
     private String getEditorInfoPackageName() {
         if (mInputEditorInfo != null) {
             return mInputEditorInfo.packageName;
+        }
+        return null;
+    }
+
+    @Nullable
+    private AutofillId getEditorInfoAutofillId() {
+        if (mInputEditorInfo != null) {
+            return mInputEditorInfo.autofillId;
         }
         return null;
     }
