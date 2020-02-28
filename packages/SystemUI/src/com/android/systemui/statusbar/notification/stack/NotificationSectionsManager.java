@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
@@ -100,14 +102,11 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     private boolean mInitialized = false;
 
     private SectionHeaderView mGentleHeader;
-    private boolean mGentleHeaderVisible;
     @Nullable private View.OnClickListener mOnClearGentleNotifsClickListener;
 
     private SectionHeaderView mAlertingHeader;
-    private boolean mAlertingHeaderVisible;
 
     private PeopleHubView mPeopleHubView;
-    private boolean mPeopleHeaderVisible;
     private boolean mPeopleHubVisible = false;
     @Nullable private Subscription mPeopleHubSubscription;
 
@@ -231,88 +230,135 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             return;
         }
 
+        // The overall strategy here is to iterate over the current children of mParent, looking
+        // for where the sections headers are currently positioned, and where each section begins.
+        // Then, once we find the start of a new section, we track that position as the "target" for
+        // the section header, adjusted for the case where existing headers are in front of that
+        // target, but won't be once they are moved / removed after the pass has completed.
+
         final boolean showHeaders = mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
         final boolean usingPeopleFiltering = mSectionsFeatureManager.isFilteringEnabled();
 
         boolean peopleNotifsPresent = false;
+
+        int currentPeopleHeaderIdx = -1;
         int peopleHeaderTarget = -1;
+        int currentAlertingHeaderIdx = -1;
         int alertingHeaderTarget = -1;
+        int currentGentleHeaderIdx = -1;
         int gentleHeaderTarget = -1;
 
-        int viewCount = 0;
+        int lastNotifIndex = 0;
 
-        if (showHeaders) {
-            final int childCount = mParent.getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                View child = mParent.getChildAt(i);
-                if (child.getVisibility() == View.GONE
-                        || !(child instanceof ExpandableNotificationRow)) {
-                    continue;
-                }
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                switch (row.getEntry().getBucket()) {
-                    case BUCKET_PEOPLE:
-                        if (peopleHeaderTarget == -1) {
-                            peopleNotifsPresent = true;
-                            peopleHeaderTarget = viewCount;
-                            viewCount++;
-                        }
-                        break;
-                    case BUCKET_ALERTING:
-                        if (usingPeopleFiltering && alertingHeaderTarget == -1) {
-                            alertingHeaderTarget = viewCount;
-                            viewCount++;
-                        }
-                        break;
-                    case BUCKET_SILENT:
-                        if (gentleHeaderTarget == -1) {
-                            gentleHeaderTarget = viewCount;
-                            viewCount++;
-                        }
-                        break;
-                }
-                viewCount++;
+        final int childCount = mParent.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = mParent.getChildAt(i);
+
+            // Track the existing positions of the headers
+            if (child == mPeopleHubView) {
+                currentPeopleHeaderIdx = i;
+                continue;
             }
-            if (usingPeopleFiltering && mPeopleHubVisible && peopleHeaderTarget == -1) {
-                // Insert the people header even if there are no people visible, in order to show
-                // the hub. Put it directly above the next header.
-                if (alertingHeaderTarget != -1) {
-                    peopleHeaderTarget = alertingHeaderTarget;
-                    alertingHeaderTarget++;
-                    gentleHeaderTarget++;
-                } else if (gentleHeaderTarget != -1) {
-                    peopleHeaderTarget = gentleHeaderTarget;
-                    gentleHeaderTarget++;
-                } else {
-                    // Put it at the end of the list.
-                    peopleHeaderTarget = viewCount;
-                }
+            if (child == mAlertingHeader) {
+                currentAlertingHeaderIdx = i;
+                continue;
+            }
+            if (child == mGentleHeader) {
+                currentGentleHeaderIdx = i;
+                continue;
+            }
+
+            if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            lastNotifIndex = i;
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            // Once we enter a new section, calculate the target position for the header.
+            switch (row.getEntry().getBucket()) {
+                case BUCKET_HEADS_UP:
+                    break;
+                case BUCKET_PEOPLE:
+                    peopleNotifsPresent = true;
+                    if (showHeaders && peopleHeaderTarget == -1) {
+                        peopleHeaderTarget = i;
+                        // Offset the target if there are other headers before this that will be
+                        // moved.
+                        if (currentPeopleHeaderIdx != -1) {
+                            peopleHeaderTarget--;
+                        }
+                        if (currentAlertingHeaderIdx != -1) {
+                            peopleHeaderTarget--;
+                        }
+                        if (currentGentleHeaderIdx != -1) {
+                            peopleHeaderTarget--;
+                        }
+                    }
+                    break;
+                case BUCKET_ALERTING:
+                    if (showHeaders && usingPeopleFiltering && alertingHeaderTarget == -1) {
+                        alertingHeaderTarget = i;
+                        // Offset the target if there are other headers before this that will be
+                        // moved.
+                        if (currentAlertingHeaderIdx != -1) {
+                            alertingHeaderTarget--;
+                        }
+                        if (currentGentleHeaderIdx != -1) {
+                            alertingHeaderTarget--;
+                        }
+                    }
+                    break;
+                case BUCKET_SILENT:
+                    if (showHeaders && gentleHeaderTarget == -1) {
+                        gentleHeaderTarget = i;
+                        // Offset the target if there are other headers before this that will be
+                        // moved.
+                        if (currentGentleHeaderIdx != -1) {
+                            gentleHeaderTarget--;
+                        }
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Cannot find section bucket for view");
+            }
+        }
+        if (showHeaders && usingPeopleFiltering && mPeopleHubVisible && peopleHeaderTarget == -1) {
+            // Insert the people header even if there are no people visible, in order to show
+            // the hub. Put it directly above the next header.
+            if (alertingHeaderTarget != -1) {
+                peopleHeaderTarget = alertingHeaderTarget;
+            } else if (gentleHeaderTarget != -1) {
+                peopleHeaderTarget = gentleHeaderTarget;
+            } else {
+                // Put it at the end of the list.
+                peopleHeaderTarget = lastNotifIndex;
             }
         }
 
-        // Allow swiping the people header if the section is empty
-        mPeopleHubView.setCanSwipe(mPeopleHubVisible && !peopleNotifsPresent);
+        // Add headers in reverse order to preserve indices
+        adjustHeaderVisibilityAndPosition(
+                gentleHeaderTarget, mGentleHeader, currentGentleHeaderIdx);
+        adjustHeaderVisibilityAndPosition(
+                alertingHeaderTarget, mAlertingHeader, currentAlertingHeaderIdx);
+        adjustHeaderVisibilityAndPosition(
+                peopleHeaderTarget, mPeopleHubView, currentPeopleHeaderIdx);
 
-        mPeopleHeaderVisible = adjustHeaderVisibilityAndPosition(
-                peopleHeaderTarget, mPeopleHubView, mPeopleHeaderVisible);
-        mAlertingHeaderVisible = adjustHeaderVisibilityAndPosition(
-                alertingHeaderTarget, mAlertingHeader, mAlertingHeaderVisible);
-        mGentleHeaderVisible = adjustHeaderVisibilityAndPosition(
-                gentleHeaderTarget, mGentleHeader, mGentleHeaderVisible);
+        // Update headers to reflect state of section contents
+        mGentleHeader.setAreThereDismissableGentleNotifs(
+                mParent.hasActiveClearableNotifications(ROWS_GENTLE));
+        mPeopleHubView.setCanSwipe(showHeaders && mPeopleHubVisible && !peopleNotifsPresent);
+        if (peopleHeaderTarget != currentPeopleHeaderIdx) {
+            mPeopleHubView.resetTranslation();
+        }
     }
 
-    private boolean adjustHeaderVisibilityAndPosition(
-            int targetIndex, StackScrollerDecorView header, boolean isCurrentlyVisible) {
-        if (targetIndex == -1) {
-            if (isCurrentlyVisible) {
+    private void adjustHeaderVisibilityAndPosition(
+            int targetPosition, StackScrollerDecorView header, int currentPosition) {
+        if (targetPosition == -1) {
+            if (currentPosition != -1) {
                 mParent.removeView(header);
             }
-            return false;
         } else {
-            if (header instanceof SwipeableView) {
-                ((SwipeableView) header).resetTranslation();
-            }
-            if (!isCurrentlyVisible) {
+            if (currentPosition == -1) {
                 // If the header is animating away, it will still have a parent, so detach it first
                 // TODO: We should really cancel the active animations here. This will happen
                 // automatically when the view's intro animation starts, but it's a fragile link.
@@ -321,11 +367,10 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                     header.setTransientContainer(null);
                 }
                 header.setContentVisible(true);
-                mParent.addView(header, targetIndex);
-            } else if (mParent.indexOfChild(header) != targetIndex) {
-                mParent.changeViewPosition(header, targetIndex);
+                mParent.addView(header, targetPosition);
+            } else {
+                mParent.changeViewPosition(header, targetPosition);
             }
-            return true;
         }
     }
 
@@ -400,8 +445,18 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
 
 
     @VisibleForTesting
-    SectionHeaderView getGentleHeaderView() {
+    ExpandableView getGentleHeaderView() {
         return mGentleHeader;
+    }
+
+    @VisibleForTesting
+    ExpandableView getAlertingHeaderView() {
+        return mAlertingHeader;
+    }
+
+    @VisibleForTesting
+    ExpandableView getPeopleHeaderView() {
+        return mPeopleHubView;
     }
 
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
