@@ -20,6 +20,8 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
+import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
@@ -354,7 +356,8 @@ class InsetsPolicy {
                         mListener, typesReady, this, mListener.getDurationMs(),
                         InsetsController.INTERPOLATOR, true,
                         show ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN
-                                : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN);
+                                : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN,
+                        show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE);
                 SurfaceAnimationThread.getHandler().post(
                         () -> mListener.onReady(mAnimationControl, typesReady));
             }
