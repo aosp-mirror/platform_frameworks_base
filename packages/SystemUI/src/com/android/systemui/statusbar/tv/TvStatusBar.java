@@ -74,11 +74,6 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
         startSystemActivity(new Intent(ACTION_OPEN_TV_NOTIFICATIONS_PANEL));
     }
 
-    @Override
-    public void animateCollapsePanels(int flags, boolean force) {
-        startSystemActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME));
-    }
-
     private void startSystemActivity(Intent intent) {
         PackageManager pm = mContext.getPackageManager();
         ResolveInfo ri = pm.resolveActivity(intent, PackageManager.MATCH_SYSTEM_ONLY);
