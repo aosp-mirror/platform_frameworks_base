@@ -42,6 +42,8 @@ public final class AppInstallMetadata {
     private final List<String> mInstallerCertificates;
     private final long mVersionCode;
     private final boolean mIsPreInstalled;
+    private final boolean mIsStampPresent;
+    private final boolean mIsStampVerified;
     private final boolean mIsStampTrusted;
     // Raw string encoding for the SHA-256 hash of the certificate of the stamp.
     private final String mStampCertificateHash;
@@ -54,6 +56,8 @@ public final class AppInstallMetadata {
         this.mInstallerCertificates = builder.mInstallerCertificates;
         this.mVersionCode = builder.mVersionCode;
         this.mIsPreInstalled = builder.mIsPreInstalled;
+        this.mIsStampPresent = builder.mIsStampPresent;
+        this.mIsStampVerified = builder.mIsStampVerified;
         this.mIsStampTrusted = builder.mIsStampTrusted;
         this.mStampCertificateHash = builder.mStampCertificateHash;
         this.mAllowedInstallersAndCertificates = builder.mAllowedInstallersAndCertificates;
@@ -89,6 +93,16 @@ public final class AppInstallMetadata {
         return mIsPreInstalled;
     }
 
+    /** @see AppInstallMetadata.Builder#setIsStampPresent(boolean) */
+    public boolean isStampPresent() {
+        return mIsStampPresent;
+    }
+
+    /** @see AppInstallMetadata.Builder#setIsStampVerified(boolean) */
+    public boolean isStampVerified() {
+        return mIsStampVerified;
+    }
+
     /** @see AppInstallMetadata.Builder#setIsStampTrusted(boolean) */
     public boolean isStampTrusted() {
         return mIsStampTrusted;
@@ -108,14 +122,16 @@ public final class AppInstallMetadata {
     public String toString() {
         return String.format(
                 "AppInstallMetadata { PackageName = %s, AppCerts = %s, InstallerName = %s,"
-                        + " InstallerCerts = %s, VersionCode = %d, PreInstalled = %b, "
-                        + "StampTrusted = %b, StampCert = %s }",
+                    + " InstallerCerts = %s, VersionCode = %d, PreInstalled = %b, StampPresent ="
+                    + " %b, StampVerified = %b, StampTrusted = %b, StampCert = %s }",
                 mPackageName,
                 mAppCertificates,
                 mInstallerName == null ? "null" : mInstallerName,
                 mInstallerCertificates == null ? "null" : mInstallerCertificates,
                 mVersionCode,
                 mIsPreInstalled,
+                mIsStampPresent,
+                mIsStampVerified,
                 mIsStampTrusted,
                 mStampCertificateHash == null ? "null" : mStampCertificateHash);
     }
@@ -128,6 +144,8 @@ public final class AppInstallMetadata {
         private List<String> mInstallerCertificates;
         private long mVersionCode;
         private boolean mIsPreInstalled;
+        private boolean mIsStampPresent;
+        private boolean mIsStampVerified;
         private boolean mIsStampTrusted;
         private String mStampCertificateHash;
         private Map<String, String> mAllowedInstallersAndCertificates;
@@ -221,16 +239,24 @@ public final class AppInstallMetadata {
         }
 
         /**
-         * Set certificate hash of the stamp embedded in the APK.
+         * Set whether the stamp embedded in the APK is present or not.
          *
-         * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
-         * of the stamp.
-         *
-         * @see AppInstallMetadata#getStampCertificateHash()
+         * @see AppInstallMetadata#isStampPresent()
          */
         @NonNull
-        public Builder setStampCertificateHash(@NonNull String stampCertificateHash) {
-            this.mStampCertificateHash = Objects.requireNonNull(stampCertificateHash);
+        public Builder setIsStampPresent(boolean isStampPresent) {
+            this.mIsStampPresent = isStampPresent;
+            return this;
+        }
+
+        /**
+         * Set whether the stamp embedded in the APK is verified or not.
+         *
+         * @see AppInstallMetadata#isStampVerified()
+         */
+        @NonNull
+        public Builder setIsStampVerified(boolean isStampVerified) {
+            this.mIsStampVerified = isStampVerified;
             return this;
         }
 
@@ -242,6 +268,20 @@ public final class AppInstallMetadata {
         @NonNull
         public Builder setIsStampTrusted(boolean isStampTrusted) {
             this.mIsStampTrusted = isStampTrusted;
+            return this;
+        }
+
+        /**
+         * Set certificate hash of the stamp embedded in the APK.
+         *
+         * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
+         * of the stamp.
+         *
+         * @see AppInstallMetadata#getStampCertificateHash()
+         */
+        @NonNull
+        public Builder setStampCertificateHash(@NonNull String stampCertificateHash) {
+            this.mStampCertificateHash = Objects.requireNonNull(stampCertificateHash);
             return this;
         }
 
