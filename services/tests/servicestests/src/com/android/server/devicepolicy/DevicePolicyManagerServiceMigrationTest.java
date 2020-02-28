@@ -39,14 +39,13 @@ import androidx.test.filters.SmallTest;
 import com.android.frameworks.servicestests.R;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.devicepolicy.DevicePolicyManagerServiceTestable.OwnersTestable;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-// TODO (b/149818286): Fix old test cases and put the whole test into presubmit.
+@Presubmit
 public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     private static final String USER_TYPE_EMPTY = "";
@@ -78,7 +77,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         // Create the legacy owners & policies file.
         DpmTestUtils.writeToFile(
-                (new File(getServices().dataDir, OwnersTestable.LEGACY_FILE)).getAbsoluteFile(),
+                (new File(getServices().dataDir, "device_owner.xml")).getAbsoluteFile(),
                 DpmTestUtils.readAsset(mRealTestContext,
                         "DevicePolicyManagerServiceMigrationTest/legacy_device_owner.xml"));
 
@@ -193,8 +192,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         // Check the new owner restrictions.
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(
-                        UserManager.DISALLOW_ADD_USER,
-                        UserManager.DISALLOW_ADD_MANAGED_PROFILE
+                        UserManager.DISALLOW_ADD_USER
                 ),
                 dpms.getDeviceOwnerAdminLocked().ensureUserRestrictions());
 
@@ -216,7 +214,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         // Create the legacy owners & policies file.
         DpmTestUtils.writeToFile(
-                (new File(getServices().dataDir, OwnersTestable.LEGACY_FILE)).getAbsoluteFile(),
+                (new File(getServices().dataDir, "device_owner.xml")).getAbsoluteFile(),
                 DpmTestUtils.readAsset(mRealTestContext,
                         "DevicePolicyManagerServiceMigrationTest2/legacy_device_owner.xml"));
 
@@ -346,7 +344,6 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         assertTrue(alreadySet.contains(UserManager.DISALLOW_BLUETOOTH_SHARING));
     }
 
-    @Presubmit
     @SmallTest
     public void testCompMigrationUnAffiliated_skipped() throws Exception {
         prepareAdmin1AsDo();
@@ -359,7 +356,6 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         assertTrue(dpms.mOwners.hasDeviceOwner());
     }
 
-    @Presubmit
     @SmallTest
     public void testCompMigrationAffiliated() throws Exception {
         prepareAdmin1AsDo();
