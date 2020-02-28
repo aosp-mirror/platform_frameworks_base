@@ -28,6 +28,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
+import android.os.PowerSaveState;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -42,6 +44,7 @@ import org.mockito.Mock;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.function.Consumer;
 
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
@@ -79,29 +82,34 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Mock
     private Resources mResources;
     @Mock
-    TwilightManager mTwilightManager;
+    private TwilightManager mTwilightManager;
     @Mock
-    PowerManager.WakeLock mWakeLock;
+    private PowerManager.WakeLock mWakeLock;
     @Mock
-    AlarmManager mAlarmManager;
+    private AlarmManager mAlarmManager;
     @Mock
-    PowerManager mPowerManager;
+    private PowerManager mPowerManager;
     @Mock
-    TwilightState mTwilightState;
+    private TwilightState mTwilightState;
+    @Mock
+    PowerManagerInternal mLocalPowerManager;
 
     private BroadcastReceiver mScreenOffCallback;
     private BroadcastReceiver mTimeChangedCallback;
     private AlarmManager.OnAlarmListener mCustomListener;
+    private Consumer<PowerSaveState> mPowerSaveConsumer;
 
     @Before
     public void setUp() {
         initMocks(this);
-        mUiManagerService = new UiModeManagerService(mContext,
-                mWindowManager, mAlarmManager, mPowerManager,
-                mWakeLock, mTwilightManager, true);
-        mService = mUiManagerService.getService();
         when(mContext.checkCallingOrSelfPermission(anyString()))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
+        doAnswer(inv -> {
+            mPowerSaveConsumer = (Consumer<PowerSaveState>) inv.getArgument(1);
+            return null;
+        }).when(mLocalPowerManager).registerLowPowerModeObserver(anyInt(), any());
+        when(mLocalPowerManager.getLowPowerState(anyInt()))
+                .thenReturn(new PowerSaveState.Builder().setBatterySaverEnabled(false).build());
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -127,6 +135,14 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             mCustomListener = () -> {};
             return null;
         }).when(mAlarmManager).cancel(eq(mCustomListener));
+
+        mUiManagerService = new UiModeManagerService(mContext,
+                mWindowManager, mAlarmManager, mPowerManager,
+                mWakeLock, mTwilightManager, mLocalPowerManager, true);
+        try {
+            mUiManagerService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+        } catch (SecurityException e) {/* ignore for permission denial */}
+        mService = mUiManagerService.getService();
     }
 
     @Test
@@ -148,6 +164,22 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         } catch (SecurityException e) { /*we should ignore this update config exception*/ }
         given(mContext.registerReceiver(any(), any())).willThrow(SecurityException.class);
         verify(mContext, atLeastOnce()).unregisterReceiver(any(BroadcastReceiver.class));
+    }
+
+    @Test
+    public void autoNightModeSwitch_batterySaverOn() throws RemoteException {
+        mService.setNightMode(MODE_NIGHT_NO);
+        when(mTwilightState.isNight()).thenReturn(false);
+        mService.setNightMode(MODE_NIGHT_AUTO);
+
+        // night NO
+        assertFalse(isNightModeActivated());
+
+        mPowerSaveConsumer.accept(
+                new PowerSaveState.Builder().setBatterySaverEnabled(true).build());
+
+        // night YES
+        assertTrue(isNightModeActivated());
     }
 
     @Test
