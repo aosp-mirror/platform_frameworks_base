@@ -31,9 +31,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -43,11 +41,8 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -122,6 +117,7 @@ public class Toast {
     private final Binder mToken;
     private final Context mContext;
     private final Handler mHandler;
+    private final ToastPresenter mPresenter;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final TN mTN;
     @UnsupportedAppUsage
@@ -172,7 +168,8 @@ public class Toast {
         looper = getLooper(looper);
         mHandler = new Handler(looper);
         mCallbacks = new ArrayList<>();
-        mTN = new TN(context.getPackageName(), mToken, mCallbacks, looper);
+        mPresenter = new ToastPresenter(context, AccessibilityManager.getInstance(context));
+        mTN = new TN(mPresenter, context.getPackageName(), mToken, mCallbacks, looper);
         mTN.mY = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.toast_y_offset);
         mTN.mGravity = context.getResources().getInteger(
@@ -504,13 +501,7 @@ public class Toast {
             return result;
         } else {
             Toast result = new Toast(context, looper);
-
-            LayoutInflater inflate = (LayoutInflater)
-                    context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View v = inflate.inflate(com.android.internal.R.layout.transient_notification, null);
-            TextView tv = (TextView) v.findViewById(com.android.internal.R.id.message);
-            tv.setText(text);
-
+            View v = result.mPresenter.getTextToastView(text);
             result.mNextView = v;
             result.mDuration = duration;
 
@@ -611,12 +602,10 @@ public class Toast {
 
         final String mPackageName;
         final Binder mToken;
+        private final ToastPresenter mPresenter;
 
         @GuardedBy("mCallbacks")
         private final List<Callback> mCallbacks;
-
-        static final long SHORT_DURATION_TIMEOUT = 4000;
-        static final long LONG_DURATION_TIMEOUT = 7000;
 
         /**
          * Creates a {@link ITransientNotification} object.
@@ -624,21 +613,9 @@ public class Toast {
          * The parameter {@code callbacks} is not copied and is accessed with itself as its own
          * lock.
          */
-        TN(String packageName, Binder token, List<Callback> callbacks, @Nullable Looper looper) {
-            // XXX This should be changed to use a Dialog, with a Theme.Toast
-            // defined that sets up the layout params appropriately.
-            final WindowManager.LayoutParams params = mParams;
-            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-            params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-            params.format = PixelFormat.TRANSLUCENT;
-            params.windowAnimations = com.android.internal.R.style.Animation_Toast;
-            params.type = WindowManager.LayoutParams.TYPE_TOAST;
-            params.setFitInsetsIgnoringVisibility(true);
-            params.setTitle("Toast");
-            params.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-
+        TN(ToastPresenter presenter, String packageName, Binder token, List<Callback> callbacks,
+                @Nullable Looper looper) {
+            mPresenter = presenter;
             mPackageName = packageName;
             mToken = token;
             mCallbacks = callbacks;
@@ -673,6 +650,8 @@ public class Toast {
                     }
                 }
             };
+
+            presenter.startLayoutParams(mParams);
         }
 
         private List<Callback> getCallbacks() {
@@ -718,30 +697,12 @@ public class Toast {
                 handleHide();
                 mView = mNextView;
                 Context context = mView.getContext().getApplicationContext();
-                String packageName = mView.getContext().getOpPackageName();
                 if (context == null) {
                     context = mView.getContext();
                 }
-                mWM = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-                // We can resolve the Gravity here by using the Locale for getting
-                // the layout direction
-                final Configuration config = mView.getContext().getResources().getConfiguration();
-                final int gravity = Gravity.getAbsoluteGravity(mGravity, config.getLayoutDirection());
-                mParams.gravity = gravity;
-                if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) {
-                    mParams.horizontalWeight = 1.0f;
-                }
-                if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.FILL_VERTICAL) {
-                    mParams.verticalWeight = 1.0f;
-                }
-                mParams.x = mX;
-                mParams.y = mY;
-                mParams.verticalMargin = mVerticalMargin;
-                mParams.horizontalMargin = mHorizontalMargin;
-                mParams.packageName = packageName;
-                mParams.hideTimeoutMilliseconds = mDuration ==
-                    Toast.LENGTH_LONG ? LONG_DURATION_TIMEOUT : SHORT_DURATION_TIMEOUT;
-                mParams.token = windowToken;
+                mWM = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                mPresenter.adjustLayoutParams(mParams, windowToken, mDuration, mGravity, mX, mY,
+                        mHorizontalMargin, mVerticalMargin);
                 if (mView.getParent() != null) {
                     if (localLOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
                     mWM.removeView(mView);
@@ -753,7 +714,7 @@ public class Toast {
                 // invalidated. Let us hedge against that.
                 try {
                     mWM.addView(mView, mParams);
-                    trySendAccessibilityEvent();
+                    mPresenter.trySendAccessibilityEvent(mView, mPackageName);
                     for (Callback callback : getCallbacks()) {
                         callback.onToastShown();
                     }
@@ -761,22 +722,6 @@ public class Toast {
                     /* ignore */
                 }
             }
-        }
-
-        private void trySendAccessibilityEvent() {
-            AccessibilityManager accessibilityManager =
-                    AccessibilityManager.getInstance(mView.getContext());
-            if (!accessibilityManager.isEnabled()) {
-                return;
-            }
-            // treat toasts as notifications since they are used to
-            // announce a transient piece of information to the user
-            AccessibilityEvent event = AccessibilityEvent.obtain(
-                    AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
-            event.setClassName(getClass().getName());
-            event.setPackageName(mView.getContext().getPackageName());
-            mView.dispatchPopulateAccessibilityEvent(event);
-            accessibilityManager.sendAccessibilityEvent(event);
         }
 
         @UnsupportedAppUsage
