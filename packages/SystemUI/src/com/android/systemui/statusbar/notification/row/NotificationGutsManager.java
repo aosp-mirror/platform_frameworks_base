@@ -390,7 +390,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             };
         }
         ConversationIconFactory iconFactoryLoader = new ConversationIconFactory(mContext,
-                launcherApps, pmUser, IconDrawableFactory.newInstance(mContext),
+                launcherApps, pmUser, IconDrawableFactory.newInstance(mContext, false),
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_guts_conversation_icon_size));
 
