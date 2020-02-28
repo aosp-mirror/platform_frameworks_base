@@ -336,9 +336,17 @@ public class PipBoundsHandler {
         // Save the snap fraction and adjust the size based on the new aspect ratio.
         final float snapFraction = mSnapAlgorithm.getSnapFraction(stackBounds,
                 getMovementBounds(stackBounds));
-        final int minEdgeSize = useCurrentMinEdgeSize ? mCurrentMinSize : mDefaultMinSize;
-        final Size size = mSnapAlgorithm.getSizeForAspectRatio(
-                new Size(stackBounds.width(), stackBounds.height()), aspectRatio, minEdgeSize);
+        final int minEdgeSize;
+        final Size size;
+        if (useCurrentMinEdgeSize) {
+            minEdgeSize = mCurrentMinSize;
+            size = mSnapAlgorithm.getSizeForAspectRatio(
+                    new Size(stackBounds.width(), stackBounds.height()), aspectRatio, minEdgeSize);
+        } else {
+            minEdgeSize = mDefaultMinSize;
+            size = mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, minEdgeSize,
+                    mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+        }
 
         final int left = (int) (stackBounds.centerX() - size.getWidth() / 2f);
         final int top = (int) (stackBounds.centerY() - size.getHeight() / 2f);
