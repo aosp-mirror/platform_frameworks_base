@@ -655,14 +655,14 @@ public final class InputMethodManager {
                             } catch (RemoteException e) {
                             }
                         }
-                    }
-                    // Check focus again in case that "onWindowFocus" is called before
-                    // handling this message.
-                    if (mServedView != null && canStartInput(mServedView)) {
-                        if (checkFocusNoStartInput(mRestartOnNextWindowFocus)) {
-                            final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
-                                    : StartInputReason.DEACTIVATED_BY_IMMS;
-                            startInputInner(reason, null, 0, 0, 0);
+                        // Check focus again in case that "onWindowFocus" is called before
+                        // handling this message.
+                        if (mServedView != null && canStartInput(mServedView)) {
+                            if (checkFocusNoStartInput(mRestartOnNextWindowFocus)) {
+                                final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
+                                        : StartInputReason.DEACTIVATED_BY_IMMS;
+                                startInputInner(reason, null, 0, 0, 0);
+                            }
                         }
                     }
                     return;
@@ -1225,10 +1225,6 @@ public final class InputMethodManager {
      */
     void clearBindingLocked() {
         if (DEBUG) Log.v(TAG, "Clearing binding!");
-        if (mWindowFocusGainFuture != null) {
-            mWindowFocusGainFuture.cancel(false /* mayInterruptIfRunning */);
-            mWindowFocusGainFuture = null;
-        }
         clearConnectionLocked();
         setInputChannelLocked(null);
         mBindSequence = -1;
