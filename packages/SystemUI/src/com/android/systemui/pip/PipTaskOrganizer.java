@@ -166,7 +166,22 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
      * Updates the display dimension with given {@link DisplayInfo}
      */
     public void onDisplayInfoChanged(DisplayInfo displayInfo) {
-        mDisplayBounds.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+        final Rect newDisplayBounds = new Rect(0, 0,
+                displayInfo.logicalWidth, displayInfo.logicalHeight);
+        if (!mDisplayBounds.equals(newDisplayBounds)) {
+            // Updates the exiting PiP animation in case the screen rotation changes in the middle.
+            // It's a legit case that PiP window is in portrait mode on home screen and
+            // the application requests landscape onces back to fullscreen mode.
+            final PipAnimationController.PipTransitionAnimator animator =
+                    mPipAnimationController.getCurrentAnimator();
+            if (animator != null
+                    && animator.getAnimationType() == ANIM_TYPE_BOUNDS
+                    && animator.getDestinationBounds().equals(mDisplayBounds)) {
+                animator.updateEndValue(newDisplayBounds);
+                animator.setDestinationBounds(newDisplayBounds);
+            }
+        }
+        mDisplayBounds.set(newDisplayBounds);
     }
 
     /**
