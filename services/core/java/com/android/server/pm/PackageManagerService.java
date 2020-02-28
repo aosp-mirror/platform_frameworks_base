@@ -11780,14 +11780,22 @@ public class PackageManagerService extends IPackageManager.Stub
         final String pkgName = pkg.getPackageName();
         if (mCustomResolverComponentName != null &&
                 mCustomResolverComponentName.getPackageName().equals(pkg.getPackageName())) {
-            setUpCustomResolverActivity(pkg);
+            setUpCustomResolverActivity(pkg, pkgSetting);
         }
 
         if (pkg.getPackageName().equals("android")) {
             synchronized (mLock) {
                 // Set up information for our fall-back user intent resolution activity.
                 mPlatformPackage = pkg;
+
+                // The instance stored in PackageManagerService is special cased to be non-user
+                // specific, so initialize all the needed fields here.
                 mAndroidApplication = pkg.toAppInfoWithoutState();
+                mAndroidApplication.flags = PackageInfoUtils.appInfoFlags(pkg, pkgSetting);
+                mAndroidApplication.privateFlags =
+                        PackageInfoUtils.appInfoPrivateFlags(pkg, pkgSetting);
+                mAndroidApplication.initForUser(UserHandle.USER_SYSTEM);
+
                 if (!mResolverReplaced) {
                     mResolveActivity.applicationInfo = mAndroidApplication;
                     mResolveActivity.name = ResolverActivity.class.getName();
@@ -11949,11 +11957,20 @@ public class PackageManagerService extends IPackageManager.Stub
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    private void setUpCustomResolverActivity(AndroidPackage pkg) {
+    private void setUpCustomResolverActivity(AndroidPackage pkg, PackageSetting pkgSetting) {
         synchronized (mLock) {
             mResolverReplaced = true;
+
+            // The instance created in PackageManagerService is special cased to be non-user
+            // specific, so initialize all the needed fields here.
+            ApplicationInfo appInfo = pkg.toAppInfoWithoutState();
+            appInfo.flags = PackageInfoUtils.appInfoFlags(pkg, pkgSetting);
+            appInfo.privateFlags =
+                    PackageInfoUtils.appInfoPrivateFlags(pkg, pkgSetting);
+            appInfo.initForUser(UserHandle.USER_SYSTEM);
+
             // Set up information for custom user intent resolution activity.
-            mResolveActivity.applicationInfo = pkg.toAppInfoWithoutState();
+            mResolveActivity.applicationInfo = appInfo;
             mResolveActivity.name = mCustomResolverComponentName.getClassName();
             mResolveActivity.packageName = pkg.getPackageName();
             mResolveActivity.processName = pkg.getProcessName();
