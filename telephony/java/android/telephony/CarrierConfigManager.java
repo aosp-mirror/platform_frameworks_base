@@ -1496,7 +1496,7 @@ public class CarrierConfigManager {
      */
     public static final class Apn {
         /** Prefix of all Apn.KEY_* constants. */
-        public static final String KEY_PREFIX = "apn.";
+        private static final String KEY_PREFIX = "apn.";
 
         /** IPv4 internet protocol */
         public static final String PROTOCOL_IPV4 = "IP";
