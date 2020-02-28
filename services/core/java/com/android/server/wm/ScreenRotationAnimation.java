@@ -205,7 +205,7 @@ class ScreenRotationAnimation {
             SurfaceControl.ScreenshotGraphicBuffer gb =
                     mService.mDisplayManagerInternal.screenshot(displayId);
             if (gb != null) {
-                mStartLuma = RotationAnimationUtils.getAvgBorderLuma(gb.getGraphicBuffer(),
+                mStartLuma = RotationAnimationUtils.getMedianBorderLuma(gb.getGraphicBuffer(),
                         gb.getColorSpace());
                 try {
                     surface.attachAndQueueBufferWithColorSpace(gb.getGraphicBuffer(),
