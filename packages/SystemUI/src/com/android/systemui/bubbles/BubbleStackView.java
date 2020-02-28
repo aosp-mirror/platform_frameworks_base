@@ -692,8 +692,8 @@ public class BubbleStackView extends FrameLayout {
     private void setUpOverflow() {
         int overflowBtnIndex = 0;
         if (mBubbleOverflow == null) {
-            mBubbleOverflow = new BubbleOverflow(mContext);
-            mBubbleOverflow.setUpOverflow(this);
+            mBubbleOverflow = new BubbleOverflow(getContext());
+            mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
         } else {
             mBubbleContainer.removeView(mBubbleOverflow.getBtn());
             mBubbleOverflow.updateIcon(mContext, this);
