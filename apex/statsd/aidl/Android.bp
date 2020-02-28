@@ -31,7 +31,7 @@ aidl_interface {
     ],
     backend: {
         java: {
-            enabled: false, // the platform uses statsd_java_aidl
+            enabled: false, // framework-statsd and service-statsd use framework-statsd-aidl-sources
         },
         cpp: {
             enabled: false,
