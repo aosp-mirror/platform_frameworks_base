@@ -6839,7 +6839,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                         && isTargetHiddenFromInstantApp));
                 final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
-                        && !resolveForStart && shouldFilterApplicationLocked(
+                        && shouldFilterApplicationLocked(
                                 getPackageSettingInternal(ai.applicationInfo.packageName,
                                         Process.SYSTEM_UID), filterCallingUid, userId);
                 if (!blockInstantResolution && !blockNormalResolution) {
