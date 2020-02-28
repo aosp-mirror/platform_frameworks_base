@@ -53,8 +53,7 @@ public class DeviceIdleManager {
         try {
             return mService.getSystemPowerWhitelistExceptIdle();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return new String[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -66,8 +65,7 @@ public class DeviceIdleManager {
         try {
             return mService.getSystemPowerWhitelist();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return new String[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
