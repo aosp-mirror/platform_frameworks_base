@@ -30,6 +30,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
@@ -53,8 +54,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -117,7 +117,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     @Mock
     private ShortcutInfo mShortcutInfo;
     @Mock
-    private Bitmap mImage;
+    private Drawable mIconDrawable;
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
@@ -183,8 +183,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         when(mShortcutInfo.getShortLabel()).thenReturn("Convo name");
         List<ShortcutInfo> shortcuts = Arrays.asList(mShortcutInfo);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcuts);
-        when(mIconFactory.getConversationBitmap(any(ShortcutInfo.class), anyString(), anyInt()))
-                .thenReturn(mImage);
+        when(mIconFactory.getConversationDrawable(
+                any(ShortcutInfo.class), anyString(), anyInt(), anyBoolean()))
+                .thenReturn(mIconDrawable);
 
         mNotificationChannel = new NotificationChannel(
                 TEST_CHANNEL, TEST_CHANNEL_NAME, IMPORTANCE_LOW);
@@ -233,7 +234,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 true);
         final ImageView view = mNotificationInfo.findViewById(R.id.conversation_icon);
-        assertEquals(mImage, ((BitmapDrawable) view.getDrawable()).getBitmap());
+        assertEquals(mIconDrawable, view.getDrawable());
     }
 
     @Test
