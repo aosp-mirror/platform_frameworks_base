@@ -380,8 +380,8 @@ message Atom {
         BootTimeEventErrorCode boot_time_event_error_code_reported = 242 [(module) = "framework"];
         UserspaceRebootReported userspace_reboot_reported = 243 [(module) = "framework"];
         NotificationReported notification_reported = 244 [(module) = "framework"];
-        NotificationPanelReported notification_panel_reported = 245;
-        NotificationChannelModified notification_channel_modified = 246;
+        NotificationPanelReported notification_panel_reported = 245 [(module) = "sysui"];
+        NotificationChannelModified notification_channel_modified = 246 [(module) = "framework"];
         IntegrityCheckResultReported integrity_check_result_reported = 247 [(module) = "framework"];
         IntegrityRulesPushed integrity_rules_pushed = 248 [(module) = "framework"];
         CellBroadcastMessageReported cb_message_reported =
@@ -3637,8 +3637,8 @@ message NotificationChannelModified {
     // The notifying app's uid and package.
     optional int32 uid = 2 [(is_uid) = true];
     optional string package_name = 3;
-    // App-assigned notification channel ID or channel-group ID
-    optional string channel_id = 4;
+    // Hash of app-assigned notification channel ID or channel-group ID
+    optional int32 channel_id_hash = 4;
     // Previous importance setting, if applicable
     optional android.stats.sysui.NotificationImportance old_importance = 5;
     // New importance setting
