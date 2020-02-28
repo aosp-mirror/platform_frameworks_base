@@ -21,6 +21,7 @@ import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_MASK;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_PREDICTED;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_MASK;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
@@ -43,6 +44,7 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 
 import libcore.io.IoUtils;
@@ -244,9 +246,9 @@ public class AppIdleHistory {
      * @param elapsedRealtime mark as used time if non-zero
      * @param timeout set the timeout of the specified bucket, if non-zero. Can only be used
      *                with bucket values of ACTIVE and WORKING_SET.
-     * @return
+     * @return {@code appUsageHistory}
      */
-    public AppUsageHistory reportUsage(AppUsageHistory appUsageHistory, String packageName,
+    AppUsageHistory reportUsage(AppUsageHistory appUsageHistory, String packageName, int userId,
             int newBucket, int usageReason, long elapsedRealtime, long timeout) {
         int bucketingReason = REASON_MAIN_USAGE | usageReason;
         final boolean isUserUsage = isUserUsage(bucketingReason);
@@ -284,11 +286,7 @@ public class AppIdleHistory {
 
         if (appUsageHistory.currentBucket > newBucket) {
             appUsageHistory.currentBucket = newBucket;
-            if (DEBUG) {
-                Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory
-                        .currentBucket
-                        + ", reason=0x0" + Integer.toHexString(appUsageHistory.bucketingReason));
-            }
+            logAppStandbyBucketChanged(packageName, userId, newBucket, bucketingReason);
         }
         appUsageHistory.bucketingReason = bucketingReason;
 
@@ -313,7 +311,8 @@ public class AppIdleHistory {
             int usageReason, long nowElapsed, long timeout) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory history = getPackageHistory(userHistory, packageName, nowElapsed, true);
-        return reportUsage(history, packageName, newBucket, usageReason, nowElapsed, timeout);
+        return reportUsage(history, packageName, userId, newBucket, usageReason, nowElapsed,
+                timeout);
     }
 
     private ArrayMap<String, AppUsageHistory> getUserHistory(int userId) {
@@ -372,6 +371,7 @@ public class AppIdleHistory {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory =
                 getPackageHistory(userHistory, packageName, elapsedRealtime, true);
+        final boolean changed = appUsageHistory.currentBucket != bucket;
         appUsageHistory.currentBucket = bucket;
         appUsageHistory.bucketingReason = reason;
 
@@ -385,9 +385,8 @@ public class AppIdleHistory {
             appUsageHistory.bucketActiveTimeoutTime = elapsed;
             appUsageHistory.bucketWorkingSetTimeoutTime = elapsed;
         }
-        if (DEBUG) {
-            Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
-                    + ", reason=0x0" + Integer.toHexString(appUsageHistory.bucketingReason));
+        if (changed) {
+            logAppStandbyBucketChanged(packageName, userId, bucket, reason);
         }
     }
 
@@ -485,18 +484,19 @@ public class AppIdleHistory {
 
     /* Returns the new standby bucket the app is assigned to */
     public int setIdle(String packageName, int userId, boolean idle, long elapsedRealtime) {
-        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
-        AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
-                elapsedRealtime, true);
+        final int newBucket;
+        final int reason;
         if (idle) {
-            appUsageHistory.currentBucket = STANDBY_BUCKET_RARE;
-            appUsageHistory.bucketingReason = REASON_MAIN_FORCED_BY_USER;
+            newBucket = STANDBY_BUCKET_RARE;
+            reason = REASON_MAIN_FORCED_BY_USER;
         } else {
-            appUsageHistory.currentBucket = STANDBY_BUCKET_ACTIVE;
+            newBucket = STANDBY_BUCKET_ACTIVE;
             // This is to pretend that the app was just used, don't freeze the state anymore.
-            appUsageHistory.bucketingReason = REASON_MAIN_USAGE | REASON_SUB_USAGE_USER_INTERACTION;
+            reason = REASON_MAIN_USAGE | REASON_SUB_USAGE_USER_INTERACTION;
         }
-        return appUsageHistory.currentBucket;
+        setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket, reason, false);
+
+        return newBucket;
     }
 
     public void clearUsage(String packageName, int userId) {
@@ -551,12 +551,26 @@ public class AppIdleHistory {
         return 0;
     }
 
+    /**
+     * Log a standby bucket change to statsd, and also logcat if debug logging is enabled.
+     */
+    private void logAppStandbyBucketChanged(String packageName, int userId, int bucket,
+            int reason) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.APP_STANDBY_BUCKET_CHANGED,
+                packageName, userId, bucket,
+                (reason & REASON_MAIN_MASK), (reason & REASON_SUB_MASK));
+        if (DEBUG) {
+            Slog.d(TAG, "Moved " + packageName + " to bucket=" + bucket
+                    + ", reason=0x0" + Integer.toHexString(reason));
+        }
+    }
+
     @VisibleForTesting
     File getUserFile(int userId) {
         return new File(new File(new File(mStorageDir, "users"),
                 Integer.toString(userId)), APP_IDLE_FILENAME);
     }
-
 
     /**
      * Check if App Idle File exists on disk
