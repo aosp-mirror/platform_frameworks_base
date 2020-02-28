@@ -60,6 +60,8 @@ import android.os.HwParcel;
 import android.os.IHwBinder;
 import android.os.IHwInterface;
 import android.os.RemoteException;
+import android.os.SharedMemory;
+import android.system.ErrnoException;
 import android.util.Pair;
 
 import org.junit.Before;
@@ -70,6 +72,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
+
+import java.io.FileDescriptor;
+import java.nio.ByteBuffer;
 
 @RunWith(Parameterized.class)
 public class SoundTriggerMiddlewareImplTest {
@@ -104,12 +109,25 @@ public class SoundTriggerMiddlewareImplTest {
         return createSoundModel(SoundModelType.GENERIC);
     }
 
+    private static FileDescriptor byteArrayToFileDescriptor(byte[] data) {
+        try {
+            SharedMemory shmem = SharedMemory.create("", data.length);
+            ByteBuffer buffer = shmem.mapReadWrite();
+            buffer.put(data);
+            return shmem.getFileDescriptor();
+        } catch (ErrnoException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static SoundModel createSoundModel(int type) {
         SoundModel model = new SoundModel();
         model.type = type;
         model.uuid = "12345678-2345-3456-4567-abcdef987654";
         model.vendorUuid = "87654321-5432-6543-7654-456789fedcba";
-        model.data = new byte[]{91, 92, 93, 94, 95};
+        byte[] data = new byte[]{91, 92, 93, 94, 95};
+        model.data = byteArrayToFileDescriptor(data);
+        model.dataSize = data.length;
         return model;
     }
 
