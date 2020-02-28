@@ -209,61 +209,116 @@ public final class Control implements Parcelable {
         mStatusText = in.readCharSequence();
     }
 
+    /**
+     * @return the identifier for the {@link Control}
+     */
     @NonNull
     public String getControlId() {
         return mControlId;
     }
 
+
+    /**
+     * @return type of device represented by this {@link Control}, used to determine the default
+     *         icon and color
+     */
     @DeviceTypes.DeviceType
     public int getDeviceType() {
         return mDeviceType;
     }
 
+    /**
+     * @return the user facing name of the {@link Control}
+     */
     @NonNull
     public CharSequence getTitle() {
         return mTitle;
     }
 
+    /**
+     * @return additional information about the {@link Control}, to appear underneath the title
+     */
     @NonNull
     public CharSequence getSubtitle() {
         return mSubtitle;
     }
 
+    /**
+     * Optional top-level group to help define the {@link Control}'s location, visible to the user.
+     * If not present, the application name will be used as the top-level group. A structure
+     * contains zones which contains controls.
+     *
+     * @return name of the structure containing the control
+     */
     @Nullable
     public CharSequence getStructure() {
         return mStructure;
     }
 
+    /**
+     * Optional group name to help define the {@link Control}'s location within a structure,
+     * visible to the user. A structure contains zones which contains controls.
+     *
+     * @return name of the zone containing the control
+     */
     @Nullable
     public CharSequence getZone() {
         return mZone;
     }
 
+    /**
+     * @return a {@link PendingIntent} linking to an Activity for the {@link Control}
+     */
     @NonNull
     public PendingIntent getAppIntent() {
         return mAppIntent;
     }
 
+    /**
+     * Optional icon to be shown with the {@link Control}. It is highly recommended
+     * to let the system default the icon unless the default icon is not suitable.
+     *
+     * @return icon to show
+     */
     @Nullable
     public Icon getCustomIcon() {
         return mCustomIcon;
     }
 
+    /**
+     * Optional color to be shown with the {@link Control}. It is highly recommended
+     * to let the system default the color unless the default is not suitable for the
+     * application.
+     *
+     * @return background color to use
+     */
     @Nullable
     public ColorStateList getCustomColor() {
         return mCustomColor;
     }
 
+    /**
+     * @return status of the {@link Control}, used to convey information about the attempt to
+     *         fetch the current state
+     */
     @Status
     public int getStatus() {
         return mStatus;
     }
 
+    /**
+     * @return instance of {@link ControlTemplate}, that defines how the {@link Control} will
+     *         behave and what interactions are available to the user
+     */
     @NonNull
     public ControlTemplate getControlTemplate() {
         return mControlTemplate;
     }
 
+    /**
+     * @return user-facing text description of the {@link Control}'s status, describing its current
+     *         state
+     */
     @NonNull
     public CharSequence getStatusText() {
         return mStatusText;
@@ -326,7 +381,10 @@ public final class Control implements Parcelable {
     /**
      * Builder class for {@link Control}.
      *
-     * This class facilitates the creation of {@link Control} with no state.
+     * This class facilitates the creation of {@link Control} with no state. Must be used to
+     * provide controls for {@link ControlsProviderService#createPublisherForAllAvailable} and
+     * {@link ControlsProviderService#createPublisherForSuggested}.
+     *
      * It provides the following defaults for non-optional parameters:
      * <ul>
      *     <li> Device type: {@link DeviceTypes#TYPE_UNKNOWN}
@@ -334,7 +392,7 @@ public final class Control implements Parcelable {
      *     <li> Subtitle: {@code ""}
      * </ul>
      * This fixes the values relating to state of the {@link Control} as required by
-     * {@link ControlsProviderService#loadAvailableControls}:
+     * {@link ControlsProviderService#createPublisherForAllAvailable}:
      * <ul>
      *     <li> Status: {@link Status#STATUS_UNKNOWN}
      *     <li> Control template: {@link ControlTemplate#NO_TEMPLATE}
@@ -355,8 +413,8 @@ public final class Control implements Parcelable {
         private @Nullable ColorStateList mCustomColor;
 
         /**
-         * @param controlId the identifier for the {@link Control}.
-         * @param appIntent the pending intent linking to the device Activity.
+         * @param controlId the identifier for the {@link Control}
+         * @param appIntent the pending intent linking to the device Activity
          */
         public StatelessBuilder(@NonNull String controlId,
                 @NonNull PendingIntent appIntent) {
@@ -368,6 +426,7 @@ public final class Control implements Parcelable {
 
         /**
          * Creates a {@link StatelessBuilder} using an existing {@link Control} as a base.
+         *
          * @param control base for the builder.
          */
         public StatelessBuilder(@NonNull Control control) {
@@ -384,7 +443,7 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param controlId the identifier for the {@link Control}.
+         * @param controlId the identifier for the {@link Control}
          * @return {@code this}
          */
         @NonNull
@@ -395,8 +454,8 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param deviceType the device type for the {@link Control}. Setting an invalid value not
-         *                   in {@link DeviceTypes} will set it to {@link DeviceTypes#TYPE_UNKNOWN}.
+         * @param deviceType type of device represented by this {@link Control}, used to
+         *                   determine the default icon and color
          * @return {@code this}
          */
         @NonNull
@@ -422,7 +481,8 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param subtitle the user facing subtitle for the {@link Control}
+         * @param subtitle additional information about the {@link Control}, to appear underneath
+         *                 the title
          * @return {@code this}
          */
         @NonNull
@@ -433,8 +493,11 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param structure the user facing name of the structure for the {@link Control}.
-         *                  {@code null} indicates that it's not associated with any structure.
+         * Optional top-level group to help define the {@link Control}'s location, visible to the
+         * user. If not present, the application name will be used as the top-level group. A
+         * structure contains zones which contains controls.
+         *
+         * @param structure name of the structure containing the control
          * @return {@code this}
          */
         @NonNull
@@ -444,8 +507,10 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param zone the user facing name of the zone for the {@link Control}. {@code null}
-         *             indicates that it's not associated with any zone.
+         * Optional group name to help define the {@link Control}'s location within a structure,
+         * visible to the user. A structure contains zones which contains controls.
+         *
+         * @param zone name of the zone containing the control
          * @return {@code this}
          */
         @NonNull
@@ -455,7 +520,7 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param appIntent an {@link Intent} linking to an Activity for the {@link Control}
+         * @param appIntent a {@link PendingIntent} linking to an Activity for the {@link Control}
          * @return {@code this}
          */
         @NonNull
@@ -466,7 +531,10 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param customIcon an {@link Icon} to override the one determined by the device type.
+         * Optional icon to be shown with the {@link Control}. It is highly recommended
+         * to let the system default the icon unless the default icon is not suitable.
+         *
+         * @param customIcon icon to show
          * @return {@code this}
          */
         @NonNull
@@ -476,7 +544,11 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param customColor a list of colors to override the ones determined by the device type.
+         * Optional color to be shown with the {@link Control}. It is highly recommended
+         * to let the system default the color unless the default is not suitable for the
+         * application.
+         *
+         * @param customColor background color to use
          * @return {@code this}
          */
         @NonNull
@@ -486,7 +558,6 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * Build a stateless {@link Control}
          * @return a valid {@link Control}
          */
         @NonNull
@@ -507,9 +578,15 @@ public final class Control implements Parcelable {
     }
 
     /**
-     * Builder class for {@link Control}.
+     * Builder class for {@link Control} that contains state information.
      *
-     * This class facilitates the creation of {@link Control} with an associated state.
+     * State information is passed through an instance of a {@link ControlTemplate} and will
+     * determine how the user can interact with the {@link Control}. User interactions will
+     * be sent through the method call {@link ControlsProviderService#performControlAction}
+     * with an instance of {@link ControlAction} to convey any potential new value.
+     *
+     * Must be used to provide controls for {@link ControlsProviderService#createPublisherFor}.
+     *
      * It provides the following defaults for non-optional parameters:
      * <ul>
      *     <li> Device type: {@link DeviceTypes#TYPE_UNKNOWN}
@@ -549,6 +626,7 @@ public final class Control implements Parcelable {
 
         /**
          * Creates a {@link StatelessBuilder} using an existing {@link Control} as a base.
+         *
          * @param control base for the builder.
          */
         public StatefulBuilder(@NonNull Control control) {
@@ -579,8 +657,8 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param deviceType the device type for the {@link Control}. Setting an invalid value not
-         *                   in {@link DeviceTypes} will set it to {@link DeviceTypes#TYPE_UNKNOWN}.
+         * @param deviceType type of device represented by this {@link Control}, used to
+         *                   determine the default icon and color
          * @return {@code this}
          */
         @NonNull
@@ -606,7 +684,8 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param subtitle the user facing subtitle for the {@link Control}
+         * @param subtitle additional information about the {@link Control}, to appear underneath
+         *                 the title
          * @return {@code this}
          */
         @NonNull
@@ -617,8 +696,11 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param structure the user facing name of the structure for the {@link Control}.
-         *                  {@code null} indicates that it's not associated with any structure.
+         * Optional top-level group to help define the {@link Control}'s location, visible to the
+         * user. If not present, the application name will be used as the top-level group. A
+         * structure contains zones which contains controls.
+         *
+         * @param structure name of the structure containing the control
          * @return {@code this}
          */
         @NonNull
@@ -628,8 +710,10 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param zone the user facing name of the zone for the {@link Control}. {@code null}
-         *             indicates that it's not associated with any zone.
+         * Optional group name to help define the {@link Control}'s location within a structure,
+         * visible to the user. A structure contains zones which contains controls.
+         *
+         * @param zone name of the zone containing the control
          * @return {@code this}
          */
         @NonNull
@@ -639,7 +723,7 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param appIntent an {@link Intent} linking to an Activity for the {@link Control}
+         * @param appIntent a {@link PendingIntent} linking to an Activity for the {@link Control}
          * @return {@code this}
          */
         @NonNull
@@ -650,7 +734,10 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param customIcon an {@link Icon} to override the one determined by the device type.
+         * Optional icon to be shown with the {@link Control}. It is highly recommended
+         * to let the system default the icon unless the default icon is not suitable.
+         *
+         * @param customIcon icon to show
          * @return {@code this}
          */
         @NonNull
@@ -660,7 +747,11 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param customColor a list of colors to override the ones determined by the device type.
+         * Optional color to be shown with the {@link Control}. It is highly recommended
+         * to let the system default the color unless the default is not suitable for the
+         * application.
+         *
+         * @param customColor background color to use
          * @return {@code this}
          */
         @NonNull
@@ -670,8 +761,8 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param status the status of the {@link Control}. Setting an invalid value not in
-         *               {@link Control} will set it to {@link Control#STATUS_UNKNOWN}.
+         * @param status status of the {@link Control}, used to convey information about the
+         *               attempt to fetch the current state
          * @return {@code this}
          */
         @NonNull
@@ -686,7 +777,9 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param controlTemplate a template for the {@link Control}
+         * @param controlTemplate instance of {@link ControlTemplate}, that defines how the
+         *                        {@link Control} will behave and what interactions are
+         *                        available to the user
          * @return {@code this}
          */
         @NonNull
@@ -697,7 +790,8 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * @param statusText a user facing text representing the status of the {@link Control}.
+         * @param statusText user-facing text description of the {@link Control}'s status,
+         *                   describing its current state
          * @return {@code this}
          */
         @NonNull
@@ -708,7 +802,6 @@ public final class Control implements Parcelable {
         }
 
         /**
-         * Build a stateless {@link Control}
          * @return a valid {@link Control}
          */
         @NonNull
