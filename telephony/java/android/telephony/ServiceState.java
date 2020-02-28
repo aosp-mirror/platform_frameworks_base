@@ -1992,7 +1992,6 @@ public class ServiceState implements Parcelable {
      * @return the copied ServiceState with location info sanitized.
      * @hide
      */
-    @SystemApi
     @NonNull
     public ServiceState createLocationInfoSanitizedCopy(boolean removeCoarseLocation) {
         ServiceState state = new ServiceState(this);
