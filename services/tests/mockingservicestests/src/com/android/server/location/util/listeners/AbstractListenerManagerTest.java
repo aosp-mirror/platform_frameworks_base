@@ -56,6 +56,7 @@ public class AbstractListenerManagerTest {
 
         mListenerManager.addListener(0, listener);
         assertThat(mListenerManager.mRegistered).isTrue();
+        assertThat(mListenerManager.mActive).isTrue();
         assertThat(mListenerManager.mMergedRequest).isEqualTo(0);
 
         mListenerManager.notifyListeners();
@@ -69,6 +70,7 @@ public class AbstractListenerManagerTest {
         mListenerManager.addListener(0, listener);
         mListenerManager.removeListener(listener);
         assertThat(mListenerManager.mRegistered).isFalse();
+        assertThat(mListenerManager.mActive).isFalse();
 
         mListenerManager.notifyListeners();
         verify(listener, never()).run();
@@ -83,6 +85,7 @@ public class AbstractListenerManagerTest {
         mListenerManager.addListener(0, listener1);
         mListenerManager.addListener(1, listener2);
         assertThat(mListenerManager.mRegistered).isTrue();
+        assertThat(mListenerManager.mActive).isTrue();
         assertThat(mListenerManager.mMergedRequest).isEqualTo(1);
 
         mListenerManager.notifyListeners();
@@ -92,6 +95,7 @@ public class AbstractListenerManagerTest {
 
         mListenerManager.addListener(0, listener3);
         assertThat(mListenerManager.mRegistered).isTrue();
+        assertThat(mListenerManager.mActive).isTrue();
         assertThat(mListenerManager.mMergedRequest).isEqualTo(1);
 
         mListenerManager.notifyListeners();
@@ -101,6 +105,7 @@ public class AbstractListenerManagerTest {
 
         mListenerManager.removeListener(listener2);
         assertThat(mListenerManager.mRegistered).isTrue();
+        assertThat(mListenerManager.mActive).isTrue();
         assertThat(mListenerManager.mMergedRequest).isEqualTo(0);
 
         mListenerManager.notifyListeners();
@@ -111,6 +116,7 @@ public class AbstractListenerManagerTest {
         mListenerManager.removeListener(listener1);
         mListenerManager.removeListener(listener3);
         assertThat(mListenerManager.mRegistered).isFalse();
+        assertThat(mListenerManager.mActive).isFalse();
     }
 
     @Test
@@ -133,12 +139,14 @@ public class AbstractListenerManagerTest {
         mListenerManager.addListener(0, listener);
         mListenerManager.setActive(0, false);
         assertThat(mListenerManager.mRegistered).isFalse();
+        assertThat(mListenerManager.mActive).isFalse();
 
         mListenerManager.notifyListeners();
         verify(listener, never()).run();
 
         mListenerManager.setActive(0, true);
         assertThat(mListenerManager.mRegistered).isTrue();
+        assertThat(mListenerManager.mActive).isTrue();
         assertThat(mListenerManager.mMergedRequest).isEqualTo(0);
 
         mListenerManager.notifyListeners();
@@ -155,6 +163,7 @@ public class AbstractListenerManagerTest {
         mListenerManager.addListener(2, listener2);
         mListenerManager.addListener(1, listener3);
         assertThat(mListenerManager.mRegistered).isTrue();
+        assertThat(mListenerManager.mActive).isTrue();
         assertThat(mListenerManager.mMergedRequest).isEqualTo(2);
 
         mListenerManager.notifyListeners();
@@ -164,6 +173,7 @@ public class AbstractListenerManagerTest {
 
         mListenerManager.setActive(2, false);
         assertThat(mListenerManager.mRegistered).isTrue();
+        assertThat(mListenerManager.mActive).isTrue();
         assertThat(mListenerManager.mMergedRequest).isEqualTo(1);
 
         mListenerManager.notifyListeners();
@@ -173,6 +183,7 @@ public class AbstractListenerManagerTest {
 
         mListenerManager.setActive(2, true);
         assertThat(mListenerManager.mRegistered).isTrue();
+        assertThat(mListenerManager.mActive).isTrue();
         assertThat(mListenerManager.mMergedRequest).isEqualTo(2);
 
         mListenerManager.notifyListeners();
@@ -184,12 +195,13 @@ public class AbstractListenerManagerTest {
         mListenerManager.setActive(1, false);
         mListenerManager.setActive(2, false);
         assertThat(mListenerManager.mRegistered).isFalse();
+        assertThat(mListenerManager.mActive).isFalse();
     }
 
     private static class TestRegistration extends
             AbstractListenerManager.Registration<Integer, Runnable> {
 
-        private boolean mActive = true;
+        boolean mActive = true;
 
         protected TestRegistration(Integer integer, Runnable runnable) {
             super(integer, DIRECT_EXECUTOR, runnable);
@@ -199,8 +211,12 @@ public class AbstractListenerManagerTest {
     private static class TestListenerManager extends
             AbstractListenerManager<Runnable, Integer, Runnable, TestRegistration, Integer> {
 
-        private boolean mRegistered;
-        private int mMergedRequest;
+        boolean mActive;
+        boolean mRegistered;
+        int mMergedRequest;
+
+        TestListenerManager() {
+        }
 
         public void addListener(Integer request, Runnable listener) {
             addRegistration(listener, new TestRegistration(request, listener));
@@ -243,6 +259,16 @@ public class AbstractListenerManagerTest {
         @Override
         protected boolean isActive(TestRegistration registration) {
             return registration.mActive;
+        }
+
+        @Override
+        protected void onActive() {
+            mActive = true;
+        }
+
+        @Override
+        protected void onInactive() {
+            mActive = false;
         }
 
         @Override
