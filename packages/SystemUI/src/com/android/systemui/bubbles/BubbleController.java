@@ -425,7 +425,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     public void onEntryRemoved(
                             NotificationEntry entry,
                             @android.annotation.Nullable NotificationVisibility visibility,
-                            boolean removedByUser) {
+                            boolean removedByUser,
+                            int reason) {
                         BubbleController.this.onEntryRemoved(entry);
                     }
 

@@ -19,6 +19,7 @@ package android.service.notification;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -37,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -53,6 +55,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1566,6 +1569,7 @@ public abstract class NotificationListenerService extends Service {
         private boolean mCanBubble;
         private boolean mVisuallyInterruptive;
         private boolean mIsConversation;
+        private ShortcutInfo mShortcutInfo;
 
         private static final int PARCEL_VERSION = 2;
 
@@ -1599,6 +1603,7 @@ public abstract class NotificationListenerService extends Service {
             out.writeBoolean(mCanBubble);
             out.writeBoolean(mVisuallyInterruptive);
             out.writeBoolean(mIsConversation);
+            out.writeParcelable(mShortcutInfo, flags);
         }
 
         /** @hide */
@@ -1620,7 +1625,7 @@ public abstract class NotificationListenerService extends Service {
             mImportance = in.readInt();
             mImportanceExplanation = in.readCharSequence(); // may be null
             mOverrideGroupKey = in.readString(); // may be null
-            mChannel = (NotificationChannel) in.readParcelable(cl); // may be null
+            mChannel = in.readParcelable(cl); // may be null
             mOverridePeople = in.createStringArrayList();
             mSnoozeCriteria = in.createTypedArrayList(SnoozeCriterion.CREATOR);
             mShowBadge = in.readBoolean();
@@ -1633,6 +1638,7 @@ public abstract class NotificationListenerService extends Service {
             mCanBubble = in.readBoolean();
             mVisuallyInterruptive = in.readBoolean();
             mIsConversation = in.readBoolean();
+            mShortcutInfo = in.readParcelable(cl);
         }
 
 
@@ -1840,6 +1846,13 @@ public abstract class NotificationListenerService extends Service {
         /**
          * @hide
          */
+        public @Nullable ShortcutInfo getShortcutInfo() {
+            return mShortcutInfo;
+        }
+
+        /**
+         * @hide
+         */
         @VisibleForTesting
         public void populate(String key, int rank, boolean matchesInterruptionFilter,
                 int visibilityOverride, int suppressedVisualEffects, int importance,
@@ -1849,7 +1862,7 @@ public abstract class NotificationListenerService extends Service {
                 int userSentiment, boolean hidden, long lastAudiblyAlertedMs,
                 boolean noisy, ArrayList<Notification.Action> smartActions,
                 ArrayList<CharSequence> smartReplies, boolean canBubble,
-                boolean visuallyInterruptive, boolean isConversation) {
+                boolean visuallyInterruptive, boolean isConversation, ShortcutInfo shortcutInfo) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1872,6 +1885,7 @@ public abstract class NotificationListenerService extends Service {
             mCanBubble = canBubble;
             mVisuallyInterruptive = visuallyInterruptive;
             mIsConversation = isConversation;
+            mShortcutInfo = shortcutInfo;
         }
 
         /**
@@ -1898,7 +1912,8 @@ public abstract class NotificationListenerService extends Service {
                     other.mSmartReplies,
                     other.mCanBubble,
                     other.mVisuallyInterruptive,
-                    other.mIsConversation);
+                    other.mIsConversation,
+                    other.mShortcutInfo);
         }
 
         /**
@@ -1952,7 +1967,10 @@ public abstract class NotificationListenerService extends Service {
                     && Objects.equals(mSmartReplies, other.mSmartReplies)
                     && Objects.equals(mCanBubble, other.mCanBubble)
                     && Objects.equals(mVisuallyInterruptive, other.mVisuallyInterruptive)
-                    && Objects.equals(mIsConversation, other.mIsConversation);
+                    && Objects.equals(mIsConversation, other.mIsConversation)
+                    // Shortcutinfo doesn't have equals either; use id
+                    &&  Objects.equals((mShortcutInfo == null ? 0 : mShortcutInfo.getId()),
+                    (other.mShortcutInfo == null ? 0 : other.mShortcutInfo.getId()));
         }
     }
 
