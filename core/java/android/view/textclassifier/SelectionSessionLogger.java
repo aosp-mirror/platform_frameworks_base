@@ -90,7 +90,7 @@ public final class SelectionSessionLogger {
                     .addTaggedData(SMART_END, event.getSmartEnd());
         }
         if (event.getSessionId() != null) {
-            log.addTaggedData(SESSION_ID, event.getSessionId().flattenToString());
+            log.addTaggedData(SESSION_ID, event.getSessionId().getValue());
         }
         mMetricsLogger.write(log);
         debugLog(log);
