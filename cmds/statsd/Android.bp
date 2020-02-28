@@ -302,11 +302,7 @@ cc_test {
     static_libs: [
         "libgmock",
         "libplatformprotos",
-
-        // TODO(b/149842105): Make libstatssocket shared and remove libcutils once statsd_test is
-        // moved to the apex.
-        "libstatssocket",
-        "libcutils",
+        "libstatssocket_private",
     ],
 
     proto: {
