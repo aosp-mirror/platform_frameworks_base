@@ -327,6 +327,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
         final Drawable drawableF = drawable;
         state.iconSupplier = () -> {
+            if (drawableF == null) return null;
             Drawable.ConstantState cs = drawableF.getConstantState();
             if (cs != null) {
                 return new DrawableIcon(cs.newDrawable());
