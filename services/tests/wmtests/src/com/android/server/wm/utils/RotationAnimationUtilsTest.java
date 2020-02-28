@@ -50,7 +50,7 @@ public class RotationAnimationUtilsTest {
     public void blackLuma() {
         Bitmap swBitmap = createBitmap(0);
         GraphicBuffer gb = swBitmapToGraphicsBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getAvgBorderLuma(gb, mColorSpace);
+        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(gb, mColorSpace);
         assertEquals(0, borderLuma, 0);
     }
 
@@ -58,7 +58,15 @@ public class RotationAnimationUtilsTest {
     public void whiteLuma() {
         Bitmap swBitmap = createBitmap(1);
         GraphicBuffer gb = swBitmapToGraphicsBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getAvgBorderLuma(gb, mColorSpace);
+        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(gb, mColorSpace);
+        assertEquals(1, borderLuma, 0);
+    }
+
+    @Test
+    public void unevenBitmapDimens() {
+        Bitmap swBitmap = createBitmap(1, BITMAP_WIDTH + 1, BITMAP_HEIGHT + 1);
+        GraphicBuffer gb = swBitmapToGraphicsBuffer(swBitmap);
+        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(gb, mColorSpace);
         assertEquals(1, borderLuma, 0);
     }
 
@@ -67,7 +75,7 @@ public class RotationAnimationUtilsTest {
         Bitmap swBitmap = createBitmap(1);
         setBorderLuma(swBitmap, 0);
         GraphicBuffer gb = swBitmapToGraphicsBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getAvgBorderLuma(gb, mColorSpace);
+        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(gb, mColorSpace);
         assertEquals(0, borderLuma, 0);
     }
 
@@ -76,7 +84,7 @@ public class RotationAnimationUtilsTest {
         Bitmap swBitmap = createBitmap(0);
         setBorderLuma(swBitmap, 1);
         GraphicBuffer gb = swBitmapToGraphicsBuffer(swBitmap);
-        float borderLuma = RotationAnimationUtils.getAvgBorderLuma(gb, mColorSpace);
+        float borderLuma = RotationAnimationUtils.getMedianBorderLuma(gb, mColorSpace);
         assertEquals(1, borderLuma, 0);
     }
 
@@ -123,9 +131,13 @@ public class RotationAnimationUtilsTest {
     }
 
     private Bitmap createBitmap(float luma) {
-        Bitmap bitmap = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, ARGB_8888);
-        for (int i = 0; i < BITMAP_WIDTH; i++) {
-            for (int j = 0; j < BITMAP_HEIGHT; j++) {
+        return createBitmap(luma, BITMAP_WIDTH, BITMAP_HEIGHT);
+    }
+
+    private Bitmap createBitmap(float luma, int width, int height) {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, ARGB_8888);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
                 bitmap.setPixel(i, j, Color.argb(1, luma, luma, luma));
             }
         }
