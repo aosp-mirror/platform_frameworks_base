@@ -61,7 +61,6 @@ import libcore.util.EmptyArray;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 
@@ -110,12 +109,9 @@ public class PackageInfoUtils {
             return null;
         }
 
-        PackageInfo info = PackageInfoWithoutStateUtils.generateWithoutComponents(pkg, gids, flags,
-                firstInstallTime, lastUpdateTime, grantedPermissions, state, userId, apexInfo,
-                applicationInfo);
-        if (info == null) {
-            return null;
-        }
+        PackageInfo info = PackageInfoWithoutStateUtils.generateWithoutComponentsUnchecked(pkg,
+                gids, flags, firstInstallTime, lastUpdateTime, grantedPermissions, state, userId,
+                apexInfo, applicationInfo);
 
         info.isStub = pkg.isStub();
         info.coreApp = pkg.isCoreApp();
@@ -220,11 +216,8 @@ public class PackageInfoUtils {
             return null;
         }
 
-        ApplicationInfo info = PackageInfoWithoutStateUtils.generateApplicationInfo(pkg, flags,
-                state, userId);
-        if (info == null) {
-            return null;
-        }
+        ApplicationInfo info = PackageInfoWithoutStateUtils.generateApplicationInfoUnchecked(pkg,
+                flags, state, userId);
 
         if (pkgSetting != null) {
             // TODO(b/135203078): Remove PackageParser1/toAppInfoWithoutState and clean all this up
@@ -267,12 +260,13 @@ public class PackageInfoUtils {
         if (applicationInfo == null) {
             applicationInfo = generateApplicationInfo(pkg, flags, state, userId, pkgSetting);
         }
-        ActivityInfo info = PackageInfoWithoutStateUtils.generateActivityInfo(pkg, a, flags, state,
-                applicationInfo, userId);
-        if (info == null) {
+
+        if (applicationInfo == null) {
             return null;
         }
 
+        ActivityInfo info =
+                PackageInfoWithoutStateUtils.generateActivityInfoUnchecked(a, applicationInfo);
         assignSharedFieldsForComponentInfo(info, a, pkgSetting);
         return info;
     }
@@ -302,12 +296,12 @@ public class PackageInfoUtils {
         if (applicationInfo == null) {
             applicationInfo = generateApplicationInfo(pkg, flags, state, userId, pkgSetting);
         }
-        ServiceInfo info = PackageInfoWithoutStateUtils.generateServiceInfo(pkg, s, flags, state,
-                applicationInfo, userId);
-        if (info == null) {
+        if (applicationInfo == null) {
             return null;
         }
 
+        ServiceInfo info =
+                PackageInfoWithoutStateUtils.generateServiceInfoUnchecked(s, applicationInfo);
         assignSharedFieldsForComponentInfo(info, s, pkgSetting);
         return info;
     }
@@ -321,21 +315,20 @@ public class PackageInfoUtils {
             @NonNull ApplicationInfo applicationInfo, int userId,
             @Nullable PackageSetting pkgSetting) {
         if (p == null) return null;
+        if (!checkUseInstalledOrHidden(pkg, pkgSetting, state, flags)) {
+            return null;
+        }
         if (applicationInfo == null || !pkg.getPackageName().equals(applicationInfo.packageName)) {
             Slog.wtf(TAG, "AppInfo's package name is different. Expected=" + pkg.getPackageName()
                     + " actual=" + (applicationInfo == null ? "(null AppInfo)"
                     : applicationInfo.packageName));
             applicationInfo = generateApplicationInfo(pkg, flags, state, userId, pkgSetting);
         }
-        if (!checkUseInstalledOrHidden(pkg, pkgSetting, state, flags)) {
+        if (applicationInfo == null) {
             return null;
         }
-        ProviderInfo info = PackageInfoWithoutStateUtils.generateProviderInfo(pkg, p, flags, state,
-                applicationInfo, userId);
-        if (info == null) {
-            return null;
-        }
-
+        ProviderInfo info = PackageInfoWithoutStateUtils.generateProviderInfoUnchecked(p, flags,
+                applicationInfo);
         assignSharedFieldsForComponentInfo(info, p, pkgSetting);
         return info;
     }
