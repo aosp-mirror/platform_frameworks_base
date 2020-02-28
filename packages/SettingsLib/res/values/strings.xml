@@ -895,7 +895,7 @@
     <!-- UI debug setting: enable verbose vendor logging [CHAR LIMIT=60] -->
     <string name="enable_verbose_vendor_logging">Enable verbose vendor logging</string>
     <!-- UI debug setting: enable verbose vendor logging summary [CHAR LIMIT=NONE] -->
-    <string name="enable_verbose_vendor_logging_summary">Allow additional vendor logs to be included in bug reports, may contain private information</string>
+    <string name="enable_verbose_vendor_logging_summary">Include additional device-specific vendor logs in bug reports, which may contain private information, use more battery, and/or use more storage.</string>
 
     <!-- UI debug setting: scaling factor for window animations [CHAR LIMIT=25] -->
     <string name="window_animation_scale_title">Window animation scale</string>
