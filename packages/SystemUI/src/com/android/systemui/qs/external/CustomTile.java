@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -72,15 +73,19 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private android.graphics.drawable.Icon mDefaultIcon;
     private CharSequence mDefaultLabel;
 
+    private final Context mUserContext;
+
     private boolean mListening;
     private boolean mIsTokenGranted;
     private boolean mIsShowingDialog;
 
-    private CustomTile(QSTileHost host, String action) {
+    private CustomTile(QSTileHost host, String action, Context userContext) {
         super(host);
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         mComponent = ComponentName.unflattenFromString(action);
         mTile = new Tile();
+        mUserContext = userContext;
+        mUser = mUserContext.getUserId();
         updateDefaultTileAndIcon();
         mServiceManager = host.getTileServices().getTileWrapper(this);
         if (mServiceManager.isToggleableTile()) {
@@ -90,7 +95,6 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
         mService = mServiceManager.getTileService();
         mServiceManager.setTileChangeListener(this);
-        mUser = ActivityManager.getCurrentUser();
     }
 
     @Override
@@ -100,7 +104,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     private void updateDefaultTileAndIcon() {
         try {
-            PackageManager pm = mContext.getPackageManager();
+            PackageManager pm = mUserContext.getPackageManager();
             int flags = PackageManager.MATCH_DIRECT_BOOT_UNAWARE | PackageManager.MATCH_DIRECT_BOOT_AWARE;
             if (isSystemApp(pm)) {
                 flags |= PackageManager.MATCH_DISABLED_COMPONENTS;
@@ -318,11 +322,11 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         state.state = tileState;
         Drawable drawable;
         try {
-            drawable = mTile.getIcon().loadDrawable(mContext);
+            drawable = mTile.getIcon().loadDrawable(mUserContext);
         } catch (Exception e) {
             Log.w(TAG, "Invalid icon, forcing into unavailable state");
             state.state = Tile.STATE_UNAVAILABLE;
-            drawable = mDefaultIcon.loadDrawable(mContext);
+            drawable = mDefaultIcon.loadDrawable(mUserContext);
         }
 
         final Drawable drawableF = drawable;
@@ -388,7 +392,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         return ComponentName.unflattenFromString(action);
     }
 
-    public static CustomTile create(QSTileHost host, String spec) {
+    public static CustomTile create(QSTileHost host, String spec, Context userContext) {
         if (spec == null || !spec.startsWith(PREFIX) || !spec.endsWith(")")) {
             throw new IllegalArgumentException("Bad custom tile spec: " + spec);
         }
@@ -396,6 +400,6 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         if (action.isEmpty()) {
             throw new IllegalArgumentException("Empty custom tile spec action");
         }
-        return new CustomTile(host, action);
+        return new CustomTile(host, action, userContext);
     }
 }

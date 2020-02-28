@@ -279,6 +279,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         if (mPackageReceiverRegistered.get() || mUserReceiverRegistered.get()) {
             stopPackageListening();
         }
+        mChangeListener = null;
     }
 
     private void handleDeath() {
