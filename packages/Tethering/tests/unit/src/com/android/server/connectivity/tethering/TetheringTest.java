@@ -28,6 +28,7 @@ import static android.net.TetheringManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.TetheringManager.EXTRA_ACTIVE_LOCAL_ONLY;
 import static android.net.TetheringManager.EXTRA_ACTIVE_TETHER;
 import static android.net.TetheringManager.EXTRA_AVAILABLE_TETHER;
+import static android.net.TetheringManager.TETHERING_ETHERNET;
 import static android.net.TetheringManager.TETHERING_NCM;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
@@ -75,6 +76,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
+import android.net.EthernetManager;
+import android.net.EthernetManager.TetheredInterfaceRequest;
 import android.net.INetd;
 import android.net.ITetheringEventCallback;
 import android.net.InetAddresses;
@@ -180,6 +183,7 @@ public class TetheringTest {
     @Mock private UserManager mUserManager;
     @Mock private NetworkRequest mNetworkRequest;
     @Mock private ConnectivityManager mCm;
+    @Mock private EthernetManager mEm;
 
     private final MockIpServerDependencies mIpServerDependencies =
             spy(new MockIpServerDependencies());
@@ -232,6 +236,7 @@ public class TetheringTest {
             if (Context.USER_SERVICE.equals(name)) return mUserManager;
             if (Context.NETWORK_STATS_SERVICE.equals(name)) return mStatsManager;
             if (Context.CONNECTIVITY_SERVICE.equals(name)) return mCm;
+            if (Context.ETHERNET_SERVICE.equals(name)) return mEm;
             return super.getSystemService(name);
         }
 
@@ -1314,6 +1319,24 @@ public class TetheringTest {
         mPhoneStateListener.onActiveDataSubscriptionIdChanged(fakeSubId);
         final TetheringConfiguration newConfig = mTethering.getTetheringConfiguration();
         assertEquals(fakeSubId, newConfig.activeDataSubId);
+    }
+
+    @Test
+    public void testNoDuplicatedEthernetRequest() throws Exception {
+        final TetheredInterfaceRequest mockRequest = mock(TetheredInterfaceRequest.class);
+        when(mEm.requestTetheredInterface(any(), any())).thenReturn(mockRequest);
+        mTethering.startTethering(createTetheringRquestParcel(TETHERING_ETHERNET), null);
+        mLooper.dispatchAll();
+        verify(mEm, times(1)).requestTetheredInterface(any(), any());
+        mTethering.startTethering(createTetheringRquestParcel(TETHERING_ETHERNET), null);
+        mLooper.dispatchAll();
+        verifyNoMoreInteractions(mEm);
+        mTethering.stopTethering(TETHERING_ETHERNET);
+        mLooper.dispatchAll();
+        verify(mockRequest, times(1)).release();
+        mTethering.stopTethering(TETHERING_ETHERNET);
+        mLooper.dispatchAll();
+        verifyNoMoreInteractions(mEm);
     }
 
     private void workingWifiP2pGroupOwner(
