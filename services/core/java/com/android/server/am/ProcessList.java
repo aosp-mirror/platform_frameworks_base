@@ -2334,6 +2334,19 @@ public final class ProcessList {
             if (sb == null) sb = new StringBuilder();
             sb.append("seq=" + app.startSeq + ",expected=" + expectedStartSeq + ";");
         }
+        try {
+            AppGlobals.getPackageManager().checkPackageStartable(app.info.packageName, app.userId);
+        } catch (RemoteException e) {
+            // unexpected; ignore
+        } catch (SecurityException e) {
+            if (mService.mConstants.FLAG_PROCESS_START_ASYNC) {
+                if (sb == null) sb = new StringBuilder();
+                sb.append("Package is frozen;");
+            } else {
+                // we're not being started async and so should throw to the caller.
+                throw e;
+            }
+        }
         return sb == null ? null : sb.toString();
     }
 
