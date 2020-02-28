@@ -19352,7 +19352,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void showWhileInUseDebugToast(int uid, int op, int mode) {
             synchronized (ActivityManagerService.this) {
-                ActivityManagerService.this.mServices.showWhileInUseDebugNotificationLocked(
+                ActivityManagerService.this.mServices.showWhileInUseDebugToastLocked(
                         uid, op, mode);
             }
         }
