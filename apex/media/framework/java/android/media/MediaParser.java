@@ -700,30 +700,34 @@ public final class MediaParser {
         mDataSource.mInputReader = seekableInputReader;
 
         // TODO: Apply parameters when creating extractor instances.
-        if (mExtractorName != null) {
-            mExtractor = EXTRACTOR_FACTORIES_BY_NAME.get(mExtractorName).createInstance();
-        } else if (mExtractor == null) {
-            for (String parserName : mParserNamesPool) {
-                Extractor extractor = EXTRACTOR_FACTORIES_BY_NAME.get(parserName).createInstance();
-                try {
-                    if (extractor.sniff(mExtractorInput)) {
-                        mExtractorName = parserName;
-                        mExtractor = extractor;
-                        mExtractor.init(new ExtractorOutputAdapter());
-                        break;
+        if (mExtractor == null) {
+            if (mExtractorName != null) {
+                mExtractor = EXTRACTOR_FACTORIES_BY_NAME.get(mExtractorName).createInstance();
+                mExtractor.init(new ExtractorOutputAdapter());
+            } else {
+                for (String parserName : mParserNamesPool) {
+                    Extractor extractor =
+                            EXTRACTOR_FACTORIES_BY_NAME.get(parserName).createInstance();
+                    try {
+                        if (extractor.sniff(mExtractorInput)) {
+                            mExtractorName = parserName;
+                            mExtractor = extractor;
+                            mExtractor.init(new ExtractorOutputAdapter());
+                            break;
+                        }
+                    } catch (EOFException e) {
+                        // Do nothing.
+                    } catch (IOException | InterruptedException e) {
+                        throw new IllegalStateException(e);
+                    } finally {
+                        mExtractorInput.resetPeekPosition();
                     }
-                } catch (EOFException e) {
-                    // Do nothing.
-                } catch (IOException | InterruptedException e) {
-                    throw new IllegalStateException(e);
-                } finally {
-                    mExtractorInput.resetPeekPosition();
                 }
+                if (mExtractor == null) {
+                    throw UnrecognizedInputFormatException.createForExtractors(mParserNamesPool);
+                }
+                return true;
             }
-            if (mExtractor == null) {
-                throw UnrecognizedInputFormatException.createForExtractors(mParserNamesPool);
-            }
-            return true;
         }
 
         if (isPendingSeek()) {
