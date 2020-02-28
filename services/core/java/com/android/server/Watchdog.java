@@ -112,6 +112,7 @@ public class Watchdog extends Thread {
             "android.hardware.biometrics.face@1.0::IBiometricsFace",
             "android.hardware.bluetooth@1.0::IBluetoothHci",
             "android.hardware.camera.provider@2.4::ICameraProvider",
+            "android.hardware.gnss@1.0::IGnss",
             "android.hardware.graphics.allocator@2.0::IAllocator",
             "android.hardware.graphics.composer@2.1::IComposer",
             "android.hardware.health@2.0::IHealth",
