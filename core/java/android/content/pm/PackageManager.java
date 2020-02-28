@@ -2884,6 +2884,13 @@ public abstract class PackageManager {
     public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device does not have a slices implementation.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SLICES_DISABLED = "android.software.slices_disabled";
+    /**
      * Extra field name for the URI to a verification file. Passed to a package
      * verifier.
      *
