@@ -73,7 +73,7 @@ public class RemoteInputUriController {
     private final NotificationEntryListener mInlineUriListener = new NotificationEntryListener() {
         @Override
         public void onEntryRemoved(NotificationEntry entry, NotificationVisibility visibility,
-                boolean removedByUser) {
+                boolean removedByUser, int reason) {
             try {
                 mStatusBarManagerService.clearInlineReplyUriPermissions(entry.getKey());
             } catch (RemoteException ex) {

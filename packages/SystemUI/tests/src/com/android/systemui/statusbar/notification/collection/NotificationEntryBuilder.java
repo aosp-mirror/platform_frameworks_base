@@ -21,6 +21,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.ShortcutInfo;
 import android.os.UserHandle;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
@@ -264,6 +265,11 @@ public class NotificationEntryBuilder {
 
     public NotificationEntryBuilder setSmartReplies(CharSequence... smartReplies) {
         mRankingBuilder.setSmartReplies(smartReplies);
+        return this;
+    }
+
+    public NotificationEntryBuilder setShortcutInfo(ShortcutInfo shortcutInfo) {
+        mRankingBuilder.setShortcutInfo(shortcutInfo);
         return this;
     }
 }
