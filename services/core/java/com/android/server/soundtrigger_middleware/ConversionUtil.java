@@ -196,8 +196,8 @@ class ConversionUtil {
         hidlModel.header.type = aidl2hidlSoundModelType(aidlModel.type);
         hidlModel.header.uuid = aidl2hidlUuid(aidlModel.uuid);
         hidlModel.header.vendorUuid = aidl2hidlUuid(aidlModel.vendorUuid);
-        hidlModel.data = HidlMemoryUtil.byteArrayToHidlMemory(aidlModel.data,
-                "SoundTrigger SoundModel");
+        hidlModel.data = HidlMemoryUtil.fileDescriptorToHidlMemory(aidlModel.data,
+                aidlModel.dataSize);
         return hidlModel;
     }
 
