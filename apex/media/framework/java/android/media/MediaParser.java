@@ -94,61 +94,84 @@ import java.util.Map;
  * which extracts and publishes all video samples:
  *
  * <pre>
- *
  * class VideoOutputConsumer implements MediaParser.OutputConsumer {
  *
- *     private static final int MAXIMUM_SAMPLE_SIZE = ...;
- *     private byte[] sampleDataBuffer = new byte[MAXIMUM_SAMPLE_SIZE];
+ *     private byte[] sampleDataBuffer = new byte[4096];
+ *     private byte[] discardedDataBuffer = new byte[4096];
  *     private int videoTrackIndex = -1;
  *     private int bytesWrittenCount = 0;
  *
- *     \@Override
- *     public void onSeekMap(int i, @NonNull MediaFormat mediaFormat) { \/* Do nothing. *\/ }
+ *     &#64;Override
+ *     public void onSeekMap(int i, &#64;NonNull MediaFormat mediaFormat) {
+ *       // Do nothing.
+ *     }
  *
- *     \@Override
- *     public void onTrackData(int i, @NonNull TrackData trackData) {
+ *     &#64;Override
+ *     public void onTrackData(int i, &#64;NonNull TrackData trackData) {
  *       MediaFormat mediaFormat = trackData.mediaFormat;
- *       if (videoTrackIndex == -1 && mediaFormat
- *           .getString(MediaFormat.KEY_MIME, \/* defaultValue= *\/ "").startsWith("video/")) {
+ *       if (videoTrackIndex == -1 &&
+ *           mediaFormat
+ *               .getString(MediaFormat.KEY_MIME, &#47;* defaultValue= *&#47; "")
+ *               .startsWith("video/")) {
  *         videoTrackIndex = i;
  *       }
  *     }
  *
- *     \@Override
- *     public void onSampleData(int trackIndex, @NonNull InputReader inputReader)
+ *     &#64;Override
+ *     public void onSampleData(int trackIndex, &#64;NonNull InputReader inputReader)
  *         throws IOException, InterruptedException {
  *       int numberOfBytesToRead = (int) inputReader.getLength();
  *       if (videoTrackIndex != trackIndex) {
  *         // Discard contents.
- *         inputReader.read(\/* bytes= *\/ null, \/* offset= *\/ 0, numberOfBytesToRead);
+ *         inputReader.read(
+ *             discardedDataBuffer,
+ *             &#47;* offset= *&#47; 0,
+ *             Math.min(discardDataBuffer.length, numberOfBytesToRead));
+ *       } else {
+ *         ensureSpaceInBuffer(numberOfBytesToRead);
+ *         int bytesRead = inputReader.read(
+ *             sampleDataBuffer, bytesWrittenCount, numberOfBytesToRead);
+ *         bytesWrittenCount += bytesRead;
  *       }
- *       int bytesRead = inputReader.read(sampleDataBuffer, bytesWrittenCount, numberOfBytesToRead);
- *       bytesWrittenCount += bytesRead;
  *     }
  *
- *     \@Override
+ *     &#64;Override
  *     public void onSampleCompleted(
  *         int trackIndex,
  *         long timeUs,
  *         int flags,
  *         int size,
  *         int offset,
- *         \@Nullable CryptoInfo cryptoData) {
+ *         &#64;Nullable CryptoInfo cryptoData) {
  *       if (videoTrackIndex != trackIndex) {
  *         return; // It's not the video track. Ignore.
  *       }
  *       byte[] sampleData = new byte[size];
- *       System.arraycopy(sampleDataBuffer, bytesWrittenCount - size - offset, sampleData, \/*
- *       destPos= *\/ 0, size);
+ *       int sampleStartOffset = bytesWrittenCount - size - offset;
+ *       System.arraycopy(
+ *           sampleDataBuffer,
+ *           sampleStartOffset,
+ *           sampleData,
+ *           &#47;* destPos= *&#47; 0,
+ *           size);
  *       // Place trailing bytes at the start of the buffer.
  *       System.arraycopy(
  *           sampleDataBuffer,
  *           bytesWrittenCount - offset,
  *           sampleDataBuffer,
- *           \/* destPos= *\/ 0,
- *           \/* size= *\/ offset);
+ *           &#47;* destPos= *&#47; 0,
+ *           &#47;* size= *&#47; offset);
+ *       bytesWrittenCount = bytesWrittenCount - offset;
  *       publishSample(sampleData, timeUs, flags);
  *     }
+ *
+ *    private void ensureSpaceInBuffer(int numberOfBytesToRead) {
+ *      int requiredLength = bytesWrittenCount + numberOfBytesToRead;
+ *      if (requiredLength > sampleDataBuffer.length) {
+ *        sampleDataBuffer = Arrays.copyOf(sampleDataBuffer, requiredLength);
+ *      }
+ *    }
+ *
  *   }
  *
  * </pre>
@@ -342,11 +365,16 @@ public final class MediaParser {
         /**
          * Called to write sample data to the output.
          *
-         * <p>Implementers must attempt to consume the entirety of the input, but should surface any
-         * thrown {@link IOException} caused by reading from {@code input}.
+         * <p>If the invocation of this method returns before the entire {@code inputReader} {@link
+         * InputReader#getLength() length} is consumed, the method will be called again for the
+         * implementer to read the remaining data. Implementers should surface any thrown {@link
+         * IOException} caused by reading from {@code input}.
          *
          * @param trackIndex The index of the track to which the sample data corresponds.
          * @param inputReader The {@link InputReader} from which to read the data.
+         * @throws IOException If an exception occurs while reading from {@code inputReader}.
+         * @throws InterruptedException If an interruption occurs while reading from {@code
+         *     inputReader}.
          */
         void onSampleData(int trackIndex, @NonNull InputReader inputReader)
                 throws IOException, InterruptedException;
@@ -361,8 +389,9 @@ public final class MediaParser {
          * @param flags Flags associated with the sample. See {@link MediaCodec
          *     MediaCodec.BUFFER_FLAG_*}.
          * @param size The size of the sample data, in bytes.
-         * @param offset The number of bytes that have been passed to {@link #onSampleData} since
-         *     the last byte belonging to the sample whose metadata is being passed.
+         * @param offset The number of bytes that have been consumed by {@code onSampleData(int,
+         *     MediaParser.InputReader)} for the specified track, since the last byte belonging to
+         *     the sample whose metadata is being passed.
          * @param cryptoData Encryption data required to decrypt the sample. May be null for
          *     unencrypted samples.
          */
@@ -684,7 +713,9 @@ public final class MediaParser {
      *     container data.
      * @return Whether there is any data left to extract. Returns false if the end of input has been
      *     reached.
-     * @throws UnrecognizedInputFormatException
+     * @throws IOException If an error occurs while reading from the {@link SeekableInputReader}.
+     * @throws UnrecognizedInputFormatException If the format cannot be recognized by any of the
+     *     underlying parser implementations.
      */
     public boolean advance(@NonNull SeekableInputReader seekableInputReader)
             throws IOException, InterruptedException {
