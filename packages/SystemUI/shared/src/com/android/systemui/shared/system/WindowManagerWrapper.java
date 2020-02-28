@@ -191,18 +191,6 @@ public class WindowManagerWrapper {
     }
 
     /**
-     * Registers a docked stack listener with the system.
-     */
-    public void registerDockedStackListener(DockedStackListenerCompat listener) {
-        try {
-            WindowManagerGlobal.getWindowManagerService().registerDockedStackListener(
-                    listener.mListener);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to register docked stack listener");
-        }
-    }
-
-    /**
      * Adds a pinned stack listener, which will receive updates from the window manager service
      * along with any other pinned stack listeners that were added via this method.
      */

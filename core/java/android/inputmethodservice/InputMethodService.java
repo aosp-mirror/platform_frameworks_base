@@ -459,6 +459,16 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     private IBinder mCurShowInputToken;
 
+    /**
+     * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#hideSoftInput}
+     * The original app window token is passed from client app window.
+     * {@link com.android.server.inputmethod.InputMethodManagerService} creates a unique dummy
+     * token to identify this window.
+     * This dummy token is only valid for a single call to {@link InputMethodImpl#hideSoftInput},
+     * after which it is set {@code null} until next call.
+     */
+    private IBinder mCurHideInputToken;
+
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
         onComputeInsets(mTmpInsets);
         if (isExtractViewShown()) {
@@ -500,6 +510,7 @@ public class InputMethodService extends AbstractInputMethodService {
     public class InputMethodImpl extends AbstractInputMethodImpl {
 
         private boolean mSystemCallingShowSoftInput;
+        private boolean mSystemCallingHideSoftInput;
 
         /**
          * {@inheritDoc}
@@ -636,11 +647,32 @@ public class InputMethodService extends AbstractInputMethodService {
 
         /**
          * {@inheritDoc}
+         * @hide
+         */
+        @MainThread
+        @Override
+        public void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
+                IBinder hideInputToken) {
+            mSystemCallingHideSoftInput = true;
+            mCurHideInputToken = hideInputToken;
+            hideSoftInput(flags, resultReceiver);
+            mCurHideInputToken = null;
+            mSystemCallingHideSoftInput = false;
+        }
+
+        /**
+         * {@inheritDoc}
          */
         @MainThread
         @Override
         public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
             if (DEBUG) Log.v(TAG, "hideSoftInput()");
+            if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R
+                    && !mSystemCallingHideSoftInput) {
+                Log.e(TAG, "IME shouldn't call hideSoftInput on itself."
+                        + " Use requestHideSelf(int) itself");
+                return;
+            }
             final boolean wasVisible = mIsPreRendered
                     ? mDecorViewVisible && mWindowVisible : isInputViewShown();
             applyVisibilityInInsetsConsumerIfNecessary(false /* setVisible */);
@@ -738,6 +770,15 @@ public class InputMethodService extends AbstractInputMethodService {
         public void setCurrentShowInputToken(IBinder showInputToken) {
             mCurShowInputToken = showInputToken;
         }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void setCurrentHideInputToken(IBinder hideInputToken) {
+            mCurHideInputToken = hideInputToken;
+        }
     }
 
     // TODO(b/137800469): Add detailed docs explaining the inline suggestions process.
@@ -812,6 +853,13 @@ public class InputMethodService extends AbstractInputMethodService {
     private void notifyImeHidden() {
         setImeWindowStatus(IME_ACTIVE | IME_INVISIBLE, mBackDisposition);
         onPreRenderedWindowVisibilityChanged(false /* setVisible */);
+    }
+
+    private void removeImeSurface() {
+        if (!mShowInputRequested && !mWindowVisible) {
+            // hiding a window removes its surface.
+            mWindow.hide();
+        }
     }
 
     private void setImeWindowStatus(int visibilityFlags, int backDisposition) {
@@ -931,6 +979,14 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         public final void notifyImeHidden() {
             InputMethodService.this.notifyImeHidden();
+        }
+
+        /**
+         * Notify IME that surface can be now removed.
+         * @hide
+         */
+        public final void removeImeSurface() {
+            InputMethodService.this.removeImeSurface();
         }
     }
     
@@ -2157,7 +2213,8 @@ public class InputMethodService extends AbstractInputMethodService {
         if (!isVisibilityAppliedUsingInsetsConsumer()) {
             return;
         }
-        mPrivOps.applyImeVisibility(mCurShowInputToken, setVisible);
+        mPrivOps.applyImeVisibility(setVisible
+                ? mCurShowInputToken : mCurHideInputToken, setVisible);
     }
 
     private boolean isVisibilityAppliedUsingInsetsConsumer() {

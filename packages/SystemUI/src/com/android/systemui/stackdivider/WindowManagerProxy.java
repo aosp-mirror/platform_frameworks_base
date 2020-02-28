@@ -292,10 +292,23 @@ public class WindowManagerProxy {
             for (int i = freeHomeAndRecents.size() - 1; i >= 0; --i) {
                 wct.setBounds(freeHomeAndRecents.get(i).token, null);
             }
+            // Reset focusable to true
+            wct.setFocusable(tiles.mPrimary.token, true /* focusable */);
             ActivityTaskManager.getTaskOrganizerController().applyContainerTransaction(wct,
                     null /* organizer */);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to remove stack: " + e);
+        }
+    }
+
+    static void applyPrimaryFocusable(SplitScreenTaskOrganizer splits, boolean focusable) {
+        try {
+            WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.setFocusable(splits.mPrimary.token, focusable);
+            ActivityTaskManager.getTaskOrganizerController().applyContainerTransaction(wct,
+                    null /* organizer */);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error setting focusability: " + e);
         }
     }
 }

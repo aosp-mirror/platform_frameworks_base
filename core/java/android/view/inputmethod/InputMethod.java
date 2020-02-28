@@ -348,6 +348,27 @@ public interface InputMethod {
      * {@link InputMethodManager#RESULT_UNCHANGED_HIDDEN InputMethodManager.RESULT_UNCHANGED_HIDDEN},
      * {@link InputMethodManager#RESULT_SHOWN InputMethodManager.RESULT_SHOWN}, or
      * {@link InputMethodManager#RESULT_HIDDEN InputMethodManager.RESULT_HIDDEN}.
+     * @param hideInputToken an opaque {@link android.os.Binder} token to identify which API call
+     *         of {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}} is associated
+     *         with this callback.
+     * @hide
+     */
+    @MainThread
+    public void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
+            IBinder hideInputToken);
+
+    /**
+     * Request that any soft input part of the input method be hidden from the user.
+     * @param flags Provides additional information about the show request.
+     * Currently always 0.
+     * @param resultReceiver The client requesting the show may wish to
+     * be told the impact of their request, which should be supplied here.
+     * The result code should be
+     * {@link InputMethodManager#RESULT_UNCHANGED_SHOWN InputMethodManager.RESULT_UNCHANGED_SHOWN},
+     * {@link InputMethodManager#RESULT_UNCHANGED_HIDDEN
+     *        InputMethodManager.RESULT_UNCHANGED_HIDDEN},
+     * {@link InputMethodManager#RESULT_SHOWN InputMethodManager.RESULT_SHOWN}, or
+     * {@link InputMethodManager#RESULT_HIDDEN InputMethodManager.RESULT_HIDDEN}.
      */
     @MainThread
     public void hideSoftInput(int flags, ResultReceiver resultReceiver);
@@ -366,4 +387,13 @@ public interface InputMethod {
      * @hide
      */
     public void setCurrentShowInputToken(IBinder showInputToken);
+
+    /**
+     * Update token of the client window requesting {@link #hideSoftInput(int, ResultReceiver)}
+     * @param hideInputToken dummy app window token for window requesting
+     *        {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}
+     * @hide
+     */
+    public void setCurrentHideInputToken(IBinder hideInputToken);
+
 }

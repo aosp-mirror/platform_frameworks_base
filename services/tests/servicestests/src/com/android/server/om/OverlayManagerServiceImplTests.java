@@ -24,30 +24,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.util.ArraySet;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.content.om.OverlayConfig;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTestsBase {

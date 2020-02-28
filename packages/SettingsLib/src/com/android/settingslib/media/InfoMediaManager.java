@@ -15,9 +15,15 @@
  */
 package com.android.settingslib.media;
 
-import static android.media.MediaRoute2Info.DEVICE_TYPE_BLUETOOTH;
-import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_TV;
-import static android.media.MediaRoute2Info.DEVICE_TYPE_UNKNOWN;
+import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
+import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_GROUP;
+import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
+import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
@@ -165,6 +171,26 @@ public class InfoMediaManager extends MediaManager {
     }
 
     /**
+     * Release session to stop playing media on MediaDevice.
+     */
+    boolean releaseSession() {
+        if (TextUtils.isEmpty(mPackageName)) {
+            Log.w(TAG, "releaseSession() package name is null or empty!");
+            return false;
+        }
+
+        final RoutingSessionInfo info = getRoutingSessionInfo();
+        if (info != null) {
+            mRouterManager.getControllerForSession(info).release();
+            return true;
+        }
+
+        Log.w(TAG, "releaseSession() Ignoring release session : " + mPackageName);
+
+        return false;
+    }
+
+    /**
      * Get the MediaDevice list that can be added to current media.
      *
      * @return list of MediaDevice
@@ -298,7 +324,9 @@ public class InfoMediaManager extends MediaManager {
 
     private void buildAllRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAllRoutes()) {
-            addMediaDevice(route);
+            if (route.isSystemRoute()) {
+                addMediaDevice(route);
+            }
         }
     }
 
@@ -309,27 +337,29 @@ public class InfoMediaManager extends MediaManager {
     }
 
     private void addMediaDevice(MediaRoute2Info route) {
-        final int deviceType = route.getDeviceType();
+        final int deviceType = route.getType();
         MediaDevice mediaDevice = null;
         switch (deviceType) {
-            case DEVICE_TYPE_UNKNOWN:
+            case TYPE_UNKNOWN:
+            case TYPE_REMOTE_TV:
+            case TYPE_REMOTE_SPEAKER:
+            case TYPE_GROUP:
                 //TODO(b/148765806): use correct device type once api is ready.
-                final String defaultRoute = "DEFAULT_ROUTE";
-                if (TextUtils.equals(defaultRoute, route.getOriginalId())) {
-                    mediaDevice =
-                            new PhoneMediaDevice(mContext, mRouterManager, route, mPackageName);
-                } else {
-                    mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
-                            mPackageName);
-                    if (!TextUtils.isEmpty(mPackageName)
-                            && TextUtils.equals(route.getClientPackageName(), mPackageName)) {
-                        mCurrentConnectedDevice = mediaDevice;
-                    }
+                mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
+                        mPackageName);
+                if (!TextUtils.isEmpty(mPackageName)
+                        && TextUtils.equals(route.getClientPackageName(), mPackageName)) {
+                    mCurrentConnectedDevice = mediaDevice;
                 }
                 break;
-            case DEVICE_TYPE_REMOTE_TV:
+            case TYPE_BUILTIN_SPEAKER:
+            case TYPE_WIRED_HEADSET:
+            case TYPE_WIRED_HEADPHONES:
+                mediaDevice =
+                        new PhoneMediaDevice(mContext, mRouterManager, route, mPackageName);
                 break;
-            case DEVICE_TYPE_BLUETOOTH:
+            case TYPE_HEARING_AID:
+            case TYPE_BLUETOOTH_A2DP:
                 final BluetoothDevice device =
                         BluetoothAdapter.getDefaultAdapter().getRemoteDevice(route.getOriginalId());
                 final CachedBluetoothDevice cachedDevice =

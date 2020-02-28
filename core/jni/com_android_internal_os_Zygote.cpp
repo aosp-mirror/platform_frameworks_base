@@ -626,12 +626,6 @@ static void PreApplicationInit() {
 
   // Set the jemalloc decay time to 1.
   mallopt(M_DECAY_TIME, 1);
-
-  // Maybe initialize GWP-ASan here. Must be called after
-  // mallopt(M_SET_ZYGOTE_CHILD).
-  bool ForceEnableGwpAsan = false;
-  android_mallopt(M_INITIALIZE_GWP_ASAN, &ForceEnableGwpAsan,
-                  sizeof(ForceEnableGwpAsan));
 }
 
 static void SetUpSeccompFilter(uid_t uid, bool is_child_zygote) {

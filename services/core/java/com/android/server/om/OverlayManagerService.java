@@ -226,7 +226,7 @@ public final class OverlayManagerService extends SystemService {
 
     private final AtomicFile mSettingsFile;
 
-    private final PackageManagerHelper mPackageManager;
+    private final PackageManagerHelperImpl mPackageManager;
 
     private final UserManagerService mUserManager;
 
@@ -244,7 +244,7 @@ public final class OverlayManagerService extends SystemService {
             traceBegin(TRACE_TAG_RRO, "OMS#OverlayManagerService");
             mSettingsFile = new AtomicFile(
                     new File(Environment.getDataSystemDirectory(), "overlays.xml"), "overlays");
-            mPackageManager = new PackageManagerHelper(context);
+            mPackageManager = new PackageManagerHelperImpl(context);
             mUserManager = UserManagerService.getInstance();
             IdmapManager im = new IdmapManager(mPackageManager);
             mSettings = new OverlayManagerSettings();
@@ -1053,14 +1053,8 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
-    /**
-     * Delegate for {@link android.content.pm.PackageManager} and {@link PackageManagerInternal}
-     * functionality, separated for easy testing.
-     *
-     * @hide
-     */
-    public static final class PackageManagerHelper implements
-            OverlayManagerServiceImpl.PackageManagerHelper, OverlayActorEnforcer.VerifyCallback {
+    private static final class PackageManagerHelperImpl implements PackageManagerHelper,
+            OverlayableInfoCallback {
 
         private final Context mContext;
         private final IPackageManager mPackageManager;
@@ -1073,7 +1067,7 @@ public final class OverlayManagerService extends SystemService {
         // behind until all pending intents have been processed.
         private final SparseArray<HashMap<String, PackageInfo>> mCache = new SparseArray<>();
 
-        PackageManagerHelper(Context context) {
+        PackageManagerHelperImpl(Context context) {
             mContext = context;
             mPackageManager = getPackageManager();
             mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
@@ -1132,7 +1126,7 @@ public final class OverlayManagerService extends SystemService {
         @Nullable
         @Override
         public OverlayableInfo getOverlayableForTarget(@NonNull String packageName,
-                @Nullable String targetOverlayableName, int userId)
+                @NonNull String targetOverlayableName, int userId)
                 throws IOException {
             PackageInfo packageInfo = getPackageInfo(packageName, userId);
             if (packageInfo == null) {

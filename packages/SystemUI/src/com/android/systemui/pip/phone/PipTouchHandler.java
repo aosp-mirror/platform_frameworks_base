@@ -48,6 +48,7 @@ import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 
 import java.io.PrintWriter;
@@ -164,7 +165,8 @@ public class PipTouchHandler {
             InputConsumerController inputConsumerController,
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            DeviceConfigProxy deviceConfig) {
         // Initialize the Pip input consumer
         mContext = context;
         mActivityManager = activityManager;
@@ -179,7 +181,8 @@ public class PipTouchHandler {
         mMotionHelper = new PipMotionHelper(mContext, activityTaskManager, pipTaskOrganizer,
                 mMenuController, mSnapAlgorithm, mFlingAnimationUtils, floatingContentCoordinator);
         mPipResizeGestureHandler =
-                new PipResizeGestureHandler(context, pipBoundsHandler, this, mMotionHelper);
+                new PipResizeGestureHandler(context, pipBoundsHandler, this, mMotionHelper,
+                        deviceConfig);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         mMovementBounds, true /* allowMenuTimeout */, willResizeMenu()));
@@ -266,6 +269,10 @@ public class PipTouchHandler {
     public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect curBounds,
             boolean fromImeAdjustment, boolean fromShelfAdjustment, int displayRotation) {
         final int bottomOffset = mIsImeShowing ? mImeHeight : 0;
+        final boolean fromDisplayRotationChanged = (mDisplayRotation != displayRotation);
+        if (fromDisplayRotationChanged) {
+            mTouchState.reset();
+        }
 
         // Re-calculate the expanded bounds
         mNormalBounds = normalBounds;
@@ -293,7 +300,7 @@ public class PipTouchHandler {
 
         // If this is from an IME or shelf adjustment, then we should move the PiP so that it is not
         // occluded by the IME or shelf.
-        if (fromImeAdjustment || fromShelfAdjustment) {
+        if (fromImeAdjustment || fromShelfAdjustment || fromDisplayRotationChanged) {
             if (mTouchState.isUserInteracting()) {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen

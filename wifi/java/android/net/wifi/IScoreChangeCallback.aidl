@@ -16,16 +16,14 @@
 
 package android.net.wifi;
 
-import android.net.NetworkScore;
-
 /**
- * Interface for Wi-Fi network score callback.
+ * Interface for Wi-Fi score callback.
  *
  * @hide
  */
 oneway interface IScoreChangeCallback
 {
-    void onScoreChange(int sessionId, in NetworkScore score);
+    void onScoreChange(int sessionId, int score);
 
     void onTriggerUpdateOfWifiUsabilityStats(int sessionId);
 }

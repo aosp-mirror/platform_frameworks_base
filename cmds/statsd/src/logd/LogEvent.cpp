@@ -65,18 +65,6 @@ using std::vector;
 #define ATTRIBUTION_CHAIN_TYPE 0x09
 #define ERROR_TYPE 0x0F
 
-// Msg is expected to begin at the start of the serialized atom -- it should not
-// include the android_log_header_t or the StatsEventTag.
-LogEvent::LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid)
-    : mBuf(msg),
-      mRemainingLen(len),
-      mLogdTimestampNs(time(nullptr)),
-      mLogUid(uid),
-      mLogPid(pid)
-{
-    initNew();
-}
-
 LogEvent::LogEvent(const LogEvent& event) {
     mTagId = event.mTagId;
     mLogUid = event.mLogUid;
@@ -84,6 +72,12 @@ LogEvent::LogEvent(const LogEvent& event) {
     mElapsedTimestampNs = event.mElapsedTimestampNs;
     mLogdTimestampNs = event.mLogdTimestampNs;
     mValues = event.mValues;
+}
+
+LogEvent::LogEvent(int32_t uid, int32_t pid)
+    : mLogdTimestampNs(time(nullptr)),
+      mLogUid(uid),
+      mLogPid(pid) {
 }
 
 LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs) {
@@ -187,9 +181,6 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(experimentIdsProto)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)), Value(trainInfo.trainName)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value(trainInfo.status)));
-}
-
-LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, timestampNs) {
 }
 
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {
@@ -467,7 +458,10 @@ void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last) {
 
 // This parsing logic is tied to the encoding scheme used in StatsEvent.java and
 // stats_event.c
-void LogEvent::initNew() {
+bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
+    mBuf = buf;
+    mRemainingLen = (uint32_t)len;
+
     int32_t pos[] = {1, 1, 1};
     bool last[] = {false, false, false};
 
@@ -529,6 +523,7 @@ void LogEvent::initNew() {
 
     if (mRemainingLen != 0) mValid = false;
     mBuf = nullptr;
+    return mValid;
 }
 
 uint8_t LogEvent::getTypeId(uint8_t typeInfo) {

@@ -150,13 +150,13 @@ public final class InlineSuggestionFactory {
             final int fieldIndex = dataset.getFieldIds().indexOf(autofillId);
             if (fieldIndex < 0) {
                 Slog.w(TAG, "AutofillId=" + autofillId + " not found in dataset");
-                return null;
+                continue;
             }
             final InlinePresentation inlinePresentation = dataset.getFieldInlinePresentation(
                     fieldIndex);
             if (inlinePresentation == null) {
                 Slog.w(TAG, "InlinePresentation not found in dataset");
-                return null;
+                continue;
             }
             if (!includeDataset(dataset, fieldIndex, filterText)) {
                 continue;
@@ -219,12 +219,12 @@ public final class InlineSuggestionFactory {
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
             @NonNull Runnable onErrorCallback, @Nullable IBinder hostInputToken,
             int displayId) {
-        // TODO(b/146453195): fill in the autofill hint properly.
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
                 isAugmented ? InlineSuggestionInfo.SOURCE_PLATFORM
-                        : InlineSuggestionInfo.SOURCE_AUTOFILL, new String[]{""},
-                InlineSuggestionInfo.TYPE_ACTION);
+                        : InlineSuggestionInfo.SOURCE_AUTOFILL,
+                inlinePresentation.getAutofillHints(),
+                InlineSuggestionInfo.TYPE_ACTION, inlinePresentation.isPinned());
         final Runnable onClickAction = () -> {
             Toast.makeText(context, "icon clicked", Toast.LENGTH_SHORT).show();
         };
@@ -240,12 +240,12 @@ public final class InlineSuggestionFactory {
             @NonNull RemoteInlineSuggestionRenderService remoteRenderService,
             @NonNull Runnable onErrorCallback, @Nullable IBinder hostInputToken,
             int displayId) {
-        // TODO(b/146453195): fill in the autofill hint properly.
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
                 isAugmented ? InlineSuggestionInfo.SOURCE_PLATFORM
-                        : InlineSuggestionInfo.SOURCE_AUTOFILL, new String[]{""},
-                InlineSuggestionInfo.TYPE_SUGGESTION);
+                        : InlineSuggestionInfo.SOURCE_AUTOFILL,
+                inlinePresentation.getAutofillHints(),
+                InlineSuggestionInfo.TYPE_SUGGESTION, inlinePresentation.isPinned());
 
         final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
                 createInlineContentProvider(inlinePresentation,
@@ -262,7 +262,8 @@ public final class InlineSuggestionFactory {
             @Nullable IBinder hostInputToken, int displayId) {
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
-                InlineSuggestionInfo.SOURCE_AUTOFILL, null, InlineSuggestionInfo.TYPE_SUGGESTION);
+                InlineSuggestionInfo.SOURCE_AUTOFILL, inlinePresentation.getAutofillHints(),
+                InlineSuggestionInfo.TYPE_SUGGESTION, inlinePresentation.isPinned());
 
         return new InlineSuggestion(inlineSuggestionInfo,
                 createInlineContentProvider(inlinePresentation,

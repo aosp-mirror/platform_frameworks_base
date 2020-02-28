@@ -17,12 +17,15 @@
 package android.service.autofill;
 
 import android.annotation.NonNull;
+import android.annotation.Size;
 import android.app.slice.Slice;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.inline.InlinePresentationSpec;
 
 import com.android.internal.util.DataClass;
+
+import java.util.List;
 
 /**
  * Wrapper class holding a {@link Slice} and an {@link InlinePresentationSpec} for rendering UI
@@ -49,6 +52,18 @@ public final class InlinePresentation implements Parcelable {
      * Indicates whether the UI should be pinned, hence non-scrollable, in the host.
      */
     private final boolean mPinned;
+
+    /**
+     * Returns the autofill hints set in the slice.
+     *
+     * @hide
+     */
+    @NonNull
+    @Size(min = 0)
+    public String[] getAutofillHints() {
+        List<String> hints = mSlice.getHints();
+        return hints.toArray(new String[hints.size()]);
+    }
 
 
 
@@ -214,10 +229,10 @@ public final class InlinePresentation implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1579726472535L,
+            time = 1582753782651L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/service/autofill/InlinePresentation.java",
-            inputSignatures = "private final @android.annotation.NonNull android.app.slice.Slice mSlice\nprivate final @android.annotation.NonNull android.view.inline.InlinePresentationSpec mInlinePresentationSpec\nprivate final  boolean mPinned\nclass InlinePresentation extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstDefs=true, genEqualsHashCode=true)")
+            inputSignatures = "private final @android.annotation.NonNull android.app.slice.Slice mSlice\nprivate final @android.annotation.NonNull android.view.inline.InlinePresentationSpec mInlinePresentationSpec\nprivate final  boolean mPinned\npublic @android.annotation.NonNull @android.annotation.Size(min=0L) java.lang.String[] getAutofillHints()\nclass InlinePresentation extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstDefs=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

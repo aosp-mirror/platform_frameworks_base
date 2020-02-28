@@ -35,12 +35,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.graphics.Rect.copyOrNull;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
@@ -210,17 +208,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     /** True if the docked stack is currently being resized. */
     private boolean mDockedStackResizing;
 
-    /**
-     * True if there are pending docked bounds that need to be applied after
-     * {@link #mDockedStackResizing} is reset to false.
-     */
-    private boolean mHasPendingDockedBounds;
-    private Rect mPendingDockedBounds;
-    private Rect mPendingTempDockedTaskBounds;
-    private Rect mPendingTempDockedTaskInsetBounds;
-    private Rect mPendingTempOtherTaskBounds;
-    private Rect mPendingTempOtherTaskInsetBounds;
-
     // Activity actions an app cannot start if it uses a permission which is not granted.
     private static final ArrayMap<String, String> ACTION_TO_RUNTIME_PERMISSION =
             new ArrayMap<>();
@@ -386,15 +373,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      * Set of tasks that are in resizing mode during an app transition to fill the "void".
      */
     private final ArraySet<Integer> mResizingTasksDuringAnimation = new ArraySet<>();
-
-
-    /**
-     * If set to {@code false} all calls to resize the docked stack {@link #resizeDockedStackLocked}
-     * will be ignored. Useful for the case where the caller is handling resizing of other stack and
-     * moving tasks around and doesn't want dock stack to be resized due to an automatic trigger
-     * like the docked stack going empty.
-     */
-    private boolean mAllowDockedStackResize = true;
 
     private KeyguardController mKeyguardController;
 
@@ -1541,12 +1519,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     }
                     otherStack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
                 }
-
-                // Also disable docked stack resizing since we have manually adjusted the
-                // size of other stacks above and we don't want to trigger a docked stack
-                // resize when we remove task from it below and it is detached from the
-                // display because it no longer contains any tasks.
-                mAllowDockedStackResize = false;
             }
 
             // If we are moving from the pinned stack, then the animation takes care of updating
@@ -1563,7 +1535,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
             mRootWindowContainer.resumeFocusedStacksTopActivities();
         } finally {
-            mAllowDockedStackResize = true;
             mService.continueWindowLayout();
         }
     }
@@ -1580,120 +1551,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         mDockedStackResizing = resizing;
         mWindowManager.setDockedStackResizing(resizing);
-
-        if (!resizing && mHasPendingDockedBounds) {
-            resizeDockedStackLocked(mPendingDockedBounds, mPendingTempDockedTaskBounds,
-                    mPendingTempDockedTaskInsetBounds, mPendingTempOtherTaskBounds,
-                    mPendingTempOtherTaskInsetBounds, PRESERVE_WINDOWS);
-
-            mHasPendingDockedBounds = false;
-            mPendingDockedBounds = null;
-            mPendingTempDockedTaskBounds = null;
-            mPendingTempDockedTaskInsetBounds = null;
-            mPendingTempOtherTaskBounds = null;
-            mPendingTempOtherTaskInsetBounds = null;
-        }
-    }
-
-    void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
-            Rect tempDockedTaskInsetBounds, Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds,
-            boolean preserveWindows) {
-        resizeDockedStackLocked(dockedBounds, tempDockedTaskBounds, tempDockedTaskInsetBounds,
-                tempOtherTaskBounds, tempOtherTaskInsetBounds, preserveWindows,
-                false /* deferResume */);
-    }
-
-    void resizeDockedStackLocked(Rect displayedBounds, Rect tempDockedTaskBounds,
-            Rect tempDockedTaskInsetBounds, Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds,
-            boolean preserveWindows, boolean deferResume) {
-
-        if (!mAllowDockedStackResize) {
-            // Docked stack resize currently disabled.
-            return;
-        }
-
-        final ActivityStack stack =
-                mRootWindowContainer.getDefaultDisplay().getRootSplitScreenPrimaryTask();
-        if (stack == null) {
-            Slog.w(TAG, "resizeDockedStackLocked: docked stack not found");
-            return;
-        }
-
-        if (mDockedStackResizing) {
-            mHasPendingDockedBounds = true;
-            mPendingDockedBounds = copyOrNull(displayedBounds);
-            mPendingTempDockedTaskBounds = copyOrNull(tempDockedTaskBounds);
-            mPendingTempDockedTaskInsetBounds = copyOrNull(tempDockedTaskInsetBounds);
-            mPendingTempOtherTaskBounds = copyOrNull(tempOtherTaskBounds);
-            mPendingTempOtherTaskInsetBounds = copyOrNull(tempOtherTaskInsetBounds);
-        }
-
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "resizeDockedStack");
-        mService.deferWindowLayout();
-        try {
-            // Don't allow re-entry while resizing. E.g. due to docked stack detaching.
-            mAllowDockedStackResize = false;
-            ActivityRecord r = stack.topRunningActivity();
-            stack.resize(displayedBounds, tempDockedTaskBounds,
-                    !PRESERVE_WINDOWS, DEFER_RESUME);
-
-            // TODO: Checking for isAttached might not be needed as if the user passes in null
-            // dockedBounds then they want the docked stack to be dismissed.
-            if (stack.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                    || (displayedBounds == null && !stack.isAttached())) {
-                // The dock stack either was dismissed or went fullscreen, which is kinda the same.
-                // In this case we make all other static stacks fullscreen and move all
-                // docked stack tasks to the fullscreen stack.
-                moveTasksToFullscreenStackLocked(stack, ON_TOP);
-
-                // stack shouldn't contain anymore activities, so nothing to resume.
-                r = null;
-            } else {
-                // Docked stacks occupy a dedicated region on screen so the size of all other
-                // static stacks need to be adjusted so they don't overlap with the docked stack.
-                // We get the bounds to use from window manager which has been adjusted for any
-                // screen controls and is also the same for all stacks.
-                final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
-                final Rect otherTaskRect = new Rect();
-                for (int i = display.getStackCount() - 1; i >= 0; --i) {
-                    final ActivityStack current = display.getStackAt(i);
-                    if (!current.inSplitScreenSecondaryWindowingMode()) {
-                        continue;
-                    }
-                    if (!current.affectedBySplitScreenResize()) {
-                        continue;
-                    }
-                    if (mDockedStackResizing && !current.isTopActivityVisible()) {
-                        // Non-visible stacks get resized once we're done with the resize
-                        // interaction.
-                        continue;
-                    }
-                    current.getStackDockedModeBounds(displayedBounds,
-                            tempOtherTaskBounds /* currentTempTaskBounds */,
-                            tempRect /* outStackBounds */,
-                            otherTaskRect /* outTempTaskBounds */);
-
-                    if (tempRect.isEmpty()) {
-                        // If this scenario is hit, it means something is not working right.
-                        // Empty/null bounds implies fullscreen. In the event that this stack
-                        // *should* be fullscreen, its mode should be set explicitly in a form
-                        // of setWindowingMode so that other parts of the system are updated
-                        // properly.
-                        throw new IllegalArgumentException("Trying to set null bounds on a"
-                                + " non-fullscreen stack");
-                    }
-
-                    current.resize(tempRect, tempOtherTaskBounds, preserveWindows, deferResume);
-                }
-            }
-            if (!deferResume) {
-                stack.ensureVisibleActivitiesConfiguration(r, preserveWindows);
-            }
-        } finally {
-            mAllowDockedStackResize = true;
-            mService.continueWindowLayout();
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
     }
 
     private void removeStackInSurfaceTransaction(ActivityStack stack) {
@@ -2723,9 +2580,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mService.deferWindowLayout();
         try {
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                mWindowManager.setDockedStackCreateStateLocked(
-                        activityOptions.getSplitScreenCreateMode(), null /* initialBounds */);
-
                 // Defer updating the stack in which recents is until the app transition is done, to
                 // not run into issues where we still need to draw the task in recents but the
                 // docked stack is already created.
@@ -2801,24 +2655,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // the window renders full-screen with the background filling the void. Also only
                 // call this at the end to make sure that tasks exists on the window manager side.
                 setResizingDuringAnimation(task);
-
-                final DisplayContent display = task.getStack().getDisplay();
-                final ActivityStack topSecondaryStack =
-                        display.getTopStackInWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-                if (topSecondaryStack != null && topSecondaryStack.isActivityTypeHome()) {
-                    // If the home activity is the top split-screen secondary stack, then the
-                    // primary split-screen stack is in the minimized mode which means it can't
-                    // receive input keys, so we should move the focused app to the home app so that
-                    // window manager can correctly calculate the focus window that can receive
-                    // input keys.
-                    display.moveHomeActivityToTop(
-                            "startActivityFromRecents: homeVisibleInSplitScreen");
-
-                    // Immediately update the minimized docked stack mode, the upcoming animation
-                    // for the docked activity (WMS.overridePendingAppTransitionMultiThumbFuture)
-                    // will do the animation to the target bounds
-                    mWindowManager.checkSplitScreenMinimizedChanged(false /* animate */);
-                }
             }
             mService.continueWindowLayout();
         }

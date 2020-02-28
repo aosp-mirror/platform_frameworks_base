@@ -22,12 +22,16 @@ import static org.mockito.Mockito.verify;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.sensors.ProximitySensor;
@@ -40,6 +44,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class BrightLineFalsingManagerTest extends SysuiTestCase {
 
 
@@ -47,6 +52,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private ProximitySensor mProximitySensor;
+    private SysuiStatusBarStateController mStatusBarStateController;
 
     private BrightLineFalsingManager mFalsingManager;
 
@@ -61,8 +67,11 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         FalsingDataProvider falsingDataProvider = new FalsingDataProvider(dm);
         DeviceConfigProxy deviceConfigProxy = new DeviceConfigProxyFake();
         DockManager dockManager = new DockManagerFake();
+        mStatusBarStateController = new StatusBarStateControllerImpl();
+        mStatusBarStateController.setState(StatusBarState.KEYGUARD);
         mFalsingManager = new BrightLineFalsingManager(falsingDataProvider,
-                mKeyguardUpdateMonitor, mProximitySensor, deviceConfigProxy, dockManager);
+                mKeyguardUpdateMonitor, mProximitySensor, deviceConfigProxy, dockManager,
+                mStatusBarStateController);
     }
 
     @Test
@@ -97,5 +106,13 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         verify(mProximitySensor).unregister(any(ProximitySensor.ProximitySensorListener.class));
         mFalsingManager.onBouncerHidden();
         verify(mProximitySensor).register(any(ProximitySensor.ProximitySensorListener.class));
+    }
+
+    @Test
+    public void testUnregisterSensor_StateTransition() {
+        mFalsingManager.onScreenTurningOn();
+        reset(mProximitySensor);
+        mStatusBarStateController.setState(StatusBarState.SHADE);
+        verify(mProximitySensor).unregister(any(ProximitySensor.ProximitySensorListener.class));
     }
 }

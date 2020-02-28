@@ -284,6 +284,30 @@ public final class ConversationStoreTest {
         assertEquals(in2, out2);
     }
 
+    @Test
+    public void testBackupAndRestore() {
+        ConversationInfo in1 = buildConversationInfo(SHORTCUT_ID, LOCUS_ID, CONTACT_URI,
+                PHONE_NUMBER, NOTIFICATION_CHANNEL_ID);
+        ConversationInfo in2 = buildConversationInfo(SHORTCUT_ID_2, LOCUS_ID_2, CONTACT_URI_2,
+                PHONE_NUMBER_2, NOTIFICATION_CHANNEL_ID_2);
+        mConversationStore.addOrUpdate(in1);
+        mConversationStore.addOrUpdate(in2);
+
+        byte[] backupPayload = mConversationStore.getBackupPayload();
+        assertNotNull(backupPayload);
+
+        ConversationStore conversationStore = new ConversationStore(mFile,
+                mMockScheduledExecutorService);
+        ConversationInfo out1 = conversationStore.getConversation(SHORTCUT_ID);
+        assertNull(out1);
+
+        conversationStore.restore(backupPayload);
+        out1 = conversationStore.getConversation(SHORTCUT_ID);
+        ConversationInfo out2 = conversationStore.getConversation(SHORTCUT_ID_2);
+        assertEquals(in1, out1);
+        assertEquals(in2, out2);
+    }
+
     private void resetConversationStore() {
         mFile.mkdir();
         mMockScheduledExecutorService = new MockScheduledExecutorService();

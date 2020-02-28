@@ -444,8 +444,7 @@ interface IWindowManager
     WindowContentFrameStats getWindowContentFrameStats(IBinder token);
 
     /**
-     * @return the dock side the current docked stack is at; must be one of the
-     *         WindowManagerGlobal.DOCKED_* values
+     * This is a no-op.
      */
     @UnsupportedAppUsage
     int getDockedStackSide();
@@ -457,25 +456,9 @@ interface IWindowManager
     void setDockedStackDividerTouchRegion(in Rect touchableRegion);
 
     /**
-     * Registers a listener that will be called when the dock divider changes its visibility or when
-     * the docked stack gets added/removed.
-     */
-    @UnsupportedAppUsage
-    void registerDockedStackListener(IDockedStackListener listener);
-
-    /**
      * Registers a listener that will be called when the pinned stack state changes.
      */
     void registerPinnedStackListener(int displayId, IPinnedStackListener listener);
-
-    /**
-     * Updates the dim layer used while resizing.
-     *
-     * @param visible Whether the dim layer should be visible.
-     * @param targetWindowingMode The windowing mode of the stack the dim layer should be placed on.
-     * @param alpha The translucency of the dim layer, between 0 and 1.
-     */
-    void setResizeDimLayer(boolean visible, int targetWindowingMode, float alpha);
 
     /**
      * Requests Keyboard Shortcuts from the displayed window.

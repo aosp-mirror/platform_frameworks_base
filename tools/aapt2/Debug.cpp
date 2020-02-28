@@ -32,9 +32,15 @@
 #include "text/Printer.h"
 #include "util/Util.h"
 
+#include "idmap2/Policies.h"
+
 using ::aapt::text::Printer;
 using ::android::StringPiece;
 using ::android::base::StringPrintf;
+
+using android::idmap2::policy::kPolicyStringToFlag;
+
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace aapt {
 
@@ -246,32 +252,25 @@ class ValueBodyPrinter : public ConstValueVisitor {
   Printer* printer_;
 };
 
-std::string OverlayablePoliciesToString(OverlayableItem::PolicyFlags policies) {
-  static const std::map<OverlayableItem::PolicyFlags, std::string> kFlagToString = {
-    {OverlayableItem::kPublic, "public"},
-    {OverlayableItem::kSystem, "system"},
-    {OverlayableItem::kVendor, "vendor"},
-    {OverlayableItem::kProduct, "product"},
-    {OverlayableItem::kSignature, "signature"},
-    {OverlayableItem::kOdm, "odm"},
-    {OverlayableItem::kOem, "oem"},
-  };
+std::string OverlayablePoliciesToString(PolicyFlags policies) {
   std::string str;
-  for (auto const& policy : kFlagToString) {
-    if ((policies & policy.first) != policy.first) {
+
+  uint32_t remaining = policies;
+  for (auto const& policy : kPolicyStringToFlag) {
+    if ((policies & policy.second) != policy.second) {
       continue;
     }
     if (!str.empty()) {
       str.append("|");
     }
-    str.append(policy.second);
-    policies &= ~policy.first;
+    str.append(policy.first.data());
+    remaining &= ~policy.second;
   }
-  if (policies != 0) {
+  if (remaining != 0) {
     if (!str.empty()) {
       str.append("|");
     }
-    str.append(StringPrintf("0x%08x", policies));
+    str.append(StringPrintf("0x%08x", remaining));
   }
   return !str.empty() ? str : "none";
 }
