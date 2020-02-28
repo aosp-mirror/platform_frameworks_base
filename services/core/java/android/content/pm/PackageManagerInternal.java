@@ -859,6 +859,13 @@ public abstract class PackageManagerInternal {
             "android.content.pm.extra.ENABLE_ROLLBACK_USER";
 
     /**
+     * Extra field name for the session id of a request to enable rollback
+     * for a package.
+     */
+    public static final String EXTRA_ENABLE_ROLLBACK_SESSION_ID =
+            "android.content.pm.extra.ENABLE_ROLLBACK_SESSION_ID";
+
+    /**
      * Used as the {@code enableRollbackCode} argument for
      * {@link PackageManagerInternal#setEnableRollbackCode} to indicate that
      * enabling rollback succeeded.
