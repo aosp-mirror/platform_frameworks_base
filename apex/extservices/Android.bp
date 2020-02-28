@@ -20,6 +20,7 @@ apex {
 
 apex_defaults {
     name: "com.android.extservices-defaults",
+    updatable: true,
     key: "com.android.extservices.key",
     certificate: ":com.android.extservices.certificate",
     apps: ["ExtServices"],

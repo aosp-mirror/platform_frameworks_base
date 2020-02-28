@@ -32,6 +32,7 @@ apex_defaults {
     compile_multilib: "both",
     prebuilts: ["com.android.os.statsd.init.rc"],
     name: "com.android.os.statsd-defaults",
+    updatable: true,
     key: "com.android.os.statsd.key",
     certificate: ":com.android.os.statsd.certificate",
 }
