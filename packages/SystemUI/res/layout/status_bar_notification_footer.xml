@@ -33,8 +33,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:focusable="true"
-            android:contentDescription="@string/accessibility_manage_notification"
-            android:text="@string/manage_notifications_text"
+            android:contentDescription="@string/manage_notifications_history_text"
+            android:text="@string/manage_notifications_history_text"
         />
         <com.android.systemui.statusbar.notification.row.FooterViewButton
             style="@style/TextAppearance.NotificationSectionHeaderButton"

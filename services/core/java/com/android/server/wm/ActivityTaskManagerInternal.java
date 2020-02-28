@@ -169,12 +169,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract List<IBinder> getTopVisibleActivities();
 
     /**
-     * Callback for window manager to let activity manager know that docked stack changes its
-     * minimized state.
-     */
-    public abstract void notifyDockedStackMinimizedChanged(boolean minimized);
-
-    /**
      * Notify listeners that contents are drawn for the first time on a single task display.
      *
      * @param displayId An ID of the display on which contents are drawn.

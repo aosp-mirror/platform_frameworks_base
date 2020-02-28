@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import android.app.ActivityManager;
-import android.app.job.JobProtoEnums;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -468,26 +467,18 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     /** A scheduled job was started. */
-    public void noteJobStart(String name, int uid, int standbyBucket, int jobid) {
+    public void noteJobStart(String name, int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteJobStartLocked(name, uid);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
-                    uid, null, name,
-                    FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED,
-                    JobProtoEnums.STOP_REASON_UNKNOWN, standbyBucket, jobid);
         }
     }
 
     /** A scheduled job was finished. */
-    public void noteJobFinish(String name, int uid, int stopReason, int standbyBucket, int jobid) {
+    public void noteJobFinish(String name, int uid, int stopReason) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteJobFinishLocked(name, uid, stopReason);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
-                    uid, null, name,
-                    FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED, stopReason,
-                    standbyBucket, jobid);
         }
     }
 

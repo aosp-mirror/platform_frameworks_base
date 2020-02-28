@@ -334,6 +334,25 @@ public class DataManager {
         });
     }
 
+    /** Retrieves a backup payload blob for specified user id. */
+    @Nullable
+    public byte[] getBackupPayload(@UserIdInt int userId) {
+        UserData userData = getUnlockedUserData(userId);
+        if (userData == null) {
+            return null;
+        }
+        return userData.getBackupPayload();
+    }
+
+    /** Attempts to restore data for the specified user id. */
+    public void restore(@UserIdInt int userId, @NonNull byte[] payload) {
+        UserData userData = getUnlockedUserData(userId);
+        if (userData == null) {
+            return;
+        }
+        userData.restore(payload);
+    }
+
     private int mimeTypeToShareEventType(String mimeType) {
         if (mimeType.startsWith("text/")) {
             return Event.TYPE_SHARE_TEXT;

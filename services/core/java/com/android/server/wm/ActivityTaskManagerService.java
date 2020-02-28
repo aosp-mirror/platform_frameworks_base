@@ -31,12 +31,12 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -2309,9 +2309,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
         if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            return setTaskWindowingModeSplitScreenPrimary(taskId,
-                    SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
-                    toTop, ANIMATE, null /* initialBounds */, true /* showRecents */);
+            return setTaskWindowingModeSplitScreenPrimary(taskId, toTop);
         }
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "setTaskWindowingMode()");
         synchronized (mGlobalLock) {
@@ -2681,10 +2679,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     throw new IllegalArgumentException("moveTaskToStack: Attempt to move task "
                             + taskId + " to stack " + stackId);
                 }
-                if (stack.inSplitScreenPrimaryWindowingMode()) {
-                    mWindowManager.setDockedStackCreateStateLocked(
-                            SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, null /* initialBounds */);
-                }
                 task.reparent(stack, toTop, REPARENT_KEEP_STACK_AT_FRONT, ANIMATE, !DEFER_RESUME,
                         "moveTaskToStack");
             } finally {
@@ -2697,22 +2691,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Moves the specified task to the primary-split-screen stack.
      *
      * @param taskId Id of task to move.
-     * @param createMode The mode the primary split screen stack should be created in if it doesn't
-     *                   exist already. See
-     *                   {@link android.app.ActivityTaskManager#SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT}
-     *                   and
-     *                   {@link android.app.ActivityTaskManager#SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT}
      * @param toTop If the task and stack should be moved to the top.
-     * @param animate Whether we should play an animation for the moving the task.
-     * @param initialBounds If the primary stack gets created, it will use these bounds for the
-     *                      stack. Pass {@code null} to use default bounds.
-     * @param showRecents If the recents activity should be shown on the other side of the task
-     *                    going into split-screen mode.
      * @return Whether the task was successfully put into splitscreen.
      */
     @Override
-    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode,
-            boolean toTop, boolean animate, Rect initialBounds, boolean showRecents) {
+    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, boolean toTop) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
                 "setTaskWindowingModeSplitScreenPrimary()");
         synchronized (mGlobalLock) {
@@ -4273,6 +4256,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    // TODO(b/149338177): remove when CTS no-longer requires it
     @Override
     public void resizeDockedStack(Rect dockedBounds, Rect tempDockedTaskBounds,
             Rect tempDockedTaskInsetBounds,
@@ -4281,9 +4265,42 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                mStackSupervisor.resizeDockedStackLocked(dockedBounds, tempDockedTaskBounds,
-                        tempDockedTaskInsetBounds, tempOtherTaskBounds, tempOtherTaskInsetBounds,
-                        PRESERVE_WINDOWS);
+                final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
+                TaskTile primary = null;
+                TaskTile secondary = null;
+                for (int i = dc.getStackCount() - 1; i >= 0; --i) {
+                    final TaskTile t = dc.getStackAt(i).asTile();
+                    if (t == null) {
+                        continue;
+                    }
+                    if (t.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                        primary = t;
+                    } else if (t.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+                        secondary = t;
+                    }
+                }
+                if (primary == null || secondary == null) {
+                    return;
+                }
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                final Rect primaryRect =
+                        tempDockedTaskInsetBounds != null ? tempDockedTaskInsetBounds
+                            : (tempDockedTaskBounds != null ? tempDockedTaskBounds
+                                    : dockedBounds);
+                wct.setBounds(primary.mRemoteToken, primaryRect);
+                Rect otherRect = tempOtherTaskInsetBounds != null ? tempOtherTaskInsetBounds
+                        : tempOtherTaskBounds;
+                if (otherRect == null) {
+                    // Temporary estimation... again this is just for tests.
+                    otherRect = new Rect(secondary.getBounds());
+                    if (dc.getBounds().width() > dc.getBounds().height()) {
+                        otherRect.left = primaryRect.right + 6;
+                    } else {
+                        otherRect.top = primaryRect.bottom + 6;
+                    }
+                }
+                wct.setBounds(secondary.mRemoteToken, otherRect);
+                mTaskOrganizerController.applyContainerTransaction(wct, null /* organizer */);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -6132,13 +6149,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public List<IBinder> getTopVisibleActivities() {
             synchronized (mGlobalLock) {
                 return mRootWindowContainer.getTopVisibleActivities();
-            }
-        }
-
-        @Override
-        public void notifyDockedStackMinimizedChanged(boolean minimized) {
-            synchronized (mGlobalLock) {
-                mRootWindowContainer.setDockedStackMinimized(minimized);
             }
         }
 

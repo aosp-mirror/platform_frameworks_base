@@ -24,11 +24,16 @@
 #include <vector>
 
 #include "android-base/stringprintf.h"
+#include "androidfw/ResourceTypes.h"
+#include "idmap2/PolicyUtils.h"
 #include "idmap2/ResourceUtils.h"
 
 using android::base::StringPrintf;
+using android::idmap2::utils::BitmaskToPolicies;
 using android::idmap2::utils::IsReference;
 using android::idmap2::utils::ResToTypeEntryName;
+using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace android::idmap2 {
 
@@ -55,9 +60,8 @@ Result<Unit> CheckOverlayable(const LoadedPackage& target_package,
                               const PolicyBitmask& fulfilled_policies,
                               const ResourceId& target_resource) {
   static constexpr const PolicyBitmask sDefaultPolicies =
-      PolicyFlags::POLICY_ODM_PARTITION | PolicyFlags::POLICY_OEM_PARTITION |
-      PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION |
-      PolicyFlags::POLICY_PRODUCT_PARTITION | PolicyFlags::POLICY_SIGNATURE;
+      PolicyFlags::ODM_PARTITION | PolicyFlags::OEM_PARTITION | PolicyFlags::SYSTEM_PARTITION |
+      PolicyFlags::VENDOR_PARTITION | PolicyFlags::PRODUCT_PARTITION | PolicyFlags::SIGNATURE;
 
   // If the resource does not have an overlayable definition, allow the resource to be overlaid if
   // the overlay is preinstalled or signed with the same signature as the target.

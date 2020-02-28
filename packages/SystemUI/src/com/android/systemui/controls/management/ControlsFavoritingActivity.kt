@@ -26,11 +26,9 @@ import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.CurrentUserTracker
@@ -51,32 +49,9 @@ class ControlsFavoritingActivity @Inject constructor(
 
     private lateinit var recyclerViewAll: RecyclerView
     private lateinit var adapterAll: ControlAdapter
-    private lateinit var recyclerViewFavorites: RecyclerView
-    private lateinit var adapterFavorites: ControlAdapter
-    private lateinit var errorText: TextView
+    private lateinit var statusText: TextView
+    private var model: ControlsModel? = null
     private var component: ComponentName? = null
-
-    private var currentModel: FavoriteModel? = null
-    private var itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
-            /* dragDirs */ ItemTouchHelper.UP
-                    or ItemTouchHelper.DOWN
-                    or ItemTouchHelper.LEFT
-                    or ItemTouchHelper.RIGHT,
-            /* swipeDirs */0
-    ) {
-        override fun onMove(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            target: RecyclerView.ViewHolder
-        ): Boolean {
-            return currentModel?.onMoveItem(
-                    viewHolder.layoutPosition, target.layoutPosition) != null
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
-
-        override fun isItemViewSwipeEnabled() = false
-    }
 
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
         private val startingUser = controller.currentUserId
@@ -89,6 +64,10 @@ class ControlsFavoritingActivity @Inject constructor(
         }
     }
 
+    override fun onBackPressed() {
+        finish()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.controls_management)
@@ -99,21 +78,27 @@ class ControlsFavoritingActivity @Inject constructor(
 
         val app = intent.getCharSequenceExtra(EXTRA_APP)
         component = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
-        errorText = requireViewById(R.id.error_message)
+        statusText = requireViewById(R.id.status_message)
 
-        setUpRecyclerViews()
+        setUpRecyclerView()
 
         requireViewById<TextView>(R.id.title).text = app?.let { it }
                 ?: resources.getText(R.string.controls_favorite_default_title)
         requireViewById<TextView>(R.id.subtitle).text =
                 resources.getText(R.string.controls_favorite_subtitle)
 
+        requireViewById<Button>(R.id.other_apps).apply {
+            visibility = View.VISIBLE
+            setOnClickListener {
+                this@ControlsFavoritingActivity.onBackPressed()
+            }
+        }
+
         requireViewById<Button>(R.id.done).setOnClickListener {
             if (component == null) return@setOnClickListener
-            val favoritesForStorage = currentModel?.favorites?.map {
-                with(it.controlStatus.control) {
-                    ControlInfo(component!!, controlId, title, deviceType)
-                }
+            val favoritesForStorage = model?.favorites?.map {
+                it.componentName = component!!
+                it.build()
             }
             if (favoritesForStorage != null) {
                 controller.replaceFavoritesForComponent(component!!, favoritesForStorage)
@@ -122,20 +107,22 @@ class ControlsFavoritingActivity @Inject constructor(
         }
 
         component?.let {
+            statusText.text = resources.getText(com.android.internal.R.string.loading)
             controller.loadForComponent(it, Consumer { data ->
                 val allControls = data.allControls
                 val favoriteKeys = data.favoritesIds
                 val error = data.errorOnLoad
                 executor.execute {
-                    val favoriteModel = FavoriteModel(
-                        allControls,
-                        favoriteKeys,
-                        allAdapter = adapterAll,
-                        favoritesAdapter = adapterFavorites)
-                    adapterAll.changeFavoritesModel(favoriteModel)
-                    adapterFavorites.changeFavoritesModel(favoriteModel)
-                    currentModel = favoriteModel
-                    errorText.visibility = if (error) View.VISIBLE else View.GONE
+                    val emptyZoneString = resources.getText(
+                            R.string.controls_favorite_other_zone_header)
+                    val model = AllModel(allControls, favoriteKeys, emptyZoneString)
+                    adapterAll.changeModel(model)
+                    this.model = model
+                    if (error) {
+                        statusText.text = resources.getText(R.string.controls_favorite_load_error)
+                    } else {
+                        statusText.visibility = View.GONE
+                    }
                 }
             })
         }
@@ -143,7 +130,7 @@ class ControlsFavoritingActivity @Inject constructor(
         currentUserTracker.startTracking()
     }
 
-    private fun setUpRecyclerViews() {
+    private fun setUpRecyclerView() {
         val margin = resources.getDimensionPixelSize(R.dimen.controls_card_margin)
         val itemDecorator = MarginItemDecorator(margin, margin)
         val layoutInflater = LayoutInflater.from(applicationContext)
@@ -156,14 +143,6 @@ class ControlsFavoritingActivity @Inject constructor(
             }
             addItemDecoration(itemDecorator)
         }
-
-        adapterFavorites = ControlAdapter(layoutInflater, true)
-        recyclerViewFavorites = requireViewById<RecyclerView>(R.id.listFavorites).apply {
-            layoutManager = GridLayoutManager(applicationContext, 2)
-            adapter = adapterFavorites
-            addItemDecoration(itemDecorator)
-        }
-        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerViewFavorites)
     }
 
     override fun onDestroy() {

@@ -40,12 +40,11 @@ import javax.inject.Inject;
  */
 public class ProximitySensor {
     private static final String TAG = "ProxSensor";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Sensor mSensor;
     private final AsyncSensorManager mSensorManager;
-    private final boolean mUsingBrightnessSensor;
-    private final float mMaxRange;
+    private final float mThreshold;
     private List<ProximitySensorListener> mListeners = new ArrayList<>();
     private String mTag = null;
     @VisibleForTesting ProximityEvent mLastEvent;
@@ -68,20 +67,27 @@ public class ProximitySensor {
     public ProximitySensor(@Main Resources resources,
             AsyncSensorManager sensorManager) {
         mSensorManager = sensorManager;
-        Sensor sensor = findBrightnessSensor(resources);
 
+        Sensor sensor = findCustomProxSensor(resources);
+        float threshold = 0;
+        if (sensor != null) {
+            try {
+                threshold = getCustomProxThreshold(resources);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Can not load custom proximity sensor.", e);
+                sensor = null;
+            }
+        }
         if (sensor == null) {
-            mUsingBrightnessSensor = false;
             sensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        } else {
-            mUsingBrightnessSensor = true;
+            if (sensor != null) {
+                threshold = sensor.getMaximumRange();
+            }
         }
+
+        mThreshold = threshold;
+
         mSensor = sensor;
-        if (mSensor != null) {
-            mMaxRange = mSensor.getMaximumRange();
-        } else {
-            mMaxRange = 0;
-        }
     }
 
     public void setTag(String tag) {
@@ -107,9 +113,15 @@ public class ProximitySensor {
         mPaused = false;
         registerInternal();
     }
+    /**
+     * Returns a brightness sensor that can be used for proximity purposes.
+     */
+    private Sensor findCustomProxSensor(Resources resources) {
+        String sensorType = resources.getString(R.string.proximity_sensor_type);
+        if (sensorType.isEmpty()) {
+            return null;
+        }
 
-    private Sensor findBrightnessSensor(Resources resources) {
-        String sensorType = resources.getString(R.string.doze_brightness_sensor_type);
         List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
         Sensor sensor = null;
         for (Sensor s : sensorList) {
@@ -120,6 +132,17 @@ public class ProximitySensor {
         }
 
         return sensor;
+    }
+
+    /**
+     * Returns a threshold value that can be used along with {@link #findCustomProxSensor}
+     */
+    private float getCustomProxThreshold(Resources resources) {
+        try {
+            return resources.getFloat(R.dimen.proximity_sensor_threshold);
+        } catch (Resources.NotFoundException e) {
+            throw new IllegalStateException("R.dimen.proximity_sensor_threshold must be set.");
+        }
     }
 
     /**
@@ -157,7 +180,6 @@ public class ProximitySensor {
         if (mRegistered || mPaused || mListeners.isEmpty()) {
             return;
         }
-        logDebug("Using brightness sensor? " + mUsingBrightnessSensor);
         logDebug("Registering sensor listener");
         mRegistered = true;
         mSensorManager.registerListener(mSensorEventListener, mSensor, mSensorDelay);
@@ -196,10 +218,7 @@ public class ProximitySensor {
     }
 
     private void onSensorEvent(SensorEvent event) {
-        boolean near = event.values[0] < mMaxRange;
-        if (mUsingBrightnessSensor) {
-            near = event.values[0] == 0;
-        }
+        boolean near = event.values[0] < mThreshold;
         mLastEvent = new ProximityEvent(near, event.timestamp);
         alertListeners();
     }

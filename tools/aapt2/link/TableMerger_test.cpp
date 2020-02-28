@@ -29,6 +29,8 @@ using ::testing::Pointee;
 using ::testing::StrEq;
 using ::testing::UnorderedElementsAreArray;
 
+using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
+
 namespace aapt {
 
 struct TableMergerTest : public ::testing::Test {
@@ -487,8 +489,8 @@ TEST_F(TableMergerTest, SetOverlayable) {
   auto overlayable = std::make_shared<Overlayable>("CustomizableResources",
                                                   "overlay://customization");
   OverlayableItem overlayable_item(overlayable);
-  overlayable_item.policies |= OverlayableItem::Policy::kProduct;
-  overlayable_item.policies |= OverlayableItem::Policy::kVendor;
+  overlayable_item.policies |= PolicyFlags::PRODUCT_PARTITION;
+  overlayable_item.policies |= PolicyFlags::VENDOR_PARTITION;
 
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
@@ -516,8 +518,8 @@ TEST_F(TableMergerTest, SetOverlayable) {
   OverlayableItem& result_overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("CustomizableResources"));
   EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://customization"));
-  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProduct
-                                                   | OverlayableItem::Policy::kVendor));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(PolicyFlags::PRODUCT_PARTITION
+                                                   | PolicyFlags::VENDOR_PARTITION));
 }
 
 TEST_F(TableMergerTest, SetOverlayableLater) {
@@ -530,8 +532,8 @@ TEST_F(TableMergerTest, SetOverlayableLater) {
           .Build();
 
   OverlayableItem overlayable_item(overlayable);
-  overlayable_item.policies |= OverlayableItem::Policy::kPublic;
-  overlayable_item.policies |= OverlayableItem::Policy::kSystem;
+  overlayable_item.policies |= PolicyFlags::PUBLIC;
+  overlayable_item.policies |= PolicyFlags::SYSTEM_PARTITION;
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
@@ -552,15 +554,15 @@ TEST_F(TableMergerTest, SetOverlayableLater) {
   OverlayableItem& result_overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("CustomizableResources"));
   EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://customization"));
-  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic
-                                                   | OverlayableItem::Policy::kSystem));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(PolicyFlags::PUBLIC
+                                                   | PolicyFlags::SYSTEM_PARTITION));
 }
 
 TEST_F(TableMergerTest, SameResourceDifferentNameFail) {
   auto overlayable_first = std::make_shared<Overlayable>("CustomizableResources",
                                                          "overlay://customization");
   OverlayableItem overlayable_item_first(overlayable_first);
-  overlayable_item_first.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item_first.policies |= PolicyFlags::PRODUCT_PARTITION;
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
@@ -570,7 +572,7 @@ TEST_F(TableMergerTest, SameResourceDifferentNameFail) {
   auto overlayable_second = std::make_shared<Overlayable>("ThemeResources",
                                                           "overlay://customization");
   OverlayableItem overlayable_item_second(overlayable_second);
-  overlayable_item_second.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item_second.policies |= PolicyFlags::PRODUCT_PARTITION;
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
@@ -589,7 +591,7 @@ TEST_F(TableMergerTest, SameResourceDifferentActorFail) {
   auto overlayable_first = std::make_shared<Overlayable>("CustomizableResources",
                                                          "overlay://customization");
   OverlayableItem overlayable_item_first(overlayable_first);
-  overlayable_item_first.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item_first.policies |= PolicyFlags::PRODUCT_PARTITION;
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
@@ -599,7 +601,7 @@ TEST_F(TableMergerTest, SameResourceDifferentActorFail) {
   auto overlayable_second = std::make_shared<Overlayable>("CustomizableResources",
                                                           "overlay://theme");
   OverlayableItem overlayable_item_second(overlayable_second);
-  overlayable_item_second.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item_second.policies |= PolicyFlags::PRODUCT_PARTITION;
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
@@ -618,7 +620,7 @@ TEST_F(TableMergerTest, SameResourceDifferentPoliciesFail) {
   auto overlayable_first = std::make_shared<Overlayable>("CustomizableResources",
                                                          "overlay://customization");
   OverlayableItem overlayable_item_first(overlayable_first);
-  overlayable_item_first.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item_first.policies |= PolicyFlags::PRODUCT_PARTITION;
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
@@ -628,7 +630,7 @@ TEST_F(TableMergerTest, SameResourceDifferentPoliciesFail) {
   auto overlayable_second = std::make_shared<Overlayable>("CustomizableResources",
                                                           "overlay://customization");
   OverlayableItem overlayable_item_second(overlayable_second);
-  overlayable_item_second.policies |= OverlayableItem::Policy::kSignature;
+  overlayable_item_second.policies |= PolicyFlags::SIGNATURE;
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
@@ -648,7 +650,7 @@ TEST_F(TableMergerTest, SameResourceSameOverlayable) {
                                                   "overlay://customization");
 
   OverlayableItem overlayable_item_first(overlayable);
-  overlayable_item_first.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item_first.policies |= PolicyFlags::PRODUCT_PARTITION;
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
@@ -656,7 +658,7 @@ TEST_F(TableMergerTest, SameResourceSameOverlayable) {
           .Build();
 
   OverlayableItem overlayable_item_second(overlayable);
-  overlayable_item_second.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item_second.policies |= PolicyFlags::PRODUCT_PARTITION;
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)

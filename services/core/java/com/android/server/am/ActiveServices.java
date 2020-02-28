@@ -3501,8 +3501,11 @@ public final class ActiveServices {
                 }
             }
 
-            // If unbound while waiting to start, remove the pending service
-            mPendingServices.remove(s);
+            // If unbound while waiting to start and there is no connection left in this service,
+            // remove the pending service
+            if (s.getConnections().isEmpty()) {
+                mPendingServices.remove(s);
+            }
 
             if ((c.flags&Context.BIND_AUTO_CREATE) != 0) {
                 boolean hasAutoCreate = s.hasAutoCreateConnections();
@@ -4866,6 +4869,19 @@ public final class ActiveServices {
         }
 
         if (isCallerSystem) {
+            return true;
+        }
+
+        if (r.app != null) {
+            ActiveInstrumentation instr = r.app.getActiveInstrumentation();
+            if (instr != null && instr.mHasBackgroundActivityStartsPermission) {
+                return true;
+            }
+        }
+
+        final boolean hasAllowBackgroundActivityStartsToken = r.app != null
+                ? !r.app.mAllowBackgroundActivityStartsTokens.isEmpty() : false;
+        if (hasAllowBackgroundActivityStartsToken) {
             return true;
         }
 

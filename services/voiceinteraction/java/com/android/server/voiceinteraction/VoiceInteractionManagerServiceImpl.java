@@ -36,6 +36,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -78,6 +79,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final IActivityManager mAm;
     final IActivityTaskManager mAtm;
     final VoiceInteractionServiceInfo mInfo;
+    final KeyphraseEnrollmentInfo mEnrollmentApplicationInfo;
     final ComponentName mSessionComponentName;
     final IWindowManager mIWindowManager;
     boolean mBound = false;
@@ -133,6 +135,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mComponent = service;
         mAm = ActivityManager.getService();
         mAtm = ActivityTaskManager.getService();
+        mEnrollmentApplicationInfo = new KeyphraseEnrollmentInfo(context.getPackageManager());
         VoiceInteractionServiceInfo info;
         try {
             info = new VoiceInteractionServiceInfo(context.getPackageManager(), service, mUser);
@@ -403,6 +406,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             pw.println("  Active session:");
             mActiveSession.dump("    ", pw);
         }
+        pw.println("  " + mEnrollmentApplicationInfo.toString());
     }
 
     void startLocked() {

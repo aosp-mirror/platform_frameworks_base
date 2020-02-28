@@ -258,9 +258,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     final ArrayList<ActivityTaskManagerInternal.SleepToken> mSleepTokens = new ArrayList<>();
 
-    /** Is dock currently minimized. */
-    boolean mIsDockMinimized;
-
     /** Set when a power hint has started, but not ended. */
     private boolean mPowerHintSent;
 
@@ -1011,9 +1008,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Send any pending task-info changes that were queued-up during a layout deferment
         mWmService.mAtmService.mTaskOrganizerController.dispatchPendingTaskInfoChanges();
 
-        if (DEBUG_WINDOW_TRACE) Slog.e(TAG,
-                "performSurfacePlacementInner exit: animating="
-                        + mWmService.mAnimator.isAnimating());
+        if (DEBUG_WINDOW_TRACE) Slog.e(TAG, "performSurfacePlacementInner exit");
     }
 
     private void checkAppTransitionReady(WindowSurfacePlacer surfacePlacer) {
@@ -1989,8 +1984,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // We dismiss the docked stack whenever we switch users.
         final ActivityStack dockedStack = getDefaultDisplay().getRootSplitScreenPrimaryTask();
         if (dockedStack != null) {
-            mStackSupervisor.moveTasksToFullscreenStackLocked(
-                    dockedStack, dockedStack.isFocusedStackOnDisplay());
+            getDefaultDisplay().onSplitScreenModeDismissed();
         }
         // Also dismiss the pinned stack whenever we switch users. Removing the pinned stack will
         // also cause all tasks to be moved to the fullscreen stack at a position that is
@@ -2164,21 +2158,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
             final DisplayContent display = getChildAt(displayNdx);
             display.mDisplayContent.executeAppTransition();
-        }
-    }
-
-    void setDockedStackMinimized(boolean minimized) {
-        // Get currently focused stack before setting mIsDockMinimized. We do this because if
-        // split-screen is active, primary stack will not be focusable (see #isFocusable) while
-        // still occluding other stacks. This will cause getTopDisplayFocusedStack() to return null.
-        final ActivityStack current = getTopDisplayFocusedStack();
-        mIsDockMinimized = minimized;
-        if (mIsDockMinimized) {
-            if (current.inSplitScreenPrimaryWindowingMode()) {
-                // The primary split-screen stack can't be focused while it is minimize, so move
-                // focus to something else.
-                current.adjustFocusToNextFocusableStack("setDockedStackMinimized");
-            }
         }
     }
 

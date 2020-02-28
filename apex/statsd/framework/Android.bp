@@ -69,6 +69,8 @@ java_library {
         "android.util",
     ],
 
+    plugins: ["java_api_finder"],
+
     hostdex: true, // for hiddenapi check
     visibility: [
         "//frameworks/base/apex/statsd:__subpackages__",

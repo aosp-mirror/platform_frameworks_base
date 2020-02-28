@@ -7171,7 +7171,6 @@ package android.net.wifi {
   }
 
   public class ScanResult implements android.os.Parcelable {
-    ctor public ScanResult();
     field public static final int CIPHER_CCMP = 3; // 0x3
     field public static final int CIPHER_GCMP_256 = 4; // 0x4
     field public static final int CIPHER_NONE = 0; // 0x0
@@ -7316,8 +7315,8 @@ package android.net.wifi {
     method @Deprecated public int getDisableReasonCounter(int);
     method @Deprecated public long getDisableTime();
     method @Deprecated public static int getMaxNetworkSelectionDisableReason();
-    method @Deprecated @Nullable public static String getNetworkDisableReasonString(int);
     method @Deprecated public int getNetworkSelectionDisableReason();
+    method @Deprecated @Nullable public static String getNetworkSelectionDisableReasonString(int);
     method @Deprecated public int getNetworkSelectionStatus();
     method @Deprecated @NonNull public String getNetworkStatusString();
     method @Deprecated public boolean hasEverConnected();
@@ -7377,15 +7376,6 @@ package android.net.wifi {
     method @Nullable public static String sanitizeSsid(@Nullable String);
     field public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
     field public static final int INVALID_RSSI = -127; // 0xffffff81
-  }
-
-  public static final class WifiInfo.Builder {
-    ctor public WifiInfo.Builder();
-    method @NonNull public android.net.wifi.WifiInfo build();
-    method @NonNull public android.net.wifi.WifiInfo.Builder setBssid(@NonNull String);
-    method @NonNull public android.net.wifi.WifiInfo.Builder setNetworkId(int);
-    method @NonNull public android.net.wifi.WifiInfo.Builder setRssi(int);
-    method @NonNull public android.net.wifi.WifiInfo.Builder setSsid(@NonNull byte[]);
   }
 
   public class WifiManager {
@@ -7530,7 +7520,7 @@ package android.net.wifi {
   }
 
   public static interface WifiManager.ScoreChangeCallback {
-    method public void onScoreChange(int, @NonNull android.net.NetworkScore);
+    method public void onScoreChange(int, int);
     method public void onTriggerUpdateOfWifiUsabilityStats(int);
   }
 
@@ -7556,6 +7546,52 @@ package android.net.wifi {
     method public void stop(int);
   }
 
+  public final class WifiMigration {
+    method @Nullable public static android.net.wifi.WifiMigration.ConfigStoreMigrationData loadFromConfigStore();
+    method @NonNull public static android.net.wifi.WifiMigration.SettingsMigrationData loadFromSettings(@NonNull android.content.Context);
+    method public static void removeConfigStore();
+  }
+
+  public static final class WifiMigration.ConfigStoreMigrationData implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
+    method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiMigration.ConfigStoreMigrationData> CREATOR;
+  }
+
+  public static final class WifiMigration.ConfigStoreMigrationData.Builder {
+    ctor public WifiMigration.ConfigStoreMigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData build();
+    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
+    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
+  }
+
+  public static final class WifiMigration.SettingsMigrationData implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getP2pDeviceName();
+    method public boolean isP2pFactoryResetPending();
+    method public boolean isScanAlwaysAvailable();
+    method public boolean isScanThrottleEnabled();
+    method public boolean isSoftApTimeoutEnabled();
+    method public boolean isVerboseLoggingEnabled();
+    method public boolean isWakeUpEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiMigration.SettingsMigrationData> CREATOR;
+  }
+
+  public static final class WifiMigration.SettingsMigrationData.Builder {
+    ctor public WifiMigration.SettingsMigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData build();
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setP2pDeviceName(@Nullable String);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setP2pFactoryResetPending(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setScanAlwaysAvailable(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setScanThrottleEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setSoftApTimeoutEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setVerboseLoggingEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiMigration.SettingsMigrationData.Builder setWakeUpEnabled(boolean);
+  }
+
   public class WifiNetworkConnectionStatistics implements android.os.Parcelable {
     ctor public WifiNetworkConnectionStatistics(int, int);
     ctor public WifiNetworkConnectionStatistics();
@@ -7572,57 +7608,11 @@ package android.net.wifi {
   }
 
   public final class WifiNetworkSuggestion implements android.os.Parcelable {
-    method @Nullable public android.net.wifi.hotspot2.PasspointConfiguration getPasspointConfiguration();
     method @NonNull public android.net.wifi.WifiConfiguration getWifiConfiguration();
   }
 
   public static final class WifiNetworkSuggestion.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
-  }
-
-  public final class WifiOemMigrationHook {
-    method @Nullable public static android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData loadFromConfigStore();
-    method @NonNull public static android.net.wifi.WifiOemMigrationHook.SettingsMigrationData loadFromSettings(@NonNull android.content.Context);
-  }
-
-  public static final class WifiOemMigrationHook.ConfigStoreMigrationData implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
-    method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData> CREATOR;
-  }
-
-  public static final class WifiOemMigrationHook.ConfigStoreMigrationData.Builder {
-    ctor public WifiOemMigrationHook.ConfigStoreMigrationData.Builder();
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData build();
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
-  }
-
-  public static final class WifiOemMigrationHook.SettingsMigrationData implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public String getP2pDeviceName();
-    method public boolean isP2pFactoryResetPending();
-    method public boolean isScanAlwaysAvailable();
-    method public boolean isScanThrottleEnabled();
-    method public boolean isSoftApTimeoutEnabled();
-    method public boolean isVerboseLoggingEnabled();
-    method public boolean isWakeUpEnabled();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemMigrationHook.SettingsMigrationData> CREATOR;
-  }
-
-  public static final class WifiOemMigrationHook.SettingsMigrationData.Builder {
-    ctor public WifiOemMigrationHook.SettingsMigrationData.Builder();
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData build();
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setP2pDeviceName(@Nullable String);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setP2pFactoryResetPending(boolean);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setScanAlwaysAvailable(boolean);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setScanThrottleEnabled(boolean);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setSoftApTimeoutEnabled(boolean);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setVerboseLoggingEnabled(boolean);
-    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setWakeUpEnabled(boolean);
   }
 
   public class WifiScanner {
@@ -9941,6 +9931,7 @@ package android.service.autofill.augmented {
     method @NonNull public android.service.autofill.augmented.FillResponse build();
     method @NonNull public android.service.autofill.augmented.FillResponse.Builder setClientState(@Nullable android.os.Bundle);
     method @NonNull public android.service.autofill.augmented.FillResponse.Builder setFillWindow(@Nullable android.service.autofill.augmented.FillWindow);
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineActions(@Nullable java.util.List<android.service.autofill.InlinePresentation>);
     method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineSuggestions(@Nullable java.util.List<android.service.autofill.Dataset>);
   }
 
@@ -9966,28 +9957,6 @@ package android.service.carrier {
     ctor public ApnService();
     method @NonNull public android.os.IBinder onBind(@Nullable android.content.Intent);
     method @NonNull @WorkerThread public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
-  }
-
-  public abstract class CarrierMessagingServiceWrapper {
-    ctor public CarrierMessagingServiceWrapper();
-    method public boolean bindToCarrierMessagingService(@NonNull android.content.Context, @NonNull String);
-    method public void disposeConnection(@NonNull android.content.Context);
-    method public void downloadMms(@NonNull android.net.Uri, int, @NonNull android.net.Uri, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-    method public void filterSms(@NonNull android.service.carrier.MessagePdu, @NonNull String, int, int, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-    method public abstract void onServiceReady();
-    method public void sendDataSms(@NonNull byte[], int, @NonNull String, int, int, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-    method public void sendMms(@NonNull android.net.Uri, int, @NonNull android.net.Uri, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-    method public void sendMultipartTextSms(@NonNull java.util.List<java.lang.String>, int, @NonNull String, int, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-    method public void sendTextSms(@NonNull String, int, @NonNull String, int, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper);
-  }
-
-  public abstract static class CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper {
-    ctor public CarrierMessagingServiceWrapper.CarrierMessagingCallbackWrapper();
-    method public void onDownloadMmsComplete(int);
-    method public void onFilterComplete(int);
-    method public void onSendMmsComplete(int, @Nullable byte[]);
-    method public void onSendMultipartSmsComplete(int, @Nullable int[]);
-    method public void onSendSmsComplete(int, int);
   }
 
 }
@@ -11797,7 +11766,6 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAlwaysAllowMmsData(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAlwaysReportSignalStrength(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCallForwarding(@NonNull android.telephony.CallForwardingInfo);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCallWaitingStatus(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
@@ -11812,7 +11780,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultiSimCarrierRestriction(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setNetworkSelectionModeManual(@NonNull String, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunisticNetworkState(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPolicyDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setPreferredNetworkTypeBitmask(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadio(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setRadioEnabled(boolean);
@@ -11939,45 +11906,6 @@ package android.telephony {
     field public static final int SRVCC_STATE_HANDOVER_FAILED = 2; // 0x2
     field public static final int SRVCC_STATE_HANDOVER_NONE = -1; // 0xffffffff
     field public static final int SRVCC_STATE_HANDOVER_STARTED = 0; // 0x0
-  }
-
-  public class TelephonyRegistryManager {
-    method public void addOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
-    method public void addOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
-    method public void listenForSubscriber(int, @NonNull String, @NonNull String, @NonNull android.telephony.PhoneStateListener, int, boolean);
-    method public void notifyActiveDataSubIdChanged(int);
-    method public void notifyBarringInfoChanged(int, int, @NonNull android.telephony.BarringInfo);
-    method public void notifyCallForwardingChanged(int, boolean);
-    method public void notifyCallQualityChanged(int, int, @NonNull android.telephony.CallQuality, int);
-    method public void notifyCallStateChanged(int, int, int, @Nullable String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyCallStateChangedForAllSubscriptions(int, @Nullable String);
-    method public void notifyCarrierNetworkChange(boolean);
-    method public void notifyCellInfoChanged(int, @NonNull java.util.List<android.telephony.CellInfo>);
-    method public void notifyCellLocation(int, @NonNull android.telephony.CellIdentity);
-    method public void notifyDataActivationStateChanged(int, int, int);
-    method public void notifyDataActivityChanged(int, int);
-    method public void notifyDataConnectionForSubscriber(int, int, int, @Nullable android.telephony.PreciseDataConnectionState);
-    method public void notifyDisconnectCause(int, int, int, int);
-    method public void notifyDisplayInfoChanged(int, int, @NonNull android.telephony.DisplayInfo);
-    method public void notifyEmergencyNumberList(int, int);
-    method public void notifyImsDisconnectCause(int, @NonNull android.telephony.ims.ImsReasonInfo);
-    method public void notifyMessageWaitingChanged(int, int, boolean);
-    method public void notifyOpportunisticSubscriptionInfoChanged();
-    method public void notifyOutgoingEmergencyCall(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
-    method public void notifyOutgoingEmergencySms(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
-    method public void notifyPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
-    method public void notifyPreciseCallState(int, int, int, int, int);
-    method public void notifyPreciseDataConnectionFailed(int, int, int, @Nullable String, int);
-    method public void notifyRadioPowerStateChanged(int, int, int);
-    method public void notifyRegistrationFailed(int, int, @NonNull android.telephony.CellIdentity, @NonNull String, int, int, int);
-    method public void notifyServiceStateChanged(int, int, @NonNull android.telephony.ServiceState);
-    method public void notifySignalStrengthChanged(int, int, @NonNull android.telephony.SignalStrength);
-    method public void notifySrvccStateChanged(int, int);
-    method public void notifySubscriptionInfoChanged();
-    method public void notifyUserMobileDataStateChanged(int, int, boolean);
-    method public void notifyVoiceActivationStateChanged(int, int, int);
-    method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
-    method public void removeOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
   }
 
   public final class UiccAccessRule implements android.os.Parcelable {

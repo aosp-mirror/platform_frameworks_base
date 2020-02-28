@@ -1713,7 +1713,7 @@ public class WifiConfiguration implements Parcelable {
          * @return network disable reason string, or null if the reason is invalid.
          */
         @Nullable
-        public static String getNetworkDisableReasonString(
+        public static String getNetworkSelectionDisableReasonString(
                 @NetworkSelectionDisableReason int reason) {
             DisableReasonInfo info = DISABLE_REASON_INFOS.get(reason);
             if (info == null) {
@@ -1727,8 +1727,8 @@ public class WifiConfiguration implements Parcelable {
          * @return current network disable reason in String (for debug purpose)
          * @hide
          */
-        public String getNetworkDisableReasonString() {
-            return getNetworkDisableReasonString(mNetworkSelectionDisableReason);
+        public String getNetworkSelectionDisableReasonString() {
+            return getNetworkSelectionDisableReasonString(mNetworkSelectionDisableReason);
         }
 
         /**
@@ -2189,17 +2189,21 @@ public class WifiConfiguration implements Parcelable {
 
 
         sbuf.append(" NetworkSelectionStatus ")
-                .append(mNetworkSelectionStatus.getNetworkStatusString() + "\n");
+                .append(mNetworkSelectionStatus.getNetworkStatusString())
+                .append("\n");
         if (mNetworkSelectionStatus.getNetworkSelectionDisableReason() > 0) {
             sbuf.append(" mNetworkSelectionDisableReason ")
-                    .append(mNetworkSelectionStatus.getNetworkDisableReasonString() + "\n");
+                    .append(mNetworkSelectionStatus.getNetworkSelectionDisableReasonString())
+                    .append("\n");
 
             for (int index = NetworkSelectionStatus.DISABLED_NONE;
                     index < NetworkSelectionStatus.NETWORK_SELECTION_DISABLED_MAX; index++) {
                 if (mNetworkSelectionStatus.getDisableReasonCounter(index) != 0) {
-                    sbuf.append(NetworkSelectionStatus.getNetworkDisableReasonString(index)
-                            + " counter:" + mNetworkSelectionStatus.getDisableReasonCounter(index)
-                            + "\n");
+                    sbuf.append(
+                            NetworkSelectionStatus.getNetworkSelectionDisableReasonString(index))
+                            .append(" counter:")
+                            .append(mNetworkSelectionStatus.getDisableReasonCounter(index))
+                            .append("\n");
                 }
             }
         }

@@ -48,6 +48,7 @@ import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.wm.DisplayChangeController;
 import com.android.systemui.wm.DisplayController;
@@ -204,7 +205,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     @Inject
     public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
             DisplayController displayController,
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            DeviceConfigProxy deviceConfig) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -225,7 +227,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager, activityTaskManager,
                 mMenuController, mInputConsumerController, mPipBoundsHandler, mPipTaskOrganizer,
-                floatingContentCoordinator);
+                floatingContentCoordinator, deviceConfig);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);

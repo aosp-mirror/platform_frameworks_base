@@ -395,6 +395,7 @@ message Atom {
         SnapshotMergeReported snapshot_merge_reported = 255;
         ForegroundServiceAppOpSessionEnded foreground_service_app_op_session_ended =
             256  [(module) = "framework"];
+        DisplayJankReported display_jank_reported = 257;
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
@@ -980,6 +981,17 @@ message ScheduledJobStateChanged {
 
     // The job id (as assigned by the app).
     optional int32 job_id = 6;
+
+    // One flag for each of the API constraints defined by Jobscheduler. Does not include implcit
+    // constraints as they are always assumed to be set.
+    optional bool has_charging_constraint = 7;
+    optional bool has_battery_not_low_constraint = 8;
+    optional bool has_storage_not_low_constraint = 9;
+    optional bool has_timing_delay_constraint = 10;
+    optional bool has_deadline_constraint = 11;
+    optional bool has_idle_constraint = 12;
+    optional bool has_connectivity_constraint = 13;
+    optional bool has_content_trigger_constraint = 14;
 }
 
 /**
@@ -8225,6 +8237,22 @@ message FrameTimingHistogram {
     // contents
     // It's required that len(time_millis) == len(frame_count)
     repeated int64 frame_counts = 2;
+}
+
+/**
+ * Janky event as reported by SurfaceFlinger.
+ * This event is intended to be consumed by a Perfetto subscriber for
+ * automated trace collection.
+ *
+ * Logged from:
+ *    frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp
+ */
+message DisplayJankReported {
+    // Informational field for how long the janky event lasted in milliseconds
+    optional int64 event_duration_millis = 1;
+    // Number of frame deadlines missed, where SurfaceFlinger failed to update
+    // the display on time.
+    optional int32 present_deadlines_missed = 2;
 }
 
 /**

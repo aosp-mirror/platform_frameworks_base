@@ -201,6 +201,13 @@
          always-on display) -->
     <string name="doze_brightness_sensor_type" translatable="false"></string>
 
+    <!-- Override value to use for proximity sensor.  -->
+    <string name="proximity_sensor_type" translatable="false"></string>
+
+    <!-- If using proximity_sensor_type, specifies a threshold value to distinguish near and
+         far break points. A sensor value less than this is considered "near". -->
+    <item name="proximity_sensor_threshold" translatable="false" format="float" type="dimen"></item>
+
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">130</integer>
 
@@ -464,7 +471,7 @@
     <!-- Allow dragging the PIP to a location to close it -->
     <bool name="config_pipEnableDismissDragToEdge">true</bool>
 
-    <!-- Alow PIP to resize to a slightly bigger state upon touch/showing the menu -->
+    <!-- Allow PIP to resize to a slightly bigger state upon touch/showing the menu -->
     <bool name="config_pipEnableResizeForMenu">true</bool>
 
     <!-- SystemUI Plugins that can be loaded on user builds. -->
