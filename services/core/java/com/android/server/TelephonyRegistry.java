@@ -167,14 +167,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         @Override
         public String toString() {
-            return "{callingPackage=" + callingPackage + " binder=" + binder
-                    + " callback=" + callback
+            return "{callingPackage=" + pii(callingPackage) + " callerUid=" + callerUid + " binder="
+                    + binder + " callback=" + callback
                     + " onSubscriptionsChangedListenererCallback="
                     + onSubscriptionsChangedListenerCallback
                     + " onOpportunisticSubscriptionsChangedListenererCallback="
-                    + onOpportunisticSubscriptionsChangedListenerCallback
-                    + " callerUid=" + callerUid + " subId=" + subId + " phoneId=" + phoneId
-                    + " events=" + Integer.toHexString(events) + "}";
+                    + onOpportunisticSubscriptionsChangedListenerCallback + " subId=" + subId
+                    + " phoneId=" + phoneId + " events=" + Integer.toHexString(events) + "}";
         }
     }
 
@@ -598,9 +597,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         int callerUserId = UserHandle.getCallingUserId();
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         if (VDBG) {
-            log("listen oscl: E pkg=" + callingPackage + " myUserId=" + UserHandle.myUserId()
-                + " callerUserId="  + callerUserId + " callback=" + callback
-                + " callback.asBinder=" + callback.asBinder());
+            log("listen oscl: E pkg=" + pii(callingPackage) + " uid=" + Binder.getCallingUid()
+                    + " myUserId=" + UserHandle.myUserId() + " callerUserId=" + callerUserId
+                    + " callback=" + callback + " callback.asBinder=" + callback.asBinder());
         }
 
         synchronized (mRecords) {
@@ -652,9 +651,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         int callerUserId = UserHandle.getCallingUserId();
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         if (VDBG) {
-            log("listen ooscl: E pkg=" + callingPackage + " myUserId=" + UserHandle.myUserId()
-                    + " callerUserId="  + callerUserId + " callback=" + callback
-                    + " callback.asBinder=" + callback.asBinder());
+            log("listen ooscl: E pkg=" + pii(callingPackage) + " uid=" + Binder.getCallingUid()
+                    + " myUserId=" + UserHandle.myUserId() + " callerUserId=" + callerUserId
+                    + " callback=" + callback + " callback.asBinder=" + callback.asBinder());
         }
 
         synchronized (mRecords) {
@@ -769,9 +768,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             IPhoneStateListener callback, int events, boolean notifyNow, int subId) {
         int callerUserId = UserHandle.getCallingUserId();
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
-        String str = "listen: E pkg=" + callingPackage + " events=0x" + Integer.toHexString(events)
-                + " notifyNow=" + notifyNow + " subId=" + subId + " myUserId="
-                + UserHandle.myUserId() + " callerUserId=" + callerUserId;
+        String str = "listen: E pkg=" + pii(callingPackage) + " uid=" + Binder.getCallingUid()
+                + " events=0x" + Integer.toHexString(events) + " notifyNow=" + notifyNow + " subId="
+                + subId + " myUserId=" + UserHandle.myUserId() + " callerUserId=" + callerUserId;
         mListenLog.log(str);
         if (VDBG) {
             log(str);
@@ -2956,5 +2955,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         SubscriptionInfo info = subManager.getActiveSubscriptionInfo(subId);
         if (info == null) return INVALID_SIM_SLOT_INDEX;
         return info.getSimSlotIndex();
+    }
+
+    /**
+     * On certain build types, we should redact information by default. UID information will be
+     * preserved in the same log line, so no debugging capability is lost in full bug reports.
+     * However, privacy-constrained bug report types (e.g. connectivity) cannot display raw
+     * package names on user builds as it's considered an information leak.
+     */
+    private static String pii(String packageName) {
+        return Build.IS_DEBUGGABLE ? packageName : "***";
     }
 }
