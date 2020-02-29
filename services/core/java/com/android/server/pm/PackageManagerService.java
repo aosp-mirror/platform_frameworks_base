@@ -213,7 +213,6 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
@@ -10986,17 +10985,22 @@ public class PackageManagerService extends IPackageManager.Stub
         if (createNewPackage) {
             final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
             final boolean virtualPreload = (scanFlags & SCAN_AS_VIRTUAL_PRELOAD) != 0;
+
+            // Flags contain system values stored in the server variant of AndroidPackage,
+            // and so the server-side PackageInfoUtils is still called, even without a
+            // PackageSetting to pass in.
+            int pkgFlags = PackageInfoUtils.appInfoFlags(parsedPackage, null);
+            int pkgPrivateFlags = PackageInfoUtils.appInfoPrivateFlags(parsedPackage, null);
+
             // REMOVE SharedUserSetting from method; update in a separate call
             pkgSetting = Settings.createNewSetting(parsedPackage.getPackageName(),
                     originalPkgSetting, disabledPkgSetting, realPkgName, sharedUserSetting,
                     destCodeFile, destResourceFile, parsedPackage.getNativeLibraryRootDir(),
                     AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage),
                     AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage),
-                    parsedPackage.getVersionCode(),
-                    PackageInfoWithoutStateUtils.appInfoFlags(parsedPackage),
-                    PackageInfoWithoutStateUtils.appInfoPrivateFlags(parsedPackage),
-                    user, true /*allowInstall*/, instantApp,
-                    virtualPreload, UserManagerService.getInstance(), usesStaticLibraries,
+                    parsedPackage.getVersionCode(), pkgFlags, pkgPrivateFlags, user,
+                    true /*allowInstall*/, instantApp, virtualPreload,
+                    UserManagerService.getInstance(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups());
         } else {
             // make a deep copy to avoid modifying any existing system state.
