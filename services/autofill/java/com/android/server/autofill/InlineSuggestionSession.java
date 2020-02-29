@@ -24,8 +24,10 @@ import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
+import android.view.inputmethod.InlineSuggestionsResponse;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
@@ -33,6 +35,8 @@ import com.android.internal.view.IInlineSuggestionsResponseCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
+import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -40,9 +44,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Maintains an inline suggestion autofill session.
+ * Maintains an autofill inline suggestion session that communicates with the IME.
  *
- * <p> This class is thread safe.
+ * <p>
+ * The same session may be reused for multiple input fields involved in the same autofill
+ * {@link Session}. Therefore, one {@link InlineSuggestionsRequest} and one
+ * {@link IInlineSuggestionsResponseCallback} may be used to generate and callback with inline
+ * suggestions for  different input fields.
+ *
+ * <p>
+ * This class is thread safe.
  */
 final class InlineSuggestionSession {
 
@@ -61,6 +72,9 @@ final class InlineSuggestionSession {
     @Nullable
     private CompletableFuture<ImeResponse> mPendingImeResponse;
 
+    @GuardedBy("mLock")
+    private boolean mIsLastResponseNonEmpty = false;
+
     InlineSuggestionSession(InputMethodManagerInternal inputMethodManagerInternal,
             int userId, ComponentName componentName) {
         mInputMethodManagerInternal = inputMethodManagerInternal;
@@ -69,26 +83,28 @@ final class InlineSuggestionSession {
         mLock = new Object();
     }
 
-    public void createRequest(@NonNull AutofillId currentViewId) {
+    public void onCreateInlineSuggestionsRequest(@NonNull AutofillId autofillId) {
+        if (sDebug) Log.d(TAG, "onCreateInlineSuggestionsRequest called for " + autofillId);
+
         synchronized (mLock) {
             cancelCurrentRequest();
             mPendingImeResponse = new CompletableFuture<>();
             // TODO(b/146454892): pipe the uiExtras from the ExtServices.
             mInputMethodManagerInternal.onCreateInlineSuggestionsRequest(
                     mUserId,
-                    new InlineSuggestionsRequestInfo(mComponentName, currentViewId, new Bundle()),
+                    new InlineSuggestionsRequestInfo(mComponentName, autofillId, new Bundle()),
                     new InlineSuggestionsRequestCallbackImpl(mPendingImeResponse));
         }
     }
 
-    @Nullable
-    public ImeResponse waitAndGetImeResponse() {
-        CompletableFuture<ImeResponse> pendingImeResponse = getPendingImeResponse();
-        if (pendingImeResponse == null || pendingImeResponse.isCancelled()) {
-            return null;
+    public Optional<InlineSuggestionsRequest> waitAndGetInlineSuggestionsRequest() {
+        final CompletableFuture<ImeResponse> pendingImeResponse = getPendingImeResponse();
+        if (pendingImeResponse == null) {
+            return Optional.empty();
         }
         try {
-            return pendingImeResponse.get(INLINE_REQUEST_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            return Optional.ofNullable(pendingImeResponse.get(INLINE_REQUEST_TIMEOUT_MS,
+                    TimeUnit.MILLISECONDS)).map(ImeResponse::getRequest);
         } catch (TimeoutException e) {
             Log.w(TAG, "Exception getting inline suggestions request in time: " + e);
         } catch (CancellationException e) {
@@ -96,13 +112,59 @@ final class InlineSuggestionSession {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-        return null;
+        return Optional.empty();
+    }
+
+    public boolean hideInlineSuggestionsUi(@NonNull AutofillId autofillId) {
+        if (sDebug) Log.d(TAG, "Called hideInlineSuggestionsUi for " + autofillId);
+        synchronized (mLock) {
+            if (mIsLastResponseNonEmpty) {
+                if (sDebug) Log.d(TAG, "Send empty suggestion to IME");
+                return onInlineSuggestionsResponseLocked(autofillId,
+                        new InlineSuggestionsResponse(Collections.EMPTY_LIST));
+            }
+            return false;
+        }
+    }
+
+    public boolean onInlineSuggestionsResponse(@NonNull AutofillId autofillId,
+            @NonNull InlineSuggestionsResponse inlineSuggestionsResponse) {
+        synchronized (mLock) {
+            return onInlineSuggestionsResponseLocked(autofillId, inlineSuggestionsResponse);
+        }
+    }
+
+    private boolean onInlineSuggestionsResponseLocked(@NonNull AutofillId autofillId,
+            @NonNull InlineSuggestionsResponse inlineSuggestionsResponse) {
+        final CompletableFuture<ImeResponse> completedImsResponse = getPendingImeResponse();
+        if (completedImsResponse == null || !completedImsResponse.isDone()) {
+            return false;
+        }
+        // There is no need to wait on the CompletableFuture since it should have been completed
+        // when {@link #waitAndGetInlineSuggestionsRequest()} was called.
+        ImeResponse imeResponse = completedImsResponse.getNow(null);
+        if (imeResponse == null) {
+            return false;
+        }
+        try {
+            imeResponse.mCallback.onInlineSuggestionsResponse(autofillId,
+                    inlineSuggestionsResponse);
+            mIsLastResponseNonEmpty = !inlineSuggestionsResponse.getInlineSuggestions().isEmpty();
+            if (sDebug) {
+                Log.d(TAG, "Autofill sends inline response to IME: "
+                        + inlineSuggestionsResponse.getInlineSuggestions().size());
+            }
+            return true;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException sending InlineSuggestionsResponse to IME");
+            return false;
+        }
     }
 
     private void cancelCurrentRequest() {
         CompletableFuture<ImeResponse> pendingImeResponse = getPendingImeResponse();
-        if (pendingImeResponse != null) {
-            pendingImeResponse.cancel(true);
+        if (pendingImeResponse != null && !pendingImeResponse.isDone()) {
+            pendingImeResponse.complete(null);
         }
     }
 
@@ -125,22 +187,18 @@ final class InlineSuggestionSession {
 
         @Override
         public void onInlineSuggestionsUnsupported() throws RemoteException {
-            if (sDebug) {
-                Log.d(TAG, "onInlineSuggestionsUnsupported() called.");
-            }
-            mResponse.cancel(true);
+            if (sDebug) Log.d(TAG, "onInlineSuggestionsUnsupported() called.");
+            mResponse.complete(null);
         }
 
         @Override
         public void onInlineSuggestionsRequest(InlineSuggestionsRequest request,
-                IInlineSuggestionsResponseCallback callback) throws RemoteException {
-            if (sDebug) {
-                Log.d(TAG, "onInlineSuggestionsRequest() received: " + request);
-            }
+                IInlineSuggestionsResponseCallback callback) {
+            if (sDebug) Log.d(TAG, "onInlineSuggestionsRequest() received: " + request);
             if (request != null && callback != null) {
                 mResponse.complete(new ImeResponse(request, callback));
             } else {
-                mResponse.cancel(true);
+                mResponse.complete(null);
             }
         }
     }
@@ -148,12 +206,12 @@ final class InlineSuggestionSession {
     /**
      * A data class wrapping IME responses for the inline suggestion request.
      */
-    public static class ImeResponse {
+    private static class ImeResponse {
         @NonNull
-        private final InlineSuggestionsRequest mRequest;
+        final InlineSuggestionsRequest mRequest;
 
         @NonNull
-        private final IInlineSuggestionsResponseCallback mCallback;
+        final IInlineSuggestionsResponseCallback mCallback;
 
         ImeResponse(@NonNull InlineSuggestionsRequest request,
                 @NonNull IInlineSuggestionsResponseCallback callback) {
@@ -161,12 +219,8 @@ final class InlineSuggestionSession {
             mCallback = callback;
         }
 
-        public InlineSuggestionsRequest getRequest() {
+        InlineSuggestionsRequest getRequest() {
             return mRequest;
-        }
-
-        public IInlineSuggestionsResponseCallback getCallback() {
-            return mCallback;
         }
     }
 }
