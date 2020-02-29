@@ -216,15 +216,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         if (TextUtils.isEmpty(mConversationId)) {
             throw new IllegalArgumentException("Does not have required information");
         }
-        // TODO: consider querying this earlier in the notification pipeline and passing it in
-        LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery()
-                .setPackage(mPackageName)
-                .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_CACHED)
-                .setShortcutIds(Arrays.asList(mConversationId));
-        List<ShortcutInfo> shortcuts = mLauncherApps.getShortcuts(query, mSbn.getUser());
-        if (shortcuts != null && !shortcuts.isEmpty()) {
-            mShortcutInfo = shortcuts.get(0);
-        }
+        mShortcutInfo = entry.getRanking().getShortcutInfo();
 
         mIsBubbleable = mEntry.getBubbleMetadata() != null
             && Settings.Global.getInt(mContext.getContentResolver(),
@@ -325,8 +317,9 @@ public class NotificationConversationInfo extends LinearLayout implements
     private void bindIcon() {
         ImageView image = findViewById(R.id.conversation_icon);
         if (mShortcutInfo != null) {
-            image.setImageBitmap(mIconFactory.getConversationBitmap(
-                    mShortcutInfo, mPackageName, mAppUid));
+            image.setImageDrawable(mIconFactory.getConversationDrawable(
+                    mShortcutInfo, mPackageName, mAppUid,
+                    mNotificationChannel.isImportantConversation()));
         } else {
             if (mSbn.getNotification().extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION, false)) {
                 // TODO: maybe use a generic group icon, or a composite of recent senders
@@ -480,6 +473,9 @@ public class NotificationConversationInfo extends LinearLayout implements
                     mContext.getString(R.string.notification_conversation_mute));
             mute.setImageResource(R.drawable.ic_notifications_silence);
         }
+
+        // update icon in case importance has changed
+        bindIcon();
     }
 
     private void updateChannel() {

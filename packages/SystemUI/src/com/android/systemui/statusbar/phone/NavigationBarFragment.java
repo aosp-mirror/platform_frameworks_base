@@ -105,8 +105,10 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.ContextualButton.ContextButtonListener;
@@ -166,6 +168,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private int mDisabledFlags2;
     private final Lazy<StatusBar> mStatusBarLazy;
     private final ShadeController mShadeController;
+    private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private Recents mRecents;
     private StatusBar mStatusBar;
     private final Divider mDivider;
@@ -291,6 +294,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             CommandQueue commandQueue, Divider divider,
             Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
+            NotificationRemoteInputManager notificationRemoteInputManager,
             @Main Handler mainHandler) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
@@ -300,6 +304,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mSysUiFlagsContainer = sysUiFlagsContainer;
         mStatusBarLazy = statusBarLazy;
         mShadeController = shadeController;
+        mNotificationRemoteInputManager = notificationRemoteInputManager;
         mAssistantAvailable = mAssistManager.getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
         mOverviewProxyService = overviewProxyService;
         mNavigationModeController = navigationModeController;
@@ -614,7 +619,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         clearTransient();
     }
 
-    void clearTransient() {
+    private void clearTransient() {
         if (mTransientShown) {
             mTransientShown = false;
             handleTransientChanged();
@@ -1048,10 +1053,30 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     /** Sets {@link AutoHideController} to the navigation bar. */
     public void setAutoHideController(AutoHideController autoHideController) {
         mAutoHideController = autoHideController;
-        mAutoHideController.setNavigationBar(this);
+        mAutoHideController.addAutoHideUiElement(new AutoHideUiElement() {
+            @Override
+            public void synchronizeState() {
+                checkNavBarModes();
+            }
+
+            @Override
+            public boolean shouldHideOnTouch() {
+                return !mNotificationRemoteInputManager.getController().isRemoteInputActive();
+            }
+
+            @Override
+            public boolean isVisible() {
+                return isTransientShown();
+            }
+
+            @Override
+            public void hide() {
+                clearTransient();
+            }
+        });
     }
 
-    boolean isTransientShown() {
+    private boolean isTransientShown() {
         return mTransientShown;
     }
 

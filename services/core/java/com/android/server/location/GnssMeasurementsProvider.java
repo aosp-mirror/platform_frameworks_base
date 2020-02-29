@@ -29,6 +29,7 @@ import com.android.server.location.gnss.GnssManagerService;
 import com.android.server.location.util.listeners.GnssListenerManager;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An base implementation for GNSS measurements provider. It abstracts out the responsibility of
@@ -37,7 +38,8 @@ import java.util.List;
  * @hide
  */
 public class GnssMeasurementsProvider extends
-        GnssListenerManager<GnssRequest, IGnssMeasurementsListener, Boolean> {
+        GnssListenerManager<GnssRequest, IGnssMeasurementsListener, Boolean> implements
+        SettingsHelper.GlobalSettingChangedListener {
 
     private final LocationUsageLogger mLogger;
     private final GnssMeasurementProviderNative mNative;
@@ -95,13 +97,29 @@ public class GnssMeasurementsProvider extends
     }
 
     @Override
+    protected void onActive() {
+        mSettingsHelper.addOnGnssMeasurementsFullTrackingEnabledChangedListener(this);
+    }
+
+    @Override
+    protected void onInactive() {
+        mSettingsHelper.removeOnGnssMeasurementsFullTrackingEnabledChangedListener(this);
+    }
+
+    @Override
+    public void onSettingChanged() {
+        // GNSS Measurements Full Tracking dev setting changed
+        updateService();
+    }
+
+    @Override
     protected Boolean mergeRequests(List<GnssRegistration> registrations) {
         if (mSettingsHelper.isGnssMeasurementsFullTrackingEnabled()) {
             return true;
         }
 
         for (GnssRegistration registration : registrations) {
-            if (registration.getRequest().isFullTracking()) {
+            if (Objects.requireNonNull(registration.getRequest()).isFullTracking()) {
                 return true;
             }
         }

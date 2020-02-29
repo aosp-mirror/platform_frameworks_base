@@ -220,6 +220,7 @@ public class Tethering {
     private final UserRestrictionActionListener mTetheringRestriction;
     private final ActiveDataSubIdListener mActiveDataSubIdListener;
     private final ConnectedClientsTracker mConnectedClientsTracker;
+    private final TetheringThreadExecutor mExecutor;
     private int mActiveDataSubId = INVALID_SUBSCRIPTION_ID;
     // All the usage of mTetheringEventCallback should run in the same thread.
     private ITetheringEventCallback mTetheringEventCallback = null;
@@ -296,8 +297,8 @@ public class Tethering {
         final UserManager userManager = (UserManager) mContext.getSystemService(
                 Context.USER_SERVICE);
         mTetheringRestriction = new UserRestrictionActionListener(userManager, this);
-        final TetheringThreadExecutor executor = new TetheringThreadExecutor(mHandler);
-        mActiveDataSubIdListener = new ActiveDataSubIdListener(executor);
+        mExecutor = new TetheringThreadExecutor(mHandler);
+        mActiveDataSubIdListener = new ActiveDataSubIdListener(mExecutor);
 
         // Load tethering configuration.
         updateConfiguration();
@@ -315,9 +316,7 @@ public class Tethering {
 
         final WifiManager wifiManager = getWifiManager();
         if (wifiManager != null) {
-            wifiManager.registerSoftApCallback(
-                  mHandler::post /* executor */,
-                  new TetheringSoftApCallback());
+            wifiManager.registerSoftApCallback(mExecutor, new TetheringSoftApCallback());
         }
     }
 
@@ -606,14 +605,17 @@ public class Tethering {
                 Context.ETHERNET_SERVICE);
         synchronized (mPublicSync) {
             if (enable) {
+                if (mEthernetCallback != null) return TETHER_ERROR_NO_ERROR;
+
                 mEthernetCallback = new EthernetCallback();
-                mEthernetIfaceRequest = em.requestTetheredInterface(mEthernetCallback);
+                mEthernetIfaceRequest = em.requestTetheredInterface(mExecutor, mEthernetCallback);
             } else {
-                if (mConfiguredEthernetIface != null) {
-                    stopEthernetTetheringLocked();
+                stopEthernetTetheringLocked();
+                if (mEthernetCallback != null) {
                     mEthernetIfaceRequest.release();
+                    mEthernetCallback = null;
+                    mEthernetIfaceRequest = null;
                 }
-                mEthernetCallback = null;
             }
         }
         return TETHER_ERROR_NO_ERROR;

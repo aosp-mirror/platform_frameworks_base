@@ -1366,10 +1366,10 @@ package android.location {
     method public void reset();
     method public void set(android.location.GnssNavigationMessage);
     method public void setData(byte[]);
-    method public void setMessageId(int);
+    method public void setMessageId(@IntRange(from=0xffffffff, to=120) int);
     method public void setStatus(int);
-    method public void setSubmessageId(int);
-    method public void setSvid(int);
+    method public void setSubmessageId(@IntRange(from=1) int);
+    method public void setSvid(@IntRange(from=1, to=200) int);
     method public void setType(int);
   }
 
@@ -1723,7 +1723,7 @@ package android.net {
   }
 
   public class EthernetManager {
-    method @NonNull public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull android.net.EthernetManager.TetheredInterfaceCallback);
+    method @NonNull public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
   }
 
   public static interface EthernetManager.TetheredInterfaceCallback {

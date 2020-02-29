@@ -11468,7 +11468,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 outLocalInsets.setEmpty();
                 return in;
             }
-            Pair<Insets, WindowInsets> result = listener.onContentApplyWindowInsets(in);
+            Pair<Insets, WindowInsets> result = listener.onContentApplyWindowInsets(this, in);
             outLocalInsets.set(result.first.toRect());
             return result.second;
         } else {

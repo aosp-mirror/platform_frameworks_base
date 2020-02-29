@@ -313,9 +313,8 @@ public class GnssManagerService {
     /**
      * Adds a GNSS measurements listener.
      */
-    public void addGnssMeasurementsListener(@Nullable GnssRequest request,
-            IGnssMeasurementsListener listener, String packageName,
-            @Nullable String featureId) {
+    public void addGnssMeasurementsListener(GnssRequest request, IGnssMeasurementsListener listener,
+            String packageName, @Nullable String featureId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
         if (request.isFullTracking()) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);

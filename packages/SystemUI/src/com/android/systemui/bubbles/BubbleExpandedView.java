@@ -243,7 +243,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mPointerView.setVisibility(INVISIBLE);
 
         mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
-                R.dimen.bubble_settings_size);
+                R.dimen.bubble_manage_button_height);
         mSettingsIcon = findViewById(R.id.settings_button);
         mSettingsIcon.setOnClickListener(this);
 
@@ -528,6 +528,16 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         float pointerLeft = x - halfPointerWidth;
         mPointerView.setTranslationX(pointerLeft);
         mPointerView.setVisibility(VISIBLE);
+    }
+
+    /**
+     * Position of the manage button displayed in the expanded view. Used for placing user
+     * education about the manage button.
+     */
+    public Rect getManageButtonLocationOnScreen() {
+        mTempLoc = mSettingsIcon.getLocationOnScreen();
+        return new Rect(mTempLoc[0], mTempLoc[1], mTempLoc[0] + mSettingsIcon.getWidth(),
+                mTempLoc[1] + mSettingsIcon.getHeight());
     }
 
     /**

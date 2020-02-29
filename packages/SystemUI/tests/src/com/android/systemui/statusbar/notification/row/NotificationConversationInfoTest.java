@@ -30,6 +30,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
@@ -53,8 +54,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -117,7 +117,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     @Mock
     private ShortcutInfo mShortcutInfo;
     @Mock
-    private Bitmap mImage;
+    private Drawable mIconDrawable;
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
@@ -183,8 +183,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         when(mShortcutInfo.getShortLabel()).thenReturn("Convo name");
         List<ShortcutInfo> shortcuts = Arrays.asList(mShortcutInfo);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcuts);
-        when(mIconFactory.getConversationBitmap(any(ShortcutInfo.class), anyString(), anyInt()))
-                .thenReturn(mImage);
+        when(mIconFactory.getConversationDrawable(
+                any(ShortcutInfo.class), anyString(), anyInt(), anyBoolean()))
+                .thenReturn(mIconDrawable);
 
         mNotificationChannel = new NotificationChannel(
                 TEST_CHANNEL, TEST_CHANNEL_NAME, IMPORTANCE_LOW);
@@ -197,7 +198,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 .build();
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 notification, UserHandle.CURRENT, null, 0);
-        mEntry = new NotificationEntryBuilder().setSbn(mSbn).build();
+        mEntry = new NotificationEntryBuilder().setSbn(mSbn).setShortcutInfo(mShortcutInfo).build();
 
         PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0,
                 new Intent(mContext, BubblesTestActivity.class), 0);
@@ -206,7 +207,10 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                         .createIntentBubble(bubbleIntent,
                                 Icon.createWithResource(mContext, R.drawable.android)).build())
                 .build();
-        mBubbleEntry = new NotificationEntryBuilder().setSbn(mBubbleSbn).build();
+        mBubbleEntry = new NotificationEntryBuilder()
+                .setSbn(mBubbleSbn)
+                .setShortcutInfo(mShortcutInfo)
+                .build();
 
         mConversationChannel = new NotificationChannel(
                 TEST_CHANNEL + " : " + CONVERSATION_ID, TEST_CHANNEL_NAME, IMPORTANCE_LOW);
@@ -233,7 +237,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 true);
         final ImageView view = mNotificationInfo.findViewById(R.id.conversation_icon);
-        assertEquals(mImage, ((BitmapDrawable) view.getDrawable()).getBitmap());
+        assertEquals(mIconDrawable, view.getDrawable());
     }
 
     @Test

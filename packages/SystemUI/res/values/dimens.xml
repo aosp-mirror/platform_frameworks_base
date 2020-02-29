@@ -1159,7 +1159,7 @@
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
-    <dimen name="bubble_settings_size">48dp</dimen>
+    <dimen name="bubble_manage_button_height">48dp</dimen>
     <!-- How far, horizontally, to animate the expanded view over when animating in/out. -->
     <dimen name="bubble_expanded_animate_x_distance">100dp</dimen>
     <!-- How far, vertically, to animate the expanded view over when animating in/out. -->
@@ -1175,11 +1175,9 @@
     <!-- How far offscreen the bubble stack rests. Cuts off padding and part of icon bitmap. -->
     <dimen name="bubble_stack_offscreen">9dp</dimen>
     <!-- How far down the screen the stack starts. -->
-    <dimen name="bubble_stack_starting_offset_y">96dp</dimen>
+    <dimen name="bubble_stack_starting_offset_y">120dp</dimen>
     <!-- Space between the pointer triangle and the bubble expanded view -->
     <dimen name="bubble_pointer_margin">8dp</dimen>
-    <!-- Height of the permission prompt shown with bubbles -->
-    <dimen name="bubble_permission_height">120dp</dimen>
     <!-- Padding applied to the bubble dismiss target. Touches in this padding cause the bubbles to
          snap to the dismiss target. -->
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
@@ -1187,6 +1185,14 @@
 
     <dimen name="dismiss_circle_size">52dp</dimen>
     <dimen name="dismiss_target_x_size">24dp</dimen>
+
+    <!-- Bubbles user education views -->
+    <dimen name="bubbles_manage_education_width">160dp</dimen>
+    <!-- The inset from the top bound of the manage button to place the user education. -->
+    <dimen name="bubbles_manage_education_top_inset">10dp</dimen>
+    <!-- Size of padding for the user education cling, this should at minimum be larger than
+        individual_bubble_size + some padding. -->
+    <dimen name="bubble_stack_user_education_side_inset">72dp</dimen>
 
     <!-- Size of the RAT type for CellularTile -->
     <dimen name="celltile_rat_type_size">10sp</dimen>

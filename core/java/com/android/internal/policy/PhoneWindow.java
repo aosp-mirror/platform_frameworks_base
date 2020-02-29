@@ -135,6 +135,29 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private final static String TAG = "PhoneWindow";
 
+    /**
+     * @see Window#setDecorFitsSystemWindows
+     */
+    private static final OnContentApplyWindowInsetsListener sDefaultContentInsetsApplier =
+            (view, insets) -> {
+                if ((view.getWindowSystemUiVisibility() & SYSTEM_UI_LAYOUT_FLAGS) != 0) {
+                    return new Pair<>(Insets.NONE, insets);
+                }
+
+                boolean includeIme = (view.getViewRootImpl().mWindowAttributes.softInputMode
+                        & SOFT_INPUT_MASK_ADJUST)
+                        == SOFT_INPUT_ADJUST_RESIZE;
+                Insets insetsToApply;
+                if (ViewRootImpl.sNewInsetsMode == 0) {
+                    insetsToApply = insets.getSystemWindowInsets();
+                } else {
+                    insetsToApply = insets.getInsets(systemBars() | (includeIme ? ime() : 0));
+                }
+                insets = insets.inset(insetsToApply);
+                return new Pair<>(insetsToApply,
+                        insets.inset(insetsToApply).consumeSystemWindowInsets());
+            };
+
     /* If true, shadows drawn around the window will be rendered by the system compositor. If
      * false, shadows will be drawn by the client by setting an elevation on the root view and
      * the contents will be inset by the shadow radius. */
@@ -320,8 +343,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** @see ViewRootImpl#mActivityConfigCallback */
     private ActivityConfigCallback mActivityConfigCallback;
 
-    private OnContentApplyWindowInsetsListener mPendingOnContentApplyWindowInsetsListener
-            = createDefaultContentWindowInsetsListener();
+    private OnContentApplyWindowInsetsListener mPendingOnContentApplyWindowInsetsListener =
+            sDefaultContentInsetsApplier;
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -2120,27 +2143,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mPendingOnContentApplyWindowInsetsListener = null;
     }
 
-    private OnContentApplyWindowInsetsListener createDefaultContentWindowInsetsListener() {
-        return insets -> {
-            if ((getDecorView().getWindowSystemUiVisibility() & SYSTEM_UI_LAYOUT_FLAGS) != 0) {
-                return new Pair<>(Insets.NONE, insets);
-            }
-
-            boolean includeIme =
-                    (getViewRootImpl().mWindowAttributes.softInputMode & SOFT_INPUT_MASK_ADJUST)
-                            == SOFT_INPUT_ADJUST_RESIZE;
-            Insets insetsToApply;
-            if (ViewRootImpl.sNewInsetsMode == 0) {
-                insetsToApply = insets.getSystemWindowInsets();
-            } else {
-                insetsToApply = insets.getInsets(systemBars() | (includeIme ? ime() : 0));
-            }
-            insets = insets.inset(insetsToApply);
-            return new Pair<>(insetsToApply,
-                    insets.inset(insetsToApply).consumeSystemWindowInsets());
-        };
-    }
-
     static private final String FOCUSED_ID_TAG = "android:focusedViewId";
     static private final String VIEWS_TAG = "android:views";
     static private final String PANELS_TAG = "android:Panels";
@@ -3907,7 +3909,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public void setDecorFitsSystemWindows(boolean decorFitsSystemWindows) {
         ViewRootImpl impl = getViewRootImplOrNull();
         OnContentApplyWindowInsetsListener listener = decorFitsSystemWindows
-                ? createDefaultContentWindowInsetsListener()
+                ? sDefaultContentInsetsApplier
                 : null;
         if (impl != null) {
             impl.setOnContentApplyWindowInsetsListener(listener);

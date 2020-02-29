@@ -380,8 +380,8 @@ message Atom {
         BootTimeEventErrorCode boot_time_event_error_code_reported = 242 [(module) = "framework"];
         UserspaceRebootReported userspace_reboot_reported = 243 [(module) = "framework"];
         NotificationReported notification_reported = 244 [(module) = "framework"];
-        NotificationPanelReported notification_panel_reported = 245;
-        NotificationChannelModified notification_channel_modified = 246;
+        NotificationPanelReported notification_panel_reported = 245 [(module) = "sysui"];
+        NotificationChannelModified notification_channel_modified = 246 [(module) = "framework"];
         IntegrityCheckResultReported integrity_check_result_reported = 247 [(module) = "framework"];
         IntegrityRulesPushed integrity_rules_pushed = 248 [(module) = "framework"];
         CellBroadcastMessageReported cb_message_reported =
@@ -396,6 +396,7 @@ message Atom {
         ForegroundServiceAppOpSessionEnded foreground_service_app_op_session_ended =
             256  [(module) = "framework"];
         DisplayJankReported display_jank_reported = 257;
+        AppStandbyBucketChanged app_standby_bucket_changed = 258 [(module) = "framework"];
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
@@ -1227,18 +1228,8 @@ message WakeupAlarmOccurred {
     // Name of source package (for historical reasons, since BatteryStats tracked it).
     optional string package_name = 3;
 
-    // These enum values match the STANDBY_BUCKET_XXX constants defined in UsageStatsManager.java.
-    enum Bucket {
-        UNKNOWN = 0;
-        EXEMPTED = 5;
-        ACTIVE = 10;
-        WORKING_SET = 20;
-        FREQUENT = 30;
-        RARE = 40;
-        NEVER = 50;
-    }
     // The App Standby bucket of the app that scheduled the alarm at the time the alarm fired.
-    optional Bucket app_standby_bucket = 4;
+    optional AppStandbyBucketChanged.Bucket app_standby_bucket = 4;
 }
 
 /**
@@ -3646,8 +3637,8 @@ message NotificationChannelModified {
     // The notifying app's uid and package.
     optional int32 uid = 2 [(is_uid) = true];
     optional string package_name = 3;
-    // App-assigned notification channel ID or channel-group ID
-    optional string channel_id = 4;
+    // Hash of app-assigned notification channel ID or channel-group ID
+    optional int32 channel_id_hash = 4;
     // Previous importance setting, if applicable
     optional android.stats.sysui.NotificationImportance old_importance = 5;
     // New importance setting
@@ -8723,4 +8714,46 @@ message GnssStats {
 
     // Total number of L5 sv status messages reports, where sv is used in fix since boot
     optional int64 l5_sv_status_reports_used_in_fix = 14;
+}
+
+/**
+ * Logs when an app is moved to a different standby bucket.
+ *
+ * Logged from:
+ *   frameworks/base/apex/jobscheduler/service/java/com/android/server/usage/AppIdleHistory.java
+ */
+message AppStandbyBucketChanged {
+    optional string package_name = 1;
+
+    // Should be 0, 10, 11, 12, etc. where 0 is the owner. See UserHandle for more documentation.
+    optional int32 user_id = 2;
+
+    // These enum values match the constants defined in UsageStatsManager.java.
+    enum Bucket {
+        BUCKET_UNKNOWN = 0;
+        BUCKET_EXEMPTED = 5;
+        BUCKET_ACTIVE = 10;
+        BUCKET_WORKING_SET = 20;
+        BUCKET_FREQUENT = 30;
+        BUCKET_RARE = 40;
+        BUCKET_RESTRICTED = 45;
+        BUCKET_NEVER = 50;
+    }
+    optional Bucket bucket = 3;
+
+    enum MainReason {
+        MAIN_UNKNOWN = 0;
+        MAIN_DEFAULT = 0x0100;
+        MAIN_TIMEOUT = 0x0200;
+        MAIN_USAGE = 0x0300;
+        MAIN_FORCED_BY_USER = 0x0400;
+        MAIN_PREDICTED = 0x0500;
+        MAIN_FORCED_BY_SYSTEM = 0x0600;
+    }
+    optional MainReason main_reason = 4;
+
+    // A more detailed reason for the standby bucket change. The sub reason name is dependent on
+    // the main reason. Values are one of the REASON_SUB_XXX constants defined in
+    // UsageStatsManager.java.
+    optional int32 sub_reason = 5;
 }

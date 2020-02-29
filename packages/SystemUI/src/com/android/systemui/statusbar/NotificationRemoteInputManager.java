@@ -292,7 +292,8 @@ public class NotificationRemoteInputManager implements Dumpable {
             public void onEntryRemoved(
                     @Nullable NotificationEntry entry,
                     NotificationVisibility visibility,
-                    boolean removedByUser) {
+                    boolean removedByUser,
+                    int reason) {
                 // We're removing the notification, the smart controller can forget about it.
                 mSmartReplyController.stopSending(entry);
 

@@ -199,7 +199,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 public void onEntryRemoved(
                         @Nullable NotificationEntry entry,
                         NotificationVisibility visibility,
-                        boolean removedByUser) {
+                        boolean removedByUser,
+                        int reason) {
                     StatusBarNotificationPresenter.this.onNotificationRemoved(
                             entry.getKey(), entry.getSbn());
                     if (removedByUser) {

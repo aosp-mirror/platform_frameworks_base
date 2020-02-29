@@ -78,13 +78,6 @@ public abstract class AbstractListenerManager<TKey, TRequest, TListener,
             return mRequest;
         }
 
-        /**
-         * Returns the listener, or null if this registration is no longer registered.
-         */
-        protected @Nullable TListener getListener() {
-            return mListener;
-        }
-
         boolean register() {
             Preconditions.checkState(mListener != null);
             return onRegister();
@@ -144,6 +137,9 @@ public abstract class AbstractListenerManager<TKey, TRequest, TListener,
 
     @GuardedBy("mRegistrations")
     private final ReentrancyGuard mReentrancyGuard = new ReentrancyGuard();
+
+    @GuardedBy("mRegistrations")
+    private boolean mActiveRegistrations = false;
 
     @GuardedBy("mRegistrations")
     private boolean mServiceRegistered = false;
@@ -216,36 +212,47 @@ public abstract class AbstractListenerManager<TKey, TRequest, TListener,
         updateService();
     }
 
-    @GuardedBy("mRegistrations")
-    private void updateService() {
-        if (Build.IS_DEBUGGABLE) {
-            Preconditions.checkState(Thread.holdsLock(mRegistrations));
-        }
-
-        ArrayList<TRegistration> actives = new ArrayList<>(mRegistrations.size());
-        for (int i = 0; i < mRegistrations.size(); i++) {
-            TRegistration registration = mRegistrations.valueAt(i);
-            if (isActive(registration)) {
-                actives.add(registration);
+    /**
+     * Forces a re-evalution of the active state of all registrations, the merged request for all
+     * active registrations, and service registration state.
+     */
+    protected void updateService() {
+        synchronized (mRegistrations) {
+            ArrayList<TRegistration> actives = new ArrayList<>(mRegistrations.size());
+            for (int i = 0; i < mRegistrations.size(); i++) {
+                TRegistration registration = mRegistrations.valueAt(i);
+                if (isActive(registration)) {
+                    actives.add(registration);
+                }
             }
-        }
 
-        if (actives.isEmpty()) {
-            if (mServiceRegistered) {
-                unregisterService();
-                mServiceRegistered = false;
-            }
-            mCurrentRequest = null;
-            return;
-        }
+            if (actives.isEmpty()) {
+                if (mServiceRegistered) {
+                    unregisterService();
+                    mServiceRegistered = false;
+                }
+                mCurrentRequest = null;
 
-        TMergedRequest merged = mergeRequests(actives);
-        if (!mServiceRegistered || !Objects.equals(merged, mCurrentRequest)) {
-            if (mServiceRegistered) {
-                unregisterService();
+                if (mActiveRegistrations) {
+                    mActiveRegistrations = false;
+                    onInactive();
+                }
+                return;
+            } else {
+                if (!mActiveRegistrations) {
+                    mActiveRegistrations = true;
+                    onActive();
+                }
             }
-            mCurrentRequest = merged;
-            mServiceRegistered = registerService(mCurrentRequest);
+
+            TMergedRequest merged = mergeRequests(actives);
+            if (!mServiceRegistered || !Objects.equals(merged, mCurrentRequest)) {
+                if (mServiceRegistered) {
+                    unregisterService();
+                }
+                mCurrentRequest = merged;
+                mServiceRegistered = registerService(mCurrentRequest);
+            }
         }
     }
 
@@ -264,7 +271,8 @@ public abstract class AbstractListenerManager<TKey, TRequest, TListener,
     /**
      * Performs some function on all (not just active) registrations. The function should return
      * true if the active state of the registration has changed, or if the change to the
-     * registration may have changed the result of {@link #mergeRequests(List)}.
+     * registration may have changed the result of {@link #mergeRequests(List)}. If the function
+     * returns true for any registration, {@link #updateService()} will be invoked.
      */
     protected final void updateRegistrations(@NonNull Function<TRegistration, Boolean> function) {
         synchronized (mRegistrations) {
@@ -306,6 +314,22 @@ public abstract class AbstractListenerManager<TKey, TRequest, TListener,
      * Should be implemented to unregister the service.
      */
     protected abstract void unregisterService();
+
+    /**
+     * Invoked when the listener goes from having no active registrations to having some active
+     * registrations. This is a convenient entry point for registering listeners, etc, which only
+     * need to be present while there are active registrations. This method will always be invoked
+     * before a corrosponding call to {@link #registerService(Object)}.
+     */
+    protected void onActive() {}
+
+    /**
+     * Invoked when the listener goes from having some active registrations to having no active
+     * registrations. This is a convenient entry point for unregistering listeners, etc, which only
+     * need to be present while there are active registrations. This method will always be invoked
+     * after a corrosponding call to {@link #unregisterService()}.
+     */
+    protected void onInactive() {}
 
     /**
      * Invoked when a registration is added.

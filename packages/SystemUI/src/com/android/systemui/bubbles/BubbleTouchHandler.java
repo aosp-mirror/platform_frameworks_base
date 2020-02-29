@@ -67,6 +67,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
         // anything, collapse the stack.
         if (action == MotionEvent.ACTION_OUTSIDE || mTouchedView == null) {
             mBubbleData.setExpanded(false);
+            mStack.hideStackUserEducation(false /* fromExpansion */);
             resetForNextGesture();
             return false;
         }
@@ -77,6 +78,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
 
             // Not touching anything touchable, but we shouldn't collapse (e.g. touching edge
             // of expanded view).
+            mStack.maybeShowManageEducation(false);
             resetForNextGesture();
             return false;
         }
@@ -180,9 +182,8 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     }
                 } else if (mTouchedView == mStack.getExpandedBubbleView()) {
                     mBubbleData.setExpanded(false);
-                } else if (isStack || isFlyout) {
-                    // Toggle expansion
-                    mBubbleData.setExpanded(!mBubbleData.isExpanded());
+                } else if (isStack) {
+                    mStack.onStackTapped();
                 } else {
                     final String key = ((BadgedImageView) mTouchedView).getKey();
                     if (key == BubbleOverflow.KEY) {

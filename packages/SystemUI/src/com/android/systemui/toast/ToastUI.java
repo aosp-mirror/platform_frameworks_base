@@ -95,7 +95,7 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
             hideCurrentToast();
         }
         View view = mPresenter.getTextToastView(text);
-        LayoutParams params = getLayoutParams(windowToken, duration);
+        LayoutParams params = getLayoutParams(packageName, windowToken, duration);
         mCurrentToast = new ToastEntry(packageName, token, view, windowToken, callback);
         try {
             mWindowManager.addView(view, params);
@@ -145,9 +145,9 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
         mCurrentToast = null;
     }
 
-    private LayoutParams getLayoutParams(IBinder windowToken, int duration) {
+    private LayoutParams getLayoutParams(String packageName, IBinder windowToken, int duration) {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        mPresenter.startLayoutParams(params);
+        mPresenter.startLayoutParams(params, packageName);
         int gravity = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_toastDefaultGravity);
         int yOffset = mContext.getResources().getDimensionPixelSize(R.dimen.toast_y_offset);

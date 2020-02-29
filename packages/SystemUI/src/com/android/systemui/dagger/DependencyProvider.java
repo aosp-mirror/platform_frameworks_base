@@ -28,6 +28,7 @@ import android.os.HandlerThread;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.view.Choreographer;
+import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
 
@@ -47,6 +48,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -164,6 +166,14 @@ public class DependencyProvider {
     @Provides
     public ConfigurationController provideConfigurationController(Context context) {
         return new ConfigurationControllerImpl(context);
+    }
+
+    /** */
+    @Singleton
+    @Provides
+    public AutoHideController provideAutoHideController(Context context,
+            @Main Handler mainHandler, IWindowManager iWindowManager) {
+        return new AutoHideController(context, mainHandler, iWindowManager);
     }
 
     @Singleton

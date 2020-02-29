@@ -130,7 +130,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
         state.secondaryLabel = TextUtils.emptyIfNull(
                 getSecondaryLabel(enabled, connecting, connected, state.isTransient));
-        state.contentDescription = state.label;
+        state.contentDescription = mContext.getString(
+                R.string.accessibility_quick_settings_bluetooth);
         state.stateDescription = "";
         if (enabled) {
             if (connected) {
@@ -148,15 +149,11 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             } else {
                 state.icon =
                         ResourceIcon.get(com.android.internal.R.drawable.ic_qs_bluetooth);
-                state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_bluetooth);
                 state.stateDescription = mContext.getString(R.string.accessibility_not_connected);
             }
             state.state = Tile.STATE_ACTIVE;
         } else {
             state.icon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_bluetooth);
-            state.contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_bluetooth);
             state.state = Tile.STATE_INACTIVE;
         }
 

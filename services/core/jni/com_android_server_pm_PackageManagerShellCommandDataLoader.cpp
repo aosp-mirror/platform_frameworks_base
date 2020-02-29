@@ -16,21 +16,16 @@
 
 #define ATRACE_TAG ATRACE_TAG_ADB
 #define LOG_TAG "PackageManagerShellCommandDataLoader-jni"
-#include <android-base/logging.h>
-
 #include <android-base/file.h>
+#include <android-base/logging.h>
 #include <android-base/stringprintf.h>
 #include <android-base/unique_fd.h>
+#include <core_jni_helpers.h>
 #include <cutils/trace.h>
+#include <endian.h>
+#include <nativehelper/JNIHelp.h>
 #include <sys/eventfd.h>
 #include <sys/poll.h>
-
-#include <nativehelper/JNIHelp.h>
-
-#include <core_jni_helpers.h>
-#include <endian.h>
-
-#include "dataloader.h"
 
 #include <charconv>
 #include <chrono>
@@ -39,6 +34,8 @@
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
+
+#include "dataloader.h"
 
 namespace android {
 
@@ -378,7 +375,7 @@ private:
     }
 
     // Installation.
-    bool onPrepareImage(const dataloader::DataLoaderInstallationFiles& addedFiles) final {
+    bool onPrepareImage(dataloader::DataLoaderInstallationFiles addedFiles) final {
         JNIEnv* env = GetOrAttachJNIEnvironment(mJvm);
         const auto& jni = jniIds(env);
 
@@ -513,7 +510,7 @@ private:
             consumed += remain;
         }
 
-        auto res = mIfs->writeBlocks({blocks->data(), blocks->data() + blocks->size()});
+        auto res = mIfs->writeBlocks({blocks->data(), blocks->size()});
 
         blocks->clear();
         buffer->erase(buffer->begin(), buffer->begin() + consumed);
@@ -533,7 +530,7 @@ private:
         uint32_t count;
     };
 
-    void onPageReads(const android::dataloader::PageReads& pageReads) final {
+    void onPageReads(android::dataloader::PageReads pageReads) final {
         auto trace = atrace_is_tag_enabled(ATRACE_TAG);
         if (CC_LIKELY(!trace)) {
             return;
@@ -603,7 +600,7 @@ private:
     }
 
     // IFS callbacks.
-    void onPendingReads(const dataloader::PendingReads& pendingReads) final {
+    void onPendingReads(dataloader::PendingReads pendingReads) final {
         CHECK(mIfs);
         for (auto&& pendingRead : pendingReads) {
             const android::dataloader::FileId& fileId = pendingRead.id;
@@ -681,7 +678,7 @@ private:
 
                 auto& writeFd = writeFds[fileIdx];
                 if (writeFd < 0) {
-                    writeFd = this->mIfs->openWrite(fileId);
+                    writeFd.reset(this->mIfs->openWrite(fileId));
                     if (writeFd < 0) {
                         ALOGE("Failed to open file %d for writing (%d). Aboring.", header.fileIdx,
                               -writeFd);

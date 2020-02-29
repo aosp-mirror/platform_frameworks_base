@@ -19,7 +19,9 @@ import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
+
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+
 import static java.lang.Integer.max;
 
 import android.app.Activity;
@@ -28,7 +30,6 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Looper;
@@ -511,6 +512,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         boolean finish = false;
         boolean strongAuth = false;
         int eventSubtype = -1;
+        mCurrentSecuritySelection = whitelistIpcs(() ->
+                mSecurityModel.getSecurityMode(targetUserId));
         if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
             finish = true;
             eventSubtype = BOUNCER_DISMISS_EXTENDED_ACCESS;
@@ -518,13 +521,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             finish = true;
             eventSubtype = BOUNCER_DISMISS_BIOMETRIC;
         } else if (SecurityMode.None == mCurrentSecuritySelection) {
-            SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
-            if (SecurityMode.None == securityMode) {
-                finish = true; // no security required
-                eventSubtype = BOUNCER_DISMISS_NONE_SECURITY;
-            } else {
-                showSecurityScreen(securityMode); // switch to the alternate security view
-            }
+            finish = true; // no security required
+            eventSubtype = BOUNCER_DISMISS_NONE_SECURITY;
         } else if (authenticated) {
             switch (mCurrentSecuritySelection) {
                 case Pattern:

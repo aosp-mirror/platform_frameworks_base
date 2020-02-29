@@ -850,9 +850,10 @@ public class StackAnimationController extends
     }
 
     /** Moves the stack to a position instantly, with no animation. */
-    private void setStackPosition(PointF pos) {
+    public void setStackPosition(PointF pos) {
         Log.d(TAG, String.format("Setting position to (%f, %f).", pos.x, pos.y));
         mStackPosition.set(pos.x, pos.y);
+        mRestingStackPosition = mStackPosition;
 
         // If we're not the active controller, we don't want to physically move the bubble views.
         if (isActiveController()) {
@@ -873,10 +874,10 @@ public class StackAnimationController extends
         }
     }
 
-    /** Returns the default stack position, which is on the top right. */
-    private PointF getDefaultStartPosition() {
+    /** Returns the default stack position, which is on the top left. */
+    public PointF getDefaultStartPosition() {
         return new PointF(
-                getAllowableStackPositionRegion().right,
+                getAllowableStackPositionRegion().left,
                 getAllowableStackPositionRegion().top + mStackStartingVerticalOffset);
     }
 

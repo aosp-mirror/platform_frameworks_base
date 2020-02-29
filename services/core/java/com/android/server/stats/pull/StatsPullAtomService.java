@@ -436,8 +436,7 @@ public class StatsPullAtomService extends SystemService {
         mStoragedUidIoStatsReader = new StoragedUidIoStatsReader();
 
         // Initialize PROC_STATS
-        // TODO (b/148402814): Change this directory to stats_pull.
-        mBaseDir = new File(SystemServiceManager.ensureSystemDir(), "stats_companion");
+        mBaseDir = new File(SystemServiceManager.ensureSystemDir(), "stats_pull");
 
         // Disables throttler on CPU time readers.
         mCpuUidUserSysTimeReader = new KernelCpuUidUserSysTimeReader(false);

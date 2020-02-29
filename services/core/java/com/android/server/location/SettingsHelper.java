@@ -98,6 +98,7 @@ public class SettingsHelper {
 
     private final IntegerSecureSetting mLocationMode;
     private final LongGlobalSetting mBackgroundThrottleIntervalMs;
+    private final BooleanGlobalSetting mGnssMeasurementFullTracking;
     private final StringListCachedSecureSetting mLocationPackageBlacklist;
     private final StringListCachedSecureSetting mLocationPackageWhitelist;
     private final StringSetCachedGlobalSetting mBackgroundThrottlePackageWhitelist;
@@ -110,6 +111,8 @@ public class SettingsHelper {
         mLocationMode = new IntegerSecureSetting(context, LOCATION_MODE, handler);
         mBackgroundThrottleIntervalMs = new LongGlobalSetting(context,
                 LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS, handler);
+        mGnssMeasurementFullTracking = new BooleanGlobalSetting(context,
+                ENABLE_GNSS_RAW_MEAS_FULL_TRACKING, handler);
         mLocationPackageBlacklist = new StringListCachedSecureSetting(context,
                 LOCATION_PACKAGE_BLACKLIST, handler);
         mLocationPackageWhitelist = new StringListCachedSecureSetting(context,
@@ -246,6 +249,30 @@ public class SettingsHelper {
     }
 
     /**
+     * Retrieve the gnss measurements full tracking enabled setting.
+     */
+    public boolean isGnssMeasurementsFullTrackingEnabled() {
+        return mGnssMeasurementFullTracking.getValue(false);
+    }
+
+    /**
+     * Add a listener for changes to the background throttle package whitelist. Callbacks occur on
+     * an unspecified thread.
+     */
+    public void addOnGnssMeasurementsFullTrackingEnabledChangedListener(
+            GlobalSettingChangedListener listener) {
+        mGnssMeasurementFullTracking.addListener(listener);
+    }
+
+    /**
+     * Remove a listener for changes to the background throttle package whitelist.
+     */
+    public void removeOnGnssMeasurementsFullTrackingEnabledChangedListener(
+            GlobalSettingChangedListener listener) {
+        mGnssMeasurementFullTracking.removeListener(listener);
+    }
+
+    /**
      * Retrieve the ignore settings package whitelist.
      */
     public Set<String> getIgnoreSettingsPackageWhitelist() {
@@ -278,19 +305,6 @@ public class SettingsHelper {
             return Settings.Global.getLong(mContext.getContentResolver(),
                     LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
                     DEFAULT_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    /**
-     * Retrieve the gnss measurements full tracking enabled setting.
-     */
-    public boolean isGnssMeasurementsFullTrackingEnabled() {
-        long identity = Binder.clearCallingIdentity();
-        try {
-            return Settings.Global.getInt(mContext.getContentResolver(),
-                    ENABLE_GNSS_RAW_MEAS_FULL_TRACKING, 0) == 1;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -395,7 +409,7 @@ public class SettingsHelper {
         @GuardedBy("this")
         private boolean mRegistered;
 
-        private ObservingSetting(Handler handler) {
+        ObservingSetting(Handler handler) {
             super(handler);
             mListeners = new CopyOnWriteArrayList<>();
         }
@@ -439,13 +453,13 @@ public class SettingsHelper {
         private final Context mContext;
         private final String mSettingName;
 
-        private IntegerSecureSetting(Context context, String settingName, Handler handler) {
+        IntegerSecureSetting(Context context, String settingName, Handler handler) {
             super(handler);
             mContext = context;
             mSettingName = settingName;
         }
 
-        private void register() {
+        void register() {
             register(mContext, Settings.Secure.getUriFor(mSettingName));
         }
 
@@ -470,7 +484,7 @@ public class SettingsHelper {
         @GuardedBy("this")
         private List<String> mCachedValue;
 
-        private StringListCachedSecureSetting(Context context, String settingName,
+        StringListCachedSecureSetting(Context context, String settingName,
                 Handler handler) {
             super(handler);
             mContext = context;
@@ -524,12 +538,38 @@ public class SettingsHelper {
         }
     }
 
+    private static class BooleanGlobalSetting extends ObservingSetting {
+
+        private final Context mContext;
+        private final String mSettingName;
+
+        BooleanGlobalSetting(Context context, String settingName, Handler handler) {
+            super(handler);
+            mContext = context;
+            mSettingName = settingName;
+        }
+
+        public void register() {
+            register(mContext, Settings.Global.getUriFor(mSettingName));
+        }
+
+        public boolean getValue(boolean defaultValue) {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                return Settings.Global.getInt(mContext.getContentResolver(), mSettingName,
+                        defaultValue ? 1 : 0) != 0;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
     private static class LongGlobalSetting extends ObservingSetting {
 
         private final Context mContext;
         private final String mSettingName;
 
-        private LongGlobalSetting(Context context, String settingName, Handler handler) {
+        LongGlobalSetting(Context context, String settingName, Handler handler) {
             super(handler);
             mContext = context;
             mSettingName = settingName;
@@ -561,7 +601,7 @@ public class SettingsHelper {
         @GuardedBy("this")
         private ArraySet<String> mCachedValue;
 
-        private StringSetCachedGlobalSetting(Context context, String settingName,
+        StringSetCachedGlobalSetting(Context context, String settingName,
                 Supplier<ArraySet<String>> baseValuesSupplier, Handler handler) {
             super(handler);
             mContext = context;

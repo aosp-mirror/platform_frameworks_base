@@ -40,11 +40,6 @@ import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
-import android.content.pm.parsing.ParsingPackage;
-import android.os.Environment;
-import android.os.UserHandle;
-
-import com.android.internal.util.ArrayUtils;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedComponent;
@@ -54,6 +49,10 @@ import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.os.Environment;
+import android.os.UserHandle;
+
+import com.android.internal.util.ArrayUtils;
 
 import libcore.util.EmptyArray;
 
@@ -186,6 +185,22 @@ public class PackageInfoWithoutStateUtils {
             return null;
         }
 
+        return generateWithoutComponentsUnchecked(pkg, gids, flags, firstInstallTime,
+                lastUpdateTime, grantedPermissions, state, userId, apexInfo, applicationInfo);
+    }
+
+    /**
+     * This bypasses critical checks that are necessary for usage with data passed outside of
+     * system server.
+     *
+     * Prefer {@link #generateWithoutComponents(ParsingPackageRead, int[], int, long, long, Set,
+     * PackageUserState, int, ApexInfo, ApplicationInfo)}.
+     */
+    @NonNull
+    public static PackageInfo generateWithoutComponentsUnchecked(ParsingPackageRead pkg, int[] gids,
+            @PackageManager.PackageInfoFlags int flags, long firstInstallTime, long lastUpdateTime,
+            Set<String> grantedPermissions, PackageUserState state, int userId,
+            @Nullable ApexInfo apexInfo, @NonNull ApplicationInfo applicationInfo) {
         PackageInfo pi = new PackageInfo();
         pi.packageName = pkg.getPackageName();
         pi.splitNames = pkg.getSplitNames();
@@ -317,6 +332,18 @@ public class PackageInfoWithoutStateUtils {
             return null;
         }
 
+        return generateApplicationInfoUnchecked(pkg, flags, state, userId);
+    }
+
+    /**
+     * This bypasses critical checks that are necessary for usage with data passed outside of
+     * system server.
+     *
+     * Prefer {@link #generateApplicationInfo(ParsingPackageRead, int, PackageUserState, int)}.
+     */
+    @NonNull
+    public static ApplicationInfo generateApplicationInfoUnchecked(@NonNull ParsingPackageRead pkg,
+            @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId) {
         // Make shallow copy so we can store the metadata/libraries safely
         ApplicationInfo ai = pkg.toAppInfoWithoutState();
         // Init handles data directories
@@ -378,6 +405,23 @@ public class PackageInfoWithoutStateUtils {
         if (applicationInfo == null) {
             applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
         }
+        if (applicationInfo == null) {
+            return null;
+        }
+
+        return generateActivityInfoUnchecked(a, applicationInfo);
+    }
+
+    /**
+     * This bypasses critical checks that are necessary for usage with data passed outside of
+     * system server.
+     *
+     * Prefer {@link #generateActivityInfo(ParsingPackageRead, ParsedActivity, int,
+     * PackageUserState, ApplicationInfo, int)}.
+     */
+    @NonNull
+    public static ActivityInfo generateActivityInfoUnchecked(@NonNull ParsedActivity a,
+            @NonNull ApplicationInfo applicationInfo) {
         // Make shallow copies so we can store the metadata safely
         ActivityInfo ai = new ActivityInfo();
         assignSharedFieldsForComponentInfo(ai, a);
@@ -431,6 +475,23 @@ public class PackageInfoWithoutStateUtils {
         if (applicationInfo == null) {
             applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
         }
+        if (applicationInfo == null) {
+            return null;
+        }
+
+        return generateServiceInfoUnchecked(s, applicationInfo);
+    }
+
+    /**
+     * This bypasses critical checks that are necessary for usage with data passed outside of
+     * system server.
+     *
+     * Prefer {@link #generateServiceInfo(ParsingPackageRead, ParsedService, int, PackageUserState,
+     * ApplicationInfo, int)}.
+     */
+    @NonNull
+    public static ServiceInfo generateServiceInfoUnchecked(@NonNull ParsedService s,
+            @NonNull ApplicationInfo applicationInfo) {
         // Make shallow copies so we can store the metadata safely
         ServiceInfo si = new ServiceInfo();
         assignSharedFieldsForComponentInfo(si, s);
@@ -461,6 +522,24 @@ public class PackageInfoWithoutStateUtils {
         if (applicationInfo == null) {
             applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
         }
+        if (applicationInfo == null) {
+            return null;
+        }
+
+        return generateProviderInfoUnchecked(p, flags, applicationInfo);
+    }
+
+    /**
+     * This bypasses critical checks that are necessary for usage with data passed outside of
+     * system server.
+     *
+     * Prefer {@link #generateProviderInfo(ParsingPackageRead, ParsedProvider, int,
+     * PackageUserState, ApplicationInfo, int)}.
+     */
+    @NonNull
+    public static ProviderInfo generateProviderInfoUnchecked(@NonNull ParsedProvider p,
+            @PackageManager.ComponentInfoFlags int flags,
+            @NonNull ApplicationInfo applicationInfo) {
         // Make shallow copies so we can store the metadata safely
         ProviderInfo pi = new ProviderInfo();
         assignSharedFieldsForComponentInfo(pi, p);
