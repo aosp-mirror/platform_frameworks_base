@@ -107,6 +107,7 @@ public class JobSchedulerServiceTest {
                 .when(() -> LocalServices.getService(AppStandbyInternal.class));
         doReturn(mock(UsageStatsManagerInternal.class))
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
+        when(mContext.getString(anyInt())).thenReturn("some_test_string");
         // Called in BackgroundJobsController constructor.
         doReturn(mock(AppStateTracker.class))
                 .when(() -> LocalServices.getService(AppStateTracker.class));
