@@ -584,6 +584,12 @@
     <!-- Format for build summary info [CHAR LIMIT=NONE] -->
     <string name="bugreport_status" translatable="false">%s (%s)</string>
 
+    <!-- Toast for taking screenshot with bugreport successfully. [CHAR_LIMIT=100] -->
+    <string name="bugreport_screenshot_success_toast">Screenshot taken with bug report</string>
+
+    <!-- Toast for failed to take screenshot with bugreport. [CHAR_LIMIT=100] -->
+    <string name="bugreport_screenshot_failure_toast">Failed to take screenshot with bug report</string>
+
     <!-- label for item that enables silent mode in phone options dialog -->
     <string name="global_action_toggle_silent_mode">Silent mode</string>
 
