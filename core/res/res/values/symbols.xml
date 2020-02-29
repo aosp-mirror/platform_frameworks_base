@@ -1789,6 +1789,8 @@
   <java-symbol type="string" name="bugreport_option_full_title" />
   <java-symbol type="string" name="bugreport_option_interactive_summary" />
   <java-symbol type="string" name="bugreport_option_interactive_title" />
+  <java-symbol type="string" name="bugreport_screenshot_failure_toast" />
+  <java-symbol type="string" name="bugreport_screenshot_success_toast" />
   <java-symbol type="string" name="bugreport_status" />
   <java-symbol type="string" name="bugreport_title" />
   <java-symbol type="string" name="faceunlock_multiple_failures" />
