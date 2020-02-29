@@ -26,9 +26,7 @@ import android.content.pm.IDataLoader;
 import android.content.pm.IDataLoaderStatusListener;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.ShellCallback;
 import android.os.incremental.IIncrementalManager;
 import android.util.Slog;
 
@@ -145,14 +143,6 @@ public class IncrementalManagerService extends IIncrementalManager.Stub  {
     @Override
     public void showHealthBlockedUI(int mountId) {
         // TODO(b/136132412): implement this
-    }
-
-    @Override
-    public void onShellCommand(@NonNull FileDescriptor in, @NonNull FileDescriptor out,
-            FileDescriptor err, @NonNull String[] args, ShellCallback callback,
-            @NonNull ResultReceiver resultReceiver) {
-        (new IncrementalManagerShellCommand(mContext)).exec(
-                this, in, out, err, args, callback, resultReceiver);
     }
 
     private static native long nativeStartService();
