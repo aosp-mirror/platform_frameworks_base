@@ -24,6 +24,7 @@ import static android.os.Process.NFC_UID;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
+import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
@@ -2937,8 +2938,10 @@ public final class ActiveServices {
         // Not running -- get it started, and enqueue this service record
         // to be executed when the app comes up.
         if (app == null && !permissionsReviewRequired) {
+            // TODO (chriswailes): Change the Zygote policy flags based on if the launch-for-service
+            //  was initiated from a notification tap or not.
             if ((app=mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
-                    hostingRecord, false, isolated, false)) == null) {
+                    hostingRecord, ZYGOTE_POLICY_FLAG_EMPTY, false, isolated, false)) == null) {
                 String msg = "Unable to launch app "
                         + r.appInfo.packageName + "/"
                         + r.appInfo.uid + " for service "
@@ -4917,35 +4920,7 @@ public final class ActiveServices {
     }
 
     // TODO: remove this toast after feature development is done
-    private void showWhileInUsePermissionInFgsBlockedNotificationLocked(String callingPackage,
-            String detailInfo) {
-        final Context context = mAm.mContext;
-        final String title = "Foreground Service While-in-use Permission Restricted";
-        final String content = "App affected:" + callingPackage + ", please file a bug report";
-        Notification.Builder n =
-                new Notification.Builder(context,
-                        SystemNotificationChannels.ALERTS)
-                        .setSmallIcon(R.drawable.stat_sys_vitals)
-                        .setWhen(0)
-                        .setColor(context.getColor(
-                                com.android.internal.R.color.system_notification_accent_color))
-                        .setTicker(title)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .setStyle(new Notification.BigTextStyle().bigText(detailInfo));
-        final NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-        notificationManager.notifyAsUser(null,
-                SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICE_WHILE_IN_USE_PERMISSION,
-                n.build(), UserHandle.ALL);
-    }
-
-    // TODO: remove this toast after feature development is done
-    // show a toast message to ask user to file a bugreport so we know how many apps are impacted by
-    // the new background started foreground service while-in-use permission restriction.
-    void showWhileInUseDebugNotificationLocked(int uid, int op, int mode) {
-        StringBuilder packageNameBuilder = new StringBuilder();
-        StringBuilder detailInfoBuilder = new StringBuilder();
+    void showWhileInUseDebugToastLocked(int uid, int op, int mode) {
         for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
             ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
             if (pr.uid != uid) {
@@ -4962,18 +4937,8 @@ public final class ActiveServices {
                             + " affected while-in-use permission:"
                             + AppOpsManager.opToPublicName(op);
                     Slog.wtf(TAG, msg);
-                    packageNameBuilder.append(r.mRecentCallingPackage + " ");
-                    detailInfoBuilder.append(msg);
-                    detailInfoBuilder.append("\n");
                 }
             }
-        }
-
-        final String callingPackageStr = packageNameBuilder.toString();
-        if (mAm.mConstants.mFlagForegroundServiceStartsLoggingEnabled
-                && !callingPackageStr.isEmpty()) {
-            showWhileInUsePermissionInFgsBlockedNotificationLocked(callingPackageStr,
-                    detailInfoBuilder.toString());
         }
     }
 }

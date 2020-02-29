@@ -92,7 +92,8 @@ public interface NotificationEntryListener {
     default void onEntryRemoved(
             NotificationEntry entry,
             @Nullable NotificationVisibility visibility,
-            boolean removedByUser) {
+            boolean removedByUser,
+            int reason) {
     }
 
     /**

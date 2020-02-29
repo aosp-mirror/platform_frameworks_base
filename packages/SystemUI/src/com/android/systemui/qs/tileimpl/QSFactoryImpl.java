@@ -178,7 +178,9 @@ public class QSFactoryImpl implements QSFactory {
         }
 
         // Custom tiles
-        if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(mHost, tileSpec);
+        if (tileSpec.startsWith(CustomTile.PREFIX)) {
+            return CustomTile.create(mHost, tileSpec, mHost.getUserContext());
+        }
 
         // Debug tiles.
         if (Build.IS_DEBUGGABLE) {

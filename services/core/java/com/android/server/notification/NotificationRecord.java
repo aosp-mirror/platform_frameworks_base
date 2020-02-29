@@ -187,6 +187,7 @@ public final class NotificationRecord {
     private boolean mSuggestionsGeneratedByAssistant;
     private boolean mEditChoicesBeforeSending;
     private boolean mHasSeenSmartReplies;
+    private boolean mPostSilently;
     /**
      * Whether this notification (and its channels) should be considered user locked. Used in
      * conjunction with user sentiment calculation.
@@ -856,6 +857,17 @@ public final class NotificationRecord {
         return mHidden;
     }
 
+    /**
+     * Override of all alerting information on the channel and notification. Used when notifications
+     * are reposted in response to direct user action and thus don't need to alert.
+     */
+    public void setPostSilently(boolean postSilently) {
+        mPostSilently = postSilently;
+    }
+
+    public boolean shouldPostSilently() {
+        return mPostSilently;
+    }
 
     public void setSuppressedVisualEffects(int effects) {
         mSuppressedVisualEffects = effects;
@@ -1342,6 +1354,10 @@ public final class NotificationRecord {
 
     public void setShortcutInfo(ShortcutInfo shortcutInfo) {
         mShortcutInfo = shortcutInfo;
+    }
+
+    public ShortcutInfo getShortcutInfo() {
+        return mShortcutInfo;
     }
 
     /**

@@ -77,7 +77,8 @@ public class NotificationAlertingManager {
             public void onEntryRemoved(
                     NotificationEntry entry,
                     NotificationVisibility visibility,
-                    boolean removedByUser) {
+                    boolean removedByUser,
+                    int reason) {
                 stopAlerting(entry.getKey());
             }
         });

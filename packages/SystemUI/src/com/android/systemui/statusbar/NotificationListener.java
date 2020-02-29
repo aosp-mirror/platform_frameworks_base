@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.RemoteInputController.processForRem
 import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
 
+import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.ComponentName;
@@ -161,6 +162,15 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         }
     }
 
+    public final void unsnoozeNotification(@NonNull String key) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().unsnoozeNotificationFromSystemListener(mWrapper, key);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
     public void registerAsSystemService() {
         try {
             registerAsSystemService(mContext,
@@ -195,7 +205,8 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                     new ArrayList<>(),
                     false,
                     false,
-                    false
+                    false,
+                    null
             );
         }
         return ranking;

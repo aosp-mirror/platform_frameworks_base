@@ -16,6 +16,8 @@
 
 package com.android.systemui;
 
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.TestCase.fail;
@@ -528,7 +530,8 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
                         .setSbn(notification)
                         .build(),
                 null,
-                false);
+                false,
+                REASON_APP_CANCEL);
     }
 
     private void entryAdded(StatusBarNotification notification, int importance) {

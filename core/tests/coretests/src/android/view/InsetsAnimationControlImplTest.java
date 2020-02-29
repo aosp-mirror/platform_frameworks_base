@@ -123,7 +123,7 @@ public class InsetsAnimationControlImplTest {
         mController = new InsetsAnimationControlImpl(controls,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
                 mMockController, 10 /* durationMs */, new LinearInterpolator(),
-                false /* fade */, LAYOUT_INSETS_DURING_ANIMATION_SHOWN);
+                false /* fade */, LAYOUT_INSETS_DURING_ANIMATION_SHOWN, 0 /* animationType */);
     }
 
     @Test

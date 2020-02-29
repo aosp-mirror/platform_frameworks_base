@@ -16,6 +16,9 @@
 
 package com.android.systemui.bubbles;
 
+import android.content.Context;
+import android.provider.Settings;
+
 import java.util.List;
 
 /**
@@ -41,6 +44,20 @@ public class BubbleDebugConfig {
     static final boolean DEBUG_BUBBLE_EXPANDED_VIEW = false;
     static final boolean DEBUG_EXPERIMENTS = true;
     static final boolean DEBUG_OVERFLOW = false;
+    static final boolean DEBUG_USER_EDUCATION = false;
+
+    private static final boolean FORCE_SHOW_USER_EDUCATION = false;
+    private static final String FORCE_SHOW_USER_EDUCATION_SETTING =
+            "force_show_bubbles_user_education";
+
+    /**
+     * @return whether we should force show user education for bubbles. Used for debugging & demos.
+     */
+    static boolean forceShowUserEducation(Context context) {
+        boolean forceShow = Settings.Secure.getInt(context.getContentResolver(),
+                FORCE_SHOW_USER_EDUCATION_SETTING, 0) != 0;
+        return FORCE_SHOW_USER_EDUCATION || forceShow;
+    }
 
     static String formatBubblesString(List<Bubble> bubbles, Bubble selected) {
         StringBuilder sb = new StringBuilder();

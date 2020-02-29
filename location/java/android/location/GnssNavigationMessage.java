@@ -272,6 +272,14 @@ public final class GnssNavigationMessage implements Parcelable {
      * range of 1-12</li>
      * <li> For Galileo I/NAV nominal frame structure, this refers to the subframe number in the
      * range of 1-24</li>
+     * <li> For SBAS and Beidou CNAV2, this is unused and can be set to -1.</li>
+     * <li> For QZSS L1 C/A subframe 4 and 5, this value corresponds to the 'frame id' of the
+     * navigation message, in the range of 1-25 (Subframe 1, 2, 3 does not contain a 'frame id' and
+     * this value can be set to -1.)</li>
+     * <li> For Beidou CNAV1 this refers to the page type number in the range of 1-63.</li>
+     * <li> For IRNSS L5 C/A subframe 3 and 4, this value corresponds to the Message Id of the
+     * navigation message, in the range of 1-63. (Subframe 1 and 2 does not contain a message type
+     * id and this value can be set to -1.)</li>
      * </ul>
      */
     public int getMessageId() {
@@ -299,6 +307,13 @@ public final class GnssNavigationMessage implements Parcelable {
      * <li>For Galileo in particular, the type information embedded within the data bits may be even
      * more useful in interpretation, than the nominal page and word types provided in this
      * field.</li>
+     * <li> For SBAS, the submessage id corresponds to the message type, in the range 1-63.</li>
+     * <li> For Beidou CNAV1, the submessage id corresponds to the subframe number of the
+     * navigation message, in the range of 1-3.</li>
+     * <li> For Beidou CNAV2, the submessage id corresponds to the message type, in the range
+     * 1-63.</li>
+     * <li> For IRNSS L5 C/A, the submessage id corresponds to the subframe number of the
+     * navigation message, in the range of 1-4.</li>
      * </ul>
      */
     public int getSubmessageId() {
@@ -333,6 +348,13 @@ public final class GnssNavigationMessage implements Parcelable {
      * <li>For Galileo I/NAV, each page contains 2 page parts, even and odd, with a total of 2x114 =
      * 228 bits, (sync &amp; tail excluded) that should be fit into 29 bytes, with MSB first (skip
      * B229-B232).</li>
+     * <li>For SBAS, each block consists of 250 data bits, that should be fit into 32 bytes.  MSB
+     * first (skip B251-B256).</li>
+     * <li>For Beidou CNAV1, subframe #1 consists of 14 data bits, that should be fit into 2
+     * bytes. MSB first (skip B15-B16).  subframe #2 consists of 600 bits that should be fit into
+     * 75 bytes. subframe #3 consists of 264 data bits that should be fit into 33 bytes.</li>
+     * <li>For Beidou CNAV2, each subframe consists of 288 data bits, that should be fit into 36
+     * bytes.</li>
      * </ul>
      */
     @NonNull

@@ -749,7 +749,7 @@ public class MediaRouter2 {
     /**
      * Callback for receiving events about media route discovery.
      */
-    public static class RouteCallback {
+    public abstract static class RouteCallback {
         /**
          * Called when routes are added. Whenever you registers a callback, this will
          * be invoked with known routes.
@@ -777,7 +777,7 @@ public class MediaRouter2 {
     /**
      * Callback for receiving events on media transfer.
      */
-    public static class TransferCallback {
+    public abstract static class TransferCallback {
         /**
          * Called when a media is transferred between two different routing controllers.
          * This can happen by calling {@link #transferTo(MediaRoute2Info)} or
@@ -826,7 +826,7 @@ public class MediaRouter2 {
     /**
      * Callback for receiving {@link RoutingController} updates.
      */
-    public static class ControllerCallback {
+    public abstract static class ControllerCallback {
         /**
          * Called when a controller is updated. (e.g., the selected routes of the
          * controller is changed or the volume of the controller is changed.)

@@ -28,6 +28,7 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.systemui.Dumpable;
@@ -61,6 +62,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import javax.inject.Inject;
@@ -91,6 +93,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
     private final Optional<StatusBar> mStatusBarOptional;
+    private Context mUserContext;
 
     @Inject
     public QSTileHost(Context context,
@@ -107,6 +110,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             QSLogger qsLogger) {
         mIconController = iconController;
         mContext = context;
+        mUserContext = context;
         mTunerService = tunerService;
         mPluginManager = pluginManager;
         mDumpManager = dumpManager;
@@ -207,6 +211,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         return mContext;
     }
 
+    public Context getUserContext() {
+        return mUserContext;
+    }
 
     public TileServices getTileServices() {
         return mServices;
@@ -227,6 +234,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         }
         final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
         int currentUser = ActivityManager.getCurrentUser();
+        if (currentUser != mCurrentUser) {
+            mUserContext = mContext.createContextAsUser(UserHandle.of(currentUser), 0);
+        }
         if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
         mTiles.entrySet().stream().filter(tile -> !tileSpecs.contains(tile.getKey())).forEach(
                 tile -> {
@@ -253,6 +263,13 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                     mQSLogger.logTileDestroyed(tileSpec, "Tile not available");
                 }
             } else {
+                // This means that the tile is a CustomTile AND the user is different, so let's
+                // destroy it
+                if (tile != null) {
+                    tile.destroy();
+                    Log.d(TAG, "Destroying tile for wrong user: " + tileSpec);
+                    mQSLogger.logTileDestroyed(tileSpec, "Tile for wrong user");
+                }
                 Log.d(TAG, "Creating tile: " + tileSpec);
                 try {
                     tile = createTile(tileSpec);
@@ -273,7 +290,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             }
         }
         mCurrentUser = currentUser;
-        List<String> currentSpecs = new ArrayList(mTileSpecs);
+        List<String> currentSpecs = new ArrayList<>(mTileSpecs);
         mTileSpecs.clear();
         mTileSpecs.addAll(tileSpecs);
         mTiles.clear();
@@ -300,7 +317,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     public void addTile(String spec) {
-        changeTileSpecs(tileSpecs-> tileSpecs.add(spec));
+        changeTileSpecs(tileSpecs-> !tileSpecs.contains(spec) && tileSpecs.add(spec));
     }
 
     private void changeTileSpecs(Predicate<List<String>> changeFunction) {
@@ -314,9 +331,12 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     public void addTile(ComponentName tile) {
-        List<String> newSpecs = new ArrayList<>(mTileSpecs);
-        newSpecs.add(0, CustomTile.toSpec(tile));
-        changeTiles(mTileSpecs, newSpecs);
+        String spec = CustomTile.toSpec(tile);
+        if (!mTileSpecs.contains(spec)) {
+            List<String> newSpecs = new ArrayList<>(mTileSpecs);
+            newSpecs.add(0, spec);
+            changeTiles(mTileSpecs, newSpecs);
+        }
     }
 
     public void removeTile(ComponentName tile) {
@@ -326,10 +346,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     public void changeTiles(List<String> previousTiles, List<String> newTiles) {
-        final int NP = previousTiles.size();
-        final int NA = newTiles.size();
+        final List<String> copy = new ArrayList<>(previousTiles);
+        final int NP = copy.size();
         for (int i = 0; i < NP; i++) {
-            String tileSpec = previousTiles.get(i);
+            String tileSpec = copy.get(i);
             if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
             if (!newTiles.contains(tileSpec)) {
                 ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
@@ -380,16 +400,26 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         }
         final ArrayList<String> tiles = new ArrayList<String>();
         boolean addedDefault = false;
+        Set<String> addedSpecs = new ArraySet<>();
         for (String tile : tileList.split(",")) {
             tile = tile.trim();
             if (tile.isEmpty()) continue;
             if (tile.equals("default")) {
                 if (!addedDefault) {
-                    tiles.addAll(getDefaultSpecs(context));
+                    List<String> defaultSpecs = getDefaultSpecs(context);
+                    for (String spec : defaultSpecs) {
+                        if (!addedSpecs.contains(spec)) {
+                            tiles.add(spec);
+                            addedSpecs.add(spec);
+                        }
+                    }
                     addedDefault = true;
                 }
             } else {
-                tiles.add(tile);
+                if (!addedSpecs.contains(tile)) {
+                    tiles.add(tile);
+                    addedSpecs.add(tile);
+                }
             }
         }
         return tiles;

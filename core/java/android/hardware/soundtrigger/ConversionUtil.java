@@ -32,7 +32,11 @@ import android.media.soundtrigger_middleware.RecognitionMode;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
+import android.os.SharedMemory;
+import android.system.ErrnoException;
 
+import java.io.FileDescriptor;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -105,7 +109,8 @@ class ConversionUtil {
         aidlModel.type = apiModel.type;
         aidlModel.uuid = api2aidlUuid(apiModel.uuid);
         aidlModel.vendorUuid = api2aidlUuid(apiModel.vendorUuid);
-        aidlModel.data = Arrays.copyOf(apiModel.data, apiModel.data.length);
+        aidlModel.data = byteArrayToSharedMemory(apiModel.data, "SoundTrigger SoundModel");
+        aidlModel.dataSize = apiModel.data.length;
         return aidlModel;
     }
 
@@ -351,5 +356,21 @@ class ConversionUtil {
             result |= AudioCapabilities.NOISE_SUPPRESSION;
         }
         return result;
+    }
+
+    private static @Nullable FileDescriptor byteArrayToSharedMemory(byte[] data, String name) {
+        if (data.length == 0) {
+            return null;
+        }
+
+        try {
+            SharedMemory shmem = SharedMemory.create(name != null ? name : "", data.length);
+            ByteBuffer buffer = shmem.mapReadWrite();
+            buffer.put(data);
+            shmem.unmap(buffer);
+            return shmem.getFileDescriptor();
+        } catch (ErrnoException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
