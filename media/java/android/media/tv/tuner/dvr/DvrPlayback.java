@@ -89,6 +89,9 @@ public class DvrPlayback implements AutoCloseable {
     /**
      * Attaches a filter to DVR interface for recording.
      *
+     * <p>There can be multiple filters attached. Attached filters are independent, so the order
+     * doesn't matter.
+     *
      * @param filter the filter to be attached.
      * @return result status of the operation.
      */
@@ -135,6 +138,7 @@ public class DvrPlayback implements AutoCloseable {
      * Stops DVR.
      *
      * <p>Stops consuming playback data or producing data for recording.
+     * <p>Does nothing if the filter is stopped or not started.</p>
      *
      * @return result status of the operation.
      */
@@ -164,9 +168,14 @@ public class DvrPlayback implements AutoCloseable {
     }
 
     /**
-     * Sets file descriptor to read/write data.
+     * Sets file descriptor to read data.
      *
-     * @param fd the file descriptor to read/write data.
+     * <p>When a read operation of the filter object is happening, this method should not be
+     * called.
+     *
+     * @param fd the file descriptor to read data.
+     * @see #read(long)
+     * @see #read(byte[], long, long)
      */
     public void setFileDescriptor(@NonNull ParcelFileDescriptor fd) {
         nativeSetFileDescriptor(fd.getFd());
