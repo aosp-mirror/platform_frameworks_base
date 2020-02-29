@@ -31,11 +31,10 @@ public class NotificationHistoryDatabaseFactory {
     }
 
     public static NotificationHistoryDatabase create(@NonNull Context context,
-            @NonNull Handler handler, @NonNull File rootDir,
-            @NonNull NotificationHistoryDatabase.FileAttrProvider fileAttrProvider) {
+            @NonNull Handler handler, @NonNull File rootDir) {
         if(sTestingNotificationHistoryDb != null) {
             return sTestingNotificationHistoryDb;
         }
-        return new NotificationHistoryDatabase(context, handler, rootDir, fileAttrProvider);
+        return new NotificationHistoryDatabase(context, handler, rootDir);
     }
 }
