@@ -38,7 +38,6 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.IoThread;
-import com.android.server.notification.NotificationHistoryDatabase.NotificationHistoryFileAttrProvider;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -291,7 +290,7 @@ public class NotificationHistoryManager {
             final File historyDir = new File(Environment.getDataSystemCeDirectory(userId),
                     DIRECTORY_PER_USER);
             userHistory = NotificationHistoryDatabaseFactory.create(mContext, IoThread.getHandler(),
-                    historyDir, new NotificationHistoryFileAttrProvider());
+                    historyDir);
             if (mUserUnlockedStates.get(userId)) {
                 try {
                     userHistory.init();
