@@ -696,7 +696,7 @@ public class ActivityManager {
 
     /** @hide Should this process state be considered a background state? */
     public static final boolean isProcStateBackground(int procState) {
-        return procState > PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+        return procState >= PROCESS_STATE_TRANSIENT_BACKGROUND;
     }
 
     /** @hide Is this a foreground service type? */
