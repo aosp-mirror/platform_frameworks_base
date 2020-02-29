@@ -101,15 +101,13 @@ class PeopleHubViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testViewModelDataSourceTransformsModel() {
-        val fakeClickIntent = PendingIntent.getActivity(context, 0, Intent("action"), 0)
-        val fakePerson = fakePersonModel("id", "name", fakeClickIntent)
+        val fakeClickRunnable = mock(Runnable::class.java)
+        val fakePerson = fakePersonModel("id", "name", fakeClickRunnable)
         val fakeModel = PeopleHubModel(listOf(fakePerson))
         val fakeModelDataSource = FakeDataSource(fakeModel)
-        val fakeSettingDataSource = FakeDataSource(true)
         val factoryDataSource = PeopleHubViewModelFactoryDataSourceImpl(
                 mockActivityStarter,
-                fakeModelDataSource,
-                fakeSettingDataSource
+                fakeModelDataSource
         )
         val fakeListener = FakeDataListener<PeopleHubViewModelFactory>()
         val mockClickView = mock(View::class.java)
@@ -126,35 +124,7 @@ class PeopleHubViewControllerTest : SysuiTestCase() {
 
         people[0].onClick()
 
-        verify(mockActivityStarter).startPendingIntentDismissingKeyguard(
-                same(fakeClickIntent),
-                any(),
-                same(mockClickView)
-        )
-    }
-
-    @Test
-    fun testViewModelDataSource_notVisibleIfSettingDisabled() {
-        val fakeClickIntent = PendingIntent.getActivity(context, 0, Intent("action"), 0)
-        val fakePerson = fakePersonModel("id", "name", fakeClickIntent)
-        val fakeModel = PeopleHubModel(listOf(fakePerson))
-        val fakeModelDataSource = FakeDataSource(fakeModel)
-        val fakeSettingDataSource = FakeDataSource(false)
-        val factoryDataSource = PeopleHubViewModelFactoryDataSourceImpl(
-                mockActivityStarter,
-                fakeModelDataSource,
-                fakeSettingDataSource
-        )
-        val fakeListener = FakeDataListener<PeopleHubViewModelFactory>()
-        val mockClickView = mock(View::class.java)
-
-        factoryDataSource.registerListener(fakeListener)
-
-        val viewModel = (fakeListener.lastSeen as Maybe.Just).value
-                .createWithAssociatedClickView(mockClickView)
-        assertThat(viewModel.isVisible).isFalse()
-        val people = viewModel.people.toList()
-        assertThat(people.size).isEqualTo(0)
+        verify(fakeClickRunnable).run()
     }
 }
 
@@ -178,10 +148,10 @@ private fun <T> castNull(): T = null as T
 private fun fakePersonModel(
     id: String,
     name: CharSequence,
-    clickIntent: PendingIntent,
+    clickRunnable: Runnable,
     userId: Int = 0
 ): PersonModel =
-        PersonModel(id, name, mock(Drawable::class.java), clickIntent, userId)
+        PersonModel(id, name, mock(Drawable::class.java), clickRunnable, userId)
 
 private fun fakePersonViewModel(name: CharSequence): PersonViewModel =
         PersonViewModel(name, mock(Drawable::class.java), mock({}.javaClass))

@@ -216,15 +216,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         if (TextUtils.isEmpty(mConversationId)) {
             throw new IllegalArgumentException("Does not have required information");
         }
-        // TODO: consider querying this earlier in the notification pipeline and passing it in
-        LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery()
-                .setPackage(mPackageName)
-                .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_CACHED)
-                .setShortcutIds(Arrays.asList(mConversationId));
-        List<ShortcutInfo> shortcuts = mLauncherApps.getShortcuts(query, mSbn.getUser());
-        if (shortcuts != null && !shortcuts.isEmpty()) {
-            mShortcutInfo = shortcuts.get(0);
-        }
+        mShortcutInfo = entry.getRanking().getShortcutInfo();
 
         mIsBubbleable = mEntry.getBubbleMetadata() != null
             && Settings.Global.getInt(mContext.getContentResolver(),

@@ -722,7 +722,7 @@ public final class PasspointConfiguration implements Parcelable {
         if (mSubscriptionUpdate != null && !mSubscriptionUpdate.validate()) {
             return false;
         }
-        return validateForCommonR1andR2(true);
+        return validateForCommonR1andR2();
     }
 
     /**
@@ -741,17 +741,17 @@ public final class PasspointConfiguration implements Parcelable {
         if (mSubscriptionUpdate == null || !mSubscriptionUpdate.validate()) {
             return false;
         }
-        return validateForCommonR1andR2(false);
+        return validateForCommonR1andR2();
     }
 
-    private boolean validateForCommonR1andR2(boolean isR1) {
+    private boolean validateForCommonR1andR2() {
         // Required: PerProviderSubscription/<X+>/HomeSP
         if (mHomeSp == null || !mHomeSp.validate()) {
             return false;
         }
 
         // Required: PerProviderSubscription/<X+>/Credential
-        if (mCredential == null || !mCredential.validate(isR1)) {
+        if (mCredential == null || !mCredential.validate()) {
             return false;
         }
 

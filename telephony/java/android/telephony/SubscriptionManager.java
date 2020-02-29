@@ -2575,8 +2575,8 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi
-    public boolean canManageSubscription(@Nullable SubscriptionInfo info,
-            @Nullable String packageName) {
+    public boolean canManageSubscription(@NonNull SubscriptionInfo info,
+            @NonNull String packageName) {
         if (info == null || info.getAllAccessRules() == null || packageName == null) {
             return false;
         }
@@ -3081,13 +3081,13 @@ public class SubscriptionManager {
      *
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      *
-     * @param enabled whether uicc applications are enabled or disabled.
      * @param subscriptionId which subscription to operate on.
+     * @param enabled whether uicc applications are enabled or disabled.
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setUiccApplicationsEnabled(boolean enabled, int subscriptionId) {
+    public void setUiccApplicationsEnabled(int subscriptionId, boolean enabled) {
         if (VDBG) {
             logd("setUiccApplicationsEnabled subId= " + subscriptionId + " enable " + enabled);
         }

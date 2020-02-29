@@ -21,21 +21,16 @@ import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.ITransientNotificationCallback;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
-import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToastPresenter;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -64,6 +59,7 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
     private final WindowManager mWindowManager;
     private final INotificationManager mNotificationManager;
     private final AccessibilityManager mAccessibilityManager;
+    private final ToastPresenter mPresenter;
     private ToastEntry mCurrentToast;
 
     @Inject
@@ -83,6 +79,7 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
         mWindowManager = windowManager;
         mNotificationManager = notificationManager;
         mAccessibilityManager = accessibilityManager;
+        mPresenter = new ToastPresenter(context, accessibilityManager);
     }
 
     @Override
@@ -97,8 +94,8 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
         if (mCurrentToast != null) {
             hideCurrentToast();
         }
-        View view = getView(text);
-        LayoutParams params = getLayoutParams(windowToken, duration);
+        View view = mPresenter.getTextToastView(text);
+        LayoutParams params = getLayoutParams(packageName, windowToken, duration);
         mCurrentToast = new ToastEntry(packageName, token, view, windowToken, callback);
         try {
             mWindowManager.addView(view, params);
@@ -106,7 +103,7 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
             Log.w(TAG, "Error while attempting to show toast from " + packageName, e);
             return;
         }
-        trySendAccessibilityEvent(view, packageName);
+        mPresenter.trySendAccessibilityEvent(view, packageName);
         if (callback != null) {
             try {
                 callback.onToastShown();
@@ -148,56 +145,13 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
         mCurrentToast = null;
     }
 
-    private void trySendAccessibilityEvent(View view, String packageName) {
-        if (!mAccessibilityManager.isEnabled()) {
-            return;
-        }
-        AccessibilityEvent event = AccessibilityEvent.obtain(
-                AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
-        event.setClassName(Toast.class.getName());
-        event.setPackageName(packageName);
-        view.dispatchPopulateAccessibilityEvent(event);
-        mAccessibilityManager.sendAccessibilityEvent(event);
-    }
-
-    private View getView(CharSequence text) {
-        View view = LayoutInflater.from(mContext).inflate(
-                R.layout.transient_notification, null);
-        TextView textView = view.findViewById(com.android.internal.R.id.message);
-        textView.setText(text);
-        return view;
-    }
-
-    private LayoutParams getLayoutParams(IBinder windowToken, int duration) {
+    private LayoutParams getLayoutParams(String packageName, IBinder windowToken, int duration) {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        params.format = PixelFormat.TRANSLUCENT;
-        params.windowAnimations = com.android.internal.R.style.Animation_Toast;
-        params.type = WindowManager.LayoutParams.TYPE_TOAST;
-        params.setTitle("Toast");
-        params.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-        Configuration config = mContext.getResources().getConfiguration();
-        int specificGravity = mContext.getResources().getInteger(
+        mPresenter.startLayoutParams(params, packageName);
+        int gravity = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_toastDefaultGravity);
-        int gravity = Gravity.getAbsoluteGravity(specificGravity, config.getLayoutDirection());
-        params.gravity = gravity;
-        if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) {
-            params.horizontalWeight = 1.0f;
-        }
-        if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.FILL_VERTICAL) {
-            params.verticalWeight = 1.0f;
-        }
-        params.x = 0;
-        params.y = mContext.getResources().getDimensionPixelSize(R.dimen.toast_y_offset);
-        params.verticalMargin = 0;
-        params.horizontalMargin = 0;
-        params.packageName = mContext.getPackageName();
-        params.hideTimeoutMilliseconds =
-                (duration == Toast.LENGTH_LONG) ? DURATION_LONG : DURATION_SHORT;
-        params.token = windowToken;
+        int yOffset = mContext.getResources().getDimensionPixelSize(R.dimen.toast_y_offset);
+        mPresenter.adjustLayoutParams(params, windowToken, duration, gravity, 0, yOffset, 0, 0);
         return params;
     }
 

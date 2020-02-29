@@ -831,24 +831,24 @@ public class AppStandbyController implements AppStandbyInternal {
         if (eventType == UsageEvents.Event.NOTIFICATION_SEEN
                 || eventType == UsageEvents.Event.SLICE_PINNED) {
             // Mild usage elevates to WORKING_SET but doesn't change usage time.
-            mAppIdleHistory.reportUsage(appHistory, pkg,
+            mAppIdleHistory.reportUsage(appHistory, pkg, userId,
                     STANDBY_BUCKET_WORKING_SET, subReason,
                     0, elapsedRealtime + mNotificationSeenTimeoutMillis);
             nextCheckDelay = mNotificationSeenTimeoutMillis;
         } else if (eventType == UsageEvents.Event.SYSTEM_INTERACTION) {
-            mAppIdleHistory.reportUsage(appHistory, pkg,
+            mAppIdleHistory.reportUsage(appHistory, pkg, userId,
                     STANDBY_BUCKET_ACTIVE, subReason,
                     0, elapsedRealtime + mSystemInteractionTimeoutMillis);
             nextCheckDelay = mSystemInteractionTimeoutMillis;
         } else if (eventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
             // Only elevate bucket if this is the first usage of the app
             if (prevBucket != STANDBY_BUCKET_NEVER) return;
-            mAppIdleHistory.reportUsage(appHistory, pkg,
+            mAppIdleHistory.reportUsage(appHistory, pkg, userId,
                     STANDBY_BUCKET_ACTIVE, subReason,
                     0, elapsedRealtime + mInitialForegroundServiceStartTimeoutMillis);
             nextCheckDelay = mInitialForegroundServiceStartTimeoutMillis;
         } else {
-            mAppIdleHistory.reportUsage(appHistory, pkg,
+            mAppIdleHistory.reportUsage(appHistory, pkg, userId,
                     STANDBY_BUCKET_ACTIVE, subReason,
                     elapsedRealtime, elapsedRealtime + mStrongUsageTimeoutMillis);
             nextCheckDelay = mStrongUsageTimeoutMillis;

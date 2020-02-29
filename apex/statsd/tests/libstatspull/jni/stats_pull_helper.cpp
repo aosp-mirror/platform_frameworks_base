@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <binder/ProcessState.h>
+#include <android/binder_process.h>
 #include <jni.h>
 #include <log/log.h>
 #include <stats_event.h>
@@ -24,7 +24,6 @@
 #include <thread>
 
 using std::this_thread::sleep_for;
-using namespace android;
 
 namespace {
 static int32_t sAtomTag;
@@ -39,10 +38,8 @@ static void init() {
     if (!initialized) {
         initialized = true;
         // Set up the binder
-        sp<ProcessState> ps(ProcessState::self());
-        ps->setThreadPoolMaxThreadCount(9);
-        ps->startThreadPool();
-        ps->giveThreadPoolName();
+        ABinderProcess_setThreadPoolMaxThreadCount(9);
+        ABinderProcess_startThreadPool();
     }
 }
 

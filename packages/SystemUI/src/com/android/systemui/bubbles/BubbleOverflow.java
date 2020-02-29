@@ -62,11 +62,12 @@ public class BubbleOverflow implements BubbleViewProvider {
                 R.dimen.bubble_overflow_icon_bitmap_size);
     }
 
-    public void setUpOverflow(ViewGroup parentViewGroup) {
+    void setUpOverflow(ViewGroup parentViewGroup, BubbleStackView stackView) {
         mOverflowExpandedView = (BubbleExpandedView) mInflater.inflate(
                 R.layout.bubble_expanded_view, parentViewGroup /* root */,
                 false /* attachToRoot */);
         mOverflowExpandedView.setOverflow(true);
+        mOverflowExpandedView.setStackView(stackView);
 
         updateIcon(mContext, parentViewGroup);
     }

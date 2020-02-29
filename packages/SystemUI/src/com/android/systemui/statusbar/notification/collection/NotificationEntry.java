@@ -153,6 +153,7 @@ public final class NotificationEntry extends ListEntry {
     public String remoteInputMimeType;
     public Uri remoteInputUri;
     private Notification.BubbleMetadata mBubbleMetadata;
+    private ShortcutInfo mShortcutInfo;
 
     /**
      * If {@link android.app.RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is

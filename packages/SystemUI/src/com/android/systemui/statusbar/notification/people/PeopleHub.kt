@@ -47,7 +47,7 @@ data class PersonModel(
     val key: PersonKey,
     val name: CharSequence,
     val avatar: Drawable,
-    val clickIntent: PendingIntent,
+    val clickRunnable: Runnable,
     val userId: Int
 )
 

@@ -99,6 +99,10 @@ public class PipAnimationController {
         return mCurrentAnimator;
     }
 
+    PipTransitionAnimator getCurrentAnimator() {
+        return mCurrentAnimator;
+    }
+
     private PipTransitionAnimator setupPipTransitionAnimator(PipTransitionAnimator animator) {
         animator.setInterpolator(mFastOutSlowInInterpolator);
         animator.setFloatValues(FRACTION_START, FRACTION_END);

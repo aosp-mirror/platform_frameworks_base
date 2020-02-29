@@ -582,7 +582,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         final InsetsAnimationControlImpl controller = new InsetsAnimationControlImpl(controls,
                 frame, mState, listener, typesReady, this, durationMs, interpolator, fade,
-                layoutInsetsDuringAnimation);
+                layoutInsetsDuringAnimation, animationType);
         mRunningAnimations.add(new RunningAnimation(controller, animationType));
         mRunningInsetsAnimations.add(controller.getAnimation());
         cancellationSignal.setOnCancelListener(controller::onCancelled);
@@ -598,7 +598,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         int typesReady = 0;
         boolean imeReady = true;
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
-            InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
+            final InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
             boolean show = animationType == ANIMATION_TYPE_SHOW
                     || animationType == ANIMATION_TYPE_USER;
             boolean canRun = false;
@@ -694,7 +694,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (shown) {
             showDirectly(controller.getTypes());
         } else {
-            hideDirectly(controller.getTypes(), true /* animationFinished */);
+            hideDirectly(controller.getTypes(), true /* animationFinished */,
+                    controller.getAnimationType());
         }
     }
 
@@ -852,10 +853,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                         : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN);
     }
 
-    private void hideDirectly(@InsetsType int types, boolean animationFinished) {
+    private void hideDirectly(
+            @InsetsType int types, boolean animationFinished, @AnimationType int animationType) {
         final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
-            getSourceConsumer(internalTypes.valueAt(i)).hide(animationFinished);
+            getSourceConsumer(internalTypes.valueAt(i)).hide(animationFinished, animationType);
         }
     }
 
@@ -887,8 +889,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (layoutDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN) {
             showDirectly(types);
         } else {
-            hideDirectly(types, false /* animationFinished */);
+            hideDirectly(types, false /* animationFinished */, controller.getAnimationType());
         }
+
         if (mViewRoot.mView == null) {
             return;
         }

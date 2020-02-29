@@ -65,6 +65,10 @@ import static android.os.Process.SHELL_UID;
 import static android.os.Process.SIGNAL_USR1;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
+import static android.os.Process.ZYGOTE_POLICY_FLAG_BATCH_LAUNCH;
+import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
+import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
+import static android.os.Process.ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS;
 import static android.os.Process.ZYGOTE_PROCESS;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.isThreadInProcess;
@@ -3054,7 +3058,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             info.targetSdkVersion = Build.VERSION.SDK_INT;
             ProcessRecord proc = mProcessList.startProcessLocked(processName, info /* info */,
                     false /* knownToBeDead */, 0 /* intentFlags */,
-                    sNullHostingRecord  /* hostingRecord */,
+                    sNullHostingRecord  /* hostingRecord */, ZYGOTE_POLICY_FLAG_EMPTY,
                     true /* allowWhileBooting */, true /* isolated */,
                     uid, true /* keepIfLarge */, abiOverride, entryPoint, entryPointArgs,
                     crashHandler);
@@ -3065,12 +3069,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final ProcessRecord startProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
-            HostingRecord hostingRecord, boolean allowWhileBooting,
+            HostingRecord hostingRecord, int zygotePolicyFlags, boolean allowWhileBooting,
             boolean isolated, boolean keepIfLarge) {
         return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
-                hostingRecord, allowWhileBooting, isolated, 0 /* isolatedUid */, keepIfLarge,
-                null /* ABI override */, null /* entryPoint */, null /* entryPointArgs */,
-                null /* crashHandler */);
+                hostingRecord, zygotePolicyFlags, allowWhileBooting, isolated, 0 /* isolatedUid */,
+                keepIfLarge, null /* ABI override */, null /* entryPoint */,
+                null /* entryPointArgs */, null /* crashHandler */);
     }
 
     boolean isAllowedWhileBooting(ApplicationInfo ai) {
@@ -4953,7 +4957,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (RemoteException e) {
             app.resetPackageList(mProcessStats);
             mProcessList.startProcessLocked(app,
-                    new HostingRecord("link fail", processName));
+                    new HostingRecord("link fail", processName),
+                    ZYGOTE_POLICY_FLAG_EMPTY);
             return false;
         }
 
@@ -5372,7 +5377,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 for (int ip=0; ip<NP; ip++) {
                     if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES, "Starting process on hold: "
                             + procs.get(ip));
-                    mProcessList.startProcessLocked(procs.get(ip), new HostingRecord("on-hold"));
+                    mProcessList.startProcessLocked(procs.get(ip),
+                            new HostingRecord("on-hold"),
+                            ZYGOTE_POLICY_FLAG_BATCH_LAUNCH);
                 }
             }
             if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
@@ -7224,8 +7231,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                             proc = startProcessLocked(cpi.processName,
                                     cpr.appInfo, false, 0,
                                     new HostingRecord("content provider",
-                                    new ComponentName(cpi.applicationInfo.packageName,
-                                            cpi.name)), false, false, false);
+                                        new ComponentName(cpi.applicationInfo.packageName,
+                                                cpi.name)),
+                                    ZYGOTE_POLICY_FLAG_EMPTY, false, false, false);
                             checkTime(startTime, "getContentProviderImpl: after start process");
                             if (proc == null) {
                                 Slog.w(TAG, "Unable to launch app "
@@ -7259,10 +7267,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             checkTime(startTime, "getContentProviderImpl: done!");
 
-            grantImplicitAccess(userId, null /*intent*/,
-                    UserHandle.getAppId(Binder.getCallingUid()),
-                    UserHandle.getAppId(cpi.applicationInfo.uid)
-            );
+            grantImplicitAccess(userId, null /*intent*/, callingUid,
+                    UserHandle.getAppId(cpi.applicationInfo.uid));
         }
 
         // Wait for the provider to be published...
@@ -7785,7 +7791,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         .getPersistentApplications(STOCK_PM_FLAGS | matchFlags).getList();
                 for (ApplicationInfo app : apps) {
                     if (!"android".equals(app.packageName)) {
-                        addAppLocked(app, null, false, null /* ABI override */);
+                        addAppLocked(app, null, false, null /* ABI override */,
+                                ZYGOTE_POLICY_FLAG_BATCH_LAUNCH);
                     }
                 }
             } catch (RemoteException ex) {
@@ -8056,23 +8063,25 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
-            String abiOverride) {
+            String abiOverride, int zygotePolicyFlags) {
         return addAppLocked(info, customProcess, isolated, false /* disableHiddenApiChecks */,
-                false /* mountExtStorageFull */, abiOverride);
+                false /* mountExtStorageFull */, abiOverride, zygotePolicyFlags);
     }
 
     @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
-            boolean disableHiddenApiChecks, boolean mountExtStorageFull, String abiOverride) {
+            boolean disableHiddenApiChecks, boolean mountExtStorageFull, String abiOverride,
+            int zygotePolicyFlags) {
         return addAppLocked(info, customProcess, isolated, disableHiddenApiChecks,
-                false /* disableTestApiChecks */, mountExtStorageFull, abiOverride);
+                false /* disableTestApiChecks */, mountExtStorageFull, abiOverride,
+                zygotePolicyFlags);
     }
 
     // TODO: Move to ProcessList?
     @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             boolean disableHiddenApiChecks, boolean disableTestApiChecks,
-            boolean mountExtStorageFull, String abiOverride) {
+            boolean mountExtStorageFull, String abiOverride, int zygotePolicyFlags) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
@@ -8107,7 +8116,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             mPersistentStartingProcesses.add(app);
             mProcessList.startProcessLocked(app, new HostingRecord("added application",
                     customProcess != null ? customProcess : app.processName),
-                    disableHiddenApiChecks, disableTestApiChecks, mountExtStorageFull, abiOverride);
+                    zygotePolicyFlags, disableHiddenApiChecks, disableTestApiChecks,
+                    mountExtStorageFull, abiOverride);
         }
 
         return app;
@@ -14614,7 +14624,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             mProcessList.addProcessNameLocked(app);
             app.pendingStart = false;
             mProcessList.startProcessLocked(app,
-                    new HostingRecord("restart", app.processName));
+                    new HostingRecord("restart", app.processName),
+                    ZYGOTE_POLICY_FLAG_EMPTY);
             return true;
         } else if (app.pid > 0 && app.pid != MY_PID) {
             // Goodbye!
@@ -14977,7 +14988,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessRecord proc = startProcessLocked(app.processName, app,
                     false, 0,
                     new HostingRecord("backup", hostingName),
-                    false, false, false);
+                    ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS, false, false, false);
             if (proc == null) {
                 Slog.e(TAG, "Unable to start backup agent process " + r);
                 return false;
@@ -16616,7 +16627,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             ProcessRecord app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
-                    disableTestApiChecks, mountExtStorageFull, abiOverride);
+                    disableTestApiChecks, mountExtStorageFull, abiOverride,
+                    ZYGOTE_POLICY_FLAG_EMPTY);
             app.setActiveInstrumentation(activeInstr);
             activeInstr.mFinished = false;
             activeInstr.mSourceUid = callingUid;
@@ -18013,7 +18025,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mProcessList.mRemovedProcesses.remove(i);
 
                 if (app.isPersistent()) {
-                    addAppLocked(app.info, null, false, null /* ABI override */);
+                    addAppLocked(app.info, null, false, null /* ABI override */,
+                            ZYGOTE_POLICY_FLAG_BATCH_LAUNCH);
                 }
             }
         }
@@ -19220,8 +19233,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // preempted by other processes before attaching the process of top app.
                     startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
                             new HostingRecord(hostingType, hostingName, isTop),
-                            false /* allowWhileBooting */, false /* isolated */,
-                            true /* keepIfLarge */);
+                            ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE, false /* allowWhileBooting */,
+                            false /* isolated */, true /* keepIfLarge */);
                 }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -19339,7 +19352,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void showWhileInUseDebugToast(int uid, int op, int mode) {
             synchronized (ActivityManagerService.this) {
-                ActivityManagerService.this.mServices.showWhileInUseDebugNotificationLocked(
+                ActivityManagerService.this.mServices.showWhileInUseDebugToastLocked(
                         uid, op, mode);
             }
         }

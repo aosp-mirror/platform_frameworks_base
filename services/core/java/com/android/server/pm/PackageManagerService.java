@@ -213,7 +213,6 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
@@ -1967,6 +1966,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 case ENABLE_ROLLBACK_TIMEOUT: {
                     final int enableRollbackToken = msg.arg1;
+                    final int sessionId = msg.arg2;
                     final InstallParams params = mPendingEnableRollback.get(enableRollbackToken);
                     if (params != null) {
                         final InstallArgs args = params.mArgs;
@@ -1982,8 +1982,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         Intent rollbackTimeoutIntent = new Intent(
                                 Intent.ACTION_CANCEL_ENABLE_ROLLBACK);
                         rollbackTimeoutIntent.putExtra(
-                                PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
-                                enableRollbackToken);
+                                PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
+                                sessionId);
                         rollbackTimeoutIntent.addFlags(
                                 Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                         mContext.sendBroadcastAsUser(rollbackTimeoutIntent, UserHandle.SYSTEM,
@@ -6832,12 +6832,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 final boolean isTargetHiddenFromInstantApp =
                         !isTargetVisibleToInstantApp
                         || (matchExplicitlyVisibleOnly && !isTargetExplicitlyVisibleToInstantApp);
-                final boolean blockResolution =
+                final boolean blockInstantResolution =
                         !isTargetSameInstantApp
                         && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                         && isTargetHiddenFromInstantApp));
-                if (!blockResolution) {
+                final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
+                        && !resolveForStart && shouldFilterApplicationLocked(
+                                getPackageSettingInternal(ai.applicationInfo.packageName,
+                                        Process.SYSTEM_UID), filterCallingUid, userId);
+                if (!blockInstantResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
                     ri.activityInfo = ai;
                     list.add(ri);
@@ -7221,9 +7225,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 resolveInfos.set(i, installerInfo);
                 continue;
             }
-            // caller is a full app, don't need to apply any other filtering
+            // caller is a full app
             if (ephemeralPkgName == null) {
-                continue;
+                SettingBase callingSetting =
+                        mSettings.getSettingLPr(UserHandle.getAppId(filterCallingUid));
+                PackageSetting resolvedSetting =
+                        getPackageSettingInternal(info.activityInfo.packageName, 0);
+                if (resolveForStart
+                        || !mAppsFilter.shouldFilterApplication(
+                                filterCallingUid, callingSetting, resolvedSetting, userId)) {
+                    continue;
+                }
             } else if (ephemeralPkgName.equals(info.activityInfo.packageName)) {
                 // caller is same app; don't need to apply any other filtering
                 continue;
@@ -7913,12 +7925,17 @@ public class PackageManagerService extends IPackageManager.Stub
                                 & ApplicationInfo.PRIVATE_FLAG_INSTANT) != 0;
                 final boolean isTargetHiddenFromInstantApp =
                         (si.flags & ServiceInfo.FLAG_VISIBLE_TO_INSTANT_APP) == 0;
-                final boolean blockResolution =
+                final boolean blockInstantResolution =
                         !isTargetSameInstantApp
                         && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                         && isTargetHiddenFromInstantApp));
-                if (!blockResolution) {
+
+                final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
+                        && shouldFilterApplicationLocked(
+                        getPackageSettingInternal(si.applicationInfo.packageName,
+                                Process.SYSTEM_UID), callingUid, userId);
+                if (!blockInstantResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
                     ri.serviceInfo = si;
                     list.add(ri);
@@ -7937,8 +7954,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return Collections.emptyList();
                 }
                 return applyPostServiceResolutionFilter(
-                        resolveInfos,
-                        instantAppPkgName);
+                        resolveInfos, instantAppPkgName, userId, callingUid);
             }
             final AndroidPackage pkg = mPackages.get(pkgName);
             if (pkg != null) {
@@ -7949,20 +7965,26 @@ public class PackageManagerService extends IPackageManager.Stub
                     return Collections.emptyList();
                 }
                 return applyPostServiceResolutionFilter(
-                        resolveInfos,
-                        instantAppPkgName);
+                        resolveInfos, instantAppPkgName, userId, callingUid);
             }
             return Collections.emptyList();
         }
     }
 
     private List<ResolveInfo> applyPostServiceResolutionFilter(List<ResolveInfo> resolveInfos,
-            String instantAppPkgName) {
-        if (instantAppPkgName == null) {
-            return resolveInfos;
-        }
+            String instantAppPkgName, @UserIdInt int userId, int filterCallingUid) {
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
+            if (instantAppPkgName == null) {
+                SettingBase callingSetting =
+                        mSettings.getSettingLPr(UserHandle.getAppId(filterCallingUid));
+                PackageSetting resolvedSetting =
+                        getPackageSettingInternal(info.serviceInfo.packageName, 0);
+                if (!mAppsFilter.shouldFilterApplication(
+                        filterCallingUid, callingSetting, resolvedSetting, userId)) {
+                    continue;
+                }
+            }
             final boolean isEphemeralApp = info.serviceInfo.applicationInfo.isInstantApp();
             // allow services that are defined in the provided package
             if (isEphemeralApp && instantAppPkgName.equals(info.serviceInfo.packageName)) {
@@ -8045,7 +8067,11 @@ public class PackageManagerService extends IPackageManager.Stub
                         && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                         && isTargetHiddenFromInstantApp));
-                if (!blockResolution) {
+                final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
+                        && shouldFilterApplicationLocked(
+                        getPackageSettingInternal(pi.applicationInfo.packageName,
+                                Process.SYSTEM_UID), callingUid, userId);
+                if (!blockResolution && !blockNormalResolution) {
                     final ResolveInfo ri = new ResolveInfo();
                     ri.providerInfo = pi;
                     list.add(ri);
@@ -8064,8 +8090,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return Collections.emptyList();
                 }
                 return applyPostContentProviderResolutionFilter(
-                        resolveInfos,
-                        instantAppPkgName);
+                        resolveInfos, instantAppPkgName, userId, callingUid);
             }
             final AndroidPackage pkg = mPackages.get(pkgName);
             if (pkg != null) {
@@ -8076,20 +8101,29 @@ public class PackageManagerService extends IPackageManager.Stub
                     return Collections.emptyList();
                 }
                 return applyPostContentProviderResolutionFilter(
-                        resolveInfos,
-                        instantAppPkgName);
+                        resolveInfos, instantAppPkgName, userId, callingUid);
             }
             return Collections.emptyList();
         }
     }
 
     private List<ResolveInfo> applyPostContentProviderResolutionFilter(
-            List<ResolveInfo> resolveInfos, String instantAppPkgName) {
-        if (instantAppPkgName == null) {
-            return resolveInfos;
-        }
+            List<ResolveInfo> resolveInfos, String instantAppPkgName,
+            @UserIdInt int userId, int callingUid) {
         for (int i = resolveInfos.size() - 1; i >= 0; i--) {
             final ResolveInfo info = resolveInfos.get(i);
+
+            if (instantAppPkgName == null) {
+                SettingBase callingSetting =
+                        mSettings.getSettingLPr(UserHandle.getAppId(callingUid));
+                PackageSetting resolvedSetting =
+                        getPackageSettingInternal(info.providerInfo.packageName, 0);
+                if (!mAppsFilter.shouldFilterApplication(
+                        callingUid, callingSetting, resolvedSetting, userId)) {
+                    continue;
+                }
+            }
+
             final boolean isEphemeralApp = info.providerInfo.applicationInfo.isInstantApp();
             // allow providers that are defined in the provided package
             if (isEphemeralApp && instantAppPkgName.equals(info.providerInfo.packageName)) {
@@ -10951,17 +10985,22 @@ public class PackageManagerService extends IPackageManager.Stub
         if (createNewPackage) {
             final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
             final boolean virtualPreload = (scanFlags & SCAN_AS_VIRTUAL_PRELOAD) != 0;
+
+            // Flags contain system values stored in the server variant of AndroidPackage,
+            // and so the server-side PackageInfoUtils is still called, even without a
+            // PackageSetting to pass in.
+            int pkgFlags = PackageInfoUtils.appInfoFlags(parsedPackage, null);
+            int pkgPrivateFlags = PackageInfoUtils.appInfoPrivateFlags(parsedPackage, null);
+
             // REMOVE SharedUserSetting from method; update in a separate call
             pkgSetting = Settings.createNewSetting(parsedPackage.getPackageName(),
                     originalPkgSetting, disabledPkgSetting, realPkgName, sharedUserSetting,
                     destCodeFile, destResourceFile, parsedPackage.getNativeLibraryRootDir(),
                     AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage),
                     AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage),
-                    parsedPackage.getVersionCode(),
-                    PackageInfoWithoutStateUtils.appInfoFlags(parsedPackage),
-                    PackageInfoWithoutStateUtils.appInfoPrivateFlags(parsedPackage),
-                    user, true /*allowInstall*/, instantApp,
-                    virtualPreload, UserManagerService.getInstance(), usesStaticLibraries,
+                    parsedPackage.getVersionCode(), pkgFlags, pkgPrivateFlags, user,
+                    true /*allowInstall*/, instantApp, virtualPreload,
+                    UserManagerService.getInstance(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups());
         } else {
             // make a deep copy to avoid modifying any existing system state.
@@ -14260,6 +14299,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final long requiredInstalledVersionCode;
         final boolean forceQueryableOverride;
         final int mDataLoaderType;
+        final int mSessionId;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
@@ -14283,6 +14323,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.requiredInstalledVersionCode = requiredInstalledVersionCode;
             this.forceQueryableOverride = false;
             this.mDataLoaderType = dataLoaderType;
+            this.mSessionId = -1;
         }
 
         InstallParams(ActiveInstallSession activeInstallSession) {
@@ -14318,6 +14359,7 @@ public class PackageManagerService extends IPackageManager.Stub
             forceQueryableOverride = sessionParams.forceQueryableOverride;
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
+            mSessionId = activeInstallSession.getSessionId();
         }
 
         @Override
@@ -14549,13 +14591,9 @@ public class PackageManagerService extends IPackageManager.Stub
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
                             enableRollbackToken);
                     enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS,
-                            installFlags);
-                    enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER,
-                            getRollbackUser().getIdentifier());
-                    enableRollbackIntent.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
-                            PACKAGE_MIME_TYPE);
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
+                            mSessionId);
+                    enableRollbackIntent.setType(PACKAGE_MIME_TYPE);
                     enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                     // Allow the broadcast to be sent before boot complete.
@@ -14581,6 +14619,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                     final Message msg = mHandler.obtainMessage(
                                             ENABLE_ROLLBACK_TIMEOUT);
                                     msg.arg1 = enableRollbackToken;
+                                    msg.arg2 = mSessionId;
                                     mHandler.sendMessageDelayed(msg, rollbackTimeout);
                                 }
                             }, null, 0, null, null);
@@ -24590,6 +24629,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private final String mPackageName;
         private final File mStagedDir;
         private final IPackageInstallObserver2 mObserver;
+        private final int mSessionId;
         private final PackageInstaller.SessionParams mSessionParams;
         private final int mInstallerUid;
         @NonNull private final InstallSource mInstallSource;
@@ -24597,11 +24637,12 @@ public class PackageManagerService extends IPackageManager.Stub
         private final SigningDetails mSigningDetails;
 
         ActiveInstallSession(String packageName, File stagedDir, IPackageInstallObserver2 observer,
-                PackageInstaller.SessionParams sessionParams, int installerUid,
+                int sessionId, PackageInstaller.SessionParams sessionParams, int installerUid,
                 InstallSource installSource, UserHandle user, SigningDetails signingDetails) {
             mPackageName = packageName;
             mStagedDir = stagedDir;
             mObserver = observer;
+            mSessionId = sessionId;
             mSessionParams = sessionParams;
             mInstallerUid = installerUid;
             mInstallSource = Preconditions.checkNotNull(installSource);
@@ -24619,6 +24660,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public IPackageInstallObserver2 getObserver() {
             return mObserver;
+        }
+
+        public int getSessionId() {
+            return mSessionId;
         }
 
         public PackageInstaller.SessionParams getSessionParams() {

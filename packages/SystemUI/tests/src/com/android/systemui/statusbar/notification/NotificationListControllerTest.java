@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification;
 
+import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 
@@ -87,7 +89,8 @@ public class NotificationListControllerTest extends SysuiTestCase {
         mEntryListener.onEntryRemoved(
                 entry,
                 NotificationVisibility.obtain(entry.getKey(), 0, 0, true),
-                false);
+                false,
+                UNDEFINED_DISMISS_REASON);
         verify(mListContainer).cleanUpViewStateForEntry(entry);
     }
 

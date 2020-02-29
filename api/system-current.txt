@@ -11422,7 +11422,6 @@ package android.telephony {
   }
 
   public class ServiceState implements android.os.Parcelable {
-    method @NonNull public android.telephony.ServiceState createLocationInfoSanitizedCopy(boolean);
     method public void fillInNotifierBundle(@NonNull android.os.Bundle);
     method public int getDataNetworkType();
     method public int getDataRegistrationState();
@@ -11599,7 +11598,7 @@ package android.telephony {
 
   public class SubscriptionManager {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean canDisablePhysicalSubscription();
-    method public boolean canManageSubscription(@Nullable android.telephony.SubscriptionInfo, @Nullable String);
+    method public boolean canManageSubscription(@NonNull android.telephony.SubscriptionInfo, @NonNull String);
     method @NonNull public int[] getActiveAndHiddenSubscriptionIdList();
     method @NonNull public int[] getActiveSubscriptionIdList();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.SubscriptionInfo getActiveSubscriptionInfoForIcc(@NonNull String);
@@ -11616,7 +11615,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setIconTint(@ColorInt int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPreferredDataSubscriptionId(int, boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setSubscriptionEnabled(int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUiccApplicationsEnabled(boolean, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUiccApplicationsEnabled(int, boolean);
     field @RequiresPermission(android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS) public static final String ACTION_SUBSCRIPTION_PLANS_CHANGED = "android.telephony.action.SUBSCRIPTION_PLANS_CHANGED";
     field @NonNull public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
     field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff

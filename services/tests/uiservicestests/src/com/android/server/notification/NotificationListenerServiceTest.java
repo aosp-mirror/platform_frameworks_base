@@ -35,9 +35,12 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
+import android.app.Person;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.os.Binder;
@@ -118,6 +121,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(canBubble(i), ranking.canBubble());
             assertEquals(visuallyInterruptive(i), ranking.visuallyInterruptive());
             assertEquals(isConversation(i), ranking.isConversation());
+            assertEquals(getShortcutInfo(i).getId(), ranking.getShortcutInfo().getId());
         }
     }
 
@@ -186,7 +190,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 (ArrayList) tweak.getSmartReplies(),
                 tweak.canBubble(),
                 tweak.visuallyInterruptive(),
-                tweak.isConversation()
+                tweak.isConversation(),
+                tweak.getShortcutInfo()
         );
         assertNotEquals(nru, nru2);
     }
@@ -264,7 +269,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                     getSmartReplies(key, i),
                     canBubble(i),
                     visuallyInterruptive(i),
-                    isConversation(i)
+                    isConversation(i),
+                    getShortcutInfo(i)
             );
             rankings[i] = ranking;
         }
@@ -377,6 +383,17 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         return index % 4 == 0;
     }
 
+    private ShortcutInfo getShortcutInfo(int index) {
+        ShortcutInfo si = new ShortcutInfo(
+                index, String.valueOf(index), "packageName", new ComponentName("1", "1"), null,
+                "title", 0, "titleResName", "text", 0, "textResName",
+                "disabledMessage", 0, "disabledMessageResName",
+                null, null, 0, null, 0, 0,
+                0, "iconResName", "bitmapPath", 0,
+                null, null);
+        return si;
+    }
+
     private void assertActionsEqual(
             List<Notification.Action> expecteds, List<Notification.Action> actuals) {
         assertEquals(expecteds.size(), actuals.size());
@@ -411,6 +428,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertEquals(comment, a.getSmartReplies(), b.getSmartReplies());
         assertEquals(comment, a.canBubble(), b.canBubble());
         assertEquals(comment, a.isConversation(), b.isConversation());
+        assertEquals(comment, a.getShortcutInfo().getId(), b.getShortcutInfo().getId());
         assertActionsEqual(a.getSmartActions(), b.getSmartActions());
     }
 
