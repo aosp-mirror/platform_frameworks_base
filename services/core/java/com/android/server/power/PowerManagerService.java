@@ -4786,6 +4786,12 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
+        public void acquireWakeLockAsync(IBinder lock, int flags, String tag, String packageName,
+                WorkSource ws, String historyTag) {
+            acquireWakeLock(lock, flags, tag, packageName, ws, historyTag);
+        }
+
+        @Override // Binder call
         public void releaseWakeLock(IBinder lock, int flags) {
             if (lock == null) {
                 throw new IllegalArgumentException("lock must not be null");
@@ -4802,6 +4808,11 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
+        public void releaseWakeLockAsync(IBinder lock, int flags) {
+            releaseWakeLock(lock, flags);
+        }
+
+        @Override // Binder call
         public void updateWakeLockUids(IBinder lock, int[] uids) {
             WorkSource ws = null;
 
@@ -4814,6 +4825,11 @@ public final class PowerManagerService extends SystemService
                 }
             }
             updateWakeLockWorkSource(lock, ws, null);
+        }
+
+        @Override // Binder call
+        public void updateWakeLockUidsAsync(IBinder lock, int[] uids) {
+            updateWakeLockUids(lock, uids);
         }
 
         @Override // Binder call
