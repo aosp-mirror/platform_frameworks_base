@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
 
@@ -145,8 +146,8 @@ class InlineSuggestionSession {
         }
 
         @Override
-        public void onInlineSuggestionsResponse(InlineSuggestionsResponse response)
-                throws RemoteException {
+        public void onInlineSuggestionsResponse(AutofillId fieldId,
+                InlineSuggestionsResponse response) {
             final InlineSuggestionSession session = mInlineSuggestionSession.get();
             if (session != null) {
                 session.mHandler.sendMessage(obtainMessage(

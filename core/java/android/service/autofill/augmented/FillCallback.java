@@ -55,14 +55,14 @@ public final class FillCallback {
 
         if (response == null) {
             mProxy.logEvent(AutofillProxy.REPORT_EVENT_NO_RESPONSE);
-            mProxy.reportResult(null /*inlineSuggestions*/);
+            mProxy.reportResult(/* inlineSuggestionsData */ null, /* inlineActions */null);
             return;
         }
 
         List<Dataset> inlineSuggestions = response.getInlineSuggestions();
         if (inlineSuggestions != null && !inlineSuggestions.isEmpty()) {
             mProxy.logEvent(AutofillProxy.REPORT_EVENT_INLINE_RESPONSE);
-            mProxy.reportResult(inlineSuggestions);
+            mProxy.reportResult(inlineSuggestions, response.getInlineActions());
             return;
         }
 
