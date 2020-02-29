@@ -570,17 +570,17 @@ public class NotificationManagerService extends SystemService {
 
         public StatusBarNotification[] getArray(int count, boolean includeSnoozed) {
             if (count == 0) count = mBufferSize;
-            final StatusBarNotification[] a
-                    = new StatusBarNotification[Math.min(count, mBuffer.size())];
+            List<StatusBarNotification> a = new ArrayList();
             Iterator<Pair<StatusBarNotification, Integer>> iter = descendingIterator();
             int i=0;
             while (iter.hasNext() && i < count) {
                 Pair<StatusBarNotification, Integer> pair = iter.next();
                 if (pair.second != REASON_SNOOZED || includeSnoozed) {
-                    a[i++] = pair.first;
+                    i++;
+                    a.add(pair.first);
                 }
             }
-            return a;
+            return  a.toArray(new StatusBarNotification[a.size()]);
         }
 
     }
@@ -2697,8 +2697,13 @@ public class NotificationManagerService extends SystemService {
         CharSequence title = null;
         if (n.extras != null) {
             title = n.extras.getCharSequence(Notification.EXTRA_TITLE);
+            if (title == null) {
+                title = n.extras.getCharSequence(Notification.EXTRA_TITLE_BIG);
+            }
         }
-        return title == null? null : String.valueOf(title);
+        return title == null ? getContext().getResources().getString(
+            com.android.internal.R.string.notification_history_title_placeholder)
+            : String.valueOf(title);
     }
 
     /**
