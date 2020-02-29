@@ -242,6 +242,13 @@ void JMediaCodec::release() {
     });
 }
 
+void JMediaCodec::releaseAsync() {
+    if (mCodec != NULL) {
+        mCodec->releaseAsync();
+    }
+    mInitStatus = NO_INIT;
+}
+
 JMediaCodec::~JMediaCodec() {
     if (mLooper != NULL) {
         /* MediaCodec and looper should have been released explicitly already
@@ -1124,7 +1131,10 @@ static sp<JMediaCodec> getMediaCodec(JNIEnv *env, jobject thiz) {
 }
 
 static void android_media_MediaCodec_release(JNIEnv *env, jobject thiz) {
-    setMediaCodec(env, thiz, NULL);
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+    if (codec != NULL) {
+        codec->releaseAsync();
+    }
 }
 
 static void throwCodecException(JNIEnv *env, status_t err, int32_t actionCode, const char *msg) {
@@ -2797,7 +2807,7 @@ static void android_media_MediaCodec_native_setup(
 
 static void android_media_MediaCodec_native_finalize(
         JNIEnv *env, jobject thiz) {
-    android_media_MediaCodec_release(env, thiz);
+    setMediaCodec(env, thiz, NULL);
 }
 
 // MediaCodec.LinearBlock
