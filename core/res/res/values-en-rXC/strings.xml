@@ -193,14 +193,10 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‏‎‎‎‏‏‎‏‎‎‎‎‏‎‏‎‏‎‎‎‏‏‎‏‎‎‏‎‏‎‎‎‏‎‏‎‎‎‎‎Your organization manages this device and may monitor network traffic. Tap for details.‎‏‎‎‏‎"</string>
     <string name="location_changed_notification_title" msgid="4119726617105166830">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‎‎‏‎‏‏‎‎‎‎‏‏‎‏‎‏‏‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‎‏‏‎‎‏‏‏‎‎‎‏‏‏‏‎‏‏‏‎‎Location settings changed by your admin‎‏‎‎‏‎"</string>
     <string name="location_changed_notification_text" msgid="198907268219396399">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‎‎‎‎‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‏‏‏‎‏‎‏‏‏‏‎‎‎‎‏‎‎‏‎‏‏‏‏‎Tap to see your location settings.‎‏‎‎‏‎"</string>
-    <!-- no translation found for country_detector (7023275114706088854) -->
-    <skip />
-    <!-- no translation found for location_service (2439187616018455546) -->
-    <skip />
-    <!-- no translation found for sensor_notification_service (7474531979178682676) -->
-    <skip />
-    <!-- no translation found for twilight_service (8964898045693187224) -->
-    <skip />
+    <string name="country_detector" msgid="7023275114706088854">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‎‏‏‏‏‎‏‎‏‏‏‏‏‎‎‎‎‎‎‏‏‎‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‏‏‎‎‏‏‏‎‎‏‎‏‏‎‎Country Detector‎‏‎‎‏‎"</string>
+    <string name="location_service" msgid="2439187616018455546">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‎‏‏‎‎‏‏‎‏‏‏‏‎‎‎‎‏‏‎‏‏‎‏‎‏‎‎‎‎‏‎‏‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‏‎‏‎‎Location Service‎‏‎‎‏‎"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‏‏‎‏‏‏‎‏‏‏‎‎‏‎‎‏‏‏‏‏‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‎‎‎Sensor Notification Service‎‏‎‎‏‎"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‎‏‏‎‏‏‎‏‏‏‎‏‎‎‎‏‏‎‎‏‎‎‎‏‎‏‎‎‏‎‎‎‏‎‏‏‎‏‎‏‎‎‏‎‎‏‏‎‎‎‎Twilight Service‎‏‎‎‏‎"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‎‏‎‎‎‏‎‏‎‏‏‎‏‎‏‎‏‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎Your device will be erased‎‏‎‎‏‎"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‎‎‎‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‎‏‎The admin app can\'t be used. Your device will now be erased.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎If you have questions, contact your organization\'s admin.‎‏‎‎‏‎"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‎‎‎‎‏‎‏‎‏‎‏‏‎‏‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‎‎‏‎‏‏‏‏‎‎‏‎Printing disabled by ‎‏‎‎‏‏‎<xliff:g id="OWNER_APP">%s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
@@ -253,6 +249,8 @@
       <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‎‏‎‏‎‏‎‏‎‎‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‏‏‏‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎Taking screenshot for bug report in ‎‏‎‎‏‏‎<xliff:g id="NUMBER_1">%d</xliff:g>‎‏‎‎‏‏‏‎ seconds.‎‏‎‎‏‎</item>
       <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‎‏‎‏‎‏‎‏‎‎‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‏‏‏‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎Taking screenshot for bug report in ‎‏‎‎‏‏‎<xliff:g id="NUMBER_0">%d</xliff:g>‎‏‎‎‏‏‏‎ second.‎‏‎‎‏‎</item>
     </plurals>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‏‎‏‎‏‎‎‎‏‎‎‏‏‏‏‎‎‏‎‏‏‏‏‎‏‏‎‎‎‎‏‎‏‏‎‏‏‏‏‎‏‎‎‏‏‏‎‎‏‎‏‎‎‎‏‎Screenshot taken with bug report‎‏‎‎‏‎"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‏‏‏‎‎‎‎‏‏‏‎‎‎‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‎‏‎‏‏‎‏‏‎‏‎‏‎‏‏‎‎Failed to take screenshot with bug report‎‏‎‎‏‎"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‏‎‏‏‏‎‏‏‎‏‎‏‏‏‏‎‏‎‏‏‎‎‏‎‎‏‏‏‏‎‎‎‏‏‎‎‏‎‏‎‏‏‏‎‎‏‏‎‏‏‏‎‎‎Silent mode‎‏‎‎‏‎"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‏‏‏‎‏‎‏‎‏‎‏‎‎‏‏‏‏‎‏‏‎‎‏‎‎‎‏‏‏‏‎‏‎‏‎‎‏‏‏‏‏‎‎‏‏‎‏‏‎‏‎‎‏‏‎‏‎Sound is OFF‎‏‎‎‏‎"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‏‎‏‎‎‎‏‎‏‏‎‏‎‏‏‏‏‎‎‎‏‎‏‎‏‏‏‎‎‏‏‎‏‏‏‎‎‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‎‎Sound is ON‎‏‎‎‏‎"</string>
@@ -420,11 +418,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‏‏‎‏‎‎‏‎‎‎‏‎‏‎‎‎‎‏‎‏‏‎‏‎‏‎‎‏‏‎‎‏‏‏‎‎‏‎‎‏‎‏‎‏‎‏‎‏‏‏‏‏‏‎‏‎‎‎access extra location provider commands‎‏‎‎‏‎"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‏‏‏‎‏‏‏‎‏‎‎‎‎‏‏‎‏‏‎‎‎‏‏‏‎‏‏‏‏‏‏‎‎‎‎‎‎‏‏‏‏‏‏‎‎‎‏‏‎‏‏‏‏‏‏‏‎Allows the app to access extra location provider commands. This may allow the app to interfere with the operation of the GPS or other location sources.‎‏‎‎‏‎"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‏‏‏‎‏‏‎‏‏‏‏‎‏‎‎‏‎‎‏‎‎‏‎‎‏‎‏‎‎‎‏‏‎‎‎‏‎‏‏‏‎‏‎‎‎‎‏‏‎‏‏‎‎access precise location only in the foreground‎‏‎‎‏‎"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‏‎‎‎‏‎‏‎‎‎‏‏‎‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‎‎‏‏‎‎‎This app can get your exact location only when it is in the foreground. Location services must be turned on and available on your device for the app to be able to use them. This may increase battery consumption.‎‏‎‎‏‎"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‎‏‎‏‏‏‏‏‎‎‏‎‏‎‏‎‎‎‎‏‎‎‏‎‏‎‏‏‎‎‏‏‎‎‎‏‎‏‏‎‏‏‏‏‎‎‏‏‏‏‎This app can get your precise location from location services while the app is in use. Location services for your device must be turned on for the app to get location. This may increase battery usage.‎‏‎‎‏‎"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‎‏‎‏‎‎‏‏‏‏‏‎‎‎‎‎‏‎‎‎‏‎‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎‎‏‏‎‎‎‏‎‎‏‏‎‏‏‏‏‎‏‎access approximate location only in the foreground‎‏‎‎‏‎"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‎‎‏‎‎‎‏‏‏‏‎‏‏‎‏‎‏‏‏‎‎‏‏‏‎‏‎‏‎‏‎‏‏‏‏‏‎‏‎‎This app can get your approximate location only when it is in the foreground. Location services must be turned on and available on your device for the app to be able to use them.‎‏‎‎‏‎"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‏‏‎‏‏‏‎‏‏‏‎‏‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‎‎‏‎‏‏‏‎‎‏‏‎‏‏‏‎‎‎‎‏‏‏‎‎‎‎This app can get your approximate location from location services while the app is in use. Location services for your device must be turned on for the app to get location.‎‏‎‎‏‎"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‎‎‎‏‎‏‏‎‎‏‏‏‎‎‎‏‎‏‏‎‏‏‎‎‏‎‏‎‎‏‏‏‏‏‏‎‎‎‏‎‏‎‏‏‎‎‏‏‏‏‎‏‎‎access location in the background‎‏‎‎‏‎"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‎‏‎‎‏‏‏‏‎‏‏‏‏‏‎‏‏‎‎‏‎‎‎‏‎‎‏‎‏‎‏‏‎‏‎‎‏‏‎‏‎‎‎‎‏‏‎‎‎‏‏‎‏‎‏‎This app can access location while running in the background, in addition to foreground location access.‎‏‎‎‏‎"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‏‎‏‏‎‎‎‏‎‏‎‎‏‎‏‏‎‏‏‎‏‎‏‎‏‎‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‎‏‎‏‏‎‎‏‎This app can access location at any time, even while the app is not in use.‎‏‎‎‏‎"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎‎‏‏‏‎‏‎‏‏‏‎‎‏‎‎‏‏‎‏‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‎‏‏‏‎‎‏‏‎‏‏‎‎‎‏‏‏‎change your audio settings‎‏‎‎‏‎"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‏‏‏‏‎‎‏‏‏‎‏‏‎‏‏‏‏‎‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‏‏‏‏‎‏‏‎‏‎‏‏‎‏‏‏‎‎‏‎Allows the app to modify global audio settings such as volume and which speaker is used for output.‎‏‎‎‏‎"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‎‎‏‎‏‎‏‎‎‏‏‎‏‏‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‏‎‏‎‎‏‎‏‎‎‏‏‏‏‎‎‎‏‎‏‏‎record audio‎‏‎‎‏‎"</string>
@@ -1853,6 +1851,8 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‏‎‎‎‏‏‎‏‎‏‏‏‎‏‏‎‎‏‏‏‏‎‎‎‏‏‎‏‎‎‎‎‏‏‎‎‏‎‏‎‎‏‏‏‎‏‎‏‏‎‎‏‎‎Uncategorized‎‏‎‎‏‎"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‎‏‏‏‏‎‎‏‎‏‎‏‏‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‎‏‏‏‏‎‎‏‎‎‎‎‎‏‏‎‏‎‏‎‏‏‏‏‏‏‎You set the importance of these notifications.‎‏‎‎‏‎"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‎‏‎‎‎‏‎‎‏‏‎‏‎‎‎‏‎‏‏‏‏‏‏‎‎‏‏‏‎‏‎‏‏‏‎‏‏‎‎‏‎‏‏‎‏‏‏‏‎‎‏‏‏‎This is important because of the people involved.‎‏‎‎‏‎"</string>
+    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
+    <skip />
     <string name="user_creation_account_exists" msgid="2239146360099708035">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‏‎‎‏‏‎‎‎‎‏‎‏‏‏‏‎‎‎‎‎‎‎‏‎‎‎‎‎‏‏‏‎‏‏‎‏‎‎‎‎‏‏‏‎‎‏‎‎‎‎‎‏‏‎Allow ‎‏‎‎‏‏‎<xliff:g id="APP">%1$s</xliff:g>‎‏‎‎‏‏‏‎ to create a new User with ‎‏‎‎‏‏‎<xliff:g id="ACCOUNT">%2$s</xliff:g>‎‏‎‎‏‏‏‎ (a User with this account already exists) ?‎‏‎‎‏‎"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‎‎‏‎‎‏‏‏‎‏‏‏‎‎‎‎‎‎‏‏‏‏‎‎‏‏‎‎‎‎‎‏‎‏‏‎‎‎‎‏‎‏‎‎‏‎‏‏‏‎‎‎Allow ‎‏‎‎‏‏‎<xliff:g id="APP">%1$s</xliff:g>‎‏‎‎‏‏‏‎ to create a new User with ‎‏‎‎‏‏‎<xliff:g id="ACCOUNT">%2$s</xliff:g>‎‏‎‎‏‏‏‎ ?‎‏‎‎‏‎"</string>
     <string name="language_selection_title" msgid="52674936078683285">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‎‏‎‏‏‏‎‏‏‎‎‏‎‎‎‏‏‏‎‎‏‎‎‏‏‎‏‎‎‎‏‎‏‏‎‎‎‏‎‎‏‎‏‎‎‏‏‎‎‏‎‎‏‎‏‎‏‎Add a language‎‏‎‎‏‎"</string>
