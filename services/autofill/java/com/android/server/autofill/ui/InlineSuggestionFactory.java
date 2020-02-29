@@ -70,6 +70,7 @@ public final class InlineSuggestionFactory {
      * Creates an {@link InlineSuggestionsResponse} with the {@code datasets} provided by the
      * autofill service, potentially filtering the datasets.
      */
+    @Nullable
     public static InlineSuggestionsResponse createInlineSuggestionsResponse(
             @NonNull InlineSuggestionsRequest request, @NonNull FillResponse response,
             @Nullable String filterText, @Nullable List<InlinePresentation> inlineActions,
@@ -92,23 +93,21 @@ public final class InlineSuggestionFactory {
             };
         }
 
-        final List<Dataset> datasetList = response.getDatasets();
-        final Dataset[] datasets = datasetList == null
-                ? null
-                : datasetList.toArray(new Dataset[]{});
         final InlinePresentation inlineAuthentication =
                 response.getAuthentication() == null ? null : response.getInlinePresentation();
         return createInlineSuggestionsResponseInternal(/* isAugmented= */ false, request,
-                datasets, filterText, inlineAuthentication, inlineActions, autofillId, context,
-                onErrorCallback, onClickFactory, remoteRenderService);
+                response.getDatasets(), filterText, inlineAuthentication, inlineActions, autofillId,
+                context, onErrorCallback, onClickFactory, remoteRenderService);
     }
 
     /**
      * Creates an {@link InlineSuggestionsResponse} with the {@code datasets} provided by augmented
      * autofill service.
      */
+    @Nullable
     public static InlineSuggestionsResponse createAugmentedInlineSuggestionsResponse(
-            @NonNull InlineSuggestionsRequest request, @NonNull Dataset[] datasets,
+            @NonNull InlineSuggestionsRequest request, @NonNull List<Dataset> datasets,
+            @Nullable List<InlinePresentation> inlineActions,
             @NonNull AutofillId autofillId, @NonNull Context context,
             @NonNull InlineSuggestionUiCallback inlineSuggestionUiCallback,
             @NonNull Runnable onErrorCallback,
@@ -116,14 +115,15 @@ public final class InlineSuggestionFactory {
         if (sDebug) Slog.d(TAG, "createAugmentedInlineSuggestionsResponse called");
         return createInlineSuggestionsResponseInternal(/* isAugmented= */ true, request,
                 datasets, /* filterText= */ null, /* inlineAuthentication= */ null,
-                /* inlineActions= */ null, autofillId, context, onErrorCallback,
+                inlineActions, autofillId, context, onErrorCallback,
                 (dataset, datasetIndex) ->
                         inlineSuggestionUiCallback.autofill(dataset), remoteRenderService);
     }
 
+    @Nullable
     private static InlineSuggestionsResponse createInlineSuggestionsResponseInternal(
             boolean isAugmented, @NonNull InlineSuggestionsRequest request,
-            @Nullable Dataset[] datasets, @Nullable String filterText,
+            @Nullable List<Dataset> datasets, @Nullable String filterText,
             @Nullable InlinePresentation inlineAuthentication,
             @Nullable List<InlinePresentation> inlineActions, @NonNull AutofillId autofillId,
             @NonNull Context context, @NonNull Runnable onErrorCallback,
@@ -145,8 +145,8 @@ public final class InlineSuggestionFactory {
             return null;
         }
 
-        for (int datasetIndex = 0; datasetIndex < datasets.length; datasetIndex++) {
-            final Dataset dataset = datasets[datasetIndex];
+        for (int datasetIndex = 0; datasetIndex < datasets.size(); datasetIndex++) {
+            final Dataset dataset = datasets.get(datasetIndex);
             final int fieldIndex = dataset.getFieldIds().indexOf(autofillId);
             if (fieldIndex < 0) {
                 Slog.w(TAG, "AutofillId=" + autofillId + " not found in dataset");
@@ -169,7 +169,8 @@ public final class InlineSuggestionFactory {
 
             inlineSuggestions.add(inlineSuggestion);
         }
-        if (inlineActions != null) {
+        // We should only add inline actions if there is at least one suggestion.
+        if (!inlineSuggestions.isEmpty() && inlineActions != null) {
             for (InlinePresentation inlinePresentation : inlineActions) {
                 final InlineSuggestion inlineAction = createInlineAction(isAugmented, context,
                         mergedInlinePresentation(request, 0, inlinePresentation),
