@@ -687,7 +687,7 @@ public abstract class IntentResolver<F, R extends Object> {
     }
 
     private final void remove_all_objects(ArrayMap<String, F[]> map, String name,
-            Object object) {
+            F object) {
         F[] array = map.get(name);
         if (array != null) {
             int LAST = array.length-1;
@@ -695,7 +695,8 @@ public abstract class IntentResolver<F, R extends Object> {
                 LAST--;
             }
             for (int idx=LAST; idx>=0; idx--) {
-                if (array[idx] == object) {
+                F arrayValue = array[idx];
+                if (arrayValue != null && getIntentFilter(arrayValue) == getIntentFilter(object)) {
                     final int remain = LAST - idx;
                     if (remain > 0) {
                         System.arraycopy(array, idx+1, array, idx, remain);
