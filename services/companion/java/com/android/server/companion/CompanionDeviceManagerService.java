@@ -369,10 +369,13 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             boolean bypassMacPermission = getContext().getPackageManager().checkPermission(
                     android.Manifest.permission.COMPANION_APPROVE_WIFI_CONNECTIONS, packageName)
                     == PackageManager.PERMISSION_GRANTED;
+            if (bypassMacPermission) {
+                return true;
+            }
 
             return CollectionUtils.any(
                     readAllAssociations(userId, packageName),
-                    a -> bypassMacPermission || Objects.equals(a.deviceAddress, macAddress));
+                    a -> Objects.equals(a.deviceAddress, macAddress));
         }
 
         private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {
