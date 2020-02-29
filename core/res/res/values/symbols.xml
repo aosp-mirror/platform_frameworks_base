@@ -3908,4 +3908,7 @@
   <java-symbol type="string" name="loading" />
 
   <java-symbol type="array" name="config_toastCrossUserPackages" />
+
+  <java-symbol type="string" name="notification_history_title_placeholder" />
+
 </resources>
