@@ -131,6 +131,61 @@ TEST(ProguardRulesTest, FragmentNameAndClassRulesAreEmitted) {
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Baz { <init>(); }"));
 }
 
+TEST(ProguardRulesTest, FragmentContainerViewNameRuleIsEmitted) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> layout = test::BuildXmlDom(R"(
+      <androidx.fragment.app.FragmentContainerView
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          android:name="com.foo.Bar"/>)");
+  layout->file.name = test::ParseNameOrDie("layout/foo");
+
+  proguard::KeepSet set;
+  ASSERT_TRUE(proguard::CollectProguardRules(context.get(), layout.get(), &set));
+
+  std::string actual = GetKeepSetString(set, /** minimal_rules */ false);
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+
+  actual = GetKeepSetString(set, /** minimal_rules */ true);
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(); }"));
+}
+
+TEST(ProguardRulesTest, FragmentContainerViewClassRuleIsEmitted) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> layout =
+      test::BuildXmlDom(R"(<androidx.fragment.app.FragmentContainerView class="com.foo.Bar"/>)");
+  layout->file.name = test::ParseNameOrDie("layout/foo");
+
+  proguard::KeepSet set;
+  ASSERT_TRUE(proguard::CollectProguardRules(context.get(), layout.get(), &set));
+
+  std::string actual = GetKeepSetString(set, /** minimal_rules */ false);
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+
+  actual = GetKeepSetString(set, /** minimal_rules */ true);
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(); }"));
+}
+
+TEST(ProguardRulesTest, FragmentContainerViewNameAndClassRulesAreEmitted) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> layout = test::BuildXmlDom(R"(
+      <androidx.fragment.app.FragmentContainerView
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          android:name="com.foo.Baz"
+          class="com.foo.Bar"/>)");
+  layout->file.name = test::ParseNameOrDie("layout/foo");
+
+  proguard::KeepSet set;
+  ASSERT_TRUE(proguard::CollectProguardRules(context.get(), layout.get(), &set));
+
+  std::string actual = GetKeepSetString(set, /** minimal_rules */ false);
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Baz { <init>(...); }"));
+
+  actual = GetKeepSetString(set, /** minimal_rules */ true);
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Baz { <init>(); }"));
+}
+
 TEST(ProguardRulesTest, NavigationFragmentNameAndClassRulesAreEmitted) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder()
       .SetCompilationPackage("com.base").Build();
