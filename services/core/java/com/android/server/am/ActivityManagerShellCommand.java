@@ -1710,6 +1710,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     private boolean switchUserAndWaitForComplete(int userId) throws RemoteException {
+        UserInfo currentUser = mInterface.getCurrentUser();
+        if (currentUser != null && userId == currentUser.id) {
+            // Already switched to the correct user, exit early.
+            return true;
+        }
+
         // Register switch observer.
         final CountDownLatch switchLatch = new CountDownLatch(1);
         mInterface.registerUserSwitchObserver(
@@ -1724,13 +1730,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         // Switch.
         boolean switched = mInterface.switchUser(userId);
+        if (!switched) {
+            // Switching failed, don't wait for the user switch observer.
+            return false;
+        }
 
         // Wait.
         try {
-            switchLatch.await(USER_OPERATION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            switched = switchLatch.await(USER_OPERATION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            getErrPrintWriter().println("Thread interrupted unexpectedly.");
+            getErrPrintWriter().println("Error: Thread interrupted unexpectedly.");
         }
+
         return switched;
     }
 
@@ -1762,7 +1773,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (switched) {
             return 0;
         } else {
-            pw.printf("Failed to switch to user %d\n", userId);
+            pw.printf("Error: Failed to switch to user %d\n", userId);
             return 1;
         }
     }
