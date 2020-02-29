@@ -1803,10 +1803,10 @@ public class WifiManagerTest {
      * {@link WifiManager#setMacRandomizationSettingPasspointEnabled(String, boolean)}
      */
     @Test
-    public void testSetMeteredOverridePasspoint() throws Exception {
+    public void testSetPasspointMeteredOverride() throws Exception {
         final String fqdn = "FullyQualifiedDomainName";
-        mWifiManager.setMeteredOverridePasspoint(fqdn, METERED_OVERRIDE_METERED);
-        verify(mWifiService).setMeteredOverridePasspoint(fqdn, METERED_OVERRIDE_METERED);
+        mWifiManager.setPasspointMeteredOverride(fqdn, METERED_OVERRIDE_METERED);
+        verify(mWifiService).setPasspointMeteredOverride(fqdn, METERED_OVERRIDE_METERED);
     }
 
     /**
