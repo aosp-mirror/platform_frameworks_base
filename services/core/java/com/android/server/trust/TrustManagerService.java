@@ -1389,7 +1389,8 @@ public class TrustManagerService extends SystemService {
             if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(action)) {
                 refreshAgentList(getSendingUserId());
                 updateDevicePolicyFeatures();
-            } else if (Intent.ACTION_USER_ADDED.equals(action)) {
+            } else if (Intent.ACTION_USER_ADDED.equals(action) || Intent.ACTION_USER_STARTED.equals(
+                    action)) {
                 int userId = getUserId(intent);
                 if (userId > 0) {
                     maybeEnableFactoryTrustAgents(mLockPatternUtils, userId);
@@ -1430,6 +1431,7 @@ public class TrustManagerService extends SystemService {
             filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
             filter.addAction(Intent.ACTION_USER_ADDED);
             filter.addAction(Intent.ACTION_USER_REMOVED);
+            filter.addAction(Intent.ACTION_USER_STARTED);
             context.registerReceiverAsUser(this,
                     UserHandle.ALL,
                     filter,
