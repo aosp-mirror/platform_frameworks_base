@@ -15,6 +15,9 @@
  */
 package com.android.utils.blob;
 
+import static com.android.utils.blob.Utils.BUFFER_SIZE_BYTES;
+import static com.android.utils.blob.Utils.copy;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.blob.BlobHandle;
@@ -23,22 +26,17 @@ import android.content.Context;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class DummyBlobData {
     private static final long DEFAULT_SIZE_BYTES = 10 * 1024L * 1024L;
-    private static final int BUFFER_SIZE_BYTES = 16 * 1024;
 
     private final Context mContext;
     private final Random mRandom;
@@ -83,7 +81,7 @@ public class DummyBlobData {
     }
 
     public BlobHandle getBlobHandle() throws Exception {
-        return BlobHandle.createWithSha256(createSha256Digest(mFile), mLabel,
+        return BlobHandle.createWithSha256(mFileDigest, mLabel,
                 mExpiryTimeMs, "test_tag");
     }
 
@@ -106,11 +104,7 @@ public class DummyBlobData {
     public void writeToSession(BlobStoreManager.Session session,
             long offsetBytes, long lengthBytes) throws Exception {
         try (FileInputStream in = new FileInputStream(mFile)) {
-            in.getChannel().position(offsetBytes);
-            try (FileOutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(
-                    session.openWrite(offsetBytes, lengthBytes))) {
-                copy(in, out, lengthBytes);
-            }
+            Utils.writeToSession(session, in, offsetBytes, lengthBytes);
         }
     }
 
@@ -123,16 +117,8 @@ public class DummyBlobData {
         }
     }
 
-    private void copy(InputStream in, OutputStream out, long lengthBytes) throws Exception {
-        final byte[] buffer = new byte[BUFFER_SIZE_BYTES];
-        long bytesWrittern = 0;
-        while (bytesWrittern < lengthBytes) {
-            final int toWrite = (bytesWrittern + buffer.length <= lengthBytes)
-                    ? buffer.length : (int) (lengthBytes - bytesWrittern);
-            in.read(buffer, 0, toWrite);
-            out.write(buffer, 0, toWrite);
-            bytesWrittern += toWrite;
-        }
+    public ParcelFileDescriptor openForRead() throws Exception {
+        return ParcelFileDescriptor.open(mFile, ParcelFileDescriptor.MODE_READ_ONLY);
     }
 
     public void readFromSessionAndVerifyBytes(BlobStoreManager.Session session,
@@ -194,19 +180,6 @@ public class DummyBlobData {
             toRead = in.read(buffer, 0, toRead);
             digest.update(buffer, 0, toRead);
             bytesRead += toRead;
-        }
-        return digest.digest();
-    }
-
-    private byte[] createSha256Digest(File file) throws Exception {
-        final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        try (BufferedInputStream in = new BufferedInputStream(
-                Files.newInputStream(file.toPath()))) {
-            final byte[] buffer = new byte[BUFFER_SIZE_BYTES];
-            int bytesRead;
-            while ((bytesRead = in.read(buffer)) > 0) {
-                digest.update(buffer, 0, bytesRead);
-            }
         }
         return digest.digest();
     }
