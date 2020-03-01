@@ -27,23 +27,18 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYST
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import static java.lang.Integer.min;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.Binder;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.Build;
 import android.os.UserHandle;
 import android.os.storage.StorageManagerInternal;
-import android.util.Log;
 
-import com.android.internal.compat.IPlatformCompat;
 import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
@@ -55,27 +50,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
  * {@link com.android.packageinstaller.permission.utils.SoftRestrictedPermissionPolicy}
  */
 public abstract class SoftRestrictedPermissionPolicy {
-    /**
-     * Enables scoped storage, with exceptions for apps that explicitly request legacy access, or
-     * apps that hold the {@code android.Manifest.permission#WRITE_MEDIA_STORAGE} permission.
-     * See https://developer.android.com/training/data-storage#scoped-storage for more information.
-     */
-    @ChangeId
-    // This change is enabled for apps with targetSDK > {@link android.os.Build.VERSION_CODES.P}
-    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.P)
-    static final long ENABLE_SCOPED_STORAGE = 144914977L;
-
-    /**
-     * Enforces scoped storage for all apps, preventing individual apps from opting out. This change
-     * has precedence over {@code ENABLE_SCOPED_STORAGE}.
-     */
-    @ChangeId
-    // This change is enabled for apps with targetSDK > {@link android.os.Build.VERSION_CODES.Q}.
-    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.Q)
-    static final long REQUIRE_SCOPED_STORAGE = 131432978L;
-
-    private static final String LOG_TAG = SoftRestrictedPermissionPolicy.class.getSimpleName();
-
     private static final int FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT =
             FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT
                     | FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT
@@ -88,6 +62,41 @@ public abstract class SoftRestrictedPermissionPolicy {
                     return true;
                 }
             };
+
+    /**
+     * TargetSDK is per package. To make sure two apps int the same shared UID do not fight over
+     * what to set, always compute the combined targetSDK.
+     *
+     * @param context A context
+     * @param appInfo The app that is changed
+     * @param user The user the app belongs to
+     *
+     * @return The minimum targetSDK of all apps sharing the uid of the app
+     */
+    private static int getMinimumTargetSDK(@NonNull Context context,
+            @NonNull ApplicationInfo appInfo, @NonNull UserHandle user) {
+        PackageManager pm = context.getPackageManager();
+
+        int minimumTargetSDK = appInfo.targetSdkVersion;
+
+        String[] uidPkgs = pm.getPackagesForUid(appInfo.uid);
+        if (uidPkgs != null) {
+            for (String uidPkg : uidPkgs) {
+                if (!uidPkg.equals(appInfo.packageName)) {
+                    ApplicationInfo uidPkgInfo;
+                    try {
+                        uidPkgInfo = pm.getApplicationInfoAsUser(uidPkg, 0, user);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        continue;
+                    }
+
+                    minimumTargetSDK = min(minimumTargetSDK, uidPkgInfo.targetSdkVersion);
+                }
+            }
+        }
+
+        return minimumTargetSDK;
+    }
 
     /**
      * Get the policy for a soft restricted permission.
@@ -109,10 +118,10 @@ public abstract class SoftRestrictedPermissionPolicy {
             case READ_EXTERNAL_STORAGE: {
                 final boolean isWhiteListed;
                 boolean shouldApplyRestriction;
+                final int targetSDK;
                 final boolean hasRequestedLegacyExternalStorage;
                 final boolean shouldPreserveLegacyExternalStorage;
                 final boolean hasWriteMediaStorageGrantedForUid;
-                final boolean isScopedStorageEnabled;
 
                 if (appInfo != null) {
                     PackageManager pm = context.getPackageManager();
@@ -124,22 +133,19 @@ public abstract class SoftRestrictedPermissionPolicy {
                             appInfo.uid, context);
                     hasWriteMediaStorageGrantedForUid = hasWriteMediaStorageGrantedForUid(
                             appInfo.uid, context);
-                    final boolean isScopedStorageRequired =
-                            isChangeEnabledForUid(context, appInfo, user, REQUIRE_SCOPED_STORAGE);
-                    isScopedStorageEnabled =
-                            isChangeEnabledForUid(context, appInfo, user, ENABLE_SCOPED_STORAGE)
-                            || isScopedStorageRequired;
                     shouldPreserveLegacyExternalStorage = pkg.hasPreserveLegacyExternalStorage()
                             && smInternal.hasLegacyExternalStorage(appInfo.uid);
+                    targetSDK = getMinimumTargetSDK(context, appInfo, user);
                     shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0
-                            || (isScopedStorageRequired && !shouldPreserveLegacyExternalStorage);
+                            || (targetSDK > Build.VERSION_CODES.Q
+                            && !shouldPreserveLegacyExternalStorage);
                 } else {
                     isWhiteListed = false;
                     shouldApplyRestriction = false;
+                    targetSDK = 0;
                     hasRequestedLegacyExternalStorage = false;
                     shouldPreserveLegacyExternalStorage = false;
                     hasWriteMediaStorageGrantedForUid = false;
-                    isScopedStorageEnabled = false;
                 }
 
                 // We have a check in PermissionPolicyService.PermissionToOpSynchroniser.setUidMode
@@ -149,7 +155,7 @@ public abstract class SoftRestrictedPermissionPolicy {
                 return new SoftRestrictedPermissionPolicy() {
                     @Override
                     public boolean mayGrantPermission() {
-                        return isWhiteListed || isScopedStorageEnabled;
+                        return isWhiteListed || targetSDK >= Build.VERSION_CODES.Q;
                     }
                     @Override
                     public int getExtraAppOpCode() {
@@ -157,7 +163,7 @@ public abstract class SoftRestrictedPermissionPolicy {
                     }
                     @Override
                     public boolean mayAllowExtraAppOp() {
-                        return !shouldApplyRestriction
+                        return !shouldApplyRestriction && targetSDK <= Build.VERSION_CODES.Q
                                 && (hasRequestedLegacyExternalStorage
                                         || hasWriteMediaStorageGrantedForUid
                                         || shouldPreserveLegacyExternalStorage);
@@ -170,87 +176,27 @@ public abstract class SoftRestrictedPermissionPolicy {
             }
             case WRITE_EXTERNAL_STORAGE: {
                 final boolean isWhiteListed;
-                final boolean isScopedStorageEnabled;
+                final int targetSDK;
 
                 if (appInfo != null) {
                     final int flags = context.getPackageManager().getPermissionFlags(permission,
                             appInfo.packageName, user);
                     isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
-                    final boolean isScopedStorageRequired =
-                            isChangeEnabledForUid(context, appInfo, user, REQUIRE_SCOPED_STORAGE);
-                    isScopedStorageEnabled =
-                            isChangeEnabledForUid(context, appInfo, user, ENABLE_SCOPED_STORAGE)
-                            || isScopedStorageRequired;
+                    targetSDK = getMinimumTargetSDK(context, appInfo, user);
                 } else {
                     isWhiteListed = false;
-                    isScopedStorageEnabled = false;
+                    targetSDK = 0;
                 }
 
                 return new SoftRestrictedPermissionPolicy() {
                     @Override
                     public boolean mayGrantPermission() {
-                        return isWhiteListed || isScopedStorageEnabled;
+                        return isWhiteListed || targetSDK >= Build.VERSION_CODES.Q;
                     }
                 };
             }
             default:
                 return DUMMY_POLICY;
-        }
-    }
-
-    /**
-     * Checks whether an AppCompat change is enabled for all packages sharing a UID with the
-     * provided application.
-     *
-     * @param context A context to use.
-     * @param appInfo The application for which to check whether the compat change is enabled.
-     * @param user The user the app belongs to.
-     * @param changeId A {@link android.compat.annotation.ChangeId} corresponding to the change.
-     *
-     * @return true if this change is enabled for all apps sharing the UID of the provided app,
-     *         false otherwise.
-     */
-    private static boolean isChangeEnabledForUid(@NonNull Context context,
-            @NonNull ApplicationInfo appInfo, @NonNull UserHandle user, long changeId) {
-        PackageManager pm = context.getPackageManager();
-
-        String[] uidPackages = pm.getPackagesForUid(appInfo.uid);
-        if (uidPackages != null) {
-            for (String uidPackage : uidPackages) {
-                ApplicationInfo uidPackageInfo;
-                try {
-                    uidPackageInfo = pm.getApplicationInfoAsUser(uidPackage, 0, user);
-                } catch (PackageManager.NameNotFoundException e) {
-                    continue;
-                }
-                if (!isChangeEnabled(uidPackageInfo, changeId)) {
-                    // At least one package sharing this UID does not have this change enabled.
-                    return false;
-                }
-            }
-            // All packages sharing this UID returned true for {@link #isChangeEnabled()}.
-            return true;
-        } else {
-            Log.w(LOG_TAG, "Check for change " + changeId + " for uid " + appInfo.uid
-                    + " produced no packages. Defaulting to using the information for "
-                    + appInfo.packageName + " only.");
-            return isChangeEnabled(appInfo, changeId);
-        }
-    }
-
-    private static boolean isChangeEnabled(@NonNull ApplicationInfo appInfo, long changeId) {
-        IBinder binder = ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
-        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(binder);
-
-        final long callingId = Binder.clearCallingIdentity();
-
-        try {
-            return platformCompat.isChangeEnabled(changeId, appInfo);
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Check for change " + changeId + " failed. Defaulting to enabled.", e);
-            return true;
-        } finally {
-            Binder.restoreCallingIdentity(callingId);
         }
     }
 
