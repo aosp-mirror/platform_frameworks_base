@@ -193,6 +193,10 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organisasi mengelola perangkat ini dan mungkin memantau traffic jaringan. Ketuk untuk melihat detailnya."</string>
     <string name="location_changed_notification_title" msgid="4119726617105166830">"Setelan lokasi diubah oleh admin Anda"</string>
     <string name="location_changed_notification_text" msgid="198907268219396399">"Ketuk untuk melihat setelan lokasi Anda."</string>
+    <string name="country_detector" msgid="7023275114706088854">"Pendeteksi Negara"</string>
+    <string name="location_service" msgid="2439187616018455546">"Layanan Lokasi"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"Layanan Notifikasi Sensor"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"Layanan Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Perangkat akan dihapus"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Aplikasi admin tidak dapat digunakan. Perangkat Anda kini akan dihapus.\n\nJika ada pertanyaan, hubungi admin organisasi."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Fitur pencetakan dinonaktifkan oleh <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -245,6 +249,10 @@
       <item quantity="other">Mengambil screenshot untuk laporan bug dalam <xliff:g id="NUMBER_1">%d</xliff:g> detik.</item>
       <item quantity="one">Mengambil screenshot untuk laporan bug dalam <xliff:g id="NUMBER_0">%d</xliff:g> detik.</item>
     </plurals>
+    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
+    <skip />
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Mode senyap"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Suara MATI"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Suara AKTIF"</string>
@@ -546,8 +554,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Coba lagi."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Tidak ada sidik jari yang terdaftar."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Perangkat ini tidak memiliki sensor sidik jari."</string>
-    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor dinonaktifkan untuk sementara."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Jari <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -591,8 +598,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Tidak dapat memverifikasi wajah. Coba lagi."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Anda belum menyiapkan face unlock."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Face unlock tidak didukung di perangkat ini."</string>
-    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
-    <skip />
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor dinonaktifkan untuk sementara."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> wajah"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1318,6 +1324,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"Proses debug USB terhubung"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Ketuk untuk menonaktifkan proses debug USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Pilih untuk menonaktifkan debugging USB."</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Proses debug nirkabel terhubung"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Ketuk untuk menonaktifkan proses debug nirkabel."</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Pilih untuk menonaktifkan proses debug nirkabel."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Mode Tes Otomatis diaktifkan"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Lakukan reset ke setelan pabrik untuk menonaktifkan Mode Tes Otomatis."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Konsol serial diaktifkan"</string>
@@ -1621,8 +1630,7 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Layanan latar depan yang dimulai oleh latar belakang dari <xliff:g id="PACKAGENAME">%1$s</xliff:g> tidak akan memiliki izin saat-sedang-digunakan pada build R masa mendatang Lihat go/r-bg-fgs-restriction dan kirim laporan bug."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Mengeraskan volume di atas tingkat yang disarankan?\n\nMendengarkan dengan volume keras dalam waktu yang lama dapat merusak pendengaran Anda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Aksesibilitas?"</string>
-    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
-    <skip />
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit pintasan"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Batal"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Nonaktifkan Pintasan"</string>
@@ -1845,6 +1853,8 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Belum dikategorikan"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Anda menyetel nilai penting notifikasi ini."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Ini penting karena orang-orang yang terlibat."</string>
+    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
+    <skip />
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> (Pengguna dengan akun ini sudah ada) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Tambahkan bahasa"</string>
@@ -2018,20 +2028,14 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> telah dimasukkan ke dalam bucket DIBATASI"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Pribadi"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Kerja"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
-    <skip />
-    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
-    <skip />
-    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Tidak dapat membagikan ke aplikasi kerja"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Tidak dapat membagikan ke aplikasi pribadi"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Admin IT memblokir berbagi antara aplikasi kerja dan pribadi"</string>
+    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Aktifkan aplikasi kerja"</string>
+    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Aktifkan aplikasi kerja untuk mengakses aplikasi kerja &amp; kontak"</string>
+    <string name="resolver_no_apps_available" msgid="7710339903040989654">"Tidak ada aplikasi yang tersedia"</string>
+    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Kami tidak menemukan aplikasi"</string>
+    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Aktifkan profil kerja"</string>
+    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Rekam atau putar audio dalam panggilan telepon"</string>
+    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Mengizinkan aplikasi ini, saat ditetapkan sebagai aplikasi telepon default, untuk merekam atau memutar audio dalam panggilan telepon."</string>
 </resources>
