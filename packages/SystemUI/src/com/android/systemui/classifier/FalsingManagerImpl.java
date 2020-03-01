@@ -16,6 +16,7 @@
 
 package com.android.systemui.classifier;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
@@ -295,6 +296,10 @@ public class FalsingManagerImpl implements FalsingManager {
                         .toString(), here);
                 mHandler.postDelayed(mPendingWtf, 1000);
             }
+        }
+        if (ActivityManager.isRunningInUserTestHarness()) {
+            // This is a test device running UiAutomator code.
+            return false;
         }
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
             // Touch exploration triggers false positives in the classifier and
