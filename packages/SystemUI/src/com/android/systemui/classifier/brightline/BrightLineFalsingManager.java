@@ -19,6 +19,7 @@ package com.android.systemui.classifier.brightline;
 import static com.android.systemui.classifier.FalsingManagerImpl.FALSING_REMAIN_LOCKED;
 import static com.android.systemui.classifier.FalsingManagerImpl.FALSING_SUCCESS;
 
+import android.app.ActivityManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.net.Uri;
 import android.os.Build;
@@ -190,8 +191,8 @@ public class BrightLineFalsingManager implements FalsingManager {
             return mPreviousResult;
         }
 
-        mPreviousResult = !mJustUnlockedWithFace && !mDockManager.isDocked()
-                && mClassifiers.stream().anyMatch(falsingClassifier -> {
+        mPreviousResult = !ActivityManager.isRunningInUserTestHarness() && !mJustUnlockedWithFace
+                && !mDockManager.isDocked() && mClassifiers.stream().anyMatch(falsingClassifier -> {
                     boolean result = falsingClassifier.isFalseTouch();
                     if (result) {
                         logInfo(String.format(
