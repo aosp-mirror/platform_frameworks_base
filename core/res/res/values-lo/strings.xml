@@ -193,14 +193,10 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ອົງກອນຂອງທ່ານຈັດການອຸປະກອນນີ້ ແລະ ອາດກວດສອບທຣາບຟິກເຄືອຂ່າຍນຳ. ແຕະເພື່ອເບິ່ງລາຍລະອຽດ."</string>
     <string name="location_changed_notification_title" msgid="4119726617105166830">"ຜູ້ເບິ່ງແຍງຂອງທ່ານປ່ຽນການຕັ້ງຄ່າສະຖານທີ່ແລ້ວ"</string>
     <string name="location_changed_notification_text" msgid="198907268219396399">"ແຕະເພື່ອເບິ່ງການຕັ້ງຄ່າສະຖານທີ່ຂອງທ່ານ."</string>
-    <!-- no translation found for country_detector (7023275114706088854) -->
-    <skip />
-    <!-- no translation found for location_service (2439187616018455546) -->
-    <skip />
-    <!-- no translation found for sensor_notification_service (7474531979178682676) -->
-    <skip />
-    <!-- no translation found for twilight_service (8964898045693187224) -->
-    <skip />
+    <string name="country_detector" msgid="7023275114706088854">"ຕົວກວດຫາປະເທດ"</string>
+    <string name="location_service" msgid="2439187616018455546">"​ບໍ​ລິ​ການ​ສະ​ຖານ​ທີ່"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"ບໍລິການການແຈ້ງເຕືອນເຊັນເຊີ"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"ບໍລິການ Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"ບໍ່ສາມາດໃຊ້ແອັບຜູ້ເບິ່ງແຍງລະບົບໄດ້. ອຸປະກອນຂອງທ່ານຈະຖືກລຶບຂໍ້ມູນໃນຕອນນີ້.\n\nຫາກທ່ານມີຄຳຖາມ, ໃຫ້ຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບອົງກອນຂອງທ່ານ."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ການພິມຖືກປິດໄວ້ໂດຍ <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -253,6 +249,10 @@
       <item quantity="other">ກຳລັງຈະຖ່າຍພາບໜ້າຈໍສຳລັບການລາຍງານຂໍ້ຜິດພາດໃນ <xliff:g id="NUMBER_1">%d</xliff:g> ວິນາທີ.</item>
       <item quantity="one">ກຳລັງຈະຖ່າຍພາບໜ້າຈໍສຳລັບການລາຍງານຂໍ້ຜິດພາດໃນ <xliff:g id="NUMBER_0">%d</xliff:g> ວິນາທີ.</item>
     </plurals>
+    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
+    <skip />
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ໂໝດປິດສຽງ"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ປິດສຽງແລ້ວ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ເປິດສຽງແລ້ວ"</string>
@@ -420,11 +420,14 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"ເຂົ້າເຖິງຄຳສັ່ງຜູ່ໃຫ້ບໍລິການພິກັດສະຖານທີ່"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"ອະນຸຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າເຖິງ​ຄຳສັ່ງ​ເພີ່ມເຕີມ​ຂອງ​ຜູ່​ໃຫ້​ບໍລິການ​ສະຖານທີ່. ນີ້​ອາດ​ຈະ​ເປັນ​ການ​ເຮັດ​ໃຫ້​ແອັບຯ ລົບກວນ​ການ​ເຮັດ​ວຽກ​ຂອງ GPS ຫຼື​ແຫລ່ງ​ຂໍ້ມູນ​ສະຖານທີ່​ອື່ນໆ​ໄດ້."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ເຂົ້າເຖິງສະຖານທີ່ແນ່ນອນໃນພື້ນໜ້າເທົ່ານັ້ນ"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"ແອັບນີ້ສາມາດຮັບເອົາສະຖານທີ່ແນ່ນອນຂອງທ່ານໄດ້ທຸກເວລາທີ່ມັນຢູ່ໃນພື້ນໜ້າ. ການບໍລິການສະຖານທີ່ຕ້ອງເປີດຢູ່ ແລະ ສາມາດໃຊ້ໄດ້ໃນອຸປະກອນຂອງທ່ານເພື່ອໃຫ້ແອັບສາມາດໃຊ້ພວກມັນໄດ້. ນີ້ອາດຈະເຮັດໃຫ້ການໃຊ້ແບັດເຕີຣີເພີ່ມຂຶ້ນ."</string>
+    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"ເຂົ້າເຖິງສະຖານທີ່ໂດຍປະມານເມື່ອຢູ່ໃນພື້ນໜ້າເທົ່ານັ້ນ"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"ແອັບນີ້ສາມາດລະບຸສະຖານທີ່ໂດຍປະມານການຂອງທ່ານໄດ້ສະເພາະເມື່ອມັນຢູ່ໃນພື້ນຫຼັງເທົ່ານັ້ນ. ຈະຕ້ອງເປີດໃຊ້ບໍລິການສະຖານທີ່ ແລະ ໃຊ້ໄດ້ຢູ່ລົດຂອງທ່ານເພື່ອໃຫ້ແອັບສາມາດໃຊ້ພວກມັນໄດ້."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
+    <skip />
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"ເຂົ້າເຖິງສະຖານທີ່ໃນພື້ນຫຼັງ"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"ແອັບນີ້ສາມາດເຂົ້າເຖິງສະຖານທີ່ໃນເວລາເຮັດວຽກໃນພື້ນຫຼັງ, ນອກເໜືອໄປຈາກການເຂົ້າເຖິງສະຖານທີ່ໃນພື້ນໜ້າ."</string>
+    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ປ່ຽນການຕັ້ງຄ່າສຽງຂອງທ່ານ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂການຕັ້ງຄ່າສຽງສ່ວນກາງ ເຊັ່ນ: ລະດັບສຽງ ແລະລຳໂພງໃດທີ່ຖືກໃຊ້ສົ່ງສຽງອອກ."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ບັນທຶກສຽງ"</string>
@@ -1853,6 +1856,8 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ບໍ່​ມີ​ໝວດ​ໝູ່"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ທ່ານຕັ້ງຄວາມສຳຄັນຂອງການແຈ້ງເຕືອນເຫຼົ່ານີ້."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ຂໍ້ຄວາມນີ້ສຳຄັນເນື່ອງຈາກບຸກຄົນທີ່ກ່ຽວຂ້ອງ."</string>
+    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
+    <skip />
     <string name="user_creation_account_exists" msgid="2239146360099708035">"ອະນຸຍາດໃຫ້ <xliff:g id="APP">%1$s</xliff:g> ສ້າງຜູ້ໃຊ້ໃໝ່ກັບ <xliff:g id="ACCOUNT">%2$s</xliff:g> ໄດ້ບໍ່ (ມີຜູ້ໃຊ້ທີ່ໃຊ້ບັນຊີນີ້ຢູ່ກ່ອນແລ້ວ) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"ອະນຸຍາດໃຫ້ <xliff:g id="APP">%1$s</xliff:g> ສ້າງຜູ້ໃຊ້ໃໝ່ກັບ <xliff:g id="ACCOUNT">%2$s</xliff:g> ໄດ້ບໍ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ເພີ່ມພາສາ"</string>

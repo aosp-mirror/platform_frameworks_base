@@ -193,14 +193,10 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Shirika lako linadhibiti kifaa hiki na huenda likafuatilia shughuli kwenye mtandao. Gusa ili upate maelezo zaidi."</string>
     <string name="location_changed_notification_title" msgid="4119726617105166830">"Mipangilio ya mahali imebadilishwa na msimamizi wako"</string>
     <string name="location_changed_notification_text" msgid="198907268219396399">"Gusa ili uone mipangilio ya mahali ulipo."</string>
-    <!-- no translation found for country_detector (7023275114706088854) -->
-    <skip />
-    <!-- no translation found for location_service (2439187616018455546) -->
-    <skip />
-    <!-- no translation found for sensor_notification_service (7474531979178682676) -->
-    <skip />
-    <!-- no translation found for twilight_service (8964898045693187224) -->
-    <skip />
+    <string name="country_detector" msgid="7023275114706088854">"Kitambuzi cha Nchi"</string>
+    <string name="location_service" msgid="2439187616018455546">"Huduma ya Mahali"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"Huduma ya Arifa ya Kitambuzi"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Data iliyomo kwenye kifaa chako itafutwa"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Huwezi kutumia programu ya msimamizi. Sasa data iliyo kwenye kifaa chako itafutwa.\n\nIkiwa una maswali yoyote, wasiliana na msimamizi wa shirika lako."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Kipengele cha kuchapisha kimezimwa na <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -253,6 +249,10 @@
       <item quantity="other">Inapiga picha ya skrini ili iripoti hitilafu baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>.</item>
       <item quantity="one">Inapiga picha ya skrini ili iripoti hitilafu baada ya sekunde <xliff:g id="NUMBER_0">%d</xliff:g>.</item>
     </plurals>
+    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
+    <skip />
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Mtindo wa kimya"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Sauti Imezimwa"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Sauti imewashwa"</string>
@@ -420,11 +420,14 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"fikia amri za ziada za mtoa huduma ya mahali"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Ruhusu programu kufikia amri za ziada za mtoa huduma za mahali. Hii huenda ikaruhusu programu ikatize matumizi ya GPS au vyanzo vingine vya eneo."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"kufikia mahali mahususi ikiwa tu programu imefunguliwa kwenye skrini"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"Programu hii inaweza kupata mahali halisi ikiwa tu umeifungua kwenye skrini. Ni lazima uwashe huduma za mahali na zipatikane kwenye kifaa chako ili programu iweze kuzitumia. Hatua hii inaweza kuongeza matumizi ya betri."</string>
+    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"kufikia mahali palipokadiriwa ikiwa tu programu imefunguliwa kwenye skrini"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"Programu hii inaweza kukadiria mahali ulipo ikiwa tu umeifungua kwenye skrini. Ni lazima huduma za mahali ziwashwe na zipatikane kwenye kifaa chako ili programu iweze kuzitumia."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
+    <skip />
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"ifikie mahali inapotumika chinichini"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"Programu hii inaweza kufikia maelezo ya mahali inapotumika chinichini, pamoja na ufikiaji wa mahali wakati umeifungua kwenye skrini."</string>
+    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"badilisha mipangilio yako ya sauti"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Inaruhusu programu kurekebisha mipangilio ya sauti kila mahali kama vile sauti na ni kipaza sauti kipi ambacho kinatumika kwa kutoa."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"kurekodi sauti"</string>
@@ -1853,6 +1856,8 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Ambazo aina haijabainishwa"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Uliweka mipangilio ya umuhimu wa arifa hizi."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Hii ni muhimu kwa sababu ya watu waliohusika."</string>
+    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
+    <skip />
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Ruhusu <xliff:g id="APP">%1$s</xliff:g> iweke Mtumiaji mpya ikitumia <xliff:g id="ACCOUNT">%2$s</xliff:g> (Je, tayari kuna mtumiaji anayetumia akaunti hii)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Ungependa kuruhusu <xliff:g id="APP">%1$s</xliff:g> iweke Mtumiaji mpya ikitumia <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Ongeza lugha"</string>
@@ -1925,7 +1930,7 @@
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Ungependa kusasisha <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> katika "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Ungependa kusasisha vipengee hivi katika "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> na <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Hifadhi"</string>
-    <string name="autofill_save_no" msgid="9212826374207023544">"Hapana, asante"</string>
+    <string name="autofill_save_no" msgid="9212826374207023544">"Hapana"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Si sasa"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"Kamwe"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Sasisha"</string>

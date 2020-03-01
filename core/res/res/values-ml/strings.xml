@@ -191,18 +191,12 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"വ്യക്തിപരമായ ഉപയോഗത്തിനായി, ഉപകരണത്തിന്റെ ഔദ്യോഗിക ഉപയോഗം അഡ്‌മിൻ അവസാനിപ്പിച്ചു"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ഉപകരണം മാനേജുചെയ്യുന്നുണ്ട്"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"നിങ്ങളുടെ സ്ഥാപനമാണ് ഈ ഉപകരണം മാനേജുചെയ്യുന്നത്, നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
-    <!-- no translation found for location_changed_notification_title (4119726617105166830) -->
-    <skip />
-    <!-- no translation found for location_changed_notification_text (198907268219396399) -->
-    <skip />
-    <!-- no translation found for country_detector (7023275114706088854) -->
-    <skip />
-    <!-- no translation found for location_service (2439187616018455546) -->
-    <skip />
-    <!-- no translation found for sensor_notification_service (7474531979178682676) -->
-    <skip />
-    <!-- no translation found for twilight_service (8964898045693187224) -->
-    <skip />
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"നിങ്ങളുടെ അഡ്‌മിൻ ലൊക്കേഷൻ ക്രമീകരണം മാറ്റി"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"നിങ്ങളുടെ ലൊക്കേഷൻ ക്രമീകരണം കാണാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="country_detector" msgid="7023275114706088854">"രാജ്യം കണ്ടെത്താനുള്ള സംവിധാനം"</string>
+    <string name="location_service" msgid="2439187616018455546">"ലൊക്കേഷൻ സേവനം"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"സെൻസർ അറിയിപ്പ് സേവനം"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"സന്ധ്യാസമയത്തെ സേവനം"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"അഡ്‌മിൻ ആപ്പ് ഉപയോഗിക്കാനാകില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ മായ്ക്കപ്പെടും.\n\nനിങ്ങൾക്ക് ചോദ്യങ്ങൾ ഉണ്ടെങ്കിൽ, നിങ്ങളുടെ സ്ഥാപനത്തിന്റെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> പ്രിന്റിംഗ് പ്രവർത്തനരഹിതമാക്കി."</string>
@@ -255,6 +249,10 @@
       <item quantity="other">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
       <item quantity="one">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_0">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
     </plurals>
+    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
+    <skip />
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"നിശബ്‌ദ മോഡ്"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ശബ്‌ദം ഓഫാണ്"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ശബ്‌ദം ഓണാണ്"</string>
@@ -422,11 +420,14 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"ലൊക്കേഷൻ ദാതാവിന്റെ അധിക കമാൻഡുകൾ ആക്‌സസ്സുചെയ്യുക"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"ലൊക്കേഷൻ ദാതാവിന്റെ അധിക കമാൻഡുകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് GPS-ന്റെയോ മറ്റ് ലൊക്കേഷൻ ഉറവിടങ്ങളുടെയോ പ്രവർത്തനത്തിൽ ഇടപെടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ഫോർഗ്രൗണ്ടിൽ മാത്രം കൃത്യമായ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യുക"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"ഫോർഗ്രൗണ്ടിൽ ഉള്ളപ്പോൾ മാത്രമേ ഈ ആപ്പിന് നിങ്ങളുടെ കൃത്യമായ ലൊക്കേഷൻ ലഭിക്കൂ. ഈ ആപ്പിന് ലൊക്കേഷൻ സേവനങ്ങൾ ഉപയോഗിക്കാൻ കഴിയണമെങ്കിൽ, അവ നിങ്ങളുടെ ഉപകരണത്തിൽ ലഭ്യമായിരിക്കുകയും ഓണായിരിക്കുകയും വേണം. ഇത് ബാറ്ററി ഉപഭോഗം വർദ്ധിപ്പിച്ചേക്കാം."</string>
+    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"ഫോർഗ്രൗണ്ടിൽ മാത്രം ഏകദേശ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യുക"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"ഫോർഗ്രൗണ്ടിൽ ഉള്ളപ്പോൾ മാത്രമേ ഈ ആപ്പിന് നിങ്ങളുടെ ഏകദേശ ലൊക്കേഷൻ ലഭിക്കൂ. ഈ ആപ്പിന് ലൊക്കേഷൻ സേവനങ്ങൾ ഉപയോഗിക്കാൻ കഴിയണമെങ്കിൽ, അവ നിങ്ങളുടെ ഉപകരണത്തിൽ ലഭ്യമായിരിക്കുകയും ഓണായിരിക്കുകയും വേണം."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
+    <skip />
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"പശ്ചാത്തലത്തിൽ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യുക"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"പശ്ചാത്തലത്തിൽ പ്രവർത്തിക്കുമ്പോൾ, ഫോർഗ്രൗണ്ട് ലൊക്കേഷന് പുറമെ, ലൊക്കേഷൻ ആക്സസ് ചെയ്യാനും ഈ ആപ്പിന് കഴിയും."</string>
+    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"നിങ്ങളുടെ ഓഡിയോ ക്രമീകരണങ്ങൾ മാറ്റുക"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"വോളിയവും ഔട്ട്പുട്ടിനായി ഉപയോഗിച്ച സ്‌പീക്കറും പോലുള്ള ആഗോള ഓഡിയോ ക്രമീകരണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
@@ -441,8 +442,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"സിസ്‌റ്റം ക്യാമറ ഉപയോഗിച്ച് ഏത് സമയത്തും ചിത്രങ്ങളെടുക്കാനും വീഡിയോകൾ റെക്കോർഡ് ചെയ്യാനും ഈ വിശേഷാധികാര | സിസ്‌റ്റം ആപ്പിന് കഴിയും. ആപ്പിലും android.permission.CAMERA അനുമതി ഉണ്ടായിരിക്കണം"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"വൈബ്രേറ്റുചെയ്യൽ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"വൈബ്രേറ്റർ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <!-- no translation found for permdesc_vibrator_state (7050024956594170724) -->
-    <skip />
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"വൈബ്രേറ്റ് ചെയ്യൽ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ഫോൺ നമ്പറുകളിലേക്ക് നേരിട്ട് വിളിക്കുക"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"നിങ്ങളുടെ ഇടപെടൽ ഇല്ലാതെ ഫോൺ നമ്പറുകളിലേക്ക് കോൾ ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് അപ്രതീക്ഷിത നിരക്കുകൾക്കോ കോളുകൾക്കോ ഇടയാക്കാം. ഇത് അടിയന്തര നമ്പറുകളിലേക്ക് വിളിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കില്ലെന്ന കാര്യം ശ്രദ്ധിക്കുക. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ കോളുകൾ ചെയ്യുന്നത് പണച്ചെലവിനിടയാക്കാം."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS കോൾ സേവനം ആക്സസ് ചെയ്യുക"</string>
@@ -1327,12 +1327,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB ഡീബഗ്ഗിംഗ് കണക്റ്റ് ചെയ്തു"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ഡീബഗ്ഗിംഗ് ഓഫാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ഡീബഗ്ഗുചെയ്യൽ പ്രവർത്തനരഹിതമാക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
-    <!-- no translation found for adbwifi_active_notification_title (6147343659168302473) -->
-    <skip />
-    <!-- no translation found for adbwifi_active_notification_message (930987922852867972) -->
-    <skip />
-    <!-- no translation found for adbwifi_active_notification_message (8633421848366915478) -->
-    <skip />
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"വയർലെസ് ഡീബഗ്ഗ് ചെയ്യൽ കണക്റ്റ് ചെയ്തിരിക്കുന്നു"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"വയർലെസ് ഡീബഗ്ഗ് ചെയ്യൽ ഓഫാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"വയർലെസ് ഡീബഗ്ഗ് ചെയ്യൽ പ്രവർത്തനരഹിതമാക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"പരിശോധനാ സംവിധാനങ്ങൾ മോഡ് പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"പരിശോധനാ സംവിധാന മോഡ് പ്രവർത്തനരഹിതമാക്കാൻ ഫാക്‌ടറി പുനഃക്രമീകരണം നിർവഹിക്കുക."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"സീരിയൽ കൺസോൾ പ്രവർത്തനക്ഷമമാക്കി"</string>
@@ -1859,6 +1856,8 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"വർഗ്ഗീകരിച്ചിട്ടില്ലാത്ത"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ഈ അറിയിപ്പുകളുടെ പ്രാധാന്യം നിങ്ങൾ സജ്ജീകരിച്ചു."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ഉൾപ്പെട്ടിട്ടുള്ള ആളുകളെ കണക്കിലെടുക്കുമ്പോള്‍ ഇത് പ്രധാനപ്പെട്ടതാണ്‌."</string>
+    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
+    <skip />
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> എന്ന അക്കൗണ്ട് (ഈ അക്കൗണ്ട് ഉപയോഗിക്കുന്ന ഒരു ഉപയോക്താവ് നിലവിലുണ്ട്) ഉപയോഗിച്ച് പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാൻ <xliff:g id="APP">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> എന്ന അക്കൗണ്ട് ഉപയോഗിച്ച് പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാൻ <xliff:g id="APP">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ഒരു ഭാഷ ചേർക്കുക"</string>
@@ -2040,8 +2039,6 @@
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"ആപ്പുകളൊന്നും ലഭ്യമല്ല"</string>
     <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"ഞങ്ങൾക്ക് ആപ്പുകളൊന്നും കണ്ടെത്താൻ കഴിഞ്ഞില്ല"</string>
     <string name="resolver_switch_on_work" msgid="8294542702883688533">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുക"</string>
-    <!-- no translation found for permlab_accessCallAudio (1682957511874097664) -->
-    <skip />
-    <!-- no translation found for permdesc_accessCallAudio (8448360894684277823) -->
-    <skip />
+    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യുക അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യുക"</string>
+    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ഡിഫോൾട്ട് ഡയലർ ആപ്പായി അസെെൻ ചെയ്യുന്ന സമയത്ത്, ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യാൻ അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യാൻ ഈ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
 </resources>
