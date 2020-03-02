@@ -9439,6 +9439,8 @@ package android.telephony {
     field public static final String ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED = "com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED";
     field public static final String ACTION_CARRIER_SIGNAL_RESET = "com.android.internal.telephony.CARRIER_SIGNAL_RESET";
     field public static final String ACTION_EMERGENCY_ASSISTANCE = "android.telephony.action.EMERGENCY_ASSISTANCE";
+    field public static final String ACTION_EMERGENCY_CALLBACK_MODE_CHANGED = "android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED";
+    field public static final String ACTION_EMERGENCY_CALL_STATE_CHANGED = "android.intent.action.EMERGENCY_CALL_STATE_CHANGED";
     field public static final String ACTION_SERVICE_PROVIDERS_UPDATED = "android.telephony.action.SERVICE_PROVIDERS_UPDATED";
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
@@ -9475,6 +9477,8 @@ package android.telephony {
     field public static final String EXTRA_ERROR_CODE = "errorCode";
     field public static final String EXTRA_PCO_ID = "pcoId";
     field public static final String EXTRA_PCO_VALUE = "pcoValue";
+    field public static final String EXTRA_PHONE_IN_ECM_STATE = "android.telephony.extra.PHONE_IN_ECM_STATE";
+    field public static final String EXTRA_PHONE_IN_EMERGENCY_CALL = "android.telephony.extra.PHONE_IN_EMERGENCY_CALL";
     field public static final String EXTRA_PLMN = "android.telephony.extra.PLMN";
     field public static final String EXTRA_REDIRECTION_URL = "redirectionUrl";
     field public static final String EXTRA_SHOW_PLMN = "android.telephony.extra.SHOW_PLMN";

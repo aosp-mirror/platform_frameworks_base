@@ -104,9 +104,6 @@ public class PhoneConstants {
     public static final String DATA_APN_TYPE_KEY = "apnType";
     public static final String DATA_APN_KEY = "apn";
 
-    public static final String PHONE_IN_ECM_STATE = "phoneinECMState";
-    public static final String PHONE_IN_EMERGENCY_CALL = "phoneInEmergencyCall";
-
     /**
      * Return codes for supplyPinReturnResult and
      * supplyPukReturnResult APIs
