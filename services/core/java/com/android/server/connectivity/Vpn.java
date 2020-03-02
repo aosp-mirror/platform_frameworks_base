@@ -52,7 +52,6 @@ import android.net.Ikev2VpnProfile;
 import android.net.IpPrefix;
 import android.net.IpSecManager;
 import android.net.IpSecManager.IpSecTunnelInterface;
-import android.net.IpSecManager.UdpEncapsulationSocket;
 import android.net.IpSecTransform;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -2197,7 +2196,6 @@ public class Vpn {
         /** Signal to ensure shutdown is honored even if a new Network is connected. */
         private boolean mIsRunning = true;
 
-        @Nullable private UdpEncapsulationSocket mEncapSocket;
         @Nullable private IpSecTunnelInterface mTunnelIface;
         @Nullable private IkeSession mSession;
         @Nullable private Network mActiveNetwork;
@@ -2348,12 +2346,8 @@ public class Vpn {
                     resetIkeState();
                     mActiveNetwork = network;
 
-                    // TODO(b/149356682): Update this based on new IKE API
-                    mEncapSocket = mIpSecManager.openUdpEncapsulationSocket();
-
-                    // TODO(b/149356682): Update this based on new IKE API
                     final IkeSessionParams ikeSessionParams =
-                            VpnIkev2Utils.buildIkeSessionParams(mProfile, mEncapSocket);
+                            VpnIkev2Utils.buildIkeSessionParams(mContext, mProfile, network);
                     final ChildSessionParams childSessionParams =
                             VpnIkev2Utils.buildChildSessionParams();
 
@@ -2365,11 +2359,6 @@ public class Vpn {
                                     ikeSessionParams.getServerAddress() /* unused */,
                                     network);
                     mNetd.setInterfaceUp(mTunnelIface.getInterfaceName());
-
-                    // Socket must be bound to prevent network switches from causing
-                    // the IKE teardown to fail/timeout.
-                    // TODO(b/149356682): Update this based on new IKE API
-                    network.bindSocket(mEncapSocket.getFileDescriptor());
 
                     mSession = mIkev2SessionCreator.createIkeSession(
                             mContext,
@@ -2454,16 +2443,6 @@ public class Vpn {
             if (mSession != null) {
                 mSession.kill(); // Kill here to make sure all resources are released immediately
                 mSession = null;
-            }
-
-            // TODO(b/149356682): Update this based on new IKE API
-            if (mEncapSocket != null) {
-                try {
-                    mEncapSocket.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "Failed to close encap socket", e);
-                }
-                mEncapSocket = null;
             }
         }
 
