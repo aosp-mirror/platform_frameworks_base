@@ -16,6 +16,10 @@
 
 package com.android.settingslib.testutils.shadow;
 
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_ALL;
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_AUDIO;
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_PHONE_CALL;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -60,5 +64,27 @@ public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBlueto
 
     public void setMostRecentlyConnectedDevices(List<BluetoothDevice> list) {
         mMostRecentlyConnectedDevices = list;
+    }
+
+    @Implementation
+    protected boolean removeActiveDevice(@BluetoothAdapter.ActiveDeviceUse int profiles) {
+        if (profiles != ACTIVE_DEVICE_AUDIO && profiles != ACTIVE_DEVICE_PHONE_CALL
+                && profiles != ACTIVE_DEVICE_ALL) {
+            return false;
+        }
+        return true;
+    }
+
+    @Implementation
+    protected boolean setActiveDevice(BluetoothDevice device,
+            @BluetoothAdapter.ActiveDeviceUse int profiles) {
+        if (device == null) {
+            return false;
+        }
+        if (profiles != ACTIVE_DEVICE_AUDIO && profiles != ACTIVE_DEVICE_PHONE_CALL
+                && profiles != ACTIVE_DEVICE_ALL) {
+            return false;
+        }
+        return true;
     }
 }
