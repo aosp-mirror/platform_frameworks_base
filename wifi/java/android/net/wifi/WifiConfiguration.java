@@ -2554,6 +2554,8 @@ public class WifiConfiguration implements Parcelable {
             key = SSID + KeyMgmt.strings[KeyMgmt.WAPI_PSK];
         } else if (allowedKeyManagement.get(KeyMgmt.WAPI_CERT)) {
             key = SSID + KeyMgmt.strings[KeyMgmt.WAPI_CERT];
+        } else if (allowedKeyManagement.get(KeyMgmt.OSEN)) {
+            key = SSID + KeyMgmt.strings[KeyMgmt.OSEN];
         } else {
             key = SSID + KeyMgmt.strings[KeyMgmt.NONE];
         }
