@@ -40,6 +40,8 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OpEventProxyInfo;
+import static android.app.AppOpsManager.SAMPLING_STRATEGY_RARELY_USED;
+import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
@@ -60,8 +62,6 @@ import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
-import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
-import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM;
 
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
@@ -5683,7 +5683,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (mRarelyUsedPackages.contains(packageName)) {
             mRarelyUsedPackages.remove(packageName);
             if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
-                mSamplingStrategy = RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
+                mSamplingStrategy = SAMPLING_STRATEGY_RARELY_USED;
                 resampleAppOpForPackageLocked(packageName);
             }
         }
@@ -5692,7 +5692,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     /** Resamples package and appop to watch from the list provided. */
     private void resamplePackageAndAppOpLocked(@NonNull List<String> packageNames) {
         if (!packageNames.isEmpty()) {
-            mSamplingStrategy = RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM;
+            mSamplingStrategy = SAMPLING_STRATEGY_UNIFORM;
             resampleAppOpForPackageLocked(packageNames.get(
                     ThreadLocalRandom.current().nextInt(packageNames.size())));
         }
