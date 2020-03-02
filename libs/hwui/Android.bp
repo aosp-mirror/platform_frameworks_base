@@ -153,6 +153,107 @@ cc_defaults {
 }
 
 // ------------------------
+// framework-graphics jar
+// ------------------------
+
+java_library {
+    name: "framework-graphics",
+
+    srcs: [
+        ":framework-graphics-srcs",
+    ],
+
+    permitted_packages: [
+        "android.graphics",
+    ],
+
+    sdk_version: "module_current",
+
+    // TODO: once framework-graphics is officially part of the
+    // UI-rendering module this line would no longer be
+    // needed.
+    installable: true,
+
+    // Enable detection of apis used by this module
+    plugins: ["java_api_finder",],
+}
+
+filegroup {
+    name: "framework-graphics-srcs",
+    srcs: [
+        "apex/java/**/*.java",
+    ],
+    path: "apex/java"
+}
+
+stubs_defaults {
+    name: "framework-graphics-stubs-srcs-defaults",
+    srcs: [ ":framework-graphics-srcs"],
+}
+
+droidstubs {
+    name: "framework-graphics-api-module_libs_api",
+    defaults: [
+        "framework-graphics-stubs-srcs-defaults",
+        "framework-module-api-defaults-module_libs_api",
+    ],
+}
+
+droidstubs {
+    name: "framework-graphics-stubs-srcs-module_libs_api",
+    defaults: [
+        "framework-graphics-stubs-srcs-defaults",
+        "framework-module-stubs-defaults-module_libs_api",
+    ],
+}
+
+droidstubs {
+    name: "framework-graphics-stubs-srcs-publicapi",
+    defaults: [
+        "framework-graphics-stubs-srcs-defaults",
+        "framework-module-stubs-defaults-publicapi",
+    ],
+}
+
+droidstubs {
+    name: "framework-graphics-stubs-srcs-systemapi",
+    defaults: [
+        "framework-graphics-stubs-srcs-defaults",
+        "framework-module-stubs-defaults-systemapi",
+    ],
+}
+
+java_library {
+    name: "framework-graphics-stubs-module_libs_api",
+    srcs: [":framework-graphics-stubs-srcs-module_libs_api"],
+    sdk_version: "system_current",
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/libs/hwui", // UI-rendering module
+    ],
+}
+
+java_library {
+    name: "framework-graphics-stubs-publicapi",
+    srcs: [":framework-graphics-stubs-srcs-publicapi"],
+    sdk_version: "current",
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/libs/hwui", // UI-rendering module
+    ],
+}
+
+java_library {
+    name: "framework-graphics-stubs-systemapi",
+    srcs: [":framework-graphics-stubs-srcs-systemapi"],
+    sdk_version: "system_current",
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/libs/hwui", // UI-rendering module
+    ],
+}
+
+// ------------------------
 // APEX
 // ------------------------
 
