@@ -124,6 +124,24 @@ final class ApkSigningBlockUtils {
         }
     }
 
+    static boolean isSupportedSignatureAlgorithm(int sigAlgorithm) {
+        switch (sigAlgorithm) {
+            case SIGNATURE_RSA_PSS_WITH_SHA256:
+            case SIGNATURE_RSA_PSS_WITH_SHA512:
+            case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA256:
+            case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA512:
+            case SIGNATURE_ECDSA_WITH_SHA256:
+            case SIGNATURE_ECDSA_WITH_SHA512:
+            case SIGNATURE_DSA_WITH_SHA256:
+            case SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256:
+            case SIGNATURE_VERITY_ECDSA_WITH_SHA256:
+            case SIGNATURE_VERITY_DSA_WITH_SHA256:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private static void verifyIntegrityFor1MbChunkBasedAlgorithm(
             Map<Integer, byte[]> expectedDigests,
             FileDescriptor apkFileDescriptor,
