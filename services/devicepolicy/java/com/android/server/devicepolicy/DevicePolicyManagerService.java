@@ -6549,13 +6549,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             // Or ensure calling process is delegatePackage itself.
             } else {
-                int uid = 0;
-                try {
-                  uid = mInjector.getPackageManager()
-                          .getPackageUidAsUser(delegatePackage, userId);
-                } catch(NameNotFoundException e) {
-                }
-                if (uid != callingUid) {
+                if (!isCallingFromPackage(delegatePackage, callingUid)) {
                     throw new SecurityException("Caller with uid " + callingUid + " is not "
                             + delegatePackage);
                 }
@@ -6675,15 +6669,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final List<String> scopes = policy.mDelegationMap.get(callerPackage);
             // Check callingUid only if callerPackage has the required scope delegation.
             if (scopes != null && scopes.contains(scope)) {
-                try {
-                    // Retrieve the expected UID for callerPackage.
-                    final int uid = mInjector.getPackageManager()
-                            .getPackageUidAsUser(callerPackage, userId);
-                    // Return true if the caller is actually callerPackage.
-                    return uid == callerUid;
-                } catch (NameNotFoundException e) {
-                    // Ignore.
-                }
+                // Return true if the caller is actually callerPackage.
+                return isCallingFromPackage(callerPackage, callerUid);
             }
             return false;
         }
@@ -8575,14 +8562,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void clearDeviceOwner(String packageName) {
         Objects.requireNonNull(packageName, "packageName is null");
         final int callingUid = mInjector.binderGetCallingUid();
-        try {
-            int uid = mInjector.getPackageManager().getPackageUidAsUser(packageName,
-                    UserHandle.getUserId(callingUid));
-            if (uid != callingUid) {
-                throw new SecurityException("Invalid packageName");
-            }
-        } catch (NameNotFoundException e) {
-            throw new SecurityException(e);
+        if (!isCallingFromPackage(packageName, callingUid)) {
+            throw new SecurityException("Invalid packageName");
         }
         synchronized (getLockObject()) {
             final ComponentName deviceOwnerComponent = mOwners.getDeviceOwnerComponent();
@@ -12297,14 +12278,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (ownerPackage == null) {
                     ownerPackage = mOwners.getDeviceOwnerPackageName();
                 }
+                final String packageName = ownerPackage;
                 PackageManager pm = mInjector.getPackageManager();
-                PackageInfo packageInfo;
-                try {
-                    packageInfo = pm.getPackageInfo(ownerPackage, 0);
-                } catch (NameNotFoundException e) {
-                    Log.e(LOG_TAG, "getPackageInfo error", e);
-                    return null;
-                }
+                PackageInfo packageInfo = mInjector.binderWithCleanCallingIdentity(() -> {
+                    try {
+                        return pm.getPackageInfo(packageName, 0);
+                    } catch (NameNotFoundException e) {
+                        Log.e(LOG_TAG, "getPackageInfo error", e);
+                        return null;
+                    }
+                });
                 if (packageInfo == null) {
                     Log.e(LOG_TAG, "packageInfo is inexplicably null");
                     return null;
@@ -12869,13 +12852,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     boolean isPackageInstalledForUser(String packageName, int userHandle) {
-        try {
-            PackageInfo pi = mInjector.getIPackageManager().getPackageInfo(packageName, 0,
-                    userHandle);
-            return (pi != null) && (pi.applicationInfo.flags != 0);
-        } catch (RemoteException re) {
-            throw new RuntimeException("Package manager has died", re);
-        }
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            try {
+                PackageInfo pi = mInjector.getIPackageManager().getPackageInfo(packageName, 0,
+                        userHandle);
+                return (pi != null) && (pi.applicationInfo.flags != 0);
+            } catch (RemoteException re) {
+                throw new RuntimeException("Package manager has died", re);
+            }
+        });
     }
 
     public boolean isRuntimePermission(String permissionName) throws NameNotFoundException {
@@ -13940,13 +13925,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             mPackagesToRemove.remove(packageUserPair);
         }
-        try {
-            if (mInjector.getIPackageManager().getPackageInfo(packageName, 0, userId) == null) {
-                // Package does not exist. Nothing to do.
-                return;
-            }
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Failure talking to PackageManager while getting package info");
+        if (!isPackageInstalledForUser(packageName, userId)) {
+            // Package does not exist. Nothing to do.
+            return;
         }
 
         try { // force stop the package before uninstalling
@@ -15534,14 +15515,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean isCallingFromPackage(String packageName, int callingUid) {
-        try {
-            final int packageUid = mInjector.getPackageManager().getPackageUidAsUser(
-                    packageName, UserHandle.getUserId(callingUid));
-            return packageUid == callingUid;
-        } catch (NameNotFoundException e) {
-            Log.d(LOG_TAG, "Calling package not found", e);
-            return false;
-        }
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            try {
+                final int packageUid = mInjector.getPackageManager().getPackageUidAsUser(
+                        packageName, UserHandle.getUserId(callingUid));
+                return packageUid == callingUid;
+            } catch (NameNotFoundException e) {
+                Log.d(LOG_TAG, "Calling package not found", e);
+                return false;
+            }
+        });
     }
 
     private DevicePolicyConstants loadConstants() {
