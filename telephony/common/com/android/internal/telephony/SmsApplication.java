@@ -1057,7 +1057,8 @@ public final class SmsApplication {
     }
 
     /**
-     * Check if a package is default sms app (or equivalent, like bluetooth)
+     * Check if a package is default sms app (or equivalent, like bluetooth), and verify that
+     * packageName belongs to the caller.
      *
      * @param context context from the calling app
      * @param packageName the name of the package to be checked
@@ -1066,8 +1067,22 @@ public final class SmsApplication {
     @UnsupportedAppUsage
     public static boolean isDefaultSmsApplication(Context context, String packageName) {
         if (packageName == null) {
+            Log.e(LOG_TAG, "isDefaultSmsApplication: packageName is null");
             return false;
         }
+        try {
+            if (Binder.getCallingUid()
+                    == context.getPackageManager().getPackageUid(packageName, 0)) {
+                Log.e(LOG_TAG, "isDefaultSmsApplication: " + packageName + " calling uid "
+                        + context.getPackageManager().getPackageUid(packageName, 0)
+                        + " does not match calling uid " + Binder.getCallingUid());
+                return false;
+            }
+        } catch (NameNotFoundException ex) {
+            Log.e(LOG_TAG, "isDefaultSmsApplication: packageName " + packageName + " not found");
+            return false;
+        }
+
         final String defaultSmsPackage = getDefaultSmsApplicationPackageName(context);
         if ((defaultSmsPackage != null && defaultSmsPackage.equals(packageName))
                 || BLUETOOTH_PACKAGE_NAME.equals(packageName)) {
