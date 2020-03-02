@@ -40,6 +40,7 @@ import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.XmlRes;
+import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
@@ -58,9 +59,11 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pools.SynchronizedPool;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -100,6 +103,12 @@ import java.util.List;
  * resources&mdash;enables you to optimize your application for a variety of device configurations
  * (such as for different languages and screen sizes). This is an important aspect of developing
  * Android applications that are compatible on different types of devices.</p>
+ *
+ * <p>After {@link Build.VERSION_CODES#R}, {@link Resources} must be obtained by
+ * {@link android.app.Activity} or {@link android.content.Context} created with
+ * {@link android.content.Context#createWindowContext(int, Bundle)}.
+ * {@link Application#getResources()} may report wrong values in multi-window or on secondary
+ * displays.
  *
  * <p>For more information about using resources, see the documentation about <a
  * href="{@docRoot}guide/topics/resources/index.html">Application Resources</a>.</p>
@@ -2024,10 +2033,20 @@ public class Resources {
     }
 
     /**
-     * Return the current display metrics that are in effect for this resource 
-     * object.  The returned object should be treated as read-only.
-     * 
-     * @return The resource's current display metrics. 
+     * Return the current display metrics that are in effect for this resource
+     * object. The returned object should be treated as read-only.
+     *
+     * <p>Note that the reported value may be different than the window this application is
+     * interested in.</p>
+     *
+     * <p>Best practices are to obtain metrics from {@link WindowManager#getCurrentWindowMetrics()}
+     * for window bounds, {@link Display#getRealMetrics(DisplayMetrics)} for display bounds and
+     * obtain density from {@link Configuration#densityDpi}. The value obtained from this API may be
+     * wrong if the {@link Resources} is from the context which is different than the window is
+     * attached such as {@link Application#getResources()}.
+     * <p/>
+     *
+     * @return The resource's current display metrics.
      */
     public DisplayMetrics getDisplayMetrics() {
         return mResourcesImpl.getDisplayMetrics();
