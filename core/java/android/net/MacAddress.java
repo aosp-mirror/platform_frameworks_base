@@ -20,11 +20,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.net.util.MacAddressUtils;
 import android.net.wifi.WifiInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.BitUtils;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -33,7 +33,6 @@ import java.net.Inet6Address;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Random;
 
 /**
  * Representation of a MAC address.
@@ -109,18 +108,10 @@ public final class MacAddress implements Parcelable {
         if (equals(BROADCAST_ADDRESS)) {
             return TYPE_BROADCAST;
         }
-        if (isMulticastAddress()) {
+        if ((mAddr & MULTICAST_MASK) != 0) {
             return TYPE_MULTICAST;
         }
         return TYPE_UNICAST;
-    }
-
-    /**
-     * @return true if this MacAddress is a multicast address.
-     * @hide
-     */
-    public boolean isMulticastAddress() {
-        return (mAddr & MULTICAST_MASK) != 0;
     }
 
     /**
@@ -192,7 +183,7 @@ public final class MacAddress implements Parcelable {
      * @hide
      */
     public static boolean isMacAddress(byte[] addr) {
-        return addr != null && addr.length == ETHER_ADDR_LEN;
+        return MacAddressUtils.isMacAddress(addr);
     }
 
     /**
@@ -261,26 +252,11 @@ public final class MacAddress implements Parcelable {
     }
 
     private static byte[] byteAddrFromLongAddr(long addr) {
-        byte[] bytes = new byte[ETHER_ADDR_LEN];
-        int index = ETHER_ADDR_LEN;
-        while (index-- > 0) {
-            bytes[index] = (byte) addr;
-            addr = addr >> 8;
-        }
-        return bytes;
+        return MacAddressUtils.byteAddrFromLongAddr(addr);
     }
 
     private static long longAddrFromByteAddr(byte[] addr) {
-        Preconditions.checkNotNull(addr);
-        if (!isMacAddress(addr)) {
-            throw new IllegalArgumentException(
-                    Arrays.toString(addr) + " was not a valid MAC address");
-        }
-        long longAddr = 0;
-        for (byte b : addr) {
-            longAddr = (longAddr << 8) + BitUtils.uint8(b);
-        }
-        return longAddr;
+        return MacAddressUtils.longAddrFromByteAddr(addr);
     }
 
     // Internal conversion function equivalent to longAddrFromByteAddr(byteAddrFromStringAddr(addr))
@@ -350,50 +326,7 @@ public final class MacAddress implements Parcelable {
      * @hide
      */
     public static @NonNull MacAddress createRandomUnicastAddressWithGoogleBase() {
-        return createRandomUnicastAddress(BASE_GOOGLE_MAC, new SecureRandom());
-    }
-
-    /**
-     * Returns a generated MAC address whose 46 bits, excluding the locally assigned bit and the
-     * unicast bit, are randomly selected.
-     *
-     * The locally assigned bit is always set to 1. The multicast bit is always set to 0.
-     *
-     * @return a random locally assigned, unicast MacAddress.
-     *
-     * @hide
-     */
-    public static @NonNull MacAddress createRandomUnicastAddress() {
-        return createRandomUnicastAddress(null, new SecureRandom());
-    }
-
-    /**
-     * Returns a randomly generated MAC address using the given Random object and the same
-     * OUI values as the given MacAddress.
-     *
-     * The locally assigned bit is always set to 1. The multicast bit is always set to 0.
-     *
-     * @param base a base MacAddress whose OUI is used for generating the random address.
-     *             If base == null then the OUI will also be randomized.
-     * @param r a standard Java Random object used for generating the random address.
-     * @return a random locally assigned MacAddress.
-     *
-     * @hide
-     */
-    public static @NonNull MacAddress createRandomUnicastAddress(MacAddress base, Random r) {
-        long addr;
-        if (base == null) {
-            addr = r.nextLong() & VALID_LONG_MASK;
-        } else {
-            addr = (base.mAddr & OUI_MASK) | (NIC_MASK & r.nextLong());
-        }
-        addr |= LOCALLY_ASSIGNED_MASK;
-        addr &= ~MULTICAST_MASK;
-        MacAddress mac = new MacAddress(addr);
-        if (mac.equals(DEFAULT_MAC_ADDRESS)) {
-            return createRandomUnicastAddress(base, r);
-        }
-        return mac;
+        return MacAddressUtils.createRandomUnicastAddress(BASE_GOOGLE_MAC, new SecureRandom());
     }
 
     // Convenience function for working around the lack of byte literals.

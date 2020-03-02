@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
+import android.net.util.MacAddressUtils;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
 import android.os.Parcel;
@@ -62,7 +63,8 @@ public class WifiConfigurationTest {
         config.updateIdentifier = "1234";
         config.fromWifiNetworkSpecifier = true;
         config.fromWifiNetworkSuggestion = true;
-        MacAddress macBeforeParcel = config.getOrCreateRandomizedMacAddress();
+        config.setRandomizedMacAddress(MacAddressUtils.createRandomUnicastAddress());
+        MacAddress macBeforeParcel = config.getRandomizedMacAddress();
         Parcel parcelW = Parcel.obtain();
         config.writeToParcel(parcelW, 0);
         byte[] bytes = parcelW.marshall();
@@ -75,7 +77,7 @@ public class WifiConfigurationTest {
 
         // lacking a useful config.equals, check two fields near the end.
         assertEquals(cookie, reconfig.getMoTree());
-        assertEquals(macBeforeParcel, reconfig.getOrCreateRandomizedMacAddress());
+        assertEquals(macBeforeParcel, reconfig.getRandomizedMacAddress());
         assertEquals(config.updateIdentifier, reconfig.updateIdentifier);
         assertFalse(reconfig.trusted);
         assertTrue(config.fromWifiNetworkSpecifier);
@@ -211,7 +213,7 @@ public class WifiConfigurationTest {
         MacAddress defaultMac = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
         assertEquals(defaultMac, config.getRandomizedMacAddress());
 
-        MacAddress macToChangeInto = MacAddress.createRandomUnicastAddress();
+        MacAddress macToChangeInto = MacAddressUtils.createRandomUnicastAddress();
         config.setRandomizedMacAddress(macToChangeInto);
         MacAddress macAfterChange = config.getRandomizedMacAddress();
 
