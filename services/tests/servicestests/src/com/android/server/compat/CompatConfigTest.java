@@ -212,6 +212,17 @@ public class CompatConfigTest {
     }
 
     @Test
+    public void testLoggingOnlyChangePreventAddOverride() throws Exception {
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addLoggingOnlyChangeWithId(1234L)
+                .build();
+
+        assertThrows(SecurityException.class,
+                () -> compatConfig.addOverride(1234L, "com.some.package", true)
+        );
+    }
+
+    @Test
     public void testPreventRemoveOverride() throws Exception {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addDisabledChangeWithId(1234L)
