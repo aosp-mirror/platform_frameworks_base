@@ -25,12 +25,16 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.TYPE_INTERNAL;
+import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
 import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
+import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
@@ -1430,6 +1434,7 @@ public class DisplayPolicy {
      */
     void simulateLayoutDisplay(DisplayFrames displayFrames, InsetsState insetsState, int uiMode) {
         displayFrames.onBeginLayout();
+        updateInsetsStateForDisplayCutout(displayFrames, insetsState);
         insetsState.setDisplayFrame(displayFrames.mUnrestricted);
         final WindowFrames simulatedWindowFrames = new WindowFrames();
         if (mNavigationBar != null) {
@@ -1458,6 +1463,8 @@ public class DisplayPolicy {
      */
     public void beginLayoutLw(DisplayFrames displayFrames, int uiMode) {
         displayFrames.onBeginLayout();
+        updateInsetsStateForDisplayCutout(displayFrames,
+                mDisplayContent.getInsetsStateController().getRawInsetsState());
         mSystemGestures.screenWidth = displayFrames.mUnrestricted.width();
         mSystemGestures.screenHeight = displayFrames.mUnrestricted.height();
 
@@ -1522,6 +1529,23 @@ public class DisplayPolicy {
         mLastNavTranslucent = navTranslucent;
         mLastNavAllowedHidden = navAllowedHidden;
         mLastNotificationShadeForcesShowingNavigation = notificationShadeForcesShowingNavigation;
+    }
+
+    private static void updateInsetsStateForDisplayCutout(DisplayFrames displayFrames,
+            InsetsState state) {
+        if (displayFrames.mDisplayCutout.getDisplayCutout().isEmpty()) {
+            state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);
+            return;
+        }
+        final Rect u = displayFrames.mUnrestricted;
+        final Rect s = displayFrames.mDisplayCutoutSafe;
+        state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(u.left, u.top, s.left, u.bottom);
+        state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(u.left, u.top, u.right, s.top);
+        state.getSource(ITYPE_RIGHT_DISPLAY_CUTOUT).setFrame(s.right, u.top, u.right, u.bottom);
+        state.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(u.left, s.bottom, u.right, u.bottom);
     }
 
     /** Enforces the last layout policy for display frames. */
