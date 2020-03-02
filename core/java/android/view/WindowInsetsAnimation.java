@@ -264,6 +264,11 @@ public final class WindowInsetsAnimation {
                     WindowInsets.insetInsets(
                             mUpperBound, insets.left, insets.top, insets.right, insets.bottom));
         }
+
+        @Override
+        public String toString() {
+            return "Bounds{lower=" + mLowerBound + " upper=" + mUpperBound + "}";
+        }
     }
 
     /**
