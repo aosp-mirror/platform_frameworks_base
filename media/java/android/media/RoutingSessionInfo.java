@@ -369,7 +369,6 @@ public final class RoutingSessionInfo implements Parcelable {
         Bundle mControlHints;
         boolean mIsSystemSession;
 
-        //TODO: Remove this.
         /**
          * Constructor for builder to create {@link RoutingSessionInfo}.
          * <p>
