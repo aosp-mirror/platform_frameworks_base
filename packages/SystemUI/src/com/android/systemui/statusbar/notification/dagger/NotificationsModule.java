@@ -43,8 +43,6 @@ import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
-import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -146,22 +144,13 @@ public interface NotificationsModule {
             @UiBackground Executor uiBgExecutor,
             NotificationEntryManager entryManager,
             StatusBarStateController statusBarStateController,
-            NotificationLogger.ExpansionStateLogger expansionStateLogger,
-            NotificationPanelLogger notificationPanelLogger) {
+            NotificationLogger.ExpansionStateLogger expansionStateLogger) {
         return new NotificationLogger(
                 notificationListener,
                 uiBgExecutor,
                 entryManager,
                 statusBarStateController,
-                expansionStateLogger,
-                notificationPanelLogger);
-    }
-
-    /** Provides an instance of {@link NotificationPanelLogger} */
-    @Singleton
-    @Provides
-    static NotificationPanelLogger provideNotificationPanelLogger() {
-        return new NotificationPanelLoggerImpl();
+                expansionStateLogger);
     }
 
     /** Provides an instance of {@link NotificationBlockingHelperManager} */
