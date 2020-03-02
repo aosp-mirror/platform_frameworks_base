@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"अनुमती द्या"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB डीबग करण्‍यास अनुमती नाही"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"सध्‍या या डीव्हाइसमध्‍ये साइन इन केलेला वापरकर्ता USB डीबग करणे चालू करू शकत नाही. हे वैशिष्‍ट्य वापरण्‍यासाठी, प्राथमिक वापरकर्त्‍यावर स्विच करा."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"या नेटवर्कवर वायरलेस डीबगिंग करण्याला अनुमती द्यायची का?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्कचे नाव (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nवाय-फाय ॲड्रेस (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"या नेटवर्कवर नेहमी अनुमती द्या"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"अनुमती द्या"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"वायरलेस डीबगिंग करण्याला अनुमती नाही"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"सध्‍या या डिव्हाइसमध्‍ये साइन इन केलेला वापरकर्ता वायरलेस डीबगिंग सुरू करू शकत नाही. हे वैशिष्‍ट्य वापरण्‍यासाठी प्राथमिक वापरकर्त्‍यावर स्विच करा."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB पोर्ट बंद करा"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"तुमच्या डिव्हाइसला ओलावा किंवा धूळीपासून संरक्षित करण्यासाठी, USB पोर्ट बंद आहे आणि अ‍ॅक्सेसरी डिटेक्ट करणार नाही. \n\n तुम्हाला USB पोर्ट पुन्हा वापरणे ठीक आहे तेव्हा सूचित केले जाईल."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"चार्जर आणि अ‍ॅक्सेसरी शोधण्यासाठी USB पोर्ट सुरू केलेले आहे"</string>
@@ -82,11 +88,11 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"अ‍ॅप किंवा आपल्या संस्थेद्वारे स्क्रीनशॉट घेण्याची अनुमती नाही"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रेकॉर्डर"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रेकॉर्ड सत्रासाठी सुरू असलेली सूचना"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"रेकॉर्डिंग सुरू करायची आहे का?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"रेकॉर्डिंग सुरू करायचे आहे का?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"रेकॉर्डिंग करताना, Android सिस्टम तुमच्या स्क्रीनवर दिसणारी किंवा तुमच्या डिव्हाइसवर प्ले केलेली कोणतीही संवेदनशील माहिती कॅप्चर करू शकते. यात पासवर्ड, पेमेंट माहिती, फोटो, मेसेज आणि ऑडिओचा समावेश आहे."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ऑडिओ रेकॉर्ड करा"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिव्हाइस ऑडिओ"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तुमच्या डिव्हाइसवरील आवाज जसे संगीत, कॉल आणि रिंगटोन"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तुमच्या डिव्हाइसवरील आवाज जसे की, संगीत, कॉल आणि रिंगटोन"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"मायक्रोफोन"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"डिव्हाइस ऑडिओ आणि मायक्रोफोन"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"सुरू"</string>
@@ -105,7 +111,7 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"स्क्रीन रेकॉर्डिंग हटवले"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रीन रेकॉर्डिंग हटवताना एरर आली"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"परवानग्या मिळवता आल्या नाहीत"</string>
-    <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रीन रेकॉर्डिंग सुरू एरर आली"</string>
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रीन रेकॉर्डिंग सुरू करताना एरर आली"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"USB फाईल स्थानांतरण पर्याय"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"मीडिया प्लेअर म्हणून माउंट करा (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"कॅमेरा म्हणून माउंट करा (PTP)"</string>
@@ -488,6 +494,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"व्यवस्थापित करा"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"सायलंट सूचना"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"लक्ष वेधून घेणाऱ्या सूचना"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"संभाषणे"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"सर्व सायलंट सूचना साफ करा"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"व्यत्यय आणून नकाद्वारे सूचना थांबवल्या"</string>
@@ -686,10 +693,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"आवाज किंवा व्हायब्रेशनशिवाय तुम्हाला लक्ष केंद्रित करण्यास मदत करते."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"आवाज किंवा व्हायब्रेशनने तुमचे लक्ष वेधून घेते."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"या आशयाच्या फ्लोटिंग शॉर्टकटसह तुमचे लक्ष केंद्रित करते."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"अलीकडील कोणतेही बबल नाहीत"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"अलीकडील बबल आणि डिसमिस केलेले बबल येथे दिसतील."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी केलेल्या सूचना"</string>
@@ -713,7 +718,7 @@
     <string name="inline_undo" msgid="9026953267645116526">"पहिल्यासारखे करा"</string>
     <string name="demote" msgid="6225813324237153980">"ही सूचना संभाषण नाही म्हणून खूण करा"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"महत्त्वाचे संभाषण"</string>
-    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"महत्वाचे संभाषण नाही"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"महत्त्वाचे संभाषण नाही"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"शांत केले"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"सूचना देत आहे"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"बबल दाखवा"</string>
@@ -974,6 +979,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"तळाशी डावीकडे हलवा"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"तळाशी उजवीकडे हलवा"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"डिसमिस करा"</string>
+    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेव्हिगेशन अपडेट केले. बदल करण्यासाठी, सेटिंग्जवर जा."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेव्हिगेशन अपडेट करण्यासाठी सेटिंग्जवर जा"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टँडबाय"</string>
@@ -983,16 +994,12 @@
     <string name="quick_controls_title" msgid="525285759614231333">"क्विक नियंत्रणे"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"नियंत्रणे जोडा"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"ज्यामधून नियंत्रणे जोडायची आहेत ते ॲप निवडा"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> सध्याचे आवडते.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> सध्याचे आवडते.</item>
-    </plurals>
+    <!-- no translation found for controls_number_of_favorites (1057347832073807380) -->
     <string name="controls_favorite_default_title" msgid="967742178688938137">"नियंत्रणे"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"झटपट अ‍ॅक्सेससाठी नियंत्रणे निवडा"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"आवडते"</string>
+    <string name="controls_favorite_header_all" msgid="7507855973418969992">"सर्व"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"सर्व नियंत्रणांची सूची लोड करता आली नाही."</string>
+    <!-- no translation found for controls_favorite_other_zone_header (9089613266575525252) -->
     <skip />
 </resources>

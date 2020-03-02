@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"允许"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"不允许使用 USB 调试功能"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"目前已登录此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为主要用户的帐号。"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"要在此网络上允许无线调试吗？"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"网络名称 (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWLAN 地址 (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"在此网络上始终允许"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"允许"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"不允许使用无线调试功能"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"目前已登录此设备的用户无法开启无线调试功能。要使用此功能，请切换为主要用户的帐号。"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB 端口已停用"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"为避免液体或碎屑导致您的设备受损，系统已停用 USB 端口，因此目前无法检测任何配件。\n\n系统会在重新允许使用 USB 端口时通知您。"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB 端口已启用，可检测充电器和配件"</string>
@@ -488,6 +494,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"历史记录"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"无声通知"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"提醒通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"对话"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有无声通知"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"勿扰模式暂停的通知"</string>
@@ -686,10 +693,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"不会发出提示音或振动，可帮助您保持专注。"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"通过提示音或振动吸引您的注意。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"通过可链接到这项内容的浮动快捷方式吸引您的注意。"</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近没有气泡"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"此处会显示最近的气泡和已关闭的气泡。"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"无法修改这些通知。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"您无法在此处配置这组通知"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
@@ -974,6 +979,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"移至左下角"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"移至右下角"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"关闭"</string>
+    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系统导航已更新。要进行更改，请转到“设置”。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"转到“设置”即可更新系统导航"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待机"</string>
@@ -983,16 +994,14 @@
     <string name="quick_controls_title" msgid="525285759614231333">"快速控制"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"添加控件"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"选择要添加的控件来自哪个应用"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other">当前有 <xliff:g id="NUMBER_1">%s</xliff:g> 项收藏。</item>
-      <item quantity="one">当前有 <xliff:g id="NUMBER_0">%s</xliff:g> 项收藏。</item>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other">已添加 <xliff:g id="NUMBER_1">%s</xliff:g> 个控件。</item>
+      <item quantity="one">已添加 <xliff:g id="NUMBER_0">%s</xliff:g> 个控件。</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控件"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"选择用于快速访问的控件"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"收藏"</string>
+    <string name="controls_favorite_header_all" msgid="7507855973418969992">"全部"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"无法加载所有控件的列表。"</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
 </resources>

@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Autoriser"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Débogage USB non autorisé"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"L\'utilisateur actuellement connecté sur cet appareil ne peut pas activer le débogage USB. Pour utiliser cette fonctionnalité, l\'utilisateur principal doit se connecter."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Autoriser le débogage via Wi-Fi sur ce réseau ?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Nom du réseau (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresse Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Toujours autoriser sur ce réseau"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Autoriser"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Débogage via Wi-Fi non autorisé"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"L\'utilisateur actuellement connecté sur cet appareil ne peut pas activer le débogage via Wi-Fi. Pour que cette fonctionnalité soit disponible, l\'utilisateur principal doit se connecter."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Port USB désactivé"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Pour protéger votre appareil des liquides et des saletés, le port USB est désactivé et ne détecte plus les accessoires.\n\nVous recevrez une notification lorsque vous pourrez de nouveau utiliser le port USB."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Port USB activé pour détecter les chargeurs et les accessoires"</string>
@@ -488,6 +494,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historique"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notifications silencieuses"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Notifications sonores"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversations"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Effacer toutes les notifications silencieuses"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notifications suspendues par le mode Ne pas déranger"</string>
@@ -686,10 +693,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Sans sons ni vibrations, vous aide à vous concentrer."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Attire votre attention à l\'aide de sons ou de vibrations."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Attire votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Les bulles récentes et fermées s\'afficheront ici."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Impossible de modifier ces notifications."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Vous ne pouvez pas configurer ce groupe de notifications ici"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notification de proxy"</string>
@@ -974,6 +979,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Déplacer en bas à gauche"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Déplacer en bas à droite"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ignorer"</string>
+    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigation système mise à jour. Pour apporter des modifications, accédez aux paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez aux paramètres pour mettre à jour la navigation système"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Mode Veille imminent"</string>
@@ -983,16 +994,14 @@
     <string name="quick_controls_title" msgid="525285759614231333">"Commandes rapides"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"Ajouter des commandes"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"Sélectionnez une application depuis laquelle vous souhaitez ajouter des commandes"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> current favorites.</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> favoris actuels.</item>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Sélectionnez des commandes pour pouvoir y accéder rapidement"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"Favoris"</string>
+    <string name="controls_favorite_header_all" msgid="7507855973418969992">"Tout"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossible de charger toutes les commandes."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
 </resources>

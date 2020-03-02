@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Povolit"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Ladění přes USB není povoleno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění přes USB. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Povolit v této síti bezdrátové ladění?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Název sítě (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Vždy povolit v této síti"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Povolit"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Bezdrátové ladění není povoleno"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout bezdrátové ladění. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Port USB je deaktivován"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Kvůli ochraně vašeho zařízení před tekutinami a nečistotami je port USB zakázán a nerozpozná žádné příslušenství.\n\nAž bude opět bezpečné port USB použít, budeme vás informovat."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Port USB může zjišťovat nabíječky a příslušenství"</string>
@@ -494,6 +500,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovat"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historie"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Tichá oznámení"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Oznámení s upozorněním"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzace"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vymazat všechna tichá oznámení"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Oznámení jsou pozastavena režimem Nerušit"</string>
@@ -692,10 +699,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Pomáhá vám soustředit se vypnutím zvuku a vibrací."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Upozorňuje vás pomocí zvuku a vibrací."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Přitahuje pozornost pomocí plovoucí zkratky k tomuto obsahu."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Žádné nedávné bubliny"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Zde se budou zobrazovat nedávné bubliny a zavřené bubliny."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tato oznámení nelze upravit."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tuto skupinu oznámení tady nelze nakonfigurovat"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Zprostředkované oznámení"</string>
@@ -984,6 +989,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Přesunout vlevo dolů"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Přesunout vpravo dolů"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Zavřít"</string>
+    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systémová navigace byla aktualizována. Chcete-li provést změny, přejděte do Nastavení."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Přejděte do Nastavení a aktualizujte systémovou navigaci"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostní režim"</string>
@@ -993,18 +1004,16 @@
     <string name="quick_controls_title" msgid="525285759614231333">"Rychlé ovládací prvky"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"Přidání ovládacích prvků"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"Vyberte aplikaci, ze které chcete přidat ovládací prvky"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="few"><xliff:g id="NUMBER_1">%s</xliff:g> stávající oblíbené.</item>
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> stávajících oblíbených.</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> stávajících oblíbených.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> stávající oblíbený.</item>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="few">Byly přidány <xliff:g id="NUMBER_1">%s</xliff:g> ovládací prvky.</item>
+      <item quantity="many">Bylo přidáno <xliff:g id="NUMBER_1">%s</xliff:g> ovládacího prvku.</item>
+      <item quantity="other">Bylo přidáno <xliff:g id="NUMBER_1">%s</xliff:g> ovládacích prvků.</item>
+      <item quantity="one">Byl přidán <xliff:g id="NUMBER_0">%s</xliff:g> ovládací prvek.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládací prvky"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Vyberte ovládací prvky pro rychlý přístup"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"Oblíbené"</string>
+    <string name="controls_favorite_header_all" msgid="7507855973418969992">"Vše"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Načtení seznamu všech ovládacích prvků se nezdařilo."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Jiné"</string>
 </resources>
