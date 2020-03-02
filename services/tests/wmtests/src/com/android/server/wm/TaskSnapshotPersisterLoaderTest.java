@@ -48,7 +48,6 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoSession;
 
 import java.io.File;
-import java.util.function.Predicate;
 
 /**
  * Test class for {@link TaskSnapshotPersister} and {@link TaskSnapshotLoader}
@@ -65,6 +64,10 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
 
     private static final Rect TEST_INSETS = new Rect(10, 20, 30, 40);
 
+    public TaskSnapshotPersisterLoaderTest() {
+        super(0.8f, 0.5f);
+    }
+
     @Test
     public void testPersistAndLoadSnapshot() {
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
@@ -79,13 +82,6 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertEquals(TEST_INSETS, snapshot.getContentInsets());
         assertNotNull(snapshot.getSnapshot());
         assertEquals(Configuration.ORIENTATION_PORTRAIT, snapshot.getOrientation());
-    }
-
-    private static void assertTrueForFiles(File[] files, Predicate<File> predicate,
-            String message) {
-        for (File file : files) {
-            assertTrue(file.getName() + message, predicate.test(file));
-        }
     }
 
     @Test
