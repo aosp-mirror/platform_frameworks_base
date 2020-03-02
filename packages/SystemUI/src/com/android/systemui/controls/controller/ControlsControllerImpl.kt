@@ -145,21 +145,23 @@ class ControlsControllerImpl @Inject constructor (
      * If some component has been removed, the new set of favorites will also be saved.
      */
     private val listingCallback = object : ControlsListingController.ControlsListingCallback {
-        override fun onServicesUpdated(candidates: List<ControlsServiceInfo>) {
+        override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
             executor.execute {
-                val candidateComponents = candidates.map(ControlsServiceInfo::componentName)
-                synchronized(currentFavorites) {
-                    val components = currentFavorites.keys.toSet() // create a copy
-                    components.forEach {
-                        if (it !in candidateComponents) {
-                            currentFavorites.remove(it)
-                            bindingController.onComponentRemoved(it)
-                        }
-                    }
-                    // Check if something has been removed, if so, store the new list
-                    if (components.size > currentFavorites.size) {
-                        persistenceWrapper.storeFavorites(favoritesAsListLocked())
-                    }
+                val serviceInfoSet = serviceInfos.map(ControlsServiceInfo::componentName).toSet()
+                val favoriteComponentSet = Favorites.getAllStructures().map {
+                    it.componentName
+                }.toSet()
+
+                var changed = false
+                favoriteComponentSet.subtract(serviceInfoSet).forEach {
+                    changed = true
+                    Favorites.removeStructures(it)
+                    bindingController.onComponentRemoved(it)
+                }
+
+                // Check if something has been removed, if so, store the new list
+                if (changed) {
+                    persistenceWrapper.storeFavorites(Favorites.getAllStructures())
                 }
             }
         }
@@ -183,6 +185,7 @@ class ControlsControllerImpl @Inject constructor (
 
         if (shouldLoad) {
             Favorites.load(persistenceWrapper.readFavorites())
+            listingController.addCallback(listingCallback)
         }
     }
 
@@ -220,39 +223,42 @@ class ControlsControllerImpl @Inject constructor (
                 componentName,
                 object : ControlsBindingController.LoadCallback {
                     override fun accept(controls: List<Control>) {
-                        val favoritesForComponentKeys = Favorites
-                            .getControlsForComponent(componentName).map { it.controlId }
+                        executor.execute {
+                            val favoritesForComponentKeys = Favorites
+                                .getControlsForComponent(componentName).map { it.controlId }
 
-                        val changed = Favorites.updateControls(componentName, controls)
-                        if (changed) {
-                            persistenceWrapper.storeFavorites(Favorites.getAllStructures())
-                        }
-                        val removed = findRemovedLocked(favoritesForComponentKeys.toSet(),
-                            controls)
-                        val controlsWithFavorite = controls.map {
-                            ControlStatus(it, it.controlId in favoritesForComponentKeys)
-                        }
-                        val loadData = createLoadDataObject(
-                            Favorites.getControlsForComponent(componentName)
-                                .filter { it.controlId in removed }
-                                .map { createRemovedStatus(componentName, it) } +
-                            controlsWithFavorite,
-                            favoritesForComponentKeys
-                        )
+                            val changed = Favorites.updateControls(componentName, controls)
+                            if (changed) {
+                                persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+                            }
+                            val removed = findRemoved(favoritesForComponentKeys.toSet(), controls)
+                            val controlsWithFavorite = controls.map {
+                                ControlStatus(it, it.controlId in favoritesForComponentKeys)
+                            }
+                            val loadData = createLoadDataObject(
+                                Favorites.getControlsForComponent(componentName)
+                                    .filter { it.controlId in removed }
+                                    .map { createRemovedStatus(componentName, it) } +
+                                controlsWithFavorite,
+                                favoritesForComponentKeys
+                            )
 
-                        dataCallback.accept(loadData)
+                            dataCallback.accept(loadData)
+                        }
                     }
 
                     override fun error(message: String) {
-                        Favorites.getControlsForComponent(componentName).let { controls ->
-                            val keys = controls.map { it.controlId }
-                            val loadData = createLoadDataObject(
-                                controls.map { createRemovedStatus(componentName, it, false) },
-                                keys,
-                                true
-                            )
-                            dataCallback.accept(loadData)
+                        val loadData = Favorites.getControlsForComponent(componentName).let {
+                            controls ->
+                                val keys = controls.map { it.controlId }
+                                createLoadDataObject(
+                                    controls.map { createRemovedStatus(componentName, it, false) },
+                                    keys,
+                                    true
+                                )
                         }
+
+                        dataCallback.accept(loadData)
                     }
                 }
         )
@@ -278,7 +284,7 @@ class ControlsControllerImpl @Inject constructor (
         return ControlStatus(control, true, setRemoved)
     }
 
-    private fun findRemovedLocked(favoriteKeys: Set<String>, list: List<Control>): Set<String> {
+    private fun findRemoved(favoriteKeys: Set<String>, list: List<Control>): Set<String> {
         val controlsKeys = list.map { it.controlId }
         return favoriteKeys.minus(controlsKeys)
     }
@@ -296,8 +302,10 @@ class ControlsControllerImpl @Inject constructor (
 
     override fun replaceFavoritesForStructure(structureInfo: StructureInfo) {
         if (!confirmAvailability()) return
-        Favorites.replaceControls(structureInfo)
-        persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+        executor.execute {
+            Favorites.replaceControls(structureInfo)
+            persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+        }
     }
 
     override fun refreshStatus(componentName: ComponentName, control: Control) {
@@ -358,6 +366,8 @@ class ControlsControllerImpl @Inject constructor (
 /**
  * Relies on immutable data for thread safety. When necessary to update favMap, use reassignment to
  * replace it, which will not disrupt any ongoing map traversal.
+ *
+ * Update/replace calls should use thread isolation to avoid race conditions.
  */
 private object Favorites {
     private var favMap = mapOf<ComponentName, List<StructureInfo>>()
@@ -416,9 +426,15 @@ private object Favorites {
 
         val newFavMap = favMap.toMutableMap()
         newFavMap.put(componentName, structures)
-        favMap = newFavMap.toMap()
+        favMap = newFavMap
 
         return true
+    }
+
+    fun removeStructures(componentName: ComponentName) {
+        val newFavMap = favMap.toMutableMap()
+        newFavMap.remove(componentName)
+        favMap = newFavMap
     }
 
     fun replaceControls(updatedStructure: StructureInfo) {

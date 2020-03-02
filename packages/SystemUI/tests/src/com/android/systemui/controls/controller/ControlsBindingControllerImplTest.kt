@@ -39,6 +39,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -176,20 +177,13 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testComponentRemoved_existingIsUnbound() {
-        controller.bindServices(listOf(
-                TEST_COMPONENT_NAME_1,
-                TEST_COMPONENT_NAME_2,
-                TEST_COMPONENT_NAME_3
-        ))
+        controller.bindService(TEST_COMPONENT_NAME_1)
 
-        controller.onComponentRemoved(TEST_COMPONENT_NAME_2)
+        controller.onComponentRemoved(TEST_COMPONENT_NAME_1)
 
         executor.runAllReady()
 
-        providers.forEach {
-            verify(it, if (it.componentName == TEST_COMPONENT_NAME_2) times(1) else never())
-                    .unbindService()
-        }
+        verify(providers[0], times(1)).unbindService()
     }
 }
 

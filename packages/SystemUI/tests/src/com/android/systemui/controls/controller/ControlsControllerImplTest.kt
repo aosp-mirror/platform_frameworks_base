@@ -47,12 +47,14 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -149,6 +151,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         assertTrue(controller.available)
         verify(broadcastDispatcher).registerReceiver(
                 capture(broadcastReceiverCaptor), any(), any(), eq(UserHandle.ALL))
+
         verify(listingController).addCallback(capture(listingCallbackCaptor))
     }
 
@@ -210,6 +213,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun testSubscribeFavorites() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO_2)
+        delayableExecutor.runAllReady()
 
         controller.subscribeToFavorites(TEST_STRUCTURE_INFO)
 
@@ -241,6 +245,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         controlLoadCallbackCaptor.value.accept(listOf(control))
 
+        delayableExecutor.runAllReady()
+
         assertTrue(loaded)
     }
 
@@ -251,6 +257,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         val control2 = builderFromInfo(TEST_CONTROL_INFO_2).build()
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO_2)
+        delayableExecutor.runAllReady()
 
         controller.loadForComponent(TEST_COMPONENT, Consumer { data ->
             val controls = data.allControls
@@ -272,6 +279,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 capture(controlLoadCallbackCaptor))
 
         controlLoadCallbackCaptor.value.accept(listOf(control, control2))
+        delayableExecutor.runAllReady()
 
         assertTrue(loaded)
     }
@@ -280,6 +288,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun testLoadForComponent_removed() {
         var loaded = false
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
 
         controller.loadForComponent(TEST_COMPONENT, Consumer { data ->
             val controls = data.allControls
@@ -300,6 +309,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 capture(controlLoadCallbackCaptor))
 
         controlLoadCallbackCaptor.value.accept(emptyList())
+        delayableExecutor.runAllReady()
 
         assertTrue(loaded)
     }
@@ -308,6 +318,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun testErrorOnLoad_notRemoved() {
         var loaded = false
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
 
         controller.loadForComponent(TEST_COMPONENT, Consumer { data ->
             val controls = data.allControls
@@ -335,6 +346,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testFavoriteInformationModifiedOnLoad() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
 
         val newControlInfo = TEST_CONTROL_INFO.copy(controlTitle = TEST_CONTROL_TITLE_2)
         val control = builderFromInfo(newControlInfo).build()
@@ -345,6 +357,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 capture(controlLoadCallbackCaptor))
 
         controlLoadCallbackCaptor.value.accept(listOf(control))
+        delayableExecutor.runAllReady()
 
         val favorites = controller.getFavorites().flatMap { it.controls }
         assertEquals(1, favorites.size)
@@ -370,6 +383,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testSwitchUsers() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
 
         reset(persistenceWrapper)
         val intent = Intent(Intent.ACTION_USER_SWITCHED).apply {
@@ -401,6 +415,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testDisableFeature_clearFavorites() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
+
         assertFalse(controller.getFavorites().isEmpty())
 
         Settings.Secure.putIntForUser(mContext.contentResolver,
@@ -412,6 +428,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testDisableFeature_noChangeForNotCurrentUser() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
+
         Settings.Secure.putIntForUser(mContext.contentResolver,
                 ControlsControllerImpl.CONTROLS_AVAILABLE, 0, otherUser)
         controller.settingObserver.onChange(false, ControlsControllerImpl.URI, otherUser)
@@ -440,6 +458,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testCountFavoritesForComponent_singleComponent() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
 
         assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
         assertEquals(0, controller.countFavoritesForComponent(TEST_COMPONENT_2))
@@ -449,6 +468,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun testCountFavoritesForComponent_multipleComponents() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO_2)
+        delayableExecutor.runAllReady()
 
         assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
         assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT_2))
@@ -457,6 +477,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testGetFavoritesForComponent() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
+
         assertEquals(listOf(TEST_STRUCTURE_INFO),
             controller.getFavoritesForComponent(TEST_COMPONENT))
     }
@@ -464,6 +486,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testGetFavoritesForComponent_otherComponent() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO_2)
+        delayableExecutor.runAllReady()
+
         assertTrue(controller.getFavoritesForComponent(TEST_COMPONENT).isEmpty())
     }
 
@@ -477,6 +501,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 "Home",
                 listOf(TEST_CONTROL_INFO, controlInfo)
         ))
+        delayableExecutor.runAllReady()
 
         assertEquals(listOf(TEST_CONTROL_INFO, controlInfo),
             controller.getFavoritesForComponent(TEST_COMPONENT).flatMap { it.controls })
@@ -487,6 +512,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 "Home",
                 listOf(controlInfo, TEST_CONTROL_INFO)
         ))
+        delayableExecutor.runAllReady()
 
         assertEquals(listOf(controlInfo, TEST_CONTROL_INFO),
             controller.getFavoritesForComponent(TEST_COMPONENT).flatMap { it.controls })
@@ -495,6 +521,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Test
     fun testReplaceFavoritesForStructure_noFavorites() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
 
         assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
         assertEquals(listOf(TEST_STRUCTURE_INFO),
@@ -505,6 +532,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun testReplaceFavoritesForStructure_differentComponentsAreFilteredOut() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO_2)
+        delayableExecutor.runAllReady()
 
         assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
         assertEquals(listOf(TEST_CONTROL_INFO),
@@ -530,6 +558,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 "Home",
                 listOf(TEST_CONTROL_INFO)
         ))
+        delayableExecutor.runAllReady()
 
         assertEquals(1, controller.countFavoritesForComponent(newComponent))
         assertEquals(listOf(TEST_CONTROL_INFO), controller
@@ -543,6 +572,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         val listOrder1 = listOf(TEST_CONTROL_INFO, controlInfo)
         val structure1 = StructureInfo(TEST_COMPONENT, "Home", listOrder1)
         controller.replaceFavoritesForStructure(structure1)
+        delayableExecutor.runAllReady()
 
         assertEquals(2, controller.countFavoritesForComponent(TEST_COMPONENT))
         assertEquals(listOrder1, controller.getFavoritesForComponent(TEST_COMPONENT)
@@ -552,6 +582,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         val structure2 = StructureInfo(TEST_COMPONENT, "Home", listOrder2)
 
         controller.replaceFavoritesForStructure(structure2)
+        delayableExecutor.runAllReady()
 
         assertEquals(2, controller.countFavoritesForComponent(TEST_COMPONENT))
         assertEquals(listOrder2, controller.getFavoritesForComponent(TEST_COMPONENT)
@@ -560,7 +591,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testPackageRemoved_noFavorites_noRemovals() {
-        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
 
         val serviceInfo = mock(ServiceInfo::class.java)
         `when`(serviceInfo.componentName).thenReturn(TEST_COMPONENT)
@@ -569,21 +601,21 @@ class ControlsControllerImplTest : SysuiTestCase() {
         // Don't want to check what happens before this call
         reset(persistenceWrapper)
         listingCallbackCaptor.value.onServicesUpdated(listOf(info))
-
         delayableExecutor.runAllReady()
 
         verify(bindingController, never()).onComponentRemoved(any())
 
-        assertEquals(1, controller.getFavoriteControls().size)
-        assertEquals(TEST_CONTROL_INFO, controller.getFavoriteControls()[0])
+        assertEquals(1, controller.getFavorites().size)
+        assertEquals(TEST_STRUCTURE_INFO, controller.getFavorites()[0])
 
         verify(persistenceWrapper, never()).storeFavorites(ArgumentMatchers.anyList())
     }
 
     @Test
     fun testPackageRemoved_hasFavorites() {
-        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
-        controller.changeFavoriteStatus(TEST_CONTROL_INFO_2, true)
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO_2)
+        delayableExecutor.runAllReady()
 
         val serviceInfo = mock(ServiceInfo::class.java)
         `when`(serviceInfo.componentName).thenReturn(TEST_COMPONENT)
@@ -591,14 +623,14 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         // Don't want to check what happens before this call
         reset(persistenceWrapper)
-        listingCallbackCaptor.value.onServicesUpdated(listOf(info))
 
+        listingCallbackCaptor.value.onServicesUpdated(listOf(info))
         delayableExecutor.runAllReady()
 
         verify(bindingController).onComponentRemoved(TEST_COMPONENT_2)
 
-        assertEquals(1, controller.getFavoriteControls().size)
-        assertEquals(TEST_CONTROL_INFO, controller.getFavoriteControls()[0])
+        assertEquals(1, controller.getFavorites().size)
+        assertEquals(TEST_STRUCTURE_INFO, controller.getFavorites()[0])
 
         verify(persistenceWrapper).storeFavorites(ArgumentMatchers.anyList())
     }

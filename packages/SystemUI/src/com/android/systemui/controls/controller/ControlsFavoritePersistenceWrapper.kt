@@ -52,6 +52,10 @@ class ControlsFavoritePersistenceWrapper(
         private const val TAG_ID = "id"
         private const val TAG_TITLE = "title"
         private const val TAG_TYPE = "type"
+        private const val TAG_VERSION = "version"
+
+        // must increment with every change to the XML structure
+        private const val VERSION = 1
     }
 
     /**
@@ -83,6 +87,10 @@ class ControlsFavoritePersistenceWrapper(
                     setOutput(writer, "utf-8")
                     setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
                     startDocument(null, true)
+                    startTag(null, TAG_VERSION)
+                    text("$VERSION")
+                    endTag(null, TAG_VERSION)
+
                     startTag(null, TAG_STRUCTURES)
                     structures.forEach { s ->
                         startTag(null, TAG_STRUCTURE)

@@ -162,11 +162,9 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
     override fun onComponentRemoved(componentName: ComponentName) {
         backgroundExecutor.execute {
-            synchronized(componentMap) {
-                val removed = componentMap.remove(Key(componentName, currentUser))
-                removed?.let {
-                    it.unbindService()
-                    tokenMap.remove(it.token)
+            currentProvider?.let {
+                if (it.componentName == componentName) {
+                    unbind()
                 }
             }
         }
@@ -182,16 +180,10 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
     private abstract inner class CallbackRunnable(val token: IBinder) : Runnable {
         protected val provider: ControlsProviderLifecycleManager? = currentProvider
-    }
 
-    private inner class OnLoadRunnable(
-        token: IBinder,
-        val list: List<Control>,
-        val callback: ControlsBindingController.LoadCallback
-    ) : CallbackRunnable(token) {
         override fun run() {
             if (provider == null) {
-                Log.e(TAG, "No provider found for token:$token")
+                Log.e(TAG, "No current provider set")
                 return
             }
             if (provider.user != currentUser) {
@@ -202,8 +194,21 @@ open class ControlsBindingControllerImpl @Inject constructor(
                 Log.e(TAG, "Provider for token:$token does not exist anymore")
                 return
             }
+
+            doRun()
+        }
+
+        abstract fun doRun()
+    }
+
+    private inner class OnLoadRunnable(
+        token: IBinder,
+        val list: List<Control>,
+        val callback: ControlsBindingController.LoadCallback
+    ) : CallbackRunnable(token) {
+        override fun doRun() {
             callback.accept(list)
-            provider.unbindService()
+            provider?.unbindService()
         }
     }
 
@@ -211,14 +216,11 @@ open class ControlsBindingControllerImpl @Inject constructor(
         token: IBinder,
         val control: Control
     ) : CallbackRunnable(token) {
-        override fun run() {
+        override fun doRun() {
             if (!refreshing.get()) {
                 Log.d(TAG, "onRefresh outside of window from:${provider?.componentName}")
             }
-            if (provider?.user != currentUser) {
-                Log.e(TAG, "User ${provider?.user} is not current user")
-                return
-            }
+
             provider?.let {
                 lazyController.get().refreshStatus(it.componentName, control)
             }
@@ -229,7 +231,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
         token: IBinder,
         val subscription: IControlsSubscription
     ) : CallbackRunnable(token) {
-        override fun run() {
+        override fun doRun() {
             if (!refreshing.get()) {
                 Log.d(TAG, "onRefresh outside of window from '${provider?.componentName}'")
             }
@@ -242,7 +244,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     private inner class OnCompleteRunnable(
         token: IBinder
     ) : CallbackRunnable(token) {
-        override fun run() {
+        override fun doRun() {
             provider?.let {
                 Log.i(TAG, "onComplete receive from '${it.componentName}'")
             }
@@ -253,7 +255,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
         token: IBinder,
         val error: String
     ) : CallbackRunnable(token) {
-        override fun run() {
+        override fun doRun() {
             provider?.let {
                 Log.e(TAG, "onError receive from '${it.componentName}': $error")
             }
@@ -265,11 +267,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
         val controlId: String,
         @ControlAction.ResponseResult val response: Int
     ) : CallbackRunnable(token) {
-        override fun run() {
-            if (provider?.user != currentUser) {
-                Log.e(TAG, "User ${provider?.user} is not current user")
-                return
-            }
+        override fun doRun() {
             provider?.let {
                 lazyController.get().onActionResponse(it.componentName, controlId, response)
             }
@@ -281,7 +279,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
         val error: String,
         val callback: ControlsBindingController.LoadCallback
     ) : CallbackRunnable(token) {
-        override fun run() {
+        override fun doRun() {
             callback.error(error)
             provider?.let {
                 Log.e(TAG, "onError receive from '${it.componentName}': $error")
