@@ -70,7 +70,6 @@ public class NotificationLogger implements StateListener {
     private final NotificationListenerService mNotificationListener;
     private final Executor mUiBgExecutor;
     private final NotificationEntryManager mEntryManager;
-    private final NotificationPanelLogger mNotificationPanelLogger;
     private HeadsUpManager mHeadsUpManager;
     private final ExpansionStateLogger mExpansionStateLogger;
 
@@ -199,15 +198,13 @@ public class NotificationLogger implements StateListener {
             @UiBackground Executor uiBgExecutor,
             NotificationEntryManager entryManager,
             StatusBarStateController statusBarStateController,
-            ExpansionStateLogger expansionStateLogger,
-            NotificationPanelLogger notificationPanelLogger) {
+            ExpansionStateLogger expansionStateLogger) {
         mNotificationListener = notificationListener;
         mUiBgExecutor = uiBgExecutor;
         mEntryManager = entryManager;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mExpansionStateLogger = expansionStateLogger;
-        mNotificationPanelLogger = notificationPanelLogger;
         // Not expected to be destroyed, don't need to unsubscribe
         statusBarStateController.addCallback(this);
 
@@ -267,9 +264,6 @@ public class NotificationLogger implements StateListener {
         // (Note that in cases where the scroller does emit events, this
         // additional event doesn't break anything.)
         mNotificationLocationsChangedListener.onChildLocationsChanged();
-        // TODO - determine if this work needs to be put on mUiBgExecutor
-        mNotificationPanelLogger.logPanelShown(mListContainer.hasPulsingNotifications(),
-                mEntryManager.getVisibleNotifications());
     }
 
     private void setDozing(boolean dozing) {
