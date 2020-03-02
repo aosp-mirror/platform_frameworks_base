@@ -22,8 +22,6 @@ import android.content.Context;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
-import com.android.internal.logging.InstanceId;
-
 /**
  * Convenience builder for {@link StatusBarNotification} since its constructor is terrifying.
  *
@@ -42,7 +40,6 @@ public class SbnBuilder {
     private UserHandle mUser = UserHandle.of(0);
     private String mOverrideGroupKey;
     private long mPostTime;
-    private InstanceId mInstanceId;
 
     public SbnBuilder() {
     }
@@ -58,7 +55,6 @@ public class SbnBuilder {
         mUser = source.getUser();
         mOverrideGroupKey = source.getOverrideGroupKey();
         mPostTime = source.getPostTime();
-        mInstanceId = source.getInstanceId();
     }
 
     public StatusBarNotification build() {
@@ -75,7 +71,7 @@ public class SbnBuilder {
             notification.setBubbleMetadata(mBubbleMetadata);
         }
 
-        StatusBarNotification result = new StatusBarNotification(
+        return new StatusBarNotification(
                 mPkg,
                 mOpPkg,
                 mId,
@@ -86,12 +82,6 @@ public class SbnBuilder {
                 mUser,
                 mOverrideGroupKey,
                 mPostTime);
-        if (mInstanceId != null) {
-            result.setInstanceId(mInstanceId);
-        } else {
-            result.setInstanceId(InstanceId.fakeInstanceId(1));
-        }
-        return result;
     }
 
     public SbnBuilder setPkg(String pkg) {
@@ -183,11 +173,6 @@ public class SbnBuilder {
 
     public SbnBuilder setBubbleMetadata(Notification.BubbleMetadata data) {
         mBubbleMetadata = data;
-        return this;
-    }
-
-    public SbnBuilder setInstanceId(InstanceId instanceId) {
-        mInstanceId = instanceId;
         return this;
     }
 }

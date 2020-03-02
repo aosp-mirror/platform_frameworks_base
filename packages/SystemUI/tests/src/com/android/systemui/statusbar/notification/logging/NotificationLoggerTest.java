@@ -16,10 +16,7 @@
 
 package com.android.systemui.statusbar.notification.logging;
 
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING;
-
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -65,8 +62,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
-import nano.Notifications;
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -86,10 +81,9 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     private NotificationEntry mEntry;
     private TestableNotificationLogger mLogger;
+    private NotificationEntryListener mNotificationEntryListener;
     private ConcurrentLinkedQueue<AssertionError> mErrorQueue = new ConcurrentLinkedQueue<>();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
-    private NotificationPanelLoggerFake mNotificationPanelLoggerFake =
-            new NotificationPanelLoggerFake();
 
     @Before
     public void setUp() {
@@ -111,6 +105,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 mExpansionStateLogger);
         mLogger.setUpWithContainer(mListContainer);
         verify(mEntryManager).addNotificationEntryListener(mEntryListenerCaptor.capture());
+        mNotificationEntryListener = mEntryListenerCaptor.getValue();
     }
 
     @Test
@@ -169,21 +164,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
         verify(mBarService, times(1)).onNotificationVisibilityChanged(any(), any());
     }
 
-    @Test
-    public void testLogPanelShownOnLoggingStart() {
-        when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
-        mLogger.startNotificationLogging();
-        assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
-        assertEquals(false, mNotificationPanelLoggerFake.get(0).isDozing);
-        assertEquals(1, mNotificationPanelLoggerFake.get(0).list.notifications.length);
-        Notifications.Notification n = mNotificationPanelLoggerFake.get(0).list.notifications[0];
-        assertEquals(TEST_PACKAGE_NAME, n.packageName);
-        assertEquals(TEST_UID, n.uid);
-        assertEquals(1, n.instanceId);
-        assertEquals(false, n.isGroupSummary);
-        assertEquals(1 + BUCKET_ALERTING, n.section);
-    }
-
     private class TestableNotificationLogger extends NotificationLogger {
 
         TestableNotificationLogger(NotificationListener notificationListener,
@@ -193,7 +173,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 IStatusBarService barService,
                 ExpansionStateLogger expansionStateLogger) {
             super(notificationListener, uiBgExecutor, entryManager, statusBarStateController,
-                    expansionStateLogger, mNotificationPanelLoggerFake);
+                    expansionStateLogger);
             mBarService = barService;
             // Make this on the current thread so we can wait for it during tests.
             mHandler = Handler.createAsync(Looper.myLooper());
