@@ -11011,9 +11011,15 @@ public class TelephonyManager {
     }
 
     /**
-     * Checks if FEATURE_TELEPHONY_DATA is enabled.
-     *
-     * @hide
+     * @return true if the current device is "data capable" over a radio on the device.
+     * <p>
+     * "Data capable" means that this device supports packet-switched
+     * data connections over the telephony network.
+     * <p>
+     * Note: the meaning of this flag is subtly different from the
+     * PackageManager.FEATURE_TELEPHONY system feature, which is available
+     * on any device with a telephony radio, even if the device is
+     * voice-only.
      */
     public boolean isDataCapable() {
         if (mContext == null) return true;
