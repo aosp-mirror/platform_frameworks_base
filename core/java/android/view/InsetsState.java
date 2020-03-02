@@ -147,10 +147,13 @@ public class InsetsState implements Parcelable {
      * Calculates {@link WindowInsets} based on the current source configuration.
      *
      * @param frame The frame to calculate the insets relative to.
+     * @param ignoringVisibilityState {@link InsetsState} used to calculate
+     *        {@link WindowInsets#getInsetsIgnoringVisibility(int)} information, or pass
+     *        {@code null} to use this state to calculate that information.
      * @return The calculated insets.
      */
-    public WindowInsets calculateInsets(Rect frame, boolean isScreenRound,
-            boolean alwaysConsumeSystemBars, DisplayCutout cutout,
+    public WindowInsets calculateInsets(Rect frame, @Nullable InsetsState ignoringVisibilityState,
+            boolean isScreenRound, boolean alwaysConsumeSystemBars, DisplayCutout cutout,
             @Nullable Rect legacyContentInsets, @Nullable Rect legacyStableInsets,
             int legacySoftInputMode, int legacySystemUiFlags,
             @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
@@ -188,8 +191,15 @@ public class InsetsState implements Parcelable {
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
             if (source.getType() != ITYPE_IME) {
-                processSource(source, relativeFrameMax, true /* ignoreVisibility */,
-                        typeMaxInsetsMap, null /* typeSideMap */, null /* typeVisibilityMap */);
+                InsetsSource ignoringVisibilitySource = ignoringVisibilityState != null
+                        ? ignoringVisibilityState.getSource(type)
+                        : source;
+                if (ignoringVisibilitySource == null) {
+                    continue;
+                }
+                processSource(ignoringVisibilitySource, relativeFrameMax,
+                        true /* ignoreVisibility */, typeMaxInsetsMap, null /* typeSideMap */,
+                        null /* typeVisibilityMap */);
             }
         }
         final int softInputAdjustMode = legacySoftInputMode & SOFT_INPUT_MASK_ADJUST;
@@ -295,6 +305,10 @@ public class InsetsState implements Parcelable {
 
     public InsetsSource getSource(@InternalInsetsType int type) {
         return mSources.computeIfAbsent(type, InsetsSource::new);
+    }
+
+    public @Nullable InsetsSource peekSource(@InternalInsetsType int type) {
+        return mSources.get(type);
     }
 
     public void setDisplayFrame(Rect frame) {
