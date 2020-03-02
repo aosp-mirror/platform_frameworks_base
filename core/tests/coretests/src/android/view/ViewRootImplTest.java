@@ -16,9 +16,13 @@
 
 package android.view;
 
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
@@ -102,77 +106,127 @@ public class ViewRootImplTest {
     }
 
     @Test
-    public void adjustLayoutParamsForInsets_layoutFullscreen() {
+    public void adjustLayoutParamsForCompatibility_layoutFullscreen() {
         assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
+        // Type.statusBars() must be removed.
         assertEquals(0, attrs.getFitInsetsTypes() & Type.statusBars());
     }
 
     @Test
-    public void adjustLayoutParamsForInsets_layoutInScreen() {
+    public void adjustLayoutParamsForCompatibility_layoutInScreen() {
         assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.flags = FLAG_LAYOUT_IN_SCREEN;
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
+        // Type.statusBars() must be removed.
         assertEquals(0, attrs.getFitInsetsTypes() & Type.statusBars());
     }
 
     @Test
-    public void adjustLayoutParamsForInsets_layoutHideNavigation() {
+    public void adjustLayoutParamsForCompatibility_layoutHideNavigation() {
         assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
+        // Type.systemBars() must be removed.
         assertEquals(0, attrs.getFitInsetsTypes() & Type.systemBars());
     }
 
     @Test
-    public void adjustLayoutParamsForInsets_toast() {
+    public void adjustLayoutParamsForCompatibility_toast() {
         assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_TOAST);
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertEquals(Type.systemBars(), attrs.getFitInsetsTypes() & Type.systemBars());
         assertEquals(true, attrs.isFitInsetsIgnoringVisibility());
     }
 
     @Test
-    public void adjustLayoutParamsForInsets_systemAlert() {
+    public void adjustLayoutParamsForCompatibility_systemAlert() {
         assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_SYSTEM_ALERT);
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        assertEquals(Type.systemBars(), attrs.getFitInsetsTypes() & Type.systemBars());
         assertEquals(true, attrs.isFitInsetsIgnoringVisibility());
     }
 
     @Test
-    public void adjustLayoutParamsForInsets_noAdjust() {
+    public void adjustLayoutParamsForCompatibility_fitSystemBars() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+
+        // A window which fits system bars must fit IME, unless its type is toast or system alert.
+        assertEquals(Type.systemBars() | Type.ime(), attrs.getFitInsetsTypes());
+    }
+
+    @Test
+    public void adjustLayoutParamsForCompatibility_noAdjustLayout() {
         assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         final int types = Type.all();
         final int sides = Side.TOP | Side.LEFT;
         final boolean fitMaxInsets = true;
-        attrs.flags = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        attrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         attrs.setFitInsetsTypes(types);
         attrs.setFitInsetsSides(sides);
         attrs.setFitInsetsIgnoringVisibility(fitMaxInsets);
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
+        // Fit-insets related fields must not be adjusted due to legacy system UI visibility
+        // after calling fit-insets related methods.
         assertEquals(types, attrs.getFitInsetsTypes());
         assertEquals(sides, attrs.getFitInsetsSides());
         assertEquals(fitMaxInsets, attrs.isFitInsetsIgnoringVisibility());
+    }
+
+    @Test
+    public void adjustLayoutParamsForCompatibility_noAdjustAppearance() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final ViewRootImpl viewRoot = mViewRootImpl.get();
+        final WindowInsetsController controller = viewRoot.getInsetsController();
+        final WindowManager.LayoutParams attrs = viewRoot.mWindowAttributes;
+        final int appearance = 0;
+        controller.setSystemBarsAppearance(appearance, 0xffffffff);
+        attrs.systemUiVisibility = SYSTEM_UI_FLAG_LOW_PROFILE
+                | SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                | SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+
+        // Appearance must not be adjusted due to legacy system UI visibility after calling
+        // setSystemBarsAppearance.
+        assertEquals(appearance, controller.getSystemBarsAppearance());
+    }
+
+    @Test
+    public void adjustLayoutParamsForCompatibility_noAdjustBehavior() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final ViewRootImpl viewRoot = mViewRootImpl.get();
+        final WindowInsetsController controller = viewRoot.getInsetsController();
+        final WindowManager.LayoutParams attrs = viewRoot.mWindowAttributes;
+        final int behavior = BEHAVIOR_SHOW_BARS_BY_TOUCH;
+        controller.setSystemBarsBehavior(behavior);
+        attrs.systemUiVisibility = SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+
+        // Behavior must not be adjusted due to legacy system UI visibility after calling
+        // setSystemBarsBehavior.
+        assertEquals(behavior, controller.getSystemBarsBehavior());
     }
 
     private static class ViewRootImplAccessor {
