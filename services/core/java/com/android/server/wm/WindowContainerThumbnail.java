@@ -28,9 +28,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 
-import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.hardware.HardwareBuffer;
 import android.os.Process;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
@@ -60,7 +60,7 @@ class WindowContainerThumbnail implements Animatable {
     private final boolean mRelative;
 
     WindowContainerThumbnail(Supplier<Surface> surfaceFactory, Transaction t,
-            WindowContainer container, GraphicBuffer thumbnailHeader) {
+            WindowContainer container, HardwareBuffer thumbnailHeader) {
         this(surfaceFactory, t, container, thumbnailHeader, false /* relative */);
     }
 
@@ -72,12 +72,12 @@ class WindowContainerThumbnail implements Animatable {
      *                 relative to it) or not.
      */
     WindowContainerThumbnail(Supplier<Surface> surfaceFactory, Transaction t,
-            WindowContainer container, GraphicBuffer thumbnailHeader, boolean relative) {
+            WindowContainer container, HardwareBuffer thumbnailHeader, boolean relative) {
         this(t, container, thumbnailHeader, relative, surfaceFactory.get(), null);
     }
 
     WindowContainerThumbnail(Transaction t, WindowContainer container,
-            GraphicBuffer thumbnailHeader, boolean relative, Surface drawSurface,
+            HardwareBuffer thumbnailHeader, boolean relative, Surface drawSurface,
             SurfaceAnimator animator) {
         mWindowContainer = container;
         mRelative = relative;
@@ -109,7 +109,7 @@ class WindowContainerThumbnail implements Animatable {
 
         // Transfer the thumbnail to the surface
         drawSurface.copyFrom(mSurfaceControl);
-        drawSurface.attachAndQueueBuffer(thumbnailHeader);
+        drawSurface.attachAndQueueBufferWithColorSpace(thumbnailHeader, null);
         drawSurface.release();
         t.show(mSurfaceControl);
 
