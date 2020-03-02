@@ -17,6 +17,7 @@
 package android.app.compat;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.Compatibility;
 import android.os.UserHandle;
@@ -54,14 +55,13 @@ public final class CompatChanges {
      * <p> Note that this involves a binder call to the system server (unless running in the system
      * server). If the binder call fails, a {@code RuntimeException} will be thrown.
      *
-     * <p> Caller must have android.permission.READ_COMPAT_CHANGE_CONFIG permission. If it
-     * doesn't, a {@code RuntimeException} will be thrown.
-     *
      * @param changeId    The ID of the compatibility change in question.
      * @param packageName The package name of the app in question.
      * @param user        The user that the operation is done for.
      * @return {@code true} if the change is enabled for the current app.
      */
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG,
+            android.Manifest.permission.LOG_COMPAT_CHANGE})
     public static boolean isChangeEnabled(long changeId, @NonNull String packageName,
             @NonNull UserHandle user) {
         return QUERY_CACHE.query(ChangeIdStateQuery.byPackageName(changeId, packageName,
@@ -75,9 +75,6 @@ public final class CompatChanges {
      * <p> Note that this involves a binder call to the system server (unless running in the system
      * server). If the binder call fails, {@code RuntimeException}  will be thrown.
      *
-     * <p> Caller must have android.permission.READ_COMPAT_CHANGE_CONFIG permission. If it
-     * doesn't, a {@code RuntimeException} will be thrown.
-     *
      * <p> Returns {@code true} if there are no installed packages for the required UID, or if the
      * change is enabled for ALL of the installed packages associated with the provided UID. Please
      * use a more specific API if you want a different behaviour for multi-package UIDs.
@@ -86,6 +83,8 @@ public final class CompatChanges {
      * @param uid      The UID of the app in question.
      * @return {@code true} if the change is enabled for the current app.
      */
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG,
+            android.Manifest.permission.LOG_COMPAT_CHANGE})
     public static boolean isChangeEnabled(long changeId, int uid) {
         return QUERY_CACHE.query(ChangeIdStateQuery.byUid(changeId, uid));
     }
