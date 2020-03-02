@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.net.Uri;
+import android.os.FileUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -55,6 +56,7 @@ class EventHistoryImpl implements EventHistory {
     private final ScheduledExecutorService mScheduledExecutorService;
     private final EventsProtoDiskReadWriter mEventsProtoDiskReadWriter;
     private final EventIndexesProtoDiskReadWriter mEventIndexesProtoDiskReadWriter;
+    private final File mRootDir;
 
     // Event Type -> Event Index
     @GuardedBy("this")
@@ -77,10 +79,11 @@ class EventHistoryImpl implements EventHistory {
         mScheduledExecutorService = scheduledExecutorService;
         mLastPruneTime = injector.currentTimeMillis();
 
-        File eventsDir = new File(rootDir, EVENTS_DIR);
+        mRootDir = rootDir;
+        File eventsDir = new File(mRootDir, EVENTS_DIR);
         mEventsProtoDiskReadWriter = new EventsProtoDiskReadWriter(eventsDir,
                 mScheduledExecutorService);
-        File indexesDir = new File(rootDir, INDEXES_DIR);
+        File indexesDir = new File(mRootDir, INDEXES_DIR);
         mEventIndexesProtoDiskReadWriter = new EventIndexesProtoDiskReadWriter(indexesDir,
                 scheduledExecutorService);
     }
@@ -188,6 +191,7 @@ class EventHistoryImpl implements EventHistory {
         mRecentEvents.clear();
         mEventsProtoDiskReadWriter.deleteRecentEventsFile();
         mEventIndexesProtoDiskReadWriter.deleteIndexesFile();
+        FileUtils.deleteContentsAndDir(mRootDir);
     }
 
     /** Deletes the events data that exceeds the retention period. */
