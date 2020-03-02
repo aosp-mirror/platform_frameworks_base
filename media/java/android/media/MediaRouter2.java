@@ -1071,7 +1071,7 @@ public class MediaRouter2 {
                 try {
                     mMediaRouterService.deselectRouteWithRouter2(stub, getId(), route);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to remove route from session.", ex);
+                    Log.e(TAG, "Unable to deselect route from session.", ex);
                 }
             }
         }

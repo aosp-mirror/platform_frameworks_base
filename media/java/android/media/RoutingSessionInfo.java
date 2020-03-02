@@ -357,7 +357,7 @@ public final class RoutingSessionInfo implements Parcelable {
         // TODO: Reorder these (important ones first)
         final String mId;
         CharSequence mName;
-        final String mClientPackageName;
+        String mClientPackageName;
         String mProviderId;
         final List<String> mSelectedRoutes;
         final List<String> mSelectableRoutes;
@@ -430,6 +430,17 @@ public final class RoutingSessionInfo implements Parcelable {
         @NonNull
         public Builder setName(@Nullable CharSequence name) {
             mName = name;
+            return this;
+        }
+
+        /**
+         * Sets the client package name of the session.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setClientPackageName(@Nullable String packageName) {
+            mClientPackageName = packageName;
             return this;
         }
 
