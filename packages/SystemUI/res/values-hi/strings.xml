@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"अनुमति दें"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB डीबगिंग की अनुमति नहीं है"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन किया है, वो USB डीबगिंग चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, प्राथमिक उपयोगकर्ता में बदलें."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"क्या आप इस नेटवर्क पर वायरलेस तरीके से डीबग करने की सुविधा के इस्तेमाल की अनुमति देना चाहते हैं?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्क का नाम (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nवाई-फ़ाई का पता (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"इस नेटवर्क पर हमेशा अनुमति दें"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"अनुमति दें"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"वायरलेस तरीके से डीबग करने की सुविधा चालू करने की अनुमति नहीं है"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन कर रखा है वह वायरलेस तरीके से डीबग करने की सुविधा चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, मुख्य उपयोगकर्ता के तौर पर साइन इन करें."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"यूएसबी पोर्ट बंद है"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"तरल चीज़ या कचरे से आपके डिवाइस की सुरक्षा करने के लिए, यूएसबी पोर्ट को बंद कर दिया गया है. साथ ही, इससे किसी भी एक्सेसरी की पहचान नहीं की जा सकेगी.\n\nयूएसबी पोर्ट का दोबारा इस्तेमाल करना सुरक्षित होने पर आपको सूचित किया जाएगा."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"चार्जर और एक्सेसरी पहचानने के लिए यूएसबी पोर्ट को चालू कर दिया गया है"</string>
@@ -80,31 +86,19 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रीनशॉट दोबारा लेने की कोशिश करें"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"मेमोरी कम होने की वजह से स्क्रीनशॉट सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
-    <!-- no translation found for screenrecord_name (2596401223859996572) -->
-    <skip />
+    <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
-    <!-- no translation found for screenrecord_start_label (1750350278888217473) -->
-    <skip />
-    <!-- no translation found for screenrecord_description (1123231719680353736) -->
-    <skip />
-    <!-- no translation found for screenrecord_audio_label (6183558856175159629) -->
-    <skip />
-    <!-- no translation found for screenrecord_device_audio_label (9016927171280567791) -->
-    <skip />
-    <!-- no translation found for screenrecord_device_audio_description (4922694220572186193) -->
-    <skip />
-    <!-- no translation found for screenrecord_mic_label (2111264835791332350) -->
-    <skip />
-    <!-- no translation found for screenrecord_device_audio_and_mic_label (1831323771978646841) -->
-    <skip />
-    <!-- no translation found for screenrecord_start (330991441575775004) -->
-    <skip />
-    <!-- no translation found for screenrecord_ongoing_screen_only (4459670242451527727) -->
-    <skip />
-    <!-- no translation found for screenrecord_ongoing_screen_and_audio (5351133763125180920) -->
-    <skip />
-    <!-- no translation found for screenrecord_taps_label (1595690528298857649) -->
-    <skip />
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"रिकॉर्डिंग शुरू करना चाहते हैं?"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"रिकॉर्ड करते समय, Android सिस्टम आपकी स्क्रीन पर दिखने वाली या चलाई जाने वाली संवेदनशील जानकारी को कैप्चर कर सकता है. इसमें पासवर्ड, पैसे चुकाने से जुड़ी जानकारी, फ़ोटो, मैसेज, और ऑडियो शामिल हैं."</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"ऑडियो रिकॉर्ड करें"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिवाइस ऑडियो"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"आपके डिवाइस से आने वाली आवाज़. जैसे कि संगीत, कॉल, और रिंगटोन"</string>
+    <string name="screenrecord_mic_label" msgid="2111264835791332350">"माइक्रोफ़ोन"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"डिवाइस ऑडियो और माइक्रोफ़ोन"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"शुरू करें"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"स्क्रीन को रिकॉर्ड किया जा रहा है"</string>
+    <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"स्क्रीन और ऑडियो, दोनों रिकॉर्ड हो रहे हैं"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्क्रीन को कहां छुआ गया, ये दिखाएं"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"रोकने के लिए टैप करें"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"रोकें"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"रोकें"</string>
@@ -117,8 +111,7 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"स्क्रीन रिकॉर्डिंग मिटा दी गई"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"स्क्रीन रिकॉर्डिंग मिटाने में गड़बड़ी हुई"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"मंज़ूरी नहीं मिल सकी"</string>
-    <!-- no translation found for screenrecord_start_error (2200660692479682368) -->
-    <skip />
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रीन को रिकॉर्ड करने में गड़बड़ी आ रही है"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"USB फ़ाइल स्थानांतरण विकल्प"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"मीडिया प्लेयर के रूप में माउंट करें (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"कैमरे के रूप में माउंट करें (PTP)"</string>
@@ -499,9 +492,9 @@
     <string name="media_projection_remember_text" msgid="6896767327140422951">"फिर से न दिखाएं"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सभी को हटाएं"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"प्रबंधित करें"</string>
-    <!-- no translation found for manage_notifications_history_text (57055985396576230) -->
-    <skip />
+    <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"बिना आवाज़ या वाइब्रेशन वाली सूचनाएं"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"आवाज़ या वाइब्रेशन वाली सूचनाएं"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"बातचीत"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
@@ -700,10 +693,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"आवाज़ या वाइब्रेशन न होने की वजह से आप काम में ध्यान लगा पाते हैं."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"आवाज़ या वाइब्रेशन होने की वजह से आपका ध्यान सूचनाओं पर जाता है."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ़्लोट करने वाले शॉर्टकट की मदद से इस सामग्री पर आपका ध्यान बना रहता है."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हाल ही के बबल्स मौजूद नहीं हैं"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी सूचना"</string>
@@ -726,25 +717,18 @@
     <string name="notification_done" msgid="6215117625922713976">"हो गया"</string>
     <string name="inline_undo" msgid="9026953267645116526">"पहले जैसा करें"</string>
     <string name="demote" msgid="6225813324237153980">"इस सूचना को \'बातचीत नहीं\' के रूप में मार्क करें"</string>
-    <!-- no translation found for notification_conversation_favorite (1905240206975921907) -->
-    <skip />
-    <!-- no translation found for notification_conversation_unfavorite (181383708304763807) -->
-    <skip />
-    <!-- no translation found for notification_conversation_mute (268951550222925548) -->
-    <skip />
+    <string name="notification_conversation_favorite" msgid="1905240206975921907">"अहम बातचीत"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"अहम बातचीत नहीं है"</string>
+    <string name="notification_conversation_mute" msgid="268951550222925548">"आवाज़ और वाइब्रेशन बंद किया गया"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"आवाज़ या वाइब्रेशन चालू करें"</string>
-    <!-- no translation found for notification_conversation_bubble (2242180995373949022) -->
-    <skip />
-    <!-- no translation found for notification_conversation_unbubble (6908427185031099868) -->
-    <skip />
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"बबल दिखाएं"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"बबल हटाएं"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"होम स्क्रीन पर जोड़ें"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"सूचना नियंत्रण"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"सूचना को स्नूज़ (थोड़ी देर के लिए चुप करना) करने के विकल्प"</string>
-    <!-- no translation found for notification_menu_snooze_action (5415729610393475019) -->
-    <skip />
-    <!-- no translation found for notification_menu_settings_action (7085494017202764285) -->
-    <skip />
+    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"बाद में याद दिलाएं"</string>
+    <string name="notification_menu_settings_action" msgid="7085494017202764285">"सेटिंग"</string>
     <string name="snooze_undo" msgid="60890935148417175">"पहले जैसा करें"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> के लिए याद दिलाया गया"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
@@ -816,8 +800,7 @@
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"डेटा बचाने की सेटिंग बंद है"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"चालू"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"बंद"</string>
-    <!-- no translation found for tile_unavailable (3095879009136616920) -->
-    <skip />
+    <string name="tile_unavailable" msgid="3095879009136616920">"उपलब्ध नहीं है"</string>
     <string name="nav_bar" msgid="4642708685386136807">"नेविगेशन बार"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"लेआउट"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"कुछ और बाएं बटन के प्रकार"</string>
@@ -996,6 +979,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"बाईं ओर सबसे नीचे ले जाएं"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"सबसे नीचे दाईं ओर ले जाएं"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"खारिज करें"</string>
+    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेविगेशन अपडेट हो गया. बदलाव करने के लिए \'सेटिंग\' पर जाएं."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेविगेशन अपडेट करने के लिए \'सेटिंग\' में जाएं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
@@ -1005,16 +994,12 @@
     <string name="quick_controls_title" msgid="525285759614231333">"फटाफट नियंत्रण"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"कंट्राेल जोड़ें"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"वह ऐप्लिकेशन चुनें जिससे आप कंट्राेल जोड़ना चाहते हैं"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="one">फ़िलहाल, <xliff:g id="NUMBER_1">%s</xliff:g> कंट्राेल पसंदीदा है.</item>
-      <item quantity="other">फ़िलहाल, <xliff:g id="NUMBER_1">%s</xliff:g> कंट्राेल पसंदीदा हैं.</item>
-    </plurals>
+    <!-- no translation found for controls_number_of_favorites (1057347832073807380) -->
     <string name="controls_favorite_default_title" msgid="967742178688938137">"कंट्राेल"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"झटपट ऐक्सेस पाने के लिए कंट्राेल चुनें"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"पसंदीदा"</string>
+    <string name="controls_favorite_header_all" msgid="7507855973418969992">"सभी"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"सभी कंट्रोल की सूची लोड नहीं हो सकी."</string>
+    <!-- no translation found for controls_favorite_other_zone_header (9089613266575525252) -->
     <skip />
 </resources>

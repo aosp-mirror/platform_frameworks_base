@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Allow"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB debugging not allowed"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Allow wireless debugging on this network?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Network Name (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi Address (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Always allow on this network"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Allow"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Wireless debugging not allowed"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"The user currently signed in to this device can’t turn on wireless debugging. To use this feature, switch to the primary user."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB port disabled"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"To protect your device from liquid or debris, the USB port is disabled and won’t detect any accessories.\n\nYou’ll be notified when it’s OK to use the USB port again."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB port enabled to detect chargers and accessories"</string>
@@ -488,6 +494,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Manage"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"History"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Silent notifications"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Alerting notifications"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversations"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Clear all silent notifications"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notifications paused by Do Not Disturb"</string>
@@ -687,7 +694,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Gets your attention with sound or vibration."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Keeps your attention with a floating shortcut to this content."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No recent bubbles"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="3106801169793396894">"Recently dismissed bubbles will appear here for easy retrieval."</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Recent bubbles and dismissed bubbles will appear here."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"These notifications can\'t be modified."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"This group of notifications cannot be configured here"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Proxied notification"</string>
@@ -972,6 +979,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Move bottom left"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Move bottom right"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Dismiss"</string>
+    <string name="bubbles_user_education_title" msgid="3385222165904578710">"Keep chats up front"</string>
+    <string name="bubbles_user_education_description" msgid="6663205638091146934">"New chats from <xliff:g id="APP_NAME">%1$s</xliff:g> will appear as bubbles. Tap a bubble to open it. Drag to move it.\n\nTap the bubble"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tap Manage to turn off bubbles from this app"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"System navigation updated. To make changes, go to Settings."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Go to Settings to update system navigation"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
@@ -981,13 +991,14 @@
     <string name="quick_controls_title" msgid="525285759614231333">"Quick controls"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"Add controls"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"Choose an app from which to add controls"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> current favourites.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> current favourite.</item>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> control added.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controls"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Choose controls for quick access"</string>
     <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"Favourites"</string>
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"All"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"The list of all controls could not be loaded."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Other"</string>
 </resources>

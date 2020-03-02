@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"అనుమతించు"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన వినియోగదారు USB డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక వినియోగదారుకి మారాలి."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"ఈ నెట్‌వర్క్ పై వైర్‌లెస్ డీబగ్గింగ్‌ను అనుమతిస్తారా?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"నెట్‌వర్క్ పేరు (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi చిరునామా (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"ఈ నెట్‌వర్క్ నుండి ఎల్లప్పుడూ అనుమతించు"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"అనుమతించు"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"వైర్‌లెస్ డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన యూజర్, వైర్‌లెస్ డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక యూజర్ కి స్విచ్ అవ్వండి."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB పోర్ట్‌ నిలిపివేయబడింది"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"మీ పరికరంలోకి నీరు లేదా చెత్తాచెదారం చేరిపోకుండా కాపాడటానికి, USB పోర్ట్ నిలిపివేయబడుతుంది, అలాగే యాక్సెసరీలు వేటిని గుర్తించదు.\n\nUSB పోర్ట్‌ను ఉపయోగించడం సురక్షితమేనని నిర్ధారించుకున్న తర్వాత, మళ్లీ మీకో నోటిఫికేషన్‌ రూపంలో తెలియజేయబడుతుంది."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ఛార్జర్‌లు, యాక్సెసరీలను గుర్తించే విధంగా USB పోర్ట్ ప్రారంభించబడింది"</string>
@@ -88,7 +94,7 @@
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"పరికరం ఆడియో"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే సంగీతం, కాల్‌లు, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"మైక్రోఫోన్"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"పరికరం ఆడియో, మైక్రో ఫోన్"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"పరికరం ఆడియో, మైక్రోఫోన్"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"ప్రారంభం"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"స్క్రీన్ రికార్డింగ్ చేయబడుతోంది"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"స్క్రీన్, ఆడియో రికార్డింగ్ చేయబడుతున్నాయి"</string>
@@ -115,7 +121,7 @@
     <string name="accessibility_menu" msgid="2701163794470513040">"మెను"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"యాక్సెస్ సామర్థ్యం"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"స్క్రీన్‌ను తిప్పండి"</string>
-    <string name="accessibility_recent" msgid="901641734769533575">"అవలోకనం"</string>
+    <string name="accessibility_recent" msgid="901641734769533575">"ఓవర్‌వ్యూ"</string>
     <string name="accessibility_search_light" msgid="524741790416076988">"వెతుకు"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"కెమెరా"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ఫోన్"</string>
@@ -236,7 +242,7 @@
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"శీఘ్ర సెట్టింగ్‌లు."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"లాక్ స్క్రీన్."</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"సెట్టింగ్‌లు"</string>
-    <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"అవలోకనం."</string>
+    <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"ఓవర్‌వ్యూ."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"కార్యాలయ లాక్ స్క్రీన్"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"మూసివేస్తుంది"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
@@ -488,6 +494,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"నిర్వహించండి"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"చరిత్ర"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"నిశ్శబ్ద నోటిఫికేషన్‌లు"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"అలర్ట్ చేసే నోటిఫికేషన్‌లు"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"సంభాషణలు"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"అన్ని నిశ్శబ్ద నోటిఫికేషన్‌లను క్లియర్ చేస్తుంది"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
@@ -619,7 +626,7 @@
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ఛార్జింగ్‌లో లేనప్పుడు స్థితి పట్టీ చిహ్నం లోపల బ్యాటరీ స్థాయి శాతం చూపుతుంది"</string>
     <string name="quick_settings" msgid="6211774484997470203">"శీఘ్ర సెట్టింగ్‌లు"</string>
     <string name="status_bar" msgid="4357390266055077437">"స్థితి పట్టీ"</string>
-    <string name="overview" msgid="3522318590458536816">"స్థూలదృష్టి"</string>
+    <string name="overview" msgid="3522318590458536816">"ఓవర్‌వ్యూ"</string>
     <string name="demo_mode" msgid="263484519766901593">"సిస్టమ్ UI డెమో మోడ్"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"డెమో మోడ్ ప్రారంభించండి"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"డెమో మోడ్ చూపు"</string>
@@ -686,10 +693,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"శబ్దం లేదా వైబ్రేషన్ లేకుండా దృష్టి కేంద్రీకరించడానికి మీకు సహాయపడుతుంది."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"శబ్దం లేదా వైబ్రేషన్‌తో మీరు దృష్టి సారించేలా చేస్తుంది."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ఫ్లోటింగ్ షార్ట్‌కట్‌తో మీ దృష్టిని ఈ కంటెంట్‌పై నిలిపి ఉంచుతుంది."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ఇటీవల బబుల్‌లు ఏవీ లేవు"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"ఇటీవలి బబుల్‌లు, తీసివేసిన బబుల్‌లు ఇక్కడ కనిపిస్తాయి."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ఈ నోటిఫికేషన్‌ల సమూహాన్ని ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
@@ -974,6 +979,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"దిగువ ఎడమవైపునకు తరలించు"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"దిగవు కుడివైపునకు జరుపు"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"విస్మరించు"</string>
+    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"సిస్టమ్ నావిగేషన్ అప్‌డేట్ చేయబడింది. మార్పులు చేయడానికి, సెట్టింగ్‌లకు వెళ్లండి."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"సిస్టమ్ నావిగేషన్‌ను అప్‌డేట్ చేయడానికి సెట్టింగ్‌లకు వెళ్లండి"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"స్టాండ్‌బై"</string>
@@ -983,16 +994,12 @@
     <string name="quick_controls_title" msgid="525285759614231333">"త్వరిత నియంత్రణలు"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"నియంత్రణలను జోడించండి"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"దాని నుండి నియంత్రణలను జోడించేలా ఒక యాప్‌ను ఎంచుకోండి"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> ప్రస్తుత ఇష్టాలు.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> ప్రస్తుత ఇష్టం.</item>
-    </plurals>
+    <!-- no translation found for controls_number_of_favorites (1057347832073807380) -->
     <string name="controls_favorite_default_title" msgid="967742178688938137">"నియంత్రణలు"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"త్వరిత యాక్సెస్ కోసం నియంత్రణలను ఎంచుకోండి"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
+    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"ఇష్టమైనవి"</string>
+    <string name="controls_favorite_header_all" msgid="7507855973418969992">"అన్ని"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"అన్ని నియంత్రణలు గల జాబితాను లోడ్ చేయలేకపోయాము."</string>
+    <!-- no translation found for controls_favorite_other_zone_header (9089613266575525252) -->
     <skip />
 </resources>
