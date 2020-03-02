@@ -4914,6 +4914,9 @@ package android.net {
     field public static final int TETHER_ERROR_UNKNOWN_IFACE = 1; // 0x1
     field public static final int TETHER_ERROR_UNSUPPORTED = 3; // 0x3
     field public static final int TETHER_ERROR_UNTETHER_IFACE_ERROR = 7; // 0x7
+    field public static final int TETHER_HARDWARE_OFFLOAD_FAILED = 2; // 0x2
+    field public static final int TETHER_HARDWARE_OFFLOAD_STARTED = 1; // 0x1
+    field public static final int TETHER_HARDWARE_OFFLOAD_STOPPED = 0; // 0x0
   }
 
   public static interface TetheringManager.OnTetheringEntitlementResultListener {
@@ -4930,6 +4933,7 @@ package android.net {
     ctor public TetheringManager.TetheringEventCallback();
     method public void onClientsChanged(@NonNull java.util.Collection<android.net.TetheredClient>);
     method public void onError(@NonNull String, int);
+    method public void onOffloadStatusChanged(int);
     method @Deprecated public void onTetherableInterfaceRegexpsChanged(@NonNull android.net.TetheringManager.TetheringInterfaceRegexps);
     method public void onTetherableInterfacesChanged(@NonNull java.util.List<java.lang.String>);
     method public void onTetheredInterfacesChanged(@NonNull java.util.List<java.lang.String>);
