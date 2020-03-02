@@ -961,17 +961,19 @@ public class ResourcesManager {
                 // Rebase each Resources associated with this Activity.
                 final int refCount = activityResources.activityResources.size();
                 for (int i = 0; i < refCount; i++) {
-                    WeakReference<Resources> weakResRef = activityResources.activityResources.get(
-                            i);
+                    final WeakReference<Resources> weakResRef =
+                            activityResources.activityResources.get(i);
 
-                    Resources resources = weakResRef.get();
+                    final Resources resources = weakResRef.get();
                     if (resources == null) {
                         continue;
                     }
 
-                    ResourcesKey newKey = rebaseActivityOverrideConfig(resources, oldConfig,
+                    final ResourcesKey newKey = rebaseActivityOverrideConfig(resources, oldConfig,
                             overrideConfig, displayId);
-                    updateActivityResources(resources, newKey, false);
+                    if (newKey != null) {
+                        updateActivityResources(resources, newKey, false);
+                    }
                 }
             }
         } finally {
@@ -983,8 +985,9 @@ public class ResourcesManager {
      * Rebases an updated override config over any old override config and returns the new one
      * that an Activity's Resources should be set to.
      */
-    private ResourcesKey rebaseActivityOverrideConfig(Resources resources,
-            Configuration oldOverrideConfig, @Nullable Configuration newOverrideConfig,
+    @Nullable
+    private ResourcesKey rebaseActivityOverrideConfig(@NonNull Resources resources,
+            @NonNull Configuration oldOverrideConfig, @Nullable Configuration newOverrideConfig,
             int displayId) {
         // Extract the ResourcesKey that was last used to create the Resources for this
         // activity.
