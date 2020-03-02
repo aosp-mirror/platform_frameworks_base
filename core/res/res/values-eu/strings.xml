@@ -89,7 +89,7 @@
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ezin duzu egin larrialdi-deirik Wi-Fi bidez"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertak"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Dei-desbideratzea"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Larrialdi-deiak soilik jasotzeko modua"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Larrialdi-zerbitzuen deiak jasotzeko modua"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Datu-konexioaren egoera"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS mezuak"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Erantzungailuko mezuak"</string>
@@ -191,10 +191,12 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Erabilera pertsonalerako utzi du gailua administratzaileak"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Jabeak kudeatzen du gailua"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Erakundeak kudeatzen du gailua eta baliteke sareko trafikoa gainbegiratzea. Sakatu hau xehetasunak ikusteko."</string>
-    <!-- no translation found for location_changed_notification_title (4119726617105166830) -->
-    <skip />
-    <!-- no translation found for location_changed_notification_text (198907268219396399) -->
-    <skip />
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"Administratzaileak kokapen-ezarpenak aldatu ditu"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"Sakatu kokapen-ezarpenak ikusteko."</string>
+    <string name="country_detector" msgid="7023275114706088854">"Herrialde-hautemailea"</string>
+    <string name="location_service" msgid="2439187616018455546">"Kokapen-zerbitzua"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"Sentsorearen jakinarazpen-zerbitzua"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"Ilunabarreko zerbitzua"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Gailuko datuak ezabatu egingo dira"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Ezin da erabili administratzeko aplikazioa. Ezabatu egingo da gailuko eduki guztia.\n\nZalantzarik baduzu, jarri erakundeko administratzailearekin harremanetan."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> aplikazioak desgaitu egin du inprimatzeko aukera."</string>
@@ -247,6 +249,10 @@
       <item quantity="other">Akatsen txostenaren argazkia aterako da <xliff:g id="NUMBER_1">%d</xliff:g> segundo barru.</item>
       <item quantity="one">Akatsen txostenaren argazkia aterako da <xliff:g id="NUMBER_0">%d</xliff:g> segundo barru.</item>
     </plurals>
+    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
+    <skip />
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Isilik modua"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Soinua DESAKTIBATUTA dago"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Soinua AKTIBATUTA dago"</string>
@@ -433,8 +439,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Pribilegioa duen sistema-aplikazio honek edonoiz erabil dezake kamera argazkiak ateratzeko eta bideoak grabatzeko. Halaber, android.permission.CAMERA baimena izan behar du aplikazioak."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolatu dardara"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko aukera ematen die aplikazioei."</string>
-    <!-- no translation found for permdesc_vibrator_state (7050024956594170724) -->
-    <skip />
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Dardara-egoera atzitzeko baimena ematen dio aplikazioari."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"deitu zuzenean telefono-zenbakietara"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"Telefono-zenbakietara zuk esku hartu gabe deitzeko baimena ematen die aplikazioei. Horrela, ustekabeko gastuak edo deiak eragin daitezke. Aplikazio gaiztoek erabil dezakete zuk berretsi gabeko deiak eginda gastuak eragiteko."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"atzitu IMS dei-zerbitzua"</string>
@@ -497,7 +502,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Tableta WiMAX sareetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Android TV gailua WiMAX sareetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Telefonoa WiMAX sareetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_bluetooth" msgid="586333280736937209">"partekatu Bluetooth gailuekin"</string>
+    <string name="permlab_bluetooth" msgid="586333280736937209">"partekatu Bluetooth bidezko gailuekin"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Tabletaren Bluetooth konfigurazioa ikusteko eta parekatutako gailuekin konexioak egiteko eta onartzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV gailuaren Bluetooth konexioaren konfigurazioa ikusteko eta parekatutako gailuekin konexioak sortzeko eta onartzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Telefonoaren Bluetooth konfigurazioa ikusteko eta parekatutako gailuekin konexioak egiteko eta onartzeko baimena ematen die aplikazioei."</string>
@@ -549,8 +554,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Saiatu berriro."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ez da erregistratu hatz-markarik."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Gailu honek ez du hatz-marken sentsorerik."</string>
-    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sentsorea aldi baterako desgaitu da."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> hatza"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -594,8 +598,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ezin da egiaztatu aurpegia. Saiatu berriro."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Ez duzu konfiguratu aurpegiaren bidez desblokeatzeko aukera."</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"Gailu honek ez du onartzen aurpegiaren bidez desblokeatzea."</string>
-    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
-    <skip />
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"Sentsorea aldi baterako desgaitu da."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> aurpegia"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1321,6 +1324,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB bidezko arazketa konektatuta"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Sakatu USB bidezko arazketa desaktibatzeko"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Hautatu USB bidezko arazketa desgaitzeko."</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Konektatu da hari gabeko arazketa"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Sakatu hau hari gabeko arazketa desaktibatzeko"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Hautatu hau hari gabeko arazketa desgaitzeko"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Proba-materialeko modua gaitu da"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Proba-materialaren modua desgaitzeko, berrezarri jatorrizko datuak."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serie-kontsola gaituta dago"</string>
@@ -1557,7 +1563,7 @@
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefonoa"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Konektatu bozgorailuak oinarrira"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
-    <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Aurikularrak"</string>
+    <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Entzungailuak"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth bidezko audioa"</string>
@@ -1624,8 +1630,7 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> webgunearen atzeko planoak hasitako aurreko planoko zerbitzuak ez du izango erabili bitarteko baimenik etorkizuneko R konpilazioetan. Joan go/r-bg-fgs-restriction atalera eta egin akatsaren txostena."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Bolumena gomendatutako mailatik gora igo nahi duzu?\n\nMusika bolumen handian eta denbora luzez entzuteak entzumena kalte diezazuke."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erabilerraztasun-lasterbidea erabili nahi duzu?"</string>
-    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
-    <skip />
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Lasterbidea aktibatuta dagoenean, bi bolumen-botoiak hiru segundoz sakatuta abiaraziko da erabilerraztasun-eginbidea."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editatu lasterbideak"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Utzi"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desaktibatu lasterbidea"</string>
@@ -1848,6 +1853,8 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Kategoriarik gabea"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Zuk ezarri duzu jakinarazpen hauen garrantzia."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Garrantzitsua da eragiten dien pertsonengatik."</string>
+    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
+    <skip />
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu <xliff:g id="APP">%1$s</xliff:g> aplikazioari? (Badago kontu hori duen erabiltzaile bat)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu <xliff:g id="APP">%1$s</xliff:g> aplikazioari?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Gehitu hizkuntza"</string>
@@ -2021,20 +2028,14 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Murriztuen edukiontzian ezarri da <xliff:g id="PACKAGE_NAME">%1$s</xliff:g>"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Pertsonala"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Lanekoa"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
-    <skip />
-    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
-    <skip />
-    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Ezin da partekatu laneko aplikazioekin"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Ezin da partekatu aplikazio pertsonalekin"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"IKT administratzaileak blokeatu egin du edukia aplikazio pertsonalen eta laneko aplikazioen artean partekatzeko aukera"</string>
+    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Aktibatu laneko aplikazioak"</string>
+    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Aktibatu laneko aplikazioak, haiek eta kontaktuak atzitzeko"</string>
+    <string name="resolver_no_apps_available" msgid="7710339903040989654">"Ez dago aplikaziorik erabilgarri"</string>
+    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Ezin izan dugu aurkitu aplikaziorik"</string>
+    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Aktibatu laneko profila"</string>
+    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Grabatu edo erreproduzitu telefono-deietako audioa"</string>
+    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Aplikazio hau markagailu lehenetsia denean, telefono-deietako audioa grabatu edo erreproduzitzeko aukera ematen dio."</string>
 </resources>
