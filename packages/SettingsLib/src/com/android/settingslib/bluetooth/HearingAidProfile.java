@@ -162,7 +162,9 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         if (mBluetoothAdapter == null) {
             return false;
         }
-        return mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_ALL);
+        return device == null
+                ? mBluetoothAdapter.removeActiveDevice(ACTIVE_DEVICE_ALL)
+                : mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_ALL);
     }
 
     public List<BluetoothDevice> getActiveDevices() {
