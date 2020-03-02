@@ -680,6 +680,8 @@
     <dimen name="notification_media_image_max_width_low_ram">100dp</dimen>
     <!-- The size of the right icon image when on low ram -->
     <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size</dimen>
+    <!-- The maximum size of the grayscale icon -->
+    <dimen name="notification_grayscale_icon_max_size">256dp</dimen>
 
     <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
 
