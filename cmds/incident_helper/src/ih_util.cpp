@@ -244,7 +244,7 @@ Reader::Reader(const int fd)
 Reader::~Reader()
 {
     if (mFile != nullptr) fclose(mFile);
-    free(mBuffer);
+    delete[] mBuffer;
 }
 
 bool Reader::readLine(std::string* line) {
