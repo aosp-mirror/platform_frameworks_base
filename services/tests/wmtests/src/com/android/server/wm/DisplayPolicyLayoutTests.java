@@ -269,6 +269,26 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
     }
 
+    @Test
+    public void layoutWindowLw_fitDisplayCutout() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+        addDisplayCutout();
+
+        mWindow.mAttrs.setFitInsetsTypes(Type.displayCutout());
+        mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), DISPLAY_CUTOUT_HEIGHT, 0);
+        assertInsetByTopBottom(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0);
+        assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
     // TODO(b/118118435): remove after migration
     @Test
     public void layoutWindowLw_appDrawsBarsLegacy() {
