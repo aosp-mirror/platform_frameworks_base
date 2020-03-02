@@ -67,6 +67,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -155,6 +156,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(context);
+    }
+
+    @After
+    public void tearDown() {
+        mKeyguardUpdateMonitor.destroy();
     }
 
     @Test
