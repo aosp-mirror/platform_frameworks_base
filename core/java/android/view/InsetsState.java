@@ -24,6 +24,7 @@ import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
+import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
 import static android.view.WindowInsets.Type.isVisibleInsetsType;
@@ -71,6 +72,10 @@ public class InsetsState implements Parcelable {
             ITYPE_RIGHT_GESTURES,
             ITYPE_TOP_TAPPABLE_ELEMENT,
             ITYPE_BOTTOM_TAPPABLE_ELEMENT,
+            ITYPE_LEFT_DISPLAY_CUTOUT,
+            ITYPE_TOP_DISPLAY_CUTOUT,
+            ITYPE_RIGHT_DISPLAY_CUTOUT,
+            ITYPE_BOTTOM_DISPLAY_CUTOUT,
             ITYPE_IME
     })
     public @interface InternalInsetsType {}
@@ -88,8 +93,13 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 7;
     public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 8;
 
+    public static final int ITYPE_LEFT_DISPLAY_CUTOUT = 9;
+    public static final int ITYPE_TOP_DISPLAY_CUTOUT = 10;
+    public static final int ITYPE_RIGHT_DISPLAY_CUTOUT = 11;
+    public static final int ITYPE_BOTTOM_DISPLAY_CUTOUT = 12;
+
     /** Input method window. */
-    public static final int ITYPE_IME = 9;
+    public static final int ITYPE_IME = 13;
 
     static final int LAST_TYPE = ITYPE_IME;
 
@@ -185,8 +195,8 @@ public class InsetsState implements Parcelable {
         final int softInputAdjustMode = legacySoftInputMode & SOFT_INPUT_MASK_ADJUST;
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
                 alwaysConsumeSystemBars, cutout, softInputAdjustMode == SOFT_INPUT_ADJUST_RESIZE
-                        ? systemBars() | ime()
-                        : systemBars(),
+                        ? systemBars() | displayCutout() | ime()
+                        : systemBars() | displayCutout(),
                 sNewInsetsMode == NEW_INSETS_MODE_FULL
                         && (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
     }
@@ -358,6 +368,12 @@ public class InsetsState implements Parcelable {
         if ((types & Type.CAPTION_BAR) != 0) {
             result.add(ITYPE_CAPTION_BAR);
         }
+        if ((types & Type.DISPLAY_CUTOUT) != 0) {
+            result.add(ITYPE_LEFT_DISPLAY_CUTOUT);
+            result.add(ITYPE_TOP_DISPLAY_CUTOUT);
+            result.add(ITYPE_RIGHT_DISPLAY_CUTOUT);
+            result.add(ITYPE_BOTTOM_DISPLAY_CUTOUT);
+        }
         if ((types & Type.IME) != 0) {
             result.add(ITYPE_IME);
         }
@@ -388,6 +404,11 @@ public class InsetsState implements Parcelable {
             case ITYPE_TOP_TAPPABLE_ELEMENT:
             case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
                 return Type.TAPPABLE_ELEMENT;
+            case ITYPE_LEFT_DISPLAY_CUTOUT:
+            case ITYPE_TOP_DISPLAY_CUTOUT:
+            case ITYPE_RIGHT_DISPLAY_CUTOUT:
+            case ITYPE_BOTTOM_DISPLAY_CUTOUT:
+                return Type.DISPLAY_CUTOUT;
             default:
                 throw new IllegalArgumentException("Unknown type: " + type);
         }
@@ -437,6 +458,14 @@ public class InsetsState implements Parcelable {
                 return "ITYPE_TOP_TAPPABLE_ELEMENT";
             case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
                 return "ITYPE_BOTTOM_TAPPABLE_ELEMENT";
+            case ITYPE_LEFT_DISPLAY_CUTOUT:
+                return "ITYPE_LEFT_DISPLAY_CUTOUT";
+            case ITYPE_TOP_DISPLAY_CUTOUT:
+                return "ITYPE_TOP_DISPLAY_CUTOUT";
+            case ITYPE_RIGHT_DISPLAY_CUTOUT:
+                return "ITYPE_RIGHT_DISPLAY_CUTOUT";
+            case ITYPE_BOTTOM_DISPLAY_CUTOUT:
+                return "ITYPE_BOTTOM_DISPLAY_CUTOUT";
             case ITYPE_IME:
                 return "ITYPE_IME";
             default:
