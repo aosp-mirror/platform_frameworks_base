@@ -4503,42 +4503,42 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         public void onAppOpsChanged(int code, int uid, @Nullable String packageName, int mode) {
-            if (mIsFuseEnabled) {
-                // When using FUSE, we may need to kill the app if the op changes
-                switch(code) {
-                    case OP_REQUEST_INSTALL_PACKAGES:
-                        // Always kill regardless of op change, to remount apps /storage
-                        killAppForOpChange(code, uid, packageName);
-                        return;
-                    case OP_MANAGE_EXTERNAL_STORAGE:
-                        if (mode != MODE_ALLOWED) {
-                            // Only kill if op is denied, to lose external_storage gid
-                            // Killing when op is granted to pickup the gid automatically, results
-                            // in a bad UX, especially since the gid only gives access to unreliable
-                            // volumes, USB OTGs that are rarely mounted. The app will get the
-                            // external_storage gid on next organic restart.
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (mIsFuseEnabled) {
+                    // When using FUSE, we may need to kill the app if the op changes
+                    switch(code) {
+                        case OP_REQUEST_INSTALL_PACKAGES:
+                            // Always kill regardless of op change, to remount apps /storage
                             killAppForOpChange(code, uid, packageName);
-                        }
-                        return;
-                    case OP_LEGACY_STORAGE:
-                        updateLegacyStorageApps(packageName, uid, mode == MODE_ALLOWED);
-                        return;
+                            return;
+                        case OP_MANAGE_EXTERNAL_STORAGE:
+                            if (mode != MODE_ALLOWED) {
+                                // Only kill if op is denied, to lose external_storage gid
+                                // Killing when op is granted to pickup the gid automatically,
+                                // results in a bad UX, especially since the gid only gives access
+                                // to unreliable volumes, USB OTGs that are rarely mounted. The app
+                                // will get the external_storage gid on next organic restart.
+                                killAppForOpChange(code, uid, packageName);
+                            }
+                            return;
+                        case OP_LEGACY_STORAGE:
+                            updateLegacyStorageApps(packageName, uid, mode == MODE_ALLOWED);
+                            return;
+                    }
                 }
-            }
 
-            if (mode == MODE_ALLOWED && (code == OP_READ_EXTERNAL_STORAGE
-                    || code == OP_WRITE_EXTERNAL_STORAGE
-                    || code == OP_REQUEST_INSTALL_PACKAGES)) {
-                final long token = Binder.clearCallingIdentity();
-                try {
+                if (mode == MODE_ALLOWED && (code == OP_READ_EXTERNAL_STORAGE
+                                || code == OP_WRITE_EXTERNAL_STORAGE
+                                || code == OP_REQUEST_INSTALL_PACKAGES)) {
                     final UserManagerInternal userManagerInternal =
                             LocalServices.getService(UserManagerInternal.class);
                     if (userManagerInternal.isUserInitialized(UserHandle.getUserId(uid))) {
                         onExternalStoragePolicyChanged(uid, packageName);
                     }
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
