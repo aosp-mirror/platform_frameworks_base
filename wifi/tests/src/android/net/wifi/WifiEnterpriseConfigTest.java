@@ -521,4 +521,23 @@ public class WifiEnterpriseConfigTest {
             // expected exception.
         }
     }
+
+    /** Verifies that the EAP inner method is reset when we switch to Unauth-TLS */
+    @Test
+    public void eapPhase2MethodForUnauthTls() {
+        // Initially select an EAP method that supports an phase2.
+        mEnterpriseConfig.setEapMethod(Eap.PEAP);
+        mEnterpriseConfig.setPhase2Method(Phase2.MSCHAPV2);
+        assertEquals("PEAP", getSupplicantEapMethod());
+        assertEquals("\"auth=MSCHAPV2\"", getSupplicantPhase2Method());
+
+        // Change the EAP method to another type which supports a phase2.
+        mEnterpriseConfig.setEapMethod(Eap.TTLS);
+        assertEquals("TTLS", getSupplicantEapMethod());
+        assertEquals("\"auth=MSCHAPV2\"", getSupplicantPhase2Method());
+
+        // Change the EAP method to Unauth-TLS which does not support a phase2.
+        mEnterpriseConfig.setEapMethod(Eap.UNAUTH_TLS);
+        assertEquals(null, getSupplicantPhase2Method());
+    }
 }
