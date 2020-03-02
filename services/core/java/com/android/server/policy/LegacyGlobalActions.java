@@ -746,8 +746,8 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
             } else if (TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED.equals(action)) {
                 // Airplane mode can be changed after ECM exits if airplane toggle button
                 // is pressed during ECM mode
-                if (!(intent.getBooleanExtra("PHONE_IN_ECM_STATE", false)) &&
-                        mIsWaitingForEcmExit) {
+                if (!(intent.getBooleanExtra(TelephonyManager.EXTRA_PHONE_IN_ECM_STATE, false))
+                        && mIsWaitingForEcmExit) {
                     mIsWaitingForEcmExit = false;
                     changeAirplaneModeSystemSetting(true);
                 }
