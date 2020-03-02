@@ -335,9 +335,9 @@ public final class DataManagerTest {
             throws IntentFilter.MalformedMimeTypeException {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
         AppTarget appTarget = new AppTarget.Builder(
-                    new AppTargetId(TEST_SHORTCUT_ID),
-                    TEST_PKG_NAME,
-                    UserHandle.of(USER_ID_PRIMARY))
+                new AppTargetId(TEST_SHORTCUT_ID),
+                TEST_PKG_NAME,
+                UserHandle.of(USER_ID_PRIMARY))
                 .setClassName(TEST_CLASS_NAME)
                 .build();
         AppTargetEvent appTargetEvent =
@@ -347,8 +347,7 @@ public final class DataManagerTest {
 
         mDataManager.reportShareTargetEvent(appTargetEvent, intentFilter);
 
-        List<Range<Long>> activeShareTimeSlots = getActiveSlotsForTestShortcut(
-                Event.SHARE_EVENT_TYPES);
+        List<Range<Long>> activeShareTimeSlots = getActiveSlotsForAppShares();
         assertEquals(1, activeShareTimeSlots.size());
     }
 
@@ -692,13 +691,22 @@ public final class DataManagerTest {
         return conversations;
     }
 
-    private List<Range<Long>> getActiveSlotsForTestShortcut(
-            Set<Integer> eventTypes) {
+    private List<Range<Long>> getActiveSlotsForTestShortcut(Set<Integer> eventTypes) {
         List<Range<Long>> activeSlots = new ArrayList<>();
         mDataManager.forPackagesInProfile(USER_ID_PRIMARY, packageData ->
                 activeSlots.addAll(
                         packageData.getEventHistory(TEST_SHORTCUT_ID)
                                 .getEventIndex(eventTypes)
+                                .getActiveTimeSlots()));
+        return activeSlots;
+    }
+
+    private List<Range<Long>> getActiveSlotsForAppShares() {
+        List<Range<Long>> activeSlots = new ArrayList<>();
+        mDataManager.forPackagesInProfile(USER_ID_PRIMARY, packageData ->
+                activeSlots.addAll(
+                        packageData.getClassLevelEventHistory(TEST_CLASS_NAME)
+                                .getEventIndex(Event.SHARE_EVENT_TYPES)
                                 .getActiveTimeSlots()));
         return activeSlots;
     }
