@@ -248,10 +248,9 @@ public class MediaRouter2ManagerTest {
 
         assertEquals(2, sessions.size());
 
-        MediaRouter2Manager.RoutingController routingController =
-                mManager.getControllerForSession(sessions.get(1));
+        RoutingSessionInfo sessionInfo = sessions.get(1);
         awaitOnRouteChangedManager(
-                () -> routingController.release(),
+                () -> mManager.releaseSession(sessionInfo),
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), null));
         assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
@@ -283,8 +282,7 @@ public class MediaRouter2ManagerTest {
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
 
         assertEquals(2, sessions.size());
-        MediaRouter2Manager.RoutingController routingController =
-                mManager.getControllerForSession(sessions.get(1));
+        RoutingSessionInfo sessionInfo = sessions.get(1);
 
         awaitOnRouteChangedManager(
                 () -> mManager.selectRoute(mPackageName, routes.get(ROUTE_ID5_TO_TRANSFER_TO)),
@@ -292,7 +290,7 @@ public class MediaRouter2ManagerTest {
                 route -> TextUtils.equals(route.getClientPackageName(), mPackageName));
 
         awaitOnRouteChangedManager(
-                () -> routingController.release(),
+                () -> mManager.releaseSession(sessionInfo),
                 ROUTE_ID5_TO_TRANSFER_TO,
                 route -> TextUtils.equals(route.getClientPackageName(), null));
     }
@@ -573,7 +571,7 @@ public class MediaRouter2ManagerTest {
         addManagerCallback(new MediaRouter2Manager.Callback());
 
         for (RoutingSessionInfo session : mManager.getActiveSessions()) {
-            mManager.getControllerForSession(session).release();
+            mManager.releaseSession(session);
         }
     }
 }
