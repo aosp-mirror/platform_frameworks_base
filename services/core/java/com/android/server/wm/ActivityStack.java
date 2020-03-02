@@ -556,9 +556,9 @@ class ActivityStack extends Task {
         }
     }
 
-    ActivityStack(DisplayContent display, int id, ActivityStackSupervisor supervisor,
-            int activityType, ActivityInfo info, Intent intent) {
-        this(supervisor.mService, id, info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
+    ActivityStack(ActivityTaskManagerService atmService, int id, int activityType,
+            ActivityInfo info, Intent intent) {
+        this(atmService, id, info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
                 null /*taskDescription*/, null /*stack*/);
 
         setActivityType(activityType);

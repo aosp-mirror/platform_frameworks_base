@@ -111,7 +111,6 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        Task.setTaskFactory(null);
         mParentBounds = new Rect(10 /*left*/, 30 /*top*/, 80 /*right*/, 60 /*bottom*/);
         removeGlobalMinSizeRestriction();
     }
@@ -148,11 +147,16 @@ public class TaskRecordTests extends ActivityTestsBase {
         TestTaskFactory factory = new TestTaskFactory();
         Task.setTaskFactory(factory);
 
-        assertFalse(factory.mCreated);
+        try {
+            assertFalse(factory.mCreated);
 
-        Task.create(null, 0, null, null, null, null);
+            Task.create(mService, 0 /*taskId*/, 0 /*activityType*/,
+                    new ActivityInfo(), new Intent());
 
-        assertTrue(factory.mCreated);
+            assertTrue(factory.mCreated);
+        } finally {
+            Task.setTaskFactory(null);
+        }
     }
 
     @Test
@@ -509,7 +513,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         info.targetActivity = targetClassName;
 
         final Task task = Task.create(mService, 1 /* taskId */, info, intent,
-                null /* taskDescription */, null /*stack*/);
+                null /* voiceSession */, null /* voiceInteractor */, null /*stack*/);
         assertEquals("The alias activity component should be saved in task intent.", aliasClassName,
                 task.intent.getComponent().getClassName());
 
@@ -997,17 +1001,16 @@ public class TaskRecordTests extends ActivityTestsBase {
         private boolean mCreated = false;
 
         @Override
-        Task create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
-                Intent intent, IVoiceInteractionSession voiceSession,
-                IVoiceInteractor voiceInteractor, ActivityStack stack) {
+        Task create(ActivityTaskManagerService service, int taskId, int activityType,
+                ActivityInfo info, Intent intent) {
             mCreated = true;
             return null;
         }
 
         @Override
         Task create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
-                Intent intent, ActivityManager.TaskDescription taskDescription,
-                ActivityStack stack) {
+                Intent intent, IVoiceInteractionSession voiceSession,
+                IVoiceInteractor voiceInteractor, ActivityStack stack) {
             mCreated = true;
             return null;
         }
