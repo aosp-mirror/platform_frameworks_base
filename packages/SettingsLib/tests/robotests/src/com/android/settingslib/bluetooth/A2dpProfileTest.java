@@ -203,4 +203,10 @@ public class A2dpProfileTest {
         assertThat(mProfile.getHighQualityAudioOptionLabel(mDevice)).isEqualTo(
                 String.format(KNOWN_CODEC_LABEL, config.getCodecName()));
     }
+
+    @Test
+    public void setActiveDevice_returnTrue() {
+        assertThat(mProfile.setActiveDevice(null)).isTrue();
+        assertThat(mProfile.setActiveDevice(mDevice)).isTrue();
+    }
 }
