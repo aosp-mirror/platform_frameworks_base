@@ -420,6 +420,9 @@ public final class SurfaceControl implements Parcelable {
         if (mNativeObject != 0) {
             release();
         }
+      	if (nativeObject != 0) {
+            mCloseGuard.open("release");
+        }
         mNativeObject = nativeObject;
     }
 
@@ -867,14 +870,12 @@ public final class SurfaceControl implements Parcelable {
 
     private SurfaceControl(Parcel in) {
         readFromParcel(in);
-        mCloseGuard.open("release");
     }
 
     /**
      * @hide
      */
     public SurfaceControl() {
-        mCloseGuard.open("release");
     }
 
     public void readFromParcel(Parcel in) {
@@ -972,8 +973,8 @@ public final class SurfaceControl implements Parcelable {
         if (mNativeObject != 0) {
             nativeRelease(mNativeObject);
             mNativeObject = 0;
+            mCloseGuard.close();
         }
-        mCloseGuard.close();
     }
 
     /**
