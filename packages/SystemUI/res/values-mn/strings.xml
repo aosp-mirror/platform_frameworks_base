@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Зөвшөөрөх"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB алдаа засалт хийх боломжгүй"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Энэ төхөөрөмжид нэвтэрсэн хэрэглэгч USB дебаг хийх онцлогийг асаах боломжгүй байна. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Энэ сүлжээн дээр утасгүй дебагийг зөвшөөрөх үү?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Сүлжээний нэр (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi хаяг (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Энэ сүлжээн дээр үргэлж зөвшөөрөх"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Зөвшөөрөх"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Утасгүй дебагийг зөвшөөрөөгүй байна"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Энэ төхөөрөмжид одоогоор нэвтэрсэн байгаа хэрэглэгч утасгүй дебагийг асаах боломжгүй. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB портыг идэвхгүй болгосон"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Таны төхөөрөмжийг шингэн зүйл эсвэл бохирдлоос хамгаалахын тулд USB портыг идэвхгүй болгосон бөгөөд энэ нь ямар ч дагалдах хэрэгслийг илрүүлэхгүй.\n\nТанд USB портыг дахин ашиглахад аюулгүй болох үед мэдэгдэх болно."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Цэнэглэгч болон нэмэлт хэрэгслийг илрүүлэхийн тулд USB портыг идэвхжүүлсэн"</string>
@@ -488,6 +494,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Удирдах"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Түүх"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Чимээгүй мэдэгдэл"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Сэрэмжлүүлэх мэдэгдэл"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Харилцан яриа"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Бүх чимээгүй мэдэгдлийг арилгах"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Бүү саад бол горимын түр зогсоосон мэдэгдэл"</string>
@@ -686,10 +693,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Дуу эсвэл чичиргээгүйгээр танд төвлөрөхөд тусална."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Дуу эсвэл чичиргээгүйгээр таны анхаарлыг татна."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Энэ контентын хөвөн гарч ирэх товчлолтойгоор таны анхаарлыг татдаг."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Саяхны бөмбөлөг алга байна"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Саяхны бөмбөлгүүд болон үл хэрэгссэн бөмбөлгүүд энд харагдана."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Эдгээр мэдэгдлийг өөрчлөх боломжгүй."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Энэ бүлэг мэдэгдлийг энд тохируулах боломжгүй байна"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Прокси хийсэн мэдэгдэл"</string>
@@ -974,6 +979,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Зүүн доош зөөх"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Баруун доош зөөх"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Үл хэрэгсэх"</string>
+    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Системийн навигацыг шинэчиллээ. Өөрчлөхийн тулд Тохиргоо руу очно уу."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Системийн навигацыг шинэчлэхийн тулд Тохиргоо руу очно уу"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Зогсолтын горим"</string>
@@ -983,16 +994,14 @@
     <string name="quick_controls_title" msgid="525285759614231333">"Шуурхай хяналтууд"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"Хяналт нэмэх"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"Хяналт нэмэх апп сонгох"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other">Одоогоор <xliff:g id="NUMBER_1">%s</xliff:g> дуртай зүйл байна.</item>
-      <item quantity="one">Одоогоор <xliff:g id="NUMBER_0">%s</xliff:g> дуртай зүйл байна.</item>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> хяналтыг нэмлээ.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> хяналтыг нэмлээ.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Хяналт"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Шуурхай хандалтын хяналт сонгох"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"Дуртай"</string>
+    <string name="controls_favorite_header_all" msgid="7507855973418969992">"Бүх"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Бүх хяналтын жагсаалтыг ачаалж чадсангүй."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Бусад"</string>
 </resources>

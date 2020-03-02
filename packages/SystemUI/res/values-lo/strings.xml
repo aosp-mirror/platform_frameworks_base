@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"ອະນຸຍາດ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"ບໍ່​ອະ​ນຸ​ຍາດ​ໃຫ້​ມີ​ການ​ແກ້​ໄຂ​ບັນ​ຫາ USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"ຜູ້ໃຊ້ທີ່ກຳລັງເຂົ້າສູ່ລະບົບອຸປະກອນຢູ່ໃນຕອນນີ້ບໍ່ສາມາດເປີດໃຊ້ການດີບັກ USB ໄດ້. ເພື່ອໃຊ້ຄຸນສົມບັດນີ້, ໃຫ້ສະຫຼັບໄປໃຊ້ຜູ້ໃຊ້ຫຼັກ."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"ອະນຸຍາດການດີບັກໄຮ້ສາຍຢູ່ເຄືອຂ່າຍນີ້ບໍ?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"ຊື່ເຄືອຂ່າຍ (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nທີ່ຢູ່ Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"ອະນຸຍາດຕະຫຼອດຢູ່ເຄືອຂ່າຍນີ້"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"ອະນຸຍາດ"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"ບໍ່ອະນຸຍາດໃຫ້ໃຊ້ການດີບັກໄຮ້ສາຍ"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"ຜູ້ໃຊ້ທີ່ກຳລັງເຂົ້າສູ່ລະບົບອຸປະກອນຢູ່ໃນຕອນນີ້ບໍ່ສາມາດເປີດໃຊ້ການດີບັກໄຮ້ສາຍໄດ້. ເພື່ອໃຊ້ຄຸນສົມບັດນີ້, ໃຫ້ສະຫຼັບໄປໃຊ້ຜູ້ໃຊ້ຫຼັກ."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"ປິດການນຳໃຊ້ຜອດ USB ແລ້ວ"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"ເພື່ອປົກປ້ອງອຸປະກອນຂອງທ່ານຈາກຂອງແຫລວ ຫຼື ເສດດິນຕ່າງໆ, ຜອດ USB ຈຶ່ງຖືກປິດການນຳໃຊ້ ແລະ ຈະບໍ່ກວດຫາອຸປະກອນເສີມໃດໆ.\n\nທ່ານຈະໄດ້ຮັບການແຈ້ງເຕືອນເມື່ອສາມາດໃຊ້ຜອດ USB ໄດ້ອີກເທື່ອໜຶ່ງ."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ເປີດນຳໃຊ້ USB ແລ້ວເພື່ອກວດຫາສາຍສາກ ແລະ ອຸປະກອນເສີມ"</string>
@@ -488,6 +494,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"ຈັດການ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ປະຫວັດ"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"ການແຈ້ງເຕືອນແບບງຽບ"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"ການແຈ້ງເຕືອນການເຕືອນ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ການສົນທະນາ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ລຶບລ້າງການແຈ້ງເຕືອນແບບງຽບທັງໝົດ"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ຢຸດການແຈ້ງເຕືອນໂດຍໂໝດຫ້າມລົບກວນແລ້ວ"</string>
@@ -687,7 +694,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ດຶງຄວາມສົນໃຈຂອງທ່ານດ້ວຍສຽງ ຫຼື ການສັ່ນເຕືອນ."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ເອົາໃຈໃສ່ທາງລັດແບບລອຍໄປຫາເນື້ອຫານີ້."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ບໍ່ມີ bubble ຫຼ້າສຸດ"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="3106801169793396894">"Bubble ທີ່ຫາກໍປິດໄປຈະປາກົດຢູ່ບ່ອນນີ້ເພື່ອໃຫ້ດຶງໄດ້ງ່າຍ."</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Bubbles ຫຼ້າສຸດ ແລະ Bubbles ທີ່ປິດໄປຈະປາກົດຢູ່ບ່ອນນີ້."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ບໍ່ສາມາດແກ້ໄຂການແຈ້ງເຕືອນເຫຼົ່ານີ້ໄດ້."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ບໍ່ສາມາດຕັ້ງຄ່າກຸ່ມການແຈ້ງເຕືອນນີ້ຢູ່ບ່ອນນີ້ໄດ້"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ການແຈ້ງເຕືອນແບບພຣັອກຊີ"</string>
@@ -972,6 +979,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ຍ້າຍຊ້າຍລຸ່ມ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ຍ້າຍຂວາລຸ່ມ"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"ປິດໄວ້"</string>
+    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ອັບເດດການນຳທາງລະບົບແລ້ວ. ເພື່ອປ່ຽນແປງ, ກະລຸນາໄປທີ່ການຕັ້ງຄ່າ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ໄປທີ່ການຕັ້ງຄ່າເພື່ອອັບເດດການນຳທາງລະບົບ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ສະແຕນບາຍ"</string>
@@ -981,13 +994,14 @@
     <string name="quick_controls_title" msgid="525285759614231333">"ການຄວບຄຸມດ່ວນ"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"ເພີ່ມການຄວບຄຸມ"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"ເລືອກແອັບໃດໜຶ່ງທີ່ຈະເພີ່ມການຄວບຄຸມ"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> ລາຍການທີ່ມັກປັດຈຸບັນ.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> ລາຍການທີ່ມັກປັດຈຸບັນ.</item>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other">ເພີ່ມ <xliff:g id="NUMBER_1">%s</xliff:g> ການຄວບຄຸມແລ້ວ.</item>
+      <item quantity="one">ເພີ່ມ <xliff:g id="NUMBER_0">%s</xliff:g> ການຄວບຄຸມແລ້ວ.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ການຄວບຄຸມ"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"ເລືອກການຄວບຄຸມສຳລັບການເຂົ້າເຖິງດ່ວນ"</string>
     <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"ລາຍການທີ່ມັກ"</string>
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"ທັງໝົດ"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ບໍ່ສາມາດໂຫຼດລາຍຊື່ການຄວບຄຸມທັງໝົດໄດ້."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ອື່ນໆ"</string>
 </resources>
