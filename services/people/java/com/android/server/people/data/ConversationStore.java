@@ -198,7 +198,10 @@ class ConversationStore {
         mLocusIdToShortcutIdMap.clear();
         mNotifChannelIdToShortcutIdMap.clear();
         mPhoneNumberToShortcutIdMap.clear();
-        mConversationInfosProtoDiskReadWriter.deleteConversationsFile();
+        ConversationInfosProtoDiskReadWriter writer = getConversationInfosProtoDiskReadWriter();
+        if (writer != null) {
+            writer.deleteConversationsFile();
+        }
     }
 
     @Nullable
