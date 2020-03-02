@@ -96,6 +96,11 @@
             <!-- hidden, do not use -->
             <!-- enum name="virtual_source" value="15"/ -->
             <enum name="assistant" value="16"/>
+            <enum name="call_assistant" value="17"/>
+            <enum name="emergency" value="1000"/>
+            <enum name="safety" value="1001"/>
+            <enum name="vehicle_status" value="1002"/>
+            <enum name="announcement" value="1003"/>
         </attr>
 
         <!-- Icon resource ids to render on UI -->
