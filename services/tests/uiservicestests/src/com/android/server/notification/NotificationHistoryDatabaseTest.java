@@ -64,7 +64,6 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     Context mContext;
     @Mock
     AlarmManager mAlarmManager;
-    TestFileAttrProvider mFileAttrProvider;
 
     NotificationHistoryDatabase mDataBase;
 
@@ -103,11 +102,9 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         when(mContext.getUser()).thenReturn(getContext().getUser());
         when(mContext.getPackageName()).thenReturn(getContext().getPackageName());
 
-        mFileAttrProvider = new TestFileAttrProvider();
         mRootDir = new File(mContext.getFilesDir(), "NotificationHistoryDatabaseTest");
 
-        mDataBase = new NotificationHistoryDatabase(
-                mContext, mFileWriteHandler, mRootDir, mFileAttrProvider);
+        mDataBase = new NotificationHistoryDatabase(mContext, mFileWriteHandler, mRootDir);
         mDataBase.init();
     }
 
@@ -127,7 +124,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         // add 5 files with a creation date of "today"
         for (long i = cal.getTimeInMillis(); i >= 5; i--) {
             File file = mock(File.class);
-            mFileAttrProvider.creationDates.put(file, i);
+            when(file.getName()).thenReturn(String.valueOf(i));
             AtomicFile af = new AtomicFile(file);
             expectedFiles.add(af);
             mDataBase.mHistoryFiles.addLast(af);
@@ -137,7 +134,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         // Add 5 more files more than retainDays old
         for (int i = 5; i >= 0; i--) {
             File file = mock(File.class);
-            mFileAttrProvider.creationDates.put(file, cal.getTimeInMillis() - i);
+            when(file.getName()).thenReturn(String.valueOf(cal.getTimeInMillis() - i));
             AtomicFile af = new AtomicFile(file);
             mDataBase.mHistoryFiles.addLast(af);
         }
@@ -330,14 +327,5 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         verify(af).openRead();
         verify(nh).removeConversationFromWrite("pkg", "convo");
         verify(af, never()).startWrite();
-    }
-
-    private class TestFileAttrProvider implements NotificationHistoryDatabase.FileAttrProvider {
-        public Map<File, Long> creationDates = new HashMap<>();
-
-        @Override
-        public long getCreationTime(File file) {
-            return creationDates.get(file);
-        }
     }
 }

@@ -191,10 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"நிர்வாகியால் தனிப்பட்ட உபயோகத்திற்காக ஒதுக்கப்பட்ட சாதனம்"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"சாதனம் நிர்வகிக்கப்படுகிறது"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"உங்கள் நிறுவனம் இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம். விவரங்களுக்கு, தட்டவும்."</string>
-    <!-- no translation found for location_changed_notification_title (4119726617105166830) -->
-    <skip />
-    <!-- no translation found for location_changed_notification_text (198907268219396399) -->
-    <skip />
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"உங்கள் நிர்வாகியால் இருப்பிட அமைப்புகள் மாற்றப்பட்டன"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"உங்கள் இருப்பிட அமைப்புகளைப் பார்க்க தட்டவும்."</string>
     <!-- no translation found for country_detector (7023275114706088854) -->
     <skip />
     <!-- no translation found for location_service (2439187616018455546) -->
@@ -255,6 +253,10 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> வினாடிகளில் பிழை அறிக்கைக்கான ஸ்கிரீன்ஷாட் எடுக்கப்படும்.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> வினாடியில் பிழை அறிக்கைக்கான ஸ்கிரீன்ஷாட் எடுக்கப்படும்.</item>
     </plurals>
+    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
+    <skip />
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"நிசப்த பயன்முறை"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ஒலி முடக்கத்தில் உள்ளது"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ஒலி இயக்கத்தில் உள்ளது"</string>
@@ -422,11 +424,14 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"கூடுதல் இட வழங்குநரின் கட்டளைகளின் அணுகல்"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"கூடுதல் இட வழங்குநர் கட்டளைகளை அணுகப் ஆப்ஸை அனுமதிக்கிறது. இது, GPS அல்லது பிற இருப்பிட மூலங்களின் செயல்பாட்டை இடைமறிக்க ஆப்ஸை அனுமதிக்கலாம்."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"முன்புலத்தில் இயங்கும்போது மட்டும் துல்லியமான இருப்பிடத்தைக் கண்டறிதல்"</string>
-    <string name="permdesc_accessFineLocation" msgid="9221079523494157324">"இந்த ஆப்ஸ் முன்புலத்தில் இயங்கும்போது மட்டுமே நீங்கள் இருக்கும் இடத்தைத் துல்லியமாகக் கண்டறியும். உங்கள் சாதனத்தில், இருப்பிடச் சேவைகளை ஆப்ஸ் பயன்படுத்துவதற்கு வசதியாக, அவை ஆன் செய்யப்பட்டிருக்க வேண்டும். இதனால் பேட்டரி அதிகம் பயன்படுத்தப்படக்கூடும்."</string>
+    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"முன்புலத்தில் இயங்கும்போது மட்டும் தோராயமான இருப்பிடத்தைக் கண்டறிதல்"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="4826281078353537786">"முன்புலத்தில் இருக்கும்போது மட்டுமே இந்த ஆப்ஸால் தோராயமான இடத்தைக் கண்டறிய முடியும். இருப்பிட சேவைகள் ஆன் செய்யப்பட்டு சாதனத்தில் இருக்க வேண்டும், அப்போதுதான் அவற்றை ஆப்ஸால் பயன்படுத்த முடியும்."</string>
+    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
+    <skip />
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"பின்புலத்தில் இருப்பிடத்தை அணுகுதல்"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="623676842127558197">"முன்புல இருப்பிட அணுகலுடன் பின்புலத்தில் இயங்கும்போதும் இந்த ஆப்ஸால் இருப்பிடத்தை அணுக முடியும்."</string>
+    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"எனது ஆடியோ அமைப்புகளை மாற்றுதல்"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ஒலியளவு மற்றும் வெளியீட்டிற்கு ஸ்பீக்கர்கள் பயன்படுத்தப்படுவது போன்ற ஒட்டுமொத்த ஆடியோ அமைப்புகளைக் கட்டுப்படுத்தப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ஆடியோவைப் பதிவுசெய்தல்"</string>
@@ -441,8 +446,7 @@
     <string name="permdesc_systemCamera" msgid="544730545441964482">"இந்த முன்னுரிமை பெற்ற சிஸ்டம் ஆப்ஸால் சிஸ்டம் கேமராவைப் பயன்படுத்தி எப்போது வேண்டுமானாலும் படங்களை எடுக்கவோ வீடியோக்களை ரெக்கார்டு செய்யவோ முடியும். android.permission.CAMERA அனுமதியும் ஆப்ஸிற்குத் தேவை"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"அதிர்வைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"அதிர்வைக் கட்டுப்படுத்தப் ஆப்ஸை அனுமதிக்கிறது."</string>
-    <!-- no translation found for permdesc_vibrator_state (7050024956594170724) -->
-    <skip />
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"அதிர்வு நிலையை அணுக ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"உங்கள் தலையீட்டின்றி மொபைல் எண்களை அழைக்கப் ஆப்ஸை அனுமதிக்கிறது. இதன் விளைவாக எதிர்பாராத கட்டணங்களோ அழைப்புகளோ ஏற்படலாம். அவசரகால எண்களை அழைக்க இது ஆப்ஸை அனுமதிக்காது என்பதை நினைவில்கொள்ளவும். தீங்கிழைக்கும் ஆப்ஸ், உங்கள் உறுதிப்படுத்தல் இன்றி அழைப்புகளைச் செய்வதால் உங்களுக்குச் செலவு ஏற்படக்கூடும்."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS அழைப்புச் சேவையை அணுகுதல்"</string>
@@ -1862,6 +1866,8 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"வகைப்படுத்தப்படாதவை"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"இந்த அறிவிப்புகளின் முக்கியத்துவத்தை அமைத்துள்ளீர்கள்."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ஈடுபட்டுள்ளவர்களின் காரணமாக, இது முக்கியமானது."</string>
+    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
+    <skip />
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா (இந்தக் கணக்கில் ஏற்கெனவே ஒரு பயனர் உள்ளார்) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"மொழியைச் சேர்"</string>

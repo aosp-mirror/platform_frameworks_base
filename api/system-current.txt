@@ -7425,7 +7425,7 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setAutoWakeupEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WIFI_SET_DEVICE_MOBILITY_STATE) public void setDeviceMobilityState(int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMacRandomizationSettingPasspointEnabled(@NonNull String, boolean);
-    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMeteredOverridePasspoint(@NonNull String, int);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setPasspointMeteredOverride(@NonNull String, int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setScanAlwaysAvailable(boolean);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setScanThrottleEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public boolean setSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
@@ -8859,9 +8859,9 @@ package android.os.connectivity {
     method public long getNumPacketsTx();
     method public long getRxTimeMillis();
     method public long getSleepTimeMillis();
-    method @NonNull public long[] getTimeInRatMicros();
-    method @NonNull public long[] getTimeInRxSignalStrengthLevelMicros();
-    method @NonNull public long[] getTxTimeMillis();
+    method @NonNull public long getTimeInRatMicros(int);
+    method @NonNull public long getTimeInRxSignalStrengthLevelMicros(@IntRange(from=android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN, to=android.telephony.CellSignalStrength.SIGNAL_STRENGTH_GREAT) int);
+    method @NonNull public long getTxTimeMillis(@IntRange(from=android.telephony.ModemActivityInfo.TX_POWER_LEVEL_0, to=android.telephony.ModemActivityInfo.TX_POWER_LEVEL_4) int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.connectivity.CellularBatteryStats> CREATOR;
   }
@@ -11180,6 +11180,11 @@ package android.telephony {
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ModemActivityInfo> CREATOR;
     field public static final int TX_POWER_LEVELS = 5; // 0x5
+    field public static final int TX_POWER_LEVEL_0 = 0; // 0x0
+    field public static final int TX_POWER_LEVEL_1 = 1; // 0x1
+    field public static final int TX_POWER_LEVEL_2 = 2; // 0x2
+    field public static final int TX_POWER_LEVEL_3 = 3; // 0x3
+    field public static final int TX_POWER_LEVEL_4 = 4; // 0x4
   }
 
   public class ModemActivityInfo.TransmitPower {
@@ -11426,7 +11431,6 @@ package android.telephony {
   }
 
   public class ServiceState implements android.os.Parcelable {
-    method @NonNull public android.telephony.ServiceState createLocationInfoSanitizedCopy(boolean);
     method public void fillInNotifierBundle(@NonNull android.os.Bundle);
     method public int getDataNetworkType();
     method public int getDataRegistrationState();
@@ -11603,7 +11607,7 @@ package android.telephony {
 
   public class SubscriptionManager {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean canDisablePhysicalSubscription();
-    method public boolean canManageSubscription(@Nullable android.telephony.SubscriptionInfo, @Nullable String);
+    method public boolean canManageSubscription(@NonNull android.telephony.SubscriptionInfo, @NonNull String);
     method @NonNull public int[] getActiveAndHiddenSubscriptionIdList();
     method @NonNull public int[] getActiveSubscriptionIdList();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.SubscriptionInfo getActiveSubscriptionInfoForIcc(@NonNull String);
@@ -11782,7 +11786,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataRoamingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setIccLockEnabled(boolean, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultiSimCarrierRestriction(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setNetworkSelectionModeManual(@NonNull String, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunisticNetworkState(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setPreferredNetworkTypeBitmask(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadio(boolean);

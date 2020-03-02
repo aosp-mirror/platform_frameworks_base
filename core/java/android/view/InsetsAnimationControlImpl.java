@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsState.ISIDE_BOTTOM;
 import static android.view.InsetsState.ISIDE_FLOATING;
 import static android.view.InsetsState.ISIDE_LEFT;
@@ -64,10 +65,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private final Insets mShownInsets;
     private final Matrix mTmpMatrix = new Matrix();
     private final InsetsState mInitialInsetsState;
+    private final @AnimationType int mAnimationType;
     private final @InsetsType int mTypes;
     private final InsetsAnimationControlCallbacks mController;
     private final WindowInsetsAnimation mAnimation;
-    private final Rect mFrame;
     private final boolean mFade;
     private Insets mCurrentInsets;
     private Insets mPendingInsets;
@@ -83,7 +84,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types,
             InsetsAnimationControlCallbacks controller, long durationMs, Interpolator interpolator,
-            boolean fade, @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
+            boolean fade, @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
+            @AnimationType int animationType) {
         mControls = controls;
         mListener = listener;
         mTypes = types;
@@ -96,12 +98,12 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
                 null /* typeSideMap */);
         mShownInsets = calculateInsets(mInitialInsetsState, frame, controls, true /* shown */,
                 mTypeSideMap);
-        mFrame = new Rect(frame);
         buildTypeSourcesMap(mTypeSideMap, mSideSourceMap, mControls);
 
         mAnimation = new WindowInsetsAnimation(mTypes, interpolator,
                 durationMs);
         mAnimation.setAlpha(getCurrentAlpha());
+        mAnimationType = animationType;
         mController.startAnimation(this, listener, types, mAnimation,
                 new Bounds(mHiddenInsets, mShownInsets), layoutInsetsDuringAnimation);
     }
@@ -133,6 +135,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
 
     boolean controlsInternalType(@InternalInsetsType int type) {
         return InsetsState.toInternalType(mTypes).contains(type);
+    }
+
+    @AnimationType int getAnimationType() {
+        return mAnimationType;
     }
 
     @Override

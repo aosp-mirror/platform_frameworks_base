@@ -84,14 +84,12 @@ public class NotificationHistoryDatabase {
     // Current version of the database files schema
     private int mCurrentVersion;
     private final WriteBufferRunnable mWriteBufferRunnable;
-    private final FileAttrProvider mFileAttrProvider;
 
     // Object containing posted notifications that have not yet been written to disk
     @VisibleForTesting
     NotificationHistory mBuffer;
 
-    public NotificationHistoryDatabase(Context context, Handler fileWriteHandler, File dir,
-            FileAttrProvider fileAttrProvider) {
+    public NotificationHistoryDatabase(Context context, Handler fileWriteHandler, File dir) {
         mContext = context;
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mCurrentVersion = DEFAULT_CURRENT_VERSION;
@@ -101,7 +99,6 @@ public class NotificationHistoryDatabase {
         mHistoryFiles = new LinkedList<>();
         mBuffer = new NotificationHistory();
         mWriteBufferRunnable = new WriteBufferRunnable();
-        mFileAttrProvider = fileAttrProvider;
 
         IntentFilter deletionFilter = new IntentFilter(ACTION_HISTORY_DELETION);
         deletionFilter.addDataScheme(SCHEME_DELETION);
@@ -131,8 +128,8 @@ public class NotificationHistoryDatabase {
         }
 
         // Sort with newest files first
-        Arrays.sort(files, (lhs, rhs) -> Long.compare(mFileAttrProvider.getCreationTime(rhs),
-                mFileAttrProvider.getCreationTime(lhs)));
+        Arrays.sort(files, (lhs, rhs) -> Long.compare(Long.parseLong(rhs.getName()),
+                Long.parseLong(lhs.getName())));
 
         for (File file : files) {
             mHistoryFiles.addLast(new AtomicFile(file));
@@ -255,10 +252,9 @@ public class NotificationHistoryDatabase {
 
             for (int i = mHistoryFiles.size() - 1; i >= 0; i--) {
                 final AtomicFile currentOldestFile = mHistoryFiles.get(i);
-                final long creationTime =
-                        mFileAttrProvider.getCreationTime(currentOldestFile.getBaseFile());
+                final long creationTime = Long.parseLong(currentOldestFile.getBaseFile().getName());
                 if (DEBUG) {
-                    Slog.d(TAG, "Pruning " + currentOldestFile.getBaseFile().getName()
+                    Slog.d(TAG, "File " + currentOldestFile.getBaseFile().getName()
                             + " created on " + creationTime);
                 }
                 if (creationTime <= retentionBoundary.getTimeInMillis()) {
@@ -468,25 +464,5 @@ public class NotificationHistoryDatabase {
                 }
             }
         }
-    }
-
-    public static final class NotificationHistoryFileAttrProvider implements
-            NotificationHistoryDatabase.FileAttrProvider {
-        final static String TAG = "NotifHistoryFileDate";
-
-        public long getCreationTime(File file) {
-            try {
-                BasicFileAttributes attr = Files.readAttributes(FileSystems.getDefault().getPath(
-                        file.getAbsolutePath()), BasicFileAttributes.class);
-                return attr.creationTime().to(TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
-                Slog.w(TAG, "Cannot read creation data for file; using file name");
-                return Long.valueOf(file.getName());
-            }
-        }
-    }
-
-    interface FileAttrProvider {
-        long getCreationTime(File file);
     }
 }

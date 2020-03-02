@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -23,6 +24,8 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.Range;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +46,38 @@ public final class ModemActivityInfo implements Parcelable {
      * </ul>
      */
     public static final int TX_POWER_LEVELS = 5;
+    /**
+     * Tx(transmit) power level 0: tx_power < 0dBm
+     */
+    public static final int TX_POWER_LEVEL_0 = 0;
+    /**
+     * Tx(transmit) power level 1: 0dBm < tx_power < 5dBm
+     */
+    public static final int TX_POWER_LEVEL_1 = 1;
+    /**
+     * Tx(transmit) power level 2: 5dBm < tx_power < 15dBm
+     */
+    public static final int TX_POWER_LEVEL_2 = 2;
+    /**
+     * Tx(transmit) power level 3: 15dBm < tx_power < 20dBm.
+     */
+    public static final int TX_POWER_LEVEL_3 = 3;
+    /**
+     * Tx(transmit) power level 4: tx_power > 20dBm
+     */
+    public static final int TX_POWER_LEVEL_4 = 4;
+
+    /** @hide */
+    @IntDef(prefix = {"TX_POWER_LEVEL_"}, value = {
+            TX_POWER_LEVEL_0,
+            TX_POWER_LEVEL_1,
+            TX_POWER_LEVEL_2,
+            TX_POWER_LEVEL_3,
+            TX_POWER_LEVEL_4,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TxPowerLevel {}
+
     private static final Range<Integer>[] TX_POWER_RANGES = new Range[] {
         new Range<>(Integer.MIN_VALUE, 0),
         new Range<>(0, 5),
@@ -201,7 +236,7 @@ public final class ModemActivityInfo implements Parcelable {
     }
 
     /**
-     * Indicate if the ModemActivityInfo is invalid due to modem's invalid reporting.
+     * Indicates if the modem has reported valid {@link ModemActivityInfo}.
      *
      * @return {@code true} if this {@link ModemActivityInfo} record is valid,
      * {@code false} otherwise.

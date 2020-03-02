@@ -16,6 +16,7 @@
 
 package com.android.internal.view;
 
+import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsResponse;
 
 /**
@@ -23,5 +24,5 @@ import android.view.inputmethod.InlineSuggestionsResponse;
  * {@hide}
  */
 oneway interface IInlineSuggestionsResponseCallback {
-    void onInlineSuggestionsResponse(in InlineSuggestionsResponse response);
+    void onInlineSuggestionsResponse(in AutofillId fieldId, in InlineSuggestionsResponse response);
 }

@@ -12598,7 +12598,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
     /*@hide */
     public CellularBatteryStats getCellularBatteryStats() {
-        CellularBatteryStats s = new CellularBatteryStats();
         final int which = STATS_SINCE_CHARGED;
         final long rawRealTime = SystemClock.elapsedRealtime() * 1000;
         final ControllerActivityCounter counter = getModemControllerActivity();
@@ -12625,21 +12624,16 @@ public class BatteryStatsImpl extends BatteryStats {
             txTimeMs[i] = counter.getTxTimeCounters()[i].getCountLocked(which);
             totalTxTimeMs += txTimeMs[i];
         }
-        s.setLoggingDurationMillis(computeBatteryRealtime(rawRealTime, which) / 1000);
-        s.setKernelActiveTimeMillis(getMobileRadioActiveTime(rawRealTime, which) / 1000);
-        s.setNumPacketsTx(getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which));
-        s.setNumBytesTx(getNetworkActivityBytes(NETWORK_MOBILE_TX_DATA, which));
-        s.setNumPacketsRx(getNetworkActivityPackets(NETWORK_MOBILE_RX_DATA, which));
-        s.setNumBytesRx(getNetworkActivityBytes(NETWORK_MOBILE_RX_DATA, which));
-        s.setSleepTimeMillis(sleepTimeMs);
-        s.setIdleTimeMillis(idleTimeMs);
-        s.setRxTimeMillis(rxTimeMs);
-        s.setEnergyConsumedMaMillis(energyConsumedMaMs);
-        s.setTimeInRatMicros(timeInRatMs);
-        s.setTimeInRxSignalStrengthLevelMicros(timeInRxSignalStrengthLevelMs);
-        s.setTxTimeMillis(txTimeMs);
-        s.setMonitoredRailChargeConsumedMaMillis(monitoredRailChargeConsumedMaMs);
-        return s;
+
+        return new CellularBatteryStats(computeBatteryRealtime(rawRealTime, which) / 1000,
+                getMobileRadioActiveTime(rawRealTime, which) / 1000,
+                getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which),
+                getNetworkActivityBytes(NETWORK_MOBILE_TX_DATA, which),
+                getNetworkActivityPackets(NETWORK_MOBILE_RX_DATA, which),
+                getNetworkActivityBytes(NETWORK_MOBILE_RX_DATA, which),
+                sleepTimeMs, idleTimeMs, rxTimeMs, energyConsumedMaMs, timeInRatMs,
+                timeInRxSignalStrengthLevelMs, txTimeMs,
+                monitoredRailChargeConsumedMaMs);
     }
 
     /*@hide */

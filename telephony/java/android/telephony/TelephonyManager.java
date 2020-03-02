@@ -7932,21 +7932,19 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param operatorNumeric the PLMN ID of the network to select.
-     * @param ran the initial suggested radio access network type.
-     *         If registration fails, the RAN is not available after, the RAN is not within the
-     *         network types specified by {@link #setPreferredNetworkTypeBitmask}, or the value is
-     *         {@link AccessNetworkConstants.AccessNetworkType#UNKNOWN}, modem will select
-     *         the next best RAN for network registration.
      * @param persistSelection whether the selection will persist until reboot.
      *         If true, only allows attaching to the selected PLMN until reboot; otherwise,
      *         attach to the chosen PLMN and resume normal network selection next time.
+     * @param ran the initial suggested radio access network type.
+     *         If registration fails, the RAN is not available after, the RAN is not within the
+     *         network types specified by the preferred network types, or the value is
+     *         {@link AccessNetworkConstants.AccessNetworkType#UNKNOWN}, modem will select
+     *         the next best RAN for network registration.
      * @return {@code true} on success; {@code false} on any failure.
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    @SystemApi
     public boolean setNetworkSelectionModeManual(@NonNull String operatorNumeric,
-            @AccessNetworkConstants.RadioAccessNetworkType int ran, boolean persistSelection) {
+            boolean persistSelection, @AccessNetworkConstants.RadioAccessNetworkType int ran) {
         return setNetworkSelectionModeManual(new OperatorInfo("" /* operatorAlphaLong */,
                 "" /* operatorAlphaShort */, operatorNumeric, ran), persistSelection);
     }
