@@ -795,7 +795,12 @@ public final class ViewRootImpl implements ViewParent,
 
     public void setOnContentApplyWindowInsetsListener(OnContentApplyWindowInsetsListener listener) {
         mAttachInfo.mContentOnApplyWindowInsetsListener = listener;
-        requestFitSystemWindows();
+
+        // System windows will be fitted on first traversal, so no reason to request additional
+        // (possibly getting executed after the first traversal).
+        if (!mFirst) {
+            requestFitSystemWindows();
+        }
     }
 
     public void addWindowCallbacks(WindowCallbacks callback) {
