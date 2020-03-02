@@ -1995,7 +1995,10 @@ public abstract class PackageManager {
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports a Context Hub, used to expose the
      * functionalities in {@link android.hardware.location.ContextHubManager}.
+     *
+     * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CONTEXT_HUB = "android.hardware.context_hub";
 
