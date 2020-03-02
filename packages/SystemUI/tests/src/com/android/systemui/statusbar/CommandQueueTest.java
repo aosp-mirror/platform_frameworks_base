@@ -447,4 +447,11 @@ public class CommandQueueTest extends SysuiTestCase {
         waitForIdleSync();
         verify(mCallbacks).hideAuthenticationDialog();
     }
+
+    @Test
+    public void testSuppressAmbientDisplay() {
+        mCommandQueue.suppressAmbientDisplay(true);
+        waitForIdleSync();
+        verify(mCallbacks).suppressAmbientDisplay(true);
+    }
 }

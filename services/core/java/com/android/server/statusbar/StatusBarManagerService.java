@@ -63,7 +63,6 @@ import com.android.server.LocalServices;
 import com.android.server.notification.NotificationDelegate;
 import com.android.server.policy.GlobalActionsProvider;
 import com.android.server.power.ShutdownThread;
-import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1448,6 +1447,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         if (mBar != null) {
             try {
                 mBar.dismissInattentiveSleepWarning(animated);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void suppressAmbientDisplay(boolean suppress) {
+        enforceStatusBarService();
+        if (mBar != null) {
+            try {
+                mBar.suppressAmbientDisplay(suppress);
             } catch (RemoteException ex) {
             }
         }
