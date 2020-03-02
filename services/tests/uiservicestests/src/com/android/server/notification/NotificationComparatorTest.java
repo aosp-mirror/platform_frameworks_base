@@ -22,8 +22,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -33,6 +33,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.media.session.MediaSession;
 import android.os.Build;
+import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
@@ -140,7 +141,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Notification n3 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.MediaStyle()
-                        .setMediaSession(new MediaSession.Token(null)))
+                        .setMediaSession(new MediaSession.Token(Process.myUid(), null)))
                 .build();
         mRecordDefaultMedia = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "media", uid2, uid2, n3, new UserHandle(userId),
