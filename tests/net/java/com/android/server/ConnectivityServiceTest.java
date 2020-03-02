@@ -2426,7 +2426,7 @@ public class ConnectivityServiceTest {
         assertEquals(expectedRequestCount, testFactory.getMyRequestCount());
         assertTrue(testFactory.getMyStartRequested());
 
-        testFactory.unregister();
+        testFactory.terminate();
         if (networkCallback != null) mCm.unregisterNetworkCallback(networkCallback);
         handlerThread.quit();
     }
@@ -2449,6 +2449,38 @@ public class ConnectivityServiceTest {
         tryNetworkFactoryRequests(NET_CAPABILITY_TRUSTED);
         tryNetworkFactoryRequests(NET_CAPABILITY_NOT_VPN);
         // Skipping VALIDATED and CAPTIVE_PORTAL as they're disallowed.
+    }
+
+    @Test
+    public void testNetworkFactoryUnregister() throws Exception {
+        final NetworkCapabilities filter = new NetworkCapabilities();
+        filter.clearAll();
+
+        final HandlerThread handlerThread = new HandlerThread("testNetworkFactoryRequests");
+        handlerThread.start();
+
+        // Checks that calling setScoreFilter on a NetworkFactory immediately before closing it
+        // does not crash.
+        for (int i = 0; i < 100; i++) {
+            final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
+                    mServiceContext, "testFactory", filter);
+            // Register the factory and don't be surprised when the default request arrives.
+            testFactory.register();
+            testFactory.expectAddRequestsWithScores(0);
+            testFactory.waitForNetworkRequests(1);
+
+            testFactory.setScoreFilter(42);
+            testFactory.terminate();
+
+            if (i % 2 == 0) {
+                try {
+                    testFactory.register();
+                    fail("Re-registering terminated NetworkFactory should throw");
+                } catch (IllegalStateException expected) {
+                }
+            }
+        }
+        handlerThread.quit();
     }
 
     @Test
@@ -3488,7 +3520,7 @@ public class ConnectivityServiceTest {
         cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
         assertLength(1, mCm.getAllNetworks());
 
-        testFactory.unregister();
+        testFactory.terminate();
         mCm.unregisterNetworkCallback(cellNetworkCallback);
         handlerThread.quit();
     }
@@ -3828,7 +3860,7 @@ public class ConnectivityServiceTest {
             mCm.unregisterNetworkCallback(networkCallback);
         }
 
-        testFactory.unregister();
+        testFactory.terminate();
         handlerThread.quit();
     }
 
