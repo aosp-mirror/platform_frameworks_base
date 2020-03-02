@@ -2022,11 +2022,11 @@ public class ServiceState implements Parcelable {
     /**
      * The current registered raw data network operator name in long alphanumeric format.
      *
+     * The long format can be up to 16 characters long.
+     *
      * @return long raw name of operator, null if unregistered or unknown
-     * @hide
      */
     @Nullable
-    @SystemApi
     public String getOperatorAlphaLongRaw() {
         return mOperatorAlphaLongRaw;
     }
@@ -2041,11 +2041,11 @@ public class ServiceState implements Parcelable {
     /**
      * The current registered raw data network operator name in short alphanumeric format.
      *
+     * The short format can be up to 8 characters long.
+     *
      * @return short raw name of operator, null if unregistered or unknown
-     * @hide
      */
     @Nullable
-    @SystemApi
     public String getOperatorAlphaShortRaw() {
         return mOperatorAlphaShortRaw;
     }
