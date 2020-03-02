@@ -172,7 +172,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         mTag = tag;
         mSessionInfo = sessionInfo;
         mController = new ControllerStub();
-        mSessionToken = new MediaSession.Token(mController);
+        mSessionToken = new MediaSession.Token(ownerUid, mController);
         mSession = new SessionStub();
         mSessionCb = new SessionCb(cb);
         mService = service;
