@@ -5000,6 +5000,11 @@ package android.media.tv.tuner.filter {
     field public static final int LENGTH_TYPE_UNDEFINED = 0; // 0x0
     field public static final int LENGTH_TYPE_WITHOUT_ADDITIONAL_HEADER = 1; // 0x1
     field public static final int LENGTH_TYPE_WITH_ADDITIONAL_HEADER = 2; // 0x2
+    field public static final int PACKET_TYPE_COMPRESSED = 2; // 0x2
+    field public static final int PACKET_TYPE_EXTENSION = 6; // 0x6
+    field public static final int PACKET_TYPE_IPV4 = 0; // 0x0
+    field public static final int PACKET_TYPE_MPEG2_TS = 7; // 0x7
+    field public static final int PACKET_TYPE_SIGNALING = 4; // 0x4
   }
 
   public static class AlpFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.AlpFilterConfiguration.Builder> {
@@ -5090,9 +5095,6 @@ package android.media.tv.tuner.filter {
   public abstract class FilterConfiguration {
     method @Nullable public android.media.tv.tuner.filter.Settings getSettings();
     method public abstract int getType();
-    field public static final int PACKET_TYPE_COMPRESSED = 2; // 0x2
-    field public static final int PACKET_TYPE_IPV4 = 0; // 0x0
-    field public static final int PACKET_TYPE_SIGNALING = 4; // 0x4
   }
 
   public abstract static class FilterConfiguration.Builder<T extends android.media.tv.tuner.filter.FilterConfiguration.Builder<T>> {
@@ -5290,6 +5292,11 @@ package android.media.tv.tuner.filter {
     method public int getType();
     method public boolean isCompressedIpPacket();
     method public boolean isPassthrough();
+    field public static final int PACKET_TYPE_COMPRESSED = 3; // 0x3
+    field public static final int PACKET_TYPE_IPV4 = 1; // 0x1
+    field public static final int PACKET_TYPE_IPV6 = 2; // 0x2
+    field public static final int PACKET_TYPE_NULL = 255; // 0xff
+    field public static final int PACKET_TYPE_SIGNALING = 254; // 0xfe
   }
 
   public static class TlvFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.TlvFilterConfiguration.Builder> {
