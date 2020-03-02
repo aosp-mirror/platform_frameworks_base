@@ -29,6 +29,7 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.os.Handler;
+import android.os.Process;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -116,13 +117,13 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testOnRemoteVolumeChanged_newStream_noNullPointer() {
-        MediaSession.Token token = new MediaSession.Token(null);
+        MediaSession.Token token = new MediaSession.Token(Process.myUid(), null);
         mVolumeController.mMediaSessionsCallbacksW.onRemoteVolumeChanged(token, 0);
     }
 
     @Test
     public void testOnRemoteRemove_newStream_noNullPointer() {
-        MediaSession.Token token = new MediaSession.Token(null);
+        MediaSession.Token token = new MediaSession.Token(Process.myUid(), null);
         mVolumeController.mMediaSessionsCallbacksW.onRemoteRemoved(token);
     }
 
