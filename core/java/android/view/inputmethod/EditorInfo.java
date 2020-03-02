@@ -31,6 +31,7 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Printer;
 import android.view.View;
+import android.view.autofill.AutofillId;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -425,6 +426,15 @@ public class EditorInfo implements InputType, Parcelable {
     public String packageName;
 
     /**
+     * Autofill Id for the field that's currently on focus.
+     *
+     * <p> Marked as hide since it's only used by framework.</p>
+     * @hide
+     */
+    @NonNull
+    public AutofillId autofillId = new AutofillId(View.NO_ID);
+
+    /**
      * Identifier for the editor's field.  This is optional, and may be
      * 0.  By default it is filled in with the result of
      * {@link android.view.View#getId() View.getId()} on the View that
@@ -793,6 +803,7 @@ public class EditorInfo implements InputType, Parcelable {
         pw.println(prefix + "hintText=" + hintText
                 + " label=" + label);
         pw.println(prefix + "packageName=" + packageName
+                + " autofillId=" + autofillId
                 + " fieldId=" + fieldId
                 + " fieldName=" + fieldName);
         pw.println(prefix + "extras=" + extras);
@@ -821,6 +832,7 @@ public class EditorInfo implements InputType, Parcelable {
         TextUtils.writeToParcel(hintText, dest, flags);
         TextUtils.writeToParcel(label, dest, flags);
         dest.writeString(packageName);
+        autofillId.writeToParcel(dest, flags);
         dest.writeInt(fieldId);
         dest.writeString(fieldName);
         dest.writeBundle(extras);
@@ -852,6 +864,7 @@ public class EditorInfo implements InputType, Parcelable {
                     res.hintText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.label = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
                     res.packageName = source.readString();
+                    res.autofillId = AutofillId.CREATOR.createFromParcel(source);
                     res.fieldId = source.readInt();
                     res.fieldName = source.readString();
                     res.extras = source.readBundle();
