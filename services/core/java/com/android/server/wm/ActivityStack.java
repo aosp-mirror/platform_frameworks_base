@@ -356,8 +356,7 @@ class ActivityStack extends Task {
             final PooledFunction f = PooledLambda.obtainFunction(
                     EnsureVisibleActivitiesConfigHelper::processActivity, this,
                     PooledLambda.__(ActivityRecord.class));
-            forAllActivities(f, start.getTask(), true /*includeBoundary*/,
-                    true /*traverseTopToBottom*/);
+            forAllActivities(f, start, true /*includeBoundary*/, true /*traverseTopToBottom*/);
             f.recycle();
 
             if (mUpdateConfig) {
@@ -3945,15 +3944,8 @@ class ActivityStack extends Task {
         proto.write(MIN_HEIGHT, mMinHeight);
 
         proto.write(FILLS_PARENT, matchParentBounds());
+        getRawBounds().dumpDebug(proto, BOUNDS);
 
-        if (!matchParentBounds()) {
-            final Rect bounds = getRequestedOverrideBounds();
-            bounds.dumpDebug(proto, BOUNDS);
-        } else if (getStack().getTile() != null) {
-            // use tile's bounds here for cts.
-            final Rect bounds = getStack().getTile().getRequestedOverrideBounds();
-            bounds.dumpDebug(proto, BOUNDS);
-        }
         getOverrideDisplayedBounds().dumpDebug(proto, DISPLAYED_BOUNDS);
         if (mLastNonFullscreenBounds != null) {
             mLastNonFullscreenBounds.dumpDebug(proto, LAST_NON_FULLSCREEN_BOUNDS);
