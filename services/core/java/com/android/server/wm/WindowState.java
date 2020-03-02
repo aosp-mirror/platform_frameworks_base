@@ -57,6 +57,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
@@ -3195,6 +3196,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             // These are the windows that by default are shown to all users. However, to
             // protect against spoofing, check permissions below.
+            case TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY:
             case TYPE_APPLICATION_STARTING:
             case TYPE_BOOT_PROGRESS:
             case TYPE_DISPLAY_OVERLAY:
@@ -5135,13 +5137,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean shouldMagnify() {
-        if (mAttrs.type == TYPE_INPUT_METHOD ||
-                mAttrs.type == TYPE_INPUT_METHOD_DIALOG ||
-                mAttrs.type == TYPE_MAGNIFICATION_OVERLAY ||
-                mAttrs.type == TYPE_NAVIGATION_BAR ||
+        if (mAttrs.type == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY
+                || mAttrs.type == TYPE_INPUT_METHOD
+                || mAttrs.type == TYPE_INPUT_METHOD_DIALOG
+                || mAttrs.type == TYPE_MAGNIFICATION_OVERLAY
+                || mAttrs.type == TYPE_NAVIGATION_BAR
                 // It's tempting to wonder: Have we forgotten the rounded corners overlay?
                 // worry not: it's a fake TYPE_NAVIGATION_BAR_PANEL
-                mAttrs.type == TYPE_NAVIGATION_BAR_PANEL) {
+                || mAttrs.type == TYPE_NAVIGATION_BAR_PANEL) {
             return false;
         }
         return true;
