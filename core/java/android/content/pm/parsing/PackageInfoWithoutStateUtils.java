@@ -389,7 +389,7 @@ public class PackageInfoWithoutStateUtils {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
         ai.seInfoUser = SELinuxUtil.assignSeinfoUser(state);
-        ai.resourceDirs = state.getOverlayPaths();
+        ai.resourceDirs = state.getAllOverlayPaths();
 
         return ai;
     }
