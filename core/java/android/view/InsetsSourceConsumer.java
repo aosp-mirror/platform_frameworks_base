@@ -160,7 +160,8 @@ public class InsetsSourceConsumer {
     }
 
     boolean applyLocalVisibilityOverride() {
-        final boolean isVisible = mState.getSource(mType).isVisible();
+        InsetsSource source = mState.peekSource(mType);
+        final boolean isVisible = source != null && source.isVisible();
         final boolean hasControl = mSourceControl != null;
 
         // We still need to let the legacy app know the visibility change even if we don't have the
