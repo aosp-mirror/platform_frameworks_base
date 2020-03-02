@@ -50,6 +50,7 @@ import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 
+import android.app.WindowConfiguration;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -855,9 +856,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
 
-        mDisplayPolicy.getLayoutHintLw(mWindow.mAttrs, null, mFrames,
-                false /* floatingStack */, outFrame, outContentInsets, outStableInsets,
-                outDisplayCutout);
+        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, null /* windowToken */, outFrame,
+                outContentInsets, outStableInsets, outDisplayCutout);
 
         assertThat(outFrame, is(mFrames.mUnrestricted));
         assertThat(outContentInsets, is(new Rect(0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT)));
@@ -874,6 +874,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
 
         final Rect taskBounds = new Rect(100, 100, 200, 200);
+        final Task task = mWindow.getTask();
+        // Force the bounds because the task may resolve different bounds from Task#setBounds.
+        task.getWindowConfiguration().setBounds(taskBounds);
 
         final Rect outFrame = new Rect();
         final Rect outContentInsets = new Rect();
@@ -881,9 +884,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
 
-        mDisplayPolicy.getLayoutHintLw(mWindow.mAttrs, taskBounds, mFrames,
-                false /* floatingStack */, outFrame, outContentInsets, outStableInsets,
-                outDisplayCutout);
+        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame,
+                outContentInsets, outStableInsets, outDisplayCutout);
 
         assertThat(outFrame, is(taskBounds));
         assertThat(outContentInsets, is(new Rect()));
@@ -904,15 +906,20 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final Rect taskBounds = new Rect(100, mFrames.mContent.bottom + 1,
                 200, mFrames.mContent.bottom + 10);
 
+        final Task task = mWindow.getTask();
+        // Make the task floating.
+        task.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
+        // Force the bounds because the task may resolve different bounds from Task#setBounds.
+        task.getWindowConfiguration().setBounds(taskBounds);
+
         final Rect outFrame = new Rect();
         final Rect outContentInsets = new Rect();
         final Rect outStableInsets = new Rect();
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
 
-        mDisplayPolicy.getLayoutHintLw(mWindow.mAttrs, taskBounds, mFrames,
-                true /* floatingStack */, outFrame, outContentInsets, outStableInsets,
-                outDisplayCutout);
+        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame, outContentInsets,
+                outStableInsets, outDisplayCutout);
 
         assertThat(outFrame, is(taskBounds));
         assertThat(outContentInsets, is(new Rect()));
@@ -939,6 +946,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final InsetsState simulatedInsetsState = new InsetsState();
         final DisplayFrames simulatedDisplayFrames = createDisplayFrames();
         mDisplayPolicy.beginLayoutLw(mFrames, uiMode);
+        // Force the display bounds because it is not synced with display frames in policy test.
+        mDisplayContent.getWindowConfiguration().setBounds(mFrames.mUnrestricted);
         mDisplayContent.getInsetsStateController().onPostLayout();
         mDisplayPolicy.simulateLayoutDisplay(simulatedDisplayFrames, simulatedInsetsState, uiMode);
 
@@ -947,20 +956,18 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final StringWriter simulatedFramesDump = new StringWriter();
         simulatedDisplayFrames.dump(prefix, new PrintWriter(simulatedFramesDump));
 
-        assertEquals(realFramesDump.toString(), simulatedFramesDump.toString());
+        assertEquals(new ToStringComparatorWrapper<>(realFramesDump),
+                new ToStringComparatorWrapper<>(simulatedFramesDump));
 
-        final StringWriter realInsetsDump = new StringWriter();
         final InsetsState realInsetsState = new InsetsState(
                 mDisplayContent.getInsetsStateController().getRawInsetsState());
         // Exclude comparing IME insets because currently the simulated layout only focuses on the
         // insets from status bar and navigation bar.
         realInsetsState.removeSource(InsetsState.ITYPE_IME);
         realInsetsState.removeSource(InsetsState.ITYPE_CAPTION_BAR);
-        realInsetsState.dump(prefix, new PrintWriter(realInsetsDump));
-        final StringWriter simulatedInsetsDump = new StringWriter();
-        simulatedInsetsState.dump(prefix, new PrintWriter(simulatedInsetsDump));
 
-        assertEquals(realInsetsDump.toString(), simulatedInsetsDump.toString());
+        assertEquals(new ToStringComparatorWrapper<>(realInsetsState),
+                new ToStringComparatorWrapper<>(simulatedInsetsState));
     }
 
     @Test
