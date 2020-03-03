@@ -255,6 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"نمایش دستگاه‌های بلوتوث بدون نام"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"غیرفعال کردن میزان صدای مطلق"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"‏فعال کردن Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"اتصال بهبودیافته"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"‏نسخه AVRCP بلوتوث"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"‏انتخاب نسخه AVRCP بلوتوث"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"‏نسخه MAP بلوتوث"</string>
@@ -308,6 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"‏دستگاه‌های بلوتوث بدون نام (فقط نشانی‌های MAC) نشان داده خواهند شد"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"درصورت وجود مشکل در صدا با دستگاه‌های راه دور مثل صدای بلند ناخوشایند یا عدم کنترل صدا، ویژگی میزان صدای کامل بلوتوث را غیرفعال کنید."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"‏دسته ویژگی Gabeldorsche، بلوتوث را فعال می‌کند."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"ویژگی «اتصال بهبودیافته» را فعال می‌کند."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ترمینال محلی"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"فعال کردن ترمینال برنامه‌ کاربردی که دسترسی به برنامه محلی را پیشنهاد می‌کند"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏بررسی HDCP"</string>
@@ -354,6 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"‏پرداز زدن HWUI نمایه"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏فعال کردن لایه‌های اشکال‌زدایی GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏مجاز کردن بارگیری لایه‌های اشکال‌زدایی GPU برای برنامه‌های اشکا‌ل‌زدایی"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش طولانی فروشنده"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"شامل گزارشات اشکال تکمیلی ورود به سیستم فروشنده ویژه دستگاه می‌شود که ممکن است دربرگیرنده اطلاعات خصوصی، استفاده بیشتر از باتری، و/یا استفاده بیشتر از فضای ذخیره‌سازی باشد."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"مقیاس پویانمایی پنجره"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"مقیاس پویانمایی انتقالی"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"مقیاس طول مدت انیماتور"</string>
@@ -501,6 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"هربار پرسیده شود"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"تا زمانی‌که آن را خاموش کنید"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"هم‌اکنون"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"این دستگاه"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"بلندگوی تلفن"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"مشکل در اتصال. دستگاه را خاموش و دوباره روشن کنید"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"دستگاه صوتی سیمی"</string>
 </resources>
