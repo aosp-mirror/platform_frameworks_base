@@ -3730,7 +3730,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);
     method public void setCarrierTestOverride(String, String, String, String, String, String, String, String, String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSystemSelectionChannels(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Boolean>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSystemSelectionChannels(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSystemSelectionChannels(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>);
     method @RequiresPermission("android.permission.READ_ACTIVE_EMERGENCY_SESSION") public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String);
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
