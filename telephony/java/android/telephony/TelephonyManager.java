@@ -12601,14 +12601,32 @@ public class TelephonyManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setSystemSelectionChannels(@NonNull List<RadioAccessSpecifier> specifiers,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> callback) {
+        Objects.requireNonNull(specifiers, "Specifiers must not be null.");
+        Objects.requireNonNull(executor, "Executor must not be null.");
+        Objects.requireNonNull(callback, "Callback must not be null.");
+        setSystemSelectionChannelsInternal(specifiers, executor, callback);
+    }
+
+    /**
+     * Same as {@link #setSystemSelectionChannels(List, Executor, Consumer<Boolean>)}, but to be
+     * used when the caller does not need feedback on the results of the operation.
+     * @param specifiers which bands to scan.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setSystemSelectionChannels(@NonNull List<RadioAccessSpecifier> specifiers) {
+        Objects.requireNonNull(specifiers, "Specifiers must not be null.");
+        setSystemSelectionChannelsInternal(specifiers, null, null);
+    }
+
+
+    private void setSystemSelectionChannelsInternal(@NonNull List<RadioAccessSpecifier> specifiers,
             @Nullable @CallbackExecutor Executor executor,
             @Nullable Consumer<Boolean> callback) {
-        Objects.requireNonNull(specifiers, "Specifiers must not be null.");
-        if (callback != null) {
-            Objects.requireNonNull(executor, "Executor must not be null when"
-                    + " the callback is nonnull");
-        }
-
         IBooleanConsumer aidlConsumer = callback == null ? null : new IBooleanConsumer.Stub() {
             @Override
             public void accept(boolean result) {
