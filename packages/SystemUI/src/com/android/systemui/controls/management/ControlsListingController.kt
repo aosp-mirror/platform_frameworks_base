@@ -17,7 +17,7 @@
 package com.android.systemui.controls.management
 
 import android.content.ComponentName
-import com.android.settingslib.widget.CandidateInfo
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.UserAwareController
 import com.android.systemui.statusbar.policy.CallbackController
 
@@ -31,7 +31,7 @@ interface ControlsListingController :
     /**
      * @return the current list of services that satisfies the [ServiceListing].
      */
-    fun getCurrentServices(): List<CandidateInfo>
+    fun getCurrentServices(): List<ControlsServiceInfo>
 
     /**
      * Get the app label for a given component.
@@ -45,6 +45,6 @@ interface ControlsListingController :
 
     @FunctionalInterface
     interface ControlsListingCallback {
-        fun onServicesUpdated(candidates: List<CandidateInfo>)
+        fun onServicesUpdated(candidates: List<ControlsServiceInfo>)
     }
 }
