@@ -2998,83 +2998,92 @@ class PackageManagerShellCommand extends ShellCommand {
             for (String arg : args) {
                 final int delimLocation = arg.indexOf(':');
 
-                // 2. File with specified size read from stdin.
                 if (delimLocation != -1) {
-                    final String[] fileDesc = arg.split(":");
-                    String name = null;
-                    long sizeBytes = -1;
-                    String metadata;
-                    byte[] signature = null;
-
-                    try {
-                        if (fileDesc.length > 0) {
-                            name = fileDesc[0];
-                        }
-                        if (fileDesc.length > 1) {
-                            sizeBytes = Long.parseUnsignedLong(fileDesc[1]);
-                        }
-                        if (fileDesc.length > 2 && !TextUtils.isEmpty(fileDesc[2])) {
-                            metadata = fileDesc[2];
-                        } else {
-                            metadata = name;
-                        }
-                        if (fileDesc.length > 3) {
-                            signature = Base64.getDecoder().decode(fileDesc[3]);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        getErrPrintWriter().println(
-                                "Unable to parse file parameters: " + arg + ", reason: " + e);
+                    // 2. File with specified size read from stdin.
+                    if (processArgForStdin(arg, session) != 0) {
                         return 1;
                     }
-
-                    if (TextUtils.isEmpty(name)) {
-                        getErrPrintWriter().println("Empty file name in: " + arg);
-                        return 1;
-                    }
-
-                    if (signature != null) {
-                        // Streaming/adb mode.
-                        metadata = "+" + metadata;
-                    } else {
-                        // Singleshot read from stdin.
-                        metadata = "-" + metadata;
-                    }
-
-                    try {
-                        if (V4Signature.readFrom(signature) == null) {
-                            getErrPrintWriter().println("V4 signature is invalid in: " + arg);
-                            return 1;
-                        }
-                    } catch (Exception e) {
-                        getErrPrintWriter().println("V4 signature is invalid: " + e + " in " + arg);
-                        return 1;
-                    }
-
-                    session.addFile(LOCATION_DATA_APP, name, sizeBytes,
-                            metadata.getBytes(StandardCharsets.UTF_8), signature);
-                    continue;
+                } else {
+                    // 3. Local file.
+                    processArgForLocalFile(arg, session);
                 }
-
-                // 3. Local file.
-                final String inPath = arg;
-
-                final File file = new File(inPath);
-                final String name = file.getName();
-                final long size = file.length();
-                final byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
-
-                // Try to load a v4 signature for the APK.
-                final V4Signature v4signature = V4Signature.readFrom(
-                        new File(inPath + V4Signature.EXT));
-                final byte[] v4signatureBytes =
-                        (v4signature != null) ? v4signature.toByteArray() : null;
-
-                session.addFile(LOCATION_DATA_APP, name, size, metadata, v4signatureBytes);
             }
             return 0;
         } finally {
             IoUtils.closeQuietly(session);
         }
+    }
+
+    private int processArgForStdin(String arg, PackageInstaller.Session session) {
+        final String[] fileDesc = arg.split(":");
+        String name, metadata;
+        long sizeBytes;
+        byte[] signature = null;
+
+        try {
+            if (fileDesc.length < 2) {
+                getErrPrintWriter().println("Must specify file name and size");
+                return 1;
+            }
+            name = fileDesc[0];
+            sizeBytes = Long.parseUnsignedLong(fileDesc[1]);
+            metadata = name;
+
+            if (fileDesc.length > 2 && !TextUtils.isEmpty(fileDesc[2])) {
+                metadata = fileDesc[2];
+            }
+            if (fileDesc.length > 3) {
+                signature = Base64.getDecoder().decode(fileDesc[3]);
+            }
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println(
+                    "Unable to parse file parameters: " + arg + ", reason: " + e);
+            return 1;
+        }
+
+        if (TextUtils.isEmpty(name)) {
+            getErrPrintWriter().println("Empty file name in: " + arg);
+            return 1;
+        }
+
+        if (signature != null) {
+            // Streaming/adb mode.
+            metadata = "+" + metadata;
+            try {
+                if (V4Signature.readFrom(signature) == null) {
+                    getErrPrintWriter().println("V4 signature is invalid in: " + arg);
+                    return 1;
+                }
+            } catch (Exception e) {
+                getErrPrintWriter().println(
+                        "V4 signature is invalid: " + e + " in " + arg);
+                return 1;
+            }
+        } else {
+            // Single-shot read from stdin.
+            metadata = "-" + metadata;
+        }
+
+        session.addFile(LOCATION_DATA_APP, name, sizeBytes,
+                metadata.getBytes(StandardCharsets.UTF_8), signature);
+        return 0;
+    }
+
+    private void processArgForLocalFile(String arg, PackageInstaller.Session session) {
+        final String inPath = arg;
+
+        final File file = new File(inPath);
+        final String name = file.getName();
+        final long size = file.length();
+        final byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
+
+        // Try to load a v4 signature for the APK.
+        final V4Signature v4signature = V4Signature.readFrom(
+                new File(inPath + V4Signature.EXT));
+        final byte[] v4signatureBytes =
+                (v4signature != null) ? v4signature.toByteArray() : null;
+
+        session.addFile(LOCATION_DATA_APP, name, size, metadata, v4signatureBytes);
     }
 
     private int doWriteSplits(int sessionId, ArrayList<String> splitPaths, long sessionSizeBytes,
