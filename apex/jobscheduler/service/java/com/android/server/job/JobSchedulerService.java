@@ -2833,6 +2833,13 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
 
                 js.overrideState = (force) ? JobStatus.OVERRIDE_FULL : JobStatus.OVERRIDE_SOFT;
+
+                // Re-evaluate constraints after the override is set in case one of the overridden
+                // constraints was preventing another constraint from thinking it needed to update.
+                for (int c = mControllers.size() - 1; c >= 0; --c) {
+                    mControllers.get(c).reevaluateStateLocked(uid);
+                }
+
                 if (!js.isConstraintsSatisfied()) {
                     js.overrideState = 0;
                     return JobSchedulerShellCommand.CMD_ERR_CONSTRAINTS;
