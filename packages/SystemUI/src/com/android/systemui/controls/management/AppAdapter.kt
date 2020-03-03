@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.settingslib.applications.DefaultAppInfo
 import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.R
+import com.android.systemui.controls.ControlsServiceInfo
 import java.text.Collator
 import java.util.concurrent.Executor
 
@@ -58,7 +59,7 @@ class AppAdapter(
     private var listOfServices = emptyList<CandidateInfo>()
 
     private val callback = object : ControlsListingController.ControlsListingCallback {
-        override fun onServicesUpdated(candidates: List<CandidateInfo>) {
+        override fun onServicesUpdated(candidates: List<ControlsServiceInfo>) {
             backgroundExecutor.execute {
                 val collator = Collator.getInstance(resources.configuration.locales[0])
                 val localeComparator = compareBy<CandidateInfo, CharSequence>(collator) {
