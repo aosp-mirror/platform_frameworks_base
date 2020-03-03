@@ -122,7 +122,7 @@ class ControlViewHolder(
     }
 
     fun action(action: ControlAction) {
-        controlsController.action(cws.ci, action)
+        controlsController.action(cws.componentName, cws.ci, action)
     }
 
     private fun findBehavior(status: Int, template: ControlTemplate): KClass<out Behavior> {

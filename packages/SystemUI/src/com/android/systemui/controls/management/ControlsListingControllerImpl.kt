@@ -24,7 +24,6 @@ import android.os.UserHandle
 import android.service.controls.ControlsProviderService
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
-import com.android.settingslib.applications.DefaultAppInfo
 import com.android.settingslib.applications.ServiceListing
 import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.controls.ControlsServiceInfo
@@ -157,7 +156,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
      * @return a label as returned by [CandidateInfo.loadLabel] or `null`.
      */
     override fun getAppLabel(name: ComponentName): CharSequence? {
-        return getCurrentServices().firstOrNull { (it as? DefaultAppInfo)?.componentName == name }
+        return getCurrentServices().firstOrNull { it.componentName == name }
                 ?.loadLabel()
     }
 }
