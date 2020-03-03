@@ -42,6 +42,7 @@ import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.R
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.util.concurrency.DelayableExecutor
 
 import dagger.Lazy
@@ -128,7 +129,7 @@ class ControlsUiControllerImpl @Inject constructor (
         get() = controlsController.get().available
 
     private val listingCallback = object : ControlsListingController.ControlsListingCallback {
-        override fun onServicesUpdated(candidates: List<CandidateInfo>) {
+        override fun onServicesUpdated(candidates: List<ControlsServiceInfo>) {
             bgExecutor.execute {
                 val collator = Collator.getInstance(context.resources.configuration.locales[0])
                 val localeComparator = compareBy<CandidateInfo, CharSequence>(collator) {
