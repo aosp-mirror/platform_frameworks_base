@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 @RunWith(AndroidJUnit4.class)
 public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceImplTestsBase {
@@ -132,57 +133,115 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testMutabilityChange() {
+    public void testMutableEnabledToImmutableEnabled() {
         final OverlayManagerServiceImpl impl = getImpl();
         installTargetPackage(TARGET, USER);
 
-        addOverlayPackage(OVERLAY, TARGET, USER, false, true, 0);
-        impl.updateOverlaysForUser(USER);
-        final OverlayInfo o1 = impl.getOverlayInfo(OVERLAY, USER);
-        assertNotNull(o1);
-        assertTrue(o1.isEnabled());
-        assertFalse(o1.isMutable);
+        final BiConsumer<Boolean, Boolean> setOverlay = (mutable, enabled) -> {
+            addOverlayPackage(OVERLAY, TARGET, USER, mutable, enabled, 0);
+            impl.updateOverlaysForUser(USER);
+            final OverlayInfo o1 = impl.getOverlayInfo(OVERLAY, USER);
+            assertNotNull(o1);
+            assertEquals(enabled, o1.isEnabled());
+            assertEquals(mutable, o1.isMutable);
+        };
 
-        addOverlayPackage(OVERLAY, TARGET, USER, true, false, 0);
-        impl.updateOverlaysForUser(USER);
-        final OverlayInfo o2 = impl.getOverlayInfo(OVERLAY, USER);
-        assertNotNull(o2);
-        assertFalse(o2.isEnabled());
-        assertTrue(o2.isMutable);
+        // Immutable/enabled -> mutable/enabled
+        setOverlay.accept(false /* mutable */, true /* enabled */);
+        setOverlay.accept(true /* mutable */, true /* enabled */);
 
-        addOverlayPackage(OVERLAY, TARGET, USER, false, false, 0);
-        impl.updateOverlaysForUser(USER);
-        final OverlayInfo o3 = impl.getOverlayInfo(OVERLAY, USER);
-        assertNotNull(o3);
-        assertFalse(o3.isEnabled());
-        assertFalse(o3.isMutable);
+        // Mutable/enabled -> immutable/enabled
+        setOverlay.accept(false /* mutable */, true /* enabled */);
+
+        // Immutable/enabled -> mutable/disabled
+        setOverlay.accept(true /* mutable */, false /* enabled */);
+
+        // Mutable/disabled -> immutable/enabled
+        setOverlay.accept(false /* mutable */, true /* enabled */);
+
+        // Immutable/enabled -> immutable/disabled
+        setOverlay.accept(false /* mutable */, false /* enabled */);
+
+        // Immutable/disabled -> mutable/enabled
+        setOverlay.accept(true /* mutable */, true /* enabled */);
+
+        // Mutable/enabled -> immutable/disabled
+        setOverlay.accept(false /* mutable */, false /* enabled */);
+
+        // Immutable/disabled -> mutable/disabled
+        setOverlay.accept(true /* mutable */, false /* enabled */);
+
+        // Mutable/disabled -> immutable/disabled
+        setOverlay.accept(false /* mutable */, false /* enabled */);
     }
 
     @Test
-    public void testPriorityChange() {
+    public void testMutablePriorityChange() {
         final OverlayManagerServiceImpl impl = getImpl();
         installTargetPackage(TARGET, USER);
+        addOverlayPackage(OVERLAY, TARGET, USER, true, true, 0);
+        addOverlayPackage(OVERLAY2, TARGET, USER, true, true, 1);
+        impl.updateOverlaysForUser(USER);
 
+        final OverlayInfo o1 = impl.getOverlayInfo(OVERLAY, USER);
+        assertNotNull(o1);
+        assertEquals(0, o1.priority);
+
+        final OverlayInfo o2 = impl.getOverlayInfo(OVERLAY2, USER);
+        assertNotNull(o2);
+        assertEquals(1, o2.priority);
+
+        // Overlay priority changing between reboots should not affect enable state of mutable
+        // overlays
+        impl.setEnabled(OVERLAY, true, USER);
+
+        // Reorder the overlays
+        addOverlayPackage(OVERLAY, TARGET, USER, true, true, 1);
+        addOverlayPackage(OVERLAY2, TARGET, USER, true, true, 0);
+        impl.updateOverlaysForUser(USER);
+
+        final OverlayInfo o3 = impl.getOverlayInfo(OVERLAY, USER);
+        assertNotNull(o3);
+        assertEquals(1, o3.priority);
+
+        final OverlayInfo o4 = impl.getOverlayInfo(OVERLAY2, USER);
+        assertNotNull(o4);
+        assertEquals(0, o4.priority);
+        assertTrue(o1.isEnabled());
+    }
+
+    @Test
+    public void testImmutablePriorityChange() {
+        final OverlayManagerServiceImpl impl = getImpl();
+        installTargetPackage(TARGET, USER);
         addOverlayPackage(OVERLAY, TARGET, USER, false, true, 0);
         addOverlayPackage(OVERLAY2, TARGET, USER, false, true, 1);
         impl.updateOverlaysForUser(USER);
 
         final OverlayInfo o1 = impl.getOverlayInfo(OVERLAY, USER);
-        final OverlayInfo o2 = impl.getOverlayInfo(OVERLAY2, USER);
         assertNotNull(o1);
-        assertNotNull(o2);
         assertEquals(0, o1.priority);
+
+        final OverlayInfo o2 = impl.getOverlayInfo(OVERLAY2, USER);
+        assertNotNull(o2);
         assertEquals(1, o2.priority);
 
+        // Overlay priority changing between reboots should not affect enable state of mutable
+        // overlays
+        impl.setEnabled(OVERLAY, true, USER);
+
+        // Reorder the overlays
         addOverlayPackage(OVERLAY, TARGET, USER, false, true, 1);
         addOverlayPackage(OVERLAY2, TARGET, USER, false, true, 0);
         impl.updateOverlaysForUser(USER);
 
         final OverlayInfo o3 = impl.getOverlayInfo(OVERLAY, USER);
-        final OverlayInfo o4 = impl.getOverlayInfo(OVERLAY2, USER);
         assertNotNull(o3);
-        assertNotNull(o4);
         assertEquals(1, o3.priority);
+
+        final OverlayInfo o4 = impl.getOverlayInfo(OVERLAY2, USER);
+        assertNotNull(o4);
         assertEquals(0, o4.priority);
+        assertTrue(o1.isEnabled());
     }
 }

@@ -71,24 +71,9 @@ final class OverlayManagerSettings {
             @NonNull final String baseCodePath, boolean isMutable, boolean isEnabled, int priority,
             @Nullable String overlayCategory) {
         remove(packageName, userId);
-        final SettingsItem item =
-                new SettingsItem(packageName, userId, targetPackageName, targetOverlayableName,
-                        baseCodePath, OverlayInfo.STATE_UNKNOWN, isEnabled, isMutable, priority,
-                        overlayCategory);
-
-        int i;
-        for (i = mItems.size() - 1; i >= 0; i--) {
-            SettingsItem parentItem = mItems.get(i);
-            if (parentItem.mPriority <= priority) {
-                break;
-            }
-        }
-        int pos = i + 1;
-        if (pos == mItems.size()) {
-            mItems.add(item);
-        } else {
-            mItems.add(pos, item);
-        }
+        insert(new SettingsItem(packageName, userId, targetPackageName, targetOverlayableName,
+                baseCodePath, OverlayInfo.STATE_UNKNOWN, isEnabled, isMutable, priority,
+                overlayCategory));
     }
 
     /**
@@ -220,6 +205,21 @@ final class OverlayManagerSettings {
     }
 
     /**
+     * Reassigns the priority of an overlay maintaining the values of the overlays other settings.
+     */
+    void setPriority(@NonNull final String packageName, final int userId, final int priority) {
+        final int moveIdx = select(packageName, userId);
+        if (moveIdx < 0) {
+            throw new BadKeyException(packageName, userId);
+        }
+
+        final SettingsItem itemToMove = mItems.get(moveIdx);
+        mItems.remove(moveIdx);
+        itemToMove.setPriority(priority);
+        insert(itemToMove);
+    }
+
+    /**
      * Returns true if the settings were modified, false if they remain the same.
      */
     boolean setPriority(@NonNull final String packageName,
@@ -282,6 +282,21 @@ final class OverlayManagerSettings {
         mItems.remove(idx);
         mItems.add(item);
         return true;
+    }
+
+    /**
+     * Inserts the item into the list of settings items.
+     */
+    private void insert(@NonNull SettingsItem item) {
+        int i;
+        for (i = mItems.size() - 1; i >= 0; i--) {
+            SettingsItem parentItem = mItems.get(i);
+            if (parentItem.mPriority <= item.getPriority()) {
+                break;
+            }
+        }
+
+        mItems.add(i + 1, item);
     }
 
     void dump(@NonNull final PrintWriter p, @NonNull DumpState dumpState) {
@@ -581,6 +596,11 @@ final class OverlayManagerSettings {
                         mCategory, mBaseCodePath, mState, mUserId, mPriority, mIsMutable);
             }
             return mCache;
+        }
+
+        private void setPriority(int priority) {
+            mPriority = priority;
+            invalidateCache();
         }
 
         private void invalidateCache() {
