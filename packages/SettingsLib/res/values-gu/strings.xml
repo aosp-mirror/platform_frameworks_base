@@ -255,6 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"નામ વિનાના બ્લૂટૂથ ઉપકરણો બતાવો"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ચોક્કસ વૉલ્યૂમને અક્ષમ કરો"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ચાલુ કરો"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"વિસ્તૃત કનેક્ટિવિટી"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"બ્લૂટૂથ AVRCP સંસ્કરણ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"બ્લૂટૂથ AVRCP સંસ્કરણ પસંદ કરો"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"બ્લૂટૂથ MAP વર્ઝન"</string>
@@ -308,6 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"નામ વગરના (ફક્ત MAC ઍડ્રેસવાળા) બ્લૂટૂથ ઉપકરણો બતાવવામાં આવશે"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"રિમોટ ઉપકરણોમાં વધુ પડતું ઊંચું વૉલ્યૂમ અથવા નિયંત્રણની કમી જેવી વૉલ્યૂમની સમસ્યાઓની સ્થિતિમાં બ્લૂટૂથ ચોક્કસ વૉલ્યૂમ સુવિધાને અક્ષમ કરે છે."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"બ્લૂટૂથ Gabeldorsche સુવિધાનું સ્ટૅક ચાલુ કરે છે."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"કનેક્ટિવિટીની વિસ્તૃત સુવિધા ચાલુ કરે છે."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"સ્થાનિક ટર્મિનલ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"સ્થાનિક શેલ અ‍ૅક્સેસની ઑફર કરતી ટર્મિનલ એપ્લિકેશનને સક્ષમ કરો"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP તપાસણી"</string>
@@ -354,6 +356,9 @@
     <string name="track_frame_time" msgid="522674651937771106">"HWUIની પ્રોફાઇલ રેંડરીંગ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ડિબગ સ્તરોને સક્ષમ કરો"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ડિબગ ઍપ માટે GPU ડિબગ સ્તરો લોડ કરવાની મંજૂરી આપો"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"વર્બોઝ વેન્ડર લૉગિંગ ચાલુ કરો"</string>
+    <!-- no translation found for enable_verbose_vendor_logging_summary (5426292185780393708) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"વિંડો એનિમેશન સ્કેલ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"સંક્રમણ એનિમેશન સ્કેલ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"એનિમેટર અવધિ સ્કેલ"</string>
@@ -501,6 +506,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"દર વખતે પૂછો"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"તમે બંધ ન કરો ત્યાં સુધી"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"હમણાં જ"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"આ ડિવાઇસ"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ફોન સ્પીકર"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"કનેક્ટ કરવામાં સમસ્યા આવી રહી છે. ડિવાઇસને બંધ કરીને ફરી ચાલુ કરો"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"વાયરવાળો ઑડિયો ડિવાઇસ"</string>
 </resources>

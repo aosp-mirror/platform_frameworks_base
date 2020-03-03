@@ -255,6 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"የብሉቱዝ መሣሪያዎችን ያለ ስሞች አሳይ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ፍጹማዊ ድምፅን አሰናክል"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorscheን አንቃ"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"የተሻሻለ ተገናኝነት"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"የብሉቱዝ AVRCP ስሪት"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"የብሉቱዝ AVRCP ስሪት ይምረጡ"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"የብሉቱዝ MAP ስሪት"</string>
@@ -308,6 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"የብሉቱዝ መሣሪያዎች ያለ ስሞች (MAC አድራሻዎች ብቻ) ይታያሉ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"እንደ ተቀባይነት በሌለው ደረጃ ድምፁ ከፍ ማለት ወይም መቆጣጠር አለመቻል ያሉ ከሩቅ መሣሪያዎች ጋር የድምፅ ችግር በሚኖርበት ጊዜ የብሉቱዝ ፍጹማዊ ድምፅን ባሕሪ ያሰናክላል።"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"የብሉቱዝ Gabeldorsche ባህሪ ቁልሉን ያነቃል።"</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"የተሻሻለ ተገናኝነት ባህሪውን ያነቃል።"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"አካባቢያዊ ተርሚናል"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"የአካባቢያዊ ሼል መዳረሻ የሚያቀርብ የተርሚናል መተግበሪያ አንቃ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"የHDCP ምልከታ"</string>
@@ -354,6 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"የመገለጫ HWUI ምስልን በመስራት ላይ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"የጂፒዩ ስህተት ማረሚያ ንብርብሮችን ያንቁ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ለስህተት ማረሚያ መተግበሪያዎች የጂፒዩ ንብርብሮችን መስቀልን ፍቀድ"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"የዝርክርክ ቃላት አቅራቢ ምዝግብ ማስታወሻን መያዝ አንቃ"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"በሳንካ ሪፖርቶች ውስጥ ተጨማሪ መሣሪያ-ተኮር የአቅራቢ ምዝግብ ማስታወሻዎችን ያካትቱ፣ ይህም የግል መረጃን ሊይዝ፣ ተጨማሪ ባትሪ ሊፈጅ እና/ወይም ተጨማሪ ማከማቻ ሊጠቀም ይችላል።"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"የዊንዶው እነማ ልኬት ለውጥ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"የእነማ ልኬት ለውጥ ሽግግር"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"እነማ አድራጊ ቆይታ መለኪያ"</string>
@@ -501,6 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ሁልጊዜ ጠይቅ"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"እስኪያጠፉት ድረስ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ልክ አሁን"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"ይህ መሣሪያ"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"የስልክ ድምጽ ማጉያ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"መገናኘት ላይ ችግር። መሳሪያውን ያጥፉት እና እንደገና ያብሩት"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ባለገመድ የኦዲዮ መሣሪያ"</string>
 </resources>

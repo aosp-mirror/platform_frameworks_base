@@ -255,6 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheter uten navn"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Slå av funksjonen for absolutt volum"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Aktiver Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Forbedret tilkobling"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Velg Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP-versjon"</string>
@@ -308,6 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-enheter uten navn (bare MAC-adresser) vises"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Slår av funksjonen for absolutt volum via Bluetooth i tilfelle det oppstår volumrelaterte problemer med eksterne enheter, for eksempel uakseptabelt høyt volum eller mangel på kontroll."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Aktiverer funksjonsstabelen Bluetooth Gabeldorsche"</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Slår på Forbedret tilkobling-funksjonen."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktiver terminalappen som gir lokal kommandolistetilgang"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontroll"</string>
@@ -354,6 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"HWUI-gjengivelse av profil"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Slå på GPU-feilsøkingslag"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Tillat GPU-feilsøkingslag for feilsøkingsapper"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Detaljert leverandørlogging"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inkluder ytterligere enhetsspesifikke leverandørlogger i feilrapporter, som kan inneholde privat informasjon, bruke mer batteri og/eller bruke mer lagringsplass."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Animasjonsskala for vindu"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Animasjonsskala for overgang"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Varighetsskala for animasjoner"</string>
@@ -501,6 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Spør hver gang"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Til du slår av"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nå nettopp"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Denne enheten"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonhøyttaler"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Tilkoblingsproblemer. Slå enheten av og på igjen"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhet med kabel"</string>
 </resources>

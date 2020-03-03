@@ -255,6 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheder uden navne"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Deaktiver absolut lydstyrke"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Aktivér Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Enhanced Connectivity"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"AVRCP-version for Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Vælg AVRCP-version for Bluetooth"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"MAP-version for Bluetooth"</string>
@@ -308,6 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth-enheder uden navne (kun MAC-adresser) vises"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Deaktiverer funktionen til absolut lydstyrke via Bluetooth i tilfælde af problemer med lydstyrken på eksterne enheder, f.eks. uacceptabel høj lyd eller manglende kontrol."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Aktiverer funktioner fra Bluetooth Gabeldorsche."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Aktivér funktionen Enhanced Connectivity."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktivér terminalappen, der giver lokal shell-adgang"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontrol"</string>
@@ -354,6 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"HWUI-profilgengivelse"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Aktivér fejlretningslag for grafikprocessor"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Tillad, at fejlretningslag indlæses for grafikprocessor i apps til fejlretning"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivér detaljeret leverandørlogging"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Medtag yderligere enhedsspecifikke leverandørlogfiler i fejlrapporter, som muligvis indeholder personlige oplysninger. Dette bruger muligvis mere batteri og/eller lagerplads."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Animationsskala for vindue"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Overgangsanimationsskala"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatorvarighedsskala"</string>
@@ -501,6 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Spørg hver gang"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Indtil du deaktiverer"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Lige nu"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Denne enhed"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonens højttaler"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Der kunne ikke oprettes forbindelse. Sluk og tænd enheden"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhed med ledning"</string>
 </resources>

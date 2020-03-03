@@ -212,9 +212,9 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Hari gabeko arazketa"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Erabilgarri dauden gailuak ikusteko eta erabiltzeko, aktibatu hari gabeko arazketa"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Parekatu gailua QR kodearekin"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Parekatu gailu berriak QR kodea eskaneatuta"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"Parekatu gailu gehiago QR kodea eskaneatuta"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Parekatu gailua parekatze-kodearekin"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Parekatu gailu berriak sei digituko kodearekin"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Parekatu gailu gehiago sei digituko kodearekin"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Parekatutako gailuak"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Konektatuta daudenak"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Gailuaren xehetasunak"</string>
@@ -226,12 +226,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wifi bidezko parekatze-kodea"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Ezin izan da parekatu gailua"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Ziurtatu gailua sare berera konektatuta dagoela."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Parekatu gailua wifi sare baten bidez QR kode bat eskaneatuta"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Parekatu gailua wifi-sare baten bidez QR kode bat eskaneatuta"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Gailua parekatzen…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Ezin izan da parekatu gailua. QR kodea ez zen zuzena zen edo gailua ez dago sare berera konektatuta."</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Ezin izan da parekatu gailua. QR kodea ez da zuzena edo gailua ez dago sare berera konektatuta."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP helbidea eta ataka"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Eskaneatu QR kodea"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Parekatu gailua wifi sare baten bidez QR kode bat eskaneatuta"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Parekatu gailua wifi-sare baten bidez QR kode bat eskaneatuta"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, araztu, gailua"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Akatsen txostenerako lasterbidea"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Bateriaren menuan, erakutsi akatsen txostena sortzeko botoia"</string>
@@ -252,9 +252,10 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-sareen bilaketaren muga"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datu-konexioa beti aktibo"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Erakutsi Bluetooth gailuak izenik gabe"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Erakutsi Bluetooth bidezko gailuak izenik gabe"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Desgaitu bolumen absolutua"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gaitu Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Konexio hobeak"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP bertsioa"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Hautatu Bluetooth AVRCP bertsioa"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAParen bertsioa"</string>
@@ -305,9 +306,10 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Ezarpen hauek garapen-xedeetarako pentsatu dira soilik. Baliteke ezarpenen eraginez gailua matxuratzea edo funtzionamendu okerra izatea."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Egiaztatu USBko aplikazioak"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Egiaztatu ADB/ADT bidez instalatutako aplikazioak portaera kaltegarriak atzemateko"</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth gailuak izenik gabe (MAC helbideak soilik) erakutsiko dira"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth bidezko gailuak izenik gabe (MAC helbideak soilik) erakutsiko dira"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Bluetooth bidezko bolumen absolutuaren eginbidea desgaitu egiten du urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo ezin bada kontrolatu"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche eginbide sorta gaitzen du."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Konexioak hobetzeko eginbidea gaitzen du."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Tokiko terminala"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Gaitu tokiko shell-sarbidea duen terminal-aplikazioa"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP egiaztapena"</string>
@@ -354,6 +356,9 @@
     <string name="track_frame_time" msgid="522674651937771106">"Profilaren HWUI errendatzea"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Gaitu GPUaren arazketa-geruzak"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Eman GPUaren arazketa-geruzak kargatzeko baimena arazketa-aplikazioei"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Gaitu saltzaileen erregistro xehatuak"</string>
+    <!-- no translation found for enable_verbose_vendor_logging_summary (5426292185780393708) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Leihoen animazio-eskala"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Trantsizioen animazio-eskala"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatzailearen iraupena"</string>
@@ -412,7 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopia (urdin-horia)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koloreen zuzenketa"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Kolore-zuzenketak kolore zehatzagoak ikusten laguntzen die kolore-itsutasuna duten pertsonei"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Koloreen zuzenketak kolore zehatzagoak ikusten laguntzen die kolore-itsutasuna duten pertsonei"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> inguru gelditzen dira"</string>
@@ -501,6 +506,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Galdetu beti"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Zuk desaktibatu arte"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Oraintxe"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Gailu hau"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonoaren bozgorailua"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazoren bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
 </resources>
