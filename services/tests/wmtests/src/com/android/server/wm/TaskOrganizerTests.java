@@ -293,8 +293,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
 
         // Info should reflect new membership
         List<TaskTile> tiles = getTaskTiles(mDisplayContent);
-        info1 = new RunningTaskInfo();
-        tiles.get(0).fillTaskInfo(info1);
+        info1 = tiles.get(0).getTaskInfo();
         assertEquals(ACTIVITY_TYPE_STANDARD, info1.topActivityType);
 
         // Children inherit configuration
@@ -307,9 +306,8 @@ public class TaskOrganizerTests extends WindowTestsBase {
 
         tile1.removeChild(stack);
         assertEquals(mDisplayContent.getWindowingMode(), stack.getWindowingMode());
-        info1 = new RunningTaskInfo();
         tiles = getTaskTiles(mDisplayContent);
-        tiles.get(0).fillTaskInfo(info1);
+        info1 = tiles.get(0).getTaskInfo();
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info1.topActivityType);
     }
 
