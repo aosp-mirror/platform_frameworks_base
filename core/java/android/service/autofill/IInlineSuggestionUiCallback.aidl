@@ -17,7 +17,7 @@
 package android.service.autofill;
 
 import android.os.IBinder;
-import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 
 /**
  * Interface to receive events from inline suggestions.
@@ -26,7 +26,7 @@ import android.view.SurfaceControl;
  */
 oneway interface IInlineSuggestionUiCallback {
     void onAutofill();
-    void onContent(in SurfaceControl surface);
+    void onContent(in SurfaceControlViewHost.SurfacePackage surface);
     void onError();
     void onTransferTouchFocusToImeWindow(in IBinder sourceInputToken, int displayId);
 }

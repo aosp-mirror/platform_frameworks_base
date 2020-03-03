@@ -30,7 +30,7 @@ import android.service.autofill.IInlineSuggestionUiCallback;
 import android.service.autofill.InlinePresentation;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -328,7 +328,7 @@ public final class InlineSuggestionFactory {
             }
 
             @Override
-            public void onContent(SurfaceControl surface)
+            public void onContent(SurfaceControlViewHost.SurfacePackage surface)
                     throws RemoteException {
                 callback.onContent(surface);
             }
