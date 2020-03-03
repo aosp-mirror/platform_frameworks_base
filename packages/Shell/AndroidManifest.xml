@@ -269,6 +269,9 @@
     <!-- Permission needed to test mainline permission module rollback -->
     <uses-permission android:name="android.permission.UPGRADE_RUNTIME_PERMISSIONS" />
 
+    <!-- Permission needed to read wifi network credentials for CtsNetTestCases -->
+    <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
