@@ -357,6 +357,7 @@ message Atom {
         BootTimeEventUtcTime boot_time_event_utc_time_reported = 241;
         BootTimeEventErrorCode boot_time_event_error_code_reported = 242;
         UserspaceRebootReported userspace_reboot_reported = 243 [(log_from_module) = "framework"];
+        SnapshotMergeReported snapshot_merge_reported = 255;
     }
 
     // Pulled events will start at field 10000.
@@ -3988,6 +3989,52 @@ message BootTimeEventErrorCode {
     // For example, this can have a value of FsStatFlags.FS_STAT_FULL_MOUNT_FAILED for the event of
     // FS_MGR_FS_STAT.
     optional int32 error_code = 2;
+}
+
+/**
+ * Collects Virtual A/B statistics related to the use of dm-snapshot performed
+ * after an OTA.
+ *
+ * Logged from:
+ *  - system/core/fs_mgr/libsnapshot/snapshot.cpp
+ *  - system/core/fs_mgr/libsnapshot/snapshotctl.cpp
+ */
+message SnapshotMergeReported {
+    // Keep in sync with
+    // system/core/fs_mgr/libsnapshot/android/snapshot/snapshot.proto
+    enum UpdateState {
+        // No update or merge is in progress.
+        NONE = 0;
+        // An update is applying; snapshots may already exist.
+        INITIATED = 1;
+        // An update is pending, but has not been successfully booted yet.
+        UNVERIFIED = 2;
+        // The kernel is merging in the background.
+        MERGING = 3;
+        // Post-merge cleanup steps could not be completed due to a transient
+        // error, but the next reboot will finish any pending operations.
+        MERGE_NEEDS_REBOOT = 4;
+        // Merging is complete, and needs to be acknowledged.
+        MERGE_COMPLETED = 5;
+        // Merging failed due to an unrecoverable error.
+        MERGE_FAILED = 6;
+        // The update was implicitly cancelled, either by a rollback or a flash
+        // operation via fastboot. This state can only be returned by WaitForMerge.
+        CANCELLED = 7;
+    };
+
+    // Status of the update after the merge attempts.
+    optional UpdateState final_state = 1;
+
+    // Time to complete a merge operation in milliseconds.
+    // A negative value corresponds to the case in which the merge operation
+    // was interrupted and resumed (e.g. in case of a system reboot during the
+    // merge).
+    optional int64 duration_millis = 2;
+
+    // Number of reboots that occurred after issuing and before completing the
+    // merge of all the snapshot devices.
+    optional int32 intermediate_reboots = 3;
 }
 
 //////////////////////////////////////////////////////////////////////
