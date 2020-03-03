@@ -756,7 +756,7 @@ public class ResolverActivity extends Activity implements
 
     private void registerWorkProfileStateReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         registerReceiverAsUser(mWorkProfileStateReceiver, UserHandle.ALL, filter, null, null);
     }
@@ -1729,6 +1729,14 @@ public class ResolverActivity extends Activity implements
     @Override // ResolverListCommunicator
     public void onHandlePackagesChanged(ResolverListAdapter listAdapter) {
         if (listAdapter == mMultiProfilePagerAdapter.getActiveListAdapter()) {
+            if (listAdapter.getUserHandle() == getWorkProfileUserHandle()
+                    && mMultiProfilePagerAdapter.isWaitingToEnableWorkProfile()) {
+                // We have just turned on the work profile and entered the pass code to start it,
+                // now we are waiting to receive the ACTION_USER_UNLOCKED broadcast. There is no
+                // point in reloading the list now, since the work profile user is still
+                // turning on.
+                return;
+            }
             boolean listRebuilt = mMultiProfilePagerAdapter.rebuildActiveTab(true);
             if (listRebuilt) {
                 ResolverListAdapter activeListAdapter =
@@ -1749,9 +1757,17 @@ public class ResolverActivity extends Activity implements
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if (!TextUtils.equals(action, Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
+                if (!TextUtils.equals(action, Intent.ACTION_USER_UNLOCKED)
                         && !TextUtils.equals(action, Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)) {
                     return;
+                }
+                int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                if (TextUtils.equals(action, Intent.ACTION_USER_UNLOCKED)
+                        && userHandle != getWorkProfileUserHandle().getIdentifier()) {
+                    return;
+                }
+                if (TextUtils.equals(action, Intent.ACTION_USER_UNLOCKED)) {
+                    mMultiProfilePagerAdapter.markWorkProfileEnabledBroadcastReceived();
                 }
                 if (mMultiProfilePagerAdapter.getCurrentUserHandle()
                         == getWorkProfileUserHandle()) {
