@@ -2606,8 +2606,6 @@
     <string name="inattentive_sleep_warning_title">Standby</string>
 
     <!-- Window Magnification strings -->
-    <!-- Title for Magnification Overlay Window [CHAR LIMIT=NONE] -->
-    <string name="magnification_overlay_title">Magnification Overlay Window</string>
     <!-- Title for Magnification Window [CHAR LIMIT=NONE] -->
     <string name="magnification_window_title">Magnification Window</string>
     <!-- Title for Magnification Controls Window [CHAR LIMIT=NONE] -->

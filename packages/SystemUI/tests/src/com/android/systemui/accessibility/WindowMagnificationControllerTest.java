@@ -21,7 +21,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import android.app.Instrumentation;
-import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.InstrumentationRegistry;
@@ -72,7 +71,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                     Float.NaN);
         });
         mInstrumentation.waitForIdleSync();
-        verify(mMirrorWindowControl).showControl(any(IBinder.class));
+        verify(mMirrorWindowControl).showControl();
     }
 
     @Test
