@@ -78,6 +78,7 @@ import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.InputQueue;
 import android.view.InsetsState;
+import android.view.InsetsController;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
@@ -85,6 +86,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.PendingInsetsController;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
@@ -285,6 +287,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * Whether the app targets an SDK that uses the new insets APIs.
      */
     private boolean mUseNewInsetsApi;
+
+    private PendingInsetsController mPendingInsetsController = new PendingInsetsController();
 
     DecorView(Context context, int featureId, PhoneWindow window,
             WindowManager.LayoutParams params) {
@@ -1780,6 +1784,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             getViewRootImpl().removeWindowCallbacks(this);
             mWindowResizeCallbacksAdded = false;
         }
+
+        mPendingInsetsController.detach();
     }
 
     @Override
@@ -1817,6 +1823,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mDecorCaptionView.onRootViewScrollYChanged(rootScrollY);
         }
         updateColorViewTranslations();
+    }
+
+    @Override
+    public PendingInsetsController providePendingInsetsController() {
+        return mPendingInsetsController;
     }
 
     private ActionMode createActionMode(
@@ -2537,6 +2548,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public int getAccessibilityViewId() {
         return AccessibilityNodeInfo.ROOT_ITEM_ID;
+    }
+
+    @Override
+    public WindowInsetsController getWindowInsetsController() {
+        if (isAttachedToWindow()) {
+            return super.getWindowInsetsController();
+        } else {
+            return mPendingInsetsController;
+        }
     }
 
     @Override
