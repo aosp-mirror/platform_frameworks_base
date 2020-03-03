@@ -656,6 +656,12 @@
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
+    <style name="Control.Spinner.Header" parent="@*android:style/Widget.DeviceDefault.Spinner.DropDown">
+        <item name="android:textSize">25sp</item>
+        <item name="android:textColor">@color/control_primary_text</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
     <style name="TextAppearance.Control.Status">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/control_primary_text</item>
@@ -668,6 +674,9 @@
     <style name="TextAppearance.Control.Subtitle">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/control_secondary_text</item>
+    </style>
+    <style name="Control.ListPopupWindow" parent="@android:style/Widget.ListPopupWindow">
+        <item name="android:overlapAnchor">true</item>
     </style>
     
 </resources>
