@@ -405,6 +405,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private boolean hasFragileUserData;
     private boolean cantSaveState;
     private boolean allowNativeHeapPointerTagging;
+    private boolean dontAutoRevokePermissions;
+    private boolean allowDontAutoRevokePermissions;
     private boolean preserveLegacyExternalStorage;
 
     @Nullable
@@ -1089,6 +1091,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeBoolean(this.hasFragileUserData);
         dest.writeBoolean(this.cantSaveState);
         dest.writeBoolean(this.allowNativeHeapPointerTagging);
+        dest.writeBoolean(this.dontAutoRevokePermissions);
+        dest.writeBoolean(this.allowDontAutoRevokePermissions);
         dest.writeBoolean(this.preserveLegacyExternalStorage);
         dest.writeArraySet(this.mimeGroups);
         sForBoolean.parcel(this.enableGwpAsan, dest, flags);
@@ -1247,6 +1251,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.hasFragileUserData = in.readBoolean();
         this.cantSaveState = in.readBoolean();
         this.allowNativeHeapPointerTagging = in.readBoolean();
+        this.dontAutoRevokePermissions = in.readBoolean();
+        this.allowDontAutoRevokePermissions = in.readBoolean();
         this.preserveLegacyExternalStorage = in.readBoolean();
         this.mimeGroups = (ArraySet<String>) in.readArraySet(boot);
         this.enableGwpAsan = sForBoolean.unparcel(in);
@@ -2023,6 +2029,16 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
+    public boolean isDontAutoRevokePermmissions() {
+        return dontAutoRevokePermissions;
+    }
+
+    @Override
+    public boolean isAllowDontAutoRevokePermmissions() {
+        return allowDontAutoRevokePermissions;
+    }
+
+    @Override
     public boolean hasPreserveLegacyExternalStorage() {
         return preserveLegacyExternalStorage;
     }
@@ -2489,6 +2505,18 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl setAllowNativeHeapPointerTagging(boolean value) {
         allowNativeHeapPointerTagging = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setDontAutoRevokePermissions(boolean value) {
+        dontAutoRevokePermissions = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setAllowDontAutoRevokePermissions(boolean value) {
+        allowDontAutoRevokePermissions = value;
         return this;
     }
 
