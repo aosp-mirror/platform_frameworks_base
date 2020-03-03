@@ -163,7 +163,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     private @Mock IBinder mBinder;
     private @Mock AlarmManager mAlarmManager;
     private HandlerThread mHandlerThread;
-    private Handler mHandler;
 
     private NetworkStatsService mService;
     private INetworkStatsSession mSession;
@@ -199,8 +198,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         mHandlerThread = new HandlerThread("HandlerThread");
         mHandlerThread.start();
         Handler.Callback callback = new NetworkStatsService.HandlerCallback(mService);
-        mHandler = new Handler(mHandlerThread.getLooper(), callback);
-        mService.setHandler(mHandler, callback);
+        final Handler handler = new Handler(mHandlerThread.getLooper(), callback);
+        mService.setHandler(handler, callback);
 
         mElapsedRealtime = 0L;
 
@@ -939,9 +938,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         long minThresholdInBytes = 2 * 1024 * 1024; // 2 MB
         assertEquals(minThresholdInBytes, request.thresholdInBytes);
 
-        // Send dummy message to make sure that any previous message has been handled
-        mHandler.sendMessage(mHandler.obtainMessage(-1));
-        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT);
+        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
 
         // Make sure that the caller binder gets connected
         verify(mBinder).linkToDeath(any(IBinder.DeathRecipient.class), anyInt());
@@ -1077,7 +1074,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         // Simulates alert quota of the provider has been reached.
         cb.onAlertReached();
-        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT);
+        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
 
         // Verifies that polling is triggered by alert reached.
         provider.expectStatsUpdate(0 /* unused */);
@@ -1294,9 +1291,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
     private void forcePollAndWaitForIdle() {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
-        // Send dummy message to make sure that any previous message has been handled
-        mHandler.sendMessage(mHandler.obtainMessage(-1));
-        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT);
+        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
     }
 
     static class LatchedHandler extends Handler {
