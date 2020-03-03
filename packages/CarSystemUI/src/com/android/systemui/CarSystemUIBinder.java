@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.tv.TvStatusBar;
 import com.android.systemui.theme.ThemeOverlayController;
 import com.android.systemui.toast.ToastUI;
 import com.android.systemui.util.leak.GarbageMonitor;
+import com.android.systemui.voicerecognition.car.ConnectedDeviceVoiceRecognitionNotifier;
 import com.android.systemui.volume.VolumeUI;
 
 import dagger.Binds;
@@ -174,4 +175,11 @@ public abstract class CarSystemUIBinder {
     @IntoMap
     @ClassKey(ToastUI.class)
     public abstract SystemUI bindToastUI(ToastUI service);
+
+    /** Inject into ConnectedDeviceVoiceRecognitionNotifier. */
+    @Binds
+    @IntoMap
+    @ClassKey(ConnectedDeviceVoiceRecognitionNotifier.class)
+    public abstract SystemUI bindConnectedDeviceVoiceRecognitionNotifier(
+            ConnectedDeviceVoiceRecognitionNotifier sysui);
 }
