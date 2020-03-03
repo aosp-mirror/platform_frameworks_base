@@ -3498,7 +3498,7 @@ public class CarrierConfigManager {
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
-            defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT, 0);
+            defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT, 4000);
             return defaults;
         }
     }
