@@ -74,6 +74,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -140,6 +141,7 @@ public class BlobStoreManagerService extends SystemService {
 
     private final Context mContext;
     private final Handler mHandler;
+    private final Handler mBackgroundHandler;
     private final Injector mInjector;
     private final SessionStateChangeListener mSessionStateChangeListener =
             new SessionStateChangeListener();
@@ -160,11 +162,12 @@ public class BlobStoreManagerService extends SystemService {
         mContext = context;
         mInjector = injector;
         mHandler = mInjector.initializeMessageHandler();
+        mBackgroundHandler = mInjector.getBackgroundHandler();
     }
 
     private static Handler initializeMessageHandler() {
         final HandlerThread handlerThread = new ServiceThread(TAG,
-                Process.THREAD_PRIORITY_BACKGROUND, true /* allowIo */);
+                Process.THREAD_PRIORITY_DEFAULT, true /* allowIo */);
         handlerThread.start();
         final Handler handler = new Handler(handlerThread.getLooper());
         Watchdog.getInstance().addThread(handler);
@@ -418,7 +421,7 @@ public class BlobStoreManagerService extends SystemService {
         public void onStateChanged(@NonNull BlobStoreSession session) {
             mHandler.post(PooledLambda.obtainRunnable(
                     BlobStoreManagerService::onStateChangedInternal,
-                    BlobStoreManagerService.this, session));
+                    BlobStoreManagerService.this, session).recycleOnUse());
         }
     }
 
@@ -437,7 +440,11 @@ public class BlobStoreManagerService extends SystemService {
                 }
                 break;
             case STATE_COMMITTED:
-                session.verifyBlobData();
+                mBackgroundHandler.post(() -> {
+                    session.computeDigest();
+                    mHandler.post(PooledLambda.obtainRunnable(
+                            BlobStoreSession::verifyBlobData, session).recycleOnUse());
+                });
                 break;
             case STATE_VERIFIED_VALID:
                 synchronized (mBlobsLock) {
@@ -1411,6 +1418,10 @@ public class BlobStoreManagerService extends SystemService {
     static class Injector {
         public Handler initializeMessageHandler() {
             return BlobStoreManagerService.initializeMessageHandler();
+        }
+
+        public Handler getBackgroundHandler() {
+            return BackgroundThread.getHandler();
         }
     }
 }
