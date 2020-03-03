@@ -4641,8 +4641,11 @@ package android.net {
     method public int getLegacyType();
     method @NonNull public String getLegacyTypeName();
     method @Nullable public String getSubscriberId();
+    method public boolean isExplicitlySelected();
     method public boolean isNat64DetectionEnabled();
+    method public boolean isPartialConnectivityAcceptable();
     method public boolean isProvisioningNotificationEnabled();
+    method public boolean isUnvalidatedConnectivityAcceptable();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkAgentConfig> CREATOR;
   }
@@ -4652,9 +4655,12 @@ package android.net {
     method @NonNull public android.net.NetworkAgentConfig build();
     method @NonNull public android.net.NetworkAgentConfig.Builder disableNat64Detection();
     method @NonNull public android.net.NetworkAgentConfig.Builder disableProvisioningNotification();
+    method @NonNull public android.net.NetworkAgentConfig.Builder setExplicitlySelected(boolean);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyType(int);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyTypeName(@NonNull String);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setPartialConnectivityAcceptable(boolean);
     method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
+    method @NonNull public android.net.NetworkAgentConfig.Builder setUnvalidatedConnectivityAcceptable(boolean);
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
