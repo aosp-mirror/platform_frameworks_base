@@ -5874,8 +5874,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // Since this stack will be put into a tile, its windowingMode will be inherited.
             windowingMode = WINDOWING_MODE_UNDEFINED;
         }
-        final ActivityStack stack = new ActivityStack(this, stackId,
-                mRootWindowContainer.mStackSupervisor, activityType, info, intent);
+        final ActivityStack stack = (ActivityStack) Task.create(mAtmService, stackId, activityType,
+                info, intent);
         addStack(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);
         stack.setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
                 false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,

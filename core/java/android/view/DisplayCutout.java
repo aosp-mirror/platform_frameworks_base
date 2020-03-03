@@ -393,22 +393,38 @@ public final class DisplayCutout {
         return mSafeInsets.equals(ZERO_RECT);
     }
 
-    /** Returns the inset from the top which avoids the display cutout in pixels. */
+    /**
+     * Returns the inset from the top which avoids the display cutout in pixels.
+     *
+     * @see WindowInsets.Type#displayCutout()
+     */
     public int getSafeInsetTop() {
         return mSafeInsets.top;
     }
 
-    /** Returns the inset from the bottom which avoids the display cutout in pixels. */
+    /**
+     * Returns the inset from the bottom which avoids the display cutout in pixels.
+     *
+     * @see WindowInsets.Type#displayCutout()
+     */
     public int getSafeInsetBottom() {
         return mSafeInsets.bottom;
     }
 
-    /** Returns the inset from the left which avoids the display cutout in pixels. */
+    /**
+     * Returns the inset from the left which avoids the display cutout in pixels.
+     *
+     * @see WindowInsets.Type#displayCutout()
+     */
     public int getSafeInsetLeft() {
         return mSafeInsets.left;
     }
 
-    /** Returns the inset from the right which avoids the display cutout in pixels. */
+    /**
+     * Returns the inset from the right which avoids the display cutout in pixels.
+     *
+     * @see WindowInsets.Type#displayCutout()
+     */
     public int getSafeInsetRight() {
         return mSafeInsets.right;
     }

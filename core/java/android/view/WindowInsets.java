@@ -17,6 +17,7 @@
 
 package android.view;
 
+import static android.view.WindowInsets.Type.DISPLAY_CUTOUT;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.IME;
 import static android.view.WindowInsets.Type.LAST;
@@ -857,11 +858,21 @@ public final class WindowInsets {
     /**
      * Returns a copy of this instance inset in the given directions.
      *
+     * This is intended for dispatching insets to areas of the window that are smaller than the
+     * current area.
+     *
+     * <p>Example:
+     * <pre>
+     * childView.dispatchApplyWindowInsets(insets.inset(childMargins));
+     * </pre>
+     *
+     * @param insets the amount of insets to remove from all sides.
+     *
      * @see #inset(int, int, int, int)
-     * @hide
      */
     @NonNull
-    public WindowInsets inset(Insets insets) {
+    public WindowInsets inset(@NonNull Insets insets) {
+        Objects.requireNonNull(insets);
         return inset(insets.left, insets.top, insets.right, insets.bottom);
     }
 
@@ -883,6 +894,8 @@ public final class WindowInsets {
      * @param bottom the amount of insets to remove from the bottom. Must be non-negative.
      *
      * @return the inset insets
+     *
+     * @see #inset(Insets)
      */
     @NonNull
     public WindowInsets inset(@IntRange(from = 0) int left, @IntRange(from = 0) int top,
@@ -1209,6 +1222,13 @@ public final class WindowInsets {
         @NonNull
         public Builder setDisplayCutout(@Nullable DisplayCutout displayCutout) {
             mDisplayCutout = displayCutout != null ? displayCutout : DisplayCutout.NO_CUTOUT;
+            if (!mDisplayCutout.isEmpty()) {
+                final Insets safeInsets = Insets.of(mDisplayCutout.getSafeInsets());
+                final int index = indexOf(DISPLAY_CUTOUT);
+                mTypeInsetsMap[index] = safeInsets;
+                mTypeMaxInsetsMap[index] = safeInsets;
+                mTypeVisibilityMap[index] = true;
+            }
             return this;
         }
 
@@ -1256,8 +1276,10 @@ public final class WindowInsets {
         static final int MANDATORY_SYSTEM_GESTURES = 1 << 5;
         static final int TAPPABLE_ELEMENT = 1 << 6;
 
-        static final int LAST = 1 << 7;
-        static final int SIZE = 8;
+        static final int DISPLAY_CUTOUT = 1 << 7;
+
+        static final int LAST = 1 << 8;
+        static final int SIZE = 9;
         static final int WINDOW_DECOR = LAST;
 
         static int indexOf(@InsetsType int type) {
@@ -1276,8 +1298,10 @@ public final class WindowInsets {
                     return 5;
                 case TAPPABLE_ELEMENT:
                     return 6;
-                case WINDOW_DECOR:
+                case DISPLAY_CUTOUT:
                     return 7;
+                case WINDOW_DECOR:
+                    return 8;
                 default:
                     throw new IllegalArgumentException("type needs to be >= FIRST and <= LAST,"
                             + " type=" + type);
@@ -1290,7 +1314,7 @@ public final class WindowInsets {
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, value = {STATUS_BARS, NAVIGATION_BARS, CAPTION_BAR, IME, WINDOW_DECOR,
-                SYSTEM_GESTURES, MANDATORY_SYSTEM_GESTURES, TAPPABLE_ELEMENT})
+                SYSTEM_GESTURES, MANDATORY_SYSTEM_GESTURES, TAPPABLE_ELEMENT, DISPLAY_CUTOUT})
         public @interface InsetsType {
         }
 
@@ -1355,6 +1379,20 @@ public final class WindowInsets {
          */
         public static @InsetsType int tappableElement() {
             return TAPPABLE_ELEMENT;
+        }
+
+        /**
+         * Returns an insets type representing the area that used by {@link DisplayCutout}.
+         *
+         * <p>This is equivalent to the safe insets on {@link #getDisplayCutout()}.</p>
+         *
+         * @see DisplayCutout#getSafeInsetLeft()
+         * @see DisplayCutout#getSafeInsetTop()
+         * @see DisplayCutout#getSafeInsetRight()
+         * @see DisplayCutout#getSafeInsetBottom()
+         */
+        public static @InsetsType int displayCutout() {
+            return DISPLAY_CUTOUT;
         }
 
         /**

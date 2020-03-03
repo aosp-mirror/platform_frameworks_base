@@ -196,7 +196,7 @@ public final class MediaSession {
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         try {
             mBinder = manager.createSession(mCbStub, tag, sessionInfo);
-            mSessionToken = new Token(mBinder.getController());
+            mSessionToken = new Token(Process.myUid(), mBinder.getController());
             mController = new MediaController(context, mSessionToken);
         } catch (RemoteException e) {
             throw new RuntimeException("Remote error creating session.", e);
@@ -771,8 +771,8 @@ public final class MediaSession {
         /**
          * @hide
          */
-        public Token(ISessionController binder) {
-            mUid = Process.myUid();
+        public Token(int uid, ISessionController binder) {
+            mUid = uid;
             mBinder = binder;
         }
 

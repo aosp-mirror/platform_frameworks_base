@@ -153,12 +153,14 @@
 
     <FrameLayout
         android:id="@+id/stub"
+        android:layout_alwaysShow="true"
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorBackgroundFloating"/>
 
     <TabHost
+        android:layout_alwaysShow="true"
         android:id="@+id/profile_tabhost"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -178,7 +180,6 @@
             <View
                 android:id="@+id/resolver_tab_divider"
                 android:visibility="gone"
-                android:layout_alwaysShow="true"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="?attr/colorBackgroundFloating"
@@ -190,8 +191,7 @@
                 <com.android.internal.app.ResolverViewPager
                     android:id="@+id/profile_pager"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="@dimen/resolver_empty_state_height" />
+                    android:layout_height="wrap_content" />
             </FrameLayout>
         </LinearLayout>
     </TabHost>

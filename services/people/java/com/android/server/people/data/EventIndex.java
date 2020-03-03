@@ -129,8 +129,7 @@ public class EventIndex {
     }
 
     EventIndex(@NonNull EventIndex from) {
-        this(from.mInjector, Arrays.copyOf(from.mEventBitmaps, TIME_SLOT_TYPES_COUNT),
-                from.mLastUpdatedTime);
+        this(from.mInjector, from.mEventBitmaps, from.mLastUpdatedTime);
     }
 
     @VisibleForTesting
@@ -140,7 +139,7 @@ public class EventIndex {
 
     private EventIndex(@NonNull Injector injector, long[] eventBitmaps, long lastUpdatedTime) {
         mInjector = injector;
-        mEventBitmaps = eventBitmaps;
+        mEventBitmaps = Arrays.copyOf(eventBitmaps, TIME_SLOT_TYPES_COUNT);
         mLastUpdatedTime = lastUpdatedTime;
     }
 

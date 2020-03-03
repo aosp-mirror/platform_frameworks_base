@@ -54,10 +54,8 @@ public final class InputChannel implements Parcelable {
         }
     };
 
-    @SuppressWarnings("unused")
     @UnsupportedAppUsage
     private long mPtr; // used by native code
-    private Runnable mCleaner;
 
     private static native long[] nativeOpenInputChannelPair(String name);
 
@@ -85,18 +83,17 @@ public final class InputChannel implements Parcelable {
      *
      *  @hide
      */
-    @UnsupportedAppUsage
-    public void SetNativeInputChannel(long nativeChannel) {
+    public void setNativeInputChannel(long nativeChannel) {
         if (nativeChannel == 0) {
-            throw new IllegalArgumentException("Set native input channel to null.");
+            throw new IllegalArgumentException("Attempting to set native input channel to null.");
         }
         if (mPtr != 0) {
             throw new IllegalArgumentException("Already has native input channel.");
         }
         if (DEBUG) {
-            Slog.d(TAG, "SetNativeInputChannel : " +  String.format("%x", nativeChannel));
+            Slog.d(TAG, "setNativeInputChannel : " +  String.format("%x", nativeChannel));
         }
-        mCleaner = sRegistry.registerNativeAllocation(this, nativeChannel);
+        sRegistry.registerNativeAllocation(this, nativeChannel);
         mPtr = nativeChannel;
     }
 
@@ -120,7 +117,7 @@ public final class InputChannel implements Parcelable {
         long[] nativeChannels = nativeOpenInputChannelPair(name);
         for (int i = 0; i< 2; i++) {
             channels[i] = new InputChannel();
-            channels[i].SetNativeInputChannel(nativeChannels[i]);
+            channels[i].setNativeInputChannel(nativeChannels[i]);
         }
         return channels;
     }
@@ -163,7 +160,7 @@ public final class InputChannel implements Parcelable {
         if (outParameter.mPtr != 0) {
             throw new IllegalArgumentException("Other object already has a native input channel.");
         }
-        outParameter.SetNativeInputChannel(nativeDup(mPtr));
+        outParameter.setNativeInputChannel(nativeDup(mPtr));
     }
 
     /**
@@ -171,7 +168,7 @@ public final class InputChannel implements Parcelable {
      */
     public InputChannel dup() {
         InputChannel target = new InputChannel();
-        target.SetNativeInputChannel(nativeDup(mPtr));
+        target.setNativeInputChannel(nativeDup(mPtr));
         return target;
     }
 
@@ -185,8 +182,8 @@ public final class InputChannel implements Parcelable {
             throw new IllegalArgumentException("in must not be null");
         }
         long nativeIn = nativeReadFromParcel(in);
-        if (nativeIn > 0) {
-            SetNativeInputChannel(nativeIn);
+        if (nativeIn != 0) {
+            setNativeInputChannel(nativeIn);
         }
     }
 
