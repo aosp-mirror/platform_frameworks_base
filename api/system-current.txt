@@ -6281,7 +6281,7 @@ package android.net {
   }
 
   public abstract class NetworkAgent {
-    ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, @NonNull android.net.NetworkScore, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
+    ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, int, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
     method @Nullable public android.net.Network getNetwork();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
@@ -6296,7 +6296,7 @@ package android.net {
     method @NonNull public android.net.Network register();
     method public void sendLinkProperties(@NonNull android.net.LinkProperties);
     method public void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
-    method public void sendNetworkScore(@NonNull android.net.NetworkScore);
+    method public void sendNetworkScore(int);
     method public void sendSocketKeepaliveEvent(int, int);
     method public void setConnected();
     method @Deprecated public void setLegacyExtraInfo(@Nullable String);
@@ -6401,55 +6401,6 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
-  }
-
-  public final class NetworkScore implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public android.net.NetworkScore.Metrics getEndToEndMetrics();
-    method @NonNull public android.net.NetworkScore.Metrics getLinkLayerMetrics();
-    method public int getRange();
-    method @IntRange(from=android.net.NetworkScore.UNKNOWN_SIGNAL_STRENGTH, to=android.net.NetworkScore.MAX_SIGNAL_STRENGTH) public int getSignalStrength();
-    method public boolean hasPolicy(int);
-    method public boolean isExiting();
-    method @NonNull public android.net.NetworkScore withExiting(boolean);
-    method @NonNull public android.net.NetworkScore withSignalStrength(@IntRange(from=android.net.NetworkScore.UNKNOWN_SIGNAL_STRENGTH) int);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkScore> CREATOR;
-    field public static final int MAX_SIGNAL_STRENGTH = 1000; // 0x3e8
-    field public static final int MIN_SIGNAL_STRENGTH = 0; // 0x0
-    field public static final int POLICY_DEFAULT_SUBSCRIPTION = 8; // 0x8
-    field public static final int POLICY_IGNORE_ON_WIFI = 4; // 0x4
-    field public static final int POLICY_LOCKDOWN_VPN = 1; // 0x1
-    field public static final int POLICY_VPN = 2; // 0x2
-    field public static final int RANGE_CLOSE = 1; // 0x1
-    field public static final int RANGE_LONG = 4; // 0x4
-    field public static final int RANGE_MEDIUM = 3; // 0x3
-    field public static final int RANGE_SHORT = 2; // 0x2
-    field public static final int RANGE_UNKNOWN = 0; // 0x0
-    field public static final int UNKNOWN_SIGNAL_STRENGTH = -1; // 0xffffffff
-  }
-
-  public static class NetworkScore.Builder {
-    ctor public NetworkScore.Builder();
-    method @NonNull public android.net.NetworkScore.Builder addPolicy(int);
-    method @NonNull public android.net.NetworkScore build();
-    method @NonNull public android.net.NetworkScore.Builder clearPolicy(int);
-    method @NonNull public android.net.NetworkScore.Builder setEndToEndMetrics(@NonNull android.net.NetworkScore.Metrics);
-    method @NonNull public android.net.NetworkScore.Builder setExiting(boolean);
-    method @NonNull public android.net.NetworkScore.Builder setLegacyScore(int);
-    method @NonNull public android.net.NetworkScore.Builder setLinkLayerMetrics(@NonNull android.net.NetworkScore.Metrics);
-    method @NonNull public android.net.NetworkScore.Builder setRange(int);
-    method @NonNull public android.net.NetworkScore.Builder setSignalStrength(@IntRange(from=android.net.NetworkScore.UNKNOWN_SIGNAL_STRENGTH, to=android.net.NetworkScore.MAX_SIGNAL_STRENGTH) int);
-  }
-
-  public static class NetworkScore.Metrics {
-    ctor public NetworkScore.Metrics(@IntRange(from=android.net.NetworkScore.Metrics.LATENCY_UNKNOWN) int, @IntRange(from=android.net.NetworkScore.Metrics.BANDWIDTH_UNKNOWN) int, @IntRange(from=android.net.NetworkScore.Metrics.BANDWIDTH_UNKNOWN) int);
-    field public static final int BANDWIDTH_UNKNOWN = -1; // 0xffffffff
-    field @NonNull public static final android.net.NetworkScore.Metrics EMPTY;
-    field public static final int LATENCY_UNKNOWN = -1; // 0xffffffff
-    field @IntRange(from=android.net.NetworkScore.Metrics.BANDWIDTH_UNKNOWN) public final int downlinkBandwidthKBps;
-    field @IntRange(from=android.net.NetworkScore.Metrics.LATENCY_UNKNOWN) public final int latencyMs;
-    field @IntRange(from=android.net.NetworkScore.Metrics.BANDWIDTH_UNKNOWN) public final int uplinkBandwidthKBps;
   }
 
   public class NetworkScoreManager {
