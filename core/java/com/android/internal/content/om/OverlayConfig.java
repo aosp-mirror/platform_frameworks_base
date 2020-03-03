@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.pm.PackagePartitions;
 import android.content.pm.parsing.ParsingPackageRead;
 import android.os.Build;
+import android.os.Process;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -185,6 +186,13 @@ public class OverlayConfig {
      */
     @NonNull
     public static OverlayConfig getZygoteInstance() {
+        if (Process.myUid() != Process.ROOT_UID) {
+            // Scan the overlays in the zygote process to generate configuration settings for
+            // overlays on the system image. Do not cache this instance so OverlayConfig will not
+            // be present in applications by default.
+            throw new IllegalStateException("Can only be invoked in the root process");
+        }
+
         Trace.traceBegin(Trace.TRACE_TAG_RRO, "OverlayConfig#getZygoteInstance");
         try {
             return new OverlayConfig(null /* rootDirectory */, OverlayScanner::new,
@@ -201,12 +209,13 @@ public class OverlayConfig {
      */
     @NonNull
     public static OverlayConfig initializeSystemInstance(PackageProvider packageProvider) {
-        Trace.traceBegin(Trace.TRACE_TAG_RRO, "OverlayConfig#initializeSystemInstance");
-        try {
-            sInstance = new OverlayConfig(null, null, packageProvider);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_RRO);
+        if (Process.myUid() != Process.SYSTEM_UID) {
+            throw new IllegalStateException("Can only be invoked in the system process");
         }
+
+        Trace.traceBegin(Trace.TRACE_TAG_RRO, "OverlayConfig#initializeSystemInstance");
+        sInstance = new OverlayConfig(null, null, packageProvider);
+        Trace.traceEnd(Trace.TRACE_TAG_RRO);
         return sInstance;
     }
 
@@ -370,6 +379,10 @@ public class OverlayConfig {
      */
     @NonNull
     public String[] createImmutableFrameworkIdmapsInZygote() {
+        if (Process.myUid() != Process.ROOT_UID) {
+            throw new IllegalStateException("This method can only be called from the root process");
+        }
+
         final String targetPath = "/system/framework/framework-res.apk";
         final ArrayList<String> idmapPaths = new ArrayList<>();
         final ArrayList<IdmapInvocation> idmapInvocations =
