@@ -27,6 +27,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
@@ -177,6 +178,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     final SparseArray<IBinder> mOverlayWindowTokens = new SparseArray();
 
+    /** The timestamp of requesting to take screenshot in milliseconds */
+    private long mRequestTakeScreenshotTimestampMs;
 
     public interface SystemSupport {
         /**
@@ -974,44 +977,39 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
-    public void takeScreenshot(int displayId, RemoteCallback callback) {
+    public boolean takeScreenshot(int displayId, RemoteCallback callback) {
+        final long currentTimestamp = SystemClock.uptimeMillis();
+        if (mRequestTakeScreenshotTimestampMs != 0
+                && (currentTimestamp - mRequestTakeScreenshotTimestampMs)
+                <= AccessibilityService.ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS) {
+            return false;
+        }
+        mRequestTakeScreenshotTimestampMs = currentTimestamp;
+
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
-                sendScreenshotResult(true, null, callback);
-                return;
+                return false;
             }
 
             if (!mSecurityPolicy.canTakeScreenshotLocked(this)) {
-                sendScreenshotResult(true, null, callback);
                 throw new SecurityException("Services don't have the capability of taking"
                         + " the screenshot.");
             }
         }
 
         if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
-            sendScreenshotResult(true, null, callback);
-            return;
+            return false;
         }
 
         final Display display = DisplayManagerGlobal.getInstance()
                 .getRealDisplay(displayId);
         if (display == null) {
-            sendScreenshotResult(true, null, callback);
-            return;
+            return false;
         }
 
-        sendScreenshotResult(false, display, callback);
-    }
-
-    private void sendScreenshotResult(boolean noResult, Display display, RemoteCallback callback) {
-        final boolean noScreenshot = noResult;
         final long identity = Binder.clearCallingIdentity();
         try {
             mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
-                if (noScreenshot) {
-                    callback.sendResult(null);
-                    return;
-                }
                 final Point displaySize = new Point();
                 // TODO (b/145893483): calling new API with the display as a parameter
                 // when surface control supported.
@@ -1041,6 +1039,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+
+        return true;
     }
 
     @Override
