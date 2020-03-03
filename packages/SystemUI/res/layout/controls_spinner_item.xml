@@ -13,48 +13,38 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<merge
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-  <LinearLayout
-      android:id="@+id/controls_header"
-      android:orientation="horizontal"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:paddingTop="12dp">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
 
     <Space
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="1dp" />
-
     <ImageView
         android:id="@+id/app_icon"
         android:layout_gravity="center"
-        android:layout_width="24dp"
+        android:layout_width="34dp"
         android:layout_height="24dp" 
         android:layout_marginEnd="10dp" />
 
     <TextView
-        style="@style/Control.Spinner.Header"
-        android:clickable="false"
-        android:id="@+id/app_or_structure_spinner"
+        android:id="@+id/controls_spinner_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:layout_gravity="center"
-        android:ellipsize="end" />
+        android:textSize="25sp"
+        android:textColor="@color/control_secondary_text"
+        android:fontFamily="@*android:string/config_headlineFontFamily" />
 
     <Space
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="1dp" />
-  </LinearLayout>
-
-  <LinearLayout
-      android:id="@+id/global_actions_controls_list"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:orientation="vertical"
-      android:paddingTop="20dp" />
-</merge>
+</LinearLayout>
+    
