@@ -5189,6 +5189,7 @@
         <activity android:name="com.android.internal.app.BlockedAppActivity"
                 android:theme="@style/Theme.Dialog.Confirmation"
                 android:excludeFromRecents="true"
+                android:lockTaskMode="always"
                 android:process=":ui">
         </activity>
 
