@@ -2113,15 +2113,23 @@ public class WifiConfiguration implements Parcelable {
                 throw new IllegalStateException("Not an EAP network");
             }
 
-            return trimStringForKeyId(SSID) + "_" + keyMgmt + "_" +
-                    trimStringForKeyId(enterpriseConfig.getKeyId(current != null ?
-                            current.enterpriseConfig : null));
+            String keyId = trimStringForKeyId(SSID) + "_" + keyMgmt + "_"
+                    + trimStringForKeyId(enterpriseConfig.getKeyId(current != null
+                    ? current.enterpriseConfig : null));
+
+            if (!fromWifiNetworkSuggestion) {
+                return keyId;
+            }
+            return keyId + "_" + trimStringForKeyId(BSSID) + "_" + trimStringForKeyId(creatorName);
         } catch (NullPointerException e) {
             throw new IllegalStateException("Invalid config details");
         }
     }
 
     private String trimStringForKeyId(String string) {
+        if (string == null) {
+            return "";
+        }
         // Remove quotes and spaces
         return string.replace("\"", "").replace(" ", "");
     }
