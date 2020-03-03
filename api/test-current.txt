@@ -48,6 +48,10 @@ package android.accessibilityservice {
     ctor public AccessibilityGestureEvent(int, int);
   }
 
+  public abstract class AccessibilityService extends android.app.Service {
+    field public static final int ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS = 1000; // 0x3e8
+  }
+
 }
 
 package android.animation {
