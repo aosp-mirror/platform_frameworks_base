@@ -3879,6 +3879,7 @@
   <java-symbol type="id" name="resolver_empty_state_title" />
   <java-symbol type="id" name="resolver_empty_state_subtitle" />
   <java-symbol type="id" name="resolver_empty_state_button" />
+  <java-symbol type="id" name="resolver_empty_state_progress" />
   <java-symbol type="id" name="resolver_tab_divider" />
   <java-symbol type="string" name="resolver_cant_share_with_work_apps" />
   <java-symbol type="string" name="resolver_cant_share_with_personal_apps" />

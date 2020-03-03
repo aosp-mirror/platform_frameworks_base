@@ -64,6 +64,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     private final UserHandle mPersonalProfileUserHandle;
     private final UserHandle mWorkProfileUserHandle;
     private Injector mInjector;
+    private boolean mIsWaitingToEnableWorkProfile;
 
     AbstractMultiProfilePagerAdapter(Context context, int currentPage,
             UserHandle personalProfileUserHandle,
@@ -90,8 +91,17 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
             @Override
             public void requestQuietModeEnabled(boolean enabled, UserHandle workProfileUserHandle) {
                 userManager.requestQuietModeEnabled(enabled, workProfileUserHandle);
+                mIsWaitingToEnableWorkProfile = true;
             }
         };
+    }
+
+    protected void markWorkProfileEnabledBroadcastReceived() {
+        mIsWaitingToEnableWorkProfile = false;
+    }
+
+    protected boolean isWaitingToEnableWorkProfile() {
+        return mIsWaitingToEnableWorkProfile;
     }
 
     /**
@@ -294,8 +304,12 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
                     R.drawable.ic_work_apps_off,
                     R.string.resolver_turn_on_work_apps,
                     R.string.resolver_turn_on_work_apps_explanation,
-                    (View.OnClickListener) v ->
-                            mInjector.requestQuietModeEnabled(false, mWorkProfileUserHandle));
+                    (View.OnClickListener) v -> {
+                        ProfileDescriptor descriptor = getItem(
+                                userHandleToPageIndex(activeListAdapter.getUserHandle()));
+                        showSpinner(descriptor.getEmptyStateView());
+                        mInjector.requestQuietModeEnabled(false, mWorkProfileUserHandle);
+                    });
             return false;
         }
         if (UserHandle.myUserId() != listUserHandle.getIdentifier()) {
@@ -355,7 +369,8 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         ProfileDescriptor descriptor = getItem(
                 userHandleToPageIndex(activeListAdapter.getUserHandle()));
         descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.GONE);
-        View emptyStateView = descriptor.rootView.findViewById(R.id.resolver_empty_state);
+        View emptyStateView = descriptor.getEmptyStateView();
+        resetViewVisibilities(emptyStateView);
         emptyStateView.setVisibility(View.VISIBLE);
 
         ImageView icon = emptyStateView.findViewById(R.id.resolver_empty_state_icon);
@@ -370,6 +385,23 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         Button button = emptyStateView.findViewById(R.id.resolver_empty_state_button);
         button.setVisibility(buttonOnClick != null ? View.VISIBLE : View.GONE);
         button.setOnClickListener(buttonOnClick);
+    }
+
+    private void showSpinner(View emptyStateView) {
+        emptyStateView.findViewById(R.id.resolver_empty_state_icon).setVisibility(View.INVISIBLE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.INVISIBLE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_subtitle)
+                .setVisibility(View.INVISIBLE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.INVISIBLE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_progress).setVisibility(View.VISIBLE);
+    }
+
+    private void resetViewVisibilities(View emptyStateView) {
+        emptyStateView.findViewById(R.id.resolver_empty_state_icon).setVisibility(View.VISIBLE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.VISIBLE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_subtitle).setVisibility(View.VISIBLE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.INVISIBLE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_progress).setVisibility(View.GONE);
     }
 
     private void showListView(ResolverListAdapter activeListAdapter) {
@@ -409,8 +441,14 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     protected class ProfileDescriptor {
         final ViewGroup rootView;
+        private final ViewGroup mEmptyStateView;
         ProfileDescriptor(ViewGroup rootView) {
             this.rootView = rootView;
+            mEmptyStateView = rootView.findViewById(R.id.resolver_empty_state);
+        }
+
+        private ViewGroup getEmptyStateView() {
+            return mEmptyStateView;
         }
     }
 
