@@ -266,11 +266,15 @@ public class NotificationHistoryDatabase {
                     mHistoryFiles.removeLast();
                 } else {
                     // all remaining files are newer than the cut off; schedule jobs to delete
-                    final long deletionTime = creationTime + (retentionDays * HISTORY_RETENTION_MS);
-                    scheduleDeletion(currentOldestFile.getBaseFile(), deletionTime);
+                    scheduleDeletion(currentOldestFile.getBaseFile(), creationTime, retentionDays);
                 }
             }
         }
+    }
+
+    private void scheduleDeletion(File file, long creationTime, int retentionDays) {
+        final long deletionTime = creationTime + (retentionDays * HISTORY_RETENTION_MS);
+        scheduleDeletion(file, deletionTime);
     }
 
     private void scheduleDeletion(File file, long deletionTime) {
@@ -330,17 +334,28 @@ public class NotificationHistoryDatabase {
         }
     };
 
-    private final class WriteBufferRunnable implements Runnable {
+    final class WriteBufferRunnable implements Runnable {
+        long currentTime = 0;
+        AtomicFile latestNotificationsFile;
+
         @Override
         public void run() {
             if (DEBUG) Slog.d(TAG, "WriteBufferRunnable");
             synchronized (mLock) {
-                final AtomicFile latestNotificationsFiles = new AtomicFile(
-                        new File(mHistoryDir, String.valueOf(System.currentTimeMillis())));
+                if (currentTime == 0) {
+                    currentTime = System.currentTimeMillis();
+                }
+                if (latestNotificationsFile == null) {
+                    latestNotificationsFile = new AtomicFile(
+                            new File(mHistoryDir, String.valueOf(currentTime)));
+                }
                 try {
-                    writeLocked(latestNotificationsFiles, mBuffer);
-                    mHistoryFiles.addFirst(latestNotificationsFiles);
+                    writeLocked(latestNotificationsFile, mBuffer);
+                    mHistoryFiles.addFirst(latestNotificationsFile);
                     mBuffer = new NotificationHistory();
+
+                    scheduleDeletion(latestNotificationsFile.getBaseFile(), currentTime,
+                            HISTORY_RETENTION_DAYS);
                 } catch (IOException e) {
                     Slog.e(TAG, "Failed to write buffer to disk. not flushing buffer", e);
                 }
@@ -440,7 +455,7 @@ public class NotificationHistoryDatabase {
 
         @Override
         public void run() {
-            if (DEBUG) Slog.d(TAG, "RemoveConversationRunnable");
+            if (DEBUG) Slog.d(TAG, "RemoveConversationRunnable " + mPkg + " "  + mConversationId);
             synchronized (mLock) {
                 // Remove from pending history
                 mBuffer.removeConversationFromWrite(mPkg, mConversationId);
