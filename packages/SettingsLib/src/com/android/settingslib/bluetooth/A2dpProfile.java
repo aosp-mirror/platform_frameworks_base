@@ -164,7 +164,9 @@ public class A2dpProfile implements LocalBluetoothProfile {
         if (mBluetoothAdapter == null) {
             return false;
         }
-        return mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_AUDIO);
+        return device == null
+                ? mBluetoothAdapter.removeActiveDevice(ACTIVE_DEVICE_AUDIO)
+                : mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_AUDIO);
     }
 
     public BluetoothDevice getActiveDevice() {
