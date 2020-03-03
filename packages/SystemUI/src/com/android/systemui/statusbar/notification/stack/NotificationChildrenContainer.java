@@ -1316,6 +1316,18 @@ public class NotificationChildrenContainer extends ViewGroup {
         }
     }
 
+    /**
+     * Shows or hides feedback icon.
+     */
+    public void showFeedbackIcon(boolean show) {
+        if (mNotificationHeaderWrapper != null) {
+            mNotificationHeaderWrapper.showFeedbackIcon(show);
+        }
+        if (mNotificationHeaderWrapperLowPriority != null) {
+            mNotificationHeaderWrapperLowPriority.showFeedbackIcon(show);
+        }
+    }
+
     public void setRecentlyAudiblyAlerted(boolean audiblyAlertedRecently) {
         if (mNotificationHeaderWrapper != null) {
             mNotificationHeaderWrapper.setRecentlyAudiblyAlerted(audiblyAlertedRecently);

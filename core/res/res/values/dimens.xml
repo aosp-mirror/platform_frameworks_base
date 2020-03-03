@@ -449,6 +449,9 @@
     <!-- The padding on top of inbox style elements -->
     <dimen name="notification_inbox_item_top_padding">5dp</dimen>
 
+    <!-- Size of the feedback indicator for notifications -->
+    <dimen name="notification_feedback_size">14dp</dimen>
+
     <!-- Size of the profile badge for notifications -->
     <dimen name="notification_badge_size">12dp</dimen>
 

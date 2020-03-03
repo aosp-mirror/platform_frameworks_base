@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationCustomViewWrapper;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationTemplateViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies;
@@ -1568,6 +1569,18 @@ public class NotificationContentView extends FrameLayout {
         }
         if (mHeadsUpChild != null) {
             mHeadsUpWrapper.showAppOpsIcons(activeOps);
+        }
+    }
+
+    public void showFeedbackIcon(boolean show) {
+        if (mContractedChild != null) {
+            mContractedWrapper.showFeedbackIcon(show);
+        }
+        if (mExpandedChild != null) {
+            mExpandedWrapper.showFeedbackIcon(show);
+        }
+        if (mHeadsUpChild != null) {
+            mHeadsUpWrapper.showFeedbackIcon(show);
         }
     }
 

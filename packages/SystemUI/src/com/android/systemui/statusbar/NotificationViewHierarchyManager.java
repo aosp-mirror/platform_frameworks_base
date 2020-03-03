@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -487,6 +488,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             }
 
             row.showAppOpsIcons(entry.mActiveAppOps);
+            row.showFeedbackIcon(showFeedback(entry));
             row.setLastAudiblyAlertedMs(entry.getLastAudiblyAlertedMs());
         }
 
@@ -527,5 +529,11 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             Log.wtf(TAG, "Manager state has become desynced", new Exception());
         }
         mPerformingUpdate = false;
+    }
+
+    public static boolean showFeedback(NotificationEntry entry) {
+        Ranking ranking = entry.getRanking();
+        return ranking.getImportance() != ranking.getChannel().getImportance()
+                || ranking.getRankingAdjustment() != Ranking.RANKING_UNCHANGED;
     }
 }

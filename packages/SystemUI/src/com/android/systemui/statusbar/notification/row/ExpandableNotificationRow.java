@@ -1694,6 +1694,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mPublicLayout.showAppOpsIcons(activeOps);
     }
 
+    public void showFeedbackIcon(boolean show) {
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.showFeedbackIcon(show);
+        }
+        mPrivateLayout.showFeedbackIcon(show);
+        mPublicLayout.showFeedbackIcon(show);
+    }
+
     /** Sets the last time the notification being displayed audibly alerted the user. */
     public void setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
         if (NotificationUtils.useNewInterruptionModel(mContext)) {

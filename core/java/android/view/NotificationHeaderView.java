@@ -59,6 +59,7 @@ public class NotificationHeaderView extends ViewGroup {
     private CachingIconView mIcon;
     private View mProfileBadge;
     private View mAppOps;
+    private View mFeedbackIcon;
     private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
@@ -116,6 +117,7 @@ public class NotificationHeaderView extends ViewGroup {
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
         mAppOps = findViewById(com.android.internal.R.id.app_ops);
+        mFeedbackIcon = findViewById(com.android.internal.R.id.feedback);
     }
 
     @Override
@@ -144,6 +146,7 @@ public class NotificationHeaderView extends ViewGroup {
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
                     || child == mAppOps
+                    || child == mFeedbackIcon
                     || child == mTransferChip) {
                 iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
             } else {
@@ -209,6 +212,7 @@ public class NotificationHeaderView extends ViewGroup {
             if ((child == mExpandButton && mShowExpandButtonAtEnd)
                     || child == mProfileBadge
                     || child == mAppOps
+                    || child == mFeedbackIcon
                     || child == mTransferChip) {
                 if (end == getMeasuredWidth()) {
                     layoutRight = end - mContentEndMargin;
