@@ -36,6 +36,8 @@ import android.util.SparseArray;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.google.common.truth.Correspondence;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +47,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Tests for {@link TunerResourceManagerService} class.
@@ -57,6 +60,37 @@ public class TunerResourceManagerServiceTest {
     @Mock private ITvInputManager mITvInputManagerMock;
     private TunerResourceManagerService mTunerResourceManagerService;
     private int mReclaimingId;
+
+    // A correspondence to compare a FrontendResource and a TunerFrontendInfo.
+    private static final Correspondence<FrontendResource, TunerFrontendInfo> FR_TFI_COMPARE =
+            new Correspondence<FrontendResource, TunerFrontendInfo>() {
+            @Override
+            public boolean compare(FrontendResource actual, TunerFrontendInfo expected) {
+                if (actual == null || expected == null) {
+                    return (actual == null) && (expected == null);
+                }
+
+                return actual.getId() == expected.getId()
+                        && actual.getType() == expected.getFrontendType()
+                        && actual.getExclusiveGroupId() == expected.getExclusiveGroupId();
+            }
+
+            @Override
+            public String toString() {
+                return "is correctly configured from ";
+            }
+        };
+
+    private static <T> List<T> sparseArrayToList(SparseArray<T> sparseArray) {
+        if (sparseArray == null) {
+            return null;
+        }
+        List<T> arrayList = new ArrayList<T>(sparseArray.size());
+        for (int i = 0; i < sparseArray.size(); i++) {
+            arrayList.add(sparseArray.valueAt(i));
+        }
+        return arrayList;
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -86,14 +120,16 @@ public class TunerResourceManagerServiceTest {
 
         SparseArray<FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
-        assertThat(resources.size()).isEqualTo(infos.length);
         for (int id = 0; id < infos.length; id++) {
-            FrontendResource fe = resources.get(infos[id].getId());
-            assertThat(fe.getId()).isEqualTo(infos[id].getId());
-            assertThat(fe.getType()).isEqualTo(infos[id].getFrontendType());
-            assertThat(fe.getExclusiveGroupId()).isEqualTo(infos[id].getExclusiveGroupId());
-            assertThat(fe.getExclusiveGroupMemberFeIds().size()).isEqualTo(0);
+            assertThat(resources.get(infos[id].getId())
+                    .getExclusiveGroupMemberFeIds().size()).isEqualTo(0);
         }
+        for (int id = 0; id < infos.length; id++) {
+            assertThat(resources.get(infos[id].getId())
+                    .getExclusiveGroupMemberFeIds().size()).isEqualTo(0);
+        }
+        assertThat(sparseArrayToList(resources)).comparingElementsUsing(FR_TFI_COMPARE)
+                .containsExactlyElementsIn(Arrays.asList(infos));
     }
 
     @Test
@@ -112,13 +148,8 @@ public class TunerResourceManagerServiceTest {
 
         SparseArray<FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
-        assertThat(resources.size()).isEqualTo(infos.length);
-        for (int id = 0; id < infos.length; id++) {
-            FrontendResource fe = resources.get(infos[id].getId());
-            assertThat(fe.getId()).isEqualTo(infos[id].getId());
-            assertThat(fe.getType()).isEqualTo(infos[id].getFrontendType());
-            assertThat(fe.getExclusiveGroupId()).isEqualTo(infos[id].getExclusiveGroupId());
-        }
+        assertThat(sparseArrayToList(resources)).comparingElementsUsing(FR_TFI_COMPARE)
+                .containsExactlyElementsIn(Arrays.asList(infos));
 
         assertThat(resources.get(0).getExclusiveGroupMemberFeIds())
                 .isEqualTo(new ArrayList<Integer>());
@@ -169,14 +200,12 @@ public class TunerResourceManagerServiceTest {
 
         SparseArray<FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
-        assertThat(resources.size()).isEqualTo(infos1.length);
         for (int id = 0; id < infos1.length; id++) {
-            FrontendResource fe = resources.get(infos1[id].getId());
-            assertThat(fe.getId()).isEqualTo(infos1[id].getId());
-            assertThat(fe.getType()).isEqualTo(infos1[id].getFrontendType());
-            assertThat(fe.getExclusiveGroupId()).isEqualTo(infos1[id].getExclusiveGroupId());
-            assertThat(fe.getExclusiveGroupMemberFeIds().size()).isEqualTo(0);
+            assertThat(resources.get(infos1[id].getId())
+                    .getExclusiveGroupMemberFeIds().size()).isEqualTo(0);
         }
+        assertThat(sparseArrayToList(resources)).comparingElementsUsing(FR_TFI_COMPARE)
+                .containsExactlyElementsIn(Arrays.asList(infos1));
     }
 
     @Test
@@ -198,14 +227,12 @@ public class TunerResourceManagerServiceTest {
 
         SparseArray<FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
-        assertThat(resources.size()).isEqualTo(infos1.length);
         for (int id = 0; id < infos1.length; id++) {
-            FrontendResource fe = resources.get(infos1[id].getId());
-            assertThat(fe.getId()).isEqualTo(infos1[id].getId());
-            assertThat(fe.getType()).isEqualTo(infos1[id].getFrontendType());
-            assertThat(fe.getExclusiveGroupId()).isEqualTo(infos1[id].getExclusiveGroupId());
-            assertThat(fe.getExclusiveGroupMemberFeIds().size()).isEqualTo(0);
+            assertThat(resources.get(infos1[id].getId())
+                    .getExclusiveGroupMemberFeIds().size()).isEqualTo(0);
         }
+        assertThat(sparseArrayToList(resources)).comparingElementsUsing(FR_TFI_COMPARE)
+                .containsExactlyElementsIn(Arrays.asList(infos1));
     }
 
     @Test
