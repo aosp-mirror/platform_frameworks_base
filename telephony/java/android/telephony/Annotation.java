@@ -651,4 +651,16 @@ public class Annotation {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UiccAppType{}
+
+    /**
+     * Override network type
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "OVERRIDE_NETWORK_TYPE_", value = {
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_NONE,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE})
+    public @interface OverrideNetworkType {}
 }

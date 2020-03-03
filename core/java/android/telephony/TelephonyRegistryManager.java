@@ -536,6 +536,24 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Notify display info changed.
+     *
+     * @param slotIndex The SIM slot index for which display info has changed. Can be
+     * derived from {@code subscriptionId} except when {@code subscriptionId} is invalid, such as
+     * when the device is in emergency-only mode.
+     * @param subscriptionId Subscription id for which display network info has changed.
+     * @param displayInfo The display info.
+     */
+    public void notifyDisplayInfoChanged(int slotIndex, int subscriptionId,
+            @NonNull DisplayInfo displayInfo) {
+        try {
+            sRegistry.notifyDisplayInfoChanged(slotIndex, subscriptionId, displayInfo);
+        } catch (RemoteException ex) {
+            // system process is dead
+        }
+    }
+
+    /**
      * Notify IMS call disconnect causes which contains {@link android.telephony.ims.ImsReasonInfo}.
      *
      * @param subId for which ims call disconnect.
