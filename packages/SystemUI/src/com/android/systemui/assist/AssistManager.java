@@ -39,13 +39,13 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.applications.InterestingConfigChanges;
-import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.ui.DefaultUiController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import javax.inject.Inject;
@@ -55,7 +55,7 @@ import javax.inject.Singleton;
  * Class to manage everything related to assist in SystemUI.
  */
 @Singleton
-public class AssistManager implements ConfigurationChangedReceiver {
+public class AssistManager {
 
     /**
      * Controls the UI for showing Assistant invocation progress.
@@ -153,12 +153,40 @@ public class AssistManager implements ConfigurationChangedReceiver {
         }
     };
 
+    private ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+                @Override
+                public void onConfigChanged(Configuration newConfig) {
+                    if (!mInterestingConfigChanges.applyNewConfig(mContext.getResources())) {
+                        return;
+                    }
+                    boolean visible = false;
+                    if (mView != null) {
+                        visible = mView.isShowing();
+                        mWindowManager.removeView(mView);
+                    }
+
+                    mView = (AssistOrbContainer) LayoutInflater.from(mContext).inflate(
+                            R.layout.assist_orb, null);
+                    mView.setVisibility(View.GONE);
+                    mView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+                    WindowManager.LayoutParams lp = getLayoutParams();
+                    mWindowManager.addView(mView, lp);
+                    if (visible) {
+                        mView.show(true /* show */, false /* animate */);
+                    }
+                }
+            };
+
     @Inject
     public AssistManager(
             DeviceProvisionedController controller,
             Context context,
             AssistUtils assistUtils,
-            AssistHandleBehaviorController handleController) {
+            AssistHandleBehaviorController handleController,
+            ConfigurationController configurationController) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
@@ -167,11 +195,13 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mPhoneStateMonitor = new PhoneStateMonitor(context);
         mHandleController = handleController;
 
+        configurationController.addCallback(mConfigurationListener);
+
         registerVoiceInteractionSessionListener();
         mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION
                 | ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_UI_MODE
                 | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
-        onConfigurationChanged(context.getResources().getConfiguration());
+        mConfigurationListener.onConfigChanged(context.getResources().getConfiguration());
         mShouldEnableOrb = !ActivityManager.isLowRamDeviceStatic();
 
         mUiController = new DefaultUiController(mContext);
@@ -219,29 +249,6 @@ public class AssistManager implements ConfigurationChangedReceiver {
                         }
                     }
                 });
-    }
-
-    public void onConfigurationChanged(Configuration newConfiguration) {
-        if (!mInterestingConfigChanges.applyNewConfig(mContext.getResources())) {
-            return;
-        }
-        boolean visible = false;
-        if (mView != null) {
-            visible = mView.isShowing();
-            mWindowManager.removeView(mView);
-        }
-
-        mView = (AssistOrbContainer) LayoutInflater.from(mContext).inflate(
-                R.layout.assist_orb, null);
-        mView.setVisibility(View.GONE);
-        mView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        WindowManager.LayoutParams lp = getLayoutParams();
-        mWindowManager.addView(mView, lp);
-        if (visible) {
-            mView.show(true /* show */, false /* animate */);
-        }
     }
 
     protected boolean shouldShowOrb() {
