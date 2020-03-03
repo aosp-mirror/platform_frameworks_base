@@ -301,6 +301,13 @@ public class PhoneStateListener {
     public static final int LISTEN_USER_MOBILE_DATA_STATE                  = 0x00080000;
 
     /**
+     *  Listen for display info changed event.
+     *
+     *  @see #onDisplayInfoChanged
+     */
+    public static final int LISTEN_DISPLAY_INFO_CHANGED = 0x00100000;
+
+    /**
      *  Listen for changes to the phone capability.
      *
      *  @see #onPhoneCapabilityChanged
@@ -837,6 +844,21 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when the display info has changed on the registered subscription.
+     * <p> The {@link DisplayInfo} contains status information shown to the user based on
+     * carrier policy.
+     *
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * @param displayInfo The display information.
+     */
+    @RequiresPermission((android.Manifest.permission.READ_PHONE_STATE))
+    public void onDisplayInfoChanged(@NonNull DisplayInfo displayInfo) {
+        // default implementation empty
+    }
+
+    /**
      * Callback invoked when the current emergency number list has changed on the registered
      * subscription.
      * Note, the registration subId comes from {@link TelephonyManager} object which registers
@@ -1199,6 +1221,15 @@ public class PhoneStateListener {
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
                             () -> psl.onUserMobileDataStateChanged(enabled)));
+        }
+
+        public void onDisplayInfoChanged(DisplayInfo displayInfo) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onDisplayInfoChanged(displayInfo)));
         }
 
         public void onOemHookRawEvent(byte[] rawData) {
