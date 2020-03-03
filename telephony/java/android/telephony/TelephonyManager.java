@@ -8645,9 +8645,13 @@ public class TelephonyManager {
         return false;
     }
 
-    /** @hide */
+    /**
+     * @deprecated use {@link #supplyPinReportPinResult(String pin)} instead.
+     *
+     * @hide */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @Deprecated
     public int[] supplyPinReportResult(String pin) {
         try {
             ITelephony telephony = getITelephony();
@@ -8659,9 +8663,13 @@ public class TelephonyManager {
         return new int[0];
     }
 
-    /** @hide */
+    /**
+     * @deprecated use {@link #supplyPukReportPinResult(String puk, String pin)} instead.
+     *
+     * @hide */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @Deprecated
     public int[] supplyPukReportResult(String puk, String pin) {
         try {
             ITelephony telephony = getITelephony();
@@ -8671,6 +8679,55 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#]", e);
         }
         return new int[0];
+    }
+
+    /**
+     * Used when the user attempts to enter their pin.
+     *
+     * @param pin The user entered pin.
+     * @return The result of the pin.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public PinResult supplyPinReportPinResult(@NonNull String pin) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                int[] result = telephony.supplyPinReportResultForSubscriber(getSubId(), pin);
+                return new PinResult(result[0], result[1]);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#supplyPinReportResultForSubscriber", e);
+        }
+        return null;
+    }
+
+    /**
+     * Used when the user attempts to enter the puk or their pin.
+     *
+     * @param puk The product unblocking key.
+     * @param pin The user entered pin.
+     * @return The result of the pin.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public PinResult supplyPukReportPinResult(@NonNull String puk, @NonNull String pin) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                int[] result = telephony.supplyPukReportResultForSubscriber(getSubId(), puk, pin);
+                return new PinResult(result[0], result[1]);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#]", e);
+        }
+        return null;
     }
 
     /**
