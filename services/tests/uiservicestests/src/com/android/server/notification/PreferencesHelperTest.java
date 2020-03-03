@@ -134,6 +134,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     private PreferencesHelper mHelper;
     private AudioAttributes mAudioAttributes;
+    private NotificationChannelLoggerFake mLogger = new NotificationChannelLoggerFake();
 
     @Before
     public void setUp() throws Exception {
@@ -183,7 +184,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
                 NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         resetZenModeHelper();
 
         mAudioAttributes = new AudioAttributes.Builder()
@@ -1107,6 +1108,22 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testDoubleDeleteChannel() throws Exception {
+        NotificationChannel channel = getChannel();
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel, true, false);
+        mHelper.deleteNotificationChannel(PKG_N_MR1, UID_N_MR1, channel.getId());
+        mHelper.deleteNotificationChannel(PKG_N_MR1, UID_N_MR1, channel.getId());
+        assertEquals(2, mLogger.getCalls().size());
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_CREATED,
+                mLogger.get(0).event);
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_DELETED,
+                mLogger.get(1).event);
+        // No log for the second delete of the same channel.
+    }
+
+    @Test
     public void testGetDeletedChannel() throws Exception {
         NotificationChannel channel = getChannel();
         channel.setSound(new Uri.Builder().scheme("test").build(), mAudioAttributes);
@@ -1444,7 +1461,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
                 NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
         resetZenModeHelper();
@@ -1455,7 +1472,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // start notification policy off with mAreChannelsBypassingDnd = false
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0, 0, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, never()).setNotificationPolicy(any());
         resetZenModeHelper();
@@ -1525,6 +1542,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // Old settings not overridden
         compareChannels(channel,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, newChannel.getId(), false));
+
+        assertEquals(1, mLogger.getCalls().size());
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_CREATED,
+                mLogger.get(0).event);
     }
 
     @Test
@@ -1594,6 +1616,16 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(1, mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1).size());
 
         verify(mHandler, never()).requestSort();
+
+        assertEquals(7, mLogger.getCalls().size());
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_GROUP_DELETED,
+                mLogger.get(5).event);  // Next-to-last log is the deletion of the channel group.
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_DELETED,
+                mLogger.get(6).event);  // Final log is the deletion of the channel.
     }
 
     @Test
@@ -1739,6 +1771,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(ncg,
                 mHelper.getNotificationChannelGroups(PKG_N_MR1, UID_N_MR1).iterator().next());
         verify(mHandler, never()).requestSort();
+        assertEquals(1, mLogger.getCalls().size());
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_GROUP_CREATED,
+                mLogger.get(0).event);
     }
 
     @Test
@@ -1751,6 +1788,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
             fail("Created a channel with a bad group");
         } catch (IllegalArgumentException e) {
         }
+        assertEquals(0, mLogger.getCalls().size());
     }
 
     @Test
@@ -1905,6 +1943,17 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(IMPORTANCE_DEFAULT, actual.getImportance());
 
         verify(mHandler, times(1)).requestSort();
+        assertEquals(3, mLogger.getCalls().size());
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_GROUP_CREATED,
+                mLogger.get(0).event);
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_CREATED,
+                mLogger.get(1).event);
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_UPDATED,
+                mLogger.get(2).event);
     }
 
     @Test
@@ -2189,7 +2238,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
                 + "</ranking>\n";
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadByteArrayXml(preQXml.getBytes(), true, UserHandle.USER_SYSTEM);
 
         assertEquals(PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS,
@@ -2201,7 +2250,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setHideSilentStatusIcons(!PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertEquals(!PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS,
@@ -2297,7 +2346,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_UNSPECIFIED);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
@@ -2308,7 +2357,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.setNotificationDelegate(PKG_O, UID_O, "other", 53);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertEquals("other", mHelper.getNotificationDelegate(PKG_O, UID_O));
@@ -2320,7 +2369,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.revokeNotificationDelegate(PKG_O, UID_O);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
@@ -2332,7 +2381,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.toggleNotificationDelegate(PKG_O, UID_O, false);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         // appears disabled
@@ -2350,7 +2399,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.revokeNotificationDelegate(PKG_O, UID_O);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         // appears disabled
@@ -2368,7 +2417,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(mHelper.areBubblesAllowed(PKG_O, UID_O));
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertTrue(mHelper.areBubblesAllowed(PKG_O, UID_O));
@@ -2383,7 +2432,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 mHelper.getAppLockedFields(PKG_O, UID_O));
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertFalse(mHelper.areBubblesAllowed(PKG_O, UID_O));
@@ -2876,7 +2925,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testPlaceholderConversationId_flagOn() throws Exception {
         Settings.Global.putString(
                 mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
@@ -2896,7 +2945,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testPlaceholderConversationId_flagOff() throws Exception {
         Settings.Global.putString(
                 mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
@@ -2916,7 +2965,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testNormalConversationId_flagOff() throws Exception {
         Settings.Global.putString(
                 mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
@@ -2936,7 +2985,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testNoConversationId_flagOff() throws Exception {
         Settings.Global.putString(
                 mContext.getContentResolver(), NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "false");
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
@@ -3171,5 +3220,33 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(channel, mHelper.getNotificationChannel(PKG_O, UID_O, channel.getId(), true));
         assertEquals(channel2,
                 mHelper.getNotificationChannel(PKG_O, UID_O, channel2.getId(), true));
+
+        assertEquals(7, mLogger.getCalls().size());
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_CREATED,
+                mLogger.get(0).event);  // Channel messages
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_CREATED,
+                mLogger.get(1).event);  // Channel calls
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_CONVERSATION_CREATED,
+                mLogger.get(2).event);  // Channel channel - Conversation A person msgs
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_CONVERSATION_CREATED,
+                mLogger.get(3).event);  // Channel noMatch - Conversation B person msgs
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_CONVERSATION_CREATED,
+                mLogger.get(4).event);  // Channel channel2 - Conversation A person calls
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_CONVERSATION_DELETED,
+                mLogger.get(5).event);  // Delete Channel channel - Conversation A person msgs
+        assertEquals(
+                NotificationChannelLogger.NotificationChannelEvent
+                        .NOTIFICATION_CHANNEL_CONVERSATION_DELETED,
+                mLogger.get(6).event);  // Delete Channel channel2 - Conversation A person calls
     }
 }

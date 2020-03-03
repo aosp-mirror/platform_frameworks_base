@@ -1979,7 +1979,8 @@ public class NotificationManagerService extends SystemService {
         mPreferencesHelper = new PreferencesHelper(getContext(),
                 mPackageManagerClient,
                 mRankingHandler,
-                mZenModeHelper);
+                mZenModeHelper,
+                new NotificationChannelLoggerImpl());
         mRankingHelper = new RankingHelper(getContext(),
                 mRankingHandler,
                 mPreferencesHelper,
