@@ -22,27 +22,33 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.os.IBinder
 import android.service.controls.Control
 import android.service.controls.TokenProvider
 import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ListPopupWindow
 import android.widget.Space
-
-import com.android.settingslib.widget.CandidateInfo
-import com.android.systemui.controls.controller.ControlsController
+import android.widget.TextView
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlInfo
+import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.R
-import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.util.concurrency.DelayableExecutor
 
 import dagger.Lazy
@@ -56,8 +62,11 @@ import javax.inject.Singleton
 private const val TOKEN = "https://www.googleapis.com/auth/assistant"
 private const val SCOPE = "oauth2:" + TOKEN
 private var tokenProviderConnection: TokenProviderConnection? = null
-class TokenProviderConnection(val cc: ControlsController, val context: Context)
-    : ServiceConnection {
+class TokenProviderConnection(
+    val cc: ControlsController,
+    val context: Context,
+    val structure: StructureInfo?
+) : ServiceConnection {
     private var mTokenProvider: TokenProvider? = null
 
     override fun onServiceConnected(cName: ComponentName, binder: IBinder) {
@@ -71,7 +80,9 @@ class TokenProviderConnection(val cc: ControlsController, val context: Context)
                 Log.e(ControlsUiController.TAG, "NO ACCOUNT IS SET. Open HomeMock app")
             } else {
                 mTokenProvider?.setAuthToken(getAuthToken(mLastAccountName))
-                cc.subscribeToFavorites()
+                structure?.let {
+                    cc.subscribeToFavorites(it)
+                }
             }
         }, "TokenProviderThread").start()
     }
@@ -117,83 +128,115 @@ class ControlsUiControllerImpl @Inject constructor (
     val context: Context,
     @Main val uiExecutor: DelayableExecutor,
     @Background val bgExecutor: DelayableExecutor,
-    val controlsListingController: Lazy<ControlsListingController>
+    val controlsListingController: Lazy<ControlsListingController>,
+    @Main val sharedPreferences: SharedPreferences
 ) : ControlsUiController {
 
-    private lateinit var controlInfos: List<ControlInfo>
+    companion object {
+        private const val PREF_COMPONENT = "controls_component"
+        private const val PREF_STRUCTURE = "controls_structure"
+
+        private val EMPTY_COMPONENT = ComponentName("", "")
+        private val EMPTY_STRUCTURE = StructureInfo(
+            EMPTY_COMPONENT,
+            "",
+            mutableListOf<ControlInfo>()
+        )
+    }
+
+    private var selectedStructure: StructureInfo = EMPTY_STRUCTURE
+    private lateinit var allStructures: List<StructureInfo>
     private val controlsById = mutableMapOf<ControlKey, ControlWithState>()
     private val controlViewsById = mutableMapOf<ControlKey, ControlViewHolder>()
     private lateinit var parent: ViewGroup
+    private lateinit var lastItems: List<SelectionItem>
+    private var popup: ListPopupWindow? = null
+
+    private val addControlsItem = SelectionItem(
+        context.resources.getString(R.string.controls_providers_title),
+        "",
+        context.getDrawable(R.drawable.ic_add),
+        EMPTY_COMPONENT
+    )
 
     override val available: Boolean
         get() = controlsController.get().available
 
-    private val listingCallback = object : ControlsListingController.ControlsListingCallback {
-        override fun onServicesUpdated(candidates: List<ControlsServiceInfo>) {
-            bgExecutor.execute {
-                val collator = Collator.getInstance(context.resources.configuration.locales[0])
-                val localeComparator = compareBy<CandidateInfo, CharSequence>(collator) {
-                    it.loadLabel()
-                }
+    private lateinit var listingCallback: ControlsListingController.ControlsListingCallback
 
-                val mList = candidates.toMutableList()
-                mList.sortWith(localeComparator)
-                loadInitialSetupViewIcons(mList.map { it.loadLabel() to it.loadIcon() })
+    private fun createCallback(
+        onResult: (List<SelectionItem>) -> Unit
+    ): ControlsListingController.ControlsListingCallback {
+        return object : ControlsListingController.ControlsListingCallback {
+            override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
+                bgExecutor.execute {
+                    val collator = Collator.getInstance(context.resources.configuration.locales[0])
+                    val localeComparator = compareBy<ControlsServiceInfo, CharSequence>(collator) {
+                        it.loadLabel()
+                    }
+
+                    val mList = serviceInfos.toMutableList()
+                    mList.sortWith(localeComparator)
+                    lastItems = mList.map {
+                        SelectionItem(it.loadLabel(), "", it.loadIcon(), it.componentName)
+                    }
+                    uiExecutor.execute {
+                        onResult(lastItems)
+                    }
+                }
             }
         }
     }
 
     override fun show(parent: ViewGroup) {
         Log.d(ControlsUiController.TAG, "show()")
-
         this.parent = parent
 
-        controlInfos = controlsController.get().getFavoriteControls()
+        allStructures = controlsController.get().getFavorites()
+        selectedStructure = loadPreference(allStructures)
 
-        controlInfos.map {
-            ControlWithState(it, null)
-        }.associateByTo(controlsById) { ControlKey(it.ci.component, it.ci.controlId) }
-
-        if (controlInfos.isEmpty()) {
-            showInitialSetupView()
+        if (selectedStructure.controls.isEmpty() && allStructures.size <= 1) {
+            // only show initial view if there are really no favorites across any structure
+            listingCallback = createCallback(::showInitialSetupView)
         } else {
-            showControlsView()
+            selectedStructure.controls.map {
+                ControlWithState(selectedStructure.componentName, it, null)
+            }.associateByTo(controlsById) {
+                ControlKey(selectedStructure.componentName, it.ci.controlId)
+            }
+            listingCallback = createCallback(::showControlsView)
         }
 
+        controlsListingController.get().addCallback(listingCallback)
+
         // Temp code to pass auth
-        tokenProviderConnection = TokenProviderConnection(controlsController.get(), context)
+        tokenProviderConnection = TokenProviderConnection(controlsController.get(), context,
+                selectedStructure)
+
         val serviceIntent = Intent()
         serviceIntent.setComponent(ComponentName("com.android.systemui.home.mock",
                 "com.android.systemui.home.mock.AuthService"))
         if (!context.bindService(serviceIntent, tokenProviderConnection!!,
                 Context.BIND_AUTO_CREATE)) {
-            controlsController.get().subscribeToFavorites()
+            controlsController.get().subscribeToFavorites(selectedStructure)
         }
     }
 
-    private fun showInitialSetupView() {
+    private fun showInitialSetupView(items: List<SelectionItem>) {
+        parent.removeAllViews()
+
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
 
         val viewGroup = parent.requireViewById(R.id.controls_no_favorites_group) as ViewGroup
         viewGroup.setOnClickListener(launchSelectorActivityListener(context))
 
-        controlsListingController.get().addCallback(listingCallback)
-    }
-
-    private fun loadInitialSetupViewIcons(icons: List<Pair<CharSequence, Drawable>>) {
-        uiExecutor.execute {
-            val viewGroup = parent.requireViewById(R.id.controls_icon_row) as ViewGroup
-            viewGroup.removeAllViews()
-
-            val inflater = LayoutInflater.from(context)
-            icons.forEach {
-                val imageView = inflater.inflate(R.layout.controls_icon, viewGroup, false)
-                        as ImageView
-                imageView.setContentDescription(it.first)
-                imageView.setImageDrawable(it.second)
-                viewGroup.addView(imageView)
-            }
+        val iconRowGroup = parent.requireViewById(R.id.controls_icon_row) as ViewGroup
+        items.forEach {
+            val imageView = inflater.inflate(R.layout.controls_icon, viewGroup, false) as ImageView
+            imageView.setContentDescription(it.getTitle())
+            imageView.setImageDrawable(it.icon)
+            iconRowGroup.addView(imageView)
         }
     }
 
@@ -209,14 +252,16 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    private fun showControlsView() {
+    private fun showControlsView(items: List<SelectionItem>) {
+        parent.removeAllViews()
+        controlViewsById.clear()
+
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_with_favorites, parent, true)
 
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
-        controlInfos.forEach {
-            Log.d(ControlsUiController.TAG, "favorited control id: " + it.controlId)
+        selectedStructure.controls.forEach {
             if (lastRow.getChildCount() == 2) {
                 lastRow = createRow(inflater, listView)
             }
@@ -224,21 +269,114 @@ class ControlsUiControllerImpl @Inject constructor (
                 R.layout.controls_base_item, lastRow, false) as ViewGroup
             lastRow.addView(item)
             val cvh = ControlViewHolder(item, controlsController.get(), uiExecutor, bgExecutor)
-            val key = ControlKey(it.component, it.controlId)
+            val key = ControlKey(selectedStructure.componentName, it.controlId)
             cvh.bindData(controlsById.getValue(key))
             controlViewsById.put(key, cvh)
         }
 
-        if ((controlInfos.size % 2) == 1) {
+        // add spacer if necessary to keep control size consistent
+        if ((selectedStructure.controls.size % 2) == 1) {
             lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
         }
 
-        val moreImageView = parent.requireViewById(R.id.controls_more) as View
-        moreImageView.setOnClickListener(launchSelectorActivityListener(context))
+        val itemsByComponent = items.associateBy { it.componentName }
+        var adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
+            val listItems = allStructures.mapNotNull {
+                itemsByComponent.get(it.componentName)?.copy(structure = it.structure)
+            }
+
+            addAll(listItems + addControlsItem)
+        }
+
+        /*
+         * Default spinner widget does not work with the window type required
+         * for this dialog. Use a textView with the ListPopupWindow to achieve
+         * a similar effect
+         */
+        parent.requireViewById<TextView>(R.id.app_or_structure_spinner).apply {
+            setText((adapter.findSelectionItem(selectedStructure) ?: adapter.getItem(0)).getTitle())
+        }
+        val anchor = parent.requireViewById<ViewGroup>(R.id.controls_header)
+        anchor.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View) {
+                popup = ListPopupWindow(
+                    ContextThemeWrapper(context, R.style.Control_ListPopupWindow))
+                popup?.apply {
+                    setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+                    setAnchorView(anchor)
+                    setAdapter(adapter)
+                    setModal(true)
+                    setOnItemClickListener(object : AdapterView.OnItemClickListener {
+                        override fun onItemClick(
+                            parent: AdapterView<*>,
+                            view: View,
+                            pos: Int,
+                            id: Long
+                        ) {
+                            val listItem = parent.getItemAtPosition(pos) as SelectionItem
+                            this@ControlsUiControllerImpl.switchAppOrStructure(listItem)
+                            dismiss()
+                        }
+                    })
+                    // need to call show() first in order to construct the listView
+                    show()
+                    getListView()?.apply {
+                        setDividerHeight(
+                            context.resources.getDimensionPixelSize(R.dimen.control_list_divider))
+                        setDivider(
+                            context.resources.getDrawable(R.drawable.controls_list_divider))
+                    }
+                    show()
+                }
+            }
+        })
+
+        parent.requireViewById<ImageView>(R.id.app_icon).apply {
+            setContentDescription("My Home")
+            setImageDrawable(items[0].icon)
+        }
+    }
+
+    private fun loadPreference(structures: List<StructureInfo>): StructureInfo {
+        if (structures.isEmpty()) return EMPTY_STRUCTURE
+
+        val component = sharedPreferences.getString(PREF_COMPONENT, null)?.let {
+            ComponentName.unflattenFromString(it)
+        } ?: EMPTY_COMPONENT
+        val structure = sharedPreferences.getString(PREF_STRUCTURE, "")
+
+        return structures.firstOrNull {
+            component == it.componentName && structure == it.structure
+        } ?: structures.get(0)
+    }
+
+    private fun updatePreferences(si: StructureInfo) {
+        sharedPreferences.edit()
+            .putString(PREF_COMPONENT, si.componentName.flattenToString())
+            .putString(PREF_STRUCTURE, si.structure.toString())
+            .commit()
+    }
+
+    private fun switchAppOrStructure(item: SelectionItem) {
+        if (item == addControlsItem) {
+            launchSelectorActivityListener(context)(parent)
+        } else {
+            val newSelection = allStructures.first {
+                it.structure == item.structure && it.componentName == item.componentName
+            }
+
+            if (newSelection != selectedStructure) {
+                selectedStructure = newSelection
+                updatePreferences(selectedStructure)
+                showControlsView(lastItems)
+            }
+        }
     }
 
     override fun hide() {
         Log.d(ControlsUiController.TAG, "hide()")
+        popup?.dismiss()
+
         controlsController.get().unsubscribe()
         context.unbindService(tokenProviderConnection)
         tokenProviderConnection = null
@@ -254,7 +392,7 @@ class ControlsUiControllerImpl @Inject constructor (
         controls.forEach { c ->
             controlsById.get(ControlKey(componentName, c.getControlId()))?.let {
                 Log.d(ControlsUiController.TAG, "onRefreshState() for id: " + c.getControlId())
-                val cws = ControlWithState(it.ci, c)
+                val cws = ControlWithState(componentName, it.ci, c)
                 val key = ControlKey(componentName, c.getControlId())
                 controlsById.put(key, cws)
 
@@ -276,5 +414,48 @@ class ControlsUiControllerImpl @Inject constructor (
         val row = inflater.inflate(R.layout.controls_row, listView, false) as ViewGroup
         listView.addView(row)
         return row
+    }
+}
+
+private data class SelectionItem(
+    val appName: CharSequence,
+    val structure: CharSequence,
+    val icon: Drawable,
+    val componentName: ComponentName
+) {
+    fun getTitle() = if (structure.isEmpty()) { appName } else { structure }
+}
+
+private class ItemAdapter(
+    val parentContext: Context,
+    val resource: Int
+) : ArrayAdapter<SelectionItem>(parentContext, resource) {
+
+    val layoutInflater = LayoutInflater.from(context)
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val item = getItem(position)
+        val view = convertView ?: layoutInflater.inflate(resource, parent, false)
+        view.requireViewById<TextView>(R.id.controls_spinner_item).apply {
+            setText(item.getTitle())
+        }
+        view.requireViewById<ImageView>(R.id.app_icon).apply {
+            setContentDescription(item.getTitle())
+            setImageDrawable(item.icon)
+        }
+        return view
+    }
+
+    fun findSelectionItem(si: StructureInfo): SelectionItem? {
+        var i = 0
+        while (i < getCount()) {
+            val item = getItem(i)
+            if (item.componentName == si.componentName &&
+                item.structure == si.structure) {
+                return item
+            }
+            i++
+        }
+        return null
     }
 }
