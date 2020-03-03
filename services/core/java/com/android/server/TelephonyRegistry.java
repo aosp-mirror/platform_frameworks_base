@@ -1538,17 +1538,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
-                if (mDisplayInfos[phoneId] != null) {
-                    mDisplayInfos[phoneId] = displayInfo;
-                    for (Record r : mRecords) {
-                        if (r.matchPhoneStateListenerEvent(
-                                PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED)
-                                && idMatch(r.subId, subId, phoneId)) {
-                            try {
-                                r.callback.onDisplayInfoChanged(displayInfo);
-                            } catch (RemoteException ex) {
-                                mRemoveList.add(r.binder);
-                            }
+                mDisplayInfos[phoneId] = displayInfo;
+                for (Record r : mRecords) {
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED)
+                            && idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            r.callback.onDisplayInfoChanged(displayInfo);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
                         }
                     }
                 }
