@@ -255,8 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Ցուցադրել Bluetooth սարքերն առանց անունների"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Անջատել ձայնի բացարձակ ուժգնությունը"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Միացնել Gabeldorsche-ը"</string>
-    <!-- no translation found for enhanced_connectivity (7201127377781666804) -->
-    <skip />
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Տվյալների լավացված փոխանակում"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP տարբերակը"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Ընտրել Bluetooth AVRCP տարբերակը"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP-ի տարբերակ"</string>
@@ -310,8 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth սարքերը կցուցադրվեն առանց անունների (միայն MAC հասցեները)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Կասեցնում է Bluetooth-ի ձայնի բացարձակ ուժգնության գործառույթը՝ հեռավոր սարքերի հետ ձայնի ուժգնությանը վերաբերող խնդիրներ ունենալու դեպքում (օրինակ՝ երբ ձայնի ուժգնությունն անընդունելի է կամ դրա կառավարումը հնարավոր չէ):"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Միացնել Bluetooth Gabeldorsche գործառույթի զտիչը"</string>
-    <!-- no translation found for enhanced_connectivity_summary (1576414159820676330) -->
-    <skip />
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Միացնում է «Տվյալների լավացված փոխանակում» գործառույթը։"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Տեղային տերմինալ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Միացնել տերմինալային հավելվածը, որն առաջարկում է մուտք տեղային խեցի"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ստուգում"</string>
@@ -358,10 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Պրոֆիլի HWUI արտապատկերում"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Միացնել GPU վրիպազերծման շերտերը"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Թույլատրել GPU վրիպազերծման շերտերի բեռնումը վրիպազերծման հավելվածների համար"</string>
-    <!-- no translation found for enable_verbose_vendor_logging (1196698788267682072) -->
-    <skip />
-    <!-- no translation found for enable_verbose_vendor_logging_summary (7023960541751826611) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Մատակարարի մանրամասն գրանցամատյան"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Վրիպակների հաշվետվություններում ներառել կոնկրետ սարքի վերաբերյալ մատակարարի լրացուցիչ մատյանները։ Դա կարող է պարունակել խիստ անձնական տեղեկություններ, ավելի արագ սպառել մարտկոցի լիցքը և/կամ ավելի շատ տարածք օգտագործել։"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Պատուհանի շարժապատկերի սանդղակ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Անցումային շարժական սանդղակ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Շարժանկարի տևողության սանդղակ"</string>
@@ -509,9 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Հարցնել ամեն անգամ"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Մինչև չանջատեք"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Հենց նոր"</string>
-    <!-- no translation found for media_transfer_this_device_name (2716555073132169240) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Հեռախոսի բարձրախոս"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Կապի խնդիր կա: Սարքն անջատեք և նորից միացրեք:"</string>
-    <!-- no translation found for media_transfer_wired_device_name (4447880899964056007) -->
-    <skip />
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Լարով աուդիո սարք"</string>
 </resources>

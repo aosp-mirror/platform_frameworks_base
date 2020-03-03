@@ -206,60 +206,33 @@
     <string name="enable_adb" msgid="8072776357237289039">"USB பிழைதிருத்தம்"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB இணைக்கப்பட்டிருக்கும்போது பிழைத்திருத்தப் பயன்முறையை அமை"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB பிழைத்திருத்த அங்கீகரிப்புகளை நிராகரி"</string>
-    <!-- no translation found for enable_adb_wireless (6973226350963971018) -->
-    <skip />
-    <!-- no translation found for enable_adb_wireless_summary (7344391423657093011) -->
-    <skip />
-    <!-- no translation found for adb_wireless_error (721958772149779856) -->
-    <skip />
-    <!-- no translation found for adb_wireless_settings (2295017847215680229) -->
-    <skip />
-    <!-- no translation found for adb_wireless_list_empty_off (1713707973837255490) -->
-    <skip />
-    <!-- no translation found for adb_pair_method_qrcode_title (6982904096137468634) -->
-    <skip />
-    <!-- no translation found for adb_pair_method_qrcode_summary (3729901496856458634) -->
-    <skip />
-    <!-- no translation found for adb_pair_method_code_title (1122590300445142904) -->
-    <skip />
-    <!-- no translation found for adb_pair_method_code_summary (6370414511333685185) -->
-    <skip />
-    <!-- no translation found for adb_paired_devices_title (5268997341526217362) -->
-    <skip />
-    <!-- no translation found for adb_wireless_device_connected_summary (3039660790249148713) -->
-    <skip />
-    <!-- no translation found for adb_wireless_device_details_title (7129369670526565786) -->
-    <skip />
-    <!-- no translation found for adb_device_forget (193072400783068417) -->
-    <skip />
-    <!-- no translation found for adb_device_fingerprint_title_format (291504822917843701) -->
-    <skip />
-    <!-- no translation found for adb_wireless_connection_failed_title (664211177427438438) -->
-    <skip />
-    <!-- no translation found for adb_wireless_connection_failed_message (9213896700171602073) -->
-    <skip />
-    <!-- no translation found for adb_pairing_device_dialog_title (7141739231018530210) -->
-    <skip />
-    <!-- no translation found for adb_pairing_device_dialog_pairing_code_label (3639239786669722731) -->
-    <skip />
-    <!-- no translation found for adb_pairing_device_dialog_failed_title (3426758947882091735) -->
-    <skip />
-    <!-- no translation found for adb_pairing_device_dialog_failed_msg (6611097519661997148) -->
-    <skip />
-    <!-- no translation found for adb_wireless_qrcode_summary (8051414549011801917) -->
-    <skip />
-    <!-- no translation found for adb_wireless_verifying_qrcode_text (6123192424916029207) -->
-    <skip />
-    <!-- no translation found for adb_qrcode_pairing_device_failed_msg (6936292092592914132) -->
-    <skip />
-    <!-- no translation found for adb_wireless_ip_addr_preference_title (8335132107715311730) -->
-    <skip />
-    <!-- no translation found for adb_wireless_qrcode_pairing_title (1906409667944674707) -->
-    <skip />
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (8578868049289910131) -->
-    <skip />
-    <!-- no translation found for keywords_adb_wireless (6507505581882171240) -->
-    <skip />
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"வயர்லெஸ் பிழைதிருத்தம்"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"வைஃபையை இணைக்கும்போது பிழைதிருத்தப் பயன்முறை இயக்கப்படும்"</string>
+    <string name="adb_wireless_error" msgid="721958772149779856">"பிழை"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"வயர்லெஸ் பிழைதிருத்தம்"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"கிடைக்கும் சாதனங்களைப் பார்க்கவும் பயன்படுத்தவும் வயர்லெஸ் பிழைதிருத்தத்தை ஆன் செய்யவும்"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR குறியீட்டின் மூலம் சாதனத்தை இணைத்தல்"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="3729901496856458634">"QR குறியீடு ஸ்கேனரைப் பயன்படுத்தி புதிய சாதனங்களை இணைக்கலாம்"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"இணைத்தல் குறியீட்டின் மூலம் சாதனத்தை இணைத்தல்"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ஆறு இலக்கக் குறியீட்டைப் பயன்படுத்தி புதிய சாதனங்களை இணைக்கலாம்"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"இணைக்கப்பட்ட சாதனங்கள்"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"தற்போது இணைக்கப்பட்டுள்ளது"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"சாதன விவரங்கள்"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"அகற்று"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"சாதனக் கைரேகை: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"இணைக்கப்படவில்லை"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> சரியான நெட்வொர்க்குடன் இணைக்கப்பட்டுள்ளதை உறுதிசெய்துகொள்ளவும்"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"சாதனத்துடன் இணைத்தல்"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"வைஃபை இணைத்தல் குறியீடு"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"இணைக்கப்படவில்லை"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"சாதனம் அதே நெட்வொர்க்கில் இணைக்கப்பட்டுள்ளதை உறுதிசெய்து கொள்ளவும்."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR குறியீட்டை ஸ்கேன் செய்வதன் மூலம் சாதனத்தை வைஃபை மூலம் இணைக்கலாம்"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"சாதனத்தை இணைக்கிறது…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"சாதனத்துடன் இணைக்க முடியவில்லை. தவறான QR குறியீடாகவோ சாதனம் அதே நெர்வொர்க்குடன் இணைக்கப்படாமலோ இருக்கலாம்."</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP முகவரி &amp; போர்ட்"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR குறியீட்டை ஸ்கேன் செய்தல்"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR குறியீட்டை ஸ்கேன் செய்வதன் மூலம் சாதனத்தை வைஃபை மூலம் இணைக்கலாம்"</string>
+    <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"பிழைப் புகாருக்கான ஷார்ட்கட்"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"பிழை அறிக்கையைப் பெற பவர் மெனுவில் விருப்பத்தைக் காட்டு"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"செயலில் வைத்திரு"</string>
@@ -327,10 +300,8 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"வன்பொருள் விரைவுப்படுத்துதல் இணைப்பு முறை கிடைக்கும் போது, அதைப் பயன்படுத்தும்"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB பிழைதிருத்தத்தை அனுமதிக்கவா?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB பிழைதிருத்தம் மேம்படுத்தல் நோக்கங்களுக்காக மட்டுமே. அதை உங்கள் கணினி மற்றும் சாதனத்திற்கு இடையில் தரவை நகலெடுக்கவும், அறிவிப்பு இல்லாமல் உங்கள் சாதனத்தில் ஆப்ஸை நிறுவவும், பதிவு தரவைப் படிக்கவும் பயன்படுத்தவும்."</string>
-    <!-- no translation found for adbwifi_warning_title (727104571653031865) -->
-    <skip />
-    <!-- no translation found for adbwifi_warning_message (8005936574322702388) -->
-    <skip />
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"வயர்லெஸ் பிழைதிருத்தத்தை அனுமதிக்கவா?"</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"\'வயர்லெஸ் பிழைதிருத்தம்\' டெவெலப்மெண்ட் நோக்கங்களுக்காக மட்டுமே. அதை உங்கள் கம்ப்யூட்டருக்கும் சாதனத்திற்கும் இடையே தரவை நகலெடுக்கவும், உங்கள் சாதனத்தில் அறிவிப்பின்றி ஆப்ஸை நிறுவவும், பதிவுத் தரவைப் படிக்கவும் பயன்படுத்தவும்."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"நீங்கள் ஏற்கனவே அனுமதித்த எல்லா கணினிகளிலிருந்தும் USB பிழைத்திருத்தத்திற்கான அணுகலைத் திரும்பப்பெற வேண்டுமா?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"மேம்பட்ட அமைப்புகளை அனுமதிக்கவா?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"இந்த அமைப்பு மேம்பட்டப் பயன்பாட்டிற்காக மட்டுமே. உங்கள் சாதனம் மற்றும் அதில் உள்ள பயன்பாடுகளைச் சிதைக்கும் அல்லது தவறாகச் செயல்படும் வகையில் பாதிப்பை ஏற்படுத்தும்."</string>
@@ -389,7 +360,7 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"பிழைத்திருத்த ஆப்ஸிற்கு, GPU பிழைத்திருத்த லேயர்களை ஏற்றுவதற்கு அனுமதி"</string>
     <!-- no translation found for enable_verbose_vendor_logging (1196698788267682072) -->
     <skip />
-    <!-- no translation found for enable_verbose_vendor_logging_summary (7023960541751826611) -->
+    <!-- no translation found for enable_verbose_vendor_logging_summary (5426292185780393708) -->
     <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"சாளர அனிமேஷன் வேகம்"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"அனிமேஷன் மாற்றத்தின் வேகம்"</string>
@@ -449,8 +420,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"நிறம் அடையாளங்காண முடியாமை (நீலம்-மஞ்சள்)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"வண்ணத்திருத்தம்"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"நிறக்குருடு உள்ளவர்கள் வண்ணங்களை இன்னும் துல்லியமாகப் பார்க்க வண்ணத் திருத்தம் உதவுகிறது"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
@@ -469,27 +439,19 @@
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g>க்கும் குறைவாகவே பயன்படுத்த முடியும் (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>க்கும் மேல் பயன்படுத்த முடியும் (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>க்கும் மேல் பயன்படுத்த முடியும்"</string>
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (137330009791560774) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (145489081521468132) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1070562682853942350) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (4429259621177089719) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7703677921000858479) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (4374784375644214578) -->
-    <skip />
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"மொபைல் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"சாதனம் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"மொபைல் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"சாதனம் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழு சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"சார்ஜ் ஆகிறது"</string>
-    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
-    <skip />
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"வேகமாக சார்ஜாகிறது"</string>
+    <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"மெதுவாக சார்ஜாகிறது"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"சார்ஜ் செய்யப்படவில்லை"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"செருகப்பட்டது, ஆனால் இப்போது சார்ஜ் செய்ய முடியவில்லை"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"முழுவதும் சார்ஜ் ஆனது"</string>

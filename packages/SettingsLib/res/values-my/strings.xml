@@ -255,8 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"အမည်မရှိသော ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသရန်"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ပကတိ အသံနှုန်း သတ်မှတ်ချက် ပိတ်ရန်"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ကို ဖွင့်ရန်"</string>
-    <!-- no translation found for enhanced_connectivity (7201127377781666804) -->
-    <skip />
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"အရည်အသွေးမြှင့်တင်ထားသော ချိတ်ဆက်နိုင်မှု"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ဘလူးတုသ် AVRCP ဗားရှင်း"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ဘလူးတုသ် AVRCP ဗားရှင်းကို ရွေးပါ"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ဘလူးတုသ် MAP ဗားရှင်း"</string>
@@ -310,8 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"အမည်မရှိသော (MAC လိပ်စာများသာပါသော) ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသပါမည်"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ချိတ်ဆက်ထားသည့် ကိရိယာတွင် လက်မခံနိုင်လောက်အောင် ဆူညံ သို့မဟုတ် ထိန်းညှိမရနိုင်သော အသံပိုင်းပြဿနာ ရှိခဲ့လျှင် ဘလူးတုသ် ပကတိ အသံနှုန်းကို ပိတ်ပါ။"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ဘလူးတုသ် Gabeldorsche လုပ်ဆောင်ချက်အပိုင်းကို ဖွင့်သည်။"</string>
-    <!-- no translation found for enhanced_connectivity_summary (1576414159820676330) -->
-    <skip />
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"အရည်အသွေးမြှင့်တင်ထားသော ချိတ်ဆက်နိုင်သည့် ဝန်ဆောင်မှုကို ဖွင့်ပါ။"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"လိုကယ်တာမီနယ်"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"local shell အသုံးပြုခွင့်ကမ်းလှမ်းသော တာမင်နယ်အပလီကေးရှင်းဖွင့်ပါ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP စစ်ဆေးမှု"</string>
@@ -358,10 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"HWUI ပရိုဖိုင် ဆောင်ရွက်ခြင်း"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU အမှားရှာ အလွှာများဖွင့်ထားပါ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ထည့်သွင်းခွင့်ပြုပါ"</string>
-    <!-- no translation found for enable_verbose_vendor_logging (1196698788267682072) -->
-    <skip />
-    <!-- no translation found for enable_verbose_vendor_logging_summary (7023960541751826611) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"verbose vendor မှတ်တမ်းဖွင့်ရန်"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ချွတ်ယွင်းမှု အစီရင်ခံချက်တွင် စက်ပစ္စည်းအလိုက် ထုတ်လုပ်သူမှတ်တမ်းများကို ထည့်သွင်းခြင်းဖြင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များ ပါဝင်ခြင်း၊ ဘက်ထရီပိုသုံးခြင်း နှင့်/သို့မဟုတ် သိုလှောင်ခန်းပိုသုံးခြင်းတို့ ဖြစ်စေနိုင်သည်။"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"လှုပ်ရှားသက်ဝင်ပုံစကေး"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"သက်ဝင်အသွင်ပြောင်းခြင်း"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"လှုပ်ရှားမှုကြာချိန်စကေး"</string>
@@ -509,9 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"အမြဲမေးပါ"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"သင်ပိတ်လိုက်သည် အထိ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ယခုလေးတင်"</string>
-    <!-- no translation found for media_transfer_this_device_name (2716555073132169240) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ဖုန်းစပီကာ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ချိတ်ဆက်ရာတွင် ပြဿနာရှိပါသည်။ စက်ကိုပိတ်ပြီး ပြန်ဖွင့်ပါ"</string>
-    <!-- no translation found for media_transfer_wired_device_name (4447880899964056007) -->
-    <skip />
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ကြိုးတပ် အသံစက်ပစ္စည်း"</string>
 </resources>

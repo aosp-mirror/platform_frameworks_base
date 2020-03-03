@@ -57,7 +57,7 @@
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"اكتمل الاشتراك. جارٍ الاتصال…"</string>
     <string name="speed_label_very_slow" msgid="8526005255731597666">"بطيئة جدًا"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"بطيئة"</string>
-    <string name="speed_label_okay" msgid="1253594383880810424">"موافق"</string>
+    <string name="speed_label_okay" msgid="1253594383880810424">"حسنًا"</string>
     <string name="speed_label_medium" msgid="9078405312828606976">"متوسطة"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"سريعة"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"سريعة جدًا"</string>
@@ -242,7 +242,7 @@
     <string name="oem_unlock_enable" msgid="5334869171871566731">"فتح قفل المصنّع الأصلي للجهاز"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"‏السماح بإلغاء قفل برنامج bootloader"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"هل تريد السماح بإلغاء قفل المصنّع الأصلي للجهاز؟"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"تحذير: لن تعمل ميزات الحماية على هذا الجهاز أثناء تشغيل هذا الإعداد."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"تحذير: لن تعمل ميزات الحماية على هذا الجهاز أثناء تفعيل هذا الإعداد."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"اختيار تطبيق الموقع الزائف"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"لم يتم تعيين تطبيق موقع زائف"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"تطبيق الموقع الزائف: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -255,8 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"عرض أجهزة البلوتوث بدون أسماء"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"إيقاف مستوى الصوت المطلق"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"‏تفعيل Gabeldorsche"</string>
-    <!-- no translation found for enhanced_connectivity (7201127377781666804) -->
-    <skip />
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"إمكانية اتصال محسّن"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"‏إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"‏اختيار إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"‏إصدار Bluetooth MAP"</string>
@@ -310,8 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"‏سيتم عرض أجهزة البلوتوث بدون أسماء (عناوين MAC فقط)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"لإيقاف ميزة مستوى الصوت المطلق للبلوتوث في حال حدوث مشاكل متعلقة بمستوى الصوت في الأجهزة البعيدة، مثل مستوى صوت عالٍ بشكل غير مقبول أو عدم إمكانية التحكّم في الصوت"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"‏تفعيل حِزم ميزة Bluetooth Gabeldorsche"</string>
-    <!-- no translation found for enhanced_connectivity_summary (1576414159820676330) -->
-    <skip />
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"لتفعيل الميزة \"إمكانية اتصال محسّن\""</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"تطبيق طرفي محلي"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"تفعيل تطبيق طرفي يوفر إمكانية الدخول إلى واجهة النظام المحلية"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏التحقق من HDCP"</string>
@@ -358,10 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"‏عرض ملف التعريف HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏تفعيل طبقات تصحيح أخطاء GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏السماح بتحميل طبقات تصحيح أخطاء GPU لتطبيقات تصحيح الأخطاء"</string>
-    <!-- no translation found for enable_verbose_vendor_logging (1196698788267682072) -->
-    <skip />
-    <!-- no translation found for enable_verbose_vendor_logging_summary (7023960541751826611) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"تفعيل التسجيل المطوَّل للمورّد"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"يمكنك تضمين سجلات المورّدين الإضافية الخاصة بالجهاز في تقارير الخطأ، وقد تحتوي على معلومات شخصية و/أو تستهلك المزيد من شحن البطارية و/أو تستهلك المزيد من مساحة التخزين."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"حجم الرسوم المتحركة للنافذة"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"حجم الرسوم المتحركة للنقل"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"طول مدة الرسوم المتحركة"</string>
@@ -406,11 +402,11 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"‏تطبيق WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"‏تعيين تطبيق WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"لم يعد هذا الاختيار صالحًا. أعد المحاولة."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"التحويل إلى تشفير ملفات"</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"التحويل إلى ترميز ملفات"</string>
     <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"تحويل…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"تم استخدام تشفير ملفات من قبل"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"التحويل إلى تشفير على الملف"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"تحويل قسم البيانات إلى تشفير على الملف.\n !!تحذير!! سيؤدي هذا إلى محو جميع بياناتك.\n لا تزال هذه الميزة في مرحلة ألفا، وقد لا تعمل على نحو سليم.\n للمتابعة، اضغط على \"مسح وتحويل…\"."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"تم استخدام ترميز ملفات من قبل"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"التحويل إلى ترميز على الملف"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"تحويل قسم البيانات إلى ترميز على الملف.\n !!تحذير!! سيؤدي هذا إلى محو جميع بياناتك.\n لا تزال هذه الميزة في مرحلة ألفا، وقد لا تعمل على نحو سليم.\n للمتابعة، اضغط على \"مسح وتحويل…\"."</string>
     <string name="button_convert_fbe" msgid="1159861795137727671">"مسح وتحويل…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"نمط لون الصورة"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"‏استخدام sRGB"</string>
@@ -499,7 +495,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"وقت أكثر."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"وقت أقل."</string>
     <string name="cancel" msgid="5665114069455378395">"إلغاء"</string>
-    <string name="okay" msgid="949938843324579502">"موافق"</string>
+    <string name="okay" msgid="949938843324579502">"حسنًا"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"تفعيل"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"تفعيل وضع \"الرجاء عدم الإزعاج\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"مطلقًا"</string>
@@ -513,9 +509,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"الطلب في كل مرة"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"إلى أن توقف الوضع يدويًا"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"للتو"</string>
-    <!-- no translation found for media_transfer_this_device_name (2716555073132169240) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"مكبر صوت الهاتف"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"حدثت مشكلة أثناء الاتصال. يُرجى إيقاف الجهاز ثم إعادة تشغيله."</string>
-    <!-- no translation found for media_transfer_wired_device_name (4447880899964056007) -->
-    <skip />
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"جهاز سماعي سلكي"</string>
 </resources>

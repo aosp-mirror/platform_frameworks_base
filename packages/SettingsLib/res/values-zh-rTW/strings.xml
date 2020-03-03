@@ -255,8 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"顯示沒有名稱的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"停用絕對音量功能"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"啟用 Gabeldorsche"</string>
-    <!-- no translation found for enhanced_connectivity (7201127377781666804) -->
-    <skip />
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"加強型連線"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"藍牙 AVRCP 版本"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"選取藍牙 AVRCP 版本"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"藍牙 MAP 版本"</string>
@@ -310,8 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"系統會顯示沒有名稱 (僅具有 MAC 位址) 的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"只要停用藍牙絕對音量功能，即可避免在連線到遠端裝置時，發生音量過大或無法控制音量等問題。"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"啟用藍牙 Gabeldorsche 功能堆疊。"</string>
-    <!-- no translation found for enhanced_connectivity_summary (1576414159820676330) -->
-    <skip />
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"啟用「加強型連線」功能。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"本機終端機"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 檢查"</string>
@@ -358,10 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"剖析 HWUI 轉譯"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"啟用 GPU 偵錯圖層"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"允許載入 GPU 偵錯圖層為應用程式偵錯"</string>
-    <!-- no translation found for enable_verbose_vendor_logging (1196698788267682072) -->
-    <skip />
-    <!-- no translation found for enable_verbose_vendor_logging_summary (7023960541751826611) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"啟用詳細供應商記錄功能"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"在錯誤報告中附上其他的裝置專屬供應商記錄。如果你這麼做，可能會增加電池用量及/或占用較多儲存空間，報告中可能也會包含私人資訊。"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"視窗動畫比例"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"轉場動畫比例"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"動畫影片長度比例"</string>
@@ -509,9 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"每次都詢問"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"直到你關閉為止"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"剛剛"</string>
-    <!-- no translation found for media_transfer_this_device_name (2716555073132169240) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"手機喇叭"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"無法連線，請關閉裝置後再重新開啟"</string>
-    <!-- no translation found for media_transfer_wired_device_name (4447880899964056007) -->
-    <skip />
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線音訊裝置"</string>
 </resources>
