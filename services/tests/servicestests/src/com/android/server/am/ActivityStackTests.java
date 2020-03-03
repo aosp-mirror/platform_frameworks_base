@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -118,5 +119,18 @@ public class ActivityStackTests extends ActivityTestsBase {
         service.mStackSupervisor.requestVisibleBehindLocked(activityRecord, true);
         assertEquals(ActivityStack.STACK_VISIBLE_ACTIVITY_BEHIND,
                 fullscreenWorkspaceStackId.shouldBeVisible(null /*starting*/));
+    }
+
+    @Test
+    public void testNavigateUpTo() {
+        final ActivityManagerService service = createActivityManagerService();
+        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
+        final ActivityRecord activityRecord = createActivity(service, testActivityComponent, task);
+        activityRecord.app = new ProcessRecord(null, activityRecord.appInfo,
+                activityRecord.processName, activityRecord.getUid());
+        final ActivityStack testStack = service.mStackSupervisor.getStack(TEST_STACK_ID);
+        // No-op if the source activity record doesn't have attached process (app.thread == null).
+        assertFalse(testStack.navigateUpToLocked(activityRecord, activityRecord.intent,
+                0 /* resultCode */, null /* resultData */));
     }
 }
