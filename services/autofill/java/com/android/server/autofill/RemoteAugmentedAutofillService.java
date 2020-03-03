@@ -149,7 +149,7 @@ final class RemoteAugmentedAutofillService
             @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
             @Nullable Function<InlineSuggestionsResponse, Boolean> inlineSuggestionsCallback,
             @NonNull Runnable onErrorCallback,
-            @NonNull RemoteInlineSuggestionRenderService remoteRenderService) {
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
         long requestTime = SystemClock.elapsedRealtime();
         AtomicReference<ICancellationSignal> cancellationRef = new AtomicReference<>();
 
@@ -240,9 +240,10 @@ final class RemoteAugmentedAutofillService
             @Nullable List<InlinePresentation> inlineActions, @NonNull AutofillId focusedId,
             @Nullable Function<InlineSuggestionsResponse, Boolean> inlineSuggestionsCallback,
             @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback,
-            @NonNull RemoteInlineSuggestionRenderService remoteRenderService) {
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
         if (inlineSuggestionsData == null || inlineSuggestionsData.isEmpty()
-                || inlineSuggestionsCallback == null || request == null) {
+                || inlineSuggestionsCallback == null || request == null
+                || remoteRenderService == null) {
             return;
         }
         mCallbacks.setLastResponse(sessionId);

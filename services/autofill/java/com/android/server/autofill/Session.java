@@ -594,8 +594,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Returns whether inline suggestions are enabled for Autofill.
      */
-    private boolean isInlineSuggestionsEnabled() {
-        return mService.isInlineSuggestionsEnabled();
+    private boolean isInlineSuggestionsEnabledLocked() {
+        return mService.isInlineSuggestionsEnabled()
+                || mService.getRemoteInlineSuggestionRenderServiceLocked() != null;
     }
 
     /**
@@ -603,7 +604,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     private void maybeRequestInlineSuggestionsRequestThenFillLocked(@NonNull ViewState viewState,
             int newState, int flags) {
-        if (isInlineSuggestionsEnabled()) {
+        if (isInlineSuggestionsEnabledLocked()) {
             mInlineSuggestionSession.onCreateInlineSuggestionsRequest(mCurrentViewId);
         }
 
@@ -2662,6 +2663,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Log.w(TAG, "InlineSuggestionsRequest unavailable");
             return false;
         }
+
+        final RemoteInlineSuggestionRenderService remoteRenderService =
+                mService.getRemoteInlineSuggestionRenderServiceLocked();
+        if (remoteRenderService == null) {
+            Log.w(TAG, "RemoteInlineSuggestionRenderService not found");
+            return false;
+        }
+
         InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createInlineSuggestionsResponse(
                         inlineSuggestionsRequest.get(),
@@ -2670,11 +2679,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             synchronized (mLock) {
                                 requestHideFillUi(mCurrentViewId);
                             }
-                        }, mService.getRemoteInlineSuggestionRenderServiceLocked());
+                        }, remoteRenderService);
         if (inlineSuggestionsResponse == null) {
             Slog.w(TAG, "InlineSuggestionFactory created null response");
             return false;
         }
+
         return mInlineSuggestionSession.onInlineSuggestionsResponse(mCurrentViewId,
                 inlineSuggestionsResponse);
     }
@@ -2957,7 +2967,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // 2. standard autofill provider doesn't support inline (and returns null response)
         // 3. standard autofill provider supports inline, but isn't called because the field
         // doesn't want autofill
-        if (mForAugmentedAutofillOnly || !isInlineSuggestionsEnabled()) {
+        if (mForAugmentedAutofillOnly || !isInlineSuggestionsEnabledLocked()) {
             if (sDebug) Slog.d(TAG, "Create inline request for augmented autofill");
             mInlineSuggestionSession.onCreateInlineSuggestionsRequest(mCurrentViewId);
         }
