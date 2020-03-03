@@ -385,6 +385,15 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
             assertFalse("User restriction was put into non-parent PO instance",
                     dpm.getUserRestrictions(admin1).containsKey(UserManager.DISALLOW_BLUETOOTH));
 
+            assertTrue("User restriction wasn't migrated to PO parent instance",
+                    dpms.getProfileOwnerAdminLocked(COPE_PROFILE_USER_ID)
+                            .getParentActiveAdmin()
+                            .getEffectiveRestrictions()
+                            .containsKey(UserManager.DISALLOW_CONFIG_DATE_TIME));
+            assertFalse("User restriction was put into non-parent PO instance",
+                    dpms.getProfileOwnerAdminLocked(COPE_PROFILE_USER_ID)
+                            .getEffectiveRestrictions()
+                            .containsKey(UserManager.DISALLOW_CONFIG_DATE_TIME));
             // TODO(b/143516163): verify more policies.
         });
     }
