@@ -37,4 +37,15 @@
     <!-- Size of the FOD animation -->
     <dimen name="fod_animation_size">280dp</dimen>
 
+    <!-- Pixel navbar -->
+    <dimen name="halo_diameter">22dp</dimen>
+    <dimen name="opa_diamond_translation">16dp</dimen>
+    <dimen name="opa_disabled_home_diameter">32dp</dimen>
+    <dimen name="opa_dot_diam">10dp</dimen>
+    <dimen name="opa_line_x_collapse_bg">46dp</dimen>
+    <dimen name="opa_line_x_collapse_ry">15dp</dimen>
+    <dimen name="opa_line_x_trans_bg">30dp</dimen>
+    <dimen name="opa_line_x_trans_ry">15dp</dimen>
+    <dimen name="opa_line_y_translation">16dp</dimen>
+
 </resources>
