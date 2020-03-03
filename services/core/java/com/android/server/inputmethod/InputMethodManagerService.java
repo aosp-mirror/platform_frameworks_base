@@ -109,6 +109,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.autofill.AutofillId;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputBinding;
@@ -2006,7 +2007,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void onInlineSuggestionsRequest(InlineSuggestionsRequest request,
-                IInlineSuggestionsResponseCallback callback) throws RemoteException {
+                IInlineSuggestionsResponseCallback callback, AutofillId imeFieldId,
+                boolean inputViewStarted)
+                throws RemoteException {
             if (!mImePackageName.equals(request.getHostPackageName())) {
                 throw new SecurityException(
                         "Host package name in the provide request=[" + request.getHostPackageName()
@@ -2014,7 +2017,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 + "].");
             }
             request.setHostDisplayId(mImeDisplayId);
-            mCallback.onInlineSuggestionsRequest(request, callback);
+            mCallback.onInlineSuggestionsRequest(request, callback, imeFieldId, inputViewStarted);
+        }
+
+        @Override
+        public void onInputMethodStartInputView(AutofillId imeFieldId) throws RemoteException {
+            mCallback.onInputMethodStartInputView(imeFieldId);
+        }
+
+        @Override
+        public void onInputMethodFinishInputView(AutofillId imeFieldId) throws RemoteException {
+            mCallback.onInputMethodFinishInputView(imeFieldId);
         }
     }
 
