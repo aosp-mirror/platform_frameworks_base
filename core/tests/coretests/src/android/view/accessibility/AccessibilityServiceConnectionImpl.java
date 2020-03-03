@@ -156,7 +156,9 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
         return -1;
     }
 
-    public void takeScreenshot(int displayId, RemoteCallback callback) {}
+    public boolean takeScreenshot(int displayId, RemoteCallback callback) {
+        return false;
+    }
 
     public void setTouchExplorationPassthroughRegion(int displayId, Region region) {}
 
