@@ -107,17 +107,24 @@ class WindowToken extends WindowContainer<WindowState> {
      * rotated by the given rotated display info, frames and insets.
      */
     private static class FixedRotationTransformState {
+        final WindowToken mOwner;
         final DisplayInfo mDisplayInfo;
         final DisplayFrames mDisplayFrames;
         final InsetsState mInsetsState;
         final Configuration mRotatedOverrideConfiguration;
         final SeamlessRotator mRotator;
-        final ArrayList<WindowContainer<?>> mRotatedContainers = new ArrayList<>();
+        /**
+         * The tokens that share the same transform. Their end time of transform are the same as
+         * {@link #mOwner}.
+         */
+        final ArrayList<WindowToken> mAssociatedTokens = new ArrayList<>(1);
+        final ArrayList<WindowContainer<?>> mRotatedContainers = new ArrayList<>(3);
         boolean mIsTransforming = true;
 
-        FixedRotationTransformState(DisplayInfo rotatedDisplayInfo,
+        FixedRotationTransformState(WindowToken owner, DisplayInfo rotatedDisplayInfo,
                 DisplayFrames rotatedDisplayFrames, InsetsState rotatedInsetsState,
                 Configuration rotatedConfig, int currentRotation) {
+            mOwner = owner;
             mDisplayInfo = rotatedDisplayInfo;
             mDisplayFrames = rotatedDisplayFrames;
             mInsetsState = rotatedInsetsState;
@@ -429,40 +436,52 @@ class WindowToken extends WindowContainer<WindowState> {
         final InsetsState insetsState = new InsetsState();
         mDisplayContent.getDisplayPolicy().simulateLayoutDisplay(displayFrames, insetsState,
                 mDisplayContent.getConfiguration().uiMode);
-        mFixedRotationTransformState = new FixedRotationTransformState(info, displayFrames,
+        mFixedRotationTransformState = new FixedRotationTransformState(this, info, displayFrames,
                 insetsState, new Configuration(config), mDisplayContent.getRotation());
         onConfigurationChanged(getParent().getConfiguration());
     }
 
     /**
-     * Copies the {@link FixedRotationTransformState} (if any) from the other WindowToken to this
-     * one.
+     * Reuses the {@link FixedRotationTransformState} (if any) from the other WindowToken to this
+     * one. This takes the same effect as {@link #applyFixedRotationTransform}, but the linked state
+     * can only be cleared by the state owner.
      */
-    void applyFixedRotationTransform(WindowToken other) {
-        final FixedRotationTransformState fixedRotationState = other.mFixedRotationTransformState;
-        if (fixedRotationState != null) {
-            applyFixedRotationTransform(fixedRotationState.mDisplayInfo,
-                    fixedRotationState.mDisplayFrames,
-                    fixedRotationState.mRotatedOverrideConfiguration);
-        }
-    }
-
-    /** Clears the transformation and continue updating the orientation change of display. */
-    void clearFixedRotationTransform() {
-        if (mFixedRotationTransformState == null) {
+    void linkFixedRotationTransform(WindowToken other) {
+        if (mFixedRotationTransformState != null) {
             return;
         }
-        mFixedRotationTransformState.resetTransform();
+        final FixedRotationTransformState fixedRotationState = other.mFixedRotationTransformState;
+        if (fixedRotationState == null) {
+            return;
+        }
+        mFixedRotationTransformState = fixedRotationState;
+        fixedRotationState.mAssociatedTokens.add(this);
+        onConfigurationChanged(getParent().getConfiguration());
+    }
+
+    /**
+     * Clears the transformation and continue updating the orientation change of display. Only the
+     * state owner can clear the transform state.
+     */
+    void clearFixedRotationTransform() {
+        final FixedRotationTransformState state = mFixedRotationTransformState;
+        if (state == null || state.mOwner != this) {
+            return;
+        }
+        state.resetTransform();
         // Clear the flag so if the display will be updated to the same orientation, the transform
         // won't take effect. The state is cleared at the end, because it is used to indicate that
         // other windows can use seamless rotation when applying rotation to display.
-        mFixedRotationTransformState.mIsTransforming = false;
+        state.mIsTransforming = false;
         final boolean changed =
                 mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp(this);
         // If it is not the launching app or the display is not rotated, make sure the merged
         // override configuration is restored from parent.
         if (!changed) {
             onMergedOverrideConfigurationChanged();
+        }
+        for (int i = state.mAssociatedTokens.size() - 1; i >= 0; i--) {
+            state.mAssociatedTokens.get(i).mFixedRotationTransformState = null;
         }
         mFixedRotationTransformState = null;
     }

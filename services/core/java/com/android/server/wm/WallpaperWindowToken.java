@@ -136,14 +136,12 @@ class WallpaperWindowToken extends WindowToken {
                 // If the Recents animation is running, and the wallpaper target is the animating
                 // task we want the wallpaper to be rotated in the same orientation as the
                 // RecentsAnimation's target (e.g the launcher)
-                recentsAnimationController.applyFixedRotationTransformIfNeeded(this);
+                recentsAnimationController.linkFixedRotationTransformIfNeeded(this);
             } else if (wallpaperTarget != null
                     && wallpaperTarget.mToken.hasFixedRotationTransform()) {
                 // If the wallpaper target has a fixed rotation, we want the wallpaper to follow its
                 // rotation
-                applyFixedRotationTransform(wallpaperTarget.mToken);
-            } else if (hasFixedRotationTransform()) {
-                clearFixedRotationTransform();
+                linkFixedRotationTransform(wallpaperTarget.mToken);
             }
         }
 
