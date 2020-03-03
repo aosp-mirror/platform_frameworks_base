@@ -328,4 +328,26 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         verify(nh).removeConversationFromWrite("pkg", "convo");
         verify(af, never()).startWrite();
     }
+
+    @Test
+    public void testWriteBufferRunnable() throws Exception {
+        NotificationHistory nh = mock(NotificationHistory.class);
+        when(nh.getPooledStringsToWrite()).thenReturn(new String[]{});
+        when(nh.getNotificationsToWrite()).thenReturn(new ArrayList<>());
+        NotificationHistoryDatabase.WriteBufferRunnable wbr =
+                mDataBase.new WriteBufferRunnable();
+
+        mDataBase.mBuffer = nh;
+        wbr.currentTime = 5;
+        wbr.latestNotificationsFile = mock(AtomicFile.class);
+        File file = mock(File.class);
+        when(file.getName()).thenReturn("5");
+        when(wbr.latestNotificationsFile.getBaseFile()).thenReturn(file);
+
+        wbr.run();
+
+        assertThat(mDataBase.mHistoryFiles.size()).isEqualTo(1);
+        assertThat(mDataBase.mBuffer).isNotEqualTo(nh);
+        verify(mAlarmManager, times(1)).setExactAndAllowWhileIdle(anyInt(), anyLong(), any());
+    }
 }
