@@ -1468,6 +1468,9 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerIonHeapSize() {
+        if (!new File("/sys/kernel/ion/total_heaps_kb").exists()) {
+            return;
+        }
         int tagId = FrameworkStatsLog.ION_HEAP_SIZE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
