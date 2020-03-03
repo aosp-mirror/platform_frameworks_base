@@ -60,4 +60,26 @@ class SystemServiceTestsBase {
     <T> T awaitInWmLock(Callable<T> callable) {
         return mLockRule.waitForLocked(callable);
     }
+
+    /**
+     * Utility class to compare the output of T#toString. It is convenient to have readable output
+     * of assertion if the string content can represent the expected states.
+     */
+    static class ToStringComparatorWrapper<T> {
+        final T mObject;
+
+        ToStringComparatorWrapper(T object) {
+            mObject = object;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return mObject.toString().equals(obj.toString());
+        }
+
+        @Override
+        public String toString() {
+            return mObject.toString();
+        }
+    }
 }

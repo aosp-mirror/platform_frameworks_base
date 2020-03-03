@@ -15,8 +15,10 @@
  */
 package android.os.connectivity;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.BatteryStats;
 import android.os.Parcel;
@@ -36,26 +38,44 @@ import java.util.Objects;
 @SystemApi
 public final class CellularBatteryStats implements Parcelable {
 
-    private long mLoggingDurationMs = 0;
-    private long mKernelActiveTimeMs = 0;
-    private long mNumPacketsTx = 0;
-    private long mNumBytesTx = 0;
-    private long mNumPacketsRx = 0;
-    private long mNumBytesRx = 0;
-    private long mSleepTimeMs = 0;
-    private long mIdleTimeMs = 0;
-    private long mRxTimeMs = 0;
-    private long mEnergyConsumedMaMs = 0;
-    private long[] mTimeInRatMs = new long[BatteryStats.NUM_DATA_CONNECTION_TYPES];
-    private long[] mTimeInRxSignalStrengthLevelMs =
-            new long[CellSignalStrength.getNumSignalStrengthLevels()];
-    private long[] mTxTimeMs = new long[ModemActivityInfo.TX_POWER_LEVELS];
-    private long mMonitoredRailChargeConsumedMaMs = 0;
+    private final long mLoggingDurationMs;
+    private final long mKernelActiveTimeMs;
+    private final long mNumPacketsTx;
+    private final long mNumBytesTx;
+    private final long mNumPacketsRx;
+    private final long mNumBytesRx;
+    private final long mSleepTimeMs;
+    private final long mIdleTimeMs;
+    private final long mRxTimeMs;
+    private final long mEnergyConsumedMaMs;
+    private final long[] mTimeInRatMs;
+    private final long[] mTimeInRxSignalStrengthLevelMs;
+    private final long[] mTxTimeMs;
+    private final long mMonitoredRailChargeConsumedMaMs;
 
     public static final @NonNull Parcelable.Creator<CellularBatteryStats> CREATOR =
             new Parcelable.Creator<CellularBatteryStats>() {
                 public CellularBatteryStats createFromParcel(Parcel in) {
-                    return new CellularBatteryStats(in);
+                    long loggingDurationMs = in.readLong();
+                    long kernelActiveTimeMs = in.readLong();
+                    long numPacketsTx = in.readLong();
+                    long numBytesTx = in.readLong();
+                    long numPacketsRx = in.readLong();
+                    long numBytesRx = in.readLong();
+                    long sleepTimeMs = in.readLong();
+                    long idleTimeMs = in.readLong();
+                    long rxTimeMs = in.readLong();
+                    long energyConsumedMaMs = in.readLong();
+                    long[] timeInRatMs = in.createLongArray();
+                    long[] timeInRxSignalStrengthLevelMs = in.createLongArray();
+                    long[] txTimeMs = in.createLongArray();
+                    long monitoredRailChargeConsumedMaMs = in.readLong();
+
+                    return new CellularBatteryStats(loggingDurationMs, kernelActiveTimeMs,
+                            numPacketsTx, numBytesTx, numPacketsRx, numBytesRx, sleepTimeMs,
+                            idleTimeMs, rxTimeMs, energyConsumedMaMs, timeInRatMs,
+                            timeInRxSignalStrengthLevelMs, txTimeMs,
+                            monitoredRailChargeConsumedMaMs);
                 }
 
                 public CellularBatteryStats[] newArray(int size) {
@@ -64,7 +84,34 @@ public final class CellularBatteryStats implements Parcelable {
             };
 
     /** @hide **/
-    public CellularBatteryStats() {}
+    public CellularBatteryStats(long loggingDurationMs, long kernelActiveTimeMs, long numPacketsTx,
+            long numBytesTx, long numPacketsRx, long numBytesRx, long sleepTimeMs, long idleTimeMs,
+            long rxTimeMs, Long energyConsumedMaMs, long[] timeInRatMs,
+            long[] timeInRxSignalStrengthLevelMs, long[] txTimeMs,
+            long monitoredRailChargeConsumedMaMs) {
+
+        mLoggingDurationMs = loggingDurationMs;
+        mKernelActiveTimeMs = kernelActiveTimeMs;
+        mNumPacketsTx = numPacketsTx;
+        mNumBytesTx = numBytesTx;
+        mNumPacketsRx = numPacketsRx;
+        mNumBytesRx = numBytesRx;
+        mSleepTimeMs = sleepTimeMs;
+        mIdleTimeMs = idleTimeMs;
+        mRxTimeMs = rxTimeMs;
+        mEnergyConsumedMaMs = energyConsumedMaMs;
+        mTimeInRatMs = Arrays.copyOfRange(
+                timeInRatMs, 0,
+                Math.min(timeInRatMs.length, BatteryStats.NUM_DATA_CONNECTION_TYPES));
+        mTimeInRxSignalStrengthLevelMs = Arrays.copyOfRange(
+                timeInRxSignalStrengthLevelMs, 0,
+                Math.min(timeInRxSignalStrengthLevelMs.length,
+                        CellSignalStrength.getNumSignalStrengthLevels()));
+        mTxTimeMs = Arrays.copyOfRange(
+                txTimeMs, 0,
+                Math.min(txTimeMs.length, ModemActivityInfo.TX_POWER_LEVELS));
+        mMonitoredRailChargeConsumedMaMs = monitoredRailChargeConsumedMaMs;
+    }
 
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
@@ -84,23 +131,6 @@ public final class CellularBatteryStats implements Parcelable {
         out.writeLong(mMonitoredRailChargeConsumedMaMs);
     }
 
-    private void readFromParcel(Parcel in) {
-        mLoggingDurationMs = in.readLong();
-        mKernelActiveTimeMs = in.readLong();
-        mNumPacketsTx = in.readLong();
-        mNumBytesTx = in.readLong();
-        mNumPacketsRx = in.readLong();
-        mNumBytesRx = in.readLong();
-        mSleepTimeMs = in.readLong();
-        mIdleTimeMs = in.readLong();
-        mRxTimeMs = in.readLong();
-        mEnergyConsumedMaMs = in.readLong();
-        in.readLongArray(mTimeInRatMs);
-        in.readLongArray(mTimeInRxSignalStrengthLevelMs);
-        in.readLongArray(mTxTimeMs);
-        mMonitoredRailChargeConsumedMaMs = in.readLong();
-    }
-
     @Override
     public boolean equals(@Nullable Object other) {
         if (!(other instanceof CellularBatteryStats)) return false;
@@ -118,10 +148,10 @@ public final class CellularBatteryStats implements Parcelable {
                 && this.mEnergyConsumedMaMs == otherStats.mEnergyConsumedMaMs
                 && Arrays.equals(this.mTimeInRatMs, otherStats.mTimeInRatMs)
                 && Arrays.equals(this.mTimeInRxSignalStrengthLevelMs,
-                    otherStats.mTimeInRxSignalStrengthLevelMs)
+                otherStats.mTimeInRxSignalStrengthLevelMs)
                 && Arrays.equals(this.mTxTimeMs, otherStats.mTxTimeMs)
                 && this.mMonitoredRailChargeConsumedMaMs
-                    == otherStats.mMonitoredRailChargeConsumedMaMs;
+                == otherStats.mMonitoredRailChargeConsumedMaMs;
     }
 
     @Override
@@ -236,43 +266,65 @@ public final class CellularBatteryStats implements Parcelable {
      * Returns the time in microseconds that the phone has been running with
      * the given data connection.
      *
-     * @return Amount of time phone spends in various Radio Access Technologies in microseconds.
-     * The index is {@link NetworkType}.
+     * @param networkType The network type to query.
+     * @return The amount of time the phone spends in the {@code networkType} network type. The
+     * unit is in microseconds.
      */
     @NonNull
-    public long[] getTimeInRatMicros() {
-        return mTimeInRatMs;
+    @SuppressLint("MethodNameUnits")
+    public long getTimeInRatMicros(@NetworkType int networkType) {
+        if (networkType >= mTimeInRatMs.length) {
+            return -1;
+        }
+
+        return mTimeInRatMs[networkType];
     }
 
     /**
      * Returns the time in microseconds that the phone has been running with
      * the given signal strength.
      *
-     * @return Amount of time phone spends in various cellular rx signal strength levels
+     * @param signalStrengthBin a single integer from 0 to 4 representing the general signal
+     * quality.
+     * @return Amount of time phone spends in specific cellular rx signal strength levels
      * in microseconds. The index is signal strength bin.
      */
     @NonNull
-    public long[] getTimeInRxSignalStrengthLevelMicros() {
-        return mTimeInRxSignalStrengthLevelMs;
+    @SuppressLint("MethodNameUnits")
+    public long getTimeInRxSignalStrengthLevelMicros(
+            @IntRange(from = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN,
+                    to = CellSignalStrength.SIGNAL_STRENGTH_GREAT) int signalStrengthBin) {
+        if (signalStrengthBin >= mTimeInRxSignalStrengthLevelMs.length) {
+            return -1;
+        }
+        return mTimeInRxSignalStrengthLevelMs[signalStrengthBin];
     }
 
     /**
      * Returns the duration for which the device was transmitting over cellular within
      * {@link #getLoggingDurationMillis()}.
      *
-     * @return Duration of cellular transmission time in milliseconds.
-     * Tx(transmit) power index below
+     * @param level a single integer from 0 to 4 representing the Tx(transmit) power level.
+     * @return Duration of cellular transmission time for specific power level in milliseconds.
+     *
+     * Tx(transmit) power level. see power index @ModemActivityInfo.TxPowerLevel below
      * <ul>
-     *   <li> index 0 = tx_power < 0dBm. </li>
-     *   <li> index 1 = 0dBm < tx_power < 5dBm. </li>
-     *   <li> index 2 = 5dBm < tx_power < 15dBm. </li>
-     *   <li> index 3 = 15dBm < tx_power < 20dBm. </li>
-     *   <li> index 4 = tx_power > 20dBm. </li>
+     * <li> index 0 = tx_power < 0dBm. </li>
+     * <li> index 1 = 0dBm < tx_power < 5dBm. </li>
+     * <li> index 2 = 5dBm < tx_power < 15dBm. </li>
+     * <li> index 3 = 15dBm < tx_power < 20dBm. </li>
+     * <li> index 4 = tx_power > 20dBm. </li>
      * </ul>
      */
     @NonNull
-    public long[] getTxTimeMillis() {
-        return mTxTimeMs;
+    public long getTxTimeMillis(
+            @IntRange(from = ModemActivityInfo.TX_POWER_LEVEL_0,
+                    to = ModemActivityInfo.TX_POWER_LEVEL_4) int level) {
+        if (level >= mTxTimeMs.length) {
+            return -1;
+        }
+
+        return mTxTimeMs[level];
     }
 
     /**
@@ -284,98 +336,8 @@ public final class CellularBatteryStats implements Parcelable {
         return mMonitoredRailChargeConsumedMaMs;
     }
 
-    /** @hide **/
-    public void setLoggingDurationMillis(long t) {
-        mLoggingDurationMs = t;
-        return;
-    }
-
-    /** @hide **/
-    public void setKernelActiveTimeMillis(long t) {
-        mKernelActiveTimeMs = t;
-        return;
-    }
-
-    /** @hide **/
-    public void setNumPacketsTx(long n) {
-        mNumPacketsTx = n;
-        return;
-    }
-
-    /** @hide **/
-    public void setNumBytesTx(long b) {
-        mNumBytesTx = b;
-        return;
-    }
-
-    /** @hide **/
-    public void setNumPacketsRx(long n) {
-        mNumPacketsRx = n;
-        return;
-    }
-
-    /** @hide **/
-    public void setNumBytesRx(long b) {
-        mNumBytesRx = b;
-        return;
-    }
-
-    /** @hide **/
-    public void setSleepTimeMillis(long t) {
-        mSleepTimeMs = t;
-        return;
-    }
-
-    /** @hide **/
-    public void setIdleTimeMillis(long t) {
-        mIdleTimeMs = t;
-        return;
-    }
-
-    /** @hide **/
-    public void setRxTimeMillis(long t) {
-        mRxTimeMs = t;
-        return;
-    }
-
-    /** @hide **/
-    public void setEnergyConsumedMaMillis(long e) {
-        mEnergyConsumedMaMs = e;
-        return;
-    }
-
-    /** @hide **/
-    public void setTimeInRatMicros(@NonNull long[] t) {
-        mTimeInRatMs = Arrays.copyOfRange(t, 0,
-                Math.min(t.length, BatteryStats.NUM_DATA_CONNECTION_TYPES));
-        return;
-    }
-
-    /** @hide **/
-    public void setTimeInRxSignalStrengthLevelMicros(@NonNull long[] t) {
-        mTimeInRxSignalStrengthLevelMs = Arrays.copyOfRange(t, 0,
-            Math.min(t.length, CellSignalStrength.getNumSignalStrengthLevels()));
-        return;
-    }
-
-    /** @hide **/
-    public void setTxTimeMillis(@NonNull long[] t) {
-        mTxTimeMs = Arrays.copyOfRange(t, 0, Math.min(t.length, ModemActivityInfo.TX_POWER_LEVELS));
-        return;
-    }
-
-    /** @hide **/
-    public void setMonitoredRailChargeConsumedMaMillis(long monitoredRailEnergyConsumedMaMs) {
-        mMonitoredRailChargeConsumedMaMs = monitoredRailEnergyConsumedMaMs;
-        return;
-    }
-
     @Override
     public int describeContents() {
         return 0;
-    }
-
-    private CellularBatteryStats(Parcel in) {
-        readFromParcel(in);
     }
 }

@@ -1170,8 +1170,8 @@ package android.app.compat {
 
   public final class CompatChanges {
     method public static boolean isChangeEnabled(long);
-    method public static boolean isChangeEnabled(long, @NonNull String, @NonNull android.os.UserHandle);
-    method public static boolean isChangeEnabled(long, int);
+    method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, @NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, int);
   }
 
 }
@@ -1633,15 +1633,17 @@ package android.bluetooth {
   }
 
   public final class BluetoothHidHost implements android.bluetooth.BluetoothProfile {
-    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
-    method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
   }
 
-  public final class BluetoothMap implements android.bluetooth.BluetoothProfile {
-    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+  public final class BluetoothMap implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void close();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) protected void finalize();
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
@@ -1893,30 +1895,13 @@ package android.content {
     field public static final String EXTRA_PERMISSION_GROUP_NAME = "android.intent.extra.PERMISSION_GROUP_NAME";
     field public static final String EXTRA_PERMISSION_NAME = "android.intent.extra.PERMISSION_NAME";
     field public static final String EXTRA_REASON = "android.intent.extra.REASON";
-    field @Deprecated public static final String EXTRA_REBROADCAST_ON_UNLOCK = "rebroadcastOnUnlock";
     field public static final String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
     field public static final String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
     field public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
-    field @Deprecated public static final String EXTRA_SIM_LOCKED_REASON = "reason";
-    field @Deprecated public static final String EXTRA_SIM_STATE = "ss";
     field public static final String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
     field public static final String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
     field public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 67108864; // 0x4000000
     field public static final String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
-    field @Deprecated public static final String SIM_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
-    field @Deprecated public static final String SIM_LOCKED_NETWORK = "NETWORK";
-    field @Deprecated public static final String SIM_LOCKED_ON_PIN = "PIN";
-    field @Deprecated public static final String SIM_LOCKED_ON_PUK = "PUK";
-    field @Deprecated public static final String SIM_STATE_ABSENT = "ABSENT";
-    field @Deprecated public static final String SIM_STATE_CARD_IO_ERROR = "CARD_IO_ERROR";
-    field @Deprecated public static final String SIM_STATE_CARD_RESTRICTED = "CARD_RESTRICTED";
-    field @Deprecated public static final String SIM_STATE_IMSI = "IMSI";
-    field @Deprecated public static final String SIM_STATE_LOADED = "LOADED";
-    field @Deprecated public static final String SIM_STATE_LOCKED = "LOCKED";
-    field @Deprecated public static final String SIM_STATE_NOT_READY = "NOT_READY";
-    field @Deprecated public static final String SIM_STATE_PRESENT = "PRESENT";
-    field @Deprecated public static final String SIM_STATE_READY = "READY";
-    field @Deprecated public static final String SIM_STATE_UNKNOWN = "UNKNOWN";
   }
 
   public class IntentFilter implements android.os.Parcelable {
@@ -6296,7 +6281,7 @@ package android.net {
   }
 
   public abstract class NetworkAgent {
-    ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, @NonNull android.net.NetworkScore, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
+    ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, int, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
     method @Nullable public android.net.Network getNetwork();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
@@ -6311,7 +6296,7 @@ package android.net {
     method @NonNull public android.net.Network register();
     method public void sendLinkProperties(@NonNull android.net.LinkProperties);
     method public void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
-    method public void sendNetworkScore(@NonNull android.net.NetworkScore);
+    method public void sendNetworkScore(int);
     method public void sendSocketKeepaliveEvent(int, int);
     method public void setConnected();
     method @Deprecated public void setLegacyExtraInfo(@Nullable String);
@@ -6416,55 +6401,6 @@ package android.net {
 
   public static class NetworkRequest.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP) public android.net.NetworkRequest.Builder setSignalStrength(int);
-  }
-
-  public final class NetworkScore implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public android.net.NetworkScore.Metrics getEndToEndMetrics();
-    method @NonNull public android.net.NetworkScore.Metrics getLinkLayerMetrics();
-    method public int getRange();
-    method @IntRange(from=android.net.NetworkScore.UNKNOWN_SIGNAL_STRENGTH, to=android.net.NetworkScore.MAX_SIGNAL_STRENGTH) public int getSignalStrength();
-    method public boolean hasPolicy(int);
-    method public boolean isExiting();
-    method @NonNull public android.net.NetworkScore withExiting(boolean);
-    method @NonNull public android.net.NetworkScore withSignalStrength(@IntRange(from=android.net.NetworkScore.UNKNOWN_SIGNAL_STRENGTH) int);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkScore> CREATOR;
-    field public static final int MAX_SIGNAL_STRENGTH = 1000; // 0x3e8
-    field public static final int MIN_SIGNAL_STRENGTH = 0; // 0x0
-    field public static final int POLICY_DEFAULT_SUBSCRIPTION = 8; // 0x8
-    field public static final int POLICY_IGNORE_ON_WIFI = 4; // 0x4
-    field public static final int POLICY_LOCKDOWN_VPN = 1; // 0x1
-    field public static final int POLICY_VPN = 2; // 0x2
-    field public static final int RANGE_CLOSE = 1; // 0x1
-    field public static final int RANGE_LONG = 4; // 0x4
-    field public static final int RANGE_MEDIUM = 3; // 0x3
-    field public static final int RANGE_SHORT = 2; // 0x2
-    field public static final int RANGE_UNKNOWN = 0; // 0x0
-    field public static final int UNKNOWN_SIGNAL_STRENGTH = -1; // 0xffffffff
-  }
-
-  public static class NetworkScore.Builder {
-    ctor public NetworkScore.Builder();
-    method @NonNull public android.net.NetworkScore.Builder addPolicy(int);
-    method @NonNull public android.net.NetworkScore build();
-    method @NonNull public android.net.NetworkScore.Builder clearPolicy(int);
-    method @NonNull public android.net.NetworkScore.Builder setEndToEndMetrics(@NonNull android.net.NetworkScore.Metrics);
-    method @NonNull public android.net.NetworkScore.Builder setExiting(boolean);
-    method @NonNull public android.net.NetworkScore.Builder setLegacyScore(int);
-    method @NonNull public android.net.NetworkScore.Builder setLinkLayerMetrics(@NonNull android.net.NetworkScore.Metrics);
-    method @NonNull public android.net.NetworkScore.Builder setRange(int);
-    method @NonNull public android.net.NetworkScore.Builder setSignalStrength(@IntRange(from=android.net.NetworkScore.UNKNOWN_SIGNAL_STRENGTH, to=android.net.NetworkScore.MAX_SIGNAL_STRENGTH) int);
-  }
-
-  public static class NetworkScore.Metrics {
-    ctor public NetworkScore.Metrics(@IntRange(from=android.net.NetworkScore.Metrics.LATENCY_UNKNOWN) int, @IntRange(from=android.net.NetworkScore.Metrics.BANDWIDTH_UNKNOWN) int, @IntRange(from=android.net.NetworkScore.Metrics.BANDWIDTH_UNKNOWN) int);
-    field public static final int BANDWIDTH_UNKNOWN = -1; // 0xffffffff
-    field @NonNull public static final android.net.NetworkScore.Metrics EMPTY;
-    field public static final int LATENCY_UNKNOWN = -1; // 0xffffffff
-    field @IntRange(from=android.net.NetworkScore.Metrics.BANDWIDTH_UNKNOWN) public final int downlinkBandwidthKBps;
-    field @IntRange(from=android.net.NetworkScore.Metrics.LATENCY_UNKNOWN) public final int latencyMs;
-    field @IntRange(from=android.net.NetworkScore.Metrics.BANDWIDTH_UNKNOWN) public final int uplinkBandwidthKBps;
   }
 
   public class NetworkScoreManager {
@@ -8857,9 +8793,9 @@ package android.os.connectivity {
     method public long getNumPacketsTx();
     method public long getRxTimeMillis();
     method public long getSleepTimeMillis();
-    method @NonNull public long[] getTimeInRatMicros();
-    method @NonNull public long[] getTimeInRxSignalStrengthLevelMicros();
-    method @NonNull public long[] getTxTimeMillis();
+    method @NonNull public long getTimeInRatMicros(int);
+    method @NonNull public long getTimeInRxSignalStrengthLevelMicros(@IntRange(from=android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN, to=android.telephony.CellSignalStrength.SIGNAL_STRENGTH_GREAT) int);
+    method @NonNull public long getTxTimeMillis(@IntRange(from=android.telephony.ModemActivityInfo.TX_POWER_LEVEL_0, to=android.telephony.ModemActivityInfo.TX_POWER_LEVEL_4) int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.connectivity.CellularBatteryStats> CREATOR;
   }
@@ -11176,6 +11112,11 @@ package android.telephony {
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ModemActivityInfo> CREATOR;
     field public static final int TX_POWER_LEVELS = 5; // 0x5
+    field public static final int TX_POWER_LEVEL_0 = 0; // 0x0
+    field public static final int TX_POWER_LEVEL_1 = 1; // 0x1
+    field public static final int TX_POWER_LEVEL_2 = 2; // 0x2
+    field public static final int TX_POWER_LEVEL_3 = 3; // 0x3
+    field public static final int TX_POWER_LEVEL_4 = 4; // 0x4
   }
 
   public class ModemActivityInfo.TransmitPower {
@@ -11430,8 +11371,6 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForTransportType(int);
     method public int getNrFrequencyRange();
-    method @Nullable public String getOperatorAlphaLongRaw();
-    method @Nullable public String getOperatorAlphaShortRaw();
     method @NonNull public static android.telephony.ServiceState newFromBundle(@NonNull android.os.Bundle);
     field public static final int ROAMING_TYPE_DOMESTIC = 2; // 0x2
     field public static final int ROAMING_TYPE_INTERNATIONAL = 3; // 0x3
@@ -11735,10 +11674,10 @@ package android.telephony {
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isGlobalModeEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean isIccLockEnabled();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isInEmergencySmsMode();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isLteCdmaEvdoGsmWcdmaEnabled();
     method public boolean isModemEnabledForSlot(int);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isOffhook();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isOpportunisticNetworkEnabled();

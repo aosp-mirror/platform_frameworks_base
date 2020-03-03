@@ -1448,6 +1448,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    /** @return The display frames in use by this window. */
     DisplayFrames getDisplayFrames(DisplayFrames originalFrames) {
         final DisplayFrames diplayFrames = mToken.getFixedRotationTransformDisplayFrames();
         if (diplayFrames != null) {
@@ -3495,8 +3496,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void notifyInsetsChanged() {
         try {
-            mClient.insetsChanged(
-                    getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this));
+            mClient.insetsChanged(getInsetsState());
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change w=" + this, e);
         }
@@ -3506,9 +3506,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public void notifyInsetsControlChanged() {
         final InsetsStateController stateController =
                 getDisplayContent().getInsetsStateController();
-        final InsetsPolicy policy = getDisplayContent().getInsetsPolicy();
         try {
-            mClient.insetsControlChanged(policy.getInsetsForDispatch(this),
+            mClient.insetsControlChanged(getInsetsState(),
                     stateController.getControlsForDispatch(this));
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change", e);

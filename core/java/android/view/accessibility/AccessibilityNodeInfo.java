@@ -138,6 +138,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int FLAG_PREFETCH_DESCENDANTS = 0x00000004;
 
     /** @hide */
+    public static final int FLAG_PREFETCH_MASK = 0x00000007;
+
+    /** @hide */
     public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x00000008;
 
     /** @hide */

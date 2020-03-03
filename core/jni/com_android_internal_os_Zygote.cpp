@@ -793,31 +793,6 @@ static void MountAppDataTmpFs(const std::string& target_dir,
   }
 }
 
-static void BindMountObbPackage(std::string_view package_name, int userId, fail_fn_t fail_fn) {
-
-  // TODO(148772775): Pass primary volume name from zygote argument to here
-  std::string source;
-  if (IsFilesystemSupported("sdcardfs")) {
-    source = StringPrintf("/mnt/runtime/default/emulated/%d/Android/obb/%s",
-        userId, package_name.data());
-  } else {
-    source = StringPrintf("/mnt/pass_through/%d/emulated/%d/Android/obb/%s",
-        userId, userId, package_name.data());
-  }
-  std::string target(
-      StringPrintf("/storage/emulated/%d/Android/obb/%s", userId, package_name.data()));
-
-  if (access(source.c_str(), F_OK) != 0) {
-    fail_fn(CREATE_ERROR("Cannot access source %s: %s", source.c_str(), strerror(errno)));
-  }
-
-  if (access(target.c_str(), F_OK) != 0) {
-    fail_fn(CREATE_ERROR("Cannot access target %s: %s", target.c_str(), strerror(errno)));
-  }
-
-  BindMount(source, target, fail_fn);
-}
-
 // Create a private mount namespace and bind mount appropriate emulated
 // storage for the given user.
 static void MountEmulatedStorage(uid_t uid, jint mount_mode,
@@ -1540,10 +1515,39 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
   }
 }
 
-// Bind mount all obb directories that are visible to this app.
+static void BindMountStorageToLowerFs(const userid_t user_id, const char* dir_name,
+    const char* package, fail_fn_t fail_fn) {
+
+  bool hasPackage = (package != nullptr);
+  bool hasSdcardFs = IsFilesystemSupported("sdcardfs");
+  std::string source;
+  if (hasSdcardFs) {
+    source = hasPackage ?
+        StringPrintf("/mnt/runtime/default/emulated/%d/%s/%s", user_id, dir_name, package) :
+        StringPrintf("/mnt/runtime/default/emulated/%d/%s", user_id, dir_name);
+  } else {
+    source = hasPackage ?
+        StringPrintf("/mnt/pass_through/%d/emulated/%d/%s/%s",
+            user_id, user_id, dir_name, package) :
+        StringPrintf("/mnt/pass_through/%d/emulated/%d/%s", user_id, user_id, dir_name);
+  }
+  std::string target = hasPackage ?
+      StringPrintf("/storage/emulated/%d/%s/%s", user_id, dir_name, package) :
+      StringPrintf("/storage/emulated/%d/%s", user_id, dir_name);
+
+  if (access(source.c_str(), F_OK) != 0) {
+    fail_fn(CREATE_ERROR("Error accessing %s: %s", source.c_str(), strerror(errno)));
+  }
+  if (access(target.c_str(), F_OK) != 0) {
+    fail_fn(CREATE_ERROR("Error accessing %s: %s", target.c_str(), strerror(errno)));
+  }
+  BindMount(source, target, fail_fn);
+}
+
+// Bind mount all obb & data directories that are visible to this app.
 // If app data isolation is not enabled for this process, bind mount the whole obb
-// directory instead.
-static void BindMountAppObbDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
+// and data directory instead.
+static void BindMountStorageDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
     uid_t uid, const char* process_name, jstring managed_nice_name, fail_fn_t fail_fn) {
 
   auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
@@ -1571,18 +1575,8 @@ static void BindMountAppObbDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
 
   if (size == 0) {
     // App data isolation is not enabled for this process, so we bind mount to whole obb/ dir.
-    std::string source;
-    if (IsFilesystemSupported("sdcardfs")) {
-      source = StringPrintf("/mnt/runtime/default/emulated/%d/Android/obb", user_id);
-    } else {
-      source = StringPrintf("/mnt/pass_through/%d/emulated/%d/Android/obb", user_id, user_id);
-    }
-    std::string target(StringPrintf("/storage/emulated/%d/Android/obb", user_id));
-
-    if (access(source.c_str(), F_OK) != 0) {
-      fail_fn(CREATE_ERROR("Error accessing %s: %s", source.c_str(), strerror(errno)));
-    }
-    BindMount(source, target, fail_fn);
+    BindMountStorageToLowerFs(user_id, "Android/obb", /* package */ nullptr, fail_fn);
+    BindMountStorageToLowerFs(user_id, "Android/data", /* package */ nullptr, fail_fn);
     return;
   }
 
@@ -1590,7 +1584,8 @@ static void BindMountAppObbDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
   for (int i = 0; i < size; i += 3) {
     jstring package_str = (jstring) (env->GetObjectArrayElement(pkg_data_info_list, i));
     std::string packageName = extract_fn(package_str).value();
-    BindMountObbPackage(packageName, user_id, fail_fn);
+    BindMountStorageToLowerFs(user_id, "Android/obb", packageName.c_str(), fail_fn);
+    BindMountStorageToLowerFs(user_id, "Android/data", packageName.c_str(), fail_fn);
   }
 }
 
@@ -1645,7 +1640,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   if ((mount_external != MOUNT_EXTERNAL_INSTALLER) &&
         GetBoolProperty(kPropFuse, false) &&
         GetBoolProperty(ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false)) {
-    BindMountAppObbDirs(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
+    BindMountStorageDirs(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
 
   // If this zygote isn't root, it won't be able to create a process group,

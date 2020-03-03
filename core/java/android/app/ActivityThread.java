@@ -75,6 +75,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
+import android.content.res.loader.ResourcesLoader;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteDebug.DbStats;
@@ -3283,6 +3284,12 @@ public final class ActivityThread extends ClientTransactionHandler {
                     r.mPendingRemoveWindow = null;
                     r.mPendingRemoveWindowManager = null;
                 }
+
+                // Activity resources must be initialized with the same loaders as the
+                // application context.
+                appContext.getResources().addLoaders(
+                        app.getResources().getLoaders().toArray(new ResourcesLoader[0]));
+
                 appContext.setOuterContext(activity);
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
@@ -4083,6 +4090,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             java.lang.ClassLoader cl = packageInfo.getClassLoader();
             service = packageInfo.getAppFactory()
                     .instantiateService(cl, data.info.name, data.intent);
+            // Service resources must be initialized with the same loaders as the application
+            // context.
+            context.getResources().addLoaders(
+                    app.getResources().getLoaders().toArray(new ResourcesLoader[0]));
+
             context.setOuterContext(service);
             service.attach(context, this, data.info.name, data.token, app,
                     ActivityManager.getService());

@@ -110,7 +110,7 @@ interface IAccessibilityServiceConnection {
 
     int getWindowIdForLeashToken(IBinder token);
 
-    void takeScreenshot(int displayId, in RemoteCallback callback);
+    boolean takeScreenshot(int displayId, in RemoteCallback callback);
 
     void setGestureDetectionPassthroughRegion(int displayId, in Region region);
 

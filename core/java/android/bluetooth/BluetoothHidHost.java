@@ -18,7 +18,6 @@ package android.bluetooth;
 
 import android.Manifest;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -330,6 +329,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         final IBluetoothHidHost service = getService();
@@ -370,8 +370,12 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
-    public int getConnectionState(@Nullable BluetoothDevice device) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public int getConnectionState(@NonNull BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
+        if (device == null) {
+            throw new IllegalArgumentException("device must not be null");
+        }
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
@@ -416,9 +420,12 @@ public final class BluetoothHidHost implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setConnectionPolicy(@Nullable BluetoothDevice device,
+    public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
+        if (device == null) {
+            throw new IllegalArgumentException("device must not be null");
+        }
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             if (connectionPolicy != BluetoothProfile.CONNECTION_POLICY_FORBIDDEN
@@ -465,8 +472,11 @@ public final class BluetoothHidHost implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public @ConnectionPolicy int getConnectionPolicy(@Nullable BluetoothDevice device) {
+    public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
+        if (device == null) {
+            throw new IllegalArgumentException("device must not be null");
+        }
         final IBluetoothHidHost service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {

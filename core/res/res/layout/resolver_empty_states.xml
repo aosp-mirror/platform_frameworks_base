@@ -20,34 +20,34 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/resolver_empty_state_height"
     android:orientation="vertical"
-    android:layout_centerInParent="true"
-    android:gravity="center"
+    android:gravity="center_horizontal"
     android:visibility="gone"
     android:paddingStart="24dp"
     android:paddingEnd="24dp">
     <ImageView
         android:id="@+id/resolver_empty_state_icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"/>
+        android:layout_marginTop="48dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"/>
     <TextView
         android:id="@+id/resolver_empty_state_title"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@string/config_headlineFontFamilyMedium"
         android:textColor="@color/resolver_empty_state_text"
-        android:textSize="18sp"/>
+        android:textSize="14sp"/>
     <TextView
         android:id="@+id/resolver_empty_state_subtitle"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/resolver_empty_state_text"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:gravity="center_horizontal" />
     <Button
         android:id="@+id/resolver_empty_state_button"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:text="@string/resolver_switch_on_work"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

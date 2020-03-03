@@ -31,7 +31,9 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
+import android.util.SparseLongArray;
 import android.view.Display;
+import android.view.ViewConfiguration;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -89,6 +91,9 @@ public final class AccessibilityInteractionClient
 
     private static final long TIMEOUT_INTERACTION_MILLIS = 5000;
 
+    private static final long DISABLE_PREFETCHING_FOR_SCROLLING_MILLIS =
+            (long) (ViewConfiguration.getSendRecurringAccessibilityEventsInterval() * 1.5);
+
     private static final Object sStaticLock = new Object();
 
     private static final LongSparseArray<AccessibilityInteractionClient> sClients =
@@ -96,6 +101,10 @@ public final class AccessibilityInteractionClient
 
     private static final SparseArray<IAccessibilityServiceConnection> sConnectionCache =
             new SparseArray<>();
+
+    /** List of timestamps which indicate the latest time an a11y service receives a scroll event
+        from a window, mapping from windowId -> timestamp. */
+    private static final SparseLongArray sScrollingWindows = new SparseLongArray();
 
     private static AccessibilityCache sAccessibilityCache =
             new AccessibilityCache(new AccessibilityCache.AccessibilityNodeRefresher());
@@ -422,6 +431,14 @@ public final class AccessibilityInteractionClient
                         Log.i(LOG_TAG, "Node cache miss for "
                                 + idToString(accessibilityWindowId, accessibilityNodeId));
                     }
+                } else {
+                    // No need to prefech nodes in bypass cache case.
+                    prefetchFlags &= ~AccessibilityNodeInfo.FLAG_PREFETCH_MASK;
+                }
+                // Skip prefetching if window is scrolling.
+                if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_MASK) != 0
+                        && isWindowScrolling(accessibilityWindowId)) {
+                    prefetchFlags &= ~AccessibilityNodeInfo.FLAG_PREFETCH_MASK;
                 }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
@@ -718,6 +735,18 @@ public final class AccessibilityInteractionClient
     }
 
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        switch (event.getEventType()) {
+            case AccessibilityEvent.TYPE_VIEW_SCROLLED:
+                updateScrollingWindow(event.getWindowId(), SystemClock.uptimeMillis());
+                break;
+            case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+                if (event.getWindowChanges() == AccessibilityEvent.WINDOWS_CHANGE_REMOVED) {
+                    deleteScrollingWindow(event.getWindowId());
+                }
+                break;
+            default:
+                break;
+        }
         sAccessibilityCache.onAccessibilityEvent(event);
     }
 
@@ -985,5 +1014,49 @@ public final class AccessibilityInteractionClient
         if (disconnectedCount > 0) {
             Log.e(LOG_TAG, disconnectedCount + " Disconnected nodes.");
         }
+    }
+
+    /**
+     * Update scroll event timestamp of a given window.
+     *
+     * @param windowId The window id.
+     * @param uptimeMillis Device uptime millis.
+     */
+    private void updateScrollingWindow(int windowId, long uptimeMillis) {
+        synchronized (sScrollingWindows) {
+            sScrollingWindows.put(windowId, uptimeMillis);
+        }
+    }
+
+    /**
+     * Remove a window from the scrolling windows list.
+     *
+     * @param windowId The window id.
+     */
+    private void deleteScrollingWindow(int windowId) {
+        synchronized (sScrollingWindows) {
+            sScrollingWindows.delete(windowId);
+        }
+    }
+
+    /**
+     * Whether or not the window is scrolling.
+     *
+     * @param windowId
+     * @return true if it's scrolling.
+     */
+    private boolean isWindowScrolling(int windowId) {
+        synchronized (sScrollingWindows) {
+            final long latestScrollingTime = sScrollingWindows.get(windowId);
+            if (latestScrollingTime == 0) {
+                return false;
+            }
+            final long currentUptime = SystemClock.uptimeMillis();
+            if (currentUptime > (latestScrollingTime + DISABLE_PREFETCHING_FOR_SCROLLING_MILLIS)) {
+                sScrollingWindows.delete(windowId);
+                return false;
+            }
+        }
+        return true;
     }
 }
