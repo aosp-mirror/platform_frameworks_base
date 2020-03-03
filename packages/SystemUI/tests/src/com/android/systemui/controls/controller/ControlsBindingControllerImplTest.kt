@@ -40,6 +40,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -193,6 +194,24 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
         val provider2 = providers.first { it.componentName == TEST_COMPONENT_NAME_2 }
         verify(provider2).unbindService()
         verify(provider1, never()).unbindService()
+    }
+
+    @Test
+    fun testComponentRemoved_existingIsUnbound() {
+        controller.bindServices(listOf(
+                TEST_COMPONENT_NAME_1,
+                TEST_COMPONENT_NAME_2,
+                TEST_COMPONENT_NAME_3
+        ))
+
+        controller.onComponentRemoved(TEST_COMPONENT_NAME_2)
+
+        executor.runAllReady()
+
+        providers.forEach {
+            verify(it, if (it.componentName == TEST_COMPONENT_NAME_2) times(1) else never())
+                    .unbindService()
+        }
     }
 }
 
