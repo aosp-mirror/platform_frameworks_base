@@ -3519,14 +3519,14 @@ public class CarrierConfigManager {
         /**
          * Delay in milliseconds to turn off wifi when IMS is registered over wifi.
          */
-        public static final String KEY_WIFI_OFF_DEFERRING_TIME_INT =
-                KEY_PREFIX + "wifi_off_deferring_time_int";
+        public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT =
+                KEY_PREFIX + "wifi_off_deferring_time_millis_int";
 
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
-            defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_INT, 0);
+            defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT, 0);
             return defaults;
         }
     }
