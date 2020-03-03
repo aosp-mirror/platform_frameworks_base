@@ -63,7 +63,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
         DEFAULT_FLAGS.put("settings_wifi_details_datausage_header", "false");
         DEFAULT_FLAGS.put("settings_skip_direction_mutable", "true");
-        DEFAULT_FLAGS.put(SETTINGS_WIFITRACKER2, "false");
+        DEFAULT_FLAGS.put(SETTINGS_WIFITRACKER2, "true");
         DEFAULT_FLAGS.put("settings_controller_loading_enhancement", "false");
         DEFAULT_FLAGS.put("settings_conditionals", "false");
         DEFAULT_FLAGS.put(NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
