@@ -11814,12 +11814,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean isSetSecureSettingLocationModeCheckEnabled(String packageName, int userId) {
+        long ident = mInjector.binderClearCallingIdentity();
         try {
             return mIPlatformCompat.isChangeEnabledByPackageName(USE_SET_LOCATION_ENABLED,
                     packageName, userId);
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
             return getTargetSdk(packageName, userId) > Build.VERSION_CODES.Q;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
         }
     }
 
