@@ -97,6 +97,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.content.PackageHelper;
@@ -139,6 +140,7 @@ class PackageManagerShellCommand extends ShellCommand {
     /** Path where ART profiles snapshots are dumped for the shell user */
     private final static String ART_PROFILE_SNAPSHOT_DEBUG_LOCATION = "/data/misc/profman/";
     private static final int DEFAULT_WAIT_MS = 60 * 1000;
+    private static final String TAG = "PackageManagerShellCommand";
 
     final IPackageManager mInterface;
     final IPermissionManager mPermissionManager;
@@ -3077,11 +3079,20 @@ class PackageManagerShellCommand extends ShellCommand {
         final long size = file.length();
         final byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
 
-        // Try to load a v4 signature for the APK.
-        final V4Signature v4signature = V4Signature.readFrom(
-                new File(inPath + V4Signature.EXT));
-        final byte[] v4signatureBytes =
-                (v4signature != null) ? v4signature.toByteArray() : null;
+        byte[] v4signatureBytes = null;
+        // Try to load the v4 signature file for the APK; it might not exist.
+        final String v4SignaturePath = inPath + V4Signature.EXT;
+        final ParcelFileDescriptor pfd = openFileForSystem(v4SignaturePath, "r");
+        if (pfd != null) {
+            try {
+                final V4Signature v4signature = V4Signature.readFrom(pfd);
+                v4signatureBytes = v4signature.toByteArray();
+            } catch (IOException ex) {
+                Slog.e(TAG, "V4 signature file exists but failed to be parsed.", ex);
+            } finally {
+                IoUtils.closeQuietly(pfd);
+            }
+        }
 
         session.addFile(LOCATION_DATA_APP, name, size, metadata, v4signatureBytes);
     }
