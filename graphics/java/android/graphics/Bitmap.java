@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.res.ResourcesImpl;
 import android.hardware.HardwareBuffer;
 import android.os.Build;
 import android.os.Parcel;
@@ -95,12 +94,6 @@ public final class Bitmap implements Parcelable {
 
     private static volatile int sDefaultDensity = -1;
 
-    /** @hide Used only when ResourcesImpl.TRACE_FOR_DETAILED_PRELOAD is true. */
-    public static volatile int sPreloadTracingNumInstantiatedBitmaps;
-
-    /** @hide Used only when ResourcesImpl.TRACE_FOR_DETAILED_PRELOAD is true. */
-    public static volatile long sPreloadTracingTotalBitmapsSize;
-
     /**
      * For backwards compatibility, allows the app layer to change the default
      * density when running old apps.
@@ -164,12 +157,6 @@ public final class Bitmap implements Parcelable {
                     Bitmap.class.getClassLoader(), nativeGetNativeFinalizer(), allocationByteCount);
         }
         registry.registerNativeAllocation(this, nativeBitmap);
-
-        if (ResourcesImpl.TRACE_FOR_DETAILED_PRELOAD) {
-            sPreloadTracingNumInstantiatedBitmaps++;
-            long nativeSize = NATIVE_ALLOCATION_SIZE + allocationByteCount;
-            sPreloadTracingTotalBitmapsSize += nativeSize;
-        }
     }
 
     /**
