@@ -448,14 +448,13 @@ struct DrawPoints final : Op {
 };
 struct DrawVertices final : Op {
     static const auto kType = Type::DrawVertices;
-    DrawVertices(const SkVertices* v, int bc, SkBlendMode m, const SkPaint& p)
-            : vertices(sk_ref_sp(const_cast<SkVertices*>(v))), boneCount(bc), mode(m), paint(p) {}
+    DrawVertices(const SkVertices* v, SkBlendMode m, const SkPaint& p)
+            : vertices(sk_ref_sp(const_cast<SkVertices*>(v))), mode(m), paint(p) {}
     sk_sp<SkVertices> vertices;
-    int boneCount;
     SkBlendMode mode;
     SkPaint paint;
     void draw(SkCanvas* c, const SkMatrix&) const {
-        c->drawVertices(vertices, pod<SkVertices::Bone>(this), boneCount, mode, paint);
+        c->drawVertices(vertices, mode, paint);
     }
 };
 struct DrawAtlas final : Op {
@@ -686,11 +685,8 @@ void DisplayListData::drawPoints(SkCanvas::PointMode mode, size_t count, const S
     void* pod = this->push<DrawPoints>(count * sizeof(SkPoint), mode, count, paint);
     copy_v(pod, points, count);
 }
-void DisplayListData::drawVertices(const SkVertices* vertices, const SkVertices::Bone bones[],
-                                   int boneCount, SkBlendMode mode, const SkPaint& paint) {
-    void* pod = this->push<DrawVertices>(boneCount * sizeof(SkVertices::Bone), vertices, boneCount,
-                                         mode, paint);
-    copy_v(pod, bones, boneCount);
+void DisplayListData::drawVertices(const SkVertices* vertices, SkBlendMode mode, const SkPaint& paint) {
+    this->push<DrawVertices>(0, vertices, mode, paint);
 }
 void DisplayListData::drawAtlas(const SkImage* atlas, const SkRSXform xforms[], const SkRect texs[],
                                 const SkColor colors[], int count, SkBlendMode xfermode,
@@ -1007,9 +1003,8 @@ void RecordingCanvas::onDrawPoints(SkCanvas::PointMode mode, size_t count, const
     fDL->drawPoints(mode, count, pts, paint);
 }
 void RecordingCanvas::onDrawVerticesObject(const SkVertices* vertices,
-                                           const SkVertices::Bone bones[], int boneCount,
                                            SkBlendMode mode, const SkPaint& paint) {
-    fDL->drawVertices(vertices, bones, boneCount, mode, paint);
+    fDL->drawVertices(vertices, mode, paint);
 }
 void RecordingCanvas::onDrawAtlas(const SkImage* atlas, const SkRSXform xforms[],
                                   const SkRect texs[], const SkColor colors[], int count,
