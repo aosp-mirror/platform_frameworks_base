@@ -67,10 +67,10 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -183,7 +183,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 mock(StatusBarRemoteInputCallback.class), mock(NotificationGroupManager.class),
                 mock(NotificationLockscreenUserManager.class),
                 mKeyguardStateController,
-                mock(NotificationInterruptionStateProvider.class), mock(MetricsLogger.class),
+                mock(NotificationInterruptStateProvider.class), mock(MetricsLogger.class),
                 mock(LockPatternUtils.class), mHandler, mHandler, mUiBgExecutor,
                 mActivityIntentHelper, mBubbleController, mShadeController, mFeatureFlags,
                 mNotifPipeline, mNotifCollection)
