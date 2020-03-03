@@ -16,12 +16,12 @@
 
 package com.android.internal.view.inline;
 
-import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 
 /**
  * Binder interface to send the inline content from one process to the other.
  * {@hide}
  */
 oneway interface IInlineContentCallback {
-    void onContent(in SurfaceControl content);
+    void onContent(in SurfaceControlViewHost.SurfacePackage content);
 }
