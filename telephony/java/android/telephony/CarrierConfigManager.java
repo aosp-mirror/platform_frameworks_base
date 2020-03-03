@@ -2462,6 +2462,21 @@ public class CarrierConfigManager {
             "parameters_use_for_5g_nr_signal_bar_int";
 
     /**
+     * String array of default bandwidth values per network type.
+     * The entries should be of form "network_name:downstream,upstream", with values in Kbps.
+     * @hide
+     */
+    public static final String KEY_BANDWIDTH_STRING_ARRAY = "bandwidth_string_array";
+
+    /**
+     * For NR (non-standalone), whether to use the LTE value instead of NR value as the default for
+     * upstream bandwidth. Downstream bandwidth will still use the NR value as the default.
+     * @hide
+     */
+    public static final String KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL =
+            "bandwidth_nr_nsa_use_lte_value_for_upstream_bool";
+
+    /**
      * Key identifying if voice call barring notification is required to be shown to the user.
      * @hide
      */
@@ -3955,6 +3970,13 @@ public class CarrierConfigManager {
                 });
         sDefaults.putInt(KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT,
                 CellSignalStrengthNr.USE_SSRSRP);
+        sDefaults.putStringArray(KEY_BANDWIDTH_STRING_ARRAY, new String[]{
+                "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
+                "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
+                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550:", "eHRPD:750,48",
+                "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,15000",
+                "NR_NSA_MMWAVE:145000,15000", "NR_SA:145000,15000"});
+        sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
