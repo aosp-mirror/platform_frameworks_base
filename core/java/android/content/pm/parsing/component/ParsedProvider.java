@@ -16,7 +16,7 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.parsing.ParsingPackageImpl.sForString;
+import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,7 +28,6 @@ import android.os.PatternMatcher;
 import android.text.TextUtils;
 
 import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide **/
@@ -106,10 +105,10 @@ public class ParsedProvider extends ParsedMainComponent {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        sForString.parcel(this.authority, dest, flags);
+        dest.writeString(this.authority);
         dest.writeBoolean(this.syncable);
-        sForString.parcel(this.readPermission, dest, flags);
-        sForString.parcel(this.writePermission, dest, flags);
+        sForInternedString.parcel(this.readPermission, dest, flags);
+        sForInternedString.parcel(this.writePermission, dest, flags);
         dest.writeBoolean(this.grantUriPermissions);
         dest.writeBoolean(this.forceUriPermissions);
         dest.writeBoolean(this.multiProcess);
@@ -124,10 +123,10 @@ public class ParsedProvider extends ParsedMainComponent {
     protected ParsedProvider(Parcel in) {
         super(in);
         //noinspection ConstantConditions
-        this.authority = sForString.unparcel(in);
+        this.authority = in.readString();
         this.syncable = in.readBoolean();
-        this.readPermission = sForString.unparcel(in);
-        this.writePermission = sForString.unparcel(in);
+        this.readPermission = sForInternedString.unparcel(in);
+        this.writePermission = sForInternedString.unparcel(in);
         this.grantUriPermissions = in.readBoolean();
         this.forceUriPermissions = in.readBoolean();
         this.multiProcess = in.readBoolean();
