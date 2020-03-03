@@ -18,6 +18,7 @@ package com.android.internal.telephony.cdma;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
+import android.os.Build;
 import android.sysprop.TelephonyProperties;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsCbLocation;
@@ -156,7 +157,8 @@ public class SmsMessage extends SmsMessageBase {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
+            + "android.telephony.SmsMessage} API instead")
     public static SmsMessage createFromEfRecord(int index, byte[] data) {
         try {
             SmsMessage msg = new SmsMessage();
