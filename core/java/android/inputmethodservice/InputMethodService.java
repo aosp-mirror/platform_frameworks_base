@@ -444,6 +444,16 @@ public class InputMethodService extends AbstractInputMethodService {
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
 
+    /**
+     * We use a separate {@code mInlineLock} to make sure {@code mInlineSuggestionSession} is
+     * only accessed synchronously. Although when the lock is introduced, all the calls are from
+     * the main thread so the lock is not really necessarily (but for the same reason it also
+     * doesn't hurt), it's still being added as a safety guard to make sure in the future we
+     * don't add more code causing race condition when updating the {@code
+     * mInlineSuggestionSession}.
+     */
+    private final Object mInlineLock = new Object();
+    @GuardedBy("mInlineLock")
     @Nullable
     private InlineSuggestionSession mInlineSuggestionSession;
 
@@ -822,13 +832,15 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
 
-        if (mInlineSuggestionSession != null) {
-            mInlineSuggestionSession.invalidateSession();
+        synchronized (mInlineLock) {
+            if (mInlineSuggestionSession != null) {
+                mInlineSuggestionSession.invalidateSession();
+            }
+            mInlineSuggestionSession = new InlineSuggestionSession(requestInfo.getComponentName(),
+                    callback, this::getEditorInfoPackageName, this::getEditorInfoAutofillId,
+                    () -> onCreateInlineSuggestionsRequest(requestInfo.getUiExtras()),
+                    this::getHostInputToken, this::onInlineSuggestionsResponse, mInputViewStarted);
         }
-        mInlineSuggestionSession = new InlineSuggestionSession(requestInfo.getComponentName(),
-                callback, this::getEditorInfoPackageName, this::getEditorInfoAutofillId,
-                () -> onCreateInlineSuggestionsRequest(requestInfo.getUiExtras()),
-                this::getHostInputToken, this::onInlineSuggestionsResponse);
     }
 
     @Nullable
@@ -2193,6 +2205,11 @@ public class InputMethodService extends AbstractInputMethodService {
             if (!mInputViewStarted) {
                 if (DEBUG) Log.v(TAG, "CALL: onStartInputView");
                 mInputViewStarted = true;
+                synchronized (mInlineLock) {
+                    if (mInlineSuggestionSession != null) {
+                        mInlineSuggestionSession.notifyOnStartInputView(getEditorInfoAutofillId());
+                    }
+                }
                 onStartInputView(mInputEditorInfo, false);
             }
         } else if (!mCandidatesViewStarted) {
@@ -2233,6 +2250,11 @@ public class InputMethodService extends AbstractInputMethodService {
     private void finishViews(boolean finishingInput) {
         if (mInputViewStarted) {
             if (DEBUG) Log.v(TAG, "CALL: onFinishInputView");
+            synchronized (mInlineLock) {
+                if (mInlineSuggestionSession != null) {
+                    mInlineSuggestionSession.notifyOnFinishInputView(getEditorInfoAutofillId());
+                }
+            }
             onFinishInputView(finishingInput);
         } else if (mCandidatesViewStarted) {
             if (DEBUG) Log.v(TAG, "CALL: onFinishCandidatesView");
@@ -2345,6 +2367,11 @@ public class InputMethodService extends AbstractInputMethodService {
             if (mShowInputRequested) {
                 if (DEBUG) Log.v(TAG, "CALL: onStartInputView");
                 mInputViewStarted = true;
+                synchronized (mInlineLock) {
+                    if (mInlineSuggestionSession != null) {
+                        mInlineSuggestionSession.notifyOnStartInputView(getEditorInfoAutofillId());
+                    }
+                }
                 onStartInputView(mInputEditorInfo, restarting);
                 startExtractingText(true);
             } else if (mCandidatesVisibility == View.VISIBLE) {
