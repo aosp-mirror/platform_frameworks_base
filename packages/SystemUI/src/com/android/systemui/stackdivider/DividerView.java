@@ -328,7 +328,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             // Our window doesn't cover entire display, so we use the display frame to re-calculate
             // the insets.
             final InsetsState state = getWindowInsetsController().getState();
-            insets = state.calculateInsets(state.getDisplayFrame(), insets.isRound(),
+            insets = state.calculateInsets(state.getDisplayFrame(),
+                    null /* ignoringVisibilityState */, insets.isRound(),
                     insets.shouldAlwaysConsumeSystemBars(), insets.getDisplayCutout(),
                     null /* legacyContentInsets */, null /* legacyStableInsets */,
                     0 /* legacySystemUiFlags */,

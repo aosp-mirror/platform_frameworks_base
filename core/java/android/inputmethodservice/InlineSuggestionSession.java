@@ -39,11 +39,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Maintains an active inline suggestion session.
+ * Maintains an active inline suggestion session with the autofill manager service.
  *
  * <p>
- * Each session corresponds to one inline suggestion request, but there may be multiple callbacks
- * with the inline suggestions response.
+ * Each session corresponds to one {@link InlineSuggestionsRequest} and one {@link
+ * IInlineSuggestionsResponseCallback}, but there may be multiple invocations of the response
+ * callback for the same field or different fields in the same component.
  */
 class InlineSuggestionSession {
 
@@ -60,6 +61,8 @@ class InlineSuggestionSession {
     @NonNull
     private final Supplier<String> mClientPackageNameSupplier;
     @NonNull
+    private final Supplier<AutofillId> mClientAutofillIdSupplier;
+    @NonNull
     private final Supplier<InlineSuggestionsRequest> mRequestSupplier;
     @NonNull
     private final Supplier<IBinder> mHostInputTokenSupplier;
@@ -71,6 +74,7 @@ class InlineSuggestionSession {
     InlineSuggestionSession(@NonNull ComponentName componentName,
             @NonNull IInlineSuggestionsRequestCallback callback,
             @NonNull Supplier<String> clientPackageNameSupplier,
+            @NonNull Supplier<AutofillId> clientAutofillIdSupplier,
             @NonNull Supplier<InlineSuggestionsRequest> requestSupplier,
             @NonNull Supplier<IBinder> hostInputTokenSupplier,
             @NonNull Consumer<InlineSuggestionsResponse> responseConsumer) {
@@ -78,6 +82,7 @@ class InlineSuggestionSession {
         mCallback = callback;
         mResponseCallback = new InlineSuggestionsResponseCallbackImpl(this);
         mClientPackageNameSupplier = clientPackageNameSupplier;
+        mClientAutofillIdSupplier = clientAutofillIdSupplier;
         mRequestSupplier = requestSupplier;
         mHostInputTokenSupplier = hostInputTokenSupplier;
         mResponseConsumer = responseConsumer;
@@ -115,20 +120,29 @@ class InlineSuggestionSession {
         }
     }
 
-    private void handleOnInlineSuggestionsResponse(@NonNull InlineSuggestionsResponse response) {
+    private void handleOnInlineSuggestionsResponse(@NonNull AutofillId fieldId,
+            @NonNull InlineSuggestionsResponse response) {
         if (mInvalidated) {
             if (DEBUG) {
                 Log.d(TAG, "handleOnInlineSuggestionsResponse() called on invalid session");
             }
             return;
         }
-        // TODO(b/149522488): checking the current focused input field to make sure we don't send
-        //  inline responses for previous input field
+        // TODO(b/149522488): Verify fieldId against {@code mClientAutofillIdSupplier.get()} using
+        //  {@link AutofillId#equalsIgnoreSession(AutofillId)}. Right now, this seems to be
+        //  falsely alarmed quite often, depending whether autofill suggestions arrive earlier
+        //  than the IMS EditorInfo updates or not.
         if (!mComponentName.getPackageName().equals(mClientPackageNameSupplier.get())) {
             if (DEBUG) {
-                Log.d(TAG, "handleOnInlineSuggestionsResponse() called on the wrong package name");
+                Log.d(TAG,
+                        "handleOnInlineSuggestionsResponse() called on the wrong package "
+                                + "name: " + mComponentName.getPackageName() + " v.s. "
+                                + mClientPackageNameSupplier.get());
             }
             return;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "IME receives response: " + response.getInlineSuggestions().size());
         }
         mResponseConsumer.accept(response);
     }
@@ -152,7 +166,7 @@ class InlineSuggestionSession {
             if (session != null) {
                 session.mHandler.sendMessage(obtainMessage(
                         InlineSuggestionSession::handleOnInlineSuggestionsResponse, session,
-                        response));
+                        fieldId, response));
             }
         }
     }

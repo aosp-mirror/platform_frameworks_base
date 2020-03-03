@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dozvoli"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka na USB-u nije dozvoljeno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može da uključi otklanjanje grešaka na USB-u. Da biste koristili ovu funkciju, prebacite na primarnog korisnika."</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Želite li da omogućite bežično otklanjanje grešaka na ovoj mreži?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"Naziv mreže (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi adresa (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"Uvek dozvoli na ovoj mreži"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"Dozvoli"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Bežično otklanjanje grešaka nije dozvoljeno"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može da uključi bežično otklanjanje grešaka. Da biste koristili ovu funkciju, pređite na primarnog korisnika."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB port je onemogućen"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Da bi se uređaj zaštitio od tečnosti ili nečistoće, USB port je onemogućen i neće otkrivati dodatnu opremu.\n\nObavestićemo vas kada ponovo budete mogli da koristite USB port."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB port je omogućen radi otkrivanja punjača i dodatne opreme"</string>
@@ -491,6 +497,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljajte"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Istorija"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Nečujna obaveštenja"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Obaveštenja koja privlače pažnju"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzacije"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Obrišite sva nečujna obaveštenja"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Obaveštenja su pauzirana režimom Ne uznemiravaj"</string>
@@ -689,10 +696,8 @@
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Pomaže vam da se koncentrišete bez zvuka ili vibracije."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Privlači vam pažnju pomoću zvuka ili vibracije."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Privlači vam pažnju pomoću plutajuće prečice do ovog sadržaja."</string>
-    <!-- no translation found for bubble_overflow_empty_title (3120029421991510842) -->
-    <skip />
-    <!-- no translation found for bubble_overflow_empty_subtitle (3106801169793396894) -->
-    <skip />
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nema nedavnih oblačića"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Ovde se prikazuju nedavni i odbačeni oblačići."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ova obaveštenja ne mogu da se menjaju."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ova grupa obaveštenja ne može da se konfiguriše ovde"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Obaveštenje preko proksija"</string>
@@ -979,6 +984,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Premesti dole levo"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Premesti dole desno"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Odbaci"</string>
+    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigacija sistema je ažurirana. Da biste uneli izmene, idite u Podešavanja."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Idite u Podešavanja da biste ažurirali navigaciju sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stanje pripravnosti"</string>
@@ -988,17 +999,15 @@
     <string name="quick_controls_title" msgid="525285759614231333">"Brze kontrole"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"Dodajte kontrole"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"Odaberite aplikaciju iz koje ćete dodavati kontrole"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> aktuelni favorit.</item>
-      <item quantity="few"><xliff:g id="NUMBER_1">%s</xliff:g> aktuelna favorita.</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> aktuelnih favorita.</item>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> kontrola je dodata.</item>
+      <item quantity="few"><xliff:g id="NUMBER_1">%s</xliff:g> kontrole su dodate.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontrola je dodato.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"Odaberite kontrole za brz pristup"</string>
-    <!-- no translation found for controls_favorite_header_favorites (3118600046217493471) -->
-    <skip />
-    <!-- no translation found for controls_favorite_header_all (7507855973418969992) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_error (2533215155804455348) -->
-    <skip />
+    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"Omiljeno"</string>
+    <string name="controls_favorite_header_all" msgid="7507855973418969992">"Sve"</string>
+    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Učitavanje liste svih kontrola nije uspelo."</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
 </resources>

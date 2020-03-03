@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -572,6 +573,26 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN = 0x40000000;
 
+    /**
+     * The interval time of calling
+     * {@link AccessibilityService#takeScreenshot(int, Executor, Consumer)} API.
+     * @hide
+     */
+    @TestApi
+    public static final int ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS = 1000;
+
+    /** @hide */
+    public static final String KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER =
+            "screenshot_hardwareBuffer";
+
+    /** @hide */
+    public static final String KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE =
+            "screenshot_colorSpace";
+
+    /** @hide */
+    public static final String KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP =
+            "screenshot_timestamp";
+
     private int mConnectionId = AccessibilityInteractionClient.NO_ID;
 
     @UnsupportedAppUsage
@@ -597,17 +618,6 @@ public abstract class AccessibilityService extends Service {
 
     private FingerprintGestureController mFingerprintGestureController;
 
-    /** @hide */
-    public static final String KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER =
-            "screenshot_hardwareBuffer";
-
-    /** @hide */
-    public static final String KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE =
-            "screenshot_colorSpace";
-
-    /** @hide */
-    public static final String KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP =
-            "screenshot_timestamp";
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -1926,10 +1936,9 @@ public abstract class AccessibilityService extends Service {
      *                  default display.
      * @param executor Executor on which to run the callback.
      * @param callback The callback invoked when the taking screenshot is done.
-     *                 The {@link AccessibilityService.ScreenshotResult} will be null for an
-     *                 invalid display.
      *
-     * @return {@code true} if the taking screenshot accepted, {@code false} if not.
+     * @return {@code true} if the taking screenshot accepted, {@code false} if too little time
+     * has elapsed since the last screenshot, invalid display or internal errors.
      */
     public boolean takeScreenshot(int displayId, @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<ScreenshotResult> callback) {
@@ -1942,11 +1951,7 @@ public abstract class AccessibilityService extends Service {
             return false;
         }
         try {
-            connection.takeScreenshot(displayId, new RemoteCallback((result) -> {
-                if (result == null) {
-                    sendScreenshotResult(executor, callback, null);
-                    return;
-                }
+            return connection.takeScreenshot(displayId, new RemoteCallback((result) -> {
                 final HardwareBuffer hardwareBuffer =
                         result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER);
                 final ParcelableColorSpace colorSpace =
@@ -1959,7 +1964,6 @@ public abstract class AccessibilityService extends Service {
         } catch (RemoteException re) {
             throw new RuntimeException(re);
         }
-        return true;
     }
 
     /**

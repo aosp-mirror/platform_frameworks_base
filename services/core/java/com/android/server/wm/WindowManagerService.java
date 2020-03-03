@@ -1645,23 +1645,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 prepareNoneTransitionForRelaunching(activity);
             }
 
-            final DisplayFrames displayFrames = displayContent.mDisplayFrames;
-            // TODO: Not sure if onDisplayInfoUpdated() call is needed.
-            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-            displayFrames.onDisplayInfoUpdated(displayInfo,
-                    displayContent.calculateDisplayCutoutForRotation(displayInfo.rotation));
-            final Rect taskBounds;
-            final boolean floatingStack;
-            if (activity != null && activity.getTask() != null) {
-                taskBounds = mTmpRect;
-                tokenActivity.getTask().getBounds(mTmpRect);
-                floatingStack = activity.getTask().isFloating();
-            } else {
-                taskBounds = null;
-                floatingStack = false;
-            }
-            if (displayPolicy.getLayoutHintLw(win.mAttrs, taskBounds, displayFrames, floatingStack,
-                    outFrame, outContentInsets, outStableInsets, outDisplayCutout)) {
+            if (displayPolicy.getLayoutHint(win.mAttrs, token, outFrame, outContentInsets,
+                    outStableInsets, outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
             outInsetsState.set(win.getInsetsState(),
@@ -8036,27 +8021,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             + "could not be found!");
                 }
                 final WindowToken windowToken = dc.getWindowToken(attrs.token);
-                final ActivityRecord activity;
-                if (windowToken != null && windowToken.asActivityRecord() != null) {
-                    activity = windowToken.asActivityRecord();
-                } else {
-                    activity = null;
-                }
-                final Rect taskBounds;
-                final boolean floatingStack;
-                if (activity != null && activity.getTask() != null) {
-                    final Task task = activity.getTask();
-                    taskBounds = new Rect();
-                    task.getBounds(taskBounds);
-                    floatingStack = task.isFloating();
-                } else {
-                    taskBounds = null;
-                    floatingStack = false;
-                }
-                final DisplayFrames displayFrames = dc.mDisplayFrames;
-                final DisplayPolicy policy = dc.getDisplayPolicy();
-                policy.getLayoutHintLw(attrs, taskBounds, displayFrames, floatingStack,
-                        new Rect(), outContentInsets, outStableInsets, displayCutout);
+                dc.getDisplayPolicy().getLayoutHint(attrs, windowToken, mTmpRect /* outFrame */,
+                        outContentInsets, outStableInsets, displayCutout);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

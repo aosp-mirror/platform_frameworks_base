@@ -25,12 +25,16 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.TYPE_INTERNAL;
+import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
 import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
+import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
@@ -1032,7 +1036,9 @@ public class DisplayPolicy {
 
                             // In Gesture Nav, navigation bar frame is larger than frame to
                             // calculate inset.
-                            if (mNavigationBarPosition == NAV_BAR_BOTTOM) {
+                            if (navigationBarPosition(displayFrames.mDisplayWidth,
+                                    displayFrames.mDisplayHeight,
+                                    displayFrames.mRotation) == NAV_BAR_BOTTOM) {
                                 sTmpRect.set(displayFrames.mUnrestricted);
                                 sTmpRect.intersectUnchecked(displayFrames.mDisplayCutoutSafe);
                                 inOutFrame.top = sTmpRect.bottom
@@ -1234,10 +1240,7 @@ public class DisplayPolicy {
      * most recent layout, so they are not guaranteed to be correct.
      *
      * @param attrs The LayoutParams of the window.
-     * @param taskBounds The bounds of the task this window is on or {@code null} if no task is
-     *                   associated with the window.
-     * @param displayFrames display frames.
-     * @param floatingStack Whether the window's stack is floating.
+     * @param windowToken The token of the window.
      * @param outFrame The frame of the window.
      * @param outContentInsets The areas covered by system windows, expressed as positive insets.
      * @param outStableInsets The areas covered by stable system windows irrespective of their
@@ -1246,8 +1249,7 @@ public class DisplayPolicy {
      * @return Whether to always consume the system bars.
      *         See {@link #areSystemBarsForcedShownLw(WindowState)}.
      */
-    public boolean getLayoutHintLw(LayoutParams attrs, Rect taskBounds,
-            DisplayFrames displayFrames, boolean floatingStack, Rect outFrame,
+    boolean getLayoutHint(LayoutParams attrs, WindowToken windowToken, Rect outFrame,
             Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout) {
         final int fl = PolicyControl.getWindowFlags(null, attrs);
@@ -1260,6 +1262,18 @@ public class DisplayPolicy {
                 && (fl & FLAG_LAYOUT_INSET_DECOR) != 0;
         final boolean screenDecor = (pfl & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
 
+        final boolean isFixedRotationTransforming =
+                windowToken != null && windowToken.isFixedRotationTransforming();
+        final ActivityRecord activity = windowToken != null ? windowToken.asActivityRecord() : null;
+        final Task task = activity != null ? activity.getTask() : null;
+        final Rect taskBounds = isFixedRotationTransforming
+                // Use token (activity) bounds if it is rotated because its task is not rotated.
+                ? windowToken.getBounds()
+                : (task != null ? task.getBounds() : null);
+        final DisplayFrames displayFrames = isFixedRotationTransforming
+                ? windowToken.getFixedRotationTransformDisplayFrames()
+                : mDisplayContent.mDisplayFrames;
+
         if (layoutInScreenAndInsetDecor && !screenDecor) {
             if ((sysUiVis & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                     || (attrs.getFitInsetsTypes() & Type.navigationBars()) == 0) {
@@ -1268,15 +1282,10 @@ public class DisplayPolicy {
                 outFrame.set(displayFrames.mRestricted);
             }
 
-            final Rect sf;
-            if (floatingStack) {
-                sf = null;
-            } else {
-                sf = displayFrames.mStable;
-            }
-
+            final boolean isFloatingTask = task != null && task.isFloating();
+            final Rect sf = isFloatingTask ? null : displayFrames.mStable;
             final Rect cf;
-            if (floatingStack) {
+            if (isFloatingTask) {
                 cf = null;
             } else if ((sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
                 if ((fl & FLAG_FULLSCREEN) != 0) {
@@ -1425,6 +1434,8 @@ public class DisplayPolicy {
      */
     void simulateLayoutDisplay(DisplayFrames displayFrames, InsetsState insetsState, int uiMode) {
         displayFrames.onBeginLayout();
+        updateInsetsStateForDisplayCutout(displayFrames, insetsState);
+        insetsState.setDisplayFrame(displayFrames.mUnrestricted);
         final WindowFrames simulatedWindowFrames = new WindowFrames();
         if (mNavigationBar != null) {
             simulateLayoutDecorWindow(
@@ -1452,6 +1463,8 @@ public class DisplayPolicy {
      */
     public void beginLayoutLw(DisplayFrames displayFrames, int uiMode) {
         displayFrames.onBeginLayout();
+        updateInsetsStateForDisplayCutout(displayFrames,
+                mDisplayContent.getInsetsStateController().getRawInsetsState());
         mSystemGestures.screenWidth = displayFrames.mUnrestricted.width();
         mSystemGestures.screenHeight = displayFrames.mUnrestricted.height();
 
@@ -1516,6 +1529,23 @@ public class DisplayPolicy {
         mLastNavTranslucent = navTranslucent;
         mLastNavAllowedHidden = navAllowedHidden;
         mLastNotificationShadeForcesShowingNavigation = notificationShadeForcesShowingNavigation;
+    }
+
+    private static void updateInsetsStateForDisplayCutout(DisplayFrames displayFrames,
+            InsetsState state) {
+        if (displayFrames.mDisplayCutout.getDisplayCutout().isEmpty()) {
+            state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);
+            return;
+        }
+        final Rect u = displayFrames.mUnrestricted;
+        final Rect s = displayFrames.mDisplayCutoutSafe;
+        state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(u.left, u.top, s.left, u.bottom);
+        state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(u.left, u.top, u.right, s.top);
+        state.getSource(ITYPE_RIGHT_DISPLAY_CUTOUT).setFrame(s.right, u.top, u.right, u.bottom);
+        state.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(u.left, s.bottom, u.right, u.bottom);
     }
 
     /** Enforces the last layout policy for display frames. */

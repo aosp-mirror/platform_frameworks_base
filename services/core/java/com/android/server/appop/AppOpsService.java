@@ -1445,6 +1445,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 ArrayMap<String, String> dstFeatureIds = new ArrayMap<>();
                 ArraySet<String> featureIds = new ArraySet<>();
+                featureIds.add(null);
                 if (pkg.getFeatures() != null) {
                     int numFeatures = pkg.getFeatures().size();
                     for (int featureNum = 0; featureNum < numFeatures; featureNum++) {

@@ -122,7 +122,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerFake;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
@@ -274,7 +273,7 @@ public class StatusBarTest extends SysuiTestCase {
         mMetricsLogger = new FakeMetricsLogger();
         NotificationLogger notificationLogger = new NotificationLogger(mNotificationListener,
                 mUiBgExecutor, mock(NotificationEntryManager.class), mStatusBarStateController,
-                mExpansionStateLogger, new NotificationPanelLoggerFake());
+                mExpansionStateLogger);
         notificationLogger.setVisibilityReporter(mock(Runnable.class));
 
         when(mCommandQueue.asBinder()).thenReturn(new Binder());

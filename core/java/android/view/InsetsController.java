@@ -233,6 +233,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         final InsetsAnimationControlImpl control;
         final @AnimationType int type;
+
+        /**
+         * Whether {@link WindowInsetsAnimation.Callback#onStart(WindowInsetsAnimation, Bounds)} has
+         * been dispatched already for this animation.
+         */
+        boolean startDispatched;
     }
 
     /**
@@ -276,9 +282,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private final SparseArray<InsetsSourceControl> mTmpControlArray = new SparseArray<>();
     private final ArrayList<RunningAnimation> mRunningAnimations = new ArrayList<>();
-    private final ArrayList<WindowInsetsAnimation> mRunningInsetsAnimations = new ArrayList<>();
-    private final List<WindowInsetsAnimation> mUnmodifiableRunningInsetsAnimations =
-            Collections.unmodifiableList(mRunningInsetsAnimations);
+    private final ArrayList<WindowInsetsAnimation> mTmpRunningAnims = new ArrayList<>();
+    private final List<WindowInsetsAnimation> mUnmodifiableTmpRunningAnims =
+            Collections.unmodifiableList(mTmpRunningAnims);
     private final ArrayList<InsetsAnimationControlImpl> mTmpFinishedControls = new ArrayList<>();
     private WindowInsets mLastInsets;
 
@@ -294,6 +300,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private int mLastLegacySoftInputMode;
     private int mLastLegacySystemUiFlags;
+    private DisplayCutout mLastDisplayCutout;
     private boolean mStartingAnimation;
 
     private SyncRtSurfaceTransactionApplier mApplier;
@@ -329,20 +336,28 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
 
             mTmpFinishedControls.clear();
+            mTmpRunningAnims.clear();
             InsetsState state = new InsetsState(mState, true /* copySources */);
             for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
-                InsetsAnimationControlImpl control = mRunningAnimations.get(i).control;
+                RunningAnimation runningAnimation = mRunningAnimations.get(i);
+                InsetsAnimationControlImpl control = runningAnimation.control;
+
+                // Keep track of running animation to be dispatched. Aggregate it here such that if
+                // it gets finished within applyChangeInsets we still dispatch it to onProgress.
+                if (runningAnimation.startDispatched) {
+                    mTmpRunningAnims.add(control.getAnimation());
+                }
                 if (control.applyChangeInsets(state)) {
                     mTmpFinishedControls.add(control);
                 }
             }
 
-            WindowInsets insets = state.calculateInsets(mFrame, mLastInsets.isRound(),
-                    mLastInsets.shouldAlwaysConsumeSystemBars(), mLastInsets.getDisplayCutout(),
-                    mLastLegacyContentInsets, mLastLegacyStableInsets, mLastLegacySoftInputMode,
-                    mLastLegacySystemUiFlags, null /* typeSideMap */);
+            WindowInsets insets = state.calculateInsets(mFrame, mState /* ignoringVisibilityState*/,
+                    mLastInsets.isRound(), mLastInsets.shouldAlwaysConsumeSystemBars(),
+                    mLastDisplayCutout, mLastLegacyContentInsets, mLastLegacyStableInsets,
+                    mLastLegacySoftInputMode, mLastLegacySystemUiFlags, null /* typeSideMap */);
             mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets,
-                    mUnmodifiableRunningInsetsAnimations);
+                    mUnmodifiableTmpRunningAnims);
 
             for (int i = mTmpFinishedControls.size() - 1; i >= 0; i--) {
                 dispatchAnimationEnd(mTmpFinishedControls.get(i).getAnimation());
@@ -394,8 +409,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         mLastLegacyStableInsets.set(legacyStableInsets);
         mLastLegacySoftInputMode = legacySoftInputMode;
         mLastLegacySystemUiFlags = legacySystemUiFlags;
-        mLastInsets = mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeSystemBars, cutout,
-                legacyContentInsets, legacyStableInsets, legacySoftInputMode, legacySystemUiFlags,
+        mLastDisplayCutout = cutout;
+        mLastInsets = mState.calculateInsets(mFrame, null /* ignoringVisibilityState*/,
+                isScreenRound, alwaysConsumeSystemBars, cutout, legacyContentInsets,
+                legacyStableInsets, legacySoftInputMode, legacySystemUiFlags,
                 null /* typeSideMap */);
         return mLastInsets;
     }
@@ -584,7 +601,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 frame, mState, listener, typesReady, this, durationMs, interpolator, fade,
                 layoutInsetsDuringAnimation, animationType);
         mRunningAnimations.add(new RunningAnimation(controller, animationType));
-        mRunningInsetsAnimations.add(controller.getAnimation());
         cancellationSignal.setOnCancelListener(controller::onCancelled);
         return cancellationSignal;
     }
@@ -736,7 +752,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
             if (mRunningAnimations.get(i).control == control) {
                 mRunningAnimations.remove(i);
-                mRunningInsetsAnimations.remove(i);
                 break;
             }
         }
@@ -902,6 +917,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 mViewRoot.mView.getViewTreeObserver().removeOnPreDrawListener(this);
                 if (controller.isCancelled()) {
                     return true;
+                }
+                for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
+                    RunningAnimation runningAnimation = mRunningAnimations.get(i);
+                    if (runningAnimation.control == controller) {
+                        runningAnimation.startDispatched = true;
+                    }
                 }
                 mViewRoot.mView.dispatchWindowInsetsAnimationStart(animation, bounds);
                 mStartingAnimation = true;

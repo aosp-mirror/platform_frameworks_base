@@ -189,6 +189,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     public void testOnSystemActionsChanged() throws Exception {
         setupAccessibilityServiceConnection();
         mA11yms.notifySystemActionsChangedLocked(mUserState);
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         verify(mMockServiceClient).onSystemActionsChanged();
     }
 }

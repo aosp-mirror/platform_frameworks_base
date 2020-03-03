@@ -32,6 +32,7 @@ import android.hardware.display.DeviceProductInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.proto.ProtoOutputStream;
@@ -604,14 +605,9 @@ public final class DisplayInfo implements Parcelable {
         StringBuilder sb = new StringBuilder();
         sb.append("DisplayInfo{\"");
         sb.append(name);
-        sb.append(", displayId ");
+        sb.append("\", displayId ");
         sb.append(displayId);
-        sb.append("\", uniqueId \"");
-        sb.append(uniqueId);
-        sb.append("\", app ");
-        sb.append(appWidth);
-        sb.append(" x ");
-        sb.append(appHeight);
+        sb.append(flagsToString(flags));
         sb.append(", real ");
         sb.append(logicalWidth);
         sb.append(" x ");
@@ -624,22 +620,38 @@ public final class DisplayInfo implements Parcelable {
         sb.append(smallestNominalAppWidth);
         sb.append(" x ");
         sb.append(smallestNominalAppHeight);
+        sb.append(", appVsyncOff ");
+        sb.append(appVsyncOffsetNanos);
+        sb.append(", presDeadline ");
+        sb.append(presentationDeadlineNanos);
         sb.append(", mode ");
         sb.append(modeId);
         sb.append(", defaultMode ");
         sb.append(defaultModeId);
         sb.append(", modes ");
         sb.append(Arrays.toString(supportedModes));
-        sb.append(", colorMode ");
-        sb.append(colorMode);
-        sb.append(", supportedColorModes ");
-        sb.append(Arrays.toString(supportedColorModes));
         sb.append(", hdrCapabilities ");
         sb.append(hdrCapabilities);
         sb.append(", minimalPostProcessingSupported ");
         sb.append(minimalPostProcessingSupported);
         sb.append(", rotation ");
         sb.append(rotation);
+        sb.append(", state ");
+        sb.append(Display.stateToString(state));
+
+        if (Process.myUid() != Process.SYSTEM_UID) {
+            sb.append("}");
+            return sb.toString();
+        }
+
+        sb.append(", type ");
+        sb.append(Display.typeToString(type));
+        sb.append(", uniqueId \"");
+        sb.append(uniqueId);
+        sb.append("\", app ");
+        sb.append(appWidth);
+        sb.append(" x ");
+        sb.append(appHeight);
         sb.append(", density ");
         sb.append(logicalDensityDpi);
         sb.append(" (");
@@ -648,24 +660,19 @@ public final class DisplayInfo implements Parcelable {
         sb.append(physicalYDpi);
         sb.append(") dpi, layerStack ");
         sb.append(layerStack);
-        sb.append(", appVsyncOff ");
-        sb.append(appVsyncOffsetNanos);
-        sb.append(", presDeadline ");
-        sb.append(presentationDeadlineNanos);
-        sb.append(", type ");
-        sb.append(Display.typeToString(type));
+        sb.append(", colorMode ");
+        sb.append(colorMode);
+        sb.append(", supportedColorModes ");
+        sb.append(Arrays.toString(supportedColorModes));
         if (address != null) {
             sb.append(", address ").append(address);
         }
         sb.append(", deviceProductInfo ");
         sb.append(deviceProductInfo);
-        sb.append(", state ");
-        sb.append(Display.stateToString(state));
         if (ownerUid != 0 || ownerPackageName != null) {
             sb.append(", owner ").append(ownerPackageName);
             sb.append(" (uid ").append(ownerUid).append(")");
         }
-        sb.append(flagsToString(flags));
         sb.append(", removeMode ");
         sb.append(removeMode);
         sb.append("}");

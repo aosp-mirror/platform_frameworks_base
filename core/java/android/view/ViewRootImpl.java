@@ -52,8 +52,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CO
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
@@ -795,7 +793,12 @@ public final class ViewRootImpl implements ViewParent,
 
     public void setOnContentApplyWindowInsetsListener(OnContentApplyWindowInsetsListener listener) {
         mAttachInfo.mContentOnApplyWindowInsetsListener = listener;
-        requestFitSystemWindows();
+
+        // System windows will be fitted on first traversal, so no reason to request additional
+        // (possibly getting executed after the first traversal).
+        if (!mFirst) {
+            requestFitSystemWindows();
+        }
     }
 
     public void addWindowCallbacks(WindowCallbacks callback) {
@@ -2009,7 +2012,6 @@ public final class ViewRootImpl implements ViewParent,
         final int sysUiVis = inOutParams.systemUiVisibility | inOutParams.subtreeSystemUiVisibility;
         final int flags = inOutParams.flags;
         final int type = inOutParams.type;
-        final int adjust = inOutParams.softInputMode & SOFT_INPUT_MASK_ADJUST;
 
         if ((inOutParams.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) == 0) {
             inOutParams.insetsFlags.appearance = 0;
@@ -2054,8 +2056,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (type == TYPE_TOAST || type == TYPE_SYSTEM_ALERT) {
             ignoreVis = true;
-        } else if ((types & Type.systemBars()) == Type.systemBars()
-                && adjust == SOFT_INPUT_ADJUST_RESIZE) {
+        } else if ((types & Type.systemBars()) == Type.systemBars()) {
             types |= Type.ime();
         }
         inOutParams.setFitInsetsTypes(types);
@@ -2261,7 +2262,8 @@ public final class ViewRootImpl implements ViewParent,
         mAttachInfo.mVisibleInsets.set(visibleInsets);
     }
 
-    InsetsController getInsetsController() {
+    @VisibleForTesting
+    public InsetsController getInsetsController() {
         return mInsetsController;
     }
 

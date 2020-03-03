@@ -63,6 +63,12 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"許可"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USBデバッグは許可されていません"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"このデバイスに現在ログインしているユーザーでは、USB デバッグを ON にすることはできません。この機能を使用するには、メインユーザーに切り替えてください。"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"このネットワークでワイヤレス デバッグを許可しますか？"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"ネットワーク名（SSID）\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi アドレス（BSSID）\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"このネットワークで常に許可する"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"許可"</string>
+    <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"ワイヤレス デバッグは許可されていません"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"このデバイスに現在ログインしているユーザーでは、ワイヤレス デバッグを ON にすることはできません。この機能を使用するには、メインユーザーに切り替えてください。"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB ポート無効"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"液体やゴミからデバイスを保護するため、USB ポートは無効になっています。アクセサリの検出は行われません。\n\nUSB ポートを再び安全に使用できるようになりましたらお知らせします。"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"USB ポートが有効になり、充電器やアクセサリを検出できるようになりました"</string>
@@ -82,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"スクリーンショットの作成はアプリまたは組織で許可されていません"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"画面レコーダー"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"記録を開始しますか？"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"録画を開始しますか？"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"録画中に機密情報が画面に表示されたりデバイスで再生されたりした場合、Android システムでキャプチャされることがあります。これには、パスワード、お支払い情報、写真、メッセージ、音声などが含まれます。"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"録音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"デバイスの音声"</string>
@@ -90,9 +96,9 @@
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"マイク"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"デバイスの音声とマイク"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"開始"</string>
-    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"画面を記録しています"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"画面を録画しています"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"画面と音声を記録しています"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"画面上のタップを表示する"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"画面上のタップも記録する"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"タップして停止"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"停止"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"一時停止"</string>
@@ -105,7 +111,7 @@
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"画面の録画を削除しました"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"画面の録画の削除中にエラーが発生しました"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"権限を取得できませんでした"</string>
-    <string name="screenrecord_start_error" msgid="2200660692479682368">"画面の記録中にエラーが発生しました"</string>
+    <string name="screenrecord_start_error" msgid="2200660692479682368">"画面の録画中にエラーが発生しました"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"USBファイル転送オプション"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"メディアプレーヤー（MTP）としてマウント"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"カメラ（PTP）としてマウント"</string>
@@ -488,6 +494,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"履歴"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"サイレント通知"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"バイブレーションまたは音を伴う通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"会話"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"サイレント通知がすべて消去されます"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"サイレント モードにより通知は一時停止中です"</string>
@@ -687,7 +694,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"音やバイブレーションで通知をお知らせします。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"このコンテンツのフローティング ショートカットで通知をお知らせします。"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近閉じたふきだしはありません"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="3106801169793396894">"最近閉じたふきだしがここに表示され、簡単に確認できます。"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"最近表示されたふきだしや閉じたふきだしが、ここに表示されます。"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"このグループの通知はここでは設定できません"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
@@ -711,7 +718,7 @@
     <string name="inline_undo" msgid="9026953267645116526">"元に戻す"</string>
     <string name="demote" msgid="6225813324237153980">"この通知を会話ではないとマーク"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"重要な会話"</string>
-    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"重要な会話ではない"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"重要でない会話"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"マナーモード"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"アラートを受け取る"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"ふきだしを表示"</string>
@@ -972,6 +979,12 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"左下に移動"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"右下に移動"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"閉じる"</string>
+    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"システム ナビゲーションを更新しました。変更するには [設定] に移動してください。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"システム ナビゲーションを更新するには [設定] に移動してください"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"スタンバイ"</string>
@@ -981,13 +994,14 @@
     <string name="quick_controls_title" msgid="525285759614231333">"クイック コントロール"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"コントロールの追加"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"コントロールを追加するアプリの選択"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="5867139290551373147">
-      <item quantity="other">現在のお気に入りは <xliff:g id="NUMBER_1">%s</xliff:g> 個です。</item>
-      <item quantity="one">現在のお気に入りは <xliff:g id="NUMBER_0">%s</xliff:g> 個です。</item>
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> 件のコントロールを追加しました。</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> 件のコントロールを追加しました。</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"クイック アクセスのコントロールの選択"</string>
     <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"お気に入り"</string>
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"すべて"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"全コントロールの一覧を読み込めませんでした。"</string>
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"その他"</string>
 </resources>
