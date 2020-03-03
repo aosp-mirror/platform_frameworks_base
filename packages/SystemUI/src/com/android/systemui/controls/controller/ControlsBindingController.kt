@@ -73,6 +73,11 @@ interface ControlsBindingController : UserAwareController {
     fun unsubscribe()
 
     /**
+     * Notify this controller that this component has been removed (uninstalled).
+     */
+    fun onComponentRemoved(componentName: ComponentName)
+
+    /**
      * Consumer for load calls.
      *
      * Supports also sending error messages.

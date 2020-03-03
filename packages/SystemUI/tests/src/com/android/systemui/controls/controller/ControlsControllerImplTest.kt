@@ -22,6 +22,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.UserHandle
 import android.provider.Settings
 import android.service.controls.Control
@@ -32,6 +33,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlStatus
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dump.DumpManager
@@ -50,6 +52,7 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -82,6 +85,9 @@ class ControlsControllerImplTest : SysuiTestCase() {
             ArgumentCaptor<ControlsBindingController.LoadCallback>
     @Captor
     private lateinit var broadcastReceiverCaptor: ArgumentCaptor<BroadcastReceiver>
+    @Captor
+    private lateinit var listingCallbackCaptor:
+            ArgumentCaptor<ControlsListingController.ControlsListingCallback>
 
     private lateinit var delayableExecutor: FakeExecutor
     private lateinit var controller: ControlsControllerImpl
@@ -139,6 +145,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         assertTrue(controller.available)
         verify(broadcastDispatcher).registerReceiver(
                 capture(broadcastReceiverCaptor), any(), any(), eq(UserHandle.ALL))
+        verify(listingController).addCallback(capture(listingCallbackCaptor))
     }
 
     private fun builderFromInfo(controlInfo: ControlInfo): Control.StatelessBuilder {
@@ -605,5 +612,68 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         assertEquals(2, controller.countFavoritesForComponent(TEST_COMPONENT))
         assertEquals(listOrder2, controller.getFavoritesForComponent(TEST_COMPONENT))
+    }
+
+    @Test
+    fun testPackageRemoved_noFavorites_noRemovals() {
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+
+        val serviceInfo = mock(ServiceInfo::class.java)
+        `when`(serviceInfo.componentName).thenReturn(TEST_COMPONENT)
+        val info = ControlsServiceInfo(mContext, serviceInfo)
+
+        // Don't want to check what happens before this call
+        reset(persistenceWrapper)
+        listingCallbackCaptor.value.onServicesUpdated(listOf(info))
+
+        delayableExecutor.runAllReady()
+
+        verify(bindingController, never()).onComponentRemoved(any())
+
+        assertEquals(1, controller.getFavoriteControls().size)
+        assertEquals(TEST_CONTROL_INFO, controller.getFavoriteControls()[0])
+
+        verify(persistenceWrapper, never()).storeFavorites(ArgumentMatchers.anyList())
+    }
+
+    @Test
+    fun testPackageRemoved_hasFavorites() {
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO_2, true)
+
+        val serviceInfo = mock(ServiceInfo::class.java)
+        `when`(serviceInfo.componentName).thenReturn(TEST_COMPONENT)
+        val info = ControlsServiceInfo(mContext, serviceInfo)
+
+        // Don't want to check what happens before this call
+        reset(persistenceWrapper)
+        listingCallbackCaptor.value.onServicesUpdated(listOf(info))
+
+        delayableExecutor.runAllReady()
+
+        verify(bindingController).onComponentRemoved(TEST_COMPONENT_2)
+
+        assertEquals(1, controller.getFavoriteControls().size)
+        assertEquals(TEST_CONTROL_INFO, controller.getFavoriteControls()[0])
+
+        verify(persistenceWrapper).storeFavorites(ArgumentMatchers.anyList())
+    }
+
+    @Test
+    fun testListingCallbackNotListeningWhileReadingFavorites() {
+        val intent = Intent(Intent.ACTION_USER_SWITCHED).apply {
+            putExtra(Intent.EXTRA_USER_HANDLE, otherUser)
+        }
+        val pendingResult = mock(BroadcastReceiver.PendingResult::class.java)
+        `when`(pendingResult.sendingUserId).thenReturn(otherUser)
+        broadcastReceiverCaptor.value.pendingResult = pendingResult
+
+        broadcastReceiverCaptor.value.onReceive(mContext, intent)
+
+        val inOrder = inOrder(persistenceWrapper, listingController)
+
+        inOrder.verify(listingController).removeCallback(listingCallbackCaptor.value)
+        inOrder.verify(persistenceWrapper).readFavorites()
+        inOrder.verify(listingController).addCallback(listingCallbackCaptor.value)
     }
 }
