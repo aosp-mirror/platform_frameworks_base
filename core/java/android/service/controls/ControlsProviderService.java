@@ -239,7 +239,8 @@ public abstract class ControlsProviderService extends Service {
 
     private static boolean isStatelessControl(Control control) {
         return (control.getStatus() == Control.STATUS_UNKNOWN
-                && control.getControlTemplate().getTemplateType() == ControlTemplate.TYPE_NONE
+                && control.getControlTemplate().getTemplateType()
+                == ControlTemplate.TYPE_NO_TEMPLATE
                 && TextUtils.isEmpty(control.getStatusText()));
     }
 
