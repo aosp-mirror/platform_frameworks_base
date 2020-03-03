@@ -16,7 +16,7 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.parsing.ParsingPackageImpl.sForString;
+import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
 
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -25,7 +25,6 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide */
@@ -69,16 +68,16 @@ public class ParsedInstrumentation extends ParsedComponent {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        sForString.parcel(this.targetPackage, dest, flags);
-        sForString.parcel(this.targetProcesses, dest, flags);
+        sForInternedString.parcel(this.targetPackage, dest, flags);
+        sForInternedString.parcel(this.targetProcesses, dest, flags);
         dest.writeBoolean(this.handleProfiling);
         dest.writeBoolean(this.functionalTest);
     }
 
     protected ParsedInstrumentation(Parcel in) {
         super(in);
-        this.targetPackage = sForString.unparcel(in);
-        this.targetProcesses = sForString.unparcel(in);
+        this.targetPackage = sForInternedString.unparcel(in);
+        this.targetProcesses = sForInternedString.unparcel(in);
         this.handleProfiling = in.readByte() != 0;
         this.functionalTest = in.readByte() != 0;
     }
