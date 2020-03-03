@@ -804,11 +804,11 @@ public class RecentsAnimationController implements DeathRecipient {
      *
      * This avoids any screen rotation animation when animating to the Recents view.
      */
-    void applyFixedRotationTransformIfNeeded(@NonNull WindowToken wallpaper) {
+    void linkFixedRotationTransformIfNeeded(@NonNull WindowToken wallpaper) {
         if (mTargetActivityRecord == null) {
             return;
         }
-        wallpaper.applyFixedRotationTransform(mTargetActivityRecord);
+        wallpaper.linkFixedRotationTransform(mTargetActivityRecord);
     }
 
     @VisibleForTesting
