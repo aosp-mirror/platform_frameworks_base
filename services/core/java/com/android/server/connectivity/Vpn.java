@@ -985,7 +985,11 @@ public class Vpn {
     }
 
     public int getNetId() {
-        return mNetworkAgent != null ? mNetworkAgent.network.netId : NETID_UNSET;
+        final NetworkAgent agent = mNetworkAgent;
+        if (null == agent) return NETID_UNSET;
+        final Network network = agent.getNetwork();
+        if (null == network) return NETID_UNSET;
+        return network.netId;
     }
 
     private LinkProperties makeLinkProperties() {

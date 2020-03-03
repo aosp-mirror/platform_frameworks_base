@@ -4611,6 +4611,7 @@ package android.net {
 
   public abstract class NetworkAgent {
     ctor public NetworkAgent(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String, @NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties, int, @NonNull android.net.NetworkAgentConfig, @Nullable android.net.NetworkProvider);
+    method @Nullable public android.net.Network getNetwork();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
     method public void onBandwidthUpdateRequested();
@@ -4621,6 +4622,7 @@ package android.net {
     method public void onStartSocketKeepalive(int, int, @NonNull android.net.KeepalivePacketData);
     method public void onStopSocketKeepalive(int);
     method public void onValidationStatus(int, @Nullable String);
+    method @NonNull public android.net.Network register();
     method public void sendLinkProperties(@NonNull android.net.LinkProperties);
     method public void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
     method public void sendNetworkScore(int);
@@ -4631,7 +4633,6 @@ package android.net {
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
     field public static final int VALIDATION_STATUS_VALID = 1; // 0x1
-    field @NonNull public final android.net.Network network;
     field public final int providerId;
   }
 
