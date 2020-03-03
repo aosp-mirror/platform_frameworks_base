@@ -2768,7 +2768,7 @@ public final class SmsManager {
                         getSubscriptionId(), null);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            throw new RuntimeException(ex);
         }
         return smsc;
     }
@@ -2790,7 +2790,7 @@ public final class SmsManager {
      * </p>
      *
      * @param smsc the SMSC address string.
-     * @return true for success, false otherwise.
+     * @return true for success, false otherwise. Failure can be due modem returning an error.
      */
     @SuppressAutoDoc // for carrier privileges and default SMS application.
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -2802,7 +2802,7 @@ public final class SmsManager {
                         smsc, getSubscriptionId(), null);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            throw new RuntimeException(ex);
         }
         return false;
     }
