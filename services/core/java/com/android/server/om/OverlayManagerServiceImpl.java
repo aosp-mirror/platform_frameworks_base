@@ -101,10 +101,6 @@ final class OverlayManagerServiceImpl {
             return true;
         }
 
-        if (getPackageConfiguredPriority(theTruth.packageName) != oldSettings.priority) {
-            return true;
-        }
-
         // If an immutable overlay changes its configured enabled state, reinitialize the overlay.
         if (!isMutable && isPackageConfiguredEnabled(theTruth.packageName)
                 != oldSettings.isEnabled()) {
@@ -160,6 +156,7 @@ final class OverlayManagerServiceImpl {
             final PackageInfo overlayPackage = overlayPackages.get(i);
             final OverlayInfo oi = storedOverlayInfos.get(overlayPackage.packageName);
 
+            int priority = getPackageConfiguredPriority(overlayPackage.packageName);
             if (mustReinitializeOverlay(overlayPackage, oi)) {
                 // if targetPackageName has changed the package that *used* to
                 // be the target must also update its assets
@@ -173,8 +170,10 @@ final class OverlayManagerServiceImpl {
                         overlayPackage.applicationInfo.getBaseCodePath(),
                         isPackageConfiguredMutable(overlayPackage.packageName),
                         isPackageConfiguredEnabled(overlayPackage.packageName),
-                        getPackageConfiguredPriority(overlayPackage.packageName),
-                        overlayPackage.overlayCategory);
+                        priority, overlayPackage.overlayCategory);
+            } else if (priority != oi.priority) {
+                mSettings.setPriority(overlayPackage.packageName, newUserId, priority);
+                packagesToUpdateAssets.add(oi.targetPackageName);
             }
 
             storedOverlayInfos.remove(overlayPackage.packageName);
