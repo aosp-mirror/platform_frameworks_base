@@ -28,14 +28,12 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
@@ -51,6 +49,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
@@ -95,20 +94,24 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Mock RecentsAnimationController.RecentsAnimationCallbacks mAnimationCallbacks;
     @Mock TaskSnapshot mMockTaskSnapshot;
     private RecentsAnimationController mController;
+    private DisplayContent mDefaultDisplay;
+    private ActivityStack mRootHomeTask;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
-        doReturn(mDisplayContent).when(mWm.mRoot).getDisplayContent(anyInt());
         when(mMockRunner.asBinder()).thenReturn(new Binder());
+        mDefaultDisplay = mWm.mRoot.getDefaultDisplay();
         mController = spy(new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
                 DEFAULT_DISPLAY));
+        mRootHomeTask = mDefaultDisplay.getRootHomeTask();
+        assertNotNull(mRootHomeTask);
     }
 
     @Test
     public void testRemovedBeforeStarted_expectCanceled() throws Exception {
-        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         AnimationAdapter adapter = mController.addAnimation(activity.getTask(),
                 false /* isRecentTaskInvisible */);
@@ -128,7 +131,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testCancelAfterRemove_expectIgnored() {
-        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         AnimationAdapter adapter = mController.addAnimation(activity.getTask(),
                 false /* isRecentTaskInvisible */);
@@ -149,20 +152,14 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testIncludedApps_expectTargetAndVisible() {
         mWm.setRecentsAnimationController(mController);
-        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final ActivityRecord homeActivity =
-                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                        .setStack(homeStack)
-                        .setCreateTask(true)
-                        .build();
-        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+        final ActivityRecord homeActivity = createHomeActivity();
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final ActivityRecord hiddenActivity = createActivityRecord(mDisplayContent,
+        final ActivityRecord hiddenActivity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         hiddenActivity.setVisible(false);
-        mDisplayContent.getConfiguration().windowConfiguration.setRotation(
-                mDisplayContent.getRotation());
+        mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
+                mDefaultDisplay.getRotation());
         mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
 
         // Ensure that we are animating the target activity as well
@@ -174,53 +171,41 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testWallpaperIncluded_expectTarget() throws Exception {
         mWm.setRecentsAnimationController(mController);
-        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final ActivityRecord homeAppWindow =
-                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                        .setStack(homeStack)
-                        .setCreateTask(true)
-                        .build();
-        final ActivityRecord appWindow = createActivityRecord(mDisplayContent,
+        final ActivityRecord homeActivity = createHomeActivity();
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
-        appWindow.addWindow(win1);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
+        activity.addWindow(win1);
         final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
-                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
-        spyOn(mDisplayContent.mWallpaperController);
-        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+                mock(IBinder.class), true, mDefaultDisplay, true /* ownerCanManageAppTokens */);
+        spyOn(mDefaultDisplay.mWallpaperController);
+        doReturn(true).when(mDefaultDisplay.mWallpaperController).isWallpaperVisible();
 
-        mDisplayContent.getConfiguration().windowConfiguration.setRotation(
-                mDisplayContent.getRotation());
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeAppWindow);
+        mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
+                mDefaultDisplay.getRotation());
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
         mController.startAnimation();
 
         // Ensure that we are animating the app and wallpaper target
-        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
+        assertTrue(mController.isAnimatingTask(activity.getTask()));
         assertTrue(mController.isAnimatingWallpaper(wallpaperWindowToken));
     }
 
     @Test
     public void testWallpaperAnimatorCanceled_expectAnimationKeepsRunning() throws Exception {
         mWm.setRecentsAnimationController(mController);
-        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final ActivityRecord homeActivity =
-                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                        .setStack(homeStack)
-                        .setCreateTask(true)
-                        .build();
-        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+        final ActivityRecord homeActivity = createHomeActivity();
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
         activity.addWindow(win1);
         final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
-                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
-        spyOn(mDisplayContent.mWallpaperController);
-        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+                mock(IBinder.class), true, mDefaultDisplay, true /* ownerCanManageAppTokens */);
+        spyOn(mDefaultDisplay.mWallpaperController);
+        doReturn(true).when(mDefaultDisplay.mWallpaperController).isWallpaperVisible();
 
-        mDisplayContent.getConfiguration().windowConfiguration.setRotation(
-                mDisplayContent.getRotation());
+        mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
+                mDefaultDisplay.getRotation());
         mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
         mController.startAnimation();
 
@@ -234,29 +219,27 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testFinish_expectTargetAndWallpaperAdaptersRemoved() {
         mWm.setRecentsAnimationController(mController);
-        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final ActivityRecord homeActivity =
-                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                        .setStack(homeStack)
-                        .setCreateTask(true)
-                        .build();
+        final ActivityRecord homeActivity = createHomeActivity();
         final WindowState hwin1 = createWindow(null, TYPE_BASE_APPLICATION, homeActivity, "hwin1");
         homeActivity.addWindow(hwin1);
-        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
         activity.addWindow(win1);
         final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
-                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
-        spyOn(mDisplayContent.mWallpaperController);
-        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+                mock(IBinder.class), true, mDefaultDisplay, true /* ownerCanManageAppTokens */);
+        spyOn(mDefaultDisplay.mWallpaperController);
+        doReturn(true).when(mDefaultDisplay.mWallpaperController).isWallpaperVisible();
 
         // Start and finish the animation
         mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
         mController.startAnimation();
+
+        assertTrue(mController.isAnimatingTask(homeActivity.getTask()));
+        assertTrue(mController.isAnimatingTask(activity.getTask()));
+
         // Reset at this point since we may remove adapters that couldn't be created
-        reset(mController);
+        clearInvocations(mController);
         mController.cleanupAnimation(REORDER_MOVE_TO_TOP);
 
         // Ensure that we remove the task (home & app) and wallpaper adapters
@@ -267,7 +250,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testDeferCancelAnimation() throws Exception {
         mWm.setRecentsAnimationController(mController);
-        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
         activity.addWindow(win1);
@@ -290,7 +273,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testDeferCancelAnimationWithScreenShot() throws Exception {
         mWm.setRecentsAnimationController(mController);
-        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
         activity.addWindow(win1);
@@ -322,7 +305,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testShouldAnimateWhenNoCancelWithDeferredScreenshot() {
         mWm.setRecentsAnimationController(mController);
-        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
         activity.addWindow(win1);
@@ -343,19 +326,10 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mWm.mIsFixedRotationTransformEnabled = true;
         mWm.setRecentsAnimationController(mController);
 
-        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final ActivityRecord homeAppWindow =
-                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                        .setStack(homeStack)
-                        .setCreateTask(true)
-                        .build();
-        final ActivityRecord appWindow = createActivityRecord(mDisplayContent,
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState win0 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
-        appWindow.addWindow(win0);
+        final ActivityRecord homeActivity = createHomeActivity();
+        homeActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        final ActivityRecord landActivity = createActivityRecord(mDisplayContent,
+        final ActivityRecord landActivity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         landActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, landActivity, "win1");
@@ -367,13 +341,13 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Ensure that the display is in Landscape
         landActivity.onDescendantOrientationChanged(landActivity.token, landActivity);
         assertEquals(Configuration.ORIENTATION_LANDSCAPE,
-                mDisplayContent.getConfiguration().orientation);
+                mDefaultDisplay.getConfiguration().orientation);
 
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeAppWindow);
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
 
         // Check that the home app is in portrait
         assertEquals(Configuration.ORIENTATION_PORTRAIT,
-                homeAppWindow.getConfiguration().orientation);
+                homeActivity.getConfiguration().orientation);
     }
 
     @Test
@@ -381,16 +355,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mWm.mIsFixedRotationTransformEnabled = true;
         mWm.setRecentsAnimationController(mController);
 
-        // Create a portrait home stack, a wallpaper and a landscape application displayed on top.
-
-        // Home stack
-        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final ActivityRecord homeActivity =
-                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                        .setStack(homeStack)
-                        .setCreateTask(true)
-                        .build();
+        // Create a portrait home activity, a wallpaper and a landscape activity displayed on top.
+        final ActivityRecord homeActivity = createHomeActivity();
         homeActivity.setOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         final WindowState homeWindow = createWindow(null, TYPE_BASE_APPLICATION, homeActivity,
@@ -399,7 +365,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         homeWindow.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
 
         // Landscape application
-        final ActivityRecord activity = createActivityRecord(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState applicationWindow = createWindow(null, TYPE_BASE_APPLICATION, activity,
                 "applicationWindow");
@@ -408,28 +374,26 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         // Wallpaper
         final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
-                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
+                mock(IBinder.class), true, mDefaultDisplay, true /* ownerCanManageAppTokens */);
         final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
                 "wallpaperWindow");
 
         // Make sure the landscape activity is on top and the display is in landscape
         activity.moveFocusableActivityToTop("test");
-        mDisplayContent.getConfiguration().windowConfiguration.setRotation(
-                mDisplayContent.getRotation());
+        mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
+                mDefaultDisplay.getRotation());
 
-
-        spyOn(mDisplayContent.mWallpaperController);
-        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+        spyOn(mDefaultDisplay.mWallpaperController);
+        doReturn(true).when(mDefaultDisplay.mWallpaperController).isWallpaperVisible();
 
         // Start the recents animation
-        mController
-                .initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
 
-        mDisplayContent.mWallpaperController.adjustWallpaperWindows();
+        mDefaultDisplay.mWallpaperController.adjustWallpaperWindows();
 
         // Check preconditions
         ArrayList<WallpaperWindowToken> wallpapers = new ArrayList<>(1);
-        mDisplayContent.forAllWallpaperWindows(wallpapers::add);
+        mDefaultDisplay.forAllWallpaperWindows(wallpapers::add);
 
         Truth.assertThat(wallpapers).hasSize(1);
         Truth.assertThat(wallpapers.get(0).getTopChild()).isEqualTo(wallpaperWindow);
@@ -437,6 +401,25 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // Actual check
         assertEquals(Configuration.ORIENTATION_PORTRAIT,
                 wallpapers.get(0).getConfiguration().orientation);
+
+        // Wallpaper's transform state is controlled by home, so the invocation should be no-op.
+        wallpaperWindowToken.clearFixedRotationTransform();
+        assertTrue(wallpaperWindowToken.hasFixedRotationTransform());
+
+        // Wallpaper's transform state should be cleared with home.
+        homeActivity.clearFixedRotationTransform();
+        assertFalse(wallpaperWindowToken.hasFixedRotationTransform());
+    }
+
+    private ActivityRecord createHomeActivity() {
+        final ActivityRecord homeActivity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                .setStack(mRootHomeTask)
+                .setCreateTask(true)
+                .build();
+        // Avoid {@link RecentsAnimationController.TaskAnimationAdapter#createRemoteAnimationTarget}
+        // returning null when calling {@link RecentsAnimationController#createAppAnimations}.
+        homeActivity.setVisibility(true);
+        return homeActivity;
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {
