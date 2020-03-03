@@ -13117,7 +13117,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             allPackages = mPackages.keySet().toArray(new String[mPackages.size()]);
         }
-        PackageManagerService.this.removeDistractingPackageRestrictions(allPackages, userId);
+        removeDistractingPackageRestrictions(allPackages, userId);
     }
 
     /**
@@ -20161,13 +20161,13 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             synchronized (mLock) {
                 pkgSetting.setEnabled(newState, userId, callingPackage);
-                if (newState == COMPONENT_ENABLED_STATE_DISABLED_USER
-                        || newState == COMPONENT_ENABLED_STATE_DISABLED
+                if ((newState == COMPONENT_ENABLED_STATE_DISABLED_USER
+                        || newState == COMPONENT_ENABLED_STATE_DISABLED)
                         && pkgSetting.getPermissionsState().hasPermission(
                                 Manifest.permission.SUSPEND_APPS, userId)) {
                     // This app should not generally be allowed to get disabled by the UI, but if it
                     // ever does, we don't want to end up with some of the user's apps permanently
-                    // blocked
+                    // suspended.
                     unsuspendForSuspendingPackage(packageName, userId);
                     removeAllDistractingPackageRestrictions(userId);
                 }
