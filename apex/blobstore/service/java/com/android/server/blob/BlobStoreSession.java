@@ -96,6 +96,10 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
     @GuardedBy("mRevocableFds")
     private ArrayList<RevocableFileDescriptor> mRevocableFds = new ArrayList<>();
 
+    // This will be accessed from only one thread at any point of time, so no need to grab
+    // a lock for this.
+    private byte[] mDataDigest;
+
     @GuardedBy("mSessionLock")
     private int mState = STATE_CLOSED;
 
@@ -381,19 +385,21 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
         }
     }
 
-    void verifyBlobData() {
-        byte[] actualDigest = null;
+    void computeDigest() {
         try {
             Trace.traceBegin(TRACE_TAG_SYSTEM_SERVER,
                     "computeBlobDigest-i" + mSessionId + "-l" + getSessionFile().length());
-            actualDigest = FileUtils.digest(getSessionFile(), mBlobHandle.algorithm);
+            mDataDigest = FileUtils.digest(getSessionFile(), mBlobHandle.algorithm);
         } catch (IOException | NoSuchAlgorithmException e) {
             Slog.e(TAG, "Error computing the digest", e);
         } finally {
             Trace.traceEnd(TRACE_TAG_SYSTEM_SERVER);
         }
+    }
+
+    void verifyBlobData() {
         synchronized (mSessionLock) {
-            if (actualDigest != null && Arrays.equals(actualDigest, mBlobHandle.digest)) {
+            if (mDataDigest != null && Arrays.equals(mDataDigest, mBlobHandle.digest)) {
                 mState = STATE_VERIFIED_VALID;
                 // Commit callback will be sent once the data is persisted.
             } else {
