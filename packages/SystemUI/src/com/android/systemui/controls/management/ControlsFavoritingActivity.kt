@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.CurrentUserTracker
@@ -52,6 +53,7 @@ class ControlsFavoritingActivity @Inject constructor(
     private lateinit var statusText: TextView
     private var model: ControlsModel? = null
     private var component: ComponentName? = null
+    private var structureName: CharSequence = ""
 
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
         private val startingUser = controller.currentUserId
@@ -97,11 +99,11 @@ class ControlsFavoritingActivity @Inject constructor(
         requireViewById<Button>(R.id.done).setOnClickListener {
             if (component == null) return@setOnClickListener
             val favoritesForStorage = model?.favorites?.map {
-                it.componentName = component!!
                 it.build()
             }
             if (favoritesForStorage != null) {
-                controller.replaceFavoritesForComponent(component!!, favoritesForStorage)
+                controller.replaceFavoritesForStructure(StructureInfo(component!!, structureName,
+                        favoritesForStorage))
                 finishAffinity()
             }
         }
@@ -112,6 +114,12 @@ class ControlsFavoritingActivity @Inject constructor(
                 val allControls = data.allControls
                 val favoriteKeys = data.favoritesIds
                 val error = data.errorOnLoad
+                val structures = allControls.fold(hashSetOf<CharSequence>()) {
+                    s, c ->
+                        s.add(c.control.structure ?: "")
+                        s
+                }
+                // TODO add multi structure switching support
                 executor.execute {
                     val emptyZoneString = resources.getText(
                             R.string.controls_favorite_other_zone_header)

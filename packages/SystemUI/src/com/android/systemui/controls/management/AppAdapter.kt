@@ -26,15 +26,13 @@ import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
-import com.android.settingslib.applications.DefaultAppInfo
-import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsServiceInfo
 import java.text.Collator
 import java.util.concurrent.Executor
 
 /**
- * Adapter for binding [CandidateInfo] related to [ControlsProviderService].
+ * Adapter for binding [ControlsServiceInfo] related to [ControlsProviderService].
  *
  * This class handles subscribing and keeping track of the list of valid applications for
  * displaying.
@@ -56,16 +54,16 @@ class AppAdapter(
     private val resources: Resources
 ) : RecyclerView.Adapter<AppAdapter.Holder>() {
 
-    private var listOfServices = emptyList<CandidateInfo>()
+    private var listOfServices = emptyList<ControlsServiceInfo>()
 
     private val callback = object : ControlsListingController.ControlsListingCallback {
-        override fun onServicesUpdated(candidates: List<ControlsServiceInfo>) {
+        override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
             backgroundExecutor.execute {
                 val collator = Collator.getInstance(resources.configuration.locales[0])
-                val localeComparator = compareBy<CandidateInfo, CharSequence>(collator) {
+                val localeComparator = compareBy<ControlsServiceInfo, CharSequence>(collator) {
                     it.loadLabel()
                 }
-                listOfServices = candidates.sortedWith(localeComparator)
+                listOfServices = serviceInfos.sortedWith(localeComparator)
                 uiExecutor.execute(::notifyDataSetChanged)
             }
         }
@@ -101,11 +99,10 @@ class AppAdapter(
          * Bind data to the view
          * @param data Information about the [ControlsProviderService] to bind to the data
          */
-        fun bindData(data: CandidateInfo) {
+        fun bindData(data: ControlsServiceInfo) {
             icon.setImageDrawable(data.loadIcon())
             title.text = data.loadLabel()
-            favorites.text = favRenderer.renderFavoritesForComponent(
-                    (data as DefaultAppInfo).componentName)
+            favorites.text = favRenderer.renderFavoritesForComponent(data.componentName)
         }
     }
 }

@@ -45,6 +45,6 @@ interface ControlsListingController :
 
     @FunctionalInterface
     interface ControlsListingCallback {
-        fun onServicesUpdated(candidates: List<ControlsServiceInfo>)
+        fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>)
     }
 }

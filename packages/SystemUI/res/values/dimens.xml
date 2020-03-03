@@ -1222,6 +1222,7 @@
 
     <!-- Home Controls -->
     <dimen name="control_spacing">4dp</dimen>
+    <dimen name="control_list_divider">1dp</dimen>
     <dimen name="control_corner_radius">15dp</dimen>
     <dimen name="control_height">100dp</dimen>
     <dimen name="control_padding">15dp</dimen>
