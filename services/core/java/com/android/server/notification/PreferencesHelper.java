@@ -145,6 +145,7 @@ public class PreferencesHelper implements RankingConfig {
     private final PackageManager mPm;
     private final RankingHandler mRankingHandler;
     private final ZenModeHelper mZenModeHelper;
+    private final NotificationChannelLogger mNotificationChannelLogger;
 
     private SparseBooleanArray mBadgingEnabled;
     private boolean mBubblesEnabled = DEFAULT_ALLOW_BUBBLE;
@@ -161,11 +162,12 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
-            ZenModeHelper zenHelper) {
+            ZenModeHelper zenHelper, NotificationChannelLogger notificationChannelLogger) {
         mContext = context;
         mZenModeHelper = zenHelper;
         mRankingHandler = rankingHandler;
         mPm = pm;
+        mNotificationChannelLogger = notificationChannelLogger;
 
         // STOPSHIP (b/142218092) this should be removed before ship
         if (!wasBadgingForcedTrue(context)) {
@@ -654,10 +656,6 @@ public class PreferencesHelper implements RankingConfig {
                 throw new IllegalArgumentException("Invalid package");
             }
             final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
-            if (!group.equals(oldGroup)) {
-                // will log for new entries as well as name/description changes
-                MetricsLogger.action(getChannelGroupLog(group.getId(), pkg));
-            }
             if (oldGroup != null) {
                 group.setChannels(oldGroup.getChannels());
 
@@ -674,6 +672,13 @@ public class PreferencesHelper implements RankingConfig {
                     }
                 }
             }
+            if (!group.equals(oldGroup)) {
+                // will log for new entries as well as name/description changes
+                MetricsLogger.action(getChannelGroupLog(group.getId(), pkg));
+                mNotificationChannelLogger.logNotificationChannelGroup(group, uid, pkg,
+                        oldGroup == null,
+                        (oldGroup != null) && oldGroup.isBlocked());
+            }
             r.groups.put(group.getId(), group);
         }
     }
@@ -685,7 +690,7 @@ public class PreferencesHelper implements RankingConfig {
         Objects.requireNonNull(channel);
         Objects.requireNonNull(channel.getId());
         Preconditions.checkArgument(!TextUtils.isEmpty(channel.getName()));
-        boolean needsPolicyFileChange = false;
+        boolean needsPolicyFileChange = false, wasUndeleted = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -698,15 +703,18 @@ public class PreferencesHelper implements RankingConfig {
                 throw new IllegalArgumentException("Reserved id");
             }
             NotificationChannel existing = r.channels.get(channel.getId());
-            // Keep most of the existing settings
             if (existing != null && fromTargetApp) {
+                // Actually modifying an existing channel - keep most of the existing settings
                 if (existing.isDeleted()) {
+                    // The existing channel was deleted - undelete it.
                     existing.setDeleted(false);
                     needsPolicyFileChange = true;
+                    wasUndeleted = true;
 
                     // log a resurrected channel as if it's new again
                     MetricsLogger.action(getChannelLog(channel, pkg).setType(
                             com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
+                    mNotificationChannelLogger.logNotificationChannelCreated(channel, uid, pkg);
                 }
 
                 if (!Objects.equals(channel.getName().toString(), existing.getName().toString())) {
@@ -756,6 +764,10 @@ public class PreferencesHelper implements RankingConfig {
                 }
 
                 updateConfig();
+                if (needsPolicyFileChange && !wasUndeleted) {
+                    mNotificationChannelLogger.logNotificationChannelModified(existing, uid, pkg,
+                            previousExistingImportance, false);
+                }
                 return needsPolicyFileChange;
             }
 
@@ -806,6 +818,7 @@ public class PreferencesHelper implements RankingConfig {
             }
             MetricsLogger.action(getChannelLog(channel, pkg).setType(
                     com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
+            mNotificationChannelLogger.logNotificationChannelCreated(channel, uid, pkg);
         }
 
         return needsPolicyFileChange;
@@ -867,6 +880,8 @@ public class PreferencesHelper implements RankingConfig {
                 // only log if there are real changes
                 MetricsLogger.action(getChannelLog(updatedChannel, pkg)
                         .setSubtype(fromUser ? 1 : 0));
+                mNotificationChannelLogger.logNotificationChannelModified(updatedChannel, uid, pkg,
+                        channel.getImportance(), fromUser);
             }
 
             if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
@@ -954,14 +969,21 @@ public class PreferencesHelper implements RankingConfig {
             }
             NotificationChannel channel = r.channels.get(channelId);
             if (channel != null) {
-                channel.setDeleted(true);
-                LogMaker lm = getChannelLog(channel, pkg);
-                lm.setType(com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_CLOSE);
-                MetricsLogger.action(lm);
+                deleteNotificationChannelLocked(channel, pkg, uid);
+            }
+        }
+    }
 
-                if (mAreChannelsBypassingDnd && channel.canBypassDnd()) {
-                    updateChannelsBypassingDnd(mContext.getUserId());
-                }
+    private void deleteNotificationChannelLocked(NotificationChannel channel, String pkg, int uid) {
+        if (!channel.isDeleted()) {
+            channel.setDeleted(true);
+            LogMaker lm = getChannelLog(channel, pkg);
+            lm.setType(com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_CLOSE);
+            MetricsLogger.action(lm);
+            mNotificationChannelLogger.logNotificationChannelDeleted(channel, uid, pkg);
+
+            if (mAreChannelsBypassingDnd && channel.canBypassDnd()) {
+                updateChannelsBypassingDnd(mContext.getUserId());
             }
         }
     }
@@ -1158,13 +1180,17 @@ public class PreferencesHelper implements RankingConfig {
                 return deletedChannels;
             }
 
-            r.groups.remove(groupId);
+            NotificationChannelGroup channelGroup = r.groups.remove(groupId);
+            if (channelGroup != null) {
+                mNotificationChannelLogger.logNotificationChannelGroupDeleted(channelGroup, uid,
+                        pkg);
+            }
 
             int N = r.channels.size();
             for (int i = 0; i < N; i++) {
                 final NotificationChannel nc = r.channels.valueAt(i);
                 if (groupId.equals(nc.getGroup())) {
-                    nc.setDeleted(true);
+                    deleteNotificationChannelLocked(nc, pkg, uid);
                     deletedChannels.add(nc);
                 }
             }
@@ -1279,6 +1305,7 @@ public class PreferencesHelper implements RankingConfig {
                     lm.setType(
                             com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_CLOSE);
                     MetricsLogger.action(lm);
+                    mNotificationChannelLogger.logNotificationChannelDeleted(nc, uid, pkg);
 
                     deletedChannelIds.add(nc.getId());
                 }
