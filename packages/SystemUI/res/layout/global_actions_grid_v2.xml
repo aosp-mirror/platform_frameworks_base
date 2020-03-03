@@ -1,71 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/global_actions_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-  <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/global_actions_grid_root"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+>
+  <com.android.systemui.globalactions.GlobalActionsFlatLayout
+      android:id="@id/global_actions_view"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:theme="@style/qs_theme"
+      android:gravity="top | center_horizontal"
       android:clipChildren="false"
       android:clipToPadding="false"
-      android:paddingBottom="@dimen/global_actions_grid_container_shadow_offset"
-      android:layout_marginBottom="@dimen/global_actions_grid_container_negative_shadow_offset">
-
-    <com.android.systemui.globalactions.GlobalActionsFlatLayout
-        android:id="@id/global_actions_view"
-        android:layout_width="match_parent"
+      android:layout_marginTop="@dimen/global_actions_top_margin"
+  >
+    <LinearLayout
+        android:id="@android:id/list"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/global_actions_grid_side_margin"
+        android:layout_marginRight="@dimen/global_actions_grid_side_margin"
+        android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
+        android:paddingRight="@dimen/global_actions_grid_horizontal_padding"
+        android:paddingTop="@dimen/global_actions_grid_vertical_padding"
+        android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
         android:orientation="horizontal"
-        android:theme="@style/qs_theme"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:gravity="top | center_horizontal"
+        android:gravity="left"
+        android:translationZ="@dimen/global_actions_translate"
+    />
+  </com.android.systemui.globalactions.GlobalActionsFlatLayout>
+
+  <com.android.systemui.globalactions.MinHeightScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/global_actions_grid_container_shadow_offset"
+    android:layout_marginBottom="@dimen/global_actions_grid_container_negative_shadow_offset"
+    android:orientation="vertical"
+  >
+    <LinearLayout
+        android:id="@+id/global_actions_grid_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:clipChildren="false"
+        android:orientation="vertical"
         android:clipToPadding="false"
-        android:layout_marginTop="@dimen/global_actions_top_margin">
+    >
       <LinearLayout
-          android:id="@android:id/list"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginLeft="@dimen/global_actions_grid_side_margin"
-          android:layout_marginRight="@dimen/global_actions_grid_side_margin"
-          android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
-          android:paddingRight="@dimen/global_actions_grid_horizontal_padding"
-          android:paddingTop="@dimen/global_actions_grid_vertical_padding"
-          android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
-          android:orientation="horizontal"
-          android:gravity="left"
-          android:translationZ="@dimen/global_actions_translate" />
-    </com.android.systemui.globalactions.GlobalActionsFlatLayout>
-
-    <LinearLayout
-        android:id="@+id/global_actions_panel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/global_actions_view">
-
-      <FrameLayout
-          android:id="@+id/global_actions_panel_container"
+          android:id="@+id/global_actions_panel"
           android:layout_width="match_parent"
-          android:layout_height="wrap_content" />
-    </LinearLayout>
+          android:layout_height="wrap_content"
+          android:orientation="vertical"
+      >
+        <FrameLayout
+            android:id="@+id/global_actions_panel_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+        />
+      </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/global_actions_controls"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/global_actions_panel"
-        app:layout_constraintBottom_toBottomOf="parent" />
-  </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+      <LinearLayout
+          android:id="@+id/global_actions_controls"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical"
+          android:layout_marginRight="@dimen/global_actions_grid_horizontal_padding"
+          android:layout_marginLeft="@dimen/global_actions_grid_horizontal_padding"
+      />
+    </LinearLayout>
+  </com.android.systemui.globalactions.MinHeightScrollView>
+</LinearLayout>
