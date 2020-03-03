@@ -162,7 +162,7 @@ import java.util.function.Supplier;
  * might also make sense inside of a single app if the access is forwarded between two features of
  * the app.
  *
- * <p>An app can register an {@link AppOpsCollector} to get informed about what accesses the
+ * <p>An app can register an {@link OnOpNotedCallback} to get informed about what accesses the
  * system is tracking for it. As each runtime permission has an associated app-op this API is
  * particularly useful for an app that want to find unexpected private data accesses.
  */
@@ -206,16 +206,16 @@ public class AppOpsManager {
 
     private static final Object sLock = new Object();
 
-    /** Current {@link AppOpsCollector}. Change via {@link #setNotedAppOpsCollector} */
+    /** Current {@link OnOpNotedCallback}. Change via {@link #setOnOpNotedCallback} */
     @GuardedBy("sLock")
-    private static @Nullable AppOpsCollector sNotedAppOpsCollector;
+    private static @Nullable OnOpNotedCallback sOnOpNotedCallback;
 
     /**
      * Additional collector that collect accesses and forwards a few of them them via
      * {@link IAppOpsService#reportRuntimeAppOpAccessMessageAndGetConfig}.
      */
-    private static AppOpsCollector sMessageCollector =
-            new AppOpsCollector() {
+    private static OnOpNotedCallback sMessageCollector =
+            new OnOpNotedCallback() {
                 @Override
                 public void onNoted(@NonNull SyncNotedAppOp op) {
                     reportStackTraceIfNeeded(op);
@@ -7800,8 +7800,8 @@ public class AppOpsManager {
      */
     private void collectNotedOpForSelf(int op, @Nullable String featureId) {
         synchronized (sLock) {
-            if (sNotedAppOpsCollector != null) {
-                sNotedAppOpsCollector.onSelfNoted(new SyncNotedAppOp(op, featureId));
+            if (sOnOpNotedCallback != null) {
+                sOnOpNotedCallback.onSelfNoted(new SyncNotedAppOp(op, featureId));
             }
         }
         sMessageCollector.onSelfNoted(new SyncNotedAppOp(op, featureId));
@@ -7950,8 +7950,8 @@ public class AppOpsManager {
                 synchronized (sLock) {
                     for (int code = notedAppOps.nextSetBit(0); code != -1;
                             code = notedAppOps.nextSetBit(code + 1)) {
-                        if (sNotedAppOpsCollector != null) {
-                            sNotedAppOpsCollector.onNoted(new SyncNotedAppOp(code, featureId));
+                        if (sOnOpNotedCallback != null) {
+                            sOnOpNotedCallback.onNoted(new SyncNotedAppOp(code, featureId));
                         }
                     }
                 }
@@ -7964,33 +7964,45 @@ public class AppOpsManager {
     }
 
     /**
-     * Register a new {@link AppOpsCollector}.
+     * Set a new {@link OnOpNotedCallback}.
      *
-     * <p>There can only ever be one collector per process. If there currently is a collector
-     * registered, it will be unregistered.
+     * <p>There can only ever be one collector per process. If there currently is another callback
+     * set, this will fail.
      *
-     * <p><b>Only appops related to dangerous permissions are collected.</b>
+     * @param asyncExecutor executor to execute {@link OnOpNotedCallback#onAsyncNoted} on, {@code
+     * null} to unset
+     * @param callback listener to set, {@code null} to unset
      *
-     * @param collector The collector to set or {@code null} to unregister.
+     * @throws IllegalStateException If another callback is already registered
      */
-    public void setNotedAppOpsCollector(@Nullable AppOpsCollector collector) {
+    public void setOnOpNotedCallback(@Nullable @CallbackExecutor Executor asyncExecutor,
+            @Nullable OnOpNotedCallback callback) {
+        Preconditions.checkState((callback == null) == (asyncExecutor == null));
+
         synchronized (sLock) {
-            if (sNotedAppOpsCollector != null) {
+            if (callback == null) {
+                Preconditions.checkState(sOnOpNotedCallback != null,
+                        "No callback is currently registered");
+
                 try {
                     mService.stopWatchingAsyncNoted(mContext.getPackageName(),
-                            sNotedAppOpsCollector.mAsyncCb);
+                            sOnOpNotedCallback.mAsyncCb);
                 } catch (RemoteException e) {
                     e.rethrowFromSystemServer();
                 }
-            }
 
-            sNotedAppOpsCollector = collector;
+                sOnOpNotedCallback = null;
+            } else {
+                Preconditions.checkState(sOnOpNotedCallback == null,
+                        "Another callback is already registered");
 
-            if (sNotedAppOpsCollector != null) {
+                callback.mAsyncExecutor = asyncExecutor;
+                sOnOpNotedCallback = callback;
+
                 List<AsyncNotedAppOp> missedAsyncOps = null;
                 try {
                     mService.startWatchingAsyncNoted(mContext.getPackageName(),
-                            sNotedAppOpsCollector.mAsyncCb);
+                            sOnOpNotedCallback.mAsyncCb);
                     missedAsyncOps = mService.extractAsyncOps(mContext.getPackageName());
                 } catch (RemoteException e) {
                     e.rethrowFromSystemServer();
@@ -8000,10 +8012,9 @@ public class AppOpsManager {
                     int numMissedAsyncOps = missedAsyncOps.size();
                     for (int i = 0; i < numMissedAsyncOps; i++) {
                         final AsyncNotedAppOp asyncNotedAppOp = missedAsyncOps.get(i);
-                        if (sNotedAppOpsCollector != null) {
-                            sNotedAppOpsCollector.getAsyncNotedExecutor().execute(
-                                    () -> sNotedAppOpsCollector.onAsyncNoted(
-                                            asyncNotedAppOp));
+                        if (sOnOpNotedCallback != null) {
+                            sOnOpNotedCallback.getAsyncNotedExecutor().execute(
+                                    () -> sOnOpNotedCallback.onAsyncNoted(asyncNotedAppOp));
                         }
                     }
                 }
@@ -8011,27 +8022,50 @@ public class AppOpsManager {
         }
     }
 
+    // TODO moltmann: Remove
     /**
-     * @return {@code true} iff the process currently is currently collecting noted appops.
+     * Will be removed before R ships, leave it just to not break apps immediately.
      *
-     * @see #setNotedAppOpsCollector(AppOpsCollector)
+     * @removed
      *
      * @hide
      */
-    public static boolean isCollectingNotedAppOps() {
-        return sNotedAppOpsCollector != null;
+    @SystemApi
+    @Deprecated
+    public void setNotedAppOpsCollector(@Nullable AppOpsCollector collector) {
+        synchronized (sLock) {
+            if (collector != null) {
+                if (isListeningForOpNoted()) {
+                    setOnOpNotedCallback(null, null);
+                }
+                setOnOpNotedCallback(new HandlerExecutor(Handler.getMain()), collector);
+            } else if (sOnOpNotedCallback != null) {
+                setOnOpNotedCallback(null, null);
+            }
+        }
     }
 
     /**
-     * Callback an app can {@link #setNotedAppOpsCollector register} to monitor the app-ops the
-     * system has tracked for it. I.e. each time any app calls {@link #noteOp} or {@link #startOp}
-     * one of the callback methods of this object is called.
+     * @return {@code true} iff the process currently is currently collecting noted appops.
      *
-     * <p><b>There will be a callback for all app-ops related to runtime permissions, but not
+     * @see #setOnOpNotedCallback
+     *
+     * @hide
+     */
+    public static boolean isListeningForOpNoted() {
+        return sOnOpNotedCallback != null;
+    }
+
+    /**
+     * Callback an app can {@link #setOnOpNotedCallback set} to monitor the app-ops the
+     * system has tracked for it. I.e. each time any app calls {@link #noteOp} or {@link #startOp}
+     * one of a method of this object is called.
+     *
+     * <p><b>There will be a call for all app-ops related to runtime permissions, but not
      * necessarily for all other app-ops.
      *
      * <pre>
-     * setNotedAppOpsCollector(new AppOpsCollector() {
+     * setOnOpNotedCallback(getMainExecutor(), new OnOpNotedCallback() {
      *     ArraySet<Pair<String, String>> opsNotedForThisProcess = new ArraySet<>();
      *
      *     private synchronized void addAccess(String op, String accessLocation) {
@@ -8056,24 +8090,36 @@ public class AppOpsManager {
      * });
      * </pre>
      *
-     * @see #setNotedAppOpsCollector
+     * @see #setOnOpNotedCallback
      */
-    public abstract static class AppOpsCollector {
+    public abstract static class OnOpNotedCallback {
+        private @NonNull Executor mAsyncExecutor;
+
         /** Callback registered with the system. This will receive the async notes ops */
         private final IAppOpsAsyncNotedCallback mAsyncCb = new IAppOpsAsyncNotedCallback.Stub() {
             @Override
             public void opNoted(AsyncNotedAppOp op) {
                 Objects.requireNonNull(op);
 
-                getAsyncNotedExecutor().execute(() -> onAsyncNoted(op));
+                long token = Binder.clearCallingIdentity();
+                try {
+                    getAsyncNotedExecutor().execute(() -> onAsyncNoted(op));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         };
 
+        // TODO moltmann: Remove
         /**
+         * Will be removed before R ships.
+         *
          * @return The executor for the system to use when calling {@link #onAsyncNoted}.
+         *
+         * @hide
          */
-        public @NonNull Executor getAsyncNotedExecutor() {
-            return new HandlerExecutor(Handler.getMain());
+        protected @NonNull Executor getAsyncNotedExecutor() {
+            return mAsyncExecutor;
         }
 
         /**
@@ -8083,7 +8129,7 @@ public class AppOpsManager {
          * <p>Called on the calling thread before the API returns. This allows the app to e.g.
          * collect stack traces to figure out where the access came from.
          *
-         * @param op The op noted
+         * @param op op noted
          */
         public abstract void onNoted(@NonNull SyncNotedAppOp op);
 
@@ -8093,7 +8139,7 @@ public class AppOpsManager {
          * <p>This is very similar to {@link #onNoted} only that the tracking was not caused by the
          * API provider in a separate process, but by one in the app's own process.
          *
-         * @param op The op noted
+         * @param op op noted
          */
         public abstract void onSelfNoted(@NonNull SyncNotedAppOp op);
 
@@ -8105,13 +8151,29 @@ public class AppOpsManager {
          * guaranteed. Due to how async calls work in Android this might even be delivered slightly
          * before the private data is delivered to the app.
          *
-         * <p>If the app is not running or no {@link AppOpsCollector} is registered a small amount
-         * of noted app-ops are buffered and then delivered as soon as a collector is registered.
+         * <p>If the app is not running or no {@link OnOpNotedCallback} is registered a small amount
+         * of noted app-ops are buffered and then delivered as soon as a listener is registered.
          *
-         * @param asyncOp The op noted
+         * @param asyncOp op noted
          */
         public abstract void onAsyncNoted(@NonNull AsyncNotedAppOp asyncOp);
     }
+
+    // TODO moltmann: Remove
+    /**
+     * Will be removed before R ships, leave it just to not break apps immediately.
+     *
+     * @removed
+     *
+     * @hide
+     */
+    @SystemApi
+    @Deprecated
+    public abstract static class AppOpsCollector extends OnOpNotedCallback {
+        public @NonNull Executor getAsyncNotedExecutor() {
+            return new HandlerExecutor(Handler.getMain());
+        }
+    };
 
     /**
      * Generate a stack trace used for noted app-ops logging.
