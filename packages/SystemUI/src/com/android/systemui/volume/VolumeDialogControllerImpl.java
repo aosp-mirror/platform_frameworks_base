@@ -147,7 +147,12 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     public VolumeDialogControllerImpl(Context context, BroadcastDispatcher broadcastDispatcher,
             Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
         mContext = context.getApplicationContext();
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        // TODO(b/150663459): remove this TV workaround once StatusBar is "unbound" on TVs
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            mStatusBarOptionalLazy = Optional.empty();
+        } else {
+            mStatusBarOptionalLazy = statusBarOptionalLazy;
+        }
         mNotificationManager = (NotificationManager) mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         Events.writeEvent(Events.EVENT_COLLECTION_STARTED);
