@@ -3332,16 +3332,12 @@ message ForegroundServiceAppOpSessionEnded {
     optional int32 uid = 1 [(is_uid) = true];
 
     // The operation's name.
-    // To the extent possible, preserve the mapping from AppOpsManager.OP_ constants.
-    // Only these named ops are actually logged.
-    enum AppOpName {
-        OP_NONE = -1; // Also represents UNKNOWN.
-        OP_COARSE_LOCATION = 0;
-        OP_FINE_LOCATION = 1;
-        OP_CAMERA = 26;
-        OP_RECORD_AUDIO = 27;
-    }
-    optional AppOpName app_op_name = 2 [default = OP_NONE];
+    // Only following four ops are logged
+    // COARSE_LOCATION = 0
+    // FINE_LOCATION = 1
+    // CAMERA = 26
+    // RECORD_AUDIO = 27
+    optional android.app.AppOpEnum app_op_name = 2 [default = APP_OP_NONE];
 
     // The uid's permission mode for accessing the AppOp during this fgs session.
     enum Mode {
@@ -7571,8 +7567,8 @@ message AppOps {
     // Name of the package performing the op
     optional string package_name = 2;
 
-    // operation id; maps to the OP_* constants in AppOpsManager.java
-    optional int32 op_id = 3;
+    // operation id
+    optional android.app.AppOpEnum op_id = 3 [default = APP_OP_NONE];
 
     // The number of times the op was granted while the app was in the
     // foreground (only for trusted requests)
@@ -7617,8 +7613,8 @@ message AttributedAppOps {
     // above.
     optional string tag = 3;
 
-    // operation id; maps to the OPSTR_* constants in AppOpsManager.java
-    optional string op = 4;
+    // operation id
+    optional android.app.AppOpEnum op = 4 [default = APP_OP_NONE];
 
     // The number of times the op was granted while the app was in the
     // foreground (only for trusted requests)
