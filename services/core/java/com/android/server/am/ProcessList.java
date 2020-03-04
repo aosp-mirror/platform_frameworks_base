@@ -2396,9 +2396,7 @@ public final class ProcessList {
             // Ignore
         }
 
-        if (app.isPersistent()) {
-            Watchdog.getInstance().processStarted(app.processName, pid);
-        }
+        Watchdog.getInstance().processStarted(app.processName, pid);
 
         checkSlow(app.startTime, "startProcess: building log message");
         StringBuilder buf = mStringBuilder;
@@ -3769,6 +3767,7 @@ public final class ProcessList {
             Slog.i(TAG, "note: " + app + " died, saving the exit info");
         }
 
+        Watchdog.getInstance().processDied(app.processName, app.pid);
         mAppExitInfoTracker.scheduleNoteProcessDiedLocked(app);
     }
 
