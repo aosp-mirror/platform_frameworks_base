@@ -35,10 +35,12 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <string>
 #include <time.h>
+#include <wait.h>
 
 namespace android {
 namespace os {
@@ -51,6 +53,8 @@ using namespace android::util;
  *      frameworks/base/core/proto/android/os/incident.proto
  */
 const int FIELD_ID_METADATA = 2;
+// Args for exec gzip
+static const char* GZIP[] = {"/system/bin/gzip", NULL};
 
 IncidentMetadata_Destination privacy_policy_to_dest(uint8_t privacyPolicy) {
     switch (privacyPolicy) {
@@ -142,7 +146,8 @@ ReportRequest::ReportRequest(const IncidentReportArgs& a,
          mListener(listener),
          mFd(fd),
          mIsStreaming(fd >= 0),
-         mStatus(NO_ERROR) {
+         mStatus(OK),
+         mZipPid(-1) {
 }
 
 ReportRequest::~ReportRequest() {
@@ -153,7 +158,14 @@ ReportRequest::~ReportRequest() {
 }
 
 bool ReportRequest::ok() {
-    return mFd >= 0 && mStatus == NO_ERROR;
+    if (mStatus != OK) {
+        return false;
+    }
+    if (!args.gzip()) {
+        return mFd >= 0;
+    }
+    // Send a blank signal to check if mZipPid is alive
+    return mZipPid > 0 && kill(mZipPid, 0) == 0;
 }
 
 bool ReportRequest::containsSection(int sectionId) const {
@@ -161,10 +173,45 @@ bool ReportRequest::containsSection(int sectionId) const {
 }
 
 void ReportRequest::closeFd() {
-    if (mIsStreaming && mFd >= 0) {
+    if (!mIsStreaming) {
+        return;
+    }
+    if (mFd >= 0) {
         close(mFd);
         mFd = -1;
     }
+    if (mZipPid > 0) {
+        mZipPipe.close();
+        // Gzip may take some time.
+        status_t err = wait_child(mZipPid, /* timeout_ms= */ 10 * 1000);
+        if (err != 0) {
+            ALOGW("[ReportRequest] abnormal child process: %s", strerror(-err));
+        }
+    }
+}
+
+int ReportRequest::getFd() {
+    return mZipPid > 0 ? mZipPipe.writeFd().get() : mFd;
+}
+
+status_t ReportRequest::initGzipIfNecessary() {
+    if (!mIsStreaming || !args.gzip()) {
+        return OK;
+    }
+    if (!mZipPipe.init()) {
+        ALOGE("[ReportRequest] Failed to setup pipe for gzip");
+        mStatus = -errno;
+        return mStatus;
+    }
+    int status = 0;
+    pid_t pid = fork_execute_cmd((char* const*)GZIP, mZipPipe.readFd().release(), mFd, &status);
+    if (pid < 0 || status != 0) {
+        mStatus = status;
+        return mStatus;
+    }
+    mZipPid = pid;
+    mFd = -1;
+    return OK;
 }
 
 // ================================================================================
@@ -561,6 +608,13 @@ void Reporter::runReport(size_t* reportByteSize) {
         clock_gettime(CLOCK_REALTIME, &spec);
         reportId = (spec.tv_sec) * 1000 + spec.tv_nsec;
     }
+
+    mBatch->forEachStreamingRequest([](const sp<ReportRequest>& request) {
+        status_t err = request->initGzipIfNecessary();
+        if (err != 0) {
+            ALOGW("Error forking gzip: %s", strerror(err));
+        }
+    });
 
     // Write the incident report headers - each request gets its own headers.  It's different
     // from the other top-level fields in IncidentReport that are the sections where the rest
