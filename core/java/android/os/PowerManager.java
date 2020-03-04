@@ -922,7 +922,7 @@ public final class PowerManager {
     final IThermalService mThermalService;
 
     /** We lazily initialize it.*/
-    private DeviceIdleManager mDeviceIdleManager;
+    private PowerWhitelistManager mPowerWhitelistManager;
 
     private final ArrayMap<OnThermalStatusChangedListener, IThermalStatusListener>
             mListenerMap = new ArrayMap<>();
@@ -938,12 +938,12 @@ public final class PowerManager {
         mHandler = handler;
     }
 
-    private DeviceIdleManager getDeviceIdleManager() {
-        if (mDeviceIdleManager == null) {
+    private PowerWhitelistManager getPowerWhitelistManager() {
+        if (mPowerWhitelistManager == null) {
             // No need for synchronization; getSystemService() will return the same object anyway.
-            mDeviceIdleManager = mContext.getSystemService(DeviceIdleManager.class);
+            mPowerWhitelistManager = mContext.getSystemService(PowerWhitelistManager.class);
         }
-        return mDeviceIdleManager;
+        return mPowerWhitelistManager;
     }
 
     /**
@@ -1786,7 +1786,7 @@ public final class PowerManager {
      * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
      */
     public boolean isIgnoringBatteryOptimizations(String packageName) {
-        return getDeviceIdleManager().isApplicationWhitelisted(packageName);
+        return getPowerWhitelistManager().isWhitelisted(packageName, true);
     }
 
     /**

@@ -124,6 +124,26 @@ public class PowerWhitelistManager {
     }
 
     /**
+     * Returns true if the app is whitelisted from power save restrictions. This does not include
+     * temporarily whitelisted apps.
+     *
+     * @param includingIdle Set to true if the app should be whitelisted from device
+     *                      idle as well as other power save restrictions
+     * @hide
+     */
+    public boolean isWhitelisted(@NonNull String packageName, boolean includingIdle) {
+        try {
+            if (includingIdle) {
+                return mService.isPowerSaveWhitelistApp(packageName);
+            } else {
+                return mService.isPowerSaveWhitelistExceptIdleApp(packageName);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Add an app to the temporary whitelist for a short amount of time.
      *
      * @param packageName The package to add to the temp whitelist
