@@ -3222,7 +3222,9 @@ public class ConnectivityManager {
 
     /** {@hide} - returns the factory serial number */
     @UnsupportedAppUsage
-    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_FACTORY})
     public int registerNetworkFactory(Messenger messenger, String name) {
         try {
             return mService.registerNetworkFactory(messenger, name);
@@ -3233,7 +3235,9 @@ public class ConnectivityManager {
 
     /** {@hide} */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_FACTORY})
     public void unregisterNetworkFactory(Messenger messenger) {
         try {
             mService.unregisterNetworkFactory(messenger);
@@ -3253,7 +3257,9 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_FACTORY})
     public int registerNetworkProvider(@NonNull NetworkProvider provider) {
         if (provider.getProviderId() != NetworkProvider.ID_NONE) {
             throw new IllegalStateException("NetworkProviders can only be registered once");
@@ -3276,7 +3282,9 @@ public class ConnectivityManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_FACTORY})
     public void unregisterNetworkProvider(@NonNull NetworkProvider provider) {
         try {
             mService.unregisterNetworkProvider(provider.getMessenger());
@@ -3288,7 +3296,9 @@ public class ConnectivityManager {
 
 
     /** @hide exposed via the NetworkProvider class. */
-    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_FACTORY})
     public void declareNetworkRequestUnfulfillable(@NonNull NetworkRequest request) {
         try {
             mService.declareNetworkRequestUnfulfillable(request);
@@ -3306,7 +3316,9 @@ public class ConnectivityManager {
      * Register a NetworkAgent with ConnectivityService.
      * @return Network corresponding to NetworkAgent.
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_FACTORY})
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkAgentConfig config) {
         return registerNetworkAgent(messenger, ni, lp, nc, score, config, NetworkProvider.ID_NONE);
@@ -3317,7 +3329,9 @@ public class ConnectivityManager {
      * Register a NetworkAgent with ConnectivityService.
      * @return Network corresponding to NetworkAgent.
      */
-    @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_FACTORY})
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkAgentConfig config, int providerId) {
         try {
