@@ -5653,6 +5653,24 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mH.sendMessage(m);
     }
 
+    void startProcessAsync(ActivityRecord activity, boolean knownToBeDead, boolean isTop,
+            String hostingType) {
+        try {
+            if (Trace.isTagEnabled(TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dispatchingStartProcess:"
+                        + activity.processName);
+            }
+            // Post message to start process to avoid possible deadlock of calling into AMS with the
+            // ATMS lock held.
+            final Message m = PooledLambda.obtainMessage(ActivityManagerInternal::startProcess,
+                    mAmInternal, activity.processName, activity.info.applicationInfo, knownToBeDead,
+                    isTop, hostingType, activity.intent.getComponent());
+            mH.sendMessage(m);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
     void setBooting(boolean booting) {
         mAmInternal.setBooting(booting);
     }

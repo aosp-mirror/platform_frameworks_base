@@ -29,7 +29,6 @@ import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.TransactionTooLargeException;
-import android.view.RemoteAnimationAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -300,7 +299,7 @@ public abstract class ActivityManagerInternal {
 
     /** Starts a given process. */
     public abstract void startProcess(String processName, ApplicationInfo info,
-            boolean knownToBeDead, String hostingType, ComponentName hostingName);
+            boolean knownToBeDead, boolean isTop, String hostingType, ComponentName hostingName);
 
     /** Starts up the starting activity process for debugging if needed.
      * This function needs to be called synchronously from WindowManager context so the caller

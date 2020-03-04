@@ -51,7 +51,6 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppProtoEnums;
 import android.app.IApplicationThread;
-import android.app.IUidObserver;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
@@ -1899,6 +1898,14 @@ public final class ProcessList {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
                     app.processName);
             checkSlow(startTime, "startProcess: asking zygote to start proc");
+            final boolean isTopApp = hostingRecord.isTopApp();
+            if (isTopApp) {
+                // Use has-foreground-activities as a temporary hint so the current scheduling
+                // group won't be lost when the process is attaching. The actual state will be
+                // refreshed when computing oom-adj.
+                app.setHasForegroundActivities(true);
+            }
+
             final Process.ProcessStartResult startResult;
             if (hostingRecord.usesWebviewZygote()) {
                 startResult = startWebView(entryPoint,
@@ -1913,13 +1920,13 @@ public final class ProcessList {
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
-                        /*useUsapPool=*/ false, app.mDisabledCompatChanges,
+                        /*useUsapPool=*/ false, isTopApp, app.mDisabledCompatChanges,
                         new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
-                        app.info.dataDir, invokeWith, app.info.packageName,
+                        app.info.dataDir, invokeWith, app.info.packageName, isTopApp,
                         app.mDisabledCompatChanges,
                         new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             }

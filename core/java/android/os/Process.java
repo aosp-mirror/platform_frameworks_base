@@ -525,6 +525,7 @@ public class Process {
      * @param appDataDir null-ok the data directory of the app.
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
+     * @param isTopApp whether the process starts for high priority application.
      * @param disabledCompatChanges null-ok list of disabled compat changes for the process being
      *                             started.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
@@ -545,12 +546,13 @@ public class Process {
                                            @Nullable String appDataDir,
                                            @Nullable String invokeWith,
                                            @Nullable String packageName,
+                                           boolean isTopApp,
                                            @Nullable long[] disabledCompatChanges,
                                            @Nullable String[] zygoteArgs) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    /*useUsapPool=*/ true, disabledCompatChanges, zygoteArgs);
+                    /*useUsapPool=*/ true, isTopApp, disabledCompatChanges, zygoteArgs);
     }
 
     /** @hide */
@@ -571,7 +573,7 @@ public class Process {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    /*useUsapPool=*/ false, disabledCompatChanges, zygoteArgs);
+                    /*useUsapPool=*/ false, /*isTopApp=*/ false, disabledCompatChanges, zygoteArgs);
     }
 
     /**
