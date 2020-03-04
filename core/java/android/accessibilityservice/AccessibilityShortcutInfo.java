@@ -91,6 +91,12 @@ public final class AccessibilityShortcutInfo {
     private final int mHtmlDescriptionRes;
 
     /**
+     * The accessibility shortcut target setting activity's name, used by the system
+     * settings to launch the setting activity of this accessibility shortcut target.
+     */
+    private String mSettingsActivityName;
+
+    /**
      * Creates a new instance.
      *
      * @param context Context for accessing resources.
@@ -142,6 +148,9 @@ public final class AccessibilityShortcutInfo {
             mHtmlDescriptionRes = asAttributes.getResourceId(
                     com.android.internal.R.styleable.AccessibilityShortcutTarget_htmlDescription,
                     0);
+            // Get settings activity name
+            mSettingsActivityName = asAttributes.getString(
+                    com.android.internal.R.styleable.AccessibilityShortcutTarget_settingsActivity);
             asAttributes.recycle();
 
             if (mDescriptionResId == 0 || mSummaryResId == 0) {
@@ -235,6 +244,16 @@ public final class AccessibilityShortcutInfo {
         final String htmlDescription = loadResourceString(packageManager, mActivityInfo,
                 mHtmlDescriptionRes);
         return TextUtils.isEmpty(htmlDescription) ? null : getFilteredHtmlText(htmlDescription);
+    }
+
+    /**
+     * The settings activity name.
+     *
+     * @return The settings activity name.
+     */
+    @Nullable
+    public String getSettingsActivityName() {
+        return mSettingsActivityName;
     }
 
     /**
