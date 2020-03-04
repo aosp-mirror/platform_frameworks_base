@@ -1189,7 +1189,7 @@ public class PackageParser {
             final Resources res = new Resources(assets, mMetrics, null);
 
             final String[] outError = new String[1];
-            final Package pkg = parseBaseApk(res, parser, flags, outError);
+            final Package pkg = parseBaseApk(apkPath, res, parser, flags, outError);
             if (pkg == null) {
                 throw new PackageParserException(mParseError,
                         apkPath + " (at " + parser.getPositionDescription() + "): " + outError[0]);
@@ -1785,6 +1785,7 @@ public class PackageParser {
      * need to consider whether they should be supported by split APKs and child
      * packages.
      *
+     * @param apkPath The package apk file path
      * @param res The resources from which to resolve values
      * @param parser The manifest parser
      * @param flags Flags how to parse
@@ -1794,7 +1795,8 @@ public class PackageParser {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    private Package parseBaseApk(Resources res, XmlResourceParser parser, int flags,
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    private Package parseBaseApk(String apkPath, Resources res, XmlResourceParser parser, int flags,
             String[] outError) throws XmlPullParserException, IOException {
         final String splitName;
         final String pkgName;
