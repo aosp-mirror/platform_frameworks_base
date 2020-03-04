@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -325,11 +326,13 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController.onFinishedGoingToSleep(-1);
         verify(mHandler, never()).post(any());
 
+        ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
         // the value of isStrongBiometric doesn't matter here since we only care about the returned
         // value of isUnlockingWithBiometricAllowed()
         mBiometricUnlockController.onBiometricAuthenticated(1 /* userId */,
                 BiometricSourceType.FACE, true /* isStrongBiometric */);
         mBiometricUnlockController.onFinishedGoingToSleep(-1);
-        verify(mHandler).post(any());
+        verify(mHandler).post(captor.capture());
+        captor.getValue().run();
     }
 }
