@@ -89,8 +89,7 @@ public final class Bitmap implements Parcelable {
 
     private ColorSpace mColorSpace;
 
-    /** @hide */
-    public int mDensity = getDefaultDensity();
+    /*package*/ int mDensity = getDefaultDensity();
 
     private static volatile int sDefaultDensity = -1;
 
@@ -161,7 +160,10 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Return the pointer to the native object.
+     *
      * @hide
+     * Must be public for access from android.graphics.pdf,
+     * but must not be called from outside the UI module.
      */
     public long getNativeInstance() {
         return mNativePtr;
@@ -1327,7 +1329,10 @@ public final class Bitmap implements Parcelable {
      * Populates a rectangle with the bitmap's optical insets.
      *
      * @param outInsets Rect to populate with optical insets
+     *
      * @hide
+     * Must be public for access from android.graphics.drawable,
+     * but must not be called from outside the UI module.
      */
     public void getOpticalInsets(@NonNull Rect outInsets) {
         if (mNinePatchInsets == null) {
@@ -1337,7 +1342,11 @@ public final class Bitmap implements Parcelable {
         }
     }
 
-    /** @hide */
+    /**
+     * @hide
+     * Must be public for access from android.graphics.drawable,
+     * but must not be called from outside the UI module.
+     */
     public NinePatch.InsetStruct getNinePatchInsets() {
         return mNinePatchInsets;
     }
@@ -1443,10 +1452,8 @@ public final class Bitmap implements Parcelable {
      * to {@link #reconfigure(int, int, Config)}, {@link #setPixel(int, int, int)},
      * {@link #setPixels(int[], int, int, int, int, int, int)} and {@link #eraseColor(int)} will
      * fail and throw an IllegalStateException.
-     *
-     * @hide
      */
-    public void setImmutable() {
+    private void setImmutable() {
         if (isMutable()) {
             nativeSetImmutable(mNativePtr);
         }
@@ -1590,6 +1597,8 @@ public final class Bitmap implements Parcelable {
 
     /**
      * @hide
+     * Must be public for access from android.graphics.drawable,
+     * but must not be called from outside the UI module.
      */
     @UnsupportedAppUsage
     static public int scaleFromDensity(int size, int sdensity, int tdensity) {
