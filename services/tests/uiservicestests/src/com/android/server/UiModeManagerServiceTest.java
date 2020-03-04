@@ -167,6 +167,15 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void setNightModeActivated_fromNoToYesAndBAck() throws RemoteException {
+        mService.setNightMode(MODE_NIGHT_NO);
+        mService.setNightModeActivated(true);
+        assertTrue(isNightModeActivated());
+        mService.setNightModeActivated(false);
+        assertFalse(isNightModeActivated());
+    }
+
+    @Test
     public void autoNightModeSwitch_batterySaverOn() throws RemoteException {
         mService.setNightMode(MODE_NIGHT_NO);
         when(mTwilightState.isNight()).thenReturn(false);
