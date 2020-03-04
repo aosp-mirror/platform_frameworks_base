@@ -17,17 +17,13 @@
 package android.location;
 
 import android.location.Address;
-import android.location.IGeocodeListener;
-import android.location.GeocoderParams;
 
 /**
- * An interface for location providers implementing the Geocoder services.
+ * An interface for returning geocode results.
  *
  * {@hide}
  */
-interface IGeocodeProvider {
+interface IGeocodeListener {
 
-    oneway void getFromLocation(double latitude, double longitude, int maxResults, in GeocoderParams params, in IGeocodeListener listener);
-    oneway void getFromLocationName(String locationName, double lowerLeftLatitude, double lowerLeftLongitude, double upperRightLatitude,
-        double upperRightLongitude, int maxResults, in GeocoderParams params, in IGeocodeListener listener);
+    oneway void onResults(String error, in List<Address> results);
 }

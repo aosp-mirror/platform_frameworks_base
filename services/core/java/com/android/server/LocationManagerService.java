@@ -41,7 +41,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
@@ -49,6 +48,7 @@ import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssRequest;
 import android.location.IBatchedLocationCallback;
+import android.location.IGeocodeListener;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
@@ -2503,27 +2503,37 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public String getFromLocation(double latitude, double longitude, int maxResults,
-            GeocoderParams params, List<Address> addrs) {
+    public void getFromLocation(double latitude, double longitude, int maxResults,
+            GeocoderParams params, IGeocodeListener listener) {
         if (mGeocodeProvider != null) {
-            return mGeocodeProvider.getFromLocation(latitude, longitude, maxResults,
-                    params, addrs);
+            mGeocodeProvider.getFromLocation(latitude, longitude, maxResults,
+                    params, listener);
+        } else {
+            try {
+                listener.onResults(null, Collections.emptyList());
+            } catch (RemoteException e) {
+                // ignore
+            }
         }
-        return null;
     }
 
     @Override
-    public String getFromLocationName(String locationName,
+    public void getFromLocationName(String locationName,
             double lowerLeftLatitude, double lowerLeftLongitude,
             double upperRightLatitude, double upperRightLongitude, int maxResults,
-            GeocoderParams params, List<Address> addrs) {
+            GeocoderParams params, IGeocodeListener listener) {
 
         if (mGeocodeProvider != null) {
-            return mGeocodeProvider.getFromLocationName(locationName, lowerLeftLatitude,
+            mGeocodeProvider.getFromLocationName(locationName, lowerLeftLatitude,
                     lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                    maxResults, params, addrs);
+                    maxResults, params, listener);
+        } else {
+            try {
+                listener.onResults(null, Collections.emptyList());
+            } catch (RemoteException e) {
+                // ignore
+            }
         }
-        return null;
     }
 
     // Mock Providers
