@@ -23,6 +23,7 @@ import android.os.Parcelable;
 
 import com.android.internal.annotations.Immutable;
 import com.android.internal.util.DataClass;
+import com.android.internal.util.Preconditions;
 
 /**
  * When an {@link AppOpsManager#noteOp(String, int, String, String, String) app-op is noted} and the
@@ -40,7 +41,7 @@ import com.android.internal.util.DataClass;
 @DataClass.Suppress({"getOpCode"})
 public final class AsyncNotedAppOp implements Parcelable {
     /** Op that was noted */
-    private final @IntRange(from = 0, to = AppOpsManager._NUM_OP - 1) int mOpCode;
+    private final @IntRange(from = 0) int mOpCode;
 
     /** Uid that noted the op */
     private final @IntRange(from = 0) int mNotingUid;
@@ -59,6 +60,12 @@ public final class AsyncNotedAppOp implements Parcelable {
      */
     public @NonNull String getOp() {
         return AppOpsManager.opToPublicName(mOpCode);
+    }
+
+    //TODO eugenesusla: support inlinable expressions in annotation params of @DataClass members to
+    // allow validating via @IntRange(from = 0, to = AppOpsManager._NUM_OP - 1)
+    private void onConstructed() {
+        Preconditions.checkArgumentInRange(mOpCode, 0, AppOpsManager._NUM_OP - 1, "opCode");
     }
 
 
@@ -93,7 +100,7 @@ public final class AsyncNotedAppOp implements Parcelable {
      */
     @DataClass.Generated.Member
     public AsyncNotedAppOp(
-            @IntRange(from = 0, to = AppOpsManager._NUM_OP - 1) int opCode,
+            @IntRange(from = 0) int opCode,
             @IntRange(from = 0) int notingUid,
             @Nullable String featureId,
             @NonNull String message,
@@ -101,8 +108,7 @@ public final class AsyncNotedAppOp implements Parcelable {
         this.mOpCode = opCode;
         com.android.internal.util.AnnotationValidations.validate(
                 IntRange.class, null, mOpCode,
-                "from", 0,
-                "to", AppOpsManager._NUM_OP - 1);
+                "from", 0);
         this.mNotingUid = notingUid;
         com.android.internal.util.AnnotationValidations.validate(
                 IntRange.class, null, mNotingUid,
@@ -116,7 +122,7 @@ public final class AsyncNotedAppOp implements Parcelable {
                 IntRange.class, null, mTime,
                 "from", 0);
 
-        // onConstructed(); // You can define this method to get a callback
+        onConstructed();
     }
 
     /**
@@ -223,8 +229,7 @@ public final class AsyncNotedAppOp implements Parcelable {
         this.mOpCode = opCode;
         com.android.internal.util.AnnotationValidations.validate(
                 IntRange.class, null, mOpCode,
-                "from", 0,
-                "to", AppOpsManager._NUM_OP - 1);
+                "from", 0);
         this.mNotingUid = notingUid;
         com.android.internal.util.AnnotationValidations.validate(
                 IntRange.class, null, mNotingUid,
@@ -238,7 +243,7 @@ public final class AsyncNotedAppOp implements Parcelable {
                 IntRange.class, null, mTime,
                 "from", 0);
 
-        // onConstructed(); // You can define this method to get a callback
+        onConstructed();
     }
 
     @DataClass.Generated.Member
@@ -256,10 +261,10 @@ public final class AsyncNotedAppOp implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1581728574427L,
+            time = 1583375913345L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/app/AsyncNotedAppOp.java",
-            inputSignatures = "private final @android.annotation.IntRange(from=0L, to=96L) int mOpCode\nprivate final @android.annotation.IntRange(from=0L) int mNotingUid\nprivate final @android.annotation.Nullable java.lang.String mFeatureId\nprivate final @android.annotation.NonNull java.lang.String mMessage\nprivate final @android.annotation.IntRange(from=0L) long mTime\npublic @android.annotation.NonNull java.lang.String getOp()\nclass AsyncNotedAppOp extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genAidl=true, genHiddenConstructor=true)")
+            inputSignatures = "private final @android.annotation.IntRange(from=0L) int mOpCode\nprivate final @android.annotation.IntRange(from=0L) int mNotingUid\nprivate final @android.annotation.Nullable java.lang.String mFeatureId\nprivate final @android.annotation.NonNull java.lang.String mMessage\nprivate final @android.annotation.IntRange(from=0L) long mTime\npublic @android.annotation.NonNull java.lang.String getOp()\nprivate  void onConstructed()\nclass AsyncNotedAppOp extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genAidl=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 
