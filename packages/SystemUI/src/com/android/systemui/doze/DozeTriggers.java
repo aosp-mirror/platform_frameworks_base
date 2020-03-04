@@ -127,7 +127,7 @@ public class DozeTriggers implements DozeMachine.Part {
             mDozeLog.tracePulseDropped("pulseOnNotificationsDisabled");
             return;
         }
-        if (mConfig.dozeSuppressed(UserHandle.USER_CURRENT)) {
+        if (mDozeHost.isDozeSuppressed()) {
             runIfNotNull(onPulseSuppressedListener);
             mDozeLog.tracePulseDropped("dozeSuppressed");
             return;
@@ -491,6 +491,17 @@ public class DozeTriggers implements DozeMachine.Part {
             if (mDozeHost.isPowerSaveActive()) {
                 mMachine.requestState(DozeMachine.State.DOZE);
             }
+        }
+
+        @Override
+        public void onDozeSuppressedChanged(boolean suppressed) {
+            final DozeMachine.State nextState;
+            if (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT) && !suppressed) {
+                nextState = DozeMachine.State.DOZE_AOD;
+            } else {
+                nextState = DozeMachine.State.DOZE;
+            }
+            mMachine.requestState(nextState);
         }
     };
 }
