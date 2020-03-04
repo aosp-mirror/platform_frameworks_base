@@ -28,6 +28,8 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator.WakeUpListener;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -47,6 +49,8 @@ public class LockscreenLockIconController {
     private final KeyguardIndicationController mKeyguardIndicationController;
     private final StatusBarStateController mStatusBarStateController;
     private final ConfigurationController mConfigurationController;
+    private final NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
+    private final KeyguardBypassController mKeyguardBypassController;
     private LockIcon mLockIcon;
 
     private View.OnAttachStateChangeListener mOnAttachStateChangeListener =
@@ -55,6 +59,7 @@ public class LockscreenLockIconController {
         public void onViewAttachedToWindow(View v) {
             mStatusBarStateController.addCallback(mSBStateListener);
             mConfigurationController.addCallback(mConfigurationListener);
+            mNotificationWakeUpCoordinator.addListener(mWakeUpListener);
 
             mConfigurationListener.onThemeChanged();
         }
@@ -63,6 +68,7 @@ public class LockscreenLockIconController {
         public void onViewDetachedFromWindow(View v) {
             mStatusBarStateController.removeCallback(mSBStateListener);
             mConfigurationController.removeCallback(mConfigurationListener);
+            mNotificationWakeUpCoordinator.removeListener(mWakeUpListener);
         }
     };
 
@@ -115,6 +121,18 @@ public class LockscreenLockIconController {
         }
     };
 
+    private final WakeUpListener mWakeUpListener = new WakeUpListener() {
+        @Override
+        public void onFullyHiddenChanged(boolean isFullyHidden) {
+            if (mKeyguardBypassController.getBypassEnabled()) {
+                boolean changed = mLockIcon.updateIconVisibility();
+                if (changed) {
+                    mLockIcon.update();
+                }
+            }
+        }
+    };
+
     @Inject
     public LockscreenLockIconController(LockscreenGestureLogger lockscreenGestureLogger,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -123,7 +141,9 @@ public class LockscreenLockIconController {
             AccessibilityController accessibilityController,
             KeyguardIndicationController keyguardIndicationController,
             StatusBarStateController statusBarStateController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            NotificationWakeUpCoordinator notificationWakeUpCoordinator,
+            KeyguardBypassController keyguardBypassController) {
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
@@ -132,6 +152,8 @@ public class LockscreenLockIconController {
         mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarStateController = statusBarStateController;
         mConfigurationController = configurationController;
+        mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
+        mKeyguardBypassController = keyguardBypassController;
 
         mKeyguardIndicationController.setLockIconController(this);
     }

@@ -61,7 +61,6 @@ import javax.inject.Named;
  * Manages the different states and animations of the unlock icon.
  */
 public class LockIcon extends KeyguardAffordanceView implements
-        NotificationWakeUpCoordinator.WakeUpListener,
         ViewTreeObserver.OnPreDrawListener, OnHeadsUpChangedListener {
 
     private static final int STATE_LOCKED = 0;
@@ -192,7 +191,6 @@ public class LockIcon extends KeyguardAffordanceView implements
         super.onAttachedToWindow();
         mKeyguardStateController.addCallback(mKeyguardMonitorCallback);
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
-        mWakeUpCoordinator.addListener(this);
         mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
@@ -205,7 +203,6 @@ public class LockIcon extends KeyguardAffordanceView implements
         super.onDetachedFromWindow();
         mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
         mKeyguardStateController.removeCallback(mKeyguardMonitorCallback);
-        mWakeUpCoordinator.removeListener(this);
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
         }
@@ -306,7 +303,7 @@ public class LockIcon extends KeyguardAffordanceView implements
      * Update the icon visibility
      * @return true if the visibility changed
      */
-    private boolean updateIconVisibility() {
+    boolean updateIconVisibility() {
         boolean onAodNotPulsingOrDocked = mDozing && (!mPulsing || mDocked);
         boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning
                 || mShowingLaunchAffordance;
@@ -422,16 +419,6 @@ public class LockIcon extends KeyguardAffordanceView implements
             return SCANNING;
         }
         return -1;
-    }
-
-    @Override
-    public void onFullyHiddenChanged(boolean isFullyHidden) {
-        if (mBypassController.getBypassEnabled()) {
-            boolean changed = updateIconVisibility();
-            if (changed) {
-                update();
-            }
-        }
     }
 
     public void setBouncerShowingScrimmed(boolean bouncerShowing) {

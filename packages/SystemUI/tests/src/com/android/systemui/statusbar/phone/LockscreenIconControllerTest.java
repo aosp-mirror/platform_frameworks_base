@@ -31,6 +31,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
@@ -63,6 +64,10 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private ConfigurationController mConfigurationController;
+    @Mock
+    private NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
 
     @Before
     public void setUp() {
@@ -71,7 +76,8 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
         mLockIconController = new LockscreenLockIconController(
                 mLockscreenGestureLogger, mKeyguardUpdateMonitor, mLockPatternUtils,
                 mShadeController, mAccessibilityController, mKeyguardIndicationController,
-                mStatusBarStateController, mConfigurationController);
+                mStatusBarStateController, mConfigurationController, mNotificationWakeUpCoordinator,
+                mKeyguardBypassController);
 
         mLockIconController.attach(mLockIcon);
     }
