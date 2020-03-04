@@ -76,6 +76,19 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
             }
         }
 
+    override fun needsClippingToShelf(): Boolean {
+        return true
+    }
+
+    override fun applyContentTransformation(contentAlpha: Float, translationY: Float) {
+        super.applyContentTransformation(contentAlpha, translationY)
+        for (i in 0 until contents.childCount) {
+            val view = contents.getChildAt(i)
+            view.alpha = contentAlpha
+            view.translationY = translationY
+        }
+    }
+
     private inner class PersonDataListenerImpl(val avatarView: ImageView) :
             DataListener<PersonViewModel?> {
 
