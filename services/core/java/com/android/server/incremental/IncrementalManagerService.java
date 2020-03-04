@@ -17,14 +17,12 @@
 package com.android.server.incremental;
 
 import android.annotation.NonNull;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.DataLoaderManager;
 import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.FileSystemControlParcel;
 import android.content.pm.IDataLoader;
 import android.content.pm.IDataLoaderStatusListener;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.incremental.IIncrementalManager;
@@ -93,17 +91,12 @@ public class IncrementalManagerService extends IIncrementalManager.Stub  {
     public boolean prepareDataLoader(int mountId, FileSystemControlParcel control,
             DataLoaderParamsParcel params,
             IDataLoaderStatusListener listener) {
-        Bundle dataLoaderParams = new Bundle();
-        dataLoaderParams.putParcelable("componentName",
-                new ComponentName(params.packageName, params.className));
-        dataLoaderParams.putParcelable("control", control);
-        dataLoaderParams.putParcelable("params", params);
         DataLoaderManager dataLoaderManager = mContext.getSystemService(DataLoaderManager.class);
         if (dataLoaderManager == null) {
             Slog.e(TAG, "Failed to find data loader manager service");
             return false;
         }
-        if (!dataLoaderManager.initializeDataLoader(mountId, dataLoaderParams, listener)) {
+        if (!dataLoaderManager.initializeDataLoader(mountId, params, control, listener)) {
             Slog.e(TAG, "Failed to initialize data loader");
             return false;
         }

@@ -372,7 +372,7 @@ public class PackageInstaller {
      * {@hide}
      */
     @SystemApi
-    public static final int LOCATION_DATA_APP = 0;
+    public static final int LOCATION_DATA_APP = InstallationFileLocation.DATA_APP;
 
     /**
      * Target location for the file in installation session is
@@ -380,7 +380,7 @@ public class PackageInstaller {
      * {@hide}
      */
     @SystemApi
-    public static final int LOCATION_MEDIA_OBB = 1;
+    public static final int LOCATION_MEDIA_OBB = InstallationFileLocation.MEDIA_OBB;
 
     /**
      * Target location for the file in installation session is
@@ -390,7 +390,7 @@ public class PackageInstaller {
      * {@hide}
      */
     @SystemApi
-    public static final int LOCATION_MEDIA_DATA = 2;
+    public static final int LOCATION_MEDIA_DATA = InstallationFileLocation.MEDIA_DATA;
 
     /** @hide */
     @IntDef(prefix = { "LOCATION_" }, value = {
