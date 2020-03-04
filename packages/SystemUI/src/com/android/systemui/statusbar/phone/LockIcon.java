@@ -61,7 +61,7 @@ import javax.inject.Named;
  * Manages the different states and animations of the unlock icon.
  */
 public class LockIcon extends KeyguardAffordanceView implements
-        KeyguardStateController.Callback, NotificationWakeUpCoordinator.WakeUpListener,
+        NotificationWakeUpCoordinator.WakeUpListener,
         ViewTreeObserver.OnPreDrawListener, OnHeadsUpChangedListener {
 
     private static final int STATE_LOCKED = 0;
