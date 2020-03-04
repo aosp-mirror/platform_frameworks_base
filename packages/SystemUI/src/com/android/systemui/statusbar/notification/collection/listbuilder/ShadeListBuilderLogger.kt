@@ -87,12 +87,12 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
-    fun logPreRenderFilterInvalidated(name: String, pipelineState: Int) {
+    fun logFinalizeFilterInvalidated(name: String, pipelineState: Int) {
         buffer.log(TAG, DEBUG, {
             str1 = name
             int1 = pipelineState
         }, {
-            """Pre-render NotifFilter "$str1" invalidated; pipeline state is $int1"""
+            """Finalize NotifFilter "$str1" invalidated; pipeline state is $int1"""
         })
     }
 
