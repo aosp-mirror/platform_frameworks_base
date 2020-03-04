@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -164,6 +165,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlagsNewPipeline;
     @Mock
     private DumpManager mDumpManager;
+    @Mock
+    private LockscreenLockIconController mLockIconController;
 
     private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private BubbleData mBubbleData;
@@ -192,7 +195,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                     public NotificationRowComponent build() {
                         return mNotificationRowComponent;
                     }
-                });
+                },
+                mLockIconController);
 
         // Bubbles get added to status bar window view
         mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
