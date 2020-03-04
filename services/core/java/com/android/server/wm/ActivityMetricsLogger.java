@@ -134,7 +134,7 @@ class ActivityMetricsLogger {
     // Preallocated strings we are sending to tron, so we don't have to allocate a new one every
     // time we log.
     private static final String[] TRON_WINDOW_STATE_VARZ_STRINGS = {
-            "window_time_0", "window_time_1", "window_time_2", "window_time_3"};
+            "window_time_0", "window_time_1", "window_time_2", "window_time_3", "window_time_4"};
 
     private int mWindowState = WINDOW_STATE_STANDARD;
     private long mLastLogTimeSecs;
