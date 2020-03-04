@@ -162,10 +162,10 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testOnlyOneWriteRunnableInQueue() {
+    public void testForceWriteToDisk_bypassesExistingWrites() {
         when(mFileWriteHandler.hasCallbacks(any())).thenReturn(true);
         mDataBase.forceWriteToDisk();
-        verify(mFileWriteHandler, never()).post(any());
+        verify(mFileWriteHandler, times(1)).post(any());
     }
 
     @Test
