@@ -361,7 +361,7 @@ public class WifiConfigurationTest {
         WifiConfiguration config = new WifiConfiguration();
         final String mSsid = "TestAP";
         final String packageName = "TestApp";
-        final String bSsid = MacAddress.createRandomUnicastAddress().toString();
+        final String bSsid = MacAddressUtils.createRandomUnicastAddress().toString();
         String suggestionSuffix = "_" + bSsid + "_" + packageName;
         config.SSID = mSsid;
         config.fromWifiNetworkSuggestion = true;
