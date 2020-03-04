@@ -25,6 +25,7 @@ import static com.android.server.LocationManagerService.TAG;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.util.Log;
 
@@ -85,7 +86,7 @@ public class AppOpsHelper {
                 });
     }
 
-    private void onAppOpChanged(String packageName) {
+    void onAppOpChanged(String packageName) {
         if (D) {
             Log.v(TAG, "location appop changed for " + packageName);
         }

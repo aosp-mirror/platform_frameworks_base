@@ -19,11 +19,11 @@ package com.android.server.location.util.listeners;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.annotation.Nullable;
+import android.location.util.identity.CallerIdentity;
 import android.location.util.listeners.AbstractListenerManager;
 import android.os.Process;
 
 import com.android.server.FgThread;
-import com.android.server.location.CallerIdentity;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;

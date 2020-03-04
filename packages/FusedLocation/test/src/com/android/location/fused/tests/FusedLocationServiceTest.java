@@ -52,7 +52,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -200,7 +199,7 @@ public class FusedLocationServiceTest {
         }
 
         @Override
-        public void onSetAdditionalProviderPackages(List<String> packageNames) {
+        public void onSetFeatureId(String featureId) {
 
         }
 

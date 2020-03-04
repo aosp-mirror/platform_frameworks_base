@@ -20,6 +20,7 @@ package com.android.server.location;
 import android.app.PendingIntent;
 import android.location.Geofence;
 import android.location.Location;
+import android.location.util.identity.CallerIdentity;
 
 /**
  * Represents state associated with a geofence

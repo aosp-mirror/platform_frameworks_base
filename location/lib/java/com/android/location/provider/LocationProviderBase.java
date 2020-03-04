@@ -39,7 +39,6 @@ import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -65,7 +64,10 @@ public abstract class LocationProviderBase {
      * Bundle key for a version of the location containing no GPS data.
      * Allows location providers to flag locations as being safe to
      * feed to LocationFudger.
+     *
+     * @deprecated Do not use from Android R onwards.
      */
+    @Deprecated
     public static final String EXTRA_NO_GPS_LOCATION = Location.EXTRA_NO_GPS_LOCATION;
 
     /**
@@ -76,8 +78,9 @@ public abstract class LocationProviderBase {
      */
     public static final String FUSED_PROVIDER = LocationManager.FUSED_PROVIDER;
 
-    private final String mTag;
-    private final IBinder mBinder;
+    final String mTag;
+    final String mFeatureId;
+    final IBinder mBinder;
 
     /**
      * This field may be removed in the future, do not rely on it.
@@ -90,13 +93,30 @@ public abstract class LocationProviderBase {
     protected final ILocationManager mLocationManager;
 
     // write locked on mBinder, read lock is optional depending on atomicity requirements
-    @Nullable private volatile ILocationProviderManager mManager;
-    private volatile ProviderProperties mProperties;
-    private volatile boolean mAllowed;
-    private final ArrayList<String> mAdditionalProviderPackages;
+    @Nullable
+    volatile ILocationProviderManager mManager;
+    volatile ProviderProperties mProperties;
+    volatile boolean mAllowed;
 
+    /**
+     * @deprecated Prefer
+     * {@link #LocationProviderBase(Context, String, ProviderPropertiesUnbundled)}.
+     */
+    @Deprecated
     public LocationProviderBase(String tag, ProviderPropertiesUnbundled properties) {
+        this(null, tag, properties);
+    }
+
+    /**
+     * This constructor associates the feature id of the given context with this location provider.
+     * The location service may afford special privileges to incoming calls identified as belonging
+     * to this location provider.
+     */
+    @RequiresApi(VERSION_CODES.R)
+    public LocationProviderBase(Context context, String tag,
+            ProviderPropertiesUnbundled properties) {
         mTag = tag;
+        mFeatureId = context != null ? context.getFeatureId() : null;
         mBinder = new Service();
 
         mLocationManager = ILocationManager.Stub.asInterface(
@@ -105,7 +125,6 @@ public abstract class LocationProviderBase {
         mManager = null;
         mProperties = properties.getProviderProperties();
         mAllowed = true;
-        mAdditionalProviderPackages = new ArrayList<>(0);
     }
 
     public IBinder getBinder() {
@@ -183,23 +202,12 @@ public abstract class LocationProviderBase {
      * another package may issue location requests on behalf of this package in the course of
      * providing location. This will inform location services to treat the other packages as
      * location providers as well.
+     *
+     * @deprecated On Android R and above this has no effect.
      */
+    @Deprecated
     @RequiresApi(VERSION_CODES.Q)
-    public void setAdditionalProviderPackages(List<String> packageNames) {
-        synchronized (mBinder) {
-            mAdditionalProviderPackages.clear();
-            mAdditionalProviderPackages.addAll(packageNames);
-        }
-
-        ILocationProviderManager manager = mManager;
-        if (manager != null) {
-            try {
-                manager.onSetAdditionalProviderPackages(mAdditionalProviderPackages);
-            } catch (RemoteException | RuntimeException e) {
-                Log.w(mTag, e);
-            }
-        }
-    }
+    public void setAdditionalProviderPackages(List<String> packageNames) {}
 
     /**
      * @deprecated Use {@link #isAllowed()} instead.
@@ -317,12 +325,15 @@ public abstract class LocationProviderBase {
 
     private final class Service extends ILocationProvider.Stub {
 
+        Service() {
+        }
+
         @Override
         public void setLocationProviderManager(ILocationProviderManager manager) {
             synchronized (mBinder) {
                 try {
-                    if (!mAdditionalProviderPackages.isEmpty()) {
-                        manager.onSetAdditionalProviderPackages(mAdditionalProviderPackages);
+                    if (mFeatureId != null) {
+                        manager.onSetFeatureId(mFeatureId);
                     }
                     manager.onSetProperties(mProperties);
                     manager.onSetAllowed(mAllowed);

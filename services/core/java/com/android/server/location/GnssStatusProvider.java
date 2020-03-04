@@ -17,13 +17,14 @@
 package com.android.server.location;
 
 import android.location.IGnssStatusListener;
+import android.location.util.identity.CallerIdentity;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
+import com.android.server.location.gnss.GnssListenerManager;
 import com.android.server.location.gnss.GnssManagerService;
-import com.android.server.location.util.listeners.GnssListenerManager;
 
 /**
  * Implementation of a handler for {@link IGnssStatusListener}.

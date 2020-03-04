@@ -95,7 +95,7 @@ interface ILocationManager
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
     ProviderProperties getProviderProperties(String provider);
-    boolean isProviderPackage(String packageName);
+    boolean isProviderPackage(String provider, String packageName);
     List<String> getProviderPackages(String provider);
 
     void setExtraLocationControllerPackage(String packageName);

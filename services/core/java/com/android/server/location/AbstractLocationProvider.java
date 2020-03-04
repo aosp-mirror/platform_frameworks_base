@@ -19,21 +19,18 @@ package com.android.server.location;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
 import android.annotation.Nullable;
-import android.content.Context;
 import android.location.Location;
+import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Bundle;
-import android.util.ArraySet;
 
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
@@ -78,8 +75,7 @@ public abstract class AbstractLocationProvider {
          * Default state value for a location provider that is disabled with no properties and an
          * empty provider package list.
          */
-        public static final State EMPTY_STATE = new State(false, null,
-                Collections.emptySet());
+        public static final State EMPTY_STATE = new State(false, null, null);
 
         /**
          * The provider's allowed state.
@@ -92,39 +88,37 @@ public abstract class AbstractLocationProvider {
         @Nullable public final ProviderProperties properties;
 
         /**
-         * The provider's package name list - provider packages may be afforded special privileges.
+         * The provider's identity - providers may be afforded special privileges.
          */
-        public final Set<String> providerPackageNames;
+        @Nullable public final CallerIdentity identity;
 
-        private State(boolean allowed, ProviderProperties properties,
-                Set<String> providerPackageNames) {
+        private State(boolean allowed, ProviderProperties properties, CallerIdentity identity) {
             this.allowed = allowed;
             this.properties = properties;
-            this.providerPackageNames = Objects.requireNonNull(providerPackageNames);
+            this.identity = identity;
         }
 
-        private State withAllowed(boolean allowed) {
+        State withAllowed(boolean allowed) {
             if (allowed == this.allowed) {
                 return this;
             } else {
-                return new State(allowed, properties, providerPackageNames);
+                return new State(allowed, properties, identity);
             }
         }
 
-        private State withProperties(ProviderProperties properties) {
-            if (properties.equals(this.properties)) {
+        State withProperties(@Nullable ProviderProperties properties) {
+            if (Objects.equals(properties, this.properties)) {
                 return this;
             } else {
-                return new State(allowed, properties, providerPackageNames);
+                return new State(allowed, properties, identity);
             }
         }
 
-        private State withProviderPackageNames(Set<String> providerPackageNames) {
-            if (providerPackageNames.equals(this.providerPackageNames)) {
+        State withIdentity(@Nullable CallerIdentity identity) {
+            if (Objects.equals(identity, this.identity)) {
                 return this;
             } else {
-                return new State(allowed, properties,
-                        Collections.unmodifiableSet(new ArraySet<>(providerPackageNames)));
+                return new State(allowed, properties, identity);
             }
         }
 
@@ -138,12 +132,12 @@ public abstract class AbstractLocationProvider {
             }
             State state = (State) o;
             return allowed == state.allowed && properties == state.properties
-                    && providerPackageNames.equals(state.providerPackageNames);
+                    && Objects.equals(identity, state.identity);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(allowed, properties, providerPackageNames);
+            return Objects.hash(allowed, properties, identity);
         }
     }
 
@@ -153,12 +147,12 @@ public abstract class AbstractLocationProvider {
         @Nullable public final Listener listener;
         public final State state;
 
-        private InternalState(@Nullable Listener listener, State state) {
+        InternalState(@Nullable Listener listener, State state) {
             this.listener = listener;
             this.state = state;
         }
 
-        private InternalState withListener(Listener listener) {
+        InternalState withListener(Listener listener) {
             if (listener == this.listener) {
                 return this;
             } else {
@@ -166,7 +160,7 @@ public abstract class AbstractLocationProvider {
             }
         }
 
-        private InternalState withState(State state) {
+        InternalState withState(State state) {
             if (state.equals(this.state)) {
                 return this;
             } else {
@@ -174,7 +168,7 @@ public abstract class AbstractLocationProvider {
             }
         }
 
-        private InternalState withState(UnaryOperator<State> operator) {
+        InternalState withState(UnaryOperator<State> operator) {
             return withState(operator.apply(state));
         }
     }
@@ -187,14 +181,17 @@ public abstract class AbstractLocationProvider {
     // before it was set, and should not miss any updates that occur after it was set).
     private final AtomicReference<InternalState> mInternalState;
 
-    protected AbstractLocationProvider(Executor executor, Context context) {
-        this(executor, Collections.singleton(context.getPackageName()));
-    }
 
-    protected AbstractLocationProvider(Executor executor, Set<String> packageNames) {
+    protected AbstractLocationProvider(Executor executor) {
         mExecutor = executor;
         mInternalState = new AtomicReference<>(
-                new InternalState(null, State.EMPTY_STATE.withProviderPackageNames(packageNames)));
+                new InternalState(null, State.EMPTY_STATE));
+    }
+
+    protected AbstractLocationProvider(Executor executor, CallerIdentity identity) {
+        mExecutor = executor;
+        mInternalState = new AtomicReference<>(
+                new InternalState(null, State.EMPTY_STATE.withIdentity(identity)));
     }
 
     /**
@@ -275,10 +272,11 @@ public abstract class AbstractLocationProvider {
     }
 
     /**
-     * The current package set of this provider.
+     * The current identity of this provider.
      */
-    protected Set<String> getProviderPackages() {
-        return mInternalState.get().state.providerPackageNames;
+    @Nullable
+    protected CallerIdentity getIdentity() {
+        return mInternalState.get().state.identity;
     }
 
     /**
@@ -298,8 +296,8 @@ public abstract class AbstractLocationProvider {
     /**
      * Call this method to report a change in provider packages.
      */
-    protected void setPackageNames(Set<String> packageNames) {
-        setState(state -> state.withProviderPackageNames(packageNames));
+    protected void setIdentity(CallerIdentity identity) {
+        setState(state -> state.withIdentity(identity));
     }
 
     /**

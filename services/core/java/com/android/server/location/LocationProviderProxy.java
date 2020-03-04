@@ -16,20 +16,16 @@
 
 package com.android.server.location;
 
-import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
-
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.ArraySet;
-import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.ILocationProvider;
@@ -41,17 +37,11 @@ import com.android.server.ServiceWatcher;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Proxy for ILocationProvider implementations.
  */
 public class LocationProviderProxy extends AbstractLocationProvider {
-
-    private static final String TAG = "LocationProviderProxy";
-
-    private static final int MAX_ADDITIONAL_PACKAGES = 2;
 
     /**
      * Creates and registers this proxy. If no suitable service is available for the proxy, returns
@@ -69,76 +59,13 @@ public class LocationProviderProxy extends AbstractLocationProvider {
         }
     }
 
-    private final ILocationProviderManager.Stub mManager = new ILocationProviderManager.Stub() {
-        // executed on binder thread
-        @Override
-        public void onSetAdditionalProviderPackages(List<String> packageNames) {
-            int maxCount = Math.min(MAX_ADDITIONAL_PACKAGES, packageNames.size());
-            ArraySet<String> allPackages = new ArraySet<>(maxCount + 1);
-            for (String packageName : packageNames) {
-                if (packageNames.size() >= maxCount) {
-                    return;
-                }
+    final Object mLock = new Object();
 
-                try {
-                    mContext.getPackageManager().getPackageInfo(packageName, MATCH_SYSTEM_ONLY);
-                    allPackages.add(packageName);
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.w(TAG, mServiceWatcher + " specified unknown additional provider package: "
-                            + packageName);
-                }
-            }
-
-            synchronized (mLock) {
-                if (!mBound) {
-                    return;
-                }
-
-                // add the binder package
-                ComponentName service = mServiceWatcher.getBoundService().component;
-                if (service != null) {
-                    allPackages.add(service.getPackageName());
-                }
-
-                setPackageNames(allPackages);
-            }
-        }
-
-        // executed on binder thread
-        @Override
-        public void onSetAllowed(boolean allowed) {
-            synchronized (mLock) {
-                if (mBound) {
-                    setAllowed(allowed);
-                }
-            }
-        }
-
-        // executed on binder thread
-        @Override
-        public void onSetProperties(ProviderProperties properties) {
-            synchronized (mLock) {
-                if (mBound) {
-                    setProperties(properties);
-                }
-            }
-        }
-
-        // executed on binder thread
-        @Override
-        public void onReportLocation(Location location) {
-            reportLocation(location);
-        }
-    };
-
-    // also used to synchronized any state changes (setEnabled, setProperties, setState, etc)
-    private final Object mLock = new Object();
-
-    private final Context mContext;
-    private final ServiceWatcher mServiceWatcher;
+    final Context mContext;
+    final ServiceWatcher mServiceWatcher;
 
     @GuardedBy("mLock")
-    private boolean mBound;
+    Proxy mProxy;
 
     private volatile ProviderRequest mRequest;
 
@@ -146,13 +73,13 @@ public class LocationProviderProxy extends AbstractLocationProvider {
             int nonOverlayPackageResId) {
         // safe to use direct executor since our locks are not acquired in a code path invoked by
         // our owning provider
-        super(DIRECT_EXECUTOR, Collections.emptySet());
+        super(DIRECT_EXECUTOR);
 
         mContext = context;
         mServiceWatcher = new ServiceWatcher(context, FgThread.getHandler(), action, this::onBind,
                 this::onUnbind, enableOverlayResId, nonOverlayPackageResId);
 
-        mBound = false;
+        mProxy = null;
         mRequest = ProviderRequest.EMPTY_REQUEST;
     }
 
@@ -164,25 +91,19 @@ public class LocationProviderProxy extends AbstractLocationProvider {
         ILocationProvider provider = ILocationProvider.Stub.asInterface(binder);
 
         synchronized (mLock) {
-            mBound = true;
-
-            provider.setLocationProviderManager(mManager);
+            mProxy = new Proxy();
+            provider.setLocationProviderManager(mProxy);
 
             ProviderRequest request = mRequest;
             if (!request.equals(ProviderRequest.EMPTY_REQUEST)) {
                 provider.setRequest(request, request.workSource);
-            }
-
-            ComponentName service = mServiceWatcher.getBoundService().component;
-            if (service != null) {
-                setPackageNames(Collections.singleton(service.getPackageName()));
             }
         }
     }
 
     private void onUnbind() {
         synchronized (mLock) {
-            mBound = false;
+            mProxy = null;
             setState(State.EMPTY_STATE);
         }
     }
@@ -207,5 +128,77 @@ public class LocationProviderProxy extends AbstractLocationProvider {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mServiceWatcher.dump(fd, pw, args);
+    }
+
+    private class Proxy extends ILocationProviderManager.Stub {
+
+        Proxy() {}
+
+        // executed on binder thread
+        @Override
+        public void onSetFeatureId(String featureId) {
+            synchronized (mLock) {
+                if (mProxy != this) {
+                    return;
+                }
+
+                ComponentName service = mServiceWatcher.getBoundService().component;
+                if (service == null) {
+                    return;
+                }
+
+                // we don't need to verify the package name because we're getting it straight from
+                // the service watcher
+                CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext,
+                        service.getPackageName(), featureId);
+                setIdentity(identity);
+            }
+        }
+
+        // executed on binder thread
+        @Override
+        public void onSetProperties(ProviderProperties properties) {
+            synchronized (mLock) {
+                if (mProxy != this) {
+                    return;
+                }
+
+                // if no identity is set yet, set it now
+                if (getIdentity() == null) {
+                    ComponentName service = mServiceWatcher.getBoundService().component;
+                    if (service != null) {
+                        // we don't need to verify the package name because we're getting it
+                        // straight from the service watcher
+                        setIdentity(CallerIdentity.fromBinderUnsafe(mContext,
+                                service.getPackageName(), null));
+                    }
+                }
+
+                setProperties(properties);
+            }
+        }
+
+        // executed on binder thread
+        @Override
+        public void onSetAllowed(boolean allowed) {
+            synchronized (mLock) {
+                if (mProxy != this) {
+                    return;
+                }
+
+                setAllowed(allowed);
+            }
+        }
+
+        // executed on binder thread
+        @Override
+        public void onReportLocation(Location location) {
+            synchronized (mLock) {
+                if (mProxy != this) {
+                    return;
+                }
+                reportLocation(location);
+            }
+        }
     }
 }

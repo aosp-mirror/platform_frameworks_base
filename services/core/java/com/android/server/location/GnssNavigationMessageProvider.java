@@ -18,12 +18,13 @@ package com.android.server.location;
 
 import android.location.GnssNavigationMessage;
 import android.location.IGnssNavigationMessageListener;
+import android.location.util.identity.CallerIdentity;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.location.gnss.GnssListenerManager;
 import com.android.server.location.gnss.GnssManagerService;
-import com.android.server.location.util.listeners.GnssListenerManager;
 
 /**
  * An base implementation for GPS navigation messages provider.
