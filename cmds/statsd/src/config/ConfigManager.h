@@ -161,6 +161,19 @@ private:
     // IPendingIntentRef dies.
     ::ndk::ScopedAIBinder_DeathRecipient mConfigReceiverDeathRecipient;
     ::ndk::ScopedAIBinder_DeathRecipient mActiveConfigChangedReceiverDeathRecipient;
+
+    /**
+     * Death recipient callback that is called when a config receiver dies.
+     * The cookie is a pointer to a ConfigReceiverDeathCookie.
+     */
+    static void configReceiverDied(void* cookie);
+
+    /**
+     * Death recipient callback that is called when an active config changed
+     * receiver dies. The cookie is a pointer to an
+     * ActiveConfigChangedReceiverDeathCookie.
+     */
+    static void activeConfigChangedReceiverDied(void* cookie);
 };
 
 }  // namespace statsd

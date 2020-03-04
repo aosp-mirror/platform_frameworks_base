@@ -38,8 +38,6 @@ AlarmMonitor::~AlarmMonitor() {}
 void AlarmMonitor::setStatsCompanionService(
         shared_ptr<IStatsCompanionService> statsCompanionService) {
     std::lock_guard<std::mutex> lock(mLock);
-    // TODO(b/149254662): determine if tmpForLock is needed now that we have moved
-    // from sp to shared_ptr
     shared_ptr<IStatsCompanionService> tmpForLock = mStatsCompanionService;
     mStatsCompanionService = statsCompanionService;
     if (statsCompanionService == nullptr) {
