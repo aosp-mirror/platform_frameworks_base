@@ -1115,7 +1115,6 @@ public class RecentTasksTest extends ActivityTestsBase {
                 () -> mService.moveTaskToStack(0, INVALID_STACK_ID, true));
         assertSecurityException(expectCallable,
                 () -> mService.setTaskWindowingModeSplitScreenPrimary(0, true));
-        assertSecurityException(expectCallable, () -> mService.dismissPip(true, 0));
         assertSecurityException(expectCallable,
                 () -> mService.moveTopActivityToPinnedStack(INVALID_STACK_ID, new Rect()));
         assertSecurityException(expectCallable, () -> mService.getAllStackInfos());

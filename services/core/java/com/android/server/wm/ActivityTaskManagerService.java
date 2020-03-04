@@ -144,7 +144,6 @@ import android.app.IApplicationThread;
 import android.app.IAssistDataReceiver;
 import android.app.INotificationManager;
 import android.app.IRequestFinishCallback;
-import android.window.ITaskOrganizerController;
 import android.app.ITaskStackListener;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -230,9 +229,9 @@ import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
+import android.view.WindowManager;
 import android.window.IWindowOrganizerController;
 import android.window.WindowContainerTransaction;
-import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -3976,35 +3975,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             record.setSizeConfigurations(horizontalSizeConfiguration,
                     verticalSizeConfigurations, smallestSizeConfigurations);
-        }
-    }
-
-    /**
-     * Dismisses Pip
-     * @param animate True if the dismissal should be animated.
-     * @param animationDuration The duration of the resize animation in milliseconds or -1 if the
-     *                          default animation duration should be used.
-     */
-    @Override
-    public void dismissPip(boolean animate, int animationDuration) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "dismissPip()");
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityStack stack =
-                        mRootWindowContainer.getDefaultDisplay().getRootPinnedTask();
-                if (stack == null) {
-                    Slog.w(TAG, "dismissPip: pinned stack not found.");
-                    return;
-                }
-                if (stack.getWindowingMode() != WINDOWING_MODE_PINNED) {
-                    throw new IllegalArgumentException("Stack: " + stack
-                            + " doesn't support animated resize.");
-                }
-                stack.dismissPip();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
