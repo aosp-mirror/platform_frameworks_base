@@ -139,4 +139,10 @@ interface IStatusBarService
      * Returns whether SystemUI tracing is enabled.
      */
     boolean isTracing();
+
+    /**
+     * If true, suppresses the ambient display from showing. If false, re-enables the ambient
+     * display.
+     */
+    void suppressAmbientDisplay(boolean suppress);
 }
