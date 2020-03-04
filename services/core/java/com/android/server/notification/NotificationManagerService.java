@@ -876,6 +876,11 @@ public class NotificationManagerService extends SystemService {
     final NotificationDelegate mNotificationDelegate = new NotificationDelegate() {
 
         @Override
+        public void prepareForPossibleShutdown() {
+            mHistoryManager.triggerWriteToDisk();
+        }
+
+        @Override
         public void onSetDisabled(int status) {
             synchronized (mNotificationLock) {
                 mDisableNotificationEffects =

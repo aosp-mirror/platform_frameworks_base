@@ -157,9 +157,7 @@ public class NotificationHistoryDatabase {
     }
 
     public void forceWriteToDisk() {
-        if (!mFileWriteHandler.hasCallbacks(mWriteBufferRunnable)) {
-            mFileWriteHandler.post(mWriteBufferRunnable);
-        }
+        mFileWriteHandler.post(mWriteBufferRunnable);
     }
 
     public void onPackageRemoved(String packageName) {
