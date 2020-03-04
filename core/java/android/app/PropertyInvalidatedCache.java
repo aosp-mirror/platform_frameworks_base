@@ -442,6 +442,8 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                             nonce,
                             newValueString));
         }
+        // TODO(dancol): add an atomic compare and exchange property set operation to avoid a
+        // small race with concurrent disable here.
         SystemProperties.set(name, newValueString);
     }
 
