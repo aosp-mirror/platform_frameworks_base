@@ -2459,18 +2459,24 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
 
-                if (!isSameViewEntered
-                        && (flags & FLAG_MANUAL_REQUEST) == 0
-                        && mAugmentedAutofillableIds != null
-                        && mAugmentedAutofillableIds.contains(id)) {
-                    // View was already reported when server could not handle a response, but it
-                    // triggered augmented autofill
-
-                    if (sDebug) Slog.d(TAG, "updateLocked(" + id + "): augmented-autofillable");
-
-                    // ...then trigger the augmented autofill UI
-                    triggerAugmentedAutofillLocked();
-                    return;
+                if ((flags & FLAG_MANUAL_REQUEST) == 0) {
+                    // Not a manual request
+                    if (mAugmentedAutofillableIds != null && mAugmentedAutofillableIds.contains(
+                            id)) {
+                        // Regular autofill handled the view and returned null response, but it
+                        // triggered augmented autofill
+                        if (!isSameViewEntered) {
+                            if (sDebug) Slog.d(TAG, "trigger augmented autofill.");
+                            triggerAugmentedAutofillLocked();
+                        } else {
+                            if (sDebug) Slog.d(TAG, "skip augmented autofill for same view.");
+                        }
+                        return;
+                    } else if (mForAugmentedAutofillOnly && isSameViewEntered) {
+                        // Regular autofill is disabled.
+                        if (sDebug) Slog.d(TAG, "skip augmented autofill for same view.");
+                        return;
+                    }
                 }
 
                 if (requestNewFillResponseOnViewEnteredIfNecessaryLocked(id, viewState, flags)) {
