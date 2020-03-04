@@ -26,7 +26,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.biometrics.BiometricSourceType;
 import android.os.Trace;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -38,7 +37,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -141,31 +139,6 @@ public class LockIcon extends KeyguardAffordanceView implements
         }
     };
 
-    private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
-            new KeyguardUpdateMonitorCallback() {
-                @Override
-                public void onSimStateChanged(int subId, int slotId, int simState) {
-                    mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
-                    update();
-                }
-
-                @Override
-                public void onKeyguardVisibilityChanged(boolean showing) {
-                    update();
-                }
-
-                @Override
-                public void onBiometricRunningStateChanged(boolean running,
-                        BiometricSourceType biometricSourceType) {
-                    update();
-                }
-
-                @Override
-                public void onStrongAuthStateChanged(int userId) {
-                    update();
-                }
-    };
-
     @Inject
     public LockIcon(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             AccessibilityController accessibilityController,
@@ -189,7 +162,6 @@ public class LockIcon extends KeyguardAffordanceView implements
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mKeyguardStateController.addCallback(mKeyguardMonitorCallback);
-        mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
@@ -200,7 +172,6 @@ public class LockIcon extends KeyguardAffordanceView implements
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
         mKeyguardStateController.removeCallback(mKeyguardMonitorCallback);
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
@@ -438,6 +409,10 @@ public class LockIcon extends KeyguardAffordanceView implements
     void setIconColor(int iconColor) {
         mIconColor = iconColor;
         updateDarkTint();
+    }
+
+    void setSimLocked(boolean simLocked) {
+        mSimLocked = simLocked;
     }
 
     @Retention(RetentionPolicy.SOURCE)

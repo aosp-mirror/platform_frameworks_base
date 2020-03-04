@@ -18,12 +18,14 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.hardware.biometrics.BiometricSourceType;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -60,6 +62,7 @@ public class LockscreenLockIconController {
             mStatusBarStateController.addCallback(mSBStateListener);
             mConfigurationController.addCallback(mConfigurationListener);
             mNotificationWakeUpCoordinator.addListener(mWakeUpListener);
+            mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
 
             mConfigurationListener.onThemeChanged();
         }
@@ -69,6 +72,7 @@ public class LockscreenLockIconController {
             mStatusBarStateController.removeCallback(mSBStateListener);
             mConfigurationController.removeCallback(mConfigurationListener);
             mNotificationWakeUpCoordinator.removeListener(mWakeUpListener);
+            mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
         }
     };
 
@@ -132,6 +136,31 @@ public class LockscreenLockIconController {
             }
         }
     };
+
+    private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onSimStateChanged(int subId, int slotId, int simState) {
+                    mLockIcon.setSimLocked(mKeyguardUpdateMonitor.isSimPinSecure());
+                    mLockIcon.update();
+                }
+
+                @Override
+                public void onKeyguardVisibilityChanged(boolean showing) {
+                    mLockIcon.update();
+                }
+
+                @Override
+                public void onBiometricRunningStateChanged(boolean running,
+                        BiometricSourceType biometricSourceType) {
+                    mLockIcon.update();
+                }
+
+                @Override
+                public void onStrongAuthStateChanged(int userId) {
+                    mLockIcon.update();
+                }
+            };
 
     @Inject
     public LockscreenLockIconController(LockscreenGestureLogger lockscreenGestureLogger,
