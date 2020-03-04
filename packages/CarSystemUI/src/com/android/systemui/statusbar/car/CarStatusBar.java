@@ -88,6 +88,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -326,6 +327,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
+            KeyguardIndicationController keyguardIndicationController,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             /* Car Settings injected components. */
@@ -410,6 +412,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 extensionController,
                 userInfoControllerImpl,
                 phoneStatusBarPolicy,
+                keyguardIndicationController,
                 dismissCallbackRegistry,
                 statusBarTouchableRegionManager);
         mUserSwitcherController = userSwitcherController;
