@@ -46,7 +46,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.State;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
@@ -79,7 +79,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private boolean mIsTokenGranted;
     private boolean mIsShowingDialog;
 
-    private CustomTile(QSTileHost host, String action, Context userContext) {
+    private CustomTile(QSHost host, String action, Context userContext) {
         super(host);
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         mComponent = ComponentName.unflattenFromString(action);
@@ -392,7 +392,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         return ComponentName.unflattenFromString(action);
     }
 
-    public static CustomTile create(QSTileHost host, String spec, Context userContext) {
+    public static CustomTile create(QSHost host, String spec, Context userContext) {
         if (spec == null || !spec.startsWith(PREFIX) || !spec.endsWith(")")) {
             throw new IllegalArgumentException("Bad custom tile spec: " + spec);
         }
