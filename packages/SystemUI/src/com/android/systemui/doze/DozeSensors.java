@@ -305,7 +305,7 @@ public class DozeSensors {
                         mContext.getResources());
             } else {
                 sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-                mSensorThreshold = sensor.getMaximumRange();
+                mSensorThreshold = sensor == null ? 0 : sensor.getMaximumRange();
             }
             mSensor = sensor;
         }
