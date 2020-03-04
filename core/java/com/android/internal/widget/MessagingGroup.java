@@ -83,6 +83,8 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private LinearLayout mContentContainer;
     private int mRequestedMaxDisplayedLines = Integer.MAX_VALUE;
     private int mSenderTextPaddingSingleLine;
+    private boolean mIsFirstGroupInLayout = true;
+    private boolean mCanHideSenderIfFirst;
 
     public MessagingGroup(@NonNull Context context) {
         super(context);
@@ -161,7 +163,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         if (!mNeedsGeneratedAvatar) {
             setAvatar(sender.getIcon());
         }
-        mSenderView.setVisibility(TextUtils.isEmpty(nameOverride) ? GONE : VISIBLE);
+        updateSenderVisibility();
     }
 
     /**
@@ -255,6 +257,9 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mSenderName = null;
         mAddedMessages.clear();
         mFirstLayout = true;
+        setCanHideSenderIfFirst(false);
+        setIsFirstInLayout(true);
+
         setMaxDisplayedLines(Integer.MAX_VALUE);
         setSingleLine(false);
         setShowingAvatar(true);
@@ -358,6 +363,35 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     @Override
     public boolean isHidingAnimated() {
         return mIsHidingAnimated;
+    }
+
+    @Override
+    public void setIsFirstInLayout(boolean first) {
+        if (first != mIsFirstGroupInLayout) {
+            mIsFirstGroupInLayout = first;
+            updateSenderVisibility();
+        }
+    }
+
+    /**
+     * @param canHide true if the sender can be hidden if it is first
+     */
+    public void setCanHideSenderIfFirst(boolean canHide) {
+        if (mCanHideSenderIfFirst != canHide) {
+            mCanHideSenderIfFirst = canHide;
+            updateSenderVisibility();
+        }
+    }
+
+    private void updateSenderVisibility() {
+        boolean hidden = (mIsFirstGroupInLayout || mSingleLine) && mCanHideSenderIfFirst
+                || TextUtils.isEmpty(mSenderName);
+        mSenderView.setVisibility(hidden ? GONE : VISIBLE);
+    }
+
+    @Override
+    public boolean hasDifferentHeightWhenFirst() {
+        return mCanHideSenderIfFirst && !mSingleLine && !TextUtils.isEmpty(mSenderName);
     }
 
     private void setIsHidingAnimated(boolean isHiding) {
@@ -599,6 +633,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             layoutParams.setMarginEnd(singleLine ? mSenderTextPaddingSingleLine : 0);
             updateMaxDisplayedLines();
             updateClipRect();
+            updateSenderVisibility();
         }
     }
 }

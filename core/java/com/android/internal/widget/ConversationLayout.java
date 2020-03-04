@@ -271,33 +271,34 @@ public class ConversationLayout extends FrameLayout
         updateHistoricMessageVisibility();
         updateTitleAndNamesDisplay();
 
-        updateConversationIconAndHeaderText();
+        updateConversationLayout();
 
     }
 
-    private void updateConversationIconAndHeaderText() {
+    /**
+     * Update the layout according to the data provided (i.e mIsOneToOne, expanded etc);
+     */
+    private void updateConversationLayout() {
         // TODO: resolve this from shortcuts
         // Set avatar and name
+        CharSequence personOnTop = null;
         if (mIsOneToOne) {
             // Let's resolve the icon / text from the last sender
             mConversationIcon.setVisibility(VISIBLE);
             mHeaderText.setVisibility(VISIBLE);
-            boolean found = false;
+            CharSequence userKey = getKey(mUser);
             for (int i = mGroups.size() - 1; i >= 0; i--) {
                 MessagingGroup messagingGroup = mGroups.get(i);
                 Person messageSender = messagingGroup.getSender();
-                if (!mUser.equals(messageSender)) {
+                if ((messageSender != null && !TextUtils.equals(userKey, getKey(messageSender)))
+                        || i == 0) {
                     // Make sure the header is actually visible
                     // TODO: figure out what to do if there's a converationtitle + a Sender
                     mHeaderText.setText(messagingGroup.getSenderName());
                     mConversationIcon.setImageIcon(messagingGroup.getAvatarIcon());
-                    found = true;
+                    personOnTop = messagingGroup.getSenderName();
                     break;
                 }
-            }
-            if (!found) {
-                mHeaderText.setText(mUser.getName());
-                mConversationIcon.setImageIcon(mUser.getIcon());
             }
         } else {
             mHeaderText.setVisibility(GONE);
@@ -312,7 +313,22 @@ public class ConversationLayout extends FrameLayout
                 mConversationIcon.setVisibility(GONE);
             }
         }
-        // update the icon position and sizing
+        // Update if the groups can hide the sender if they are first (applies to 1:1 conversations)
+        // This needs to happen after all of the above o update all of the groups
+        for (int i = mGroups.size() - 1; i >= 0; i--) {
+            MessagingGroup messagingGroup = mGroups.get(i);
+            CharSequence messageSender = messagingGroup.getSenderName();
+            boolean canHide = mIsOneToOne
+                    && TextUtils.equals(personOnTop, messageSender);
+            messagingGroup.setCanHideSenderIfFirst(canHide);
+        }
+        updateIconPositionAndSize();
+    }
+
+    /**
+     * update the icon position and sizing
+     */
+    private void updateIconPositionAndSize() {
         int gravity;
         int marginStart;
         int marginTop;
@@ -329,7 +345,7 @@ public class ConversationLayout extends FrameLayout
             marginTop = mExpandedGroupTopMargin;
             iconSize = mIconSizeCentered;
         }
-        FrameLayout.LayoutParams layoutParams =
+        LayoutParams layoutParams =
                 (LayoutParams) mConversationIconBadge.getLayoutParams();
         layoutParams.gravity = gravity;
         layoutParams.topMargin = marginTop;
@@ -572,8 +588,7 @@ public class ConversationLayout extends FrameLayout
             }
             boolean isNewGroup = currentGroup == null;
             Person sender = message.getMessage().getSenderPerson();
-            CharSequence key = sender == null ? null
-                    : sender.getKey() == null ? sender.getName() : sender.getKey();
+            CharSequence key = getKey(sender);
             isNewGroup |= !TextUtils.equals(key, currentSenderKey);
             if (isNewGroup) {
                 currentGroup = new ArrayList<>();
@@ -586,6 +601,10 @@ public class ConversationLayout extends FrameLayout
             }
             currentGroup.add(message);
         }
+    }
+
+    private CharSequence getKey(Person person) {
+        return person == null ? null : person.getKey() == null ? person.getName() : person.getKey();
     }
 
     /**

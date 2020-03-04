@@ -84,6 +84,11 @@ public class MessagingLinearLayout extends ViewGroup {
             final View child = getChildAt(i);
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             lp.hide = true;
+            if (child instanceof MessagingChild) {
+                MessagingChild messagingChild = (MessagingChild) child;
+                // Whenever we encounter the message first, it's always first in the layout
+                messagingChild.setIsFirstInLayout(true);
+            }
         }
 
         totalHeight = mPaddingTop + mPaddingBottom;
@@ -91,6 +96,11 @@ public class MessagingLinearLayout extends ViewGroup {
         int linesRemaining = mMaxDisplayedLines;
         // Starting from the bottom: we measure every view as if it were the only one. If it still
         // fits, we take it, otherwise we stop there.
+        MessagingChild previousChild = null;
+        View previousView = null;
+        int previousChildHeight = 0;
+        int previousTotalHeight = 0;
+        int previousLinesConsumed = 0;
         for (int i = count - 1; i >= 0 && totalHeight < targetHeight; i--) {
             if (getChildAt(i).getVisibility() == GONE) {
                 continue;
@@ -99,7 +109,16 @@ public class MessagingLinearLayout extends ViewGroup {
             LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
             MessagingChild messagingChild = null;
             int spacing = mSpacing;
+            int previousChildIncrease = 0;
             if (child instanceof MessagingChild) {
+                // We need to remeasure the previous child again if it's not the first anymore
+                if (previousChild != null && previousChild.hasDifferentHeightWhenFirst()) {
+                    previousChild.setIsFirstInLayout(false);
+                    measureChildWithMargins(previousView, widthMeasureSpec, 0, heightMeasureSpec,
+                            previousTotalHeight - previousChildHeight);
+                    previousChildIncrease = previousView.getMeasuredHeight() - previousChildHeight;
+                    linesRemaining -= previousChild.getConsumedLines() - previousLinesConsumed;
+                }
                 messagingChild = (MessagingChild) child;
                 messagingChild.setMaxDisplayedLines(linesRemaining);
                 spacing += messagingChild.getExtraSpacing();
@@ -110,18 +129,26 @@ public class MessagingLinearLayout extends ViewGroup {
 
             final int childHeight = child.getMeasuredHeight();
             int newHeight = Math.max(totalHeight, totalHeight + childHeight + lp.topMargin +
-                    lp.bottomMargin + spacing);
+                    lp.bottomMargin + spacing + previousChildIncrease);
             int measureType = MessagingChild.MEASURED_NORMAL;
             if (messagingChild != null) {
                 measureType = messagingChild.getMeasuredType();
-                linesRemaining -= messagingChild.getConsumedLines();
             }
 
             // We never measure the first item as too small, we want to at least show something.
             boolean isTooSmall = measureType == MessagingChild.MEASURED_TOO_SMALL && !first;
             boolean isShortened = measureType == MessagingChild.MEASURED_SHORTENED
                     || measureType == MessagingChild.MEASURED_TOO_SMALL && first;
-            if (newHeight <= targetHeight && !isTooSmall) {
+            boolean showView = newHeight <= targetHeight && !isTooSmall;
+            if (showView) {
+                if (messagingChild != null) {
+                    previousLinesConsumed = messagingChild.getConsumedLines();
+                    linesRemaining -= previousLinesConsumed;
+                    previousChild = messagingChild;
+                    previousView = child;
+                    previousChildHeight = childHeight;
+                    previousTotalHeight = totalHeight;
+                }
                 totalHeight = newHeight;
                 measuredWidth = Math.max(measuredWidth,
                         child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin
@@ -131,6 +158,16 @@ public class MessagingLinearLayout extends ViewGroup {
                     break;
                 }
             } else {
+                // We now became too short, let's make sure to reset any previous views to be first
+                // and remeasure it.
+                if (previousChild != null && previousChild.hasDifferentHeightWhenFirst()) {
+                    previousChild.setIsFirstInLayout(true);
+                    // We need to remeasure the previous child again since it became first
+                    measureChildWithMargins(previousView, widthMeasureSpec, 0, heightMeasureSpec,
+                            previousTotalHeight - previousChildHeight);
+                    // The totalHeight is already correct here since we only set it during the
+                    // first pass
+                }
                 break;
             }
             first = false;
@@ -273,6 +310,20 @@ public class MessagingLinearLayout extends ViewGroup {
         void setMaxDisplayedLines(int lines);
         void hideAnimated();
         boolean isHidingAnimated();
+
+        /**
+         * Set that this view is first in layout. Relevant and only set if
+         * {@link #hasDifferentHeightWhenFirst()}.
+         * @param first is this first?
+         */
+        default void setIsFirstInLayout(boolean first) {}
+
+        /**
+         * @return if this layout has different height it is first in the layout
+         */
+        default boolean hasDifferentHeightWhenFirst() {
+            return false;
+        }
         default int getExtraSpacing() {
             return 0;
         }
