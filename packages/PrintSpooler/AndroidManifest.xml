@@ -40,6 +40,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <queries>
+        <intent>
+            <action android:name="android.printservice.PrintService" />
+        </intent>
+    </queries>
+
     <application
         android:allowClearUserData="true"
         android:label="@string/app_label"
