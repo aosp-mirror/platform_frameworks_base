@@ -368,11 +368,10 @@ public abstract class AtomicFormula extends IntegrityFormula {
                             "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
             mValue = hashValue(key, value);
             mIsHashedValue =
-                    key == APP_CERTIFICATE
+                    (key == APP_CERTIFICATE
                                     || key == INSTALLER_CERTIFICATE
-                                    || key == STAMP_CERTIFICATE_HASH
-                            ? true
-                            : !mValue.equals(value);
+                                    || key == STAMP_CERTIFICATE_HASH)
+                            || !mValue.equals(value);
         }
 
         StringAtomicFormula(Parcel in) {
