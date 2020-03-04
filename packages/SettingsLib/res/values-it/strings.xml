@@ -255,6 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostra dispositivi Bluetooth senza nome"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Disattiva volume assoluto"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Attiva Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Connettività migliorata"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Versione Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Seleziona versione Bluetooth AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Versione Bluetooth MAP"</string>
@@ -308,6 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Verranno mostrati solo dispositivi Bluetooth senza nome (solo indirizzo MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Disattiva la funzione del volume assoluto Bluetooth in caso di problemi con il volume dei dispositivi remoti, ad esempio un volume troppo alto o la mancanza di controllo"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Consente di attivare lo stack delle funzionalità Bluetooth Gabeldorsche."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Consente di attivare la funzionalità Connettività migliorata."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminale locale"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Abilita l\'app Terminale che offre l\'accesso alla shell locale"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Verifica HDCP"</string>
@@ -354,6 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Rendering HWUI profilo"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Attiva livelli debug GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Consenti caricamento livelli debug GPU per app di debug"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Attiva reg. dettagl. fornitori"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Includi log aggiuntivi di fornitori relativi a un dispositivo specifico nelle segnalazioni di bug che potrebbero contenere informazioni private, causare un maggior consumo della batteria e/o utilizzare più spazio di archiviazione."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Scala animazione finestra"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Scala animazione transizione"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Scala durata animatore"</string>
@@ -501,6 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Chiedi ogni volta"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Fino alla disattivazione"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Adesso"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Questo dispositivo"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altoparlante telefono"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema di connessione. Spegni e riaccendi il dispositivo"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo audio cablato"</string>
 </resources>

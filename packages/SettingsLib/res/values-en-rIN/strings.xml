@@ -255,6 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Show Bluetooth devices without names"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Disable absolute volume"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Enable Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Enhanced connectivity"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP version"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Select Bluetooth AVRCP Version"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP version"</string>
@@ -308,6 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth devices without names (MAC addresses only) will be displayed"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Enables the Bluetooth Gabeldorsche feature stack."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Enables the enhanced connectivity feature."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Local terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Enable terminal app that offers local shell access"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP checking"</string>
@@ -354,6 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Profile HWUI rendering"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Enable GPU debug layers"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Allow loading GPU debug layers for debug apps"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Enable verbose vendor logging"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Include additional device-specific vendor logs in bug reports, which may contain private information, use more battery and/or use more storage."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Window animation scale"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Transition animation scale"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator duration scale"</string>
@@ -501,6 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Ask every time"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Until you turn off"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Just now"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"This device"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Phone speaker"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem connecting. Turn device off and back on"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Wired audio device"</string>
 </resources>

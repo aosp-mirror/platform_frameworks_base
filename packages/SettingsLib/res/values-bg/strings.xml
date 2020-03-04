@@ -255,6 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Показване на устройствата с Bluetooth без имена"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Деактивиране на пълната сила на звука"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Активиране на Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Подобрена свързаност"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Версия на AVRCP за Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Избиране на версия на AVRCP за Bluetooth"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"MAP версия за Bluetooth"</string>
@@ -308,6 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Ще бъдат показани устройствата с Bluetooth без имена (само MAC адресите)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Деактивира функцията на Bluetooth за пълна сила на звука в случай на проблеми със звука на отдалечени устройства, като например неприемливо висока сила на звука или липса на управление."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Активира стека на функциите на Bluetooth Gabeldorsche."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Активира функцията за подобрена свързаност."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Актив. на прил. за терминал с достъп до локалния команден ред"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Проверка с HDCP"</string>
@@ -354,6 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Изобр. на HWUI: Профилир."</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Активиране на слоевете за отстр. на грешки в ГП"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Разреш. на зарежд. на слоевете за отстр. на грешки в ГП за съотв. прилож."</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Подр. рег. файлове за доставчиците: Актив."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Включване на допълнителни регистрационни файлове за доставчиците на конкретни устройства в сигналите за програмни грешки, които може да съдържат поверителна информация, да изразходват батерията в по-голяма степен и/или да използват повече място в хранилището."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Скала на аним.: Прозорец"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Скала на преходната анимация"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Скала за Animator"</string>
@@ -501,6 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Да се пита винаги"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"До изключване"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Току-що"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Това устройство"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Високоговорител на телефона"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"При свързването възникна проблем. Изключете устройството и го включете отново"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Аудиоустройство с кабел"</string>
 </resources>

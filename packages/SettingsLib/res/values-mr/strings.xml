@@ -255,6 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस दाखवा"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"संपूर्ण आवाज बंद करा"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"गाबलडॉर्ष सुरू करा"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"वर्धित कनेक्टिव्हिटी"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ब्लूटूथ AVRCP आवृत्ती"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ब्लूटूथ AVRCP आवृत्ती निवडा"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ब्लूटूथ MAP आवृत्ती"</string>
@@ -308,6 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नावांशिवाय ब्‍लूटूथ डीव्‍हाइस (फक्‍त MAC पत्‍ते) दाखवले जातील"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणाचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटूथ संपूर्ण आवाज वैशिष्ट्य बंद करते."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लूटूथ गाबलडॉर्ष वैशिष्‍ट्य स्टॅक सुरू करा."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"वर्धित कनेक्टिव्हिटी वैशिष्‍ट्य सुरू करा."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानिक टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"स्थानिक शेल प्रवेश देणारा टर्मिनल अ‍ॅप सुरू करा"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP तपासणी"</string>
@@ -354,6 +356,9 @@
     <string name="track_frame_time" msgid="522674651937771106">"प्रोफाइल HWUI रेंडरिंग"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU डीबग स्तर सुरू करा"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डीबग अ‍ॅप्ससाठी GPU डीबग स्तर लोड करण्याची अनुमती द्या"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"व्हर्बोझ विक्रेता लॉगिंग सुरू करा"</string>
+    <!-- no translation found for enable_verbose_vendor_logging_summary (5426292185780393708) -->
+    <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"विंडो ॲनिमेशन स्केल"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ट्रांझिशन ॲनिमेशन स्केल"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ॲनिमेटर कालावधी स्केल"</string>
@@ -501,6 +506,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"प्रत्येक वेळी विचारा"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"तुम्ही बंद करेपर्यंत"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"आत्ताच"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"हे डिव्हाइस"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"फोनचा स्पीकर"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"कनेक्‍ट करण्‍यात समस्‍या आली. डिव्हाइस बंद करा आणि नंतर सुरू करा"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"वायर असलेले ऑडिओ डिव्हाइस"</string>
 </resources>

@@ -45,11 +45,17 @@ class ControlsFavoritePersistenceWrapper(
         private const val TAG = "ControlsFavoritePersistenceWrapper"
         const val FILE_NAME = "controls_favorites.xml"
         private const val TAG_CONTROLS = "controls"
+        private const val TAG_STRUCTURES = "structures"
+        private const val TAG_STRUCTURE = "structure"
         private const val TAG_CONTROL = "control"
         private const val TAG_COMPONENT = "component"
         private const val TAG_ID = "id"
         private const val TAG_TITLE = "title"
         private const val TAG_TYPE = "type"
+        private const val TAG_VERSION = "version"
+
+        // must increment with every change to the XML structure
+        private const val VERSION = 1
     }
 
     /**
@@ -66,7 +72,7 @@ class ControlsFavoritePersistenceWrapper(
      *
      * @param list a list of favorite controls. The list will be stored in the same order.
      */
-    fun storeFavorites(list: List<ControlInfo>) {
+    fun storeFavorites(structures: List<StructureInfo>) {
         executor.execute {
             Log.d(TAG, "Saving data to file: $file")
             val atomicFile = AtomicFile(file)
@@ -81,16 +87,28 @@ class ControlsFavoritePersistenceWrapper(
                     setOutput(writer, "utf-8")
                     setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
                     startDocument(null, true)
-                    startTag(null, TAG_CONTROLS)
-                    list.forEach {
-                        startTag(null, TAG_CONTROL)
-                        attribute(null, TAG_COMPONENT, it.component.flattenToString())
-                        attribute(null, TAG_ID, it.controlId)
-                        attribute(null, TAG_TITLE, it.controlTitle.toString())
-                        attribute(null, TAG_TYPE, it.deviceType.toString())
-                        endTag(null, TAG_CONTROL)
+                    startTag(null, TAG_VERSION)
+                    text("$VERSION")
+                    endTag(null, TAG_VERSION)
+
+                    startTag(null, TAG_STRUCTURES)
+                    structures.forEach { s ->
+                        startTag(null, TAG_STRUCTURE)
+                        attribute(null, TAG_COMPONENT, s.componentName.flattenToString())
+                        attribute(null, TAG_STRUCTURE, s.structure.toString())
+
+                        startTag(null, TAG_CONTROLS)
+                        s.controls.forEach { c ->
+                            startTag(null, TAG_CONTROL)
+                            attribute(null, TAG_ID, c.controlId)
+                            attribute(null, TAG_TITLE, c.controlTitle.toString())
+                            attribute(null, TAG_TYPE, c.deviceType.toString())
+                            endTag(null, TAG_CONTROL)
+                        }
+                        endTag(null, TAG_CONTROLS)
+                        endTag(null, TAG_STRUCTURE)
                     }
-                    endTag(null, TAG_CONTROLS)
+                    endTag(null, TAG_STRUCTURES)
                     endDocument()
                     atomicFile.finishWrite(writer)
                 }
@@ -109,7 +127,7 @@ class ControlsFavoritePersistenceWrapper(
      * @return a list of stored favorite controls. Return an empty list if the file is not found
      * @throws [IllegalStateException] if there is an error while reading the file
      */
-    fun readFavorites(): List<ControlInfo> {
+    fun readFavorites(): List<StructureInfo> {
         if (!file.exists()) {
             Log.d(TAG, "No favorites, returning empty list")
             return emptyList()
@@ -134,25 +152,32 @@ class ControlsFavoritePersistenceWrapper(
         }
     }
 
-    private fun parseXml(parser: XmlPullParser): List<ControlInfo> {
+    private fun parseXml(parser: XmlPullParser): List<StructureInfo> {
         var type: Int
-        val infos = mutableListOf<ControlInfo>()
+        val infos = mutableListOf<StructureInfo>()
+
+        var lastComponent: ComponentName? = null
+        var lastStructure: CharSequence? = null
+        var controls = mutableListOf<ControlInfo>()
         while (parser.next().also { type = it } != XmlPullParser.END_DOCUMENT) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue
-            }
-            val tagName = parser.name
-            if (tagName == TAG_CONTROL) {
-                val component = ComponentName.unflattenFromString(
-                        parser.getAttributeValue(null, TAG_COMPONENT))
+            val tagName = parser.name ?: ""
+            if (type == XmlPullParser.START_TAG && tagName == TAG_STRUCTURE) {
+                lastComponent = ComponentName.unflattenFromString(
+                    parser.getAttributeValue(null, TAG_COMPONENT))
+                lastStructure = parser.getAttributeValue(null, TAG_STRUCTURE) ?: ""
+            } else if (type == XmlPullParser.START_TAG && tagName == TAG_CONTROL) {
                 val id = parser.getAttributeValue(null, TAG_ID)
                 val title = parser.getAttributeValue(null, TAG_TITLE)
                 val deviceType = parser.getAttributeValue(null, TAG_TYPE)?.toInt()
-                if (component != null && id != null && title != null && deviceType != null) {
-                    infos.add(ControlInfo(component, id, title, deviceType))
+                if (id != null && title != null && deviceType != null) {
+                    controls.add(ControlInfo(id, title, deviceType))
                 }
+            } else if (type == XmlPullParser.END_TAG && tagName == TAG_STRUCTURE) {
+                infos.add(StructureInfo(lastComponent!!, lastStructure!!, controls.toList()))
+                controls.clear()
             }
         }
+
         return infos
     }
 }

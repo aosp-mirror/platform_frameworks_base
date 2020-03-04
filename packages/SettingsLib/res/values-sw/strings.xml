@@ -255,6 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Onyesha vifaa vya Bluetooth visivyo na majina"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Zima sauti kamili"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Washa Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Muunganisho Ulioboreshwa"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Toleo la Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Chagua Toleo la Bluetooth AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Toleo la Ramani ya Bluetooth"</string>
@@ -308,6 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Itaonyesha vifaa vya Bluetooth bila majina (anwani za MAC pekee)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Huzima kipengele cha Bluetooth cha sauti kamili kunapotokea matatizo ya sauti katika vifaa vya mbali kama vile sauti ya juu mno au inaposhindikana kuidhibiti."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Huwasha rafu ya kipengele ya Bluetooth Gabeldorsche."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Huwasha kipengele cha Muunganisho Ulioboreshwa."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Kituo cha karibu"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Washa programu ya mwisho inayotoa ufikiaji mkuu wa karibu"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Inakagua HDCP"</string>
@@ -354,6 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Kutekeleza HWUI ya wasifu"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Ruhusu safu za utatuzi wa GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Ruhusu upakiaji wa safu za utatuzi wa GPU za programu za utatuzi"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Washa uwekaji kumbukumbu za muuzaji kwa kutumia sauti"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Jumuisha kumbukumbu zaidi za muuzaji ambazo ni mahususi kwa kifaa kwenye ripoti za hitilafu, ambazo huenda zikawa na maelezo ya faragha, zikatumia chaji nyingi ya betri na/au zikatumia nafasi kubwa ya hifadhi."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Uhuishaji kwenye dirisha"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Mageuzi ya kipimo cha uhuishaji"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Mizani ya muda wa uhuishaji"</string>
@@ -501,6 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Uliza kila wakati"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Hadi utakapoizima"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sasa hivi"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Kifaa hiki"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Spika ya simu"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kuna tatizo la kuunganisha kwenye Intaneti. Zima kisha uwashe kifaa"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Kifaa cha sauti kinachotumia waya"</string>
 </resources>

@@ -103,7 +103,7 @@ public final class PinnerService extends SystemService {
     private static boolean PROP_PIN_CAMERA =
             DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
                                     "pin_camera",
-                                    SystemProperties.getBoolean("pinner.pin_camera", false));
+                                    SystemProperties.getBoolean("pinner.pin_camera", true));
     // Pin using pinlist.meta when pinning apps.
     private static boolean PROP_PIN_PINLIST = SystemProperties.getBoolean(
             "pinner.use_pinlist", true);

@@ -18,6 +18,7 @@ package com.android.server.autofill;
 
 import static com.android.server.autofill.Helper.sDebug;
 
+import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -50,14 +51,24 @@ import java.util.concurrent.TimeoutException;
  * The same session may be reused for multiple input fields involved in the same autofill
  * {@link Session}. Therefore, one {@link InlineSuggestionsRequest} and one
  * {@link IInlineSuggestionsResponseCallback} may be used to generate and callback with inline
- * suggestions for  different input fields.
+ * suggestions for different input fields.
+ *
+ * <p>
+ * This class is the sole place in Autofill responsible for directly communicating with the IME. It
+ * receives the IME input view start/finish events, with the associated IME field Id. It uses the
+ * information to decide when to send the {@link InlineSuggestionsResponse} to IME. As a result,
+ * some of the response will be cached locally and only be sent when the IME is ready to show them.
+ *
+ * <p>
+ * See {@link android.inputmethodservice.InlineSuggestionSession} comments for InputMethodService
+ * side flow.
  *
  * <p>
  * This class is thread safe.
  */
 final class InlineSuggestionSession {
 
-    private static final String TAG = "InlineSuggestionSession";
+    private static final String TAG = "AfInlineSuggestionSession";
     private static final int INLINE_REQUEST_TIMEOUT_MS = 1000;
 
     @NonNull
@@ -67,13 +78,31 @@ final class InlineSuggestionSession {
     private final ComponentName mComponentName;
     @NonNull
     private final Object mLock;
+    @NonNull
+    private final ImeStatusListener mImeStatusListener;
 
+    /**
+     * To avoid the race condition, one should not access {@code mPendingImeResponse} without
+     * holding the {@code mLock}. For consuming the existing value, tt's recommended to use
+     * {@link #getPendingImeResponse()} to get a copy of the reference to avoid blocking call.
+     */
     @GuardedBy("mLock")
     @Nullable
     private CompletableFuture<ImeResponse> mPendingImeResponse;
 
     @GuardedBy("mLock")
+    @Nullable
+    private AutofillResponse mPendingAutofillResponse;
+
+    @GuardedBy("mLock")
     private boolean mIsLastResponseNonEmpty = false;
+
+    @Nullable
+    @GuardedBy("mLock")
+    private AutofillId mImeFieldId = null;
+
+    @GuardedBy("mLock")
+    private boolean mImeInputViewStarted = false;
 
     InlineSuggestionSession(InputMethodManagerInternal inputMethodManagerInternal,
             int userId, ComponentName componentName) {
@@ -81,19 +110,51 @@ final class InlineSuggestionSession {
         mUserId = userId;
         mComponentName = componentName;
         mLock = new Object();
+        mImeStatusListener = new ImeStatusListener() {
+            @Override
+            public void onInputMethodStartInputView(AutofillId imeFieldId) {
+                synchronized (mLock) {
+                    mImeFieldId = imeFieldId;
+                    mImeInputViewStarted = true;
+                    AutofillResponse pendingAutofillResponse = mPendingAutofillResponse;
+                    if (pendingAutofillResponse != null
+                            && pendingAutofillResponse.mAutofillId.equalsIgnoreSession(
+                            mImeFieldId)) {
+                        mPendingAutofillResponse = null;
+                        onInlineSuggestionsResponseLocked(pendingAutofillResponse.mAutofillId,
+                                pendingAutofillResponse.mResponse);
+                    }
+                }
+            }
+
+            @Override
+            public void onInputMethodFinishInputView(AutofillId imeFieldId) {
+                synchronized (mLock) {
+                    mImeFieldId = imeFieldId;
+                    mImeInputViewStarted = false;
+                }
+            }
+        };
     }
 
     public void onCreateInlineSuggestionsRequest(@NonNull AutofillId autofillId) {
         if (sDebug) Log.d(TAG, "onCreateInlineSuggestionsRequest called for " + autofillId);
 
         synchronized (mLock) {
-            cancelCurrentRequest();
+            // Clean up all the state about the previous request.
+            hideInlineSuggestionsUi(autofillId);
+            mImeFieldId = null;
+            mImeInputViewStarted = false;
+            if (mPendingImeResponse != null && !mPendingImeResponse.isDone()) {
+                mPendingImeResponse.complete(null);
+            }
             mPendingImeResponse = new CompletableFuture<>();
             // TODO(b/146454892): pipe the uiExtras from the ExtServices.
             mInputMethodManagerInternal.onCreateInlineSuggestionsRequest(
                     mUserId,
                     new InlineSuggestionsRequestInfo(mComponentName, autofillId, new Bundle()),
-                    new InlineSuggestionsRequestCallbackImpl(mPendingImeResponse));
+                    new InlineSuggestionsRequestCallbackImpl(mPendingImeResponse,
+                            mImeStatusListener));
         }
     }
 
@@ -116,10 +177,8 @@ final class InlineSuggestionSession {
     }
 
     public boolean hideInlineSuggestionsUi(@NonNull AutofillId autofillId) {
-        if (sDebug) Log.d(TAG, "Called hideInlineSuggestionsUi for " + autofillId);
         synchronized (mLock) {
             if (mIsLastResponseNonEmpty) {
-                if (sDebug) Log.d(TAG, "Send empty suggestion to IME");
                 return onInlineSuggestionsResponseLocked(autofillId,
                         new InlineSuggestionsResponse(Collections.EMPTY_LIST));
             }
@@ -138,14 +197,32 @@ final class InlineSuggestionSession {
             @NonNull InlineSuggestionsResponse inlineSuggestionsResponse) {
         final CompletableFuture<ImeResponse> completedImsResponse = getPendingImeResponse();
         if (completedImsResponse == null || !completedImsResponse.isDone()) {
+            if (sDebug) Log.d(TAG, "onInlineSuggestionsResponseLocked without IMS request");
             return false;
         }
         // There is no need to wait on the CompletableFuture since it should have been completed
         // when {@link #waitAndGetInlineSuggestionsRequest()} was called.
         ImeResponse imeResponse = completedImsResponse.getNow(null);
         if (imeResponse == null) {
+            if (sDebug) Log.d(TAG, "onInlineSuggestionsResponseLocked with pending IMS response");
             return false;
         }
+
+        if (!mImeInputViewStarted || !autofillId.equalsIgnoreSession(mImeFieldId)) {
+            if (sDebug) {
+                Log.d(TAG,
+                        "onInlineSuggestionsResponseLocked not sent because input view is not "
+                                + "started for " + autofillId);
+            }
+            mPendingAutofillResponse = new AutofillResponse(autofillId, inlineSuggestionsResponse);
+            // TODO(b/149442582): Although we are not sending the response to IME right away, we
+            //  still return true to indicate that the response may be sent eventually, such that
+            //  the dropdown UI will not be shown. This may not be the desired behavior in the
+            //  auto-focus case where IME isn't shown after switching back to an activity. We may
+            //  revisit this.
+            return true;
+        }
+
         try {
             imeResponse.mCallback.onInlineSuggestionsResponse(autofillId,
                     inlineSuggestionsResponse);
@@ -161,13 +238,6 @@ final class InlineSuggestionSession {
         }
     }
 
-    private void cancelCurrentRequest() {
-        CompletableFuture<ImeResponse> pendingImeResponse = getPendingImeResponse();
-        if (pendingImeResponse != null && !pendingImeResponse.isDone()) {
-            pendingImeResponse.complete(null);
-        }
-    }
-
     @Nullable
     @GuardedBy("mLock")
     private CompletableFuture<ImeResponse> getPendingImeResponse() {
@@ -180,31 +250,84 @@ final class InlineSuggestionSession {
             extends IInlineSuggestionsRequestCallback.Stub {
 
         private final CompletableFuture<ImeResponse> mResponse;
+        private final ImeStatusListener mImeStatusListener;
 
-        private InlineSuggestionsRequestCallbackImpl(CompletableFuture<ImeResponse> response) {
+        private InlineSuggestionsRequestCallbackImpl(CompletableFuture<ImeResponse> response,
+                ImeStatusListener imeStatusListener) {
             mResponse = response;
+            mImeStatusListener = imeStatusListener;
         }
 
+        @BinderThread
         @Override
         public void onInlineSuggestionsUnsupported() throws RemoteException {
             if (sDebug) Log.d(TAG, "onInlineSuggestionsUnsupported() called.");
             mResponse.complete(null);
         }
 
+        @BinderThread
         @Override
         public void onInlineSuggestionsRequest(InlineSuggestionsRequest request,
-                IInlineSuggestionsResponseCallback callback) {
-            if (sDebug) Log.d(TAG, "onInlineSuggestionsRequest() received: " + request);
+                IInlineSuggestionsResponseCallback callback, AutofillId imeFieldId,
+                boolean inputViewStarted) {
+            if (sDebug) {
+                Log.d(TAG,
+                        "onInlineSuggestionsRequest() received: " + request + ", inputViewStarted="
+                                + inputViewStarted + ", imeFieldId=" + imeFieldId);
+            }
+            if (inputViewStarted) {
+                mImeStatusListener.onInputMethodStartInputView(imeFieldId);
+            } else {
+                mImeStatusListener.onInputMethodFinishInputView(imeFieldId);
+            }
             if (request != null && callback != null) {
                 mResponse.complete(new ImeResponse(request, callback));
             } else {
                 mResponse.complete(null);
             }
         }
+
+        @BinderThread
+        @Override
+        public void onInputMethodStartInputView(AutofillId imeFieldId) {
+            if (sDebug) Log.d(TAG, "onInputMethodStartInputView() received on " + imeFieldId);
+            mImeStatusListener.onInputMethodStartInputView(imeFieldId);
+        }
+
+        @BinderThread
+        @Override
+        public void onInputMethodFinishInputView(AutofillId imeFieldId) {
+            if (sDebug) Log.d(TAG, "onInputMethodFinishInputView() received on " + imeFieldId);
+            mImeStatusListener.onInputMethodFinishInputView(imeFieldId);
+        }
+    }
+
+    private interface ImeStatusListener {
+        void onInputMethodStartInputView(AutofillId imeFieldId);
+
+        void onInputMethodFinishInputView(AutofillId imeFieldId);
     }
 
     /**
-     * A data class wrapping IME responses for the inline suggestion request.
+     * A data class wrapping Autofill responses for the inline suggestion request.
+     */
+    private static class AutofillResponse {
+        @NonNull
+        final AutofillId mAutofillId;
+
+        @NonNull
+        final InlineSuggestionsResponse mResponse;
+
+        AutofillResponse(@NonNull AutofillId autofillId,
+                @NonNull InlineSuggestionsResponse response) {
+            mAutofillId = autofillId;
+            mResponse = response;
+        }
+
+    }
+
+    /**
+     * A data class wrapping IME responses for the create inline suggestions request.
      */
     private static class ImeResponse {
         @NonNull
