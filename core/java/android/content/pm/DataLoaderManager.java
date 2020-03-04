@@ -18,7 +18,6 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Bundle;
 import android.os.RemoteException;
 
 /**
@@ -40,22 +39,19 @@ public class DataLoaderManager {
      * Finds a data loader binder service and binds to it. This requires PackageManager.
      *
      * @param dataLoaderId ID for the new data loader binder service.
-     * @param params       Bundle that contains parameters to configure the data loader service.
-     *                     Must contain:
-     *                     key: "packageName", value: String, package name of data loader service
-     *                     package;
-     *                     key: "extras", value: Bundle, client-specific data structures
-     *
+     * @param params       DataLoaderParamsParcel object that contains data loader params, including
+     *                     its package name, class name, and additional parameters.
+     * @param control      FileSystemControlParcel that contains filesystem control handlers.
      * @param listener     Callback for the data loader service to report status back to the
      *                     caller.
      * @return false if 1) target ID collides with a data loader that is already bound to data
      * loader manager; 2) package name is not specified; 3) fails to find data loader package;
      * or 4) fails to bind to the specified data loader service, otherwise return true.
      */
-    public boolean initializeDataLoader(int dataLoaderId, @NonNull Bundle params,
-            @NonNull IDataLoaderStatusListener listener) {
+    public boolean initializeDataLoader(int dataLoaderId, @NonNull DataLoaderParamsParcel params,
+            @NonNull FileSystemControlParcel control, @NonNull IDataLoaderStatusListener listener) {
         try {
-            return mService.initializeDataLoader(dataLoaderId, params, listener);
+            return mService.initializeDataLoader(dataLoaderId, params, control, listener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

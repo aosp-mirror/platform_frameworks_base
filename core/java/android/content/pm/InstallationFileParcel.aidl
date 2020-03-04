@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package android.content.pm;
 
-import android.content.pm.DataLoaderParamsParcel;
-import android.content.pm.FileSystemControlParcel;
-import android.content.pm.IDataLoader;
-import android.content.pm.IDataLoaderStatusListener;
+import android.content.pm.InstallationFileLocation;
 
-/** @hide */
-interface IDataLoaderManager {
-    boolean initializeDataLoader(int id, in DataLoaderParamsParcel params,
-            in FileSystemControlParcel control, IDataLoaderStatusListener listener);
-    IDataLoader getDataLoader(int dataLoaderId);
-    void destroyDataLoader(int dataLoaderId);
+/**
+ * Describes a file which is part of a package installation.
+ * @hide
+ */
+parcelable InstallationFileParcel {
+    String name;
+    InstallationFileLocation location;
+    long size;
+    byte[] metadata;
+    byte[] signature;
 }
