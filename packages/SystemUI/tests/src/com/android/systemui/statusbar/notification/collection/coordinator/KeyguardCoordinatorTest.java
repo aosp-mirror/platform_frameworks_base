@@ -88,7 +88,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
         mKeyguardCoordinator.attach(mNotifPipeline);
-        verify(mNotifPipeline, times(1)).addPreRenderFilter(filterCaptor.capture());
+        verify(mNotifPipeline, times(1)).addFinalizeFilter(filterCaptor.capture());
         mKeyguardFilter = filterCaptor.getValue();
     }
 

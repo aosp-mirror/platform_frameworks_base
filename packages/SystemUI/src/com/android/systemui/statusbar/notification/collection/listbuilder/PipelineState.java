@@ -82,7 +82,7 @@ public class PipelineState {
     public static final int STATE_GROUPING = 4;
     public static final int STATE_TRANSFORMING = 5;
     public static final int STATE_SORTING = 6;
-    public static final int STATE_PRE_RENDER_FILTERING = 7;
+    public static final int STATE_FINALIZE_FILTERING = 7;
     public static final int STATE_FINALIZING = 8;
 
     @IntDef(prefix = { "STATE_" }, value = {
@@ -93,7 +93,7 @@ public class PipelineState {
             STATE_GROUPING,
             STATE_TRANSFORMING,
             STATE_SORTING,
-            STATE_PRE_RENDER_FILTERING,
+            STATE_FINALIZE_FILTERING,
             STATE_FINALIZING,
     })
     @Retention(RetentionPolicy.SOURCE)
