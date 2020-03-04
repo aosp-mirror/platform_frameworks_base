@@ -24,6 +24,8 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 
+import libcore.util.EmptyArray;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
@@ -96,6 +98,28 @@ public class PowerWhitelistManager {
             mService.addPowerSaveWhitelistApps(packageNames);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get a list of app IDs of app that are whitelisted. This does not include temporarily
+     * whitelisted apps.
+     *
+     * @param includingIdle Set to true if the app should be whitelisted from device idle as well
+     *                      as other power save restrictions
+     * @hide
+     */
+    @NonNull
+    public int[] getWhitelistedAppIds(boolean includingIdle) {
+        try {
+            if (includingIdle) {
+                return mService.getAppIdWhitelist();
+            } else {
+                return mService.getAppIdWhitelistExceptIdle();
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return EmptyArray.INT;
         }
     }
 
