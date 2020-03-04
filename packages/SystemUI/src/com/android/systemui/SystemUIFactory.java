@@ -34,14 +34,12 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
-import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -156,11 +154,6 @@ public class SystemUIFactory {
                 Dependency.get(NotificationMediaManager.class),
                 Dependency.get(NotificationListener.class),
                 Dependency.get(DozeParameters.class));
-    }
-
-    public KeyguardIndicationController createKeyguardIndicationController(Context context,
-            ViewGroup indicationArea, LockIcon lockIcon) {
-        return new KeyguardIndicationController(context, indicationArea, lockIcon);
     }
 
     @Module
