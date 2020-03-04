@@ -120,6 +120,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setClipToPadding(false);
         mShelfIcons.setIsStaticLayout(false);
         setBottomRoundness(1.0f, false /* animate */);
+
+        // Setting this to first in section to get the clipping to the top roundness correct. This
+        // value determines the way we are clipping to the top roundness of the overall shade
+        setFirstInSection(true);
         initDimens();
     }
 
