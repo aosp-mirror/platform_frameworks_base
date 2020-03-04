@@ -181,7 +181,6 @@ public class NotificationHistoryManager {
         }
     }
 
-    // TODO: wire this up to AMS when power button is long pressed
     public void triggerWriteToDisk() {
         synchronized (mLock) {
             final int userCount = mUserState.size();
