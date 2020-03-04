@@ -29,6 +29,7 @@ import android.annotation.ColorInt;
 import android.annotation.StyleRes;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.text.LineBreaker;
@@ -40,6 +41,7 @@ import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.LinearLayout;
@@ -62,6 +64,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -90,6 +93,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private final ActivityStarter mActivityStarter;
     private final ConfigurationController mConfigurationController;
     private final LayoutTransition mLayoutTransition;
+    private final TunerService mTunerService;
     private Uri mKeyguardSliceUri;
     @VisibleForTesting
     TextView mTitle;
@@ -114,16 +118,14 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     @Inject
     public KeyguardSliceView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            ActivityStarter activityStarter, ConfigurationController configurationController) {
+            ActivityStarter activityStarter, ConfigurationController configurationController,
+            TunerService tunerService, @Main Resources resources) {
         super(context, attrs);
 
-        TunerService tunerService = Dependency.get(TunerService.class);
-        tunerService.addTunable(this, Settings.Secure.KEYGUARD_SLICE_URI);
-
+        mTunerService = tunerService;
         mClickActions = new HashMap<>();
-        mRowPadding = context.getResources().getDimensionPixelSize(R.dimen.subtitle_clock_padding);
-        mRowWithHeaderPadding = context.getResources()
-                .getDimensionPixelSize(R.dimen.header_subtitle_padding);
+        mRowPadding = resources.getDimensionPixelSize(R.dimen.subtitle_clock_padding);
+        mRowWithHeaderPadding = resources.getDimensionPixelSize(R.dimen.header_subtitle_padding);
         mActivityStarter = activityStarter;
         mConfigurationController = configurationController;
 
@@ -143,7 +145,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     // Eventually the existing copy will be reparented instead, and we won't need this.
     public KeyguardSliceView(Context context, AttributeSet attributeSet) {
         this(context, attributeSet, Dependency.get(ActivityStarter.class),
-                Dependency.get(ConfigurationController.class));
+                Dependency.get(ConfigurationController.class), Dependency.get(TunerService.class),
+                context.getResources());
     }
 
     @Override
@@ -166,9 +169,15 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mDisplayId = getDisplay().getDisplayId();
+        Display display = getDisplay();
+        if (display != null) {
+            mDisplayId = display.getDisplayId();
+        }
+        mTunerService.addTunable(this, Settings.Secure.KEYGUARD_SLICE_URI);
         // Make sure we always have the most current slice
-        mLiveData.observeForever(this);
+        if (mDisplayId == DEFAULT_DISPLAY) {
+            mLiveData.observeForever(this);
+        }
         mConfigurationController.addCallback(this);
     }
 
@@ -180,6 +189,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         if (mDisplayId == DEFAULT_DISPLAY) {
             mLiveData.removeObserver(this);
         }
+        mTunerService.removeTunable(this);
         mConfigurationController.removeCallback(this);
     }
 
