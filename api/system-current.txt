@@ -13197,6 +13197,7 @@ package android.view.contentcapture {
     method public long getEventTime();
     method @Nullable public android.view.autofill.AutofillId getId();
     method @Nullable public java.util.List<android.view.autofill.AutofillId> getIds();
+    method @Nullable public android.graphics.Insets getInsets();
     method @Nullable public CharSequence getText();
     method public int getType();
     method @Nullable public android.view.contentcapture.ViewNode getViewNode();
@@ -13207,6 +13208,7 @@ package android.view.contentcapture {
     field public static final int TYPE_SESSION_RESUMED = 7; // 0x7
     field public static final int TYPE_VIEW_APPEARED = 1; // 0x1
     field public static final int TYPE_VIEW_DISAPPEARED = 2; // 0x2
+    field public static final int TYPE_VIEW_INSETS_CHANGED = 9; // 0x9
     field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
     field public static final int TYPE_VIEW_TREE_APPEARED = 5; // 0x5
     field public static final int TYPE_VIEW_TREE_APPEARING = 4; // 0x4
