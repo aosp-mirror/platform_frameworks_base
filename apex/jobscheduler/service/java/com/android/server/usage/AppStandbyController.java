@@ -130,7 +130,8 @@ import java.util.concurrent.CountDownLatch;
 public class AppStandbyController implements AppStandbyInternal {
 
     private static final String TAG = "AppStandbyController";
-    static final boolean DEBUG = true;
+    // Do not submit with true.
+    static final boolean DEBUG = false;
 
     static final boolean COMPRESS_TIME = false;
     private static final long ONE_MINUTE = 60 * 1000;
