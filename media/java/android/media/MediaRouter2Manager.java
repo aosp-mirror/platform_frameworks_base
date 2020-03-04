@@ -334,7 +334,7 @@ public class MediaRouter2Manager {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.requestCreateSessionWithManager(
                         client, sessionInfo.getClientPackageName(), route, requestId);
-                //TODO: release the previous session?
+                releaseSession(sessionInfo);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }
