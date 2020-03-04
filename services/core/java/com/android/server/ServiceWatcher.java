@@ -53,11 +53,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Maintains a binding to the best service that matches the given intent information. Bind and
@@ -71,12 +66,12 @@ public class ServiceWatcher implements ServiceConnection {
     private static final String EXTRA_SERVICE_VERSION = "serviceVersion";
     private static final String EXTRA_SERVICE_IS_MULTIUSER = "serviceIsMultiuser";
 
-    private static final long BLOCKING_BINDER_TIMEOUT_MS = 30 * 1000;
-
     /** Function to run on binder interface. */
     public interface BinderRunner {
         /** Called to run client code with the binder. */
         void run(IBinder binder) throws RemoteException;
+        /** Called if an error occurred and the function could not be run. */
+        default void onError() {}
     }
 
     /**
@@ -416,6 +411,7 @@ public class ServiceWatcher implements ServiceConnection {
     public final void runOnBinder(BinderRunner runner) {
         mHandler.post(() -> {
             if (mBinder == null) {
+                runner.onError();
                 return;
             }
 
@@ -425,68 +421,9 @@ public class ServiceWatcher implements ServiceConnection {
                 // binders may propagate some specific non-RemoteExceptions from the other side
                 // through the binder as well - we cannot allow those to crash the system server
                 Log.e(TAG, getLogPrefix() + " exception running on " + mServiceInfo, e);
+                runner.onError();
             }
         });
-    }
-
-    /**
-     * Runs the given function synchronously if currently connected, and returns the default value
-     * if not currently connected or if any exception is thrown. Do not obtain any locks within the
-     * BlockingBinderRunner, or risk deadlock. The default value will be returned if there is no
-     * service connection when this is run, if a RemoteException occurs, or if the operation times
-     * out.
-     *
-     * @deprecated Using this function is an indication that your AIDL API is broken. Calls from
-     * system server to outside MUST be one-way, and so cannot return any result, and this
-     * method should not be needed or used. Use a separate callback interface to allow outside
-     * components to return results back to the system server.
-     */
-    @Deprecated
-    public final <T> T runOnBinderBlocking(BlockingBinderRunner<T> runner, T defaultValue) {
-        try {
-            return runOnHandlerBlocking(() -> {
-                if (mBinder == null) {
-                    return defaultValue;
-                }
-
-                try {
-                    return runner.run(mBinder);
-                } catch (RuntimeException | RemoteException e) {
-                    // binders may propagate some specific non-RemoteExceptions from the other side
-                    // through the binder as well - we cannot allow those to crash the system server
-                    Log.e(TAG, getLogPrefix() + " exception running on " + mServiceInfo, e);
-                    return defaultValue;
-                }
-            });
-        } catch (InterruptedException | TimeoutException e) {
-            return defaultValue;
-        }
-    }
-
-    private <T> T runOnHandlerBlocking(Callable<T> c)
-            throws InterruptedException, TimeoutException {
-        if (Looper.myLooper() == mHandler.getLooper()) {
-            try {
-                return c.call();
-            } catch (Exception e) {
-                // Function cannot throw exception, this should never happen
-                throw new IllegalStateException(e);
-            }
-        } else {
-            FutureTask<T> task = new FutureTask<>(c);
-            mHandler.post(task);
-            try {
-                // timeout will unblock callers, in particular if the caller is a binder thread to
-                // help reduce binder contention. this will still result in blocking the handler
-                // thread which may result in ANRs, but should make problems slightly more rare.
-                // the underlying solution is simply not to use this API at all, but that would
-                // require large refactors to very legacy code.
-                return task.get(BLOCKING_BINDER_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-            } catch (ExecutionException e) {
-                // Function cannot throw exception, this should never happen
-                throw new IllegalStateException(e);
-            }
-        }
     }
 
     private String getLogPrefix() {

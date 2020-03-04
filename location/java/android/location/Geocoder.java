@@ -17,16 +17,16 @@
 package android.location;
 
 import android.content.Context;
-import android.location.Address;
-import android.os.RemoteException;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.Log;
 
 import java.io.IOException;
-import java.util.Locale;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A class for handling geocoding and reverse geocoding.  Geocoding is
@@ -45,10 +45,11 @@ import java.util.List;
  * exists.
  */
 public final class Geocoder {
-    private static final String TAG = "Geocoder";
 
-    private GeocoderParams mParams;
-    private ILocationManager mService;
+    private static final long TIMEOUT_MS = 60000;
+
+    private final GeocoderParams mParams;
+    private final ILocationManager mService;
 
     /**
      * Returns true if the Geocoder methods getFromLocation and
@@ -62,8 +63,7 @@ public final class Geocoder {
         try {
             return lm.geocoderIsPresent();
         } catch (RemoteException e) {
-            Log.e(TAG, "isPresent: got RemoteException", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -129,17 +129,11 @@ public final class Geocoder {
             throw new IllegalArgumentException("longitude == " + longitude);
         }
         try {
-            List<Address> results = new ArrayList<Address>();
-            String ex =  mService.getFromLocation(latitude, longitude, maxResults,
-                mParams, results);
-            if (ex != null) {
-                throw new IOException(ex);
-            } else {
-                return results;
-            }
+            GeocodeListener listener = new GeocodeListener();
+            mService.getFromLocation(latitude, longitude, maxResults, mParams, listener);
+            return listener.getResults();
         } catch (RemoteException e) {
-            Log.e(TAG, "getFromLocation: got RemoteException", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -170,18 +164,13 @@ public final class Geocoder {
         if (locationName == null) {
             throw new IllegalArgumentException("locationName == null");
         }
+
         try {
-            List<Address> results = new ArrayList<Address>();
-            String ex = mService.getFromLocationName(locationName,
-                0, 0, 0, 0, maxResults, mParams, results);
-            if (ex != null) {
-                throw new IOException(ex);
-            } else {
-                return results;
-            }
+            GeocodeListener listener = new GeocodeListener();
+            mService.getFromLocationName(locationName, 0, 0, 0, 0, maxResults, mParams, listener);
+            return listener.getResults();
         } catch (RemoteException e) {
-            Log.e(TAG, "getFromLocationName: got RemoteException", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -242,19 +231,46 @@ public final class Geocoder {
             throw new IllegalArgumentException("upperRightLongitude == "
                 + upperRightLongitude);
         }
+
         try {
-            ArrayList<Address> result = new ArrayList<Address>();
-            String ex =  mService.getFromLocationName(locationName,
-                lowerLeftLatitude, lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                maxResults, mParams, result);
-            if (ex != null) {
-                throw new IOException(ex);
-            } else {
-                return result;
-            }
+            GeocodeListener listener = new GeocodeListener();
+            mService.getFromLocationName(locationName, lowerLeftLatitude, lowerLeftLongitude,
+                    upperRightLatitude, upperRightLongitude, maxResults, mParams, listener);
+            return listener.getResults();
         } catch (RemoteException e) {
-            Log.e(TAG, "getFromLocationName: got RemoteException", e);
-            return null;
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static class GeocodeListener extends IGeocodeListener.Stub {
+        private final CountDownLatch mLatch = new CountDownLatch(1);
+
+        private String mError = null;
+        private List<Address> mResults = Collections.emptyList();
+
+        GeocodeListener() {}
+
+        @Override
+        public void onResults(String error, List<Address> results) {
+            mError = error;
+            mResults = results;
+            mLatch.countDown();
+        }
+
+        public List<Address> getResults() throws IOException {
+            try {
+                if (!mLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                    mError = "Service not Available";
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            if (mError != null) {
+                throw new IOException(mError);
+            } else {
+                return mResults;
+            }
         }
     }
 }
