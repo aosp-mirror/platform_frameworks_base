@@ -21,6 +21,7 @@ import android.content.pm.PackageManager;
 import android.gsi.AvbPublicKey;
 import android.gsi.GsiProgress;
 import android.gsi.IGsiService;
+import android.gsi.IGsiServiceCallback;
 import android.gsi.IGsid;
 import android.os.Environment;
 import android.os.IBinder;
@@ -115,6 +116,20 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
         }
     }
 
+    class GsiServiceCallback extends IGsiServiceCallback.Stub {
+        // 0 for success
+        private int mResult = -1;
+
+        public synchronized void onResult(int result) {
+            mResult = result;
+            notify();
+        }
+
+        public int getResult() {
+            return mResult;
+        }
+    }
+
     @Override
     public boolean startInstallation(String dsuSlot) throws RemoteException {
         IGsiService service = getGsiService();
@@ -186,7 +201,9 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
 
     @Override
     public boolean isInstalled() throws RemoteException {
-        return getGsiService().isGsiInstalled();
+        boolean installed = SystemProperties.getBoolean("gsid.image_installed", false);
+        Slog.i(TAG, "isInstalled(): " + installed);
+        return installed;
     }
 
     @Override
@@ -196,16 +213,37 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
 
     @Override
     public boolean remove() throws RemoteException {
-        IGsiService gsiService = getGsiService();
-        String install_dir = gsiService.getInstalledGsiImageDir();
-        return getGsiService().removeGsi();
+        try {
+            GsiServiceCallback callback = new GsiServiceCallback();
+            synchronized (callback) {
+                getGsiService().removeGsiAsync(callback);
+                callback.wait(GSID_ROUGH_TIMEOUT_MS);
+            }
+            return callback.getResult() == 0;
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "remove() was interrupted");
+            return false;
+        }
     }
 
     @Override
     public boolean setEnable(boolean enable, boolean oneShot) throws RemoteException {
         IGsiService gsiService = getGsiService();
         if (enable) {
-            return gsiService.enableGsi(oneShot, mDsuSlot) == 0;
+            try {
+                if (mDsuSlot == null) {
+                    mDsuSlot = gsiService.getActiveDsuSlot();
+                }
+                GsiServiceCallback callback = new GsiServiceCallback();
+                synchronized (callback) {
+                    gsiService.enableGsiAsync(oneShot, mDsuSlot, callback);
+                    callback.wait(GSID_ROUGH_TIMEOUT_MS);
+                }
+                return callback.getResult() == 0;
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "setEnable() was interrupted");
+                return false;
+            }
         } else {
             return gsiService.disableGsi();
         }
