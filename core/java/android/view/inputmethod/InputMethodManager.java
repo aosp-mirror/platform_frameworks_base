@@ -1634,14 +1634,20 @@ public final class InputMethodManager {
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768499)
     public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
-        try {
-            Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be removed "
-                    + "soon. If you are using android.support.v7.widget.SearchView, please update "
-                    + "to version 26.0 or newer version.");
-            mService.showSoftInput(
-                    mClient, mCurRootView.getView().getWindowToken(), flags, resultReceiver);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        synchronized (mH) {
+            try {
+                Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be"
+                        + " removed soon. If you are using android.support.v7.widget.SearchView,"
+                        + " please update to version 26.0 or newer version.");
+                if (mCurRootView == null || mCurRootView.getView() == null) {
+                    Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
+                    return;
+                }
+                mService.showSoftInput(
+                        mClient, mCurRootView.getView().getWindowToken(), flags, resultReceiver);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -1986,11 +1992,17 @@ public final class InputMethodManager {
 
     @UnsupportedAppUsage
     void closeCurrentInput() {
-        try {
-            mService.hideSoftInput(
-                    mClient, mCurRootView.getView().getWindowToken(), HIDE_NOT_ALWAYS, null);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        synchronized (mH) {
+            if (mCurRootView == null || mCurRootView.getView() == null) {
+                Log.w(TAG, "No current root view, ignoring closeCurrentInput()");
+                return;
+            }
+            try {
+                mService.hideSoftInput(
+                        mClient, mCurRootView.getView().getWindowToken(), HIDE_NOT_ALWAYS, null);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
