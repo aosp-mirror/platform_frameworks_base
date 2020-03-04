@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Mae hyn yn ei chadw mewn golwg nes dy fod yn ei dadbinio. Cyffyrdda a dal Nôl i\'w dadbinio.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">I ddadbinio\'r sgrin, cyffyrdda a dal y botwm Nôl</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Mae hyn yn ei chadw mewn golwg nes dy fod yn ei dadbinio. Cyffyrdda &amp; a dal eich synhwyrydd olion bysedd i ddadbinio.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+</resources>

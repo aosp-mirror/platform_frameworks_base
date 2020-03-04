@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">འདི་བྱས་ན་བརྙན་ཤེལ་འདི་ཁྱེད་ཉིད་ཀྱིས་ཕྱིར་སྤྲོད་རག་བར་དུ་གཏན་འཇགས་བྱ་ངེས། གློག་སྒོའི་མཐེབ་དང་ཕྱིར་སྣུར་མཐེབ་ཡུན་དུ་མནན་ན་ཕྱིར་སྤྲོད་བྱ་ཐུབ།</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">བརྙན་ཤེལ་གཏན་འཇགས་ལས་ཕྱིར་སྤྲོད་ན། &amp;ampགློག་སྒོའི་མཐེབ་མནན་པ་དང་ཆབས་ཅིག་ཕྱིར་སྣུར་གྱི་མཐེབ་མནན་རོགས།</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">འདི་བྱས་ན་བརྙན་ཤེལ་འདི་ཁྱེད་ཉིད་ཀྱིས་ཕྱིར་སྤྲོད་རག་བར་དུ་གཏན་འཇགས་བྱ་ངེས། གློག་སྒོའི་མཐེབ་དང་མཛུབ་རིས་བརྒྱུད་ཁྲིད་ཆས་མནན་ན་ཕྱིར་སྤྲོད་བྱ་ཐུབ།</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">བརྙན་ཤེལ་གཏན་འཇགས་རྣམ་པ་ནས་ཕྱིར་སྤྲོད་ན་མཛུབ་རིས་བརྒྱུད་ཁྲིད་ཆས་མནན་རོགས།</string>
+</resources>

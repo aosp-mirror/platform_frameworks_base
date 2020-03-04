@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Toto ho ponechá zobrazené až do uvoľnenia. Uvoľníte ho stlačením a podržaním tlačidla Späť.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Pre odopnutie tejto obrazovky stlačte a podržte tlačidlo Späť</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Obsah bude pripnutý v zobrazení, až kým ho neuvoľníte. Uvoľníte ho stlačením a podržaním snímača odtlačkov prstov.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Na odopnutie tejto obrazovky stlačte a podržte snímač odtlačkov prstov</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Pinapanatili nito sa paningin hanggang ito ay iyong i-unpin. Hawakan ang &amp; hawakan ang Back para i-unpin.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Upang alisin ang screen na ito, pindutin ang &amp; pindutin ng matagal ang back button</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Pinapanatili nito sa paningin hanggang ito ay iyong i-unpin. Pindutin ang &amp; hawakan ang fingerprint sensor para i-unpin.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Para i-unpin ang screen na ito, pindutin ang &amp; hawakan ang fingerprint sensor</string>
+</resources>

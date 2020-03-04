@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Het scherm blijft zichtbaar totdat je het losmaakt. Houd \'Terug\' ingedrukt om het los te maken.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Blijf de Terug-knop aanraken om dit scherm los te maken</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Het scherm blijft zichtbaar totdat je het losmaakt. Houd \'Terug\' ingedrukt om het los te maken.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Houd de vingerafdrukscanner ingedrukt om dit scherm los te maken</string>
+</resources>

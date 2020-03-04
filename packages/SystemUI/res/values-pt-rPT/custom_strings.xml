@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Irá ficar visível até que o solte. Pressione Anterior para soltar.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Para soltar este ecrã, toque prolongadamente no botão Anterior</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Isto mantém a aplicação no ecrã até soltar, toque e mantenha premido &amp; no sensor de impressão digital para soltar.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Para soltar este ecrã, toque e mantenha premido no &amp; Mantenha o dedo no sensor de impressão digital</string>
+</resources>

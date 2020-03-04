@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">हे तुम्ही अनपिन करेपर्यंत व्ह्यूमध्ये राहते. अनपिन करण्यासाठी मागे जाणाऱ्या बटणास दाबून ठेवा.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">ही स्क्रीन अनपिन करण्यासाठी, बॅक बटण दाबा आणि दाबून ठेवा</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+</resources>

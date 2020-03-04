@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">আপনি যতক্ষণ না বিচ্ছিন্ন করছেন ততক্ষণ এইটি উহাকে প্রদর্শনে রাখবে। বিচ্ছিন্ন করতে প্রত্যাবর্তন বোতাম স্পর্শ করে ধরে রাখুন।</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">এই স্ক্রীন বিচ্ছিন্ন করতে, প্রত্যাবর্তন বোতাম স্পর্শ করে ধরে রাখুন</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">আপনি যতক্ষণ না বিচ্ছিন্ন করছেন ততক্ষণ এইটি উহাকে প্রদর্শনে রাখবে। বিচ্ছিন্ন করতে অঙ্গুলাঙ্ক সেন্সর স্পর্শ করে ধরে রাখুন।</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">এই স্ক্রীন বিচ্ছিন্ন করতে, অঙ্গুলাঙ্ক সেন্সর স্পর্শ করে ধরে রাখুন</string>
+</resources>

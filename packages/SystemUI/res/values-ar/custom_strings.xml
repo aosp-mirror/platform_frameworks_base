@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">يؤدي هذا إلى استمرار العرض إلى أن يتم إزالة التثبيت. ويمكنك لمس مع الاستمرار لإزالة التثبيت.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">لإلغاء تثبيت هذه الشاشة, استمر بالضغط على زر الرجوع</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">هذا يجعلها في العرض حتى تقوم بإلغاء التثبيت. اضغط مطولاً على مستشعر البصمة لإلغاء التثبيت.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">لإلغاء تثبيت هذه الشاشة, استمر بالضغط على مستشعر البصمة</string>
+</resources>

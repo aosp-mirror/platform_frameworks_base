@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Ви постійно бачитимете цей екран, доки не відкріпите його. Щоб відкріпити екран, натисніть &amp; і утримуйте кнопку \"Назад\".</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Щоб відкріпити цей екран, натисніть &amp; і утримуйте кнопку \"Назад\"</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Ви постійно бачитимете цей екран, доки не відкріпете його. Щоб відкріпити екран, натисніть &amp; і утримуйте палець на сканері відбитків.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Щоб розблокувати екран, натисніть &amp; і утримуйте палець на сканері відбитків пальців</string>
+</resources>

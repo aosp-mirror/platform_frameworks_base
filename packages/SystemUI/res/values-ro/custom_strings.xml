@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Aceasta îl ține în vedere până când anulați fixarea. Atingeți &amp; țineți apăsat Înapoi pentru a anula fixarea.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Pentru a anula fixarea acestui ecran, atingeți &amp; și țineți apăsat butonul Înapoi</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Ecranul este afișat până anulați fixarea. Atingeți lung senzorul de amprentă pentru a anula fixarea.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Pentru a anula fixarea acestui ecran, atingeți și țineți apăsat senzorul de amprentă</string>
+</resources>

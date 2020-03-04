@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">ಇದನ್ನು ನೀವು ಬಿಚ್ಚಿಡುವವರೆಗೂ ವೀಕ್ಷಣೆಯಲ್ಲಿ ಇರಿಸುತ್ತದೆ. ಬಿಚ್ಚಿಡಲು ಹಿಂದೆ ಗುಂಡಿಯನ್ನು ಒತ್ತಿ ಹಿಡಿಯಿರಿ.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">ಪರದೆಯನ್ನು ಅನ್‍ಪಿನ್‍ಮಾಡಲು, ಹಿಂದೆ ಬಟನ್‍ ಸ್ಪರ್ಶಿಸಿ ಹಿಡಿಯಿರಿ</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">ನೀವು ಅನ್ಪಿನ್ ಮಾಡುವವರೆಗೂ ಇದನ್ನು ಗಮನದಲ್ಲಿರಿಸಿಕೊಳ್ಳಿ. ಅನ್ಪಿನ್ ಮಾಡಲು ಅವಲೋಕನವನ್ನು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">ಪರದೆಯನ್ನು ಅನ್‍ಪಿನ್‍ಮಾಡಲು, ಹಿಂದೆ ಬಟನ್‍ ಸ್ಪರ್ಶಿಸಿ ಹಿಡಿಯಿರಿ</string>
+</resources>

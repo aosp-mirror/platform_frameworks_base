@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">고정을 해제하기 전까지 계속 볼 수 있습니다. 고정을 해제하려면 뒤로를 길게 누르세요.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">이 화면의 고정을 해제하려면, 뒤로를 길게 누르세요</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">고정을 해제하기 전까지 계속 볼 수 있습니다. 고정을 해제하려면 지문 센서를 길게 누르세요.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">이 화면의 고정을 해제하려면, 지문 센서를 길게 누르세요</string>
+</resources>

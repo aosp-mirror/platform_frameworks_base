@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Strings for Bluetooth service -->
+    <!-- toast message informing user that Bluetooth stays on after airplane mode is turned on. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_airplane_mode_toast">ہوائی جہاز وضع کے دوران بلوٹوتھ آن رہے گا</string>
+</resources>

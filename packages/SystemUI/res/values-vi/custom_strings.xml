@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Chạm &amp; giữ Quay lại để bỏ ghim.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Để bỏ ghim màn hình này, chạm &amp; giữ nút Quay lại</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Việc này giữ nó hiện đến khi bạn bỏ ghim. Chạm &amp; giữ cảm biến vân tay để bỏ ghim.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Để bỏ ghim màn hình này, chạm &amp; giữ cảm biến vân tay</string>
+</resources>

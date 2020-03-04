@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">ଆପଣ ଅନପିନ୍‌ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହାକୁ ଦର୍ଶନ ରଖନ୍ତୁ। ଅନ୍‍ପିନ୍‍ କରିବା ପାଇଁ ବ୍ୟାକ୍‍ ବଟନ୍‍ ସ୍ପର୍ଶ କରନ୍ତୁ ଓ ଧରି ରଖନ୍ତୁ।</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">ଏହି ସ୍କ୍ରିନ୍‍ କୁ ଅନ୍‍ପିନ୍‍ କରିବା ପାଇଁ,  &amp; କୁ ସ୍ପର୍ଶ କରନ୍ତୁ ଓ ବ୍ୟାକ୍‍ ବଟନ୍‍ କୁ ଧରିରଖନ୍ତୁ।</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+</resources>

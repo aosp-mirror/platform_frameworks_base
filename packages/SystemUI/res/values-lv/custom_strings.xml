@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Šis notur to skatā līdz tiek atsprausts. Pieskarieties &amp; turiet atpakaļ lai atspraustu.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Lai atspraustu šo ekrānu, pieskarieties &amp; turiet atpakaļ pogu</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Šis notur to skatā līdz tiek atsprausts. Pieskarieties &amp; turiet pirksta nospieduma sensoru lai atspraustu.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Lai atspraustu šo ekrānu, pieskarieties &amp; turiet pirksta nospiedumu sensoru</string>
+</resources>

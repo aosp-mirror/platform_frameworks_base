@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz érintse meg és tartsa lenyomva a Vissza gombot.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">A Képernyőrögzítés feloldásához tartsa nyomva a Vissza gombot</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Mindaddig megjelenítve marad, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva az ujjlenyomat-olvasót.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Képernyő rögzítésének feloldásához tartsa nyomva az ujjlenyomat-olvasót</string>
+</resources>

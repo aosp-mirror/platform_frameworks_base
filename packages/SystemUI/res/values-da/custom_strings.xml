@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Dette fastholder skærmen i visningen, indtil du frigør den. Tryk på Tilbage, og hold fingeren nede for at frigøre skærmen.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Hvis du vil frigøre dette skærmbillede, skal du trykke på Tilbage og holde fingeren nede</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Dette fastholder skærmen i visningen, indtil du frigør den. Tryk på &amp; og hold fingeren på fingeraftrykssensoren for at frigøre skærmen.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Hvis du vil frigøre dette skærmbillede, skal du trykke på &amp; og holde fingeren på fingeraftrykssensoren</string>
+</resources>

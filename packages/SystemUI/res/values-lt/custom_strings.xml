@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Programa liks aktyvi, kol jos neatrakinsite. Norėdami atrakinti, paspauskite ir laikykite mygtuką „&amp;“.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Kad atsegtumėte šį ekraną, paspauskite ir laikykite mygtuką „Atgal“</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Programėlė bus matoma tol, kol jos neatrakinsite. Palieskite ir laikykite pirštą ant pirštų atspaudų jutiklio, norėdami ją atrakinti.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Norėdami atrakinti šį ekraną, palieskite ir laikykite pirštą ant pirštų atspaudų jutiklio</string>
+</resources>

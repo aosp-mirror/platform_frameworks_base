@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">మీరు అన్‌పిన్ చేసే వరకు ఇది కనిపిస్తుంది. అన్‌పిన్ చేసేందుకు హోమ్ మరియు పవర్ బటన్‌ని నొక్కి పట్టుకోండి.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">ఈ స్క్రీనును అన్పిన్ చేయడానికి, బ్యాక్ బటనును తాకండి మరియు పట్టుకోండి</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">మీరు అన్‌పిన్ చేసే వరకు ఇది కనిపిస్తుంది. అన్‌పిన్ చేసేందుకు హోమ్ మరియు పవర్ బటన్‌ని నొక్కి పట్టుకోండి.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">ఈ స్క్రీనును అన్పిన్ చేయడానికి, ఫింగర్ ప్రింట్ బటనును తాకండి మరియు పట్టుకోండి</string>
+</resources>

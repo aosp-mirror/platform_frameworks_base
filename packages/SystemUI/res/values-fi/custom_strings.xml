@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Tämä pitää näytön kiinnitettynä, kunnes poistat sen. Paina Takaisin-näppäintä pitkään poistaaksesi kiinnityksen.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Poistaaksesi tämän näytön kiinnityksen, paina Takasin-näppäintä pitkään</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Tämä pitää sen näkyvissä, kunnes poistat kiinnityksen. Kosketa sormenjälkitunnistinta pitkään poistaaksesi kiinnityksen.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Poistaaksesi tämän näytön kiinnityksen, kosketa sormenjälkitunnistinta pitkään</string>
+</resources>

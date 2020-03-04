@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Cumaidh seo san t-sealladh e gus an dì-phrìnich thu e. Bean ri “Air ais” ⁊ cum e gus a dhì-phrìneachadh.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+</resources>

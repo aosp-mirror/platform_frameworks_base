@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Indietro.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Per disattivare il blocco su schermo, tocca e tieni premuto il pulsante Indietro</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto il sensore di impronte digitali.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Per disattivare il blocco su schermo, tocca e tieni premuto il sensore di impronte digitali</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住「返回」鍵即可取消固定。</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">如要取消固定這個畫面，請輕觸並按住返回按鈕。</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。請輕觸 &amp; 按住「指紋感應器」鍵即可取消固定。</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">如要取消固定這個畫面，請輕觸 &amp; 並按住按住指紋感應器。</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">Dan iħallih viżibbli sakemm tneħħih. Agħfas &amp; u żomm Back biex tneħħi.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">Biex tneħħi dan l-iskrin, Agħfas &amp; u żomm il-buttuna tal-Back</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">Dan iżommu viżibbli sakemm tneħħih. Agħfas &amp; u żomm is-sensur tal-fingerprint biex tneħħih.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">Biex tneħħi dan l-iskrin, agħfas &amp; u żomm is-sensur tal-fingerprint</string>
+</resources>

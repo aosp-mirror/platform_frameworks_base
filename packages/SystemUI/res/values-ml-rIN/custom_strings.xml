@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Screen pinning dialog description. (for devices without navbar) -->
+    <string name="screen_pinning_description_no_navbar">നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണാനാകുന്ന രീതിയിൽ തുടരും. അൺപിൻ ചെയ്യാനായി ഹോം &amp; പവർ ബട്ടണുകൾ ഒരേ സമയം അമർത്തിപ്പിടിക്കുക.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar)-->
+    <string name="screen_pinning_toast_no_navbar">ഈ സ്ക്രീൻ അൺപിൻ ചെയ്യുന്നതിന് &amp; ബാക്ക് ബട്ടൺ അമർത്തിപിടിക്കുക</string>
+    <!-- Screen pinning dialog description. (for devices without navbar and with gestures on fingerprint sensor) -->
+    <string name="screen_pinning_description_no_navbar_fpsensor">നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണാനാകുന്ന രീതിയിൽ തുടരും. അൺപിൻ ചെയ്യാനായി ഫിംഗർപ്രിന്റ് സെൻസർ സ്പർശിക്കുക &amp; അമർത്തിപ്പിടിക്കുക.</string>
+    <!-- Notify use that they are in Lock-to-app (for devices without navbar and with gestures on fingerprint sensor)-->
+    <string name="screen_pinning_toast_no_navbar_fpsensor">ഈ സ്ക്രീൻ അൺപിൻ ചെയ്യുന്നതിന് &amp; ഫിംഗർപ്രിന്റ് സെൻസർ
+അമർത്തിപിടിക്കുക</string>
+</resources>
