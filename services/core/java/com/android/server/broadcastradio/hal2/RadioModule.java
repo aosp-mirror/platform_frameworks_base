@@ -233,17 +233,23 @@ class RadioModule {
     }
 
     private void fanoutAidlCallbackLocked(AidlCallbackRunnable runnable) {
+        List<TunerSession> deadSessions = null;
         for (TunerSession tunerSession : mAidlTunerSessions) {
             try {
                 runnable.run(tunerSession.mCallback);
             } catch (DeadObjectException ex) {
-                // The other side died without calling close(), so just purge it from our
-                // records.
+                // The other side died without calling close(), so just purge it from our records.
                 Slog.e(TAG, "Removing dead TunerSession");
-                mAidlTunerSessions.remove(tunerSession);
+                if (deadSessions == null) {
+                    deadSessions = new ArrayList<>();
+                }
+                deadSessions.add(tunerSession);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to invoke ITunerCallback: ", ex);
             }
+        }
+        if (deadSessions != null) {
+            mAidlTunerSessions.removeAll(deadSessions);
         }
     }
 

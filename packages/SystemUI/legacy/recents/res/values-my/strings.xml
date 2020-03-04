@@ -19,25 +19,25 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_desc_recent_apps" msgid="2427210347871321373">"အနှစ်ချုပ်။"</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="2355882496933479534">"<xliff:g id="APP">%s</xliff:g> ကို ပယ်မည်။"</string>
-    <string name="accessibility_recents_item_dismissed" msgid="4816790842084268400">"<xliff:g id="APP">%s</xliff:g> ကို ဖယ်ထုတ်ထားသည်။"</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="5693205751863608046">"လတ်တလော အပလီကေးရှင်းအားလုံး ဖယ်ထုတ်ထားသည်။"</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="3406797323476801016">"<xliff:g id="APP">%s</xliff:g> အပလီကေးရှင်း အချက်အလက်ကို ဖွင့်မည်။"</string>
-    <string name="accessibility_recents_item_launched" msgid="4519918148638221791">"<xliff:g id="APP">%s</xliff:g> ကို စတင်နေသည်။"</string>
-    <string name="recents_empty_message" msgid="7967713254531861311">"လတ်တလော ဖွင့်ထားသည်များ မရှိပါ"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="1850214584987361375">"အားလုံးကို ဖယ်ရှားပြီးပါပြီ"</string>
-    <string name="recents_app_info_button_label" msgid="8732926607391786762">"အပလီကေးရှင်း အချက်အလက်"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6087750201863853365">"မျက်နှာပြင် ပင်ထိုးမှု"</string>
-    <string name="recents_search_bar_label" msgid="638132045925945941">"ရှာရန်"</string>
-    <string name="recents_launch_error_message" msgid="9107963563503438012">"<xliff:g id="APP">%s</xliff:g> ကို စတင်၍ မရပါ။"</string>
-    <string name="recents_launch_disabled_message" msgid="826461671965217243">"အန္တရာယ်ကင်းမှု စနစ်တွင် <xliff:g id="APP">%s</xliff:g> ကို ပိတ်ထားပါသည်။"</string>
-    <string name="recents_stack_action_button_label" msgid="1974273390109881497">"အားလုံး ဖယ်ရှားရန်"</string>
-    <string name="recents_drag_hint_message" msgid="610417221848280136">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းကို အသုံးပြုရန် ဤနေရာသို့ ဖိဆွဲပါ"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="488987777874979435">"အလျားလိုက် ခွဲရန်"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="2498375296906391117">"ဒေါင်လိုက် ခွဲရန်"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="7368405969130304811">"စိတ်ကြိုက် ခွဲရန်"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="8773505308411722524">"မျက်နှာပြင်ကို အပေါ်သို့ ခွဲရန်"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="722594718192007972">"မျက်နှာပြင်ကို ဘယ်ဘက်သို့ ခွဲရန်"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="2479764030969301514">"မျက်နှာပြင်ကို ညာဘက်သို့ ခွဲရန်"</string>
+    <string name="accessibility_desc_recent_apps" msgid="7556662260274154402">"အနှစ်ချုပ်။"</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="1987979391731836442">"<xliff:g id="APP">%s</xliff:g> ကို ပယ်မည်။"</string>
+    <string name="accessibility_recents_item_dismissed" msgid="99149432850273747">"<xliff:g id="APP">%s</xliff:g> ကို ဖယ်ထုတ်ထားသည်။"</string>
+    <string name="accessibility_recents_all_items_dismissed" msgid="2584965907377043255">"လတ်တလော အပလီကေးရှင်းအားလုံး ဖယ်ထုတ်ထားသည်။"</string>
+    <string name="accessibility_recents_item_open_app_info" msgid="5843409407745673280">"<xliff:g id="APP">%s</xliff:g> အပလီကေးရှင်း အချက်အလက်ကို ဖွင့်မည်။"</string>
+    <string name="accessibility_recents_item_launched" msgid="2439069760172103351">"<xliff:g id="APP">%s</xliff:g> ကို စတင်နေသည်။"</string>
+    <string name="recents_empty_message" msgid="4718114148356836203">"လတ်တလော ဖွင့်ထားသည်များ မရှိပါ"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2873215505812268822">"အားလုံးကို ဖယ်ရှားပြီးပါပြီ"</string>
+    <string name="recents_app_info_button_label" msgid="5371319329151716224">"အပလီကေးရှင်း အချက်အလက်"</string>
+    <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"မျက်နှာပြင် ပင်ထိုးမှု"</string>
+    <string name="recents_search_bar_label" msgid="1910412649656301014">"ရှာရန်"</string>
+    <string name="recents_launch_error_message" msgid="8622817255751191462">"<xliff:g id="APP">%s</xliff:g> ကို စတင်၍ မရပါ။"</string>
+    <string name="recents_launch_disabled_message" msgid="1055364973720665718">"အန္တရာယ်ကင်းမှု စနစ်တွင် <xliff:g id="APP">%s</xliff:g> ကို ပိတ်ထားပါသည်။"</string>
+    <string name="recents_stack_action_button_label" msgid="7396636872618564201">"အားလုံး ဖယ်ရှားရန်"</string>
+    <string name="recents_drag_hint_message" msgid="3309424039418402577">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းကို အသုံးပြုရန် ဤနေရာသို့ ဖိဆွဲပါ"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="3361339364058788960">"အလျားလိုက် ခွဲရန်"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="5525527159623478768">"ဒေါင်လိုက် ခွဲရန်"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="8749946272357062148">"စိတ်ကြိုက် ခွဲရန်"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="4034331660613790457">"မျက်နှာပြင်ကို အပေါ်သို့ ခွဲရန်"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="6523694635909067802">"မျက်နှာပြင်ကို ဘယ်ဘက်သို့ ခွဲရန်"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="559141375304415400">"မျက်နှာပြင်ကို ညာဘက်သို့ ခွဲရန်"</string>
 </resources>

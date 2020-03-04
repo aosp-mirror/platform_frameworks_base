@@ -110,22 +110,30 @@ public class CarFacetButton extends LinearLayout {
                 mComponentNames = componentNameString.split(FACET_FILTER_DELIMITER);
             }
 
-            setOnClickListener(v -> {
-                intent.putExtra(EXTRA_FACET_LAUNCH_PICKER, mSelected);
-                mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-            });
+            intent.putExtra(EXTRA_FACET_LAUNCH_PICKER, mSelected);
+            setOnClickListener(getButtonClickListener(intent));
 
             if (longPressIntentString != null) {
                 final Intent longPressIntent = Intent.parseUri(longPressIntentString,
                         Intent.URI_INTENT_SCHEME);
-                setOnLongClickListener(v -> {
-                    mContext.startActivityAsUser(longPressIntent, UserHandle.CURRENT);
-                    return true;
-                });
+                setOnLongClickListener(getButtonLongClickListener(longPressIntent));
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to attach intent", e);
         }
+    }
+
+    /** Defines the behavior of a button click. */
+    protected OnClickListener getButtonClickListener(Intent toSend) {
+        return v -> mContext.startActivityAsUser(toSend, UserHandle.CURRENT);
+    }
+
+    /** Defines the behavior of a long click. */
+    protected OnLongClickListener getButtonLongClickListener(Intent toSend) {
+        return v -> {
+            mContext.startActivityAsUser(toSend, UserHandle.CURRENT);
+            return true;
+        };
     }
 
     private void setupIcons(TypedArray styledAttributes) {

@@ -321,7 +321,6 @@ java_defaults {
         "core/java/android/service/vr/IVrManager.aidl",
         "core/java/android/service/vr/IVrStateCallbacks.aidl",
         "core/java/android/service/watchdog/IExplicitHealthCheckService.aidl",
-        "core/java/android/service/watchdog/PackageConfig.aidl",
         "core/java/android/print/ILayoutResultCallback.aidl",
         "core/java/android/print/IPrinterDiscoveryObserver.aidl",
         "core/java/android/print/IPrintDocumentAdapter.aidl",
@@ -421,6 +420,7 @@ java_defaults {
         "core/java/com/android/internal/appwidget/IAppWidgetHost.aidl",
         "core/java/com/android/internal/backup/IBackupTransport.aidl",
         "core/java/com/android/internal/backup/IObbBackupService.aidl",
+        "core/java/com/android/internal/car/ICarStatsService.aidl",
         "core/java/com/android/internal/inputmethod/IInputContentUriToken.aidl",
         "core/java/com/android/internal/inputmethod/IInputMethodPrivilegedOperations.aidl",
         "core/java/com/android/internal/inputmethod/IMultiClientInputMethod.aidl",
@@ -439,7 +439,6 @@ java_defaults {
         "core/java/com/android/internal/os/IShellCallback.aidl",
         "core/java/com/android/internal/statusbar/IStatusBar.aidl",
         "core/java/com/android/internal/statusbar/IStatusBarService.aidl",
-        "core/java/com/android/internal/statusbar/RegisterStatusBarResult.aidl",
         "core/java/com/android/internal/textservice/ISpellCheckerService.aidl",
         "core/java/com/android/internal/textservice/ISpellCheckerServiceCallback.aidl",
         "core/java/com/android/internal/textservice/ISpellCheckerSession.aidl",
@@ -1399,6 +1398,7 @@ droidstubs {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args,
+    write_sdk_values: true,
 }
 
 droidstubs {
@@ -1408,6 +1408,7 @@ droidstubs {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi ",
+    write_sdk_values: true,
 }
 
 droiddoc {
@@ -1431,7 +1432,6 @@ droiddoc {
     ],
     proofread_file: "offline-sdk-docs-proofrerad.txt",
     args: framework_docs_only_args + " -offlinemode -title \"Android SDK\"",
-    write_sdk_values: true,
     static_doc_index_redirect: "docs/docs-preview-index.html",
 }
 
@@ -1449,7 +1449,6 @@ droiddoc {
     ],
     proofread_file: "offline-sdk-referenceonly-docs-proofrerad.txt",
     args: framework_docs_only_args + " -offlinemode -title \"Android SDK\" -referenceonly",
-    write_sdk_values: true,
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
     static_doc_properties: "docs/source.properties",
 }
@@ -1469,7 +1468,6 @@ droiddoc {
     proofread_file: "offline-system-sdk-referenceonly-docs-proofrerad.txt",
     args: framework_docs_only_args  + " -hide 101 -hide 104 -hide 108" +
         " -offlinemode -title \"Android System SDK\" -referenceonly",
-    write_sdk_values: true,
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
     static_doc_properties: "docs/source.properties",
 }

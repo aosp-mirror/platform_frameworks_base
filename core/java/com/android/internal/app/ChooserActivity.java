@@ -43,6 +43,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LabeledIntent;
@@ -53,6 +54,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
@@ -68,6 +70,7 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -77,10 +80,12 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 import android.provider.DocumentsContract;
 import android.provider.Downloads;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.service.chooser.ChooserTarget;
 import android.service.chooser.ChooserTargetService;
 import android.service.chooser.IChooserTargetResult;
@@ -103,6 +108,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -119,9 +125,11 @@ import com.android.internal.widget.ResolverDrawerLayout;
 
 import com.google.android.collect.Lists;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.URISyntaxException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -151,6 +159,9 @@ public class ChooserActivity extends ResolverActivity {
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
     private static final String PREF_NUM_SHEET_EXPANSIONS = "pref_num_sheet_expansions";
+
+    private static final String CHIP_LABEL_METADATA_KEY = "android.service.chooser.chip_label";
+    private static final String CHIP_ICON_METADATA_KEY = "android.service.chooser.chip_icon";
 
     private static final boolean DEBUG = false;
 
@@ -251,6 +262,9 @@ public class ChooserActivity extends ResolverActivity {
 
     private static final int MAX_EXTRA_INITIAL_INTENTS = 2;
     private static final int MAX_EXTRA_CHOOSER_TARGETS = 2;
+
+    private SharedPreferences mPinnedSharedPrefs;
+    private static final String PINNED_SHARED_PREFS_NAME = "chooser_pin_settings";
 
     private boolean mListViewDataChanged = false;
 
@@ -515,6 +529,15 @@ public class ChooserActivity extends ResolverActivity {
         mIsSuccessfullySelected = false;
         Intent intent = getIntent();
         Parcelable targetParcelable = intent.getParcelableExtra(Intent.EXTRA_INTENT);
+        if (targetParcelable instanceof Uri) {
+            try {
+                targetParcelable = Intent.parseUri(targetParcelable.toString(),
+                        Intent.URI_INTENT_SCHEME);
+            } catch (URISyntaxException ex) {
+                // doesn't parse as an intent; let the next test fail and error out
+            }
+        }
+
         if (!(targetParcelable instanceof Intent)) {
             Log.w("ChooserActivity", "Target is not an intent: " + targetParcelable);
             finish();
@@ -595,6 +618,8 @@ public class ChooserActivity extends ResolverActivity {
         mRefinementIntentSender = intent.getParcelableExtra(
                 Intent.EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER);
         setSafeForwardingMode(true);
+
+        mPinnedSharedPrefs = getPinnedSharedPrefs(this);
 
         pa = intent.getParcelableArrayExtra(Intent.EXTRA_EXCLUDE_COMPONENTS);
         if (pa != null) {
@@ -727,6 +752,23 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+
+    static SharedPreferences getPinnedSharedPrefs(Context context) {
+        // The code below is because in the android:ui process, no one can hear you scream.
+        // The package info in the context isn't initialized in the way it is for normal apps,
+        // so the standard, name-based context.getSharedPreferences doesn't work. Instead, we
+        // build the path manually below using the same policy that appears in ContextImpl.
+        // This fails silently under the hood if there's a problem, so if we find ourselves in
+        // the case where we don't have access to credential encrypted storage we just won't
+        // have our pinned target info.
+        final File prefsFile = new File(new File(
+                Environment.getDataUserCePackageDirectory(StorageManager.UUID_PRIVATE_INTERNAL,
+                        context.getUserId(), context.getPackageName()),
+                "shared_prefs"),
+                PINNED_SHARED_PREFS_NAME + ".xml");
+        return context.getSharedPreferences(prefsFile, MODE_PRIVATE);
+    }
+
     /**
      * Returns true if app prediction service is defined and the component exists on device.
      */
@@ -774,10 +816,17 @@ public class ChooserActivity extends ResolverActivity {
         return new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
-                mAdapter.handlePackagesChanged();
-                bindProfileView();
+                handlePackagesChanged();
             }
         };
+    }
+
+    /**
+     * Update UI to reflect changes in data.
+     */
+    public void handlePackagesChanged() {
+        mAdapter.handlePackagesChanged();
+        bindProfileView();
     }
 
     private void onCopyButtonClicked(View v) {
@@ -864,6 +913,108 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+    private ComponentName getNearbySharingComponent() {
+        String nearbyComponent = Settings.Secure.getString(
+                getContentResolver(),
+                Settings.Secure.NEARBY_SHARING_COMPONENT);
+        if (TextUtils.isEmpty(nearbyComponent)) {
+            nearbyComponent = getString(R.string.config_defaultNearbySharingComponent);
+        }
+        if (TextUtils.isEmpty(nearbyComponent)) {
+            return null;
+        }
+        return ComponentName.unflattenFromString(nearbyComponent);
+    }
+
+    private TargetInfo getNearbySharingTarget(Intent originalIntent) {
+        final ComponentName cn = getNearbySharingComponent();
+        if (cn == null) return null;
+
+        final Intent resolveIntent = new Intent();
+        resolveIntent.setComponent(cn);
+        final ResolveInfo ri = getPackageManager().resolveActivity(
+                resolveIntent, PackageManager.GET_META_DATA);
+        if (ri == null || ri.activityInfo == null) {
+            Log.e(TAG, "Device-specified nearby sharing component (" + cn
+                    + ") not available");
+            return null;
+        }
+
+        // Allow the nearby sharing component to provide a more appropriate icon and label
+        // for the chip.
+        CharSequence name = null;
+        Drawable icon = null;
+        final Bundle metaData = ri.activityInfo.metaData;
+        if (metaData != null) {
+            try {
+                final Resources pkgRes = getPackageManager().getResourcesForActivity(cn);
+                final int nameResId = metaData.getInt(CHIP_LABEL_METADATA_KEY);
+                name = pkgRes.getString(nameResId);
+                final int resId = metaData.getInt(CHIP_ICON_METADATA_KEY);
+                icon = pkgRes.getDrawable(resId);
+            } catch (Resources.NotFoundException ex) {
+            } catch (NameNotFoundException ex) {
+            }
+        }
+        if (TextUtils.isEmpty(name)) {
+            name = ri.loadLabel(getPackageManager());
+        }
+        if (icon == null) {
+            icon = ri.loadIcon(getPackageManager());
+        }
+
+        final DisplayResolveInfo dri = new DisplayResolveInfo(
+                originalIntent, ri, name, "", null);
+        dri.setDisplayIcon(icon);
+        return dri;
+    }
+
+    private Button createActionButton(Drawable icon, CharSequence title, View.OnClickListener r) {
+        Button b = (Button) LayoutInflater.from(this).inflate(R.layout.chooser_action_button, null);
+        if (icon != null) {
+            final int size = getResources()
+                    .getDimensionPixelSize(R.dimen.chooser_action_button_icon_size);
+            icon.setBounds(0, 0, size, size);
+            b.setCompoundDrawablesRelative(icon, null, null, null);
+        }
+        b.setText(title);
+        b.setOnClickListener(r);
+        return b;
+    }
+
+    private Button createCopyButton() {
+        final Button b = createActionButton(
+                getDrawable(R.drawable.ic_menu_copy_material),
+                getString(R.string.copy), this::onCopyButtonClicked);
+        b.setId(R.id.chooser_copy_button);
+        return b;
+    }
+
+    private @Nullable Button createNearbyButton(Intent originalIntent) {
+        final TargetInfo ti = getNearbySharingTarget(originalIntent);
+        if (ti == null) return null;
+
+        return createActionButton(
+                ti.getDisplayIcon(),
+                ti.getDisplayLabel(),
+                (View unused) -> {
+                    safelyStartActivity(ti);
+                    finish();
+                }
+        );
+    }
+
+    private void addActionButton(ViewGroup parent, Button b) {
+        if (b == null) return;
+        final ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
+                        LayoutParams.WRAP_CONTENT,
+                        LayoutParams.WRAP_CONTENT
+                );
+        final int gap = getResources().getDimensionPixelSize(R.dimen.resolver_icon_margin) / 2;
+        lp.setMarginsRelative(gap, 0, gap, 0);
+        parent.addView(b, lp);
+    }
+
     private ViewGroup displayContentPreview(@ContentPreviewType int previewType,
             Intent targetIntent, LayoutInflater layoutInflater, ViewGroup convertView,
             ViewGroup parent) {
@@ -897,8 +1048,10 @@ public class ChooserActivity extends ResolverActivity {
         ViewGroup contentPreviewLayout = (ViewGroup) layoutInflater.inflate(
                 R.layout.chooser_grid_preview_text, parent, false);
 
-        contentPreviewLayout.findViewById(R.id.copy_button).setOnClickListener(
-                this::onCopyButtonClicked);
+        final ViewGroup actionRow =
+                (ViewGroup) contentPreviewLayout.findViewById(R.id.chooser_action_row);
+        addActionButton(actionRow, createCopyButton());
+        addActionButton(actionRow, createNearbyButton(targetIntent));
 
         CharSequence sharingText = targetIntent.getCharSequenceExtra(Intent.EXTRA_TEXT);
         if (sharingText == null) {
@@ -1056,7 +1209,8 @@ public class ChooserActivity extends ResolverActivity {
 
         // TODO(b/120417119): Disable file copy until after moving to sysui,
         // due to permissions issues
-        contentPreviewLayout.findViewById(R.id.file_copy_button).setVisibility(View.GONE);
+        //((ViewGroup) contentPreviewLayout.findViewById(R.id.chooser_action_row))
+        //        .addView(createCopyButton());
 
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
@@ -1273,9 +1427,10 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         ComponentName name = ri.activityInfo.getComponentName();
+        boolean pinned = mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
         ResolverTargetActionsDialogFragment f =
                 new ResolverTargetActionsDialogFragment(ri.loadLabel(getPackageManager()),
-                        name);
+                    name, pinned);
         f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
     }
 
@@ -1507,7 +1662,7 @@ public class ChooserActivity extends ResolverActivity {
             }
             return new IntentFilter(intent.getAction(), dataString);
         } catch (Exception e) {
-            Log.e(TAG, "failed to get target intent filter " + e);
+            Log.e(TAG, "failed to get target intent filter", e);
             return null;
         }
     }
@@ -1952,6 +2107,12 @@ public class ChooserActivity extends ResolverActivity {
             }
             return false;
         }
+
+        @Override
+        public boolean isComponentPinned(ComponentName name) {
+            return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
+        }
+
     }
 
     @Override
@@ -2085,6 +2246,10 @@ public class ChooserActivity extends ResolverActivity {
         public boolean isSuspended() {
             return false;
         }
+
+        public boolean isPinned() {
+            return false;
+        }
     }
 
     final class PlaceHolderTargetInfo extends NotSelectableTargetInfo {
@@ -2171,6 +2336,10 @@ public class ChooserActivity extends ResolverActivity {
 
         public boolean isSuspended() {
             return mIsSuspended;
+        }
+
+        public boolean isPinned() {
+            return mSourceInfo != null && mSourceInfo.isPinned();
         }
 
         /**
@@ -2422,6 +2591,12 @@ public class ChooserActivity extends ResolverActivity {
                 mResolverDrawerLayout.setCollapsibleHeightReserved(Math.min(offset, bottom - top));
             });
         }
+    }
+
+    @Override
+    protected boolean shouldAddFooterView() {
+        // To accommodate for window insets
+        return true;
     }
 
     public class ChooserListAdapter extends ResolveListAdapter {

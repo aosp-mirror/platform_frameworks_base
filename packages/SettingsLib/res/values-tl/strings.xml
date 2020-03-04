@@ -20,449 +20,449 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Hindi makapag-scan ng mga network"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"Wala"</string>
-    <string name="wifi_remembered" msgid="4955746899347821096">"Na-save"</string>
-    <string name="wifi_disconnected" msgid="8085419869003922556">"Nadiskonekta"</string>
-    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Naka-disable"</string>
-    <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Pagkabigo ng Configuration ng IP"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Hindi nakakonekta dahil mababa ang kalidad ng network"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Pagkabigo ng Koneksyon sa WiFi"</string>
-    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problema sa pagpapatotoo"</string>
-    <string name="wifi_cant_connect" msgid="5410016875644565884">"Hindi makakonekta"</string>
-    <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"Hindi makakonekta sa \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
-    <string name="wifi_check_password_try_again" msgid="516958988102584767">"Suriin ang password at subukang muli"</string>
-    <string name="wifi_not_in_range" msgid="1136191511238508967">"Wala sa sakop"</string>
-    <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Hindi awtomatikong kokonekta"</string>
-    <string name="wifi_no_internet" msgid="4663834955626848401">"Walang access sa internet"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Na-save ng <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_via_network_scorer" msgid="5713793306870815341">"Awtomatikong nakakonekta sa pamamagitan ng %1$s"</string>
-    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Awtomatikong nakakonekta sa pamamagitan ng provider ng rating ng network"</string>
-    <string name="connected_via_passpoint" msgid="2826205693803088747">"Nakakonekta sa pamamagitan ng %1$s"</string>
-    <string name="connected_via_app" msgid="5571999941988929520">"Nakakonekta sa pamamagitan ng <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="available_via_passpoint" msgid="1617440946846329613">"Available sa pamamagitan ng %1$s"</string>
-    <string name="tap_to_sign_up" msgid="6449724763052579434">"I-tap para mag-sign up"</string>
-    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Nakakonekta, walang internet"</string>
-    <string name="wifi_limited_connection" msgid="7717855024753201527">"Limitadong koneksyon"</string>
-    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Walang internet"</string>
-    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Kinakailangang mag-sign in"</string>
-    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Pansamantalang puno ang access point"</string>
-    <string name="connected_via_carrier" msgid="7583780074526041912">"Nakakonekta sa pamamagitan ng %1$s"</string>
-    <string name="available_via_carrier" msgid="1469036129740799053">"Available sa pamamagitan ng %1$s"</string>
-    <string name="osu_opening_provider" msgid="5488997661548640424">"Binubuksan ang <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
-    <string name="osu_connect_failed" msgid="2187750899158158934">"Hindi makakonekta"</string>
-    <string name="osu_completing_sign_up" msgid="9037638564719197082">"Kinukumpleto ang pag-sign up…"</string>
-    <string name="osu_sign_up_failed" msgid="7296159750352873260">"Hindi makumpleto ang pag-sign up. I-tap para subukang muli."</string>
-    <string name="osu_sign_up_complete" msgid="8207626049093289203">"Kumpleto na ang pag-sign up. Kumokonekta…"</string>
-    <string name="speed_label_very_slow" msgid="1867055264243608530">"Napakabagal"</string>
-    <string name="speed_label_slow" msgid="813109590815810235">"Mabagal"</string>
-    <string name="speed_label_okay" msgid="2331665440671174858">"OK"</string>
-    <string name="speed_label_medium" msgid="3175763313268941953">"Katamtaman"</string>
-    <string name="speed_label_fast" msgid="7715732164050975057">"Mabilis"</string>
-    <string name="speed_label_very_fast" msgid="2265363430784523409">"Napakabilis"</string>
-    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Hindi nakakonekta"</string>
-    <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Nadidiskonekta..."</string>
-    <string name="bluetooth_connecting" msgid="8555009514614320497">"Kumukonekta…"</string>
-    <string name="bluetooth_connected" msgid="5427152882755735944">"Nakakonekta<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="1426882272690346242">"Pinapares…"</string>
-    <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"Nakakonekta (walang telepono)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"Nakakonekta (walang media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"Nakakonekta (walang access sa mensahe)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"Nakakonekta (walang telepono o media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"Nakakonekta, baterya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Nakakonekta (walang telepono), baterya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Nakakonekta (walang media), baterya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Nakakonekta (walang telepono o media), baterya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktibo, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterya"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Aktibo, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterya, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterya"</string>
-    <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterya"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterya, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterya"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktibo"</string>
-    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Audio ng media"</string>
-    <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Mga tawag sa telepono"</string>
-    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Paglilipat ng file"</string>
-    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Device sa pag-input"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Access sa internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Pagbabahagi ng contact"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Gamitin para sa pagbabahagi ng contact"</string>
-    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Pagbabahagi ng koneksyon sa internet"</string>
-    <string name="bluetooth_profile_map" msgid="1019763341565580450">"Mga Text Message"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Access sa SIM"</string>
-    <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
-    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD audio"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Mga Hearing Aid"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Nakakonekta sa Mga Hearing Aid"</string>
-    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Konektado sa media audio"</string>
-    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Nakakonekta sa audio ng telepono"</string>
-    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Nakakonekta sa server sa paglilipat ng file"</string>
-    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Nakakonekta sa mapa"</string>
-    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Nakakonekta sa SAP"</string>
-    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Hindi konektado sa server ng paglipat ng file"</string>
-    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Nakakonekta sa device ng input"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Nakakonekta sa device para sa access sa internet"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Pagbabahagi ng lokal na koneksyon sa internet sa device"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Gamitin para sa pag-access sa internet"</string>
-    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Gamitin para sa mapa"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Gamitin para sa pag-access sa SIM"</string>
-    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Gamitin para sa media audio"</string>
-    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Ginagamit para sa audio ng telepono"</string>
-    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Ginagamit para sa paglilipat ng file"</string>
-    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Gamitin para sa input"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Gamitin para sa Mga Hearing Aid"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Pares"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"IPARES"</string>
-    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Kanselahin"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Nagbibigay ang pagpapares ng access sa iyong mga contact at history ng tawag kapag nakakonekta."</string>
-    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Hindi maipares sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Hindi maipares sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> dahil sa maling PIN o passkey."</string>
-    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Hindi magawang makipag-ugnay sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Tinanggihan ng <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ang pagpapares."</string>
-    <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"Computer"</string>
-    <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"Headset"</string>
-    <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"Telepono"</string>
-    <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"Imaging"</string>
-    <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Headphone"</string>
-    <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Input Peripheral"</string>
-    <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Nagpapares ang kaliwang hearing aid…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Nagpapares ang kanang hearing aid…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Kaliwa - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterya"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Kanan - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterya"</string>
-    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Naka-off ang Wifi."</string>
-    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Nakadiskonekta ang Wifi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"May isang bar ang Wifi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"May dalawang bar ang Wifi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"May tatlong bar ang Wifi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Puno ang signal ng Wifi."</string>
-    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Bukas na network"</string>
-    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Ligtas na network"</string>
-    <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
-    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Mga inalis na app"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Mga inalis na apps at user"</string>
-    <string name="data_usage_ota" msgid="5377889154805560860">"Mga pag-update ng system"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Pag-tether sa USB"</string>
-    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Portable na hotspot"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Pag-tether ng Bluetooth"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Nagte-tether"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Pag-tether at portable hotspot"</string>
-    <string name="managed_user_title" msgid="8109605045406748842">"Lahat ng app sa trabaho"</string>
-    <string name="user_guest" msgid="8475274842845401871">"Bisita"</string>
-    <string name="unknown" msgid="1592123443519355854">"Hindi Kilala"</string>
-    <string name="running_process_item_user_label" msgid="3129887865552025943">"User: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="launch_defaults_some" msgid="313159469856372621">"May nakatakdang ilang default"</string>
-    <string name="launch_defaults_none" msgid="4241129108140034876">"Walang nakatakdang mga default"</string>
-    <string name="tts_settings" msgid="8186971894801348327">"Mga setting ng text-to-speech"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Output ng text-to-speech"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"Rate ng pagsasalita"</string>
-    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Bilis ng pagsambit sa teksto"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Pitch"</string>
-    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Nakakaapekto sa tono ng naka-synthesize na pananalita"</string>
-    <string name="tts_default_lang_title" msgid="8018087612299820556">"Wika"</string>
-    <string name="tts_lang_use_system" msgid="2679252467416513208">"Gamitin ang wika ng system"</string>
-    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Walang napiling wika"</string>
-    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Itinatakda ang boses na partikular sa wika para sa sinasambit na teksto"</string>
-    <string name="tts_play_example_title" msgid="7094780383253097230">"Makinig sa isang halimbawa"</string>
-    <string name="tts_play_example_summary" msgid="8029071615047894486">"Mag-play ng maikling pagpapakita ng speech synthesis"</string>
-    <string name="tts_install_data_title" msgid="4264378440508149986">"I-install ang data ng boses"</string>
-    <string name="tts_install_data_summary" msgid="5742135732511822589">"I-install ang data ng boses na kinakailangan para sa speech synthesis"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Maaaring makolekta ng speech synthesis engine na ito ang lahat ng teksto na sasabihin, kabilang ang personal na data tulad ng mga password at mga numero ng credit card. Nanggagaling ito mula sa <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> engine. Paganahin ang paggamit ng speech synthesis engine na ito?"</string>
-    <string name="tts_engine_network_required" msgid="1190837151485314743">"Nangangailangan ang wikang ito ng gumaganang koneksyon sa network para sa text-to-speech na output."</string>
-    <string name="tts_default_sample_string" msgid="4040835213373086322">"Isa itong halimbawa ng speech synthesis"</string>
-    <string name="tts_status_title" msgid="7268566550242584413">"Status ng default na wika"</string>
-    <string name="tts_status_ok" msgid="1309762510278029765">"Ganap na sinusuportahan ang <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
-    <string name="tts_status_requires_network" msgid="6042500821503226892">"Kailangan ng <xliff:g id="LOCALE">%1$s</xliff:g> ng koneksyon sa network"</string>
-    <string name="tts_status_not_supported" msgid="4491154212762472495">"Hindi sinusuportahan ang <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
-    <string name="tts_status_checking" msgid="5339150797940483592">"Sinusuri…"</string>
-    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Mga setting para sa <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
-    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Ilunsad ang mga setting ng engine"</string>
-    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Ginustong engine"</string>
-    <string name="tts_general_section_title" msgid="4402572014604490502">"Pangkalahatan"</string>
-    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"I-reset ang pitch ng pagsasalita"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"I-reset ang pitch sa default na pagbigkas ng text."</string>
+    <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Hindi makapag-scan ng mga network"</string>
+    <string name="wifi_security_none" msgid="7392696451280611452">"Wala"</string>
+    <string name="wifi_remembered" msgid="3266709779723179188">"Na-save"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Nadiskonekta"</string>
+    <string name="wifi_disabled_generic" msgid="2651916945380294607">"Naka-disable"</string>
+    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Pagkabigo ng Configuration ng IP"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Hindi nakakonekta dahil mababa ang kalidad ng network"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Pagkabigo ng Koneksyon sa WiFi"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problema sa pagpapatotoo"</string>
+    <string name="wifi_cant_connect" msgid="5718417542623056783">"Hindi makakonekta"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Hindi makakonekta sa \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Suriin ang password at subukang muli"</string>
+    <string name="wifi_not_in_range" msgid="1541760821805777772">"Wala sa sakop"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Hindi awtomatikong kokonekta"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"Walang access sa internet"</string>
+    <string name="saved_network" msgid="7143698034077223645">"Na-save ng <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_via_network_scorer" msgid="7665725527352893558">"Awtomatikong nakakonekta sa pamamagitan ng %1$s"</string>
+    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Awtomatikong nakakonekta sa pamamagitan ng provider ng rating ng network"</string>
+    <string name="connected_via_passpoint" msgid="7735442932429075684">"Nakakonekta sa pamamagitan ng %1$s"</string>
+    <string name="connected_via_app" msgid="3532267661404276584">"Nakakonekta sa pamamagitan ng <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="available_via_passpoint" msgid="1716000261192603682">"Available sa pamamagitan ng %1$s"</string>
+    <string name="tap_to_sign_up" msgid="5356397741063740395">"I-tap para mag-sign up"</string>
+    <string name="wifi_connected_no_internet" msgid="2381729074310543563">"Nakakonekta, walang internet"</string>
+    <string name="wifi_limited_connection" msgid="1184778285475204682">"Limitadong koneksyon"</string>
+    <string name="wifi_status_no_internet" msgid="3799933875988829048">"Walang internet"</string>
+    <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Kinakailangang mag-sign in"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Pansamantalang puno ang access point"</string>
+    <string name="connected_via_carrier" msgid="1968057009076191514">"Nakakonekta sa pamamagitan ng %1$s"</string>
+    <string name="available_via_carrier" msgid="465598683092718294">"Available sa pamamagitan ng %1$s"</string>
+    <string name="osu_opening_provider" msgid="4318105381295178285">"Binubuksan ang <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
+    <string name="osu_connect_failed" msgid="9107873364807159193">"Hindi makakonekta"</string>
+    <string name="osu_completing_sign_up" msgid="8412636665040390901">"Kinukumpleto ang pag-sign up…"</string>
+    <string name="osu_sign_up_failed" msgid="5605453599586001793">"Hindi makumpleto ang pag-sign up. I-tap para subukang muli."</string>
+    <string name="osu_sign_up_complete" msgid="7640183358878916847">"Kumpleto na ang pag-sign up. Kumokonekta…"</string>
+    <string name="speed_label_very_slow" msgid="8526005255731597666">"Napakabagal"</string>
+    <string name="speed_label_slow" msgid="6069917670665664161">"Mabagal"</string>
+    <string name="speed_label_okay" msgid="1253594383880810424">"OK"</string>
+    <string name="speed_label_medium" msgid="9078405312828606976">"Katamtaman"</string>
+    <string name="speed_label_fast" msgid="2677719134596044051">"Mabilis"</string>
+    <string name="speed_label_very_fast" msgid="8215718029533182439">"Napakabilis"</string>
+    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Hindi nakakonekta"</string>
+    <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Nadidiskonekta..."</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"Kumukonekta…"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"Nakakonekta<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Pinapares…"</string>
+    <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Nakakonekta (walang telepono)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Nakakonekta (walang media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Nakakonekta (walang access sa mensahe)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Nakakonekta (walang telepono o media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Nakakonekta, baterya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Nakakonekta (walang telepono), baterya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Nakakonekta (walang media), baterya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Nakakonekta (walang telepono o media), baterya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktibo, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterya"</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktibo, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterya, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterya"</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterya"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterya, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterya"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktibo"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio ng media"</string>
+    <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Mga tawag sa telepono"</string>
+    <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Paglilipat ng file"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Device sa pag-input"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Access sa internet"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Pagbabahagi ng contact"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Gamitin para sa pagbabahagi ng contact"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Pagbabahagi ng koneksyon sa internet"</string>
+    <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mga Text Message"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Access sa SIM"</string>
+    <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Mga Hearing Aid"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Nakakonekta sa Mga Hearing Aid"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Konektado sa media audio"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Nakakonekta sa audio ng telepono"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Nakakonekta sa server sa paglilipat ng file"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Nakakonekta sa mapa"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Nakakonekta sa SAP"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Hindi konektado sa server ng paglipat ng file"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Nakakonekta sa device ng input"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Nakakonekta sa device para sa access sa internet"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Pagbabahagi ng lokal na koneksyon sa internet sa device"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Gamitin para sa pag-access sa internet"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Gamitin para sa mapa"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Gamitin para sa pag-access sa SIM"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Gamitin para sa media audio"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Ginagamit para sa audio ng telepono"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Ginagamit para sa paglilipat ng file"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Gamitin para sa input"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Gamitin para sa Mga Hearing Aid"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Pares"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"IPARES"</string>
+    <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Kanselahin"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Nagbibigay ang pagpapares ng access sa iyong mga contact at history ng tawag kapag nakakonekta."</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Hindi maipares sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Hindi maipares sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> dahil sa maling PIN o passkey."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Hindi magawang makipag-ugnay sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Tinanggihan ng <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ang pagpapares."</string>
+    <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
+    <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"Headset"</string>
+    <string name="bluetooth_talkback_phone" msgid="868393783858123880">"Telepono"</string>
+    <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Imaging"</string>
+    <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Headphone"</string>
+    <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Input Peripheral"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Nagpapares ang kaliwang hearing aid…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Nagpapares ang kanang hearing aid…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Kaliwa - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterya"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Kanan - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterya"</string>
+    <string name="accessibility_wifi_off" msgid="1195445715254137155">"Naka-off ang Wifi."</string>
+    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Nakadiskonekta ang Wifi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"May isang bar ang Wifi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"May dalawang bar ang Wifi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"May tatlong bar ang Wifi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Puno ang signal ng Wifi."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Bukas na network"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Ligtas na network"</string>
+    <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
+    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Mga inalis na app"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Mga inalis na apps at user"</string>
+    <string name="data_usage_ota" msgid="7984667793701597001">"Mga pag-update ng system"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Pag-tether sa USB"</string>
+    <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Portable na hotspot"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Pag-tether ng Bluetooth"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Nagte-tether"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"Pag-tether at portable hotspot"</string>
+    <string name="managed_user_title" msgid="449081789742645723">"Lahat ng app sa trabaho"</string>
+    <string name="user_guest" msgid="6939192779649870792">"Bisita"</string>
+    <string name="unknown" msgid="3544487229740637809">"Hindi Kilala"</string>
+    <string name="running_process_item_user_label" msgid="3988506293099805796">"User: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="launch_defaults_some" msgid="3631650616557252926">"May nakatakdang ilang default"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Walang nakatakdang mga default"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Mga setting ng text-to-speech"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Output ng text-to-speech"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Rate ng pagsasalita"</string>
+    <string name="tts_default_rate_summary" msgid="3781937042151716987">"Bilis ng pagsambit sa teksto"</string>
+    <string name="tts_default_pitch_title" msgid="6988592215554485479">"Pitch"</string>
+    <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Nakakaapekto sa tono ng naka-synthesize na pananalita"</string>
+    <string name="tts_default_lang_title" msgid="4698933575028098940">"Wika"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Gamitin ang wika ng system"</string>
+    <string name="tts_lang_not_selected" msgid="7927823081096056147">"Walang napiling wika"</string>
+    <string name="tts_default_lang_summary" msgid="9042620014800063470">"Itinatakda ang boses na partikular sa wika para sa sinasambit na teksto"</string>
+    <string name="tts_play_example_title" msgid="1599468547216481684">"Makinig sa isang halimbawa"</string>
+    <string name="tts_play_example_summary" msgid="634044730710636383">"Mag-play ng maikling pagpapakita ng speech synthesis"</string>
+    <string name="tts_install_data_title" msgid="1829942496472751703">"I-install ang data ng boses"</string>
+    <string name="tts_install_data_summary" msgid="3608874324992243851">"I-install ang data ng boses na kinakailangan para sa speech synthesis"</string>
+    <string name="tts_engine_security_warning" msgid="3372432853837988146">"Maaaring makolekta ng speech synthesis engine na ito ang lahat ng teksto na sasabihin, kabilang ang personal na data tulad ng mga password at mga numero ng credit card. Nanggagaling ito mula sa <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> engine. Paganahin ang paggamit ng speech synthesis engine na ito?"</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Nangangailangan ang wikang ito ng gumaganang koneksyon sa network para sa text-to-speech na output."</string>
+    <string name="tts_default_sample_string" msgid="6388016028292967973">"Isa itong halimbawa ng speech synthesis"</string>
+    <string name="tts_status_title" msgid="8190784181389278640">"Status ng default na wika"</string>
+    <string name="tts_status_ok" msgid="8583076006537547379">"Ganap na sinusuportahan ang <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
+    <string name="tts_status_requires_network" msgid="8327617638884678896">"Kailangan ng <xliff:g id="LOCALE">%1$s</xliff:g> ng koneksyon sa network"</string>
+    <string name="tts_status_not_supported" msgid="2702997696245523743">"Hindi sinusuportahan ang <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
+    <string name="tts_status_checking" msgid="8026559918948285013">"Sinusuri…"</string>
+    <string name="tts_engine_settings_title" msgid="7849477533103566291">"Mga setting para sa <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="477155276199968948">"Ilunsad ang mga setting ng engine"</string>
+    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Ginustong engine"</string>
+    <string name="tts_general_section_title" msgid="8919671529502364567">"Pangkalahatan"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"I-reset ang pitch ng pagsasalita"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"I-reset ang pitch sa default na pagbigkas ng text."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="6695494874362656215">"Napakabagal"</item>
-    <item msgid="4795095314303559268">"Mabagal"</item>
-    <item msgid="8903157781070679765">"Normal"</item>
-    <item msgid="164347302621392996">"Mabilis"</item>
-    <item msgid="5794028588101562009">"Mas Mabilis"</item>
-    <item msgid="7163942783888652942">"Napakabilis"</item>
-    <item msgid="7831712693748700507">"Matulin"</item>
-    <item msgid="5194774745031751806">"Napakatulin"</item>
-    <item msgid="9085102246155045744">"Pinakamabilis"</item>
+    <item msgid="9004239613505400644">"Napakabagal"</item>
+    <item msgid="1815382991399815061">"Mabagal"</item>
+    <item msgid="3075292553049300105">"Normal"</item>
+    <item msgid="1158955023692670059">"Mabilis"</item>
+    <item msgid="5664310435707146591">"Mas Mabilis"</item>
+    <item msgid="5491266922147715962">"Napakabilis"</item>
+    <item msgid="7659240015901486196">"Matulin"</item>
+    <item msgid="7147051179282410945">"Napakatulin"</item>
+    <item msgid="581904787661470707">"Pinakamabilis"</item>
   </string-array>
-    <string name="choose_profile" msgid="6921016979430278661">"Pumili ng profile"</string>
-    <string name="category_personal" msgid="1299663247844969448">"Personal"</string>
-    <string name="category_work" msgid="8699184680584175622">"Trabaho"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Mga opsyon ng developer"</string>
-    <string name="development_settings_enable" msgid="542530994778109538">"I-enable ang mga opsyon ng developer"</string>
-    <string name="development_settings_summary" msgid="1815795401632854041">"Magtakda ng mga pagpipilian para sa pagbuo ng app"</string>
-    <string name="development_settings_not_available" msgid="4308569041701535607">"Hindi available ang mga pagpipilian ng developer para sa user na ito"</string>
-    <string name="vpn_settings_not_available" msgid="956841430176985598">"Hindi available ang mga setting ng VPN para sa user na ito"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Hindi available ang mga setting ng pagte-theter para sa user na ito"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"Hindi available ang mga setting ng Access Point Name para sa user na ito"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"Pag-debug ng USB"</string>
-    <string name="enable_adb_summary" msgid="4881186971746056635">"Debug mode kapag nakakonekta ang USB"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Bawiin ang mga pahintulot sa pag-debug ng USB"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Shortcut ng ulat sa bug"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Magpakita ng button sa power menu sa pagkuha ng ulat sa bug"</string>
-    <string name="keep_screen_on" msgid="1146389631208760344">"Manatiling gumagana"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Hindi kailanman hihinto ang screen kapag kinakargahan"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"I-enable ang Bluetooth HCI snoop log"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"I-capture ang mga Bluetooth packet. (I-toggle ang Bluetooth pagkatapos baguhin ang setting na ito)"</string>
-    <string name="oem_unlock_enable" msgid="6040763321967327691">"Pag-a-unlock ng OEM"</string>
-    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Payagan na ma-unlock ang bootloader"</string>
-    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Payagan ang pag-a-unlock ng OEM?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"BABALA: Hindi gagana ang mga feature sa pagprotekta sa device na ito habang naka-on ang setting na ito."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"Pumili ng app para sa kunwaring lokasyon"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"Walang nakatakdang app para sa kunwaring lokasyon"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"App para sa kunwaring lokasyon: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="debug_networking_category" msgid="7044075693643009662">"Networking"</string>
-    <string name="wifi_display_certification" msgid="8611569543791307533">"Certification ng wireless display"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"I-enable ang Pagla-log sa Wi‑Fi Verbose"</string>
-    <string name="wifi_scan_throttling" msgid="160014287416479843">"Pag-throttle ng pag-scan ng Wi‑Fi"</string>
-    <string name="mobile_data_always_on" msgid="8774857027458200434">"Palaging aktibo ang mobile data"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardware acceleration para sa pag-tether"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Ipakita ang mga Bluetooth device na walang pangalan"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"I-disable ang absolute volume"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bersyon ng AVRCP ng Bluetooth"</string>
-    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Pumili ng Bersyon ng AVRCP ng Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio Codec"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Sample na Rate ng Bluetooth Audio"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth: Rate ng Sample"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits Per Sample ng Bluetooth Audio"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth: Bits Per Sample"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Channel Mode ng Bluetooth Audio"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth: Channel Mode"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Audio LDAC Codec ng Bluetooth: Kalidad ng Pag-playback"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"I-trigger ang Pagpili sa Audio LDAC\nCodec ng Bluetooth: Kalidad ng Pag-playback"</string>
-    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Pribadong DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Pumili ng Pribadong DNS Mode"</string>
-    <string name="private_dns_mode_off" msgid="8236575187318721684">"Naka-off"</string>
-    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Awtomatiko"</string>
-    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Hostname ng provider ng pribadong DNS"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ilagay ang hostname ng DNS provider"</string>
-    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Hindi makakonekta"</string>
-    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ipakita ang mga opsyon para sa certification ng wireless display"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Pataasin ang antas ng Wi‑Fi logging, ipakita sa bawat SSID RSSI sa Wi‑Fi Picker"</string>
-    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Binabawasan ang pagkaubos ng baterya at pinapahusay ang performance ng network"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Nakametro"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Hindi Nakametro"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"Mga laki ng buffer ng Logger"</string>
-    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Pumili ng mga laki ng Logger bawat log buffer"</string>
-    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"I-clear ang tuluy-tuloy na storage ng logger?"</string>
-    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Kapag hindi na namin sinusubaybayan ang tuluy-tuloy na logger, kailangan naming burahin ang data ng logger na nanatili sa iyong device."</string>
-    <string name="select_logpersist_title" msgid="7530031344550073166">"Tuloy-tuloy na i-store ang data ng logger sa device"</string>
-    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Pumili ng mga buffer ng log upang tuluy-tuloy na iimbak sa device"</string>
-    <string name="select_usb_configuration_title" msgid="2649938511506971843">"Pumili ng USB Configuration"</string>
-    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Pumili ng USB Configuration"</string>
-    <string name="allow_mock_location" msgid="2787962564578664888">"Payagan ang mga kunwaring lokasyon"</string>
-    <string name="allow_mock_location_summary" msgid="317615105156345626">"Payagan ang mga kunwaring lokasyon"</string>
-    <string name="debug_view_attributes" msgid="6485448367803310384">"I-enable ang pagsisiyasat sa attribute na view"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Palaging panatilihing aktibo ang mobile data, kahit na aktibo ang Wi‑Fi (para sa mabilis na paglipat ng network)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Gamitin ang hardware acceleration para sa pag-tether kung available"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"Payagan ang pag-debug ng USB?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"Ang pag-debug ng USB ay para lang sa mga layuning pag-develop. Gamitin ito upang kumopya ng data sa pagitan ng iyong computer at iyong device, mag-install ng mga app sa iyong device nang walang notification, at magbasa ng data ng log."</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Bawiin ang access sa pag-debug ng USB mula sa lahat ng computer na dati mong pinahintulutan?"</string>
-    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Payagan ang mga setting ng pag-develop?"</string>
-    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Nilalayon ang mga setting na ito para sa paggamit sa pag-develop lamang. Maaaring magsanhi ang mga ito ng pagkasira o hindi paggana nang maayos ng iyong device at mga application na nandito."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"I-verify ang mga app sa USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Tingnan kung may nakakahamak na pagkilos sa apps na na-install sa pamamagitan ng ADB/ADT."</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Ipapakita ang mga Bluetooth device na walang pangalan (mga MAC address lang)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Dini-disable ang absolute volume feature ng Bluetooth kung may mga isyu sa volume ang mga malayong device gaya ng hindi katanggap-tanggap na malakas na volume o kawalan ng kontrol."</string>
-    <string name="enable_terminal_title" msgid="95572094356054120">"Lokal na terminal"</string>
-    <string name="enable_terminal_summary" msgid="67667852659359206">"Paganahin ang terminal app na nag-aalok ng lokal na shell access"</string>
-    <string name="hdcp_checking_title" msgid="8605478913544273282">"Pagsusuring HDCP"</string>
-    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP checking behavior"</string>
-    <string name="debug_debugging_category" msgid="6781250159513471316">"Pagde-debug"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Pumili ng debug app"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"Walang nakatakdang application sa pag-debug"</string>
-    <string name="debug_app_set" msgid="2063077997870280017">"Application sa pag-debug: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="select_application" msgid="5156029161289091703">"Pumili ng application"</string>
-    <string name="no_application" msgid="2813387563129153880">"Wala"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"Maghintay ng debugger"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Hinihintay ng na-debug na application na ma-attach ang debugger bago magsagawa"</string>
-    <string name="debug_input_category" msgid="1811069939601180246">"Input"</string>
-    <string name="debug_drawing_category" msgid="6755716469267367852">"Pagguhit"</string>
-    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Pag-render na pinapabilis ng hardware"</string>
-    <string name="media_category" msgid="4388305075496848353">"Media"</string>
-    <string name="debug_monitoring_category" msgid="7640508148375798343">"Pagsubaybay"</string>
-    <string name="strict_mode" msgid="1938795874357830695">"Enabled ang strict mode"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"I-flash ang screen pag may long ops ang app sa main thread"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"Lokasyon ng pointer"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"Overlay ng screen na nagpapakita ng touch data"</string>
-    <string name="show_touches" msgid="2642976305235070316">"Ipakita ang mga pag-tap"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"Ipakita ang visual na feedback para sa mga pag-tap"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"Ipakita update sa surface"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"I-flash ang buong window surface kapag nag-update"</string>
-    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Ipakita update ng view"</string>
-    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"I-flash mga view sa loob ng window kapag na-draw"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Ipakita ang mga update ng hardware layers"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"I-flash nang berde ang hardware layer pag nag-update ito"</string>
-    <string name="debug_hw_overdraw" msgid="2968692419951565417">"I-debug ang GPU overdraw"</string>
-    <string name="disable_overlays" msgid="2074488440505934665">"Wag paganahin HW overlay"</string>
-    <string name="disable_overlays_summary" msgid="3578941133710758592">"Laging gamitin ang GPU para sa screen compositing"</string>
-    <string name="simulate_color_space" msgid="6745847141353345872">"Gayahin ang color space"</string>
-    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"I-enable ang OpenGL traces"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"I-disable USB audio routing"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"I-disable automatic routing sa USB audio peripheral"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Ipakita ang layout bounds"</string>
-    <string name="debug_layout_summary" msgid="2001775315258637682">"Ipakita ang mga hangganan ng clip, margin, atbp."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Ipilit ang RTL na dir. ng layout"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Ipilit ang RTL na direksyon ng screen layout sa lahat ng lokal"</string>
-    <string name="force_msaa" msgid="7920323238677284387">"Puwersahin ang 4x MSAA"</string>
-    <string name="force_msaa_summary" msgid="9123553203895817537">"Paganahin ang 4x MSAA sa OpenGL ES 2.0 na apps"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"I-debug ang di-parihabang mga clip operation"</string>
-    <string name="track_frame_time" msgid="6094365083096851167">"Rendering ng Profile HWUI"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"I-enable ang GPU debug layer"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Payagang i-load ang GPU debug layer sa debug app"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"Scale ng window animation"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Scale ng transition animation"</string>
-    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Scale ng tagal ng animator"</string>
-    <string name="overlay_display_devices_title" msgid="5364176287998398539">"I-simulate, ika-2 display"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"Mga App"</string>
-    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Huwag magtago ng mga aktibidad"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Burahin ang aktibidad kapag iniwan na ito ng user"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"Limitasyon ng proseso sa background"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"Ipakita ang mga ANR sa background"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Ipakita ang dialog na Hindi Tumutugon ang App para sa mga app sa background"</string>
-    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Ipakita ang mga babala sa notification channel"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Nagpapakita ng babala sa screen kapag nag-post ang app ng notification nang walang wastong channel"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"Puwersahang payagan ang mga app sa external"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Ginagawang kwalipikado ang anumang app na mailagay sa external na storage, anuman ang mga value ng manifest"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"Sapilitang gawing resizable ang mga aktibidad"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Gawing nare-resize ang lahat ng aktibidad para sa multi-window, anuman ang mga value ng manifest."</string>
-    <string name="enable_freeform_support" msgid="1461893351278940416">"I-enable ang mga freeform window"</string>
-    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"I-enable ang suporta para sa mga pang-eksperimentong freeform window."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Password ng pag-backup ng desktop"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Kasalukuyang hindi pinoprotektahan ang mga buong pag-backup ng desktop"</string>
-    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"I-tap upang baguhin o alisin ang password para sa mga kumpletong pag-back up sa desktop"</string>
-    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Naitakda ang bagong backup na password"</string>
-    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Hindi tugma ang password at kumpirmasyon"</string>
-    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Nabigo sa pagtatakda ng backup na password"</string>
-    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Naglo-load…"</string>
+    <string name="choose_profile" msgid="343803890897657450">"Pumili ng profile"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Personal"</string>
+    <string name="category_work" msgid="4014193632325996115">"Trabaho"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Mga opsyon ng developer"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"I-enable ang mga opsyon ng developer"</string>
+    <string name="development_settings_summary" msgid="8718917813868735095">"Magtakda ng mga pagpipilian para sa pagbuo ng app"</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"Hindi available ang mga pagpipilian ng developer para sa user na ito"</string>
+    <string name="vpn_settings_not_available" msgid="2894137119965668920">"Hindi available ang mga setting ng VPN para sa user na ito"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"Hindi available ang mga setting ng pagte-theter para sa user na ito"</string>
+    <string name="apn_settings_not_available" msgid="1147111671403342300">"Hindi available ang mga setting ng Access Point Name para sa user na ito"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"Pag-debug ng USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Debug mode kapag nakakonekta ang USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Bawiin ang mga pahintulot sa pag-debug ng USB"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Shortcut ng ulat sa bug"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Magpakita ng button sa power menu sa pagkuha ng ulat sa bug"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Manatiling gumagana"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"Hindi kailanman hihinto ang screen kapag kinakargahan"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"I-enable ang Bluetooth HCI snoop log"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"I-capture ang mga Bluetooth packet. (I-toggle ang Bluetooth pagkatapos baguhin ang setting na ito)"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"Pag-a-unlock ng OEM"</string>
+    <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Payagan na ma-unlock ang bootloader"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Payagan ang pag-a-unlock ng OEM?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"BABALA: Hindi gagana ang mga feature sa pagprotekta sa device na ito habang naka-on ang setting na ito."</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Pumili ng app para sa kunwaring lokasyon"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Walang nakatakdang app para sa kunwaring lokasyon"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"App para sa kunwaring lokasyon: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="6829757985772659599">"Networking"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Certification ng wireless display"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"I-enable ang Pagla-log sa Wi‑Fi Verbose"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pag-throttle ng pag-scan ng Wi‑Fi"</string>
+    <string name="mobile_data_always_on" msgid="8275958101875563572">"Palaging aktibo ang mobile data"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardware acceleration para sa pag-tether"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Ipakita ang mga Bluetooth device na walang pangalan"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"I-disable ang absolute volume"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bersyon ng AVRCP ng Bluetooth"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Pumili ng Bersyon ng AVRCP ng Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bluetooth Audio Codec"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Sample na Rate ng Bluetooth Audio"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth: Rate ng Sample"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bits Per Sample ng Bluetooth Audio"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth: Bits Per Sample"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Channel Mode ng Bluetooth Audio"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth: Channel Mode"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Audio LDAC Codec ng Bluetooth: Kalidad ng Pag-playback"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"I-trigger ang Pagpili sa Audio LDAC\nCodec ng Bluetooth: Kalidad ng Pag-playback"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Pribadong DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Pumili ng Pribadong DNS Mode"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"Naka-off"</string>
+    <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Awtomatiko"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostname ng provider ng pribadong DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Ilagay ang hostname ng DNS provider"</string>
+    <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Hindi makakonekta"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Ipakita ang mga opsyon para sa certification ng wireless display"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Pataasin ang antas ng Wi‑Fi logging, ipakita sa bawat SSID RSSI sa Wi‑Fi Picker"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Binabawasan ang pagkaubos ng baterya at pinapahusay ang performance ng network"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"Nakametro"</string>
+    <string name="wifi_unmetered_label" msgid="6174142840934095093">"Hindi Nakametro"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Mga laki ng buffer ng Logger"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Pumili ng mga laki ng Logger bawat log buffer"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"I-clear ang tuluy-tuloy na storage ng logger?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Kapag hindi na namin sinusubaybayan ang tuluy-tuloy na logger, kailangan naming burahin ang data ng logger na nanatili sa iyong device."</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Tuloy-tuloy na i-store ang data ng logger sa device"</string>
+    <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Pumili ng mga buffer ng log upang tuluy-tuloy na iimbak sa device"</string>
+    <string name="select_usb_configuration_title" msgid="6339801314922294586">"Pumili ng USB Configuration"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Pumili ng USB Configuration"</string>
+    <string name="allow_mock_location" msgid="2102650981552527884">"Payagan ang mga kunwaring lokasyon"</string>
+    <string name="allow_mock_location_summary" msgid="179780881081354579">"Payagan ang mga kunwaring lokasyon"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"I-enable ang pagsisiyasat sa attribute na view"</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Palaging panatilihing aktibo ang mobile data, kahit na aktibo ang Wi‑Fi (para sa mabilis na paglipat ng network)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Gamitin ang hardware acceleration para sa pag-tether kung available"</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"Payagan ang pag-debug ng USB?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"Ang pag-debug ng USB ay para lang sa mga layuning pag-develop. Gamitin ito upang kumopya ng data sa pagitan ng iyong computer at iyong device, mag-install ng mga app sa iyong device nang walang notification, at magbasa ng data ng log."</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Bawiin ang access sa pag-debug ng USB mula sa lahat ng computer na dati mong pinahintulutan?"</string>
+    <string name="dev_settings_warning_title" msgid="8251234890169074553">"Payagan ang mga setting ng pag-develop?"</string>
+    <string name="dev_settings_warning_message" msgid="37741686486073668">"Nilalayon ang mga setting na ito para sa paggamit sa pag-develop lamang. Maaaring magsanhi ang mga ito ng pagkasira o hindi paggana nang maayos ng iyong device at mga application na nandito."</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"I-verify ang mga app sa USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Tingnan kung may nakakahamak na pagkilos sa apps na na-install sa pamamagitan ng ADB/ADT."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Ipapakita ang mga Bluetooth device na walang pangalan (mga MAC address lang)"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Dini-disable ang absolute volume feature ng Bluetooth kung may mga isyu sa volume ang mga malayong device gaya ng hindi katanggap-tanggap na malakas na volume o kawalan ng kontrol."</string>
+    <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal na terminal"</string>
+    <string name="enable_terminal_summary" msgid="2481074834856064500">"Paganahin ang terminal app na nag-aalok ng lokal na shell access"</string>
+    <string name="hdcp_checking_title" msgid="3155692785074095986">"Pagsusuring HDCP"</string>
+    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP checking behavior"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"Pagde-debug"</string>
+    <string name="debug_app" msgid="8903350241392391766">"Pumili ng debug app"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"Walang nakatakdang application sa pag-debug"</string>
+    <string name="debug_app_set" msgid="6599535090477753651">"Application sa pag-debug: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="2543228890535466325">"Pumili ng application"</string>
+    <string name="no_application" msgid="9038334538870247690">"Wala"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"Maghintay ng debugger"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Hinihintay ng na-debug na application na ma-attach ang debugger bago magsagawa"</string>
+    <string name="debug_input_category" msgid="7349460906970849771">"Input"</string>
+    <string name="debug_drawing_category" msgid="5066171112313666619">"Pagguhit"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Pag-render na pinapabilis ng hardware"</string>
+    <string name="media_category" msgid="8122076702526144053">"Media"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"Pagsubaybay"</string>
+    <string name="strict_mode" msgid="889864762140862437">"Enabled ang strict mode"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"I-flash ang screen pag may long ops ang app sa main thread"</string>
+    <string name="pointer_location" msgid="7516929526199520173">"Lokasyon ng pointer"</string>
+    <string name="pointer_location_summary" msgid="957120116989798464">"Overlay ng screen na nagpapakita ng touch data"</string>
+    <string name="show_touches" msgid="8437666942161289025">"Ipakita ang mga pag-tap"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Ipakita ang visual na feedback para sa mga pag-tap"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Ipakita update sa surface"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"I-flash ang buong window surface kapag nag-update"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Ipakita update ng view"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"I-flash mga view sa loob ng window kapag na-draw"</string>
+    <string name="show_hw_layers_updates" msgid="5268370750002509767">"Ipakita ang mga update ng hardware layers"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"I-flash nang berde ang hardware layer pag nag-update ito"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"I-debug ang GPU overdraw"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"Wag paganahin HW overlay"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"Laging gamitin ang GPU para sa screen compositing"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Gayahin ang color space"</string>
+    <string name="enable_opengl_traces_title" msgid="4638773318659125196">"I-enable ang OpenGL traces"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"I-disable USB audio routing"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"I-disable automatic routing sa USB audio peripheral"</string>
+    <string name="debug_layout" msgid="1659216803043339741">"Ipakita ang layout bounds"</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Ipakita ang mga hangganan ng clip, margin, atbp."</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Ipilit ang RTL na dir. ng layout"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Ipilit ang RTL na direksyon ng screen layout sa lahat ng lokal"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"Puwersahin ang 4x MSAA"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"Paganahin ang 4x MSAA sa OpenGL ES 2.0 na apps"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"I-debug ang di-parihabang mga clip operation"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"Rendering ng Profile HWUI"</string>
+    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"I-enable ang GPU debug layer"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Payagang i-load ang GPU debug layer sa debug app"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"Scale ng window animation"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Scale ng transition animation"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Scale ng tagal ng animator"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"I-simulate, ika-2 display"</string>
+    <string name="debug_applications_category" msgid="5394089406638954196">"Mga App"</string>
+    <string name="immediately_destroy_activities" msgid="1826287490705167403">"Huwag magtago ng mga aktibidad"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Burahin ang aktibidad kapag iniwan na ito ng user"</string>
+    <string name="app_process_limit_title" msgid="8361367869453043007">"Limitasyon ng proseso sa background"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"Ipakita ang mga ANR sa background"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Ipakita ang dialog na Hindi Tumutugon ang App para sa mga app sa background"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Ipakita ang mga babala sa notification channel"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Nagpapakita ng babala sa screen kapag nag-post ang app ng notification nang walang wastong channel"</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"Puwersahang payagan ang mga app sa external"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Ginagawang kwalipikado ang anumang app na mailagay sa external na storage, anuman ang mga value ng manifest"</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"Sapilitang gawing resizable ang mga aktibidad"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Gawing nare-resize ang lahat ng aktibidad para sa multi-window, anuman ang mga value ng manifest."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"I-enable ang mga freeform window"</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"I-enable ang suporta para sa mga pang-eksperimentong freeform window."</string>
+    <string name="local_backup_password_title" msgid="4631017948933578709">"Password ng pag-backup ng desktop"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Kasalukuyang hindi pinoprotektahan ang mga buong pag-backup ng desktop"</string>
+    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"I-tap upang baguhin o alisin ang password para sa mga kumpletong pag-back up sa desktop"</string>
+    <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Naitakda ang bagong backup na password"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Hindi tugma ang password at kumpirmasyon"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"Nabigo sa pagtatakda ng backup na password"</string>
+    <string name="loading_injected_setting_summary" msgid="8394446285689070348">"Naglo-load…"</string>
   <string-array name="color_mode_names">
-    <item msgid="2425514299220523812">"Vibrant (default)"</item>
-    <item msgid="8446070607501413455">"Natural"</item>
-    <item msgid="6553408765810699025">"Standard"</item>
+    <item msgid="3836559907767149216">"Vibrant (default)"</item>
+    <item msgid="9112200311983078311">"Natural"</item>
+    <item msgid="6564241960833766170">"Standard"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
-    <item msgid="4979629397075120893">"Mga pinagandang kulay"</item>
-    <item msgid="8280754435979370728">"Mga natural na kulay tulad ng nakikita ng mata"</item>
-    <item msgid="5363960654009010371">"Mga kulay na naka-optimize para sa digital na content"</item>
+    <item msgid="6828141153199944847">"Mga pinagandang kulay"</item>
+    <item msgid="4548987861791236754">"Mga natural na kulay tulad ng nakikita ng mata"</item>
+    <item msgid="1282170165150762976">"Mga kulay na naka-optimize para sa digital na content"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="9042996804461901648">"Mga standby app"</string>
-    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Hindi aktibo. I-tap upang i-toggle."</string>
-    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktibo. I-tap upang i-toggle."</string>
-    <string name="standby_bucket_summary" msgid="6567835350910684727">"Status ng app standby:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="runningservices_settings_title" msgid="8097287939865165213">"Mga tumatakbong serbisyo"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Tingnan at kontrolin ang mga kasalukuyang tumatakbong serbisyo"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"Pagpapatupad sa WebView"</string>
-    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Itakda ang pagpapatupad sa WebView"</string>
-    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Wala nang bisa ang napiling ito. Subukang muli."</string>
-    <string name="convert_to_file_encryption" msgid="3060156730651061223">"I-convert at gawing pag-encrypt ng file"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"I-convert..."</string>
-    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Na-encrypt na ang file"</string>
-    <string name="title_convert_fbe" msgid="1263622876196444453">"Kino-convert sa pag-encrypt na batay sa file"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"I-convert ang partition ng data at gawing pag-encrypt na batay sa file.\n !!Babala!! Kapag isinagawa mo ito, mabubura ang lahat ng iyong data.\n Maituturing na alpha ang feature na ito at maaaring hindi ito gumana nang maayos.\n Pindutin ang \'I-wipe at i-convert...\' upang makapagpatuloy."</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"I-wipe at i-convert…"</string>
-    <string name="picture_color_mode" msgid="4560755008730283695">"Mode ng kulay ng larawan"</string>
-    <string name="picture_color_mode_desc" msgid="1141891467675548590">"Gamitin ang sRGB"</string>
-    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Naka-disable"</string>
-    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Monochromacy"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomaly (pula-berde)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaly (pula-berde)"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomaly (asul-dilaw)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Pagtatama ng kulay"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ang feature na ito ay pinag-eeksperimentuhan at maaaring makaapekto sa performance."</string>
-    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Na-override ng <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Humigit-kumulang <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ang natitira"</string>
-    <string name="power_discharging_duration" msgid="8848256785736335185">"Humigit-kumulang <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ang natitira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Humigit-kumulang <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ang natitira batay sa iyong paggamit"</string>
-    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Humigit-kumulang <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ang natitira batay sa iyong paggamit (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
+    <string name="inactive_apps_title" msgid="5372523625297212320">"Mga standby app"</string>
+    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Hindi aktibo. I-tap upang i-toggle."</string>
+    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Aktibo. I-tap upang i-toggle."</string>
+    <string name="standby_bucket_summary" msgid="5128193447550429600">"Status ng app standby:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="runningservices_settings_title" msgid="6460099290493086515">"Mga tumatakbong serbisyo"</string>
+    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Tingnan at kontrolin ang mga kasalukuyang tumatakbong serbisyo"</string>
+    <string name="select_webview_provider_title" msgid="3917815648099445503">"Pagpapatupad sa WebView"</string>
+    <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Itakda ang pagpapatupad sa WebView"</string>
+    <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Wala nang bisa ang napiling ito. Subukang muli."</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"I-convert at gawing pag-encrypt ng file"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"I-convert..."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Na-encrypt na ang file"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"Kino-convert sa pag-encrypt na batay sa file"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"I-convert ang partition ng data at gawing pag-encrypt na batay sa file.\n !!Babala!! Kapag isinagawa mo ito, mabubura ang lahat ng iyong data.\n Maituturing na alpha ang feature na ito at maaaring hindi ito gumana nang maayos.\n Pindutin ang \'I-wipe at i-convert...\' upang makapagpatuloy."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"I-wipe at i-convert…"</string>
+    <string name="picture_color_mode" msgid="1013807330552931903">"Mode ng kulay ng larawan"</string>
+    <string name="picture_color_mode_desc" msgid="151780973768136200">"Gamitin ang sRGB"</string>
+    <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Naka-disable"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Monochromacy"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomaly (pula-berde)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (pula-berde)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (asul-dilaw)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Pagtatama ng kulay"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"Ang feature na ito ay pinag-eeksperimentuhan at maaaring makaapekto sa performance."</string>
+    <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Na-override ng <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="8264199158671531431">"Humigit-kumulang <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ang natitira"</string>
+    <string name="power_discharging_duration" msgid="1076561255466053220">"Humigit-kumulang <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ang natitira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Humigit-kumulang <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ang natitira batay sa iyong paggamit"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"Humigit-kumulang <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ang natitira batay sa iyong paggamit (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Tatagal dapat nang hanggang humigit-kumulang <xliff:g id="TIME">%1$s</xliff:g> batay sa iyong paggamit (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Tatagal dapat nang hanggang humigit-kumulang <xliff:g id="TIME">%1$s</xliff:g> batay sa iyong paggamit"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Tatagal dapat nang hanggang humigit-kumulang <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Tatagal hanggang mga <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Hanggang <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Patagalin ang baterya nang lampas <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Wala nang <xliff:g id="THRESHOLD">%1$s</xliff:g> ang natitira"</string>
-    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Wala nang <xliff:g id="THRESHOLD">%1$s</xliff:g> ang natitira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Mahigit <xliff:g id="TIME_REMAINING">%1$s</xliff:g> pa ang natitira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Mahigit <xliff:g id="TIME_REMAINING">%1$s</xliff:g> pa ang natitira"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Malapit nang mag-shut down ang telepono"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Malapit nang mag-shut down ang tablet"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Malapit nang mag-shut down ang device"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Malapit nang mag-shut down ang telepono (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Malapit nang mag-shutdown ang tablet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Malapit nang mag-shut down ang device (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> ang natitira bago makumpleto ang charge"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hanggang sa makumpleto ang charge"</string>
-    <string name="battery_info_status_unknown" msgid="196130600938058547">"Hindi Kilala"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Nagcha-charge"</string>
-    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"nagcha-charge"</string>
-    <string name="battery_info_status_discharging" msgid="310932812698268588">"Hindi nagcha-charge"</string>
-    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Nakasaksak, hindi makapag-charge sa ngayon"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"Puno"</string>
-    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Pinapamahalaan ng admin"</string>
-    <string name="disabled" msgid="9206776641295849915">"Naka-disable"</string>
-    <string name="external_source_trusted" msgid="2707996266575928037">"Pinapayagan"</string>
-    <string name="external_source_untrusted" msgid="2677442511837596726">"Hindi pinapayagan"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"Mag-install ng di-kilalang app"</string>
-    <string name="home" msgid="3256884684164448244">"Home ng Mga Setting"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Tatagal dapat nang hanggang humigit-kumulang <xliff:g id="TIME">%1$s</xliff:g> batay sa iyong paggamit (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Tatagal dapat nang hanggang humigit-kumulang <xliff:g id="TIME">%1$s</xliff:g> batay sa iyong paggamit"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"Tatagal dapat nang hanggang humigit-kumulang <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Tatagal hanggang mga <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hanggang <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Patagalin ang baterya nang lampas <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Wala nang <xliff:g id="THRESHOLD">%1$s</xliff:g> ang natitira"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Wala nang <xliff:g id="THRESHOLD">%1$s</xliff:g> ang natitira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Mahigit <xliff:g id="TIME_REMAINING">%1$s</xliff:g> pa ang natitira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Mahigit <xliff:g id="TIME_REMAINING">%1$s</xliff:g> pa ang natitira"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="6583866940347159957">"Malapit nang mag-shut down ang telepono"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="8009177999719462724">"Malapit nang mag-shut down ang tablet"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="8320892540455268018">"Malapit nang mag-shut down ang device"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="6186572170809116621">"Malapit nang mag-shut down ang telepono (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="1338758278145563121">"Malapit nang mag-shutdown ang tablet (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="3699579688084774362">"Malapit nang mag-shut down ang device (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="2164502803652200439">"<xliff:g id="TIME">%1$s</xliff:g> ang natitira bago makumpleto ang charge"</string>
+    <string name="power_charging_duration" msgid="3831988737429146807">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> hanggang sa makumpleto ang charge"</string>
+    <string name="battery_info_status_unknown" msgid="268625384868401114">"Hindi Kilala"</string>
+    <string name="battery_info_status_charging" msgid="4279958015430387405">"Nagcha-charge"</string>
+    <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"nagcha-charge"</string>
+    <string name="battery_info_status_discharging" msgid="6962689305413556485">"Hindi nagcha-charge"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Nakasaksak, hindi makapag-charge sa ngayon"</string>
+    <string name="battery_info_status_full" msgid="4443168946046847468">"Puno"</string>
+    <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Pinapamahalaan ng admin"</string>
+    <string name="disabled" msgid="8017887509554714950">"Naka-disable"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Pinapayagan"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"Hindi pinapayagan"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Mag-install ng di-kilalang app"</string>
+    <string name="home" msgid="973834627243661438">"Home ng Mga Setting"</string>
   <string-array name="battery_labels">
-    <item msgid="8494684293649631252">"0%"</item>
-    <item msgid="8934126114226089439">"50%"</item>
-    <item msgid="1286113608943010849">"100%"</item>
+    <item msgid="7878690469765357158">"0%"</item>
+    <item msgid="8894873528875953317">"50%"</item>
+    <item msgid="7529124349186240216">"100%"</item>
   </string-array>
-    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> na ang nakalipas"</string>
-    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> na lang"</string>
-    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Maliit"</string>
-    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Default"</string>
-    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Malaki"</string>
-    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Mas malaki"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Pinakamalaki"</string>
-    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Custom (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
-    <string name="retail_demo_reset_message" msgid="118771671364131297">"Ilagay ang password upang mag-factory reset sa demo mode"</string>
-    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Susunod"</string>
-    <string name="retail_demo_reset_title" msgid="696589204029930100">"Kinakailangan ang password"</string>
-    <string name="active_input_method_subtypes" msgid="3596398805424733238">"Mga aktibong paraan ng pag-input"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Gamitin ang mga wika ng system"</string>
-    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Nabigong buksan ang mga setting para sa <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ime_security_warning" msgid="4135828934735934248">"Maaaring magawa ng pamamaraan ng pag-input na ito na kolektahin ang lahat ng tekstong iyong tina-type, kabilang ang personal na data katulad ng mga password at mga numero ng credit card. Nagmumula ito sa app na <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Gamitin ang pamamaraan ng pag-input na ito?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Tandaan: Pagkatapos ng pag-reboot, hindi makakapagsimula ang app na ito hangga\'t hindi mo ina-unlock ang iyong telepono"</string>
-    <string name="ims_reg_title" msgid="7609782759207241443">"Status ng pagpaparehistro ng IMS"</string>
-    <string name="ims_reg_status_registered" msgid="933003316932739188">"Nakarehistro"</string>
-    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Hindi nakarehistro"</string>
-    <string name="status_unavailable" msgid="7862009036663793314">"Hindi available"</string>
-    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"Naka-randomize ang MAC"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+    <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> na ang nakalipas"</string>
+    <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> na lang"</string>
+    <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Maliit"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Default"</string>
+    <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Malaki"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Mas malaki"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Pinakamalaki"</string>
+    <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Custom (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="content_description_menu_button" msgid="6254844309171779931">"Menu"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Ilagay ang password upang mag-factory reset sa demo mode"</string>
+    <string name="retail_demo_reset_next" msgid="3688129033843885362">"Susunod"</string>
+    <string name="retail_demo_reset_title" msgid="1866911701095959800">"Kinakailangan ang password"</string>
+    <string name="active_input_method_subtypes" msgid="4232680535471633046">"Mga aktibong paraan ng pag-input"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gamitin ang mga wika ng system"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Nabigong buksan ang mga setting para sa <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"Maaaring magawa ng pamamaraan ng pag-input na ito na kolektahin ang lahat ng tekstong iyong tina-type, kabilang ang personal na data katulad ng mga password at mga numero ng credit card. Nagmumula ito sa app na <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Gamitin ang pamamaraan ng pag-input na ito?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Tandaan: Pagkatapos ng pag-reboot, hindi makakapagsimula ang app na ito hangga\'t hindi mo ina-unlock ang iyong telepono"</string>
+    <string name="ims_reg_title" msgid="8197592958123671062">"Status ng pagpaparehistro ng IMS"</string>
+    <string name="ims_reg_status_registered" msgid="884916398194885457">"Nakarehistro"</string>
+    <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Hindi nakarehistro"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Hindi available"</string>
+    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Naka-randomize ang MAC"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="one">%1$d device ang nakakonekta</item>
       <item quantity="other">%1$d na device ang nakakonekta</item>
     </plurals>
-    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Dagdagan ang oras."</string>
-    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Bawasan ang oras."</string>
-    <string name="cancel" msgid="6859253417269739139">"Kanselahin"</string>
-    <string name="okay" msgid="1997666393121016642">"OK"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"I-on"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"I-on ang Huwag Istorbohin"</string>
-    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Hindi kailanman"</string>
-    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Priyoridad lang"</string>
-    <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"Hindi mo maririnig ang iyong susunod na alarm <xliff:g id="WHEN">%1$s</xliff:g> maliban na lang kung io-off mo ito bago sumapit ang oras na iyon"</string>
-    <string name="zen_alarm_warning" msgid="6236690803924413088">"Hindi mo maririnig ang iyong susunod na alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="alarm_template" msgid="4996153414057676512">"sa <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="alarm_template_far" msgid="3779172822607461675">"sa <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Tagal"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Magtanong palagi"</string>
-    <string name="zen_mode_forever" msgid="2704305038191592967">"Hanggang sa i-off mo"</string>
-    <string name="time_unit_just_now" msgid="6363336622778342422">"Ngayon lang"</string>
-    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Ang device na ito"</string>
+    <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Dagdagan ang oras."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Bawasan ang oras."</string>
+    <string name="cancel" msgid="5665114069455378395">"Kanselahin"</string>
+    <string name="okay" msgid="949938843324579502">"OK"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"I-on"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"I-on ang Huwag Istorbohin"</string>
+    <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Hindi kailanman"</string>
+    <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Priyoridad lang"</string>
+    <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="4146527909616457163">"Hindi mo maririnig ang iyong susunod na alarm <xliff:g id="WHEN">%1$s</xliff:g> maliban na lang kung io-off mo ito bago sumapit ang oras na iyon"</string>
+    <string name="zen_alarm_warning" msgid="245729928048586280">"Hindi mo maririnig ang iyong susunod na alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="3346777418136233330">"sa <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="6382760514842998629">"sa <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Tagal"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Magtanong palagi"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Hanggang sa i-off mo"</string>
+    <string name="time_unit_just_now" msgid="3006134267292728099">"Ngayon lang"</string>
+    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Ang device na ito"</string>
 </resources>

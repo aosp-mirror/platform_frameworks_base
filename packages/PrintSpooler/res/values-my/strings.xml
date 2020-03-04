@@ -87,7 +87,7 @@
     <string name="restart" msgid="2472034227037808749">"ပြန်စရန်"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"စာထုတ်စက်နဲ့ ဆက်သွယ်ထားမှု မရှိပါ"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"မသိ"</string>
-    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g>ကိုသုံးမလား။"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> ကိုသုံးမလား။"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"သင်၏ စာရွက်စာတမ်းများသည် ပရင်တာထံသို့ သွားစဉ် ဆာဗာ တစ်ခု သို့မဟုတ် ပိုများပြီး ဖြတ်ကျော်နိုင်ရသည်။"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"အဖြူ အမည်း"</item>

@@ -89,6 +89,43 @@ public final class BluetoothCodecStatus implements Parcelable {
         return Arrays.asList(c1).containsAll(Arrays.asList(c2));
     }
 
+    /**
+     * Checks whether the codec config matches the selectable capabilities.
+     * Any parameters of the codec config with NONE value will be considered a wildcard matching.
+     *
+     * @param codecConfig the codec config to compare against
+     * @return true if the codec config matches, otherwise false
+     */
+    public boolean isCodecConfigSelectable(BluetoothCodecConfig codecConfig) {
+        if (codecConfig == null || !codecConfig.hasSingleSampleRate()
+                || !codecConfig.hasSingleBitsPerSample() || !codecConfig.hasSingleChannelMode()) {
+            return false;
+        }
+        for (BluetoothCodecConfig selectableConfig : mCodecsSelectableCapabilities) {
+            if (codecConfig.getCodecType() != selectableConfig.getCodecType()) {
+                continue;
+            }
+            int sampleRate = codecConfig.getSampleRate();
+            if ((sampleRate & selectableConfig.getSampleRate()) == 0
+                    && sampleRate != BluetoothCodecConfig.SAMPLE_RATE_NONE) {
+                continue;
+            }
+            int bitsPerSample = codecConfig.getBitsPerSample();
+            if ((bitsPerSample & selectableConfig.getBitsPerSample()) == 0
+                    && bitsPerSample != BluetoothCodecConfig.BITS_PER_SAMPLE_NONE) {
+                continue;
+            }
+            int channelMode = codecConfig.getChannelMode();
+            if ((channelMode & selectableConfig.getChannelMode()) == 0
+                    && channelMode != BluetoothCodecConfig.CHANNEL_MODE_NONE) {
+                continue;
+            }
+            return true;
+        }
+        return false;
+    }
+
+
     @Override
     public int hashCode() {
         return Objects.hash(mCodecConfig, mCodecsLocalCapabilities,

@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="help_feedback_label" msgid="4550436169116444686">"Bantuan &amp; maklum balas"</string>
+    <string name="help_feedback_label" msgid="7106780063063027882">"Bantuan &amp; maklum balas"</string>
 </resources>

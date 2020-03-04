@@ -25,4 +25,6 @@
     <uses-permission android:name="android.car.permission.CAR_ENROLL_TRUST"/>
     <!-- This permission is required to get bluetooth broadcast. -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!--  Allows us to defer some actions until after the BOOT_COMPLETED event -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 </manifest>

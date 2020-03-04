@@ -120,10 +120,6 @@ import java.util.function.Predicate;
  * <a href="{@docRoot}training/improving-layouts/smooth-scrolling.html">
  * Making ListView Scrolling Smooth</a> for more ways to ensure a smooth user experience.</p>
  *
- * <p>For a more complete example of creating a custom adapter, see the
- * <a href="{@docRoot}samples/CustomChoiceList/index.html">
- *     Custom Choice List</a> sample app.</p>
- *
  * <p>To specify an action when a user clicks or taps on a single list item, see
  * <a href="{@docRoot}guide/topics/ui/declaring-layout.html#HandlingUserSelections">
  *     Handling click events</a>.</p>

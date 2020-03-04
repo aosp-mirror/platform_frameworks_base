@@ -23,9 +23,9 @@
     <string name="installing" msgid="4921993079741206516">"इंस्‍टॉल होत आहे…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> इंस्टॉल होत आहे…"</string>
     <string name="install_done" msgid="5987363587661783896">"अ‍ॅप इंस्टॉल झाले."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"तुम्हाला हे अॅप्लिकेशन इंस्टॉल करायचे आहे का?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"तुम्हाच्या विद्यमान अॅप्लिकेशनवर अपडेट इंस्टॉल करायचे आहे का? तुमचा विद्यमान डेटा गमावणार नाही."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"तुम्हाला या बिल्ट-इन अॅप्लिकेशनवर अपडेट इंस्टॉल करायचे आहे का? तुमचा विद्यमान डेटा गमावणार नाही."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"तुम्हाला हे ॲप्लिकेशन इंस्टॉल करायचे आहे का?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"तुम्हाच्या विद्यमान ॲप्लिकेशनवर अपडेट इंस्टॉल करायचे आहे का? तुमचा विद्यमान डेटा गमावणार नाही."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"तुम्हाला या बिल्ट-इन ॲप्लिकेशनवर अपडेट इंस्टॉल करायचे आहे का? तुमचा विद्यमान डेटा गमावणार नाही."</string>
     <string name="install_failed" msgid="5777824004474125469">"अ‍ॅप इंस्टॉल झाले नाही."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"पॅकेज इंस्टॉल होण्यापासून ब्लॉक केले होते."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"पॅकेजचा विद्यमान पॅकेजशी विरोध असल्याने अ‍ॅप इंस्टॉल झाले नाही."</string>
@@ -52,7 +52,7 @@
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"अ‍ॅप अनइंस्टॉल करणे शक्य झाले नाही."</string>
     <string name="uninstall_application_title" msgid="4045420072401428123">"अ‍ॅप अनइंस्टॉल करा"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"अपडेट अनइंस्टॉल करा"</string>
-    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> खालील अॅपचा भाग आहे:"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> खालील ॲपचा भाग आहे:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"तुम्हाला हे अ‍ॅप अनइंस्टॉल करायचे आहे का?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"तुम्हाला हे अ‍ॅप "<b>"सर्व"</b>" वापरकर्त्यांसाठी अनइंस्टॉल करायचे आहे का? अ‍ॅप्लिकेशन आणि त्याचा डेटा डिव्हाइसवरील "<b>"सर्व"</b>" वापरकर्त्यांकडून काढला जाईल."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"तुम्हाला <xliff:g id="USERNAME">%1$s</xliff:g> वापरकर्त्यासाठी हे अ‍ॅप अनइंस्टॉल करायचे आहे का?"</string>

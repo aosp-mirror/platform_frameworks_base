@@ -1262,8 +1262,7 @@ public final class Telephony {
              * Broadcast action: When SMS-MMS db is being created. If file-based encryption is
              * supported, this broadcast indicates creation of the db in credential-encrypted
              * storage. A boolean is specified in {@link #EXTRA_IS_INITIAL_CREATE} to indicate if
-             * this is the initial create of the db. Requires
-             * {@link android.Manifest.permission#READ_SMS} to receive.
+             * this is the initial create of the db.
              *
              * @see #EXTRA_IS_INITIAL_CREATE
              *

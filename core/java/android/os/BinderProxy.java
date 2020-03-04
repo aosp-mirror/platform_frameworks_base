@@ -241,30 +241,35 @@ public final class BinderProxy implements IBinder {
             }
 
             Map<String, Integer> counts = new HashMap<>();
-            for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
-                if (a != null) {
-                    for (WeakReference<BinderProxy> weakRef : a) {
-                        BinderProxy bp = weakRef.get();
-                        String key;
-                        if (bp == null) {
-                            key = "<cleared weak-ref>";
-                        } else {
-                            try {
-                                key = bp.getInterfaceDescriptor();
-                                if ((key == null || key.isEmpty()) && !bp.isBinderAlive()) {
-                                    key = "<proxy to dead node>";
-                                }
-                            } catch (Throwable t) {
-                                key = "<exception during getDescriptor>";
-                            }
-                        }
-                        Integer i = counts.get(key);
-                        if (i == null) {
-                            counts.put(key, 1);
-                        } else {
-                            counts.put(key, i + 1);
-                        }
+            final ArrayList<WeakReference<BinderProxy>> proxiesToQuery =
+                    new ArrayList<WeakReference<BinderProxy>>();
+            synchronized (sProxyMap) {
+                for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
+                    if (a != null) {
+                        proxiesToQuery.addAll(a);
                     }
+                }
+            }
+            for (WeakReference<BinderProxy> weakRef : proxiesToQuery) {
+                BinderProxy bp = weakRef.get();
+                String key;
+                if (bp == null) {
+                    key = "<cleared weak-ref>";
+                } else {
+                    try {
+                        key = bp.getInterfaceDescriptor();
+                        if ((key == null || key.isEmpty()) && !bp.isBinderAlive()) {
+                            key = "<proxy to dead node>";
+                        }
+                    } catch (Throwable t) {
+                        key = "<exception during getDescriptor>";
+                    }
+                }
+                Integer i = counts.get(key);
+                if (i == null) {
+                    counts.put(key, 1);
+                } else {
+                    counts.put(key, i + 1);
                 }
             }
             Map.Entry<String, Integer>[] sorted = counts.entrySet().toArray(
@@ -354,9 +359,7 @@ public final class BinderProxy implements IBinder {
      * @hide
      */
     public static InterfaceCount[] getSortedInterfaceCounts(int num) {
-        synchronized (sProxyMap) {
-            return sProxyMap.getSortedInterfaceCounts(num);
-        }
+        return sProxyMap.getSortedInterfaceCounts(num);
     }
 
     /**
@@ -376,10 +379,8 @@ public final class BinderProxy implements IBinder {
      */
     public static void dumpProxyDebugInfo() {
         if (Build.IS_DEBUGGABLE) {
-            synchronized (sProxyMap) {
-                sProxyMap.dumpProxyInterfaceCounts();
-                sProxyMap.dumpPerUidProxyCounts();
-            }
+            sProxyMap.dumpProxyInterfaceCounts();
+            sProxyMap.dumpPerUidProxyCounts();
         }
     }
 

@@ -18,21 +18,21 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"Relatórios de bugs"</string>
-    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"O relatório do bug <xliff:g id="ID">#%d</xliff:g> está sendo gerado"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"O relatório de bug <xliff:g id="ID">#%d</xliff:g> está sendo gerado"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Relatório de bug <xliff:g id="ID">#%d</xliff:g> capturado"</string>
-    <string name="bugreport_updating_title" msgid="4423539949559634214">"Adicionando detalhes ao relatório do bug"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Adicionando detalhes ao relatório de bug"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Aguarde…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"O relatório de bugs será exibido no smartphone em breve"</string>
-    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Selecione para compartilhar o relatório do bug"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Toque para compartilhar seu relatório do bug"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Selecione para compartilhar seu relatório do bug sem uma captura de tela ou aguarde a conclusão"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Selecione para compartilhar o relatório de bug"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Toque para compartilhar seu relatório de bug"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Selecione para compartilhar seu relatório de bug sem uma captura de tela ou aguarde a conclusão"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Toque para compartilhar seu relatório de bug sem captura de tela ou aguarde a conclusão"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Toque para compartilhar seu relatório de bug sem captura de tela ou aguarde a conclusão"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Os relatórios de bugs contêm dados dos diversos arquivos de registros do sistema, que podem incluir dados que você considera confidenciais (como dados de uso de apps e de local). Compartilhe relatórios de bugs somente com pessoas e apps nos quais você confia."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Não mostrar novamente"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Relatórios de bugs"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Não foi possível ler o arquivo de relatório de bug"</string>
-    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Não foi possível adicionar detalhes do relatório do bug ao arquivo ZIP"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Não foi possível adicionar detalhes do relatório de bug ao arquivo ZIP"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"sem nome"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detalhes"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Capturas de tela"</string>
@@ -43,5 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"Título do bug"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Resumo do bug"</string>
     <string name="save" msgid="4781509040564835759">"Salvar"</string>
-    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Compartilhar relatório do bug"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Compartilhar relatório de bug"</string>
 </resources>

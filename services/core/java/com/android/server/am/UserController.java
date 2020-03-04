@@ -134,12 +134,12 @@ class UserController implements Handler.Callback {
     static final int CONTINUE_USER_SWITCH_MSG = 20;
     static final int USER_SWITCH_TIMEOUT_MSG = 30;
     static final int START_PROFILES_MSG = 40;
-    static final int SYSTEM_USER_START_MSG = 50;
-    static final int SYSTEM_USER_CURRENT_MSG = 60;
+    static final int USER_START_MSG = 50;
+    static final int USER_CURRENT_MSG = 60;
     static final int FOREGROUND_PROFILE_CHANGED_MSG = 70;
     static final int REPORT_USER_SWITCH_COMPLETE_MSG = 80;
     static final int USER_SWITCH_CALLBACKS_TIMEOUT_MSG = 90;
-    static final int SYSTEM_USER_UNLOCK_MSG = 100;
+    static final int USER_UNLOCK_MSG = 100;
     static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 110;
     static final int START_USER_SWITCH_FG_MSG = 120;
 
@@ -369,16 +369,18 @@ class UserController implements Handler.Callback {
                 }
             }
 
-            mHandler.sendMessage(mHandler.obtainMessage(REPORT_LOCKED_BOOT_COMPLETE_MSG,
-                    userId, 0));
-            Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
-            intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-            intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
-                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-            mInjector.broadcastIntent(intent, null, resultTo, 0, null, null,
-                    new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                    AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID,
-                    Binder.getCallingUid(), Binder.getCallingPid(), userId);
+            if (!mInjector.getUserManager().isPreCreated(userId)) {
+                mHandler.sendMessage(mHandler.obtainMessage(REPORT_LOCKED_BOOT_COMPLETE_MSG,
+                        userId, 0));
+                Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
+                intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
+                        | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                mInjector.broadcastIntent(intent, null, resultTo, 0, null, null,
+                        new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
+                        AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID,
+                        Binder.getCallingUid(), Binder.getCallingPid(), userId);
+            }
         }
 
         // We need to delay unlocking managed profiles until the parent user
@@ -439,8 +441,7 @@ class UserController implements Handler.Callback {
 
             // Dispatch unlocked to system services; when fully dispatched,
             // that calls through to the next "unlocked" phase
-            mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0, uss)
-                    .sendToTarget();
+            mHandler.obtainMessage(USER_UNLOCK_MSG, userId, 0, uss).sendToTarget();
         });
         return true;
     }
@@ -554,6 +555,17 @@ class UserController implements Handler.Callback {
                         null, true, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
                         Binder.getCallingPid(), userId);
             }
+        }
+
+        if (userInfo.preCreated) {
+            Slog.i(TAG, "Stopping pre-created user " + userInfo.toFullString());
+            // Pre-created user was started right after creation so services could properly
+            // intialize it; it should be stopped right away as it's not really a "real" user.
+            // TODO(b/140750212): in the long-term, we should add a onCreateUser() callback
+            // on SystemService instead.
+            stopUser(userInfo.id, /* force= */ true, /* stopUserCallback= */ null,
+                    /* keyEvictedCallback= */ null);
+            return;
         }
 
         // Spin up app widgets prior to boot-complete, so they can be ready promptly
@@ -808,7 +820,8 @@ class UserController implements Handler.Callback {
             mInjector.systemServiceManagerCleanupUser(userId);
             mInjector.stackSupervisorRemoveUser(userId);
             // Remove the user if it is ephemeral.
-            if (getUserInfo(userId).isEphemeral()) {
+            UserInfo userInfo = getUserInfo(userId);
+            if (userInfo.isEphemeral() && !userInfo.preCreated) {
                 mInjector.getUserManager().removeUserEvenWhenDisallowed(userId);
             }
 
@@ -985,11 +998,13 @@ class UserController implements Handler.Callback {
      * <ul>
      *     <li>{@link Intent#ACTION_USER_STARTED} - sent to registered receivers of the new user
      *     <li>{@link Intent#ACTION_USER_BACKGROUND} - sent to registered receivers of the outgoing
-     *     user and all profiles of this user. Sent only if {@code foreground} parameter is true
+     *     user and all profiles of this user. Sent only if {@code foreground} parameter is
+     *     {@code false}
      *     <li>{@link Intent#ACTION_USER_FOREGROUND} - sent to registered receivers of the new
-     *     user and all profiles of this user. Sent only if {@code foreground} parameter is true
+     *     user and all profiles of this user. Sent only if {@code foreground} parameter is
+     *     {@code true}
      *     <li>{@link Intent#ACTION_USER_SWITCHED} - sent to registered receivers of the new user.
-     *     Sent only if {@code foreground} parameter is true
+     *     Sent only if {@code foreground} parameter is {@code true}
      *     <li>{@link Intent#ACTION_USER_STARTING} - ordered broadcast sent to registered receivers
      *     of the new fg user
      *     <li>{@link Intent#ACTION_LOCKED_BOOT_COMPLETED} - ordered broadcast sent to receivers of
@@ -1060,6 +1075,11 @@ class UserController implements Handler.Callback {
             }
             if (foreground && userInfo.isManagedProfile()) {
                 Slog.w(TAG, "Cannot switch to User #" + userId + ": not a full user");
+                return false;
+            }
+
+            if (foreground && userInfo.preCreated) {
+                Slog.w(TAG, "Cannot start pre-created user #" + userId + " as foreground");
                 return false;
             }
 
@@ -1157,19 +1177,21 @@ class UserController implements Handler.Callback {
                 // Booting up a new user, need to tell system services about it.
                 // Note that this is on the same handler as scheduling of broadcasts,
                 // which is important because it needs to go first.
-                mHandler.sendMessage(
-                        mHandler.obtainMessage(SYSTEM_USER_START_MSG, userId, 0));
+                mHandler.sendMessage(mHandler.obtainMessage(USER_START_MSG, userId, 0));
             }
 
             if (foreground) {
-                mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_CURRENT_MSG, userId,
-                        oldUserId));
+                mHandler.sendMessage(mHandler.obtainMessage(USER_CURRENT_MSG, userId, oldUserId));
                 mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
                 mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
                 mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
                         oldUserId, userId, uss));
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_TIMEOUT_MSG,
                         oldUserId, userId, uss), USER_SWITCH_TIMEOUT_MS);
+            }
+
+            if (userInfo.preCreated) {
+                needStart = false;
             }
 
             if (needStart) {
@@ -2129,13 +2151,13 @@ class UserController implements Handler.Callback {
             case START_PROFILES_MSG:
                 startProfiles();
                 break;
-            case SYSTEM_USER_START_MSG:
+            case USER_START_MSG:
                 mInjector.batteryStatsServiceNoteEvent(
                         BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                         Integer.toString(msg.arg1), msg.arg1);
                 mInjector.getSystemServiceManager().startUser(msg.arg1);
                 break;
-            case SYSTEM_USER_UNLOCK_MSG:
+            case USER_UNLOCK_MSG:
                 final int userId = msg.arg1;
                 mInjector.getSystemServiceManager().unlockUser(userId);
                 // Loads recents on a worker thread that allows disk I/O
@@ -2144,7 +2166,7 @@ class UserController implements Handler.Callback {
                 });
                 finishUserUnlocked((UserState) msg.obj);
                 break;
-            case SYSTEM_USER_CURRENT_MSG:
+            case USER_CURRENT_MSG:
                 mInjector.batteryStatsServiceNoteEvent(
                         BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_FINISH,
                         Integer.toString(msg.arg2), msg.arg2);

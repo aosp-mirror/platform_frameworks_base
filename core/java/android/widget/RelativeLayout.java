@@ -73,7 +73,7 @@ import java.util.TreeSet;
  *
  * <p>This behavior has been preserved for apps that set <code>android:targetSdkVersion="17"</code>
  * or older in their manifest's <code>uses-sdk</code> tag for compatibility. Apps targeting SDK
- * version 18 or newer will receive the correct behavior</p>
+ * version 18 or newer will receive the correct behavior.</p>
  *
  * <p>See the <a href="{@docRoot}guide/topics/ui/layout/relative.html">Relative
  * Layout</a> guide.</p>

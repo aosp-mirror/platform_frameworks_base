@@ -214,7 +214,7 @@ public class GsmSmsCbMessage {
     private static Pair<Integer, List<Geometry>> parseWarningAreaCoordinates(
             byte[] pdu, int wacOffset) {
         // little-endian
-        int wacDataLength = (pdu[wacOffset + 1] << 8) | pdu[wacOffset];
+        int wacDataLength = ((pdu[wacOffset + 1] & 0xff) << 8) | (pdu[wacOffset] & 0xff);
         int offset = wacOffset + 2;
 
         if (offset + wacDataLength > pdu.length) {

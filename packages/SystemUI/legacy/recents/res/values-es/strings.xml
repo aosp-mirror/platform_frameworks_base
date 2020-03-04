@@ -19,25 +19,25 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_desc_recent_apps" msgid="2427210347871321373">"Aplicaciones recientes."</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="2355882496933479534">"Cerrar <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="4816790842084268400">"Se ha ignorado la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="5693205751863608046">"Se han ignorado todas las aplicaciones recientes."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="3406797323476801016">"Abre la información de la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="4519918148638221791">"Iniciando la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_empty_message" msgid="7967713254531861311">"No hay elementos recientes"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="1850214584987361375">"Has borrado todo"</string>
-    <string name="recents_app_info_button_label" msgid="8732926607391786762">"Información de la aplicación"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6087750201863853365">"fijar pantalla"</string>
-    <string name="recents_search_bar_label" msgid="638132045925945941">"buscar"</string>
-    <string name="recents_launch_error_message" msgid="9107963563503438012">"No se ha podido iniciar la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="826461671965217243">"La aplicación <xliff:g id="APP">%s</xliff:g> se ha inhabilitado en modo seguro."</string>
-    <string name="recents_stack_action_button_label" msgid="1974273390109881497">"Borrar todo"</string>
-    <string name="recents_drag_hint_message" msgid="610417221848280136">"Arrastra el elemento hasta aquí para utilizar la pantalla dividida"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="488987777874979435">"División horizontal"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="2498375296906391117">"División vertical"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="7368405969130304811">"División personalizada"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="8773505308411722524">"Dividir la pantalla en la parte superior"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="722594718192007972">"Dividir la pantalla a la izquierda"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="2479764030969301514">"Dividir la pantalla a la derecha"</string>
+    <string name="accessibility_desc_recent_apps" msgid="7556662260274154402">"Aplicaciones recientes."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="1987979391731836442">"Cerrar <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="accessibility_recents_item_dismissed" msgid="99149432850273747">"Se ha ignorado la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="accessibility_recents_all_items_dismissed" msgid="2584965907377043255">"Se han ignorado todas las aplicaciones recientes."</string>
+    <string name="accessibility_recents_item_open_app_info" msgid="5843409407745673280">"Abre la información de la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="accessibility_recents_item_launched" msgid="2439069760172103351">"Iniciando la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="recents_empty_message" msgid="4718114148356836203">"No hay elementos recientes"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2873215505812268822">"Has borrado todo"</string>
+    <string name="recents_app_info_button_label" msgid="5371319329151716224">"Información de la aplicación"</string>
+    <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"fijar pantalla"</string>
+    <string name="recents_search_bar_label" msgid="1910412649656301014">"buscar"</string>
+    <string name="recents_launch_error_message" msgid="8622817255751191462">"No se ha podido iniciar la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="recents_launch_disabled_message" msgid="1055364973720665718">"La aplicación <xliff:g id="APP">%s</xliff:g> se ha inhabilitado en modo seguro."</string>
+    <string name="recents_stack_action_button_label" msgid="7396636872618564201">"Borrar todo"</string>
+    <string name="recents_drag_hint_message" msgid="3309424039418402577">"Arrastra el elemento hasta aquí para utilizar la pantalla dividida"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="3361339364058788960">"División horizontal"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="5525527159623478768">"División vertical"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="8749946272357062148">"División personalizada"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="4034331660613790457">"Dividir la pantalla en la parte superior"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="6523694635909067802">"Dividir la pantalla a la izquierda"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="559141375304415400">"Dividir la pantalla a la derecha"</string>
 </resources>
