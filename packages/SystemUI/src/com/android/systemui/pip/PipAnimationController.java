@@ -37,7 +37,6 @@ public class PipAnimationController {
     private static final float FRACTION_START = 0f;
     private static final float FRACTION_END = 1f;
 
-    public static final int DURATION_NONE = 0;
     public static final int DURATION_DEFAULT_MS = 425;
     public static final int ANIM_TYPE_BOUNDS = 0;
     public static final int ANIM_TYPE_ALPHA = 1;
@@ -49,6 +48,20 @@ public class PipAnimationController {
     @Retention(RetentionPolicy.SOURCE)
     public @interface AnimationType {}
 
+    static final int TRANSITION_DIRECTION_NONE = 0;
+    static final int TRANSITION_DIRECTION_SAME = 1;
+    static final int TRANSITION_DIRECTION_TO_PIP = 2;
+    static final int TRANSITION_DIRECTION_TO_FULLSCREEN = 3;
+
+    @IntDef(prefix = { "TRANSITION_DIRECTION_" }, value = {
+            TRANSITION_DIRECTION_NONE,
+            TRANSITION_DIRECTION_SAME,
+            TRANSITION_DIRECTION_TO_PIP,
+            TRANSITION_DIRECTION_TO_FULLSCREEN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TransitionDirection {}
+
     private final Interpolator mFastOutSlowInInterpolator;
 
     private PipTransitionAnimator mCurrentAnimator;
@@ -58,30 +71,28 @@ public class PipAnimationController {
                 com.android.internal.R.interpolator.fast_out_slow_in);
     }
 
-    PipTransitionAnimator getAnimator(SurfaceControl leash, boolean scheduleFinishPip,
+    @SuppressWarnings("unchecked")
+    PipTransitionAnimator getAnimator(SurfaceControl leash,
             Rect destinationBounds, float alphaStart, float alphaEnd) {
         if (mCurrentAnimator == null) {
             mCurrentAnimator = setupPipTransitionAnimator(
-                    PipTransitionAnimator.ofAlpha(leash, scheduleFinishPip, destinationBounds,
-                            alphaStart, alphaEnd));
+                    PipTransitionAnimator.ofAlpha(leash, destinationBounds, alphaStart, alphaEnd));
         } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_ALPHA
                 && mCurrentAnimator.isRunning()) {
             mCurrentAnimator.updateEndValue(alphaEnd);
         } else {
             mCurrentAnimator.cancel();
             mCurrentAnimator = setupPipTransitionAnimator(
-                    PipTransitionAnimator.ofAlpha(leash, scheduleFinishPip, destinationBounds,
-                            alphaStart, alphaEnd));
+                    PipTransitionAnimator.ofAlpha(leash, destinationBounds, alphaStart, alphaEnd));
         }
         return mCurrentAnimator;
     }
 
-    PipTransitionAnimator getAnimator(SurfaceControl leash, boolean scheduleFinishPip,
-            Rect startBounds, Rect endBounds) {
+    @SuppressWarnings("unchecked")
+    PipTransitionAnimator getAnimator(SurfaceControl leash, Rect startBounds, Rect endBounds) {
         if (mCurrentAnimator == null) {
             mCurrentAnimator = setupPipTransitionAnimator(
-                    PipTransitionAnimator.ofBounds(leash, scheduleFinishPip,
-                            startBounds, endBounds));
+                    PipTransitionAnimator.ofBounds(leash, startBounds, endBounds));
         } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_BOUNDS
                 && mCurrentAnimator.isRunning()) {
             mCurrentAnimator.setDestinationBounds(endBounds);
@@ -90,8 +101,7 @@ public class PipAnimationController {
         } else {
             mCurrentAnimator.cancel();
             mCurrentAnimator = setupPipTransitionAnimator(
-                    PipTransitionAnimator.ofBounds(leash, scheduleFinishPip,
-                            startBounds, endBounds));
+                    PipTransitionAnimator.ofBounds(leash, startBounds, endBounds));
         }
         return mCurrentAnimator;
     }
@@ -134,7 +144,6 @@ public class PipAnimationController {
     public abstract static class PipTransitionAnimator<T> extends ValueAnimator implements
             ValueAnimator.AnimatorUpdateListener,
             ValueAnimator.AnimatorListener {
-        private final boolean mScheduleFinishPip;
         private final SurfaceControl mLeash;
         private final @AnimationType int mAnimationType;
         private final Rect mDestinationBounds = new Rect();
@@ -144,11 +153,11 @@ public class PipAnimationController {
         private T mCurrentValue;
         private PipAnimationCallback mPipAnimationCallback;
         private SurfaceControlTransactionFactory mSurfaceControlTransactionFactory;
+        private @TransitionDirection int mTransitionDirection;
+        private int mCornerRadius;
 
-        private PipTransitionAnimator(SurfaceControl leash, boolean scheduleFinishPip,
-                @AnimationType int animationType, Rect destinationBounds,
-                T startValue, T endValue) {
-            mScheduleFinishPip = scheduleFinishPip;
+        private PipTransitionAnimator(SurfaceControl leash, @AnimationType int animationType,
+                Rect destinationBounds, T startValue, T endValue) {
             mLeash = leash;
             mAnimationType = animationType;
             mDestinationBounds.set(destinationBounds);
@@ -157,6 +166,7 @@ public class PipAnimationController {
             addListener(this);
             addUpdateListener(this);
             mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
+            mTransitionDirection = TRANSITION_DIRECTION_NONE;
         }
 
         @Override
@@ -202,8 +212,15 @@ public class PipAnimationController {
             return this;
         }
 
-        boolean shouldScheduleFinishPip() {
-            return mScheduleFinishPip;
+        @TransitionDirection int getTransitionDirection() {
+            return mTransitionDirection;
+        }
+
+        PipTransitionAnimator<T> setTransitionDirection(@TransitionDirection int direction) {
+            if (direction != TRANSITION_DIRECTION_SAME) {
+                mTransitionDirection = direction;
+            }
+            return this;
         }
 
         T getStartValue() {
@@ -224,6 +241,19 @@ public class PipAnimationController {
 
         void setCurrentValue(T value) {
             mCurrentValue = value;
+        }
+
+        int getCornerRadius() {
+            return mCornerRadius;
+        }
+
+        PipTransitionAnimator<T> setCornerRadius(int cornerRadius) {
+            mCornerRadius = cornerRadius;
+            return this;
+        }
+
+        boolean shouldApplyCornerRadius() {
+            return mTransitionDirection != TRANSITION_DIRECTION_TO_FULLSCREEN;
         }
 
         /**
@@ -251,9 +281,9 @@ public class PipAnimationController {
         abstract void applySurfaceControlTransaction(SurfaceControl leash,
                 SurfaceControl.Transaction tx, float fraction);
 
-        static PipTransitionAnimator<Float> ofAlpha(SurfaceControl leash, boolean scheduleFinishPip,
+        static PipTransitionAnimator<Float> ofAlpha(SurfaceControl leash,
                 Rect destinationBounds, float startValue, float endValue) {
-            return new PipTransitionAnimator<Float>(leash, scheduleFinishPip, ANIM_TYPE_ALPHA,
+            return new PipTransitionAnimator<Float>(leash, ANIM_TYPE_ALPHA,
                     destinationBounds, startValue, endValue) {
                 @Override
                 void applySurfaceControlTransaction(SurfaceControl leash,
@@ -266,16 +296,18 @@ public class PipAnimationController {
                         final Rect bounds = getDestinationBounds();
                         tx.setPosition(leash, bounds.left, bounds.top)
                                 .setWindowCrop(leash, bounds.width(), bounds.height());
+                        tx.setCornerRadius(leash,
+                                shouldApplyCornerRadius() ? getCornerRadius() : 0);
                     }
                     tx.apply();
                 }
             };
         }
 
-        static PipTransitionAnimator<Rect> ofBounds(SurfaceControl leash, boolean scheduleFinishPip,
+        static PipTransitionAnimator<Rect> ofBounds(SurfaceControl leash,
                 Rect startValue, Rect endValue) {
             // construct new Rect instances in case they are recycled
-            return new PipTransitionAnimator<Rect>(leash, scheduleFinishPip, ANIM_TYPE_BOUNDS,
+            return new PipTransitionAnimator<Rect>(leash, ANIM_TYPE_BOUNDS,
                     endValue, new Rect(startValue), new Rect(endValue)) {
                 private final Rect mTmpRect = new Rect();
 
@@ -299,6 +331,8 @@ public class PipAnimationController {
                     if (Float.compare(fraction, FRACTION_START) == 0) {
                         // Ensure the start condition
                         tx.setAlpha(leash, 1f);
+                        tx.setCornerRadius(leash,
+                                shouldApplyCornerRadius() ? getCornerRadius() : 0);
                     }
                     tx.apply();
                 }
