@@ -5120,8 +5120,8 @@ public final class Telephony {
         public static final String WFC_IMS_ROAMING_ENABLED = "wfc_ims_roaming_enabled";
 
         /**
-         * Determines if the user has enabled IMS RCS User Capability Exchange (UCE) for this
-         * subscription.
+         * TelephonyProvider column name for determining if the user has enabled IMS RCS User
+         * Capability Exchange (UCE) for this subscription.
          */
         public static final String IMS_RCS_UCE_ENABLED = "ims_rcs_uce_enabled";
 
