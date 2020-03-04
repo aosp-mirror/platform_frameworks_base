@@ -2820,7 +2820,8 @@ public class WifiManager {
 
     /**
      * Get the country code.
-     * @return the country code in ISO 3166 format, or null if there is no country code configured.
+     * @return the country code in ISO 3166 alpha-2 (2-letter) uppercase format, or null if
+     * there is no country code configured.
      * @hide
      */
     @Nullable
