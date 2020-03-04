@@ -168,7 +168,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 // bounds. We want to restore to the unexpanded bounds when re-entering pip,
                 // so we save the bounds before expansion (normal) instead of the current
                 // bounds.
-                mReentryBounds.set(mTouchHandler.getNormalBounds());
+                mReentryBounds.set(mTouchHandler.getMinBounds());
                 // Apply the snap fraction of the current bounds to the normal bounds.
                 float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
                 mPipBoundsHandler.applySnapFraction(mReentryBounds, snapFraction);
