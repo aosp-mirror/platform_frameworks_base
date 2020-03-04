@@ -293,9 +293,8 @@ public class RebootEscrowManagerTests {
 
         verify(mRebootEscrow, never()).storeKey(any());
 
-        ArgumentCaptor<byte[]> keyByteCaptor = ArgumentCaptor.forClass(byte[].class);
         assertTrue(mService.armRebootEscrowIfNeeded());
-        verify(mRebootEscrow).storeKey(keyByteCaptor.capture());
+        verify(mRebootEscrow).storeKey(any());
 
         assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
         assertFalse(mStorage.hasRebootEscrow(NONSECURE_SECONDARY_USER_ID));
@@ -303,13 +302,72 @@ public class RebootEscrowManagerTests {
         // pretend reboot happens here
 
         when(mInjected.getBootCount()).thenReturn(10);
-        when(mRebootEscrow.retrieveKey()).thenAnswer(invocation -> keyByteCaptor.getValue());
+        when(mRebootEscrow.retrieveKey()).thenReturn(new byte[32]);
 
         mService.loadRebootEscrowDataIfAvailable();
         verify(mRebootEscrow).retrieveKey();
         verify(mInjected, never()).reportMetric(anyBoolean());
     }
 
+    @Test
+    public void loadRebootEscrowDataIfAvailable_ManualReboot_Failure_NoMetrics() throws Exception {
+        when(mInjected.getBootCount()).thenReturn(0);
+
+        RebootEscrowListener mockListener = mock(RebootEscrowListener.class);
+        mService.setRebootEscrowListener(mockListener);
+        mService.prepareRebootEscrow();
+
+        clearInvocations(mRebootEscrow);
+        mService.callToRebootEscrowIfNeeded(PRIMARY_USER_ID, FAKE_SP_VERSION, FAKE_AUTH_TOKEN);
+        verify(mockListener).onPreparedForReboot(eq(true));
+
+        verify(mRebootEscrow, never()).storeKey(any());
+
+        assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
+        assertFalse(mStorage.hasRebootEscrow(NONSECURE_SECONDARY_USER_ID));
+
+        // pretend reboot happens here
+
+        when(mInjected.getBootCount()).thenReturn(10);
+        when(mRebootEscrow.retrieveKey()).thenReturn(new byte[32]);
+
+        mService.loadRebootEscrowDataIfAvailable();
+        verify(mInjected, never()).reportMetric(anyBoolean());
+    }
+
+    @Test
+    public void loadRebootEscrowDataIfAvailable_OTAFromBeforeArmedStatus_SuccessMetrics()
+            throws Exception {
+        when(mInjected.getBootCount()).thenReturn(0);
+
+        RebootEscrowListener mockListener = mock(RebootEscrowListener.class);
+        mService.setRebootEscrowListener(mockListener);
+        mService.prepareRebootEscrow();
+
+        clearInvocations(mRebootEscrow);
+        mService.callToRebootEscrowIfNeeded(PRIMARY_USER_ID, FAKE_SP_VERSION, FAKE_AUTH_TOKEN);
+        verify(mockListener).onPreparedForReboot(eq(true));
+
+        verify(mRebootEscrow, never()).storeKey(any());
+
+        ArgumentCaptor<byte[]> keyByteCaptor = ArgumentCaptor.forClass(byte[].class);
+        assertTrue(mService.armRebootEscrowIfNeeded());
+        verify(mRebootEscrow).storeKey(keyByteCaptor.capture());
+
+        assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
+        assertFalse(mStorage.hasRebootEscrow(NONSECURE_SECONDARY_USER_ID));
+
+        // Delete key to simulate old version that didn't have it.
+        mStorage.removeKey(RebootEscrowManager.REBOOT_ESCROW_ARMED_KEY, USER_SYSTEM);
+
+        // pretend reboot happens here
+
+        when(mInjected.getBootCount()).thenReturn(10);
+        when(mRebootEscrow.retrieveKey()).thenAnswer(invocation -> keyByteCaptor.getValue());
+
+        mService.loadRebootEscrowDataIfAvailable();
+        verify(mInjected).reportMetric(eq(true));
+    }
 
     @Test
     public void loadRebootEscrowDataIfAvailable_RestoreUnsuccessful_Failure() throws Exception {
