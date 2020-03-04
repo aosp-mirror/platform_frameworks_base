@@ -368,6 +368,14 @@ class Task extends WindowContainer<WindowContainer> {
     @Surface.Rotation
     private int mRotation;
 
+    /**
+     * Last requested orientation reported to DisplayContent. This is different from {@link
+     * #mOrientation} in the sense that this takes activities' requested orientation into
+     * account. Start with {@link ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED} so that we don't need
+     * to notify for activities that don't specify any orientation.
+     */
+    int mLastReportedRequestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+
     // For comparison with DisplayContent bounds.
     private Rect mTmpRect = new Rect();
     // For handling display rotations.

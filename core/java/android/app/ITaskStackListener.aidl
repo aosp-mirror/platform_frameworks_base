@@ -205,4 +205,15 @@ oneway interface ITaskStackListener {
      * @param {@code true} if the task got focus, {@code false} if it lost it.
      */
     void onTaskFocusChanged(int taskId, boolean focused);
+
+    /**
+     * Called when a task changes its requested orientation. It is different from {@link
+     * #onActivityRequestedOrientationChanged(int, int)} in the sense that this method is called
+     * when a task changes requested orientation due to activity launch, dimiss or reparenting.
+     *
+     * @param taskId id of the task.
+     * @param requestedOrientation the new requested orientation of this task as screen orientations
+     *                             in {@link android.content.pm.ActivityInfo}.
+     */
+     void onTaskRequestedOrientationChanged(int taskId, int requestedOrientation);
 }
