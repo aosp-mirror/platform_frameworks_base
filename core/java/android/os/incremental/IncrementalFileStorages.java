@@ -101,8 +101,7 @@ public final class IncrementalFileStorages {
                     } catch (IOException e) {
                         // TODO(b/146080380): add incremental-specific error code
                         throw new IOException(
-                                "Failed to add file to IncFS: " + file.getName() + ", reason: "
-                                        + e.getMessage(), e.getCause());
+                                "Failed to add file to IncFS: " + file.getName() + ", reason: ", e);
                     }
                 } else {
                     throw new IOException("Unknown file location: " + file.getLocation());
@@ -117,6 +116,7 @@ public final class IncrementalFileStorages {
 
             return result;
         } catch (IOException e) {
+            Slog.e(TAG, "Failed to initialize Incremental file storages. Cleaning up...", e);
             if (result != null) {
                 result.cleanUp();
             }
