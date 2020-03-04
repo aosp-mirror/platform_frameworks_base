@@ -43,9 +43,8 @@ public class PackageManagerPerfTest {
             "com.android.perftests.packagemanager.TestPermission";
     private static final String PERMISSION_NAME_DOESNT_EXIST =
             "com.android.perftests.packagemanager.TestBadPermission";
-    private static final String OTHER_PACKAGE_NAME = "com.android.perftests.appenumeration0";
     private static final ComponentName TEST_ACTIVITY =
-            new ComponentName(OTHER_PACKAGE_NAME,
+            new ComponentName("com.android.perftests.packagemanager",
                     "android.perftests.utils.PerfTestActivity");
 
     @Rule
@@ -130,7 +129,7 @@ public class PackageManagerPerfTest {
                 InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageManager();
 
         while (state.keepRunning()) {
-            pm.getPackageInfo(OTHER_PACKAGE_NAME, 0);
+            pm.getPackageInfo(TEST_ACTIVITY.getPackageName(), 0);
         }
     }
 
@@ -148,7 +147,7 @@ public class PackageManagerPerfTest {
                 InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageManager();
 
         while (state.keepRunning()) {
-            pm.getApplicationInfo(OTHER_PACKAGE_NAME, 0);
+            pm.getApplicationInfo(TEST_ACTIVITY.getPackageName(), 0);
         }
     }
 
