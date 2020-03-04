@@ -49,6 +49,7 @@ public abstract class StackScrollerDecorView extends ExpandableView {
 
     public StackScrollerDecorView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setClipChildren(false);
     }
 
     @Override
@@ -203,6 +204,11 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
         // TODO: use delay and duration
         setContentVisible(true);
+    }
+
+    @Override
+    public boolean needsClippingToShelf() {
+        return false;
     }
 
     @Override
