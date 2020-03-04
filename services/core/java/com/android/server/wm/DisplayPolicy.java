@@ -84,6 +84,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
@@ -985,13 +986,15 @@ public class DisplayPolicy {
                             "DisplayPolicy");
                 }
                 break;
-            case TYPE_STATUS_BAR_PANEL:
+            case TYPE_STATUS_BAR_ADDITIONAL:
             case TYPE_STATUS_BAR_SUB_PANEL:
             case TYPE_VOICE_INTERACTION_STARTING:
                 mContext.enforcePermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                         "DisplayPolicy");
                 break;
+            case TYPE_STATUS_BAR_PANEL:
+                return WindowManagerGlobal.ADD_INVALID_TYPE;
         }
         return ADD_OKAY;
     }
@@ -2103,7 +2106,7 @@ public class DisplayPolicy {
                     setAttachedWindowFrames(win, fl, adjust, attached, true, pf, df, cf, vf,
                             displayFrames);
                 } else {
-                    if (type == TYPE_STATUS_BAR_PANEL || type == TYPE_STATUS_BAR_SUB_PANEL) {
+                    if (type == TYPE_STATUS_BAR_ADDITIONAL || type == TYPE_STATUS_BAR_SUB_PANEL) {
                         // Status bar panels are the only windows who can go on top of the status
                         // bar. They are protected by the STATUS_BAR_SERVICE permission, so they
                         // have the same privileges as the status bar itself.
@@ -2170,7 +2173,7 @@ public class DisplayPolicy {
                         + "): IN_SCREEN");
                 // A window that has requested to fill the entire screen just
                 // gets everything, period.
-                if (type == TYPE_STATUS_BAR_PANEL || type == TYPE_STATUS_BAR_SUB_PANEL) {
+                if (type == TYPE_STATUS_BAR_ADDITIONAL || type == TYPE_STATUS_BAR_SUB_PANEL) {
                     cf.set(displayFrames.mUnrestricted);
                     df.set(displayFrames.mUnrestricted);
                     pf.set(displayFrames.mUnrestricted);
@@ -2252,7 +2255,7 @@ public class DisplayPolicy {
                         + "): normal window");
                 // Otherwise, a normal window must be placed inside the content
                 // of all screen decorations.
-                if (type == TYPE_STATUS_BAR_PANEL) {
+                if (type == TYPE_STATUS_BAR_ADDITIONAL) {
                     // Status bar panels can go on
                     // top of the status bar. They are protected by the STATUS_BAR_SERVICE
                     // permission, so they have the same privileges as the status bar itself.

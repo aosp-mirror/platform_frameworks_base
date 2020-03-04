@@ -31,7 +31,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 
@@ -376,7 +376,8 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState navBarPanel =
                 createWindow(null, TYPE_NAVIGATION_BAR_PANEL, mDisplayContent, "NavBarPanel");
         final WindowState statusBarPanel =
-                createWindow(null, TYPE_STATUS_BAR_PANEL, mDisplayContent, "StatusBarPanel");
+                createWindow(null, TYPE_STATUS_BAR_ADDITIONAL, mDisplayContent,
+                        "StatusBarAdditional");
         final WindowState statusBarSubPanel =
                 createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, mDisplayContent, "StatusBarSubPanel");
         mDisplayContent.assignChildLayers(mTransaction);
