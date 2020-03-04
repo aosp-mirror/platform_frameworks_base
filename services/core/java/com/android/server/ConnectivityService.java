@@ -2094,9 +2094,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void enforceNetworkFactoryPermission() {
-        mContext.enforceCallingOrSelfPermission(
+        enforceAnyPermissionOf(
                 android.Manifest.permission.NETWORK_FACTORY,
-                "ConnectivityService");
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
     private boolean checkSettingsPermission() {
