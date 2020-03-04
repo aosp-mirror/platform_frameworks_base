@@ -36,7 +36,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.IDataLoaderStatusListener;
-import android.content.pm.InstallationFile;
+import android.content.pm.InstallationFileParcel;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -76,7 +76,7 @@ public final class IncrementalFileStorages {
             @NonNull File stageDir,
             @NonNull DataLoaderParams dataLoaderParams,
             @Nullable IDataLoaderStatusListener dataLoaderStatusListener,
-            List<InstallationFile> addedFiles) throws IOException {
+            List<InstallationFileParcel> addedFiles) throws IOException {
         // TODO(b/136132412): sanity check if session should not be incremental
         IncrementalManager incrementalManager = (IncrementalManager) context.getSystemService(
                 Context.INCREMENTAL_SERVICE);
@@ -94,17 +94,17 @@ public final class IncrementalFileStorages {
                 result.mDefaultStorage.bind(stageDir.getAbsolutePath());
             }
 
-            for (InstallationFile file : addedFiles) {
-                if (file.getLocation() == LOCATION_DATA_APP) {
+            for (InstallationFileParcel file : addedFiles) {
+                if (file.location == LOCATION_DATA_APP) {
                     try {
                         result.addApkFile(file);
                     } catch (IOException e) {
                         // TODO(b/146080380): add incremental-specific error code
                         throw new IOException(
-                                "Failed to add file to IncFS: " + file.getName() + ", reason: ", e);
+                                "Failed to add file to IncFS: " + file.name + ", reason: ", e);
                     }
                 } else {
-                    throw new IOException("Unknown file location: " + file.getLocation());
+                    throw new IOException("Unknown file location: " + file.location);
                 }
             }
 
@@ -154,12 +154,11 @@ public final class IncrementalFileStorages {
         }
     }
 
-    private void addApkFile(@NonNull InstallationFile apk) throws IOException {
-        final String apkName = apk.getName();
+    private void addApkFile(@NonNull InstallationFileParcel apk) throws IOException {
+        final String apkName = apk.name;
         final File targetFile = new File(mStageDir, apkName);
         if (!targetFile.exists()) {
-            mDefaultStorage.makeFile(apkName, apk.getLengthBytes(), null, apk.getMetadata(),
-                    apk.getSignature());
+            mDefaultStorage.makeFile(apkName, apk.size, null, apk.metadata, apk.signature);
         }
     }
 

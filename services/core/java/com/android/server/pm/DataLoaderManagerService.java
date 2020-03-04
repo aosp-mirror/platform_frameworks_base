@@ -22,12 +22,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.DataLoaderParamsParcel;
+import android.content.pm.FileSystemControlParcel;
 import android.content.pm.IDataLoader;
 import android.content.pm.IDataLoaderManager;
 import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -65,26 +66,22 @@ public class DataLoaderManagerService extends SystemService {
 
     final class DataLoaderManagerBinderService extends IDataLoaderManager.Stub {
         @Override
-        public boolean initializeDataLoader(int dataLoaderId, Bundle params,
-                IDataLoaderStatusListener listener) {
+        public boolean initializeDataLoader(int dataLoaderId, DataLoaderParamsParcel params,
+                FileSystemControlParcel control, IDataLoaderStatusListener listener) {
             synchronized (mLock) {
                 if (mServiceConnections.get(dataLoaderId) != null) {
                     Slog.e(TAG, "Data loader of ID=" + dataLoaderId + " already exists.");
                     return false;
                 }
             }
-            ComponentName componentName = params.getParcelable("componentName");
-            if (componentName == null) {
-                Slog.e(TAG, "Must specify component name.");
-                return false;
-            }
+            ComponentName componentName = new ComponentName(params.packageName, params.className);
             ComponentName dataLoaderComponent = resolveDataLoaderComponentName(componentName);
             if (dataLoaderComponent == null) {
                 return false;
             }
             // Binds to the specific data loader service
             DataLoaderServiceConnection connection =
-                    new DataLoaderServiceConnection(dataLoaderId, params, listener);
+                    new DataLoaderServiceConnection(dataLoaderId, params, control, listener);
             Intent intent = new Intent();
             intent.setComponent(dataLoaderComponent);
             if (!mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
@@ -181,13 +178,16 @@ public class DataLoaderManagerService extends SystemService {
 
     class DataLoaderServiceConnection implements ServiceConnection {
         final int mId;
-        final Bundle mParams;
+        final DataLoaderParamsParcel mParams;
+        final FileSystemControlParcel mControl;
         final IDataLoaderStatusListener mListener;
         IDataLoader mDataLoader;
 
-        DataLoaderServiceConnection(int id, Bundle params, IDataLoaderStatusListener listener) {
+        DataLoaderServiceConnection(int id, DataLoaderParamsParcel params,
+                FileSystemControlParcel control, IDataLoaderStatusListener listener) {
             mId = id;
             mParams = params;
+            mControl = control;
             mListener = listener;
             mDataLoader = null;
         }
@@ -199,7 +199,7 @@ public class DataLoaderManagerService extends SystemService {
                 mServiceConnections.append(mId, this);
             }
             try {
-                mDataLoader.create(mId, mParams, mListener);
+                mDataLoader.create(mId, mParams, mControl, mListener);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to create data loader service.", e);
             }
@@ -226,7 +226,6 @@ public class DataLoaderManagerService extends SystemService {
             synchronized (mLock) {
                 mServiceConnections.remove(mId);
             }
-            mParams.clear();
         }
     }
 }
