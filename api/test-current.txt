@@ -843,6 +843,7 @@ package android.content.integrity {
     method @NonNull public android.content.integrity.RuleSet getCurrentRuleSet();
     method @NonNull public String getCurrentRuleSetProvider();
     method @NonNull public String getCurrentRuleSetVersion();
+    method @NonNull public java.util.List<java.lang.String> getWhitelistedRuleProviders();
     method public void updateRuleSet(@NonNull android.content.integrity.RuleSet, @NonNull android.content.IntentSender);
     field public static final String EXTRA_STATUS = "android.content.integrity.extra.STATUS";
     field public static final int STATUS_FAILURE = 1; // 0x1

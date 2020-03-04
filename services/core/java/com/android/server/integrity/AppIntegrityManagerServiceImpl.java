@@ -50,6 +50,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -237,6 +238,11 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             Slog.e(TAG, "Error getting current rules", e);
         }
         return new ParceledListSlice<>(rules);
+    }
+
+    @Override
+    public List<String> getWhitelistedRuleProviders() throws RemoteException {
+        return getAllowedRuleProviders();
     }
 
     private void handleIntegrityVerification(Intent intent) {
