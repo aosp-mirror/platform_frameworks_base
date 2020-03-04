@@ -27,6 +27,7 @@
             android:theme="@style/Theme.AlertDialogActivity"
             android:supportsRtl="true"
             android:defaultToDeviceProtectedStorage="true"
+            android:forceQueryable="true"
             android:directBootAware="true">
 
         <receiver android:name=".TemporaryFileManager"
