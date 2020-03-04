@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
@@ -63,7 +64,7 @@ import javax.inject.Singleton;
  *  6. Top-level entries are assigned sections by NotifSections ({@link #setSections})
  *  7. Top-level entries within the same section are sorted by NotifComparators
  *     ({@link #setComparators})
- *  8. Pre-render filters are fired on each notification ({@link #addPreRenderFilter})
+ *  8. Finalize filters are fired on each notification ({@link #addFinalizeFilter})
  *  9. OnBeforeRenderListListeners are fired ({@link #addOnBeforeRenderListListener})
  *  9. The list is handed off to the view layer to be rendered
  */
@@ -169,14 +170,22 @@ public class NotifPipeline implements CommonNotifCollection {
     }
 
     /**
+     * Called after notifs have been filtered once, grouped, and sorted but before the final
+     * filtering.
+     */
+    public void addOnBeforeFinalizeFilterListener(OnBeforeFinalizeFilterListener listener) {
+        mShadeListBuilder.addOnBeforeFinalizeFilterListener(listener);
+    }
+
+    /**
      * Registers a filter with the pipeline to filter right before rendering the list (after
      * pre-group filtering, grouping, promoting and sorting occurs). Filters are
      * called on each notification in the order that they were registered. If any filter returns
      * true, the notification is removed from the pipeline (and no other filters are called on that
      * notif).
      */
-    public void addPreRenderFilter(NotifFilter filter) {
-        mShadeListBuilder.addPreRenderFilter(filter);
+    public void addFinalizeFilter(NotifFilter filter) {
+        mShadeListBuilder.addFinalizeFilter(filter);
     }
 
     /**

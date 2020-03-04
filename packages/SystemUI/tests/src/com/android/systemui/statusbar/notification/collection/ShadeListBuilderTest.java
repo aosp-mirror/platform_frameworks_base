@@ -42,6 +42,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder.OnRenderListListener;
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
@@ -84,6 +85,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     @Mock private NotifCollection mNotifCollection;
     @Spy private OnBeforeTransformGroupsListener mOnBeforeTransformGroupsListener;
     @Spy private OnBeforeSortListener mOnBeforeSortListener;
+    @Spy private OnBeforeFinalizeFilterListener mOnBeforeFinalizeFilterListener;
     @Spy private OnBeforeRenderListListener mOnBeforeRenderListListener;
     @Spy private OnRenderListListener mOnRenderListListener = list -> mBuiltList = list;
 
@@ -387,7 +389,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         NotifFilter preGroupFilter = spy(new PackageFilter(PACKAGE_2));
         NotifFilter preRenderFilter = spy(new PackageFilter(PACKAGE_2));
         mListBuilder.addPreGroupFilter(preGroupFilter);
-        mListBuilder.addPreRenderFilter(preRenderFilter);
+        mListBuilder.addFinalizeFilter(preRenderFilter);
 
         // WHEN the pipeline is kicked off on a list of notifs
         addNotif(0, PACKAGE_1);
@@ -423,7 +425,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     public void testPreRenderNotifsAreFiltered() {
         // GIVEN a NotifFilter that filters out a specific package
         NotifFilter filter1 = spy(new PackageFilter(PACKAGE_2));
-        mListBuilder.addPreRenderFilter(filter1);
+        mListBuilder.addFinalizeFilter(filter1);
 
         // WHEN the pipeline is kicked off on a list of notifs
         addNotif(0, PACKAGE_1);
@@ -454,7 +456,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         final String filterTag = "FILTER_ME";
         // GIVEN a NotifFilter that filters out notifications with a tag
         NotifFilter filter1 = spy(new NotifFilterWithTag(filterTag));
-        mListBuilder.addPreRenderFilter(filter1);
+        mListBuilder.addFinalizeFilter(filter1);
 
         // WHEN the pipeline is kicked off on a list of notifs
         addGroupChildWithTag(0, PACKAGE_2, GROUP_1, filterTag);
@@ -742,8 +744,9 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addOnBeforeSortListener(mOnBeforeSortListener);
         mListBuilder.setComparators(Collections.singletonList(comparator));
         mListBuilder.setSections(Arrays.asList(section));
+        mListBuilder.addOnBeforeFinalizeFilterListener(mOnBeforeFinalizeFilterListener);
+        mListBuilder.addFinalizeFilter(preRenderFilter);
         mListBuilder.addOnBeforeRenderListListener(mOnBeforeRenderListListener);
-        mListBuilder.addPreRenderFilter(preRenderFilter);
 
         // WHEN a few new notifs are added
         addNotif(0, PACKAGE_1);
@@ -763,6 +766,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                 mOnBeforeSortListener,
                 section,
                 comparator,
+                mOnBeforeFinalizeFilterListener,
                 preRenderFilter,
                 mOnBeforeRenderListListener,
                 mOnRenderListListener);
@@ -777,6 +781,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         inOrder.verify(section, atLeastOnce()).isInSection(any(ListEntry.class));
         inOrder.verify(comparator, atLeastOnce())
                 .compare(any(ListEntry.class), any(ListEntry.class));
+        inOrder.verify(mOnBeforeFinalizeFilterListener).onBeforeFinalizeFilter(anyList());
         inOrder.verify(preRenderFilter, atLeastOnce())
                 .shouldFilterOut(any(NotificationEntry.class), anyLong());
         inOrder.verify(mOnBeforeRenderListListener).onBeforeRenderList(anyList());
@@ -1075,7 +1080,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a PreRenderNotifFilter that gets invalidated during the finalizing stage
         NotifFilter filter = new PackageFilter(PACKAGE_5);
         OnBeforeRenderListListener listener = (list) -> filter.invalidateList();
-        mListBuilder.addPreRenderFilter(filter);
+        mListBuilder.addFinalizeFilter(filter);
         mListBuilder.addOnBeforeRenderListListener(listener);
 
         // WHEN we try to run the pipeline and the PreRenderFilter is invalidated
@@ -1090,7 +1095,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a PreRenderFilter that gets invalidated during the grouping stage
         NotifFilter filter = new PackageFilter(PACKAGE_5);
         OnBeforeTransformGroupsListener listener = (list) -> filter.invalidateList();
-        mListBuilder.addPreRenderFilter(filter);
+        mListBuilder.addFinalizeFilter(filter);
         mListBuilder.addOnBeforeTransformGroupsListener(listener);
 
         // WHEN we try to run the pipeline and the filter is invalidated
