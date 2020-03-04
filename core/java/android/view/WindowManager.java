@@ -1026,7 +1026,11 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: panel that slides out from over the status bar
          * In multiuser systems shows on all users' windows.
+         *
+         * @deprecated This became API by accident and was never intended to be used for
+         * applications.
          */
+        @Deprecated
         public static final int TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+14;
 
         /**
@@ -1219,6 +1223,14 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int TYPE_NOTIFICATION_SHADE = FIRST_SYSTEM_WINDOW + 40;
+
+        /**
+         * Window type: used to show the status bar in non conventional parts of the screen (i.e.
+         * the left or the bottom of the screen).
+         * In multiuser systems shows on all users' windows.
+         * @hide
+         */
+        public static final int TYPE_STATUS_BAR_ADDITIONAL = FIRST_SYSTEM_WINDOW + 41;
 
         /**
          * End of types of system windows.
