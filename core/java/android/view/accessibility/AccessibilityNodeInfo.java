@@ -555,8 +555,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @see AccessibilityAction#ACTION_PRESS_AND_HOLD
      */
-    public static final String ACTION_ARGUMENT_PRESS_HOLD_DURATION_MILLIS_INT =
-            "android.view.accessibility.action.ARGUMENT_PRESS_HOLD_DURATION_MILLIS_INT";
+    public static final String ACTION_ARGUMENT_PRESS_AND_HOLD_DURATION_MILLIS_INT =
+            "android.view.accessibility.action.ARGUMENT_PRESS_AND_HOLD_DURATION_MILLIS_INT";
 
     /**
      * Argument to represent the IME action Id to press the returning key on a node.
@@ -4915,10 +4915,13 @@ public class AccessibilityNodeInfo implements Parcelable {
          * held. Nodes having a single action for long press should use {@link #ACTION_LONG_CLICK}
          *  instead of this action, and nodes should not expose both actions.
          * <p>
-         * Use {@link #ACTION_ARGUMENT_PRESS_HOLD_DURATION_MILLIS_INT} to specify how long the
-         * node is pressed. To ensure reasonable behavior, the first value of this argument should
-         * be 0 and the others should greater than 0 and less than 10,000. UIs requested to hold for
-         * times outside of this range should ignore the action.
+         * When calling {@code performAction(ACTION_PRESS_AND_HOLD, bundle}, use
+         * {@link #ACTION_ARGUMENT_PRESS_AND_HOLD_DURATION_MILLIS_INT} to specify how long the
+         * node is pressed. The first time an accessibility service performs ACTION_PRES_AND_HOLD
+         * on a node, it must specify 0 as ACTION_ARGUMENT_PRESS_AND_HOLD, so the application is
+         * notified that the held state has started. To ensure reasonable behavior, the values
+         * must be increased incrementally and may not exceed 10,000. UIs requested
+         * to hold for times outside of this range should ignore the action.
          * <p>
          * The total time the element is held could be specified by an accessibility user up-front,
          * or may depend on what happens on the UI as the user continues to request the hold.
