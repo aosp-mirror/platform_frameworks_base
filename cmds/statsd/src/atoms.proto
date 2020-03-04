@@ -8490,6 +8490,7 @@ message RuntimeAppOpAccess {
         DEFAULT = 0;
         UNIFORM = 1;
         RARELY_USED = 2;
+        BOOT_TIME_SAMPLING = 3;
     }
 
     // sampling strategy used to collect this message
