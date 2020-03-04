@@ -110,6 +110,12 @@ public abstract class MediaManager {
         }
     }
 
+    protected void dispatchOnRequestFailed(int reason) {
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onRequestFailed(reason);
+        }
+    }
+
     private Collection<MediaDeviceCallback> getCallbacks() {
         return new CopyOnWriteArrayList<>(mCallbacks);
     }
@@ -158,5 +164,17 @@ public abstract class MediaManager {
          * (e.g: device name, connection state, subtitle) is changed.
          */
         void onDeviceAttributesChanged();
+
+        /**
+         * Callback for notifying that transferring is failed.
+         *
+         * @param reason the reason that the request has failed. Can be one of followings:
+         * {@link android.media.MediaRoute2ProviderService#REASON_UNKNOWN_ERROR},
+         * {@link android.media.MediaRoute2ProviderService#REASON_REJECTED},
+         * {@link android.media.MediaRoute2ProviderService#REASON_NETWORK_ERROR},
+         * {@link android.media.MediaRoute2ProviderService#REASON_ROUTE_NOT_AVAILABLE},
+         * {@link android.media.MediaRoute2ProviderService#REASON_INVALID_COMMAND},
+         */
+        void onRequestFailed(int reason);
     }
 }
