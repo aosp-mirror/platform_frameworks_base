@@ -529,14 +529,15 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     public void setWindowState(
             int displayId, @WindowType int window, @WindowVisibleState int state) {
         if (displayId == mDisplayId
-                && mNavigationBarView != null
                 && window == StatusBarManager.WINDOW_NAVIGATION_BAR
                 && mNavigationBarWindowState != state) {
             mNavigationBarWindowState = state;
+            updateSystemUiStateFlags(-1);
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Navigation bar " + windowStateToString(state));
 
-            updateSystemUiStateFlags(-1);
-            mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
+            if (mNavigationBarView != null) {
+                mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
+            }
         }
     }
 
@@ -1212,6 +1213,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             @Override
             public void onViewDetachedFromWindow(View v) {
                 FragmentHostManager.removeAndDestroy(v);
+                navigationBarView.removeOnAttachStateChangeListener(this);
             }
         });
         context.getSystemService(WindowManager.class).addView(navigationBarView, lp);
