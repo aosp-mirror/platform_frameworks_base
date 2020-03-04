@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.phone.LockIcon;
+import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
@@ -41,6 +42,7 @@ public class SuperStatusBarViewFactory {
     private final Context mContext;
     private final InjectionInflationController mInjectionInflationController;
     private final NotificationRowComponent.Builder mNotificationRowComponentBuilder;
+    private final LockscreenLockIconController mLockIconController;
 
     private NotificationShadeWindowView mNotificationShadeWindowView;
     private StatusBarWindowView mStatusBarWindowView;
@@ -49,10 +51,12 @@ public class SuperStatusBarViewFactory {
     @Inject
     public SuperStatusBarViewFactory(Context context,
             InjectionInflationController injectionInflationController,
-            NotificationRowComponent.Builder notificationRowComponentBuilder) {
+            NotificationRowComponent.Builder notificationRowComponentBuilder,
+            LockscreenLockIconController lockIconController) {
         mContext = context;
         mInjectionInflationController = injectionInflationController;
         mNotificationRowComponentBuilder = notificationRowComponentBuilder;
+        mLockIconController = lockIconController;
     }
 
     /**
@@ -73,12 +77,12 @@ public class SuperStatusBarViewFactory {
             throw new IllegalStateException(
                     "R.layout.super_notification_shade could not be properly inflated");
         }
-        return mNotificationShadeWindowView;
-    }
+        LockIcon lockIcon = mNotificationShadeWindowView.findViewById(R.id.lock_icon);
+        if (lockIcon != null) {
+            mLockIconController.attach(lockIcon);
+        }
 
-    /** Gets the {@link LockIcon} inside of {@link R.layout#super_status_bar}. */
-    public LockIcon getLockIcon() {
-        return getNotificationShadeWindowView().findViewById(R.id.lock_icon);
+        return mNotificationShadeWindowView;
     }
 
     /**

@@ -46,6 +46,7 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -195,6 +196,7 @@ public interface StatusBarPhoneModule {
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
+            KeyguardIndicationController keyguardIndicationController,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
         return new StatusBar(
@@ -272,6 +274,7 @@ public interface StatusBarPhoneModule {
                 extensionController,
                 userInfoControllerImpl,
                 phoneStatusBarPolicy,
+                keyguardIndicationController,
                 dismissCallbackRegistry,
                 statusBarTouchableRegionManager);
     }
