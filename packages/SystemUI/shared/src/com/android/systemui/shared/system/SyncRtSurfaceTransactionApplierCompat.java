@@ -38,6 +38,15 @@ import java.util.function.Consumer;
  */
 public class SyncRtSurfaceTransactionApplierCompat {
 
+    public static final int FLAG_ALL = 0xffffffff;
+    public static final int FLAG_ALPHA = 1;
+    public static final int FLAG_MATRIX = 1 << 1;
+    public static final int FLAG_WINDOW_CROP = 1 << 2;
+    public static final int FLAG_LAYER = 1 << 3;
+    public static final int FLAG_CORNER_RADIUS = 1 << 4;
+    public static final int FLAG_BACKGROUND_BLUR_RADIUS = 1 << 5;
+    public static final int FLAG_VISIBILITY = 1 << 6;
+
     private static final int MSG_UPDATE_SEQUENCE_NUMBER = 0;
 
     private final SurfaceControl mBarrierSurfaceControl;
@@ -143,14 +152,31 @@ public class SyncRtSurfaceTransactionApplierCompat {
 
     public static void applyParams(TransactionCompat t,
             SyncRtSurfaceTransactionApplierCompat.SurfaceParams params) {
-        t.setMatrix(params.surface, params.matrix);
-        if (params.windowCrop != null) {
+        if ((params.flags & FLAG_MATRIX) != 0) {
+            t.setMatrix(params.surface, params.matrix);
+        }
+        if ((params.flags & FLAG_WINDOW_CROP) != 0) {
             t.setWindowCrop(params.surface, params.windowCrop);
         }
-        t.setAlpha(params.surface, params.alpha);
-        t.setLayer(params.surface, params.layer);
-        t.setCornerRadius(params.surface, params.cornerRadius);
-        t.show(params.surface);
+        if ((params.flags & FLAG_ALPHA) != 0) {
+            t.setAlpha(params.surface, params.alpha);
+        }
+        if ((params.flags & FLAG_LAYER) != 0) {
+            t.setLayer(params.surface, params.layer);
+        }
+        if ((params.flags & FLAG_CORNER_RADIUS) != 0) {
+            t.setCornerRadius(params.surface, params.cornerRadius);
+        }
+        if ((params.flags & FLAG_BACKGROUND_BLUR_RADIUS) != 0) {
+            t.setBackgroundBlurRadius(params.surface, params.backgroundBlurRadius);
+        }
+        if ((params.flags & FLAG_VISIBILITY) != 0) {
+            if (params.visible) {
+                t.show(params.surface);
+            } else {
+                t.hide(params.surface);
+            }
+        }
     }
 
     /**
@@ -183,6 +209,102 @@ public class SyncRtSurfaceTransactionApplierCompat {
     }
 
     public static class SurfaceParams {
+        public static class Builder {
+            final SurfaceControlCompat surface;
+            int flags;
+            float alpha;
+            float cornerRadius;
+            int backgroundBlurRadius;
+            Matrix matrix;
+            Rect windowCrop;
+            int layer;
+            boolean visible;
+
+            /**
+             * @param surface The surface to modify.
+             */
+            public Builder(SurfaceControlCompat surface) {
+                this.surface = surface;
+            }
+
+            /**
+             * @param alpha The alpha value to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withAlpha(float alpha) {
+                this.alpha = alpha;
+                flags |= FLAG_ALPHA;
+                return this;
+            }
+
+            /**
+             * @param matrix The matrix to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withMatrix(Matrix matrix) {
+                this.matrix = matrix;
+                flags |= FLAG_MATRIX;
+                return this;
+            }
+
+            /**
+             * @param windowCrop The window crop to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withWindowCrop(Rect windowCrop) {
+                this.windowCrop = windowCrop;
+                flags |= FLAG_WINDOW_CROP;
+                return this;
+            }
+
+            /**
+             * @param layer The layer to assign the surface.
+             * @return this Builder
+             */
+            public Builder withLayer(int layer) {
+                this.layer = layer;
+                flags |= FLAG_LAYER;
+                return this;
+            }
+
+            /**
+             * @param radius the Radius for rounded corners to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withCornerRadius(float radius) {
+                this.cornerRadius = radius;
+                flags |= FLAG_CORNER_RADIUS;
+                return this;
+            }
+
+            /**
+             * @param radius the Radius for blur to apply to the background surfaces.
+             * @return this Builder
+             */
+            public Builder withBackgroundBlur(int radius) {
+                this.backgroundBlurRadius = radius;
+                flags |= FLAG_BACKGROUND_BLUR_RADIUS;
+                return this;
+            }
+
+            /**
+             * @param visible The visibility to apply to the surface.
+             * @return this Builder
+             */
+            public Builder withVisibility(boolean visible) {
+                this.visible = visible;
+                flags |= FLAG_VISIBILITY;
+                return this;
+            }
+
+            /**
+             * @return a new SurfaceParams instance
+             */
+            public SurfaceParams build() {
+                return new SurfaceParams(surface, flags, alpha, matrix, windowCrop, layer,
+                        cornerRadius, backgroundBlurRadius, visible);
+            }
+        }
 
         /**
          * Constructs surface parameters to be applied when the current view state gets pushed to
@@ -195,19 +317,33 @@ public class SyncRtSurfaceTransactionApplierCompat {
          */
         public SurfaceParams(SurfaceControlCompat surface, float alpha, Matrix matrix,
                 Rect windowCrop, int layer, float cornerRadius) {
+            this(surface, FLAG_ALL & ~(FLAG_VISIBILITY | FLAG_BACKGROUND_BLUR_RADIUS), alpha,
+                    matrix, windowCrop, layer, cornerRadius, 0 /* backgroundBlurRadius */, true);
+        }
+
+        private SurfaceParams(SurfaceControlCompat surface, int flags, float alpha, Matrix matrix,
+                Rect windowCrop, int layer, float cornerRadius, int backgroundBlurRadius,
+                boolean visible) {
+            this.flags = flags;
             this.surface = surface;
             this.alpha = alpha;
             this.matrix = new Matrix(matrix);
             this.windowCrop = windowCrop != null ? new Rect(windowCrop) : null;
             this.layer = layer;
             this.cornerRadius = cornerRadius;
+            this.backgroundBlurRadius = backgroundBlurRadius;
+            this.visible = visible;
         }
+
+        private final int flags;
 
         public final SurfaceControlCompat surface;
         public final float alpha;
-        final float cornerRadius;
+        public final float cornerRadius;
+        public final int backgroundBlurRadius;
         public final Matrix matrix;
         public final Rect windowCrop;
         public final int layer;
+        public final boolean visible;
     }
 }

@@ -48,6 +48,7 @@ import java.lang.annotation.RetentionPolicy;
 class SurfaceAnimator {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "SurfaceAnimator" : TAG_WM;
+
     private final WindowManagerService mService;
     private AnimationAdapter mAnimation;
     private @AnimationType int mAnimationType;
@@ -142,7 +143,7 @@ class SurfaceAnimator {
         }
         mLeash = freezer != null ? freezer.takeLeashForAnimation() : null;
         if (mLeash == null) {
-            mLeash = createAnimationLeash(mAnimatable, surface, t,
+            mLeash = createAnimationLeash(mAnimatable, surface, t, type,
                     mAnimatable.getSurfaceWidth(), mAnimatable.getSurfaceHeight(), 0 /* x */,
                     0 /* y */, hidden);
             mAnimatable.onAnimationLeashCreated(t, mLeash);
@@ -372,13 +373,16 @@ class SurfaceAnimator {
     }
 
     static SurfaceControl createAnimationLeash(Animatable animatable, SurfaceControl surface,
-            Transaction t, int width, int height, int x, int y, boolean hidden) {
+            Transaction t, @AnimationType int type, int width, int height, int x, int y,
+            boolean hidden) {
         if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to leash");
         final SurfaceControl.Builder builder = animatable.makeAnimationLeash()
                 .setParent(animatable.getAnimationLeashParent())
                 .setHidden(hidden)
-                .setName(surface + " - animation-leash");
+                .setName(surface + " - animation-leash")
+                .setColorLayer();
         final SurfaceControl leash = builder.build();
+        t.unsetColor(leash);
         t.setWindowCrop(leash, width, height);
         t.setPosition(leash, x, y);
         t.show(leash);
