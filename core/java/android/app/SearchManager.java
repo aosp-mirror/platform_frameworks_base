@@ -61,8 +61,7 @@ import java.util.List;
  * </div>
  */
 @SystemService(Context.SEARCH_SERVICE)
-public class SearchManager
-        implements DialogInterface.OnDismissListener, DialogInterface.OnCancelListener {
+public class SearchManager {
 
     private static final boolean DBG = false;
     private static final String TAG = "SearchManager";
@@ -639,8 +638,22 @@ public class SearchManager
     private void ensureSearchDialog() {
         if (mSearchDialog == null) {
             mSearchDialog = new SearchDialog(mContext, this);
-            mSearchDialog.setOnCancelListener(this);
-            mSearchDialog.setOnDismissListener(this);
+            mSearchDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    if (mCancelListener != null) {
+                        mCancelListener.onCancel();
+                    }
+                }
+            });
+            mSearchDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    if (mDismissListener != null) {
+                        mDismissListener.onDismiss();
+                    }
+                }
+            });
         }
     }
 
@@ -829,26 +842,6 @@ public class SearchManager
      */
     public void setOnCancelListener(OnCancelListener listener) {
         mCancelListener = listener;
-    }
-
-    /**
-     * @deprecated This method is an obsolete internal implementation detail. Do not use.
-     */
-    @Deprecated
-    public void onCancel(DialogInterface dialog) {
-        if (mCancelListener != null) {
-            mCancelListener.onCancel();
-        }
-    }
-
-    /**
-     * @deprecated This method is an obsolete internal implementation detail. Do not use.
-     */
-    @Deprecated
-    public void onDismiss(DialogInterface dialog) {
-        if (mDismissListener != null) {
-            mDismissListener.onDismiss();
-        }
     }
 
     /**
