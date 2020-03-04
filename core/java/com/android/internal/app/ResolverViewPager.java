@@ -26,7 +26,7 @@ import com.android.internal.widget.ViewPager;
  * A {@link ViewPager} which wraps around its tallest child's height.
  * <p>Normally {@link ViewPager} instances expand their height to cover all remaining space in
  * the layout.
- * <p>This class is used for the intent resolver's tabbed view.
+ * <p>This class is used for the intent resolver and share sheet's tabbed view.
  */
 public class ResolverViewPager extends ViewPager {
 
