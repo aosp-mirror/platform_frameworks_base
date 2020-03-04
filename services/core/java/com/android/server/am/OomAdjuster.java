@@ -1439,7 +1439,6 @@ public final class OomAdjuster {
         }
 
         int capabilityFromFGS = 0; // capability from foreground service.
-        boolean procStateFromFGSClient = false;
         for (int is = app.services.size() - 1;
                 is >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
                         || schedGroup == ProcessList.SCHED_GROUP_BACKGROUND
@@ -1560,10 +1559,6 @@ public final class OomAdjuster {
                     if ((cr.flags & Context.BIND_WAIVE_PRIORITY) == 0) {
                         if (shouldSkipDueToCycle(app, client, procState, adj, cycleReEval)) {
                             continue;
-                        }
-
-                        if (clientProcState == PROCESS_STATE_FOREGROUND_SERVICE) {
-                            procStateFromFGSClient = true;
                         }
 
                         if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
@@ -2013,11 +2008,8 @@ public final class OomAdjuster {
         } else if (!ActivityManager.isProcStateBackground(procState)) {
             // procState higher than PROCESS_STATE_BOUND_FOREGROUND_SERVICE implicitly has
             // camera/microphone capability
-            if (procState == PROCESS_STATE_FOREGROUND_SERVICE && procStateFromFGSClient) {
-                // if the FGS state is passed down from client, do not grant implicit capabilities.
-            } else {
-                capability |= PROCESS_CAPABILITY_ALL_IMPLICIT;
-            }
+            //TODO: remove this line when enforcing the feature.
+            capability |= PROCESS_CAPABILITY_ALL_IMPLICIT;
         }
 
         // TOP process has all capabilities.
