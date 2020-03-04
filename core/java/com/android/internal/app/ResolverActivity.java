@@ -645,7 +645,7 @@ public class ResolverActivity extends Activity implements
 
         final DisplayResolveInfo dri =
                 mMultiProfilePagerAdapter.getActiveListAdapter().getOtherProfile();
-        if (dri != null && !ENABLE_TABBED_VIEW) {
+        if (dri != null && !shouldShowTabs()) {
             mProfileView.setVisibility(View.VISIBLE);
             View text = mProfileView.findViewById(R.id.profile_button);
             if (!(text instanceof TextView)) {
@@ -1331,7 +1331,7 @@ public class ResolverActivity extends Activity implements
         }
         // We partially rebuild the inactive adapter to determine if we should auto launch
         boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false);
             rebuildCompleted = rebuildCompleted && rebuildInactiveCompleted;
         }
