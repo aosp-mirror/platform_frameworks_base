@@ -1795,6 +1795,7 @@ public class ParsingPackageUtils {
                 // Default false
                 .setAllowTaskReparenting(bool(false, R.styleable.AndroidManifestApplication_allowTaskReparenting, sa))
                 .setCantSaveState(bool(false, R.styleable.AndroidManifestApplication_cantSaveState, sa))
+                .setCrossProfile(bool(false, R.styleable.AndroidManifestApplication_crossProfile, sa))
                 .setDebuggable(bool(false, R.styleable.AndroidManifestApplication_debuggable, sa))
                 .setDefaultToDeviceProtectedStorage(bool(false, R.styleable.AndroidManifestApplication_defaultToDeviceProtectedStorage, sa))
                 .setDirectBootAware(bool(false, R.styleable.AndroidManifestApplication_directBootAware, sa))
