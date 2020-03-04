@@ -21,7 +21,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
  * Pluggable for participating in notif filtering.
- * See {@link NotifPipeline#addPreGroupFilter} and {@link NotifPipeline#addPreRenderFilter}.
+ * See {@link NotifPipeline#addPreGroupFilter} and {@link NotifPipeline#addFinalizeFilter}.
  */
 public abstract class NotifFilter extends Pluggable<NotifFilter> {
     protected NotifFilter(String name) {
@@ -37,7 +37,7 @@ public abstract class NotifFilter extends Pluggable<NotifFilter> {
      * @param entry The entry in question.
      *              If this filter is registered via {@link NotifPipeline#addPreGroupFilter},
      *              this entry will not have any grouping nor sorting information.
-     *              If this filter is registered via {@link NotifPipeline#addPreRenderFilter},
+     *              If this filter is registered via {@link NotifPipeline#addFinalizeFilter},
      *              this entry will have grouping and sorting information.
      * @param now A timestamp in SystemClock.uptimeMillis that represents "now" for the purposes of
      *            pipeline execution. This value will be the same for all pluggable calls made

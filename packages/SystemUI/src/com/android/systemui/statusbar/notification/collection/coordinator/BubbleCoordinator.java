@@ -77,7 +77,7 @@ public class BubbleCoordinator implements Coordinator {
     public void attach(NotifPipeline pipeline) {
         mNotifPipeline = pipeline;
         mNotifPipeline.addNotificationDismissInterceptor(mDismissInterceptor);
-        mNotifPipeline.addPreRenderFilter(mNotifFilter);
+        mNotifPipeline.addFinalizeFilter(mNotifFilter);
         mBubbleController.addNotifCallback(mNotifCallback);
     }
 
