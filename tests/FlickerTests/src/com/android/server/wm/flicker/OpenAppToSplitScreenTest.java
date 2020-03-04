@@ -17,35 +17,38 @@
 package com.android.server.wm.flicker;
 
 import static com.android.server.wm.flicker.CommonTransitions.appToSplitScreen;
-import static com.android.server.wm.flicker.WindowUtils.getDisplayBounds;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.junit.runners.Parameterized;
 
 /**
  * Test open app to split screen.
  * To run this test: {@code atest FlickerTests:OpenAppToSplitScreenTest}
  */
 @LargeTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class OpenAppToSplitScreenTest extends FlickerTestBase {
+public class OpenAppToSplitScreenTest extends NonRotationTestBase {
 
-    public OpenAppToSplitScreenTest() {
+    public OpenAppToSplitScreenTest(String beginRotationName, int beginRotation) {
+        super(beginRotationName, beginRotation);
+
         this.mTestApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
 
     @Before
     public void runTransition() {
-        super.runTransition(appToSplitScreen(mTestApp, mUiDevice).includeJankyRuns().build());
+        super.runTransition(appToSplitScreen(mTestApp, mUiDevice, mBeginRotation)
+                .includeJankyRuns()
+                .build());
     }
 
     @Test
@@ -67,25 +70,6 @@ public class OpenAppToSplitScreenTest extends FlickerTestBase {
                 .then()
                 .showsAboveAppWindow(DOCKED_STACK_DIVIDER)
                 .forAllEntries());
-    }
-
-    @Test
-    public void checkCoveredRegion_noUncoveredRegions() {
-        checkResults(result ->
-                LayersTraceSubject.assertThat(result)
-                        .coversRegion(getDisplayBounds()).forAllEntries());
-    }
-
-    @Test
-    public void checkVisibility_navBarLayerIsAlwaysVisible() {
-        checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer(NAVIGATION_BAR_WINDOW_TITLE).forAllEntries());
-    }
-
-    @Test
-    public void checkVisibility_statusBarLayerIsAlwaysVisible() {
-        checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer(STATUS_BAR_WINDOW_TITLE).forAllEntries());
     }
 
     @Test

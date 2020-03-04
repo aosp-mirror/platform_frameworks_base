@@ -36,6 +36,10 @@ oneway interface IInCallAdapter {
 
     void rejectCallWithReason(String callId, int rejectReason);
 
+    void transferCall(String callId, in Uri targetNumber, boolean isConfirmationRequired);
+
+    void consultativeTransfer(String callId, String otherCallId);
+
     void disconnectCall(String callId);
 
     void holdCall(String callId);
@@ -66,6 +70,8 @@ oneway interface IInCallAdapter {
     void mergeConference(String callId);
 
     void swapConference(String callId);
+
+    void addConferenceParticipants(String callId, in List<Uri> participants);
 
     void turnOnProximitySensor();
 

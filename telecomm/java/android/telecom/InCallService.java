@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
+import android.app.UiModeManager;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.hardware.camera2.CameraManager;
@@ -43,12 +44,32 @@ import java.util.List;
  * phone calls.
  * <h2>Becoming the Default Phone App</h2>
  * The default dialer/phone app is one which provides the in-call user interface while the device is
- * in a call.  A device is bundled with a system provided default dialer/phone app.  The user may
- * choose a single app to take over this role from the system app.  An app which wishes to fulfill
- * one this role uses the {@code android.app.role.RoleManager} to request that they fill the role.
+ * in a call.  It also provides the user with a means to initiate calls and see a history of calls
+ * on their device.  A device is bundled with a system provided default dialer/phone app.  The user
+ * may choose a single app to take over this role from the system app.  An app which wishes to
+ * fulfill one this role uses the {@link android.app.role.RoleManager} to request that they fill the
+ * {@link android.app.role.RoleManager#ROLE_DIALER} role.
  * <p>
- * An app filling the role of the default phone app provides a user interface while the device is in
- * a call, and the device is not in car mode.
+ * The default phone app provides a user interface while the device is in a call, and the device is
+ * not in car mode (i.e. {@link UiModeManager#getCurrentModeType()} is not
+ * {@link android.content.res.Configuration#UI_MODE_TYPE_CAR}).
+ * <p>
+ * In order to fill the {@link android.app.role.RoleManager#ROLE_DIALER} role, an app must meet a
+ * number of requirements:
+ * <ul>
+ *     <li>It must handle the {@link Intent#ACTION_DIAL} intent.  This means the app must provide
+ *     a dial pad UI for the user to initiate outgoing calls.</li>
+ *     <li>It must fully implement the {@link InCallService} API and provide both an incoming call
+ *     UI, as well as an ongoing call UI.</li>
+ * </ul>
+ * <p>
+ * Note: If the app filling the {@link android.app.role.RoleManager#ROLE_DIALER} crashes during
+ * {@link InCallService} binding, the Telecom framework will automatically fall back to using the
+ * dialer app pre-loaded on the device.  The system will display a notification to the user to let
+ * them know that the app has crashed and that their call was continued using the pre-loaded dialer
+ * app.
+ * <p>
+ * Further, the pre-loaded dialer will ALWAYS be used when the user places an emergency call.
  * <p>
  * Below is an example manifest registration for an {@code InCallService}. The meta-data
  * {@link TelecomManager#METADATA_IN_CALL_SERVICE_UI} indicates that this particular
@@ -82,6 +103,11 @@ import java.util.List;
  *           <action android:name="android.intent.action.DIAL" />
  *           <category android:name="android.intent.category.DEFAULT" />
  *      </intent-filter>
+ *      <intent-filter>
+ *           <action android:name="android.intent.action.DIAL" />
+ *           <category android:name="android.intent.category.DEFAULT" />
+ *           <data android:scheme="tel" />
+ *      </intent-filter>
  * </activity>
  * }
  * </pre>
@@ -110,6 +136,7 @@ import java.util.List;
  *             // Your app is not the default dialer app
  *         }
  *     }
+ * }
  * }
  * </pre>
  * <p id="incomingCallNotification">

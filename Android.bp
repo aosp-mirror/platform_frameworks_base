@@ -368,6 +368,7 @@ java_library {
         "devicepolicyprotosnano",
 
         "com.android.sysprop.apex",
+        "com.android.sysprop.init",
         "PlatformProperties",
     ],
     sdk_version: "core_platform",
@@ -396,7 +397,6 @@ java_defaults {
         "ext",
         "unsupportedappusage",
         "updatable_media_stubs",
-        "framework-tethering",
     ],
 
     jarjar_rules: ":framework-jarjar-rules",
@@ -455,7 +455,9 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
-    libs: ["ike-stubs"],
+    libs: [
+        "framework-tethering-stubs",
+    ],
     installable: true,
     javac_shard_size: 150,
     required: [
@@ -471,6 +473,10 @@ java_library {
     // For backwards compatibility.
     stem: "framework",
     apex_available: ["//apex_available:platform"],
+    visibility: [
+        // TODO(b/147128803) remove the below lines
+        "//frameworks/base/packages/Tethering/tests/unit",
+    ],
 }
 
 // This "framework" module is NOT installed to the device. It's
@@ -490,9 +496,7 @@ java_library {
         "framework-minus-apex",
         "updatable_media_stubs",
         "framework-sdkextensions-stubs-systemapi",
-        // TODO(b/147200698): should be the stub of framework-tethering
-        "framework-tethering",
-        "ike-stubs",
+        "framework-tethering-stubs",
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
@@ -516,7 +520,6 @@ java_library {
     ],
     installable: false,
     plugins: [
-        "unsupportedappusage-annotation-processor",
         "compat-changeid-annotation-processor",
     ],
 }
@@ -608,7 +611,9 @@ filegroup {
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SystemApi.java",
+        "core/java/android/annotation/TestApi.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
     ],
@@ -671,17 +676,6 @@ filegroup {
     ],
 }
 
-filegroup {
-    name: "framework-tethering-annotations",
-    srcs: [
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/Nullable.java",
-        "core/java/android/annotation/RequiresPermission.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/TestApi.java",
-        "core/java/com/android/internal/annotations/GuardedBy.java",
-    ],
-}
 // Build ext.jar
 // ============================================================
 java_library {
@@ -915,22 +909,6 @@ gensrcs {
     output_extension: "proto.h",
 }
 
-
-subdirs = [
-    "cmds/*",
-    "core/*",
-    "libs/*",
-    "media/*",
-    "proto",
-    "tools/*",
-    "native/android",
-    "native/graphics/jni",
-]
-
-optional_subdirs = [
-    "core/tests/utiltests/jni",
-]
-
 // TODO(b/77285514): remove this once the last few hidl interfaces have been
 // updated to use hwbinder.stubs.
 java_library {
@@ -986,13 +964,6 @@ python_binary_host {
     ],
     libs: [
         "fontTools",
-    ],
-}
-
-filegroup {
-    name: "framework-annotation-nonnull-srcs",
-    srcs: [
-        "core/java/android/annotation/NonNull.java",
     ],
 }
 

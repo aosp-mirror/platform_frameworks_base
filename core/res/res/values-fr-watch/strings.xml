@@ -20,6 +20,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="android_upgrading_apk" msgid="1090732262010398759">"Appli <xliff:g id="NUMBER_0">%1$d</xliff:g> sur <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
-    <string name="permgrouplab_sensors" msgid="202675452368612754">"Capteurs"</string>
+    <string name="android_upgrading_apk" msgid="5356436701512342265">"Appli <xliff:g id="NUMBER_0">%1$d</xliff:g> sur <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
+    <string name="permgrouplab_sensors" msgid="2439544173324807471">"Capteurs"</string>
 </resources>

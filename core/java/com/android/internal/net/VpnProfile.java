@@ -18,6 +18,7 @@ package com.android.internal.net;
 
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.net.Ikev2VpnProfile;
 import android.net.ProxyInfo;
 import android.os.Build;
 import android.os.Parcel;
@@ -332,15 +333,38 @@ public final class VpnProfile implements Cloneable, Parcelable {
         return builder.toString().getBytes(StandardCharsets.UTF_8);
     }
 
+    /** Checks if this profile specifies a LegacyVpn type. */
+    public static boolean isLegacyType(int type) {
+        switch (type) {
+            case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS: // fall through
+            case VpnProfile.TYPE_IKEV2_IPSEC_RSA: // fall through
+            case VpnProfile.TYPE_IKEV2_IPSEC_PSK:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    private boolean isValidLockdownLegacyVpnProfile() {
+        return isLegacyType(type) && isServerAddressNumeric() && hasDns()
+                && areDnsAddressesNumeric();
+    }
+
+    private boolean isValidLockdownPlatformVpnProfile() {
+        return Ikev2VpnProfile.isValidVpnProfile(this);
+    }
+
     /**
-     * Tests if profile is valid for lockdown, which requires IPv4 address for both server and DNS.
-     * Server hostnames would require using DNS before connection.
+     * Tests if profile is valid for lockdown.
+     *
+     * <p>For LegacyVpn profiles, this requires an IPv4 address for both the server and DNS.
+     *
+     * <p>For PlatformVpn profiles, this requires a server, an identifier and the relevant fields to
+     * be non-null.
      */
     public boolean isValidLockdownProfile() {
         return isTypeValidForLockdown()
-                && isServerAddressNumeric()
-                && hasDns()
-                && areDnsAddressesNumeric();
+                && (isValidLockdownLegacyVpnProfile() || isValidLockdownPlatformVpnProfile());
     }
 
     /** Returns {@code true} if the VPN type is valid for lockdown. */

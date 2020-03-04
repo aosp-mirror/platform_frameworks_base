@@ -278,16 +278,19 @@ public class BluetoothPbap implements BluetoothProfile {
     }
 
     /**
-     * Pbap does not store connection policy, so this function only disconnects pbap if
-     * connectionPolicy is {@link #CONNECTION_POLICY_FORBIDDEN}.
+     * Set connection policy of the profile and tries to disconnect it if connectionPolicy is
+     * {@link BluetoothProfile#CONNECTION_POLICY_FORBIDDEN}
      *
      * <p> The device should already be paired.
-     * Connection policy can be one of {@link #CONNECTION_POLICY_ALLOWED},
-     * {@link #CONNECTION_POLICY_FORBIDDEN}, {@link #CONNECTION_POLICY_UNKNOWN}
+     * Connection policy can be one of:
+     * {@link BluetoothProfile#CONNECTION_POLICY_ALLOWED},
+     * {@link BluetoothProfile#CONNECTION_POLICY_FORBIDDEN},
+     * {@link BluetoothProfile#CONNECTION_POLICY_UNKNOWN}
      *
      * @param device Paired bluetooth device
-     * @param connectionPolicy determines whether to disconnect the device
-     * @return true if pbap is successfully disconnected, false otherwise
+     * @param connectionPolicy is the connection policy to set to for this profile
+     * @return true if connectionPolicy is set, false on error
+     *
      * @hide
      */
     @SystemApi

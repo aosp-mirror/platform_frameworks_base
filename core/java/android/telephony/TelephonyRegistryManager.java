@@ -18,7 +18,6 @@ package android.telephony;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Binder;
@@ -61,7 +60,6 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
-@SystemApi
 public class TelephonyRegistryManager {
 
     private static final String TAG = "TelephonyRegistryManager";
@@ -250,7 +248,6 @@ public class TelephonyRegistryManager {
      * @param incomingNumber incoming phone number.
      * @hide
      */
-    @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyCallStateChangedForAllSubscriptions(@CallState int state,
@@ -533,6 +530,24 @@ public class TelephonyRegistryManager {
     public void notifyOemHookRawEventForSubscriber(int subId, int slotIndex, byte[] rawData) {
         try {
             sRegistry.notifyOemHookRawEventForSubscriber(slotIndex, subId, rawData);
+        } catch (RemoteException ex) {
+            // system process is dead
+        }
+    }
+
+    /**
+     * Notify display info changed.
+     *
+     * @param slotIndex The SIM slot index for which display info has changed. Can be
+     * derived from {@code subscriptionId} except when {@code subscriptionId} is invalid, such as
+     * when the device is in emergency-only mode.
+     * @param subscriptionId Subscription id for which display network info has changed.
+     * @param displayInfo The display info.
+     */
+    public void notifyDisplayInfoChanged(int slotIndex, int subscriptionId,
+            @NonNull DisplayInfo displayInfo) {
+        try {
+            sRegistry.notifyDisplayInfoChanged(slotIndex, subscriptionId, displayInfo);
         } catch (RemoteException ex) {
             // system process is dead
         }

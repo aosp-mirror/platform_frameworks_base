@@ -27,6 +27,7 @@ import static com.android.internal.telephony.SmsConstants.MessageClass;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
+import android.os.Build;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 
@@ -179,7 +180,8 @@ public class SmsMessage extends SmsMessageBase {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
+            + "android.telephony.SmsMessage} API instead")
     public static SmsMessage createFromEfRecord(int index, byte[] data) {
         try {
             SmsMessage msg = new SmsMessage();

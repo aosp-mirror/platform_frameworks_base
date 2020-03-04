@@ -514,13 +514,6 @@ public class SubscriptionManager {
     public static final String ISO_COUNTRY_CODE = SimInfo.ISO_COUNTRY_CODE;
 
     /**
-     * TelephonyProvider column name for the sim provisioning status associated with a SIM.
-     * <P>Type: INTEGER (int)</P>
-     * @hide
-     */
-    public static final String SIM_PROVISIONING_STATUS = SimInfo.SIM_PROVISIONING_STATUS;
-
-    /**
      * TelephonyProvider column name for whether a subscription is embedded (that is, present on an
      * eSIM).
      * <p>Type: INTEGER (int), 1 for embedded or 0 for non-embedded.
@@ -1302,6 +1295,11 @@ public class SubscriptionManager {
      * Get both hidden and visible SubscriptionInfo(s) of the currently active SIM(s).
      * The records will be sorted by {@link SubscriptionInfo#getSimSlotIndex}
      * then by {@link SubscriptionInfo#getSubscriptionId}.
+     *
+     * Hidden subscriptions refer to those are not meant visible to the users.
+     * For example, an opportunistic subscription that is grouped with other
+     * subscriptions should remain invisible to users as they are only functionally
+     * supplementary to primary ones.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see
@@ -2146,27 +2144,41 @@ public class SubscriptionManager {
     @UnsupportedAppUsage
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId, int subId) {
         if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
-        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
-        intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
+        putSubscriptionIdExtra(intent, subId);
     }
 
     /**
-     * TODO(b/137102918) Make this static, tests use this as an instance method currently.
+     * Get visible subscription Id(s) of the currently active SIM(s).
      *
      * @return the list of subId's that are active,
-     *         is never null but the length maybe 0.
+     *         is never null but the length may be 0.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public @NonNull int[] getActiveSubscriptionIdList() {
         return getActiveSubscriptionIdList(/* visibleOnly */ true);
     }
 
     /**
-     * TODO(b/137102918) Make this static, tests use this as an instance method currently.
+     * Get both hidden and visible subscription Id(s) of the currently active SIM(s).
      *
+     * Hidden subscriptions refer to those are not meant visible to the users.
+     * For example, an opportunistic subscription that is grouped with other
+     * subscriptions should remain invisible to users as they are only functionally
+     * supplementary to primary ones.
+     *
+     * @return the list of subId's that are active,
+     *         is never null but the length may be 0.
+     * @hide
+     */
+    @SystemApi
+    public @NonNull int[] getActiveAndHiddenSubscriptionIdList() {
+        return getActiveSubscriptionIdList(/* visibleOnly */false);
+    }
+
+    /**
      * @return a non-null list of subId's that are active.
      *
      * @hide
@@ -3310,5 +3322,20 @@ public class SubscriptionManager {
         } catch (RemoteException ex) {
         }
         return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    }
+
+    /**
+     * Helper method that puts a subscription id on an intent with the constants:
+     * PhoneConstant.SUBSCRIPTION_KEY and SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX.
+     * Both constants are used to support backwards compatibility.  Once we know we got all places,
+     * we can remove PhoneConstants.SUBSCRIPTION_KEY.
+     * @param intent Intent to put sub id on.
+     * @param subId SubscriptionId to put on intent.
+     *
+     * @hide
+     */
+    public static void putSubscriptionIdExtra(Intent intent, int subId) {
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
+        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
     }
 }

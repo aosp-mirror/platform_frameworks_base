@@ -356,10 +356,10 @@ java_genrule {
     dist: {
         targets: ["docs"],
     },
-    cmd: "unzip $(location :ds-docs-java{.docs.zip}) -d $(genDir) && " +
-         "unzip $(location :ds-docs-kt{.docs.zip}) -d $(genDir)/en/reference/kotlin && " +
+    cmd: "unzip -q $(location :ds-docs-java{.docs.zip}) -d $(genDir) && " +
+         "unzip -q $(location :ds-docs-kt{.docs.zip}) -d $(genDir)/en/reference/kotlin && " +
          "SWITCHER=$$(cd $$(dirname $(location switcher4)) && pwd)/$$(basename $(location switcher4)) && " +
-         "(cd $(genDir)/en/reference && $$SWITCHER --work platform) && " +
+         "(cd $(genDir)/en/reference && $$SWITCHER --work platform) > /dev/null && " +
          "$(location soong_zip) -o $(out) -C $(genDir) -D $(genDir)",
 }
 

@@ -320,12 +320,9 @@ public class SmsMessage {
      * @param data Message data.
      * @param isCdma Indicates weather the type of the SMS is CDMA.
      * @return An SmsMessage representing the message.
-     *
-     * @hide
      */
-    @SystemApi
     @Nullable
-    public static SmsMessage createFromNativeSmsSubmitPdu(@NonNull byte[] data, boolean isCdma) {
+    public static SmsMessage createSmsSubmitPdu(@NonNull byte[] data, boolean isCdma) {
         SmsMessageBase wrappedMessage;
 
         if (isCdma) {
@@ -627,7 +624,7 @@ public class SmsMessage {
                     destinationAddress, message, statusReportRequested);
         }
 
-        return new SubmitPdu(spb);
+        return spb != null ? new SubmitPdu(spb) : null;
     }
 
     /**
@@ -655,7 +652,7 @@ public class SmsMessage {
                     destinationAddress, destinationPort, data, statusReportRequested);
         }
 
-        return new SubmitPdu(spb);
+        return spb != null ? new SubmitPdu(spb) : null;
     }
 
     // TODO: SubmitPdu class is used for SMS-DELIVER also now. Refactor for SubmitPdu and new

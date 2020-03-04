@@ -317,6 +317,14 @@ public class ServiceState implements Parcelable {
      */
     public static final int UNKNOWN_ID = -1;
 
+    /**
+     * A parcelable extra used with {@link Intent#ACTION_SERVICE_STATE} representing the service
+     * state.
+     * @hide
+     */
+    private static final String EXTRA_SERVICE_STATE = "android.intent.extra.SERVICE_STATE";
+
+
     private String mOperatorAlphaLong;
     private String mOperatorAlphaShort;
     private String mOperatorNumeric;
@@ -353,6 +361,7 @@ public class ServiceState implements Parcelable {
 
     private String mOperatorAlphaLongRaw;
     private String mOperatorAlphaShortRaw;
+    private boolean mIsDataRoamingFromRegistration;
     private boolean mIsIwlanPreferred;
 
     /**
@@ -438,6 +447,7 @@ public class ServiceState implements Parcelable {
         mNrFrequencyRange = s.mNrFrequencyRange;
         mOperatorAlphaLongRaw = s.mOperatorAlphaLongRaw;
         mOperatorAlphaShortRaw = s.mOperatorAlphaShortRaw;
+        mIsDataRoamingFromRegistration = s.mIsDataRoamingFromRegistration;
         mIsIwlanPreferred = s.mIsIwlanPreferred;
     }
 
@@ -472,6 +482,7 @@ public class ServiceState implements Parcelable {
         mNrFrequencyRange = in.readInt();
         mOperatorAlphaLongRaw = in.readString();
         mOperatorAlphaShortRaw = in.readString();
+        mIsDataRoamingFromRegistration = in.readBoolean();
         mIsIwlanPreferred = in.readBoolean();
     }
 
@@ -499,6 +510,7 @@ public class ServiceState implements Parcelable {
         out.writeInt(mNrFrequencyRange);
         out.writeString(mOperatorAlphaLongRaw);
         out.writeString(mOperatorAlphaShortRaw);
+        out.writeBoolean(mIsDataRoamingFromRegistration);
         out.writeBoolean(mIsIwlanPreferred);
     }
 
@@ -649,7 +661,9 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current data network roaming type
+     * Get whether the current data network is roaming.
+     * This value may be overwritten by resource overlay or carrier configuration.
+     * @see #getDataRoamingFromRegistration() to get the value from the network registration.
      * @return roaming type
      * @hide
      */
@@ -659,18 +673,25 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get whether data network registration state is roaming
+     * Set whether the data network registration state is roaming.
+     * This should only be set to the roaming value received
+     * once the data registration phase has completed.
+     * @hide
+     */
+    public void setDataRoamingFromRegistration(boolean dataRoaming) {
+        mIsDataRoamingFromRegistration = dataRoaming;
+    }
+
+    /**
+     * Get whether data network registration state is roaming.
+     * This value is set directly from the modem and will not be overwritten
+     * by resource overlay or carrier configuration.
      * @return true if registration indicates roaming, false otherwise
      * @hide
      */
+    @SystemApi
     public boolean getDataRoamingFromRegistration() {
-        final NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-        if (regState != null) {
-            return regState.getRegistrationState()
-                    == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING;
-        }
-        return false;
+        return mIsDataRoamingFromRegistration;
     }
 
     /**
@@ -873,6 +894,7 @@ public class ServiceState implements Parcelable {
                     mNrFrequencyRange,
                     mOperatorAlphaLongRaw,
                     mOperatorAlphaShortRaw,
+                    mIsDataRoamingFromRegistration,
                     mIsIwlanPreferred);
         }
     }
@@ -903,6 +925,7 @@ public class ServiceState implements Parcelable {
                     && mNetworkRegistrationInfos.size() == s.mNetworkRegistrationInfos.size()
                     && mNetworkRegistrationInfos.containsAll(s.mNetworkRegistrationInfos)
                     && mNrFrequencyRange == s.mNrFrequencyRange
+                    && mIsDataRoamingFromRegistration == s.mIsDataRoamingFromRegistration
                     && mIsIwlanPreferred == s.mIsIwlanPreferred;
         }
     }
@@ -1062,6 +1085,8 @@ public class ServiceState implements Parcelable {
                     .append(", mNrFrequencyRange=").append(mNrFrequencyRange)
                     .append(", mOperatorAlphaLongRaw=").append(mOperatorAlphaLongRaw)
                     .append(", mOperatorAlphaShortRaw=").append(mOperatorAlphaShortRaw)
+                    .append(", mIsDataRoamingFromRegistration=")
+                    .append(mIsDataRoamingFromRegistration)
                     .append(", mIsIwlanPreferred=").append(mIsIwlanPreferred)
                     .append("}").toString();
         }
@@ -1102,6 +1127,7 @@ public class ServiceState implements Parcelable {
         }
         mOperatorAlphaLongRaw = null;
         mOperatorAlphaShortRaw = null;
+        mIsDataRoamingFromRegistration = false;
         mIsIwlanPreferred = false;
     }
 
@@ -1274,7 +1300,7 @@ public class ServiceState implements Parcelable {
      */
     @UnsupportedAppUsage
     private void setFromNotifierBundle(Bundle m) {
-        ServiceState ssFromBundle = m.getParcelable(Intent.EXTRA_SERVICE_STATE);
+        ServiceState ssFromBundle = m.getParcelable(EXTRA_SERVICE_STATE);
         if (ssFromBundle != null) {
             copyFrom(ssFromBundle);
         }
@@ -1292,7 +1318,7 @@ public class ServiceState implements Parcelable {
      */
     @SystemApi
     public void fillInNotifierBundle(@NonNull Bundle m) {
-        m.putParcelable(Intent.EXTRA_SERVICE_STATE, this);
+        m.putParcelable(EXTRA_SERVICE_STATE, this);
         // serviceState already consists of below entries.
         // for backward compatibility, we continue fill in below entries.
         m.putInt("voiceRegState", mVoiceRegState);

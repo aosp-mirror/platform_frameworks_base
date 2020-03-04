@@ -16,8 +16,8 @@
 
 package android.telephony;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -79,8 +79,9 @@ public class SignalStrength implements Parcelable {
     /* The type of signal measurement */
     private static final String MEASUREMENT_TYPE_RSCP = "rscp";
 
-    // timeStamp of signalStrength in nanoseconds since boot
-    private long mTimestamp = Long.MAX_VALUE;
+    // Timestamp of SignalStrength since boot
+    // Effectively final. Timestamp is set during construction of SignalStrength
+    private long mTimestampMillis;
 
     CellSignalStrengthCdma mCdma;
     CellSignalStrengthGsm mGsm;
@@ -140,7 +141,7 @@ public class SignalStrength implements Parcelable {
         mTdscdma = tdscdma;
         mLte = lte;
         mNr = nr;
-        mTimestamp = SystemClock.elapsedRealtimeNanos();
+        mTimestampMillis = SystemClock.elapsedRealtime();
     }
 
     /**
@@ -275,7 +276,6 @@ public class SignalStrength implements Parcelable {
         mTdscdma.updateLevel(cc, ss);
         mLte.updateLevel(cc, ss);
         mNr.updateLevel(cc, ss);
-        mTimestamp = SystemClock.elapsedRealtimeNanos();
     }
 
     /**
@@ -301,7 +301,7 @@ public class SignalStrength implements Parcelable {
         mTdscdma = new CellSignalStrengthTdscdma(s.mTdscdma);
         mLte = new CellSignalStrengthLte(s.mLte);
         mNr = new CellSignalStrengthNr(s.mNr);
-        mTimestamp = s.getTimestampNanos();
+        mTimestampMillis = s.getTimestampMillis();
     }
 
     /**
@@ -319,7 +319,7 @@ public class SignalStrength implements Parcelable {
         mTdscdma = in.readParcelable(CellSignalStrengthTdscdma.class.getClassLoader());
         mLte = in.readParcelable(CellSignalStrengthLte.class.getClassLoader());
         mNr = in.readParcelable(CellSignalStrengthLte.class.getClassLoader());
-        mTimestamp = in.readLong();
+        mTimestampMillis = in.readLong();
     }
 
     /**
@@ -332,15 +332,17 @@ public class SignalStrength implements Parcelable {
         out.writeParcelable(mTdscdma, flags);
         out.writeParcelable(mLte, flags);
         out.writeParcelable(mNr, flags);
-        out.writeLong(mTimestamp);
+        out.writeLong(mTimestampMillis);
     }
 
     /**
-     * @return mTimestamp in nanoseconds
+     * @return timestamp in milliseconds since boot for {@link SignalStrength}.
+     * This timestamp reports the approximate time that the signal was measured and reported
+     * by the modem. It can be used to compare the recency of {@link SignalStrength} instances.
      */
-    @SuppressLint("MethodNameUnits")
-    public long getTimestampNanos() {
-        return mTimestamp;
+    @ElapsedRealtimeLong
+    public long getTimestampMillis() {
+        return mTimestampMillis;
     }
 
    /**

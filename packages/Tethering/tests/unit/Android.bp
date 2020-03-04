@@ -34,7 +34,13 @@ android_test {
         "TetheringApiCurrentLib",
         "testables",
     ],
+    // TODO(b/147200698) change sdk_version to module-current and
+    // remove framework-minus-apex, ext, and framework-res
+    sdk_version: "core_platform",
     libs: [
+        "framework-minus-apex",
+        "ext",
+        "framework-res",
         "android.test.runner",
         "android.test.base",
         "android.test.mock",

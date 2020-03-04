@@ -259,7 +259,6 @@ public abstract class SignalController<T extends SignalController.State,
         boolean enabled;
         boolean activityIn;
         boolean activityOut;
-        public boolean activityDormant;
         int level;
         IconGroup iconGroup;
         int inetCondition;
@@ -276,7 +275,6 @@ public abstract class SignalController<T extends SignalController.State,
             inetCondition = state.inetCondition;
             activityIn = state.activityIn;
             activityOut = state.activityOut;
-            activityDormant = state.activityDormant;
             rssi = state.rssi;
             time = state.time;
         }
@@ -300,7 +298,6 @@ public abstract class SignalController<T extends SignalController.State,
                     .append("iconGroup=").append(iconGroup).append(',')
                     .append("activityIn=").append(activityIn).append(',')
                     .append("activityOut=").append(activityOut).append(',')
-                    .append("activityDormant=").append(activityDormant).append(',')
                     .append("rssi=").append(rssi).append(',')
                     .append("lastModified=").append(DateFormat.format("MM-dd HH:mm:ss", time));
         }
@@ -318,7 +315,6 @@ public abstract class SignalController<T extends SignalController.State,
                     && other.iconGroup == iconGroup
                     && other.activityIn == activityIn
                     && other.activityOut == activityOut
-                    && other.activityDormant == activityDormant
                     && other.rssi == rssi;
         }
     }

@@ -230,6 +230,8 @@ extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env
 extern int register_com_android_internal_os_AtomicDirectory(JNIEnv *env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
+extern int register_com_android_internal_os_KernelCpuUidBpfMapReader(JNIEnv *env);
+extern int register_com_android_internal_os_KernelSingleUidTimeReader(JNIEnv *env);
 extern int register_com_android_internal_os_Zygote(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv *env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
@@ -282,14 +284,6 @@ static void com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup(JNIE
     gCurRuntime->setExitWithoutCleanup(exitWithoutCleanup);
 }
 
-static void com_android_internal_os_RuntimeInit_nativeDisableHeapPointerTagging(
-        JNIEnv* env, jobject clazz) {
-    HeapTaggingLevel tag_level = M_HEAP_TAGGING_LEVEL_NONE;
-    if (!android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &tag_level, sizeof(tag_level))) {
-        ALOGE("ERROR: could not disable heap pointer tagging\n");
-    }
-}
-
 /*
  * JNI registration.
  */
@@ -301,8 +295,6 @@ int register_com_android_internal_os_RuntimeInit(JNIEnv* env)
              (void*)com_android_internal_os_RuntimeInit_nativeFinishInit},
             {"nativeSetExitWithoutCleanup", "(Z)V",
              (void*)com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup},
-            {"nativeDisableHeapPointerTagging", "()V",
-             (void*)com_android_internal_os_RuntimeInit_nativeDisableHeapPointerTagging},
     };
     return jniRegisterNativeMethods(env, "com/android/internal/os/RuntimeInit",
         methods, NELEM(methods));
@@ -1650,6 +1642,8 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_com_android_internal_content_NativeLibraryHelper),
     REG_JNI(register_com_android_internal_os_AtomicDirectory),
     REG_JNI(register_com_android_internal_os_FuseAppLoop),
+    REG_JNI(register_com_android_internal_os_KernelCpuUidBpfMapReader),
+    REG_JNI(register_com_android_internal_os_KernelSingleUidTimeReader),
 };
 
 /*

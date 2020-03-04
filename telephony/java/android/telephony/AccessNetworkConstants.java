@@ -153,22 +153,55 @@ public final class AccessNetworkConstants {
         public static final int BAND_12 = 12;
         public static final int BAND_13 = 13;
         public static final int BAND_14 = 14;
-        /** band 15, 16, 17, 18 are reserved */
+        // band 15, 16, 17, 18 are reserved
         public static final int BAND_19 = 19;
         public static final int BAND_20 = 20;
         public static final int BAND_21 = 21;
         public static final int BAND_22 = 22;
-        /** band 23, 24 are reserved */
+        // band 23, 24 are reserved
         public static final int BAND_25 = 25;
         public static final int BAND_26 = 26;
 
-        /** Frequency bands for TD-SCDMA. Defined in 3GPP TS 25.102, Table 5.2. */
+        // Frequency bands for TD-SCDMA. Defined in 3GPP TS 25.102, Table 5.2.
+
+        /**
+         * Band A
+         * 1900 - 1920 MHz: Uplink and downlink transmission
+         * 2010 - 2025 MHz: Uplink and downlink transmission
+         */
         public static final int BAND_A = 101;
+
+        /**
+         * Band B
+         * 1850 - 1910 MHz: Uplink and downlink transmission
+         * 1930 - 1990 MHz: Uplink and downlink transmission
+         */
         public static final int BAND_B = 102;
+
+        /**
+         * Band C
+         * 1910 - 1930 MHz: Uplink and downlink transmission
+         */
         public static final int BAND_C = 103;
+
+        /**
+         * Band D
+         * 2570 - 2620 MHz: Uplink and downlink transmission
+         */
         public static final int BAND_D = 104;
+
+        /**
+         * Band E
+         * 2300—2400 MHz: Uplink and downlink transmission
+         */
         public static final int BAND_E = 105;
+
+        /**
+         * Band F
+         * 1880 - 1920 MHz: Uplink and downlink transmission
+         */
         public static final int BAND_F = 106;
+
         /** @hide */
         private UtranBand() {}
     }

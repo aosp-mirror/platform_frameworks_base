@@ -391,6 +391,9 @@
     <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
     <protected-broadcast android:name="android.intent.action.ADVANCED_SETTINGS" />
     <protected-broadcast android:name="android.intent.action.APPLICATION_RESTRICTIONS_CHANGED" />
+    <protected-broadcast android:name="com.android.server.adb.WIRELESS_DEBUG_PAIRED_DEVICES" />
+    <protected-broadcast android:name="com.android.server.adb.WIRELESS_DEBUG_PAIRING_RESULT" />
+    <protected-broadcast android:name="com.android.server.adb.WIRELESS_DEBUG_STATUS" />
 
     <!-- Legacy -->
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_START" />
@@ -1624,6 +1627,7 @@
 
     <!-- Allows network stack services (Connectivity and Wifi) to coordinate
          <p>Not for use by third-party or privileged applications.
+         @SystemApi @TestApi
          @hide This should only be used by Connectivity and Wifi Services.
     -->
     <permission android:name="android.permission.NETWORK_STACK"
@@ -1639,6 +1643,7 @@
 
     <!-- Allows Settings and SystemUI to call methods in Networking services
          <p>Not for use by third-party or privileged applications.
+         @SystemApi @TestApi
          @hide This should only be used by Settings and SystemUI.
     -->
     <permission android:name="android.permission.NETWORK_SETTINGS"
@@ -1781,6 +1786,9 @@
         android:protectionLevel="normal" />
 
     <!-- @SystemApi Allows an internal user to use privileged SecureElement APIs.
+         Applications holding this permission can access OMAPI reset system API
+         and bypass OMAPI AccessControlEnforcer.
+         <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.SECURE_ELEMENT_PRIVILEGED"
         android:protectionLevel="signature|privileged" />

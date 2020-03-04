@@ -130,7 +130,7 @@ public abstract class NetworkPolicyManagerInternal {
             Set<String> packageNames, int userId);
 
     /**
-     *  Notifies that any of the {@link AbstractNetworkStatsProvider} has reached its quota
+     *  Notifies that the specified {@link AbstractNetworkStatsProvider} has reached its quota
      *  which was set through {@link AbstractNetworkStatsProvider#setLimit(String, long)}.
      *
      * @param tag the human readable identifier of the custom network stats provider.

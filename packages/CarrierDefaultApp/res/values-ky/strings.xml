@@ -12,6 +12,6 @@
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Мобилдик Интернеттин абалы"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Мобилдик тармакка кирүү"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Кошулайын деген тармагыңызда коопсуздук көйгөйлөрү бар."</string>
-    <string name="ssl_error_example" msgid="6188711843183058764">"Мисалы, каттоо эсебине кирүү баракчасы көрсөтүлгөн уюмга таандык эмес болушу мүмкүн."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Мисалы, аккаунтка кирүү баракчасы көрсөтүлгөн уюмга таандык эмес болушу мүмкүн."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Баары бир серепчи аркылуу улантуу"</string>
 </resources>

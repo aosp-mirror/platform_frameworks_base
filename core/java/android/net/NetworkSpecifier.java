@@ -39,23 +39,6 @@ public abstract class NetworkSpecifier {
 
     /**
      * Optional method which can be overridden by concrete implementations of NetworkSpecifier to
-     * check a self-reported UID. A concrete implementation may contain a UID which would be self-
-     * reported by the caller (since NetworkSpecifier implementations should be non-mutable). This
-     * function is called by ConnectivityService and is passed the actual UID of the caller -
-     * allowing the verification of the self-reported UID. In cases of mismatch the implementation
-     * should throw a SecurityException.
-     *
-     * @param requestorUid The UID of the requestor as obtained from its binder.
-     *
-     * @hide
-     */
-    @SystemApi
-    public void assertValidFromUid(int requestorUid) {
-        // empty
-    }
-
-    /**
-     * Optional method which can be overridden by concrete implementations of NetworkSpecifier to
      * perform any redaction of information from the NetworkSpecifier, e.g. if it contains
      * sensitive information. The default implementation simply returns the object itself - i.e.
      * no information is redacted. A concrete implementation may return a modified (copy) of the

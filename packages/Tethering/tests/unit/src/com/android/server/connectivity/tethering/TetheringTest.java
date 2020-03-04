@@ -28,6 +28,7 @@ import static android.net.TetheringManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.TetheringManager.EXTRA_ACTIVE_LOCAL_ONLY;
 import static android.net.TetheringManager.EXTRA_ACTIVE_TETHER;
 import static android.net.TetheringManager.EXTRA_AVAILABLE_TETHER;
+import static android.net.TetheringManager.TETHERING_ETHERNET;
 import static android.net.TetheringManager.TETHERING_NCM;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
@@ -75,6 +76,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
+import android.net.EthernetManager;
+import android.net.EthernetManager.TetheredInterfaceRequest;
 import android.net.INetd;
 import android.net.ITetheringEventCallback;
 import android.net.InetAddresses;
@@ -88,12 +91,14 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.RouteInfo;
 import android.net.TetherStatesParcel;
+import android.net.TetheredClient;
 import android.net.TetheringCallbackStartedParcel;
 import android.net.TetheringConfigurationParcel;
 import android.net.TetheringRequestParcel;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServer;
+import android.net.ip.IpNeighborMonitor;
 import android.net.ip.IpServer;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.util.InterfaceParams;
@@ -142,6 +147,7 @@ import java.net.Inet6Address;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Vector;
 
 @RunWith(AndroidJUnit4.class)
@@ -171,11 +177,13 @@ public class TetheringTest {
     @Mock private UpstreamNetworkMonitor mUpstreamNetworkMonitor;
     @Mock private IPv6TetheringCoordinator mIPv6TetheringCoordinator;
     @Mock private RouterAdvertisementDaemon mRouterAdvertisementDaemon;
+    @Mock private IpNeighborMonitor mIpNeighborMonitor;
     @Mock private IDhcpServer mDhcpServer;
     @Mock private INetd mNetd;
     @Mock private UserManager mUserManager;
     @Mock private NetworkRequest mNetworkRequest;
     @Mock private ConnectivityManager mCm;
+    @Mock private EthernetManager mEm;
 
     private final MockIpServerDependencies mIpServerDependencies =
             spy(new MockIpServerDependencies());
@@ -228,6 +236,7 @@ public class TetheringTest {
             if (Context.USER_SERVICE.equals(name)) return mUserManager;
             if (Context.NETWORK_STATS_SERVICE.equals(name)) return mStatsManager;
             if (Context.CONNECTIVITY_SERVICE.equals(name)) return mCm;
+            if (Context.ETHERNET_SERVICE.equals(name)) return mEm;
             return super.getSystemService(name);
         }
 
@@ -275,6 +284,11 @@ public class TetheringTest {
                     fail(e.getMessage());
                 }
             }).run();
+        }
+
+        public IpNeighborMonitor getIpNeighborMonitor(Handler h, SharedLog l,
+                IpNeighborMonitor.NeighborEventConsumer c) {
+            return mIpNeighborMonitor;
         }
     }
 
@@ -470,6 +484,7 @@ public class TetheringTest {
                 ArgumentCaptor.forClass(PhoneStateListener.class);
         verify(mTelephonyManager).listen(phoneListenerCaptor.capture(),
                 eq(PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE));
+        verify(mWifiManager).registerSoftApCallback(any(), any());
         mPhoneStateListener = phoneListenerCaptor.getValue();
     }
 
@@ -728,7 +743,8 @@ public class TetheringTest {
 
         sendIPv6TetherUpdates(upstreamState);
         verify(mRouterAdvertisementDaemon, never()).buildNewRa(any(), notNull());
-        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).start(any());
+        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).startWithCallbacks(
+                any(), any());
     }
 
     @Test
@@ -764,7 +780,8 @@ public class TetheringTest {
         verify(mNetd, times(1)).tetherAddForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
         verify(mNetd, times(1)).ipfwdAddInterfaceForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
         verify(mRouterAdvertisementDaemon, times(1)).start();
-        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).start(any());
+        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).startWithCallbacks(
+                any(), any());
 
         sendIPv6TetherUpdates(upstreamState);
         verify(mRouterAdvertisementDaemon, times(1)).buildNewRa(any(), notNull());
@@ -778,7 +795,8 @@ public class TetheringTest {
 
         verify(mNetd, times(1)).tetherAddForward(TEST_USB_IFNAME, TEST_XLAT_MOBILE_IFNAME);
         verify(mNetd, times(1)).tetherAddForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
-        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).start(any());
+        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).startWithCallbacks(
+                any(), any());
         verify(mNetd, times(1)).ipfwdAddInterfaceForward(TEST_USB_IFNAME, TEST_XLAT_MOBILE_IFNAME);
         verify(mNetd, times(1)).ipfwdAddInterfaceForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
 
@@ -794,7 +812,8 @@ public class TetheringTest {
         runUsbTethering(upstreamState);
 
         verify(mNetd, times(1)).tetherAddForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
-        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).start(any());
+        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).startWithCallbacks(
+                any(), any());
         verify(mNetd, times(1)).ipfwdAddInterfaceForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
 
         // Then 464xlat comes up
@@ -817,7 +836,8 @@ public class TetheringTest {
         verify(mNetd, times(1)).tetherAddForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
         verify(mNetd, times(1)).ipfwdAddInterfaceForward(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
         // DHCP not restarted on downstream (still times(1))
-        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).start(any());
+        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).startWithCallbacks(
+                any(), any());
     }
 
     @Test
@@ -847,7 +867,8 @@ public class TetheringTest {
     public void workingNcmTethering() throws Exception {
         runNcmTethering();
 
-        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).start(any());
+        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).startWithCallbacks(
+                any(), any());
     }
 
     @Test
@@ -1171,6 +1192,11 @@ public class TetheringTest {
         }
 
         @Override
+        public void onTetherClientsChanged(List<TetheredClient> clients) {
+            // TODO: check this
+        }
+
+        @Override
         public void onCallbackStarted(TetheringCallbackStartedParcel parcel) {
             mActualUpstreams.add(parcel.upstreamNetwork);
             mTetheringConfigs.add(parcel.config);
@@ -1293,6 +1319,24 @@ public class TetheringTest {
         mPhoneStateListener.onActiveDataSubscriptionIdChanged(fakeSubId);
         final TetheringConfiguration newConfig = mTethering.getTetheringConfiguration();
         assertEquals(fakeSubId, newConfig.activeDataSubId);
+    }
+
+    @Test
+    public void testNoDuplicatedEthernetRequest() throws Exception {
+        final TetheredInterfaceRequest mockRequest = mock(TetheredInterfaceRequest.class);
+        when(mEm.requestTetheredInterface(any(), any())).thenReturn(mockRequest);
+        mTethering.startTethering(createTetheringRquestParcel(TETHERING_ETHERNET), null);
+        mLooper.dispatchAll();
+        verify(mEm, times(1)).requestTetheredInterface(any(), any());
+        mTethering.startTethering(createTetheringRquestParcel(TETHERING_ETHERNET), null);
+        mLooper.dispatchAll();
+        verifyNoMoreInteractions(mEm);
+        mTethering.stopTethering(TETHERING_ETHERNET);
+        mLooper.dispatchAll();
+        verify(mockRequest, times(1)).release();
+        mTethering.stopTethering(TETHERING_ETHERNET);
+        mLooper.dispatchAll();
+        verifyNoMoreInteractions(mEm);
     }
 
     private void workingWifiP2pGroupOwner(

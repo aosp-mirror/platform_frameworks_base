@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -25,7 +27,7 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,6 +36,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
+@SystemApi(client = MODULE_LIBRARIES)
 @TestApi
 public final class TetheredClient implements Parcelable {
     @NonNull
@@ -83,7 +86,7 @@ public final class TetheredClient implements Parcelable {
      * @hide
      */
     public TetheredClient addAddresses(@NonNull TetheredClient other) {
-        final HashSet<AddressInfo> newAddresses = new HashSet<>(
+        final LinkedHashSet<AddressInfo> newAddresses = new LinkedHashSet<>(
                 mAddresses.size() + other.mAddresses.size());
         newAddresses.addAll(mAddresses);
         newAddresses.addAll(other.mAddresses);
@@ -188,6 +191,15 @@ public final class TetheredClient implements Parcelable {
                 return new AddressInfo[size];
             }
         };
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "AddressInfo {"
+                    + mAddress
+                    + (mHostname != null ? ", hostname " + mHostname : "")
+                    + "}";
+        }
     }
 
     @Override
@@ -209,4 +221,13 @@ public final class TetheredClient implements Parcelable {
             return new TetheredClient[size];
         }
     };
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "TetheredClient {hwAddr " + mMacAddress
+                + ", addresses " + mAddresses
+                + ", tetheringType " + mTetheringType
+                + "}";
+    }
 }

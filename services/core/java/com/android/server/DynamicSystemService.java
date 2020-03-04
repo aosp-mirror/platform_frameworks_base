@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.gsi.AvbPublicKey;
 import android.gsi.GsiProgress;
 import android.gsi.IGsiService;
 import android.gsi.IGsid;
@@ -223,6 +224,15 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     public boolean submitFromAshmem(long size) {
         try {
             return getGsiService().commitGsiChunkFromAshmem(size);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
+    @Override
+    public boolean getAvbPublicKey(AvbPublicKey dst) {
+        try {
+            return getGsiService().getAvbPublicKey(dst) == 0;
         } catch (RemoteException e) {
             throw new RuntimeException(e.toString());
         }

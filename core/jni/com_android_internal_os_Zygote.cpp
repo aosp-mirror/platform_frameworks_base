@@ -46,7 +46,6 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
-#include <link.h>
 #include <malloc.h>
 #include <mntent.h>
 #include <paths.h>
@@ -55,7 +54,6 @@
 #include <sys/capability.h>
 #include <sys/cdefs.h>
 #include <sys/eventfd.h>
-#include <sys/mman.h>
 #include <sys/personality.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
@@ -72,10 +70,8 @@
 #include <android-base/properties.h>
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
-#include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 #include <bionic/malloc.h>
-#include <bionic/page.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <private/android_filesystem_config.h>
@@ -319,6 +315,8 @@ enum MountExternalKind {
 enum RuntimeFlags : uint32_t {
   DEBUG_ENABLE_JDWP = 1,
   PROFILE_FROM_SHELL = 1 << 15,
+  MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20),
+  MEMORY_TAG_LEVEL_TBI = 1 << 19,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {
@@ -1157,6 +1155,16 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
     }
   }
 
+  HeapTaggingLevel heap_tagging_level;
+  switch (runtime_flags & RuntimeFlags::MEMORY_TAG_LEVEL_MASK) {
+    case RuntimeFlags::MEMORY_TAG_LEVEL_TBI:
+      heap_tagging_level = M_HEAP_TAGGING_LEVEL_TBI;
+      break;
+    default:
+      heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
+  }
+  android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &heap_tagging_level, sizeof(heap_tagging_level));
+
   if (NeedsNoRandomizeWorkaround()) {
     // Work around ARM kernel ASLR lossage (http://b/5817320).
     int old_personality = personality(0xffffffff);
@@ -1783,31 +1791,6 @@ static void com_android_internal_os_Zygote_nativeEmptyUsapPool(JNIEnv* env, jcla
   }
 }
 
-static int disable_execute_only(struct dl_phdr_info *info, size_t size, void *data) {
-  // Search for any execute-only segments and mark them read+execute.
-  for (int i = 0; i < info->dlpi_phnum; i++) {
-    const auto& phdr = info->dlpi_phdr[i];
-    if ((phdr.p_type == PT_LOAD) && (phdr.p_flags == PF_X)) {
-      auto addr = reinterpret_cast<void*>(info->dlpi_addr + PAGE_START(phdr.p_vaddr));
-      size_t len = PAGE_OFFSET(phdr.p_vaddr) + phdr.p_memsz;
-      if (mprotect(addr, len, PROT_READ | PROT_EXEC) == -1) {
-        ALOGE("mprotect(%p, %zu, PROT_READ | PROT_EXEC) failed: %m", addr, len);
-        return -1;
-      }
-    }
-  }
-  // Return non-zero to exit dl_iterate_phdr.
-  return 0;
-}
-
-/**
- * @param env  Managed runtime environment
- * @return  True if disable was successful.
- */
-static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* env, jclass) {
-  return dl_iterate_phdr(disable_execute_only, nullptr) == 0;
-}
-
 static void com_android_internal_os_Zygote_nativeBlockSigTerm(JNIEnv* env, jclass) {
   auto fail_fn = std::bind(ZygoteFailure, env, "usap", nullptr, _1);
   BlockSignal(SIGTERM, fail_fn);
@@ -1889,8 +1872,6 @@ static const JNINativeMethod gMethods[] = {
       (void *) com_android_internal_os_Zygote_nativeGetUsapPoolCount },
     { "nativeEmptyUsapPool", "()V",
       (void *) com_android_internal_os_Zygote_nativeEmptyUsapPool },
-    { "nativeDisableExecuteOnly", "()Z",
-      (void *) com_android_internal_os_Zygote_nativeDisableExecuteOnly },
     { "nativeBlockSigTerm", "()V",
       (void* ) com_android_internal_os_Zygote_nativeBlockSigTerm },
     { "nativeUnblockSigTerm", "()V",

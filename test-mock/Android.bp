@@ -28,7 +28,7 @@ java_sdk_library {
         ":framework_native_aidl",
     ],
     libs: [
-        "framework-all",
+        "framework",
         "app-compat-annotations",
         "unsupportedappusage",
     ],
