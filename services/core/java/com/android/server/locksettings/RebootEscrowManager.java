@@ -181,15 +181,13 @@ class RebootEscrowManager {
     }
 
     private void onEscrowRestoreComplete(boolean success) {
-        int previousBootCount = mStorage.getInt(REBOOT_ESCROW_ARMED_KEY, 0, USER_SYSTEM);
+        int previousBootCount = mStorage.getInt(REBOOT_ESCROW_ARMED_KEY, -1, USER_SYSTEM);
         mStorage.removeKey(REBOOT_ESCROW_ARMED_KEY, USER_SYSTEM);
 
         int bootCountDelta = mInjector.getBootCount() - previousBootCount;
-        if (bootCountDelta > BOOT_COUNT_TOLERANCE) {
-            return;
+        if (success || (previousBootCount != -1 && bootCountDelta <= BOOT_COUNT_TOLERANCE)) {
+            mInjector.reportMetric(success);
         }
-
-        mInjector.reportMetric(success);
     }
 
     private RebootEscrowKey getAndClearRebootEscrowKey() {
