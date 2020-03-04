@@ -142,7 +142,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private LayoutListener mLayoutListener;
     private RowContentBindStage mRowContentBindStage;
     private int mIconTransformContentShift;
-    private int mIconTransformContentShiftNoIcon;
     private int mMaxHeadsUpHeightBeforeN;
     private int mMaxHeadsUpHeightBeforeP;
     private int mMaxHeadsUpHeight;
@@ -312,10 +311,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mHeadsupDisappearRunning;
     private View mChildAfterViewWhenDismissed;
     private View mGroupParentWhenDismissed;
-    private float mContentTransformationAmount;
     private boolean mIconsVisible = true;
     private boolean mAboveShelf;
-    private boolean mIsLastChild;
     private Runnable mOnDismissRunnable;
     private boolean mIsLowPriority;
     private boolean mIsColorized;
@@ -1504,18 +1501,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateIconVisibilities();
     }
 
-    private void updateContentTransformation() {
+    @Override
+    protected void updateContentTransformation() {
         if (mExpandAnimationRunning) {
             return;
         }
-        float contentAlpha;
-        float translationY = -mContentTransformationAmount * mIconTransformContentShift;
-        if (mIsLastChild) {
-            contentAlpha = 1.0f - mContentTransformationAmount;
-            contentAlpha = Math.min(contentAlpha / 0.5f, 1.0f);
-            contentAlpha = Interpolators.ALPHA_OUT.getInterpolation(contentAlpha);
-            translationY *= 0.4f;
-        } else {
+        super.updateContentTransformation();
+    }
+
+    @Override
+    protected void applyContentTransformation(float contentAlpha, float translationY) {
+        super.applyContentTransformation(contentAlpha, translationY);
+        if (!mIsLastChild) {
+            // Don't fade views unless we're last
             contentAlpha = 1.0f;
         }
         for (NotificationContentView l : mLayouts) {
@@ -1672,8 +1670,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         Resources res = getResources();
         mIncreasedPaddingBetweenElements = res.getDimensionPixelSize(
                 R.dimen.notification_divider_height_increased);
-        mIconTransformContentShiftNoIcon = res.getDimensionPixelSize(
-                R.dimen.notification_icon_transform_content_shift);
         mEnableNonGroupedNotificationExpand =
                 res.getBoolean(R.bool.config_enableNonGroupedNotificationExpand);
         mShowGroupBackgroundWhenExpanded =
@@ -2137,6 +2133,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
+    public StatusBarIconView getShelfIcon() {
+        return getEntry().expandedIcon;
+    }
+
+    @Override
     protected boolean shouldClipToActualHeight() {
         return super.shouldClipToActualHeight() && !mExpandAnimationRunning;
     }
@@ -2472,8 +2473,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             CachingIconView icon = notificationHeader.getIcon();
             mIconTransformContentShift = getRelativeTopPadding(icon) + icon.getHeight();
         } else {
-            mIconTransformContentShift = mIconTransformContentShiftNoIcon;
+            mIconTransformContentShift = mContentShift;
         }
+    }
+
+    @Override
+    protected float getContentTransformationShift() {
+        return mIconTransformContentShift;
     }
 
     @Override
