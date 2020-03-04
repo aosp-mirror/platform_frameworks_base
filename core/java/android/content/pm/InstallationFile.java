@@ -19,81 +19,47 @@ package android.content.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 /**
  * Defines the properties of a file in an installation session.
  * @hide
  */
 @SystemApi
-public final class InstallationFile implements Parcelable {
-    private final @PackageInstaller.FileLocation int mLocation;
-    private final @NonNull String mName;
-    private final long mLengthBytes;
-    private final @Nullable byte[] mMetadata;
-    private final @Nullable byte[] mSignature;
+public final class InstallationFile {
+    private final @NonNull InstallationFileParcel mParcel;
 
     public InstallationFile(@PackageInstaller.FileLocation int location, @NonNull String name,
             long lengthBytes, @Nullable byte[] metadata, @Nullable byte[] signature) {
-        mLocation = location;
-        mName = name;
-        mLengthBytes = lengthBytes;
-        mMetadata = metadata;
-        mSignature = signature;
+        mParcel = new InstallationFileParcel();
+        mParcel.location = location;
+        mParcel.name = name;
+        mParcel.size = lengthBytes;
+        mParcel.metadata = metadata;
+        mParcel.signature = signature;
     }
 
     public @PackageInstaller.FileLocation int getLocation() {
-        return mLocation;
+        return mParcel.location;
     }
 
     public @NonNull String getName() {
-        return mName;
+        return mParcel.name;
     }
 
     public long getLengthBytes() {
-        return mLengthBytes;
+        return mParcel.size;
     }
 
     public @Nullable byte[] getMetadata() {
-        return mMetadata;
+        return mParcel.metadata;
     }
 
     public @Nullable byte[] getSignature() {
-        return mSignature;
+        return mParcel.signature;
     }
 
-    private InstallationFile(Parcel source) {
-        mLocation = source.readInt();
-        mName = source.readString();
-        mLengthBytes = source.readLong();
-        mMetadata = source.createByteArray();
-        mSignature = source.createByteArray();
+    /** @hide */
+    public @NonNull InstallationFileParcel getData() {
+        return mParcel;
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mLocation);
-        dest.writeString(mName);
-        dest.writeLong(mLengthBytes);
-        dest.writeByteArray(mMetadata);
-        dest.writeByteArray(mSignature);
-    }
-
-    public static final @NonNull Creator<InstallationFile> CREATOR =
-            new Creator<InstallationFile>() {
-        public InstallationFile createFromParcel(Parcel source) {
-            return new InstallationFile(source);
-        }
-
-        public InstallationFile[] newArray(int size) {
-            return new InstallationFile[size];
-        }
-    };
-
 }
