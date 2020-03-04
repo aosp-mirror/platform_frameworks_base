@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package android.location.util.identity;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Process;
 import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -36,7 +37,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * Represents the calling process's uid, pid, and package name.
+ * Identifying information on a caller.
+ *
+ * @hide
  */
 public final class CallerIdentity {
 
@@ -77,6 +80,26 @@ public final class CallerIdentity {
     }
 
     /**
+     * Construct a CallerIdentity for test purposes.
+     */
+    @VisibleForTesting
+    public static CallerIdentity forTest(int uid, int pid, String packageName,
+            @Nullable String featureId, @PermissionLevel int permissionLevel) {
+
+        return new CallerIdentity(uid, pid, packageName, featureId,
+                permissionLevel);
+    }
+
+    /**
+     * Creates a CallerIdentity for the current process and context.
+     */
+    public static CallerIdentity fromContext(Context context) {
+        return new CallerIdentity(Process.myUid(), Process.myPid(),
+                context.getPackageName(), context.getFeatureId(),
+                getPermissionLevel(context, Binder.getCallingPid(), Binder.getCallingUid()));
+    }
+
+    /**
      * Creates a CallerIdentity from the current binder identity, using the given package and
      * feature id. The package will be checked to enforce it belongs to the calling uid, and a
      * security exception will be thrown if it is invalid.
@@ -100,42 +123,55 @@ public final class CallerIdentity {
     public static CallerIdentity fromBinderUnsafe(Context context, String packageName,
             @Nullable String featureId) {
         return new CallerIdentity(Binder.getCallingUid(), Binder.getCallingPid(),
-                UserHandle.getCallingUserId(), packageName, featureId,
-                getBinderPermissionLevel(context));
+                packageName, featureId,
+                getPermissionLevel(context, Binder.getCallingPid(), Binder.getCallingUid()));
     }
 
     /**
      * Throws a security exception if the caller does not hold a location permission.
      */
-    public static void enforceCallingOrSelfLocationPermission(Context context) {
-        enforceLocationPermission(Binder.getCallingUid(), getBinderPermissionLevel(context));
+    public static void enforceCallingOrSelfLocationPermission(Context context,
+            @PermissionLevel int desiredPermissionLevel) {
+        enforceLocationPermission(Binder.getCallingUid(),
+                getPermissionLevel(context, Binder.getCallingPid(), Binder.getCallingUid()),
+                desiredPermissionLevel);
     }
 
     /**
      * Returns false if the caller does not hold a location permission, true otherwise.
      */
-    public static boolean checkCallingOrSelfLocationPermission(Context context) {
-        return checkLocationPermission(getBinderPermissionLevel(context));
+    public static boolean checkCallingOrSelfLocationPermission(Context context,
+            @PermissionLevel int desiredPermissionLevel) {
+        return checkLocationPermission(
+                getPermissionLevel(context, Binder.getCallingPid(), Binder.getCallingUid()),
+                desiredPermissionLevel);
     }
 
-    private static void enforceLocationPermission(int uid, @PermissionLevel int permissionLevel) {
-        if (checkLocationPermission(permissionLevel)) {
+    private static void enforceLocationPermission(int uid, @PermissionLevel int permissionLevel,
+            @PermissionLevel int desiredPermissionLevel) {
+        if (checkLocationPermission(permissionLevel, desiredPermissionLevel)) {
             return;
         }
 
-        throw new SecurityException("uid " + uid + " does not have " + ACCESS_COARSE_LOCATION
-                + " or " + ACCESS_FINE_LOCATION + ".");
+        if (desiredPermissionLevel == PERMISSION_COARSE) {
+            throw new SecurityException("uid " + uid + " does not have " + ACCESS_COARSE_LOCATION
+                    + " or " + ACCESS_FINE_LOCATION + ".");
+        } else if (desiredPermissionLevel == PERMISSION_FINE) {
+            throw new SecurityException("uid " + uid + " does not have " + ACCESS_FINE_LOCATION
+                    + ".");
+        }
     }
 
-    private static boolean checkLocationPermission(@PermissionLevel int permissionLevel) {
-        return permissionLevel >= PERMISSION_COARSE;
+    private static boolean checkLocationPermission(@PermissionLevel int permissionLevel,
+            @PermissionLevel int desiredPermissionLevel) {
+        return permissionLevel >= desiredPermissionLevel;
     }
 
-    private static @PermissionLevel int getBinderPermissionLevel(Context context) {
-        if (context.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) {
+    private static @PermissionLevel int getPermissionLevel(Context context, int pid, int uid) {
+        if (context.checkPermission(ACCESS_FINE_LOCATION, pid, uid) == PERMISSION_GRANTED) {
             return PERMISSION_FINE;
         }
-        if (context.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED) {
+        if (context.checkPermission(ACCESS_COARSE_LOCATION, pid, uid) == PERMISSION_GRANTED) {
             return PERMISSION_COARSE;
         }
 
@@ -164,12 +200,11 @@ public final class CallerIdentity {
      */
     public final @PermissionLevel int permissionLevel;
 
-    @VisibleForTesting
-    public CallerIdentity(int uid, int pid, int userId, String packageName,
+    private CallerIdentity(int uid, int pid, String packageName,
             @Nullable String featureId, @PermissionLevel int permissionLevel) {
         this.uid = uid;
         this.pid = pid;
-        this.userId = userId;
+        this.userId = UserHandle.getUserId(uid);
         this.packageName = Objects.requireNonNull(packageName);
         this.featureId = featureId;
         this.permissionLevel = Preconditions.checkArgumentInRange(permissionLevel, PERMISSION_NONE,
@@ -179,8 +214,8 @@ public final class CallerIdentity {
     /**
      * Throws a security exception if the CallerIdentity does not hold a location permission.
      */
-    public void enforceLocationPermission() {
-        enforceLocationPermission(uid, permissionLevel);
+    public void enforceLocationPermission(@PermissionLevel int desiredPermissionLevel) {
+        enforceLocationPermission(uid, permissionLevel, desiredPermissionLevel);
     }
 
     @Override

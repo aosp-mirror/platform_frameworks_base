@@ -156,8 +156,15 @@ public abstract class AbstractListenerManager<TKey, TRequest, TListener,
             // this class does not support adding listeners reentrantly
             Preconditions.checkState(!mReentrancyGuard.isReentrant());
 
+            if (mRegistrations.isEmpty()) {
+                onRegister();
+            }
+
             if (!registration.register()) {
                 registration.unregister();
+                if (mRegistrations.isEmpty()) {
+                    onUnregister();
+                }
                 return;
             }
 
@@ -210,6 +217,10 @@ public abstract class AbstractListenerManager<TKey, TRequest, TListener,
         onRegistrationRemoved(key, registration);
         registration.unregister();
         updateService();
+
+        if (mRegistrations.isEmpty()) {
+            onUnregister();
+        }
     }
 
     /**
@@ -316,10 +327,26 @@ public abstract class AbstractListenerManager<TKey, TRequest, TListener,
     protected abstract void unregisterService();
 
     /**
+     * Invoked before the first registration occurs. This is a convenient entry point for
+     * registering listeners, etc, which only need to be present while there are any registrations.
+     * This method will always be invoked before a corresponding call to
+     * {@link Registration#onRegister()} and {@link #onActive()}.
+     */
+    protected void onRegister() {}
+
+    /**
+     * Invoked after the last unregistration occurs. This is a convenient entry point for
+     * unregistering listeners, etc, which only need to be present while there are any
+     * registrations. This method will always be after a corresponding call to
+     * {@link Registration#onUnregister()} and {@link #onInactive()}.
+     */
+    protected void onUnregister() {}
+
+    /**
      * Invoked when the listener goes from having no active registrations to having some active
      * registrations. This is a convenient entry point for registering listeners, etc, which only
      * need to be present while there are active registrations. This method will always be invoked
-     * before a corrosponding call to {@link #registerService(Object)}.
+     * before a corresponding call to {@link #registerService(Object)}.
      */
     protected void onActive() {}
 
@@ -327,7 +354,7 @@ public abstract class AbstractListenerManager<TKey, TRequest, TListener,
      * Invoked when the listener goes from having some active registrations to having no active
      * registrations. This is a convenient entry point for unregistering listeners, etc, which only
      * need to be present while there are active registrations. This method will always be invoked
-     * after a corrosponding call to {@link #unregisterService()}.
+     * after a corresponding call to {@link #unregisterService()}.
      */
     protected void onInactive() {}
 

@@ -64,7 +64,6 @@ import com.android.internal.location.ProviderProperties;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledRunnable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
@@ -313,10 +312,9 @@ public class LocationManager {
 
     private static final long GET_CURRENT_LOCATION_MAX_TIMEOUT_MS = 30 * 1000;
 
-    private final Context mContext;
-
+    final Context mContext;
     @UnsupportedAppUsage
-    private final ILocationManager mService;
+    final ILocationManager mService;
 
     @GuardedBy("mListeners")
     private final ArrayMap<LocationListener, LocationListenerTransport> mListeners =
@@ -1403,15 +1401,36 @@ public class LocationManager {
      * otherwise.
      *
      * @hide
+     * @deprecated Prefer {@link #isProviderPackage(String, String)} instead.
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public boolean isProviderPackage(@NonNull String packageName) {
         try {
-            return mService.isProviderPackage(packageName);
+            return mService.isProviderPackage(null, packageName);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return false;
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if the given provider corresponds to the given package name. If the given
+     * provider is null, this will return true if any provider corresponds to the given package
+     * name.
+     *
+     * @param provider a provider listed by {@link #getAllProviders()} or null
+     * @param packageName the package name to test if it is a provider
+     * @return true if the given arguments correspond to a provider
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    public boolean isProviderPackage(@Nullable String provider, @NonNull String packageName) {
+        try {
+            return mService.isProviderPackage(provider, packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1420,16 +1439,17 @@ public class LocationManager {
      * and an empty list if no package is associated with the provider.
      *
      * @hide
+     * @deprecated Prefer {@link #isProviderPackage(String, String)} instead.
      */
     @TestApi
+    @Deprecated
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     @Nullable
     public List<String> getProviderPackages(@NonNull String provider) {
         try {
             return mService.getProviderPackages(provider);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return Collections.emptyList();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2470,7 +2490,7 @@ public class LocationManager {
         @Nullable
         private ICancellationSignal mRemoteCancellationSignal;
 
-        private GetCurrentLocationTransport(Executor executor, Consumer<Location> consumer) {
+        GetCurrentLocationTransport(Executor executor, Consumer<Location> consumer) {
             Preconditions.checkArgument(executor != null, "illegal null executor");
             Preconditions.checkArgument(consumer != null, "illegal null consumer");
             mExecutor = executor;
@@ -2595,7 +2615,7 @@ public class LocationManager {
         private final LocationListener mListener;
         @Nullable private volatile Executor mExecutor = null;
 
-        private LocationListenerTransport(@NonNull LocationListener listener) {
+        LocationListenerTransport(@NonNull LocationListener listener) {
             Preconditions.checkArgument(listener != null, "invalid null listener");
             mListener = listener;
         }
@@ -2769,7 +2789,7 @@ public class LocationManager {
 
         private final OnNmeaMessageListener mListener;
 
-        private NmeaAdapter(OnNmeaMessageListener listener) {
+        NmeaAdapter(OnNmeaMessageListener listener) {
             mListener = listener;
         }
 
@@ -2783,7 +2803,7 @@ public class LocationManager {
 
         private final GpsStatus.Listener mGpsListener;
 
-        private GpsAdapter(GpsStatus.Listener gpsListener) {
+        GpsAdapter(GpsStatus.Listener gpsListener) {
             mGpsListener = gpsListener;
         }
 
@@ -2813,8 +2833,11 @@ public class LocationManager {
 
         private @Nullable IGnssStatusListener mListenerTransport;
 
-        private volatile @Nullable GnssStatus mGnssStatus;
-        private volatile int mTtff;
+        volatile @Nullable GnssStatus mGnssStatus;
+        volatile int mTtff;
+
+        GnssStatusListenerManager() {
+        }
 
         public GnssStatus getGnssStatus() {
             return mGnssStatus;
@@ -2862,6 +2885,9 @@ public class LocationManager {
         }
 
         private class GnssStatusListener extends IGnssStatusListener.Stub {
+            GnssStatusListener() {
+            }
+
             @Override
             public void onGnssStarted() {
                 deliverToListeners(GnssStatus.Callback::onStarted);
@@ -2905,6 +2931,9 @@ public class LocationManager {
         @Nullable
         private IGnssMeasurementsListener mListenerTransport;
 
+        GnssMeasurementsListenerManager() {
+        }
+
         @Override
         protected boolean registerService(GnssRequest request) {
             Preconditions.checkState(mListenerTransport == null);
@@ -2947,6 +2976,9 @@ public class LocationManager {
         }
 
         private class GnssMeasurementsListener extends IGnssMeasurementsListener.Stub {
+            GnssMeasurementsListener() {
+            }
+
             @Override
             public void onGnssMeasurementsReceived(final GnssMeasurementsEvent event) {
                 deliverToListeners((callback) -> callback.onGnssMeasurementsReceived(event));
@@ -2964,6 +2996,9 @@ public class LocationManager {
 
         @Nullable
         private IGnssNavigationMessageListener mListenerTransport;
+
+        GnssNavigationMessageListenerManager() {
+        }
 
         @Override
         protected boolean registerService(Void ignored) {
@@ -2994,6 +3029,9 @@ public class LocationManager {
         }
 
         private class GnssNavigationMessageListener extends IGnssNavigationMessageListener.Stub {
+            GnssNavigationMessageListener() {
+            }
+
             @Override
             public void onGnssNavigationMessageReceived(GnssNavigationMessage event) {
                 deliverToListeners((listener) -> listener.onGnssNavigationMessageReceived(event));
@@ -3011,6 +3049,9 @@ public class LocationManager {
 
         @Nullable
         private IGnssAntennaInfoListener mListenerTransport;
+
+        GnssAntennaInfoListenerManager() {
+        }
 
         @Override
         protected boolean registerService(Void ignored) {
@@ -3041,6 +3082,9 @@ public class LocationManager {
         }
 
         private class GnssAntennaInfoListener extends IGnssAntennaInfoListener.Stub {
+            GnssAntennaInfoListener() {
+            }
+
             @Override
             public void onGnssAntennaInfoReceived(List<GnssAntennaInfo> infos) {
                 deliverToListeners(callback -> callback.onGnssAntennaInfoReceived(infos));
@@ -3054,6 +3098,9 @@ public class LocationManager {
 
         @Nullable
         private IBatchedLocationCallback mListenerTransport;
+
+        BatchedLocationCallbackManager() {
+        }
 
         @Override
         protected boolean registerService(Void ignored) {
@@ -3083,6 +3130,9 @@ public class LocationManager {
         }
 
         private class BatchedLocationCallback extends IBatchedLocationCallback.Stub {
+            BatchedLocationCallback() {
+            }
+
             @Override
             public void onLocationBatch(List<Location> locations) {
                 deliverToListeners((listener) -> listener.onLocationBatch(locations));

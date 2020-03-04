@@ -39,6 +39,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
+import android.location.util.identity.CallerIdentity;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -620,7 +621,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     public GnssLocationProvider(Context context, UserInfoHelper userInfoHelper,
             SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
             AppForegroundHelper appForegroundHelper, LocationUsageLogger logger) {
-        super(FgThread.getExecutor(), context);
+        super(FgThread.getExecutor(), CallerIdentity.fromContext(context));
 
         ensureInitialized();
 

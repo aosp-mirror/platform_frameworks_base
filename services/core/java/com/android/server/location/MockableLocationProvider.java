@@ -28,7 +28,6 @@ import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,10 +47,10 @@ import java.util.List;
  */
 public class MockableLocationProvider extends AbstractLocationProvider {
 
-    private final Object mOwnerLock;
+    final Object mOwnerLock;
 
     @GuardedBy("mOwnerLock")
-    @Nullable private AbstractLocationProvider mProvider;
+    @Nullable AbstractLocationProvider mProvider;
     @GuardedBy("mOwnerLock")
     @Nullable private AbstractLocationProvider mRealProvider;
     @GuardedBy("mOwnerLock")
@@ -72,7 +71,7 @@ public class MockableLocationProvider extends AbstractLocationProvider {
     public MockableLocationProvider(Object ownerLock, Listener listener) {
         // using a direct executor is acceptable because all inbound calls are delegated to the
         // actual provider implementations which will use their own executors
-        super(DIRECT_EXECUTOR, Collections.emptySet());
+        super(DIRECT_EXECUTOR);
         mOwnerLock = ownerLock;
         mRequest = ProviderRequest.EMPTY_REQUEST;
 
@@ -236,8 +235,12 @@ public class MockableLocationProvider extends AbstractLocationProvider {
         synchronized (mOwnerLock) {
             provider = mProvider;
             pw.println("allowed=" + getState().allowed);
-            pw.println("properties=" + getState().properties);
-            pw.println("packages=" + getState().providerPackageNames);
+            if (getState().identity != null) {
+                pw.println("identity=" + getState().identity);
+            }
+            if (getState().properties != null) {
+                pw.println("properties=" + getState().properties);
+            }
             pw.println("request=" + mRequest);
         }
 
@@ -254,7 +257,7 @@ public class MockableLocationProvider extends AbstractLocationProvider {
 
         private final AbstractLocationProvider mListenerProvider;
 
-        private ListenerWrapper(AbstractLocationProvider listenerProvider) {
+        ListenerWrapper(AbstractLocationProvider listenerProvider) {
             mListenerProvider = listenerProvider;
         }
 

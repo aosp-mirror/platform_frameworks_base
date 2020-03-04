@@ -26,7 +26,7 @@ import com.android.internal.location.ProviderProperties;
  */
 interface ILocationProviderManager {
 
-    void onSetAdditionalProviderPackages(in List<String> packageNames);
+    void onSetFeatureId(String featureId);
 
     @UnsupportedAppUsage
     void onSetAllowed(boolean allowed);

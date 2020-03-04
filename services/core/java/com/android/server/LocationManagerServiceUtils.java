@@ -17,10 +17,9 @@
 package com.android.server;
 
 import android.annotation.NonNull;
+import android.location.util.identity.CallerIdentity;
 import android.os.IBinder;
 import android.os.RemoteException;
-
-import com.android.server.location.CallerIdentity;
 
 import java.util.NoSuchElementException;
 

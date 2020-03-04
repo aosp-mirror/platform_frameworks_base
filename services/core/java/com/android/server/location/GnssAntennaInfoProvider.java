@@ -18,12 +18,13 @@ package com.android.server.location;
 
 import android.location.GnssAntennaInfo;
 import android.location.IGnssAntennaInfoListener;
+import android.location.util.identity.CallerIdentity;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.location.gnss.GnssListenerManager;
 import com.android.server.location.gnss.GnssManagerService;
-import com.android.server.location.util.listeners.GnssListenerManager;
 
 import java.util.List;
 

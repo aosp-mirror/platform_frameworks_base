@@ -17,6 +17,7 @@
 package com.android.server.location.gnss;
 
 import static android.location.LocationManager.GPS_PROVIDER;
+import static android.location.util.identity.CallerIdentity.PERMISSION_FINE;
 
 import android.Manifest;
 import android.annotation.Nullable;
@@ -32,6 +33,7 @@ import android.location.IGpsGeofenceHardware;
 import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManagerInternal;
+import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -43,7 +45,6 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.location.AppForegroundHelper;
 import com.android.server.location.AppOpsHelper;
-import com.android.server.location.CallerIdentity;
 import com.android.server.location.GnssAntennaInfoProvider;
 import com.android.server.location.GnssBatchingProvider;
 import com.android.server.location.GnssCapabilitiesProvider;
@@ -65,6 +66,8 @@ public class GnssManagerService {
 
     public static final String TAG = "GnssManager";
     public static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
+
+    private static final String FEATURE_ID = "GnssService";
 
     public static boolean isGnssSupported() {
         return GnssLocationProvider.isSupported();
@@ -114,7 +117,7 @@ public class GnssManagerService {
             GnssLocationProvider gnssLocationProvider) {
         Preconditions.checkState(isGnssSupported());
 
-        mContext = context;
+        mContext = context.createFeatureContext(FEATURE_ID);
         mSettingsHelper = settingsHelper;
         mAppOpsHelper = appOpsHelper;
         mAppForegroundHelper = appForegroundHelper;
@@ -185,7 +188,6 @@ public class GnssManagerService {
      */
     public int getGnssBatchSize(String packageName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         synchronized (mGnssBatchingLock) {
             return mGnssBatchingProvider.getBatchSize();
@@ -199,7 +201,6 @@ public class GnssManagerService {
     public boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName,
             String featureId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
         if (!mAppOpsHelper.checkLocationAccess(identity)) {
@@ -224,9 +225,9 @@ public class GnssManagerService {
     public boolean addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
             @Nullable String featureId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        identity.enforceLocationPermission(PERMISSION_FINE);
 
         synchronized (mGnssBatchingLock) {
             Binder.DeathRecipient deathRecipient = () -> {
@@ -255,7 +256,6 @@ public class GnssManagerService {
      */
     public void flushGnssBatch(String packageName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         synchronized (mGnssBatchingLock) {
             mGnssBatchingProvider.flush();
@@ -297,9 +297,9 @@ public class GnssManagerService {
      */
     public void registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
             @Nullable String featureId) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
-
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        identity.enforceLocationPermission(PERMISSION_FINE);
+
         mGnssStatusProvider.addListener(identity, listener);
     }
 
@@ -315,12 +315,13 @@ public class GnssManagerService {
      */
     public void addGnssMeasurementsListener(GnssRequest request, IGnssMeasurementsListener listener,
             String packageName, @Nullable String featureId) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        identity.enforceLocationPermission(PERMISSION_FINE);
+
         if (request.isFullTracking()) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
         }
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
         mGnssMeasurementsProvider.addListener(request, identity, listener);
     }
 
@@ -351,9 +352,9 @@ public class GnssManagerService {
      */
     public void addGnssAntennaInfoListener(IGnssAntennaInfoListener listener, String packageName,
             @Nullable String featureId) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
-
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        identity.enforceLocationPermission(PERMISSION_FINE);
+
         mGnssAntennaInfoProvider.addListener(identity, listener);
     }
 
@@ -371,9 +372,9 @@ public class GnssManagerService {
      */
     public void addGnssNavigationMessageListener(IGnssNavigationMessageListener listener,
             String packageName, @Nullable String featureId) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
-
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        identity.enforceLocationPermission(PERMISSION_FINE);
+
         mGnssNavigationMessageProvider.addListener(identity, listener);
     }
 

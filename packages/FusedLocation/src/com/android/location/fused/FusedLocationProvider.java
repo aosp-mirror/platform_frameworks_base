@@ -30,9 +30,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
-import android.os.Bundle;
 import android.os.Looper;
-import android.os.Parcelable;
 import android.os.WorkSource;
 
 import com.android.internal.annotations.GuardedBy;
@@ -64,7 +62,7 @@ public class FusedLocationProvider extends LocationProviderBase {
 
     private static final long MAX_LOCATION_COMPARISON_NS = 11 * 1000000000L; // 11 seconds
 
-    private final Object mLock = new Object();
+    final Object mLock = new Object();
 
     private final Context mContext;
     private final LocationManager mLocationManager;
@@ -73,7 +71,7 @@ public class FusedLocationProvider extends LocationProviderBase {
     private final BroadcastReceiver mUserChangeReceiver;
 
     @GuardedBy("mLock")
-    private ProviderRequestUnbundled mRequest;
+    ProviderRequestUnbundled mRequest;
     @GuardedBy("mLock")
     private WorkSource mWorkSource;
     @GuardedBy("mLock")
@@ -84,12 +82,12 @@ public class FusedLocationProvider extends LocationProviderBase {
     @GuardedBy("mLock")
     @Nullable private Location mFusedLocation;
     @GuardedBy("mLock")
-    @Nullable private Location mGpsLocation;
+    @Nullable Location mGpsLocation;
     @GuardedBy("mLock")
-    @Nullable private Location mNetworkLocation;
+    @Nullable Location mNetworkLocation;
 
     public FusedLocationProvider(Context context) {
-        super(TAG, PROPERTIES);
+        super(context, TAG, PROPERTIES);
         mContext = context;
         mLocationManager = context.getSystemService(LocationManager.class);
 
@@ -232,7 +230,7 @@ public class FusedLocationProvider extends LocationProviderBase {
     }
 
     @GuardedBy("mLock")
-    private void reportBestLocationLocked() {
+    void reportBestLocationLocked() {
         Location bestLocation = chooseBestLocation(mGpsLocation, mNetworkLocation);
         if (bestLocation == mFusedLocation) {
             return;
@@ -243,28 +241,10 @@ public class FusedLocationProvider extends LocationProviderBase {
             return;
         }
 
-        // copy NO_GPS_LOCATION extra from mNetworkLocation into mFusedLocation
-        if (mNetworkLocation != null) {
-            Bundle srcExtras = mNetworkLocation.getExtras();
-            if (srcExtras != null) {
-                Parcelable srcParcelable =
-                        srcExtras.getParcelable(LocationProviderBase.EXTRA_NO_GPS_LOCATION);
-                if (srcParcelable instanceof Location) {
-                    Bundle dstExtras = mFusedLocation.getExtras();
-                    if (dstExtras == null) {
-                        dstExtras = new Bundle();
-                        mFusedLocation.setExtras(dstExtras);
-                    }
-                    dstExtras.putParcelable(LocationProviderBase.EXTRA_NO_GPS_LOCATION,
-                            srcParcelable);
-                }
-            }
-        }
-
         reportLocation(mFusedLocation);
     }
 
-    private void onUserChanged() {
+    void onUserChanged() {
         // clear cached locations when the user changes to prevent leaking user information
         synchronized (mLock) {
             mFusedLocation = null;
