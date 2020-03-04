@@ -3796,6 +3796,9 @@
         <!-- Html description of the target of accessibility shortcut purpose or behavior, to help
              users understand how the target of accessibility shortcut can help them. -->
         <attr name="htmlDescription" format="reference"/>
+        <!-- Component name of an activity that allows the user to modify the settings for this
+             target of accessibility shortcut. -->
+        <attr name="settingsActivity" />
     </declare-styleable>
 
     <!-- Use <code>print-service</code> as the root tag of the XML resource that
