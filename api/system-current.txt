@@ -695,7 +695,7 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.RuntimeAppOpAccessMessage> CREATOR;
   }
 
-  public class SearchManager {
+  public class SearchManager implements android.content.DialogInterface.OnCancelListener android.content.DialogInterface.OnDismissListener {
     method public void launchAssist(@Nullable android.os.Bundle);
   }
 
