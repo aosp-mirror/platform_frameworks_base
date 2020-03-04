@@ -686,6 +686,8 @@
     <dimen name="conversation_avatar_size">52dp</dimen>
     <!-- Start of the content in the conversation template -->
     <dimen name="conversation_content_start">80dp</dimen>
+    <!-- Size of the expand button when expanded -->
+    <dimen name="conversation_expand_button_expanded_size">80dp</dimen>
     <!-- Top margin of the expand button for conversations when expanded -->
     <dimen name="conversation_expand_button_top_margin_expanded">18dp</dimen>
     <!-- Side margins of the conversation badge in relation to the conversation icon -->

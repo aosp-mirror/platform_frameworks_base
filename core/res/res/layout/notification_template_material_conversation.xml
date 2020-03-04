@@ -76,7 +76,8 @@
         android:orientation="vertical"
         >
         <!-- LinearLayout for Expand Button-->
-        <LinearLayout
+        <com.android.internal.widget.RemeasuringLinearLayout
+            android:id="@+id/expand_button_and_content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -184,25 +185,8 @@
             <!-- Unread Count -->
             <!-- <TextView /> -->
 
-            <FrameLayout
-                android:id="@+id/expand_button_container"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:paddingStart="16dp"
-                android:paddingEnd="@dimen/notification_content_margin_end">
-            <!--TODO: figure out tinting for exander-->
-                <com.android.internal.widget.NotificationExpandButton
-                    android:id="@+id/expand_button"
-                    android:layout_width="@dimen/notification_header_expand_icon_size"
-                    android:layout_height="@dimen/notification_header_expand_icon_size"
-                    android:layout_gravity="center"
-                    android:drawable="@drawable/ic_expand_notification"
-                    android:clickable="false"
-                    android:importantForAccessibility="no"
-                    />
-            </FrameLayout>
-                    />
-        </LinearLayout>
+            <!-- This is where the expand button will be placed when collapsed-->
+        </com.android.internal.widget.RemeasuringLinearLayout>
 
         <include layout="@layout/notification_template_smart_reply_container"
             android:layout_width="match_parent"
@@ -212,4 +196,23 @@
             android:layout_marginEnd="@dimen/notification_content_margin_end" />
         <include layout="@layout/notification_material_action_list" />
     </com.android.internal.widget.RemeasuringLinearLayout>
+
+    <!--This is dynamically placed between here and at the end of the layout-->
+    <FrameLayout
+        android:id="@+id/expand_button_container"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/conversation_expand_button_expanded_size"
+        android:layout_gravity="end|top"
+        android:paddingStart="16dp"
+        android:paddingEnd="@dimen/notification_content_margin_end">
+        <com.android.internal.widget.NotificationExpandButton
+            android:id="@+id/expand_button"
+            android:layout_width="@dimen/notification_header_expand_icon_size"
+            android:layout_height="@dimen/notification_header_expand_icon_size"
+            android:layout_gravity="center"
+            android:drawable="@drawable/ic_expand_notification"
+            android:clickable="false"
+            android:importantForAccessibility="no"
+            />
+    </FrameLayout>
 </com.android.internal.widget.ConversationLayout>

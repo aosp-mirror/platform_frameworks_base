@@ -107,6 +107,7 @@ public class ConversationLayout extends FrameLayout
     private View mConversationIconBadge;
     private Icon mLargeIcon;
     private View mExpandButtonContainer;
+    private ViewGroup mExpandButtonAndContentContainer;
     private NotificationExpandButton mExpandButton;
     private int mExpandButtonExpandedTopMargin;
     private int mBadgedSideMargins;
@@ -114,6 +115,7 @@ public class ConversationLayout extends FrameLayout
     private int mIconSizeCentered;
     private View mIcon;
     private int mExpandedGroupTopMargin;
+    private int mExpandButtonExpandedSize;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -153,9 +155,12 @@ public class ConversationLayout extends FrameLayout
         mConversationIconBadge = findViewById(R.id.conversation_icon_badge);
         mHeaderText = findViewById(R.id.header_text);
         mExpandButtonContainer = findViewById(R.id.expand_button_container);
+        mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
         mExpandButton = findViewById(R.id.expand_button);
         mExpandButtonExpandedTopMargin = getResources().getDimensionPixelSize(
                 R.dimen.conversation_expand_button_top_margin_expanded);
+        mExpandButtonExpandedSize = getResources().getDimensionPixelSize(
+                R.dimen.conversation_expand_button_expanded_size);
         mBadgedSideMargins = getResources().getDimensionPixelSize(
                 R.dimen.conversation_badge_side_margin);
         mIconSizeBadged = getResources().getDimensionPixelSize(
@@ -713,18 +718,35 @@ public class ConversationLayout extends FrameLayout
         int contentDescriptionId;
         int gravity;
         int topMargin = 0;
+        ViewGroup newContainer;
+        int newContainerHeight;
         if (mIsCollapsed) {
             drawableId = R.drawable.ic_expand_notification;
             contentDescriptionId = R.string.expand_button_content_description_collapsed;
             gravity = Gravity.CENTER;
+            newContainer = mExpandButtonAndContentContainer;
+            newContainerHeight = LayoutParams.MATCH_PARENT;
         } else {
             drawableId = R.drawable.ic_collapse_notification;
             contentDescriptionId = R.string.expand_button_content_description_expanded;
             gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
             topMargin = mExpandButtonExpandedTopMargin;
+            newContainer = this;
+            newContainerHeight = mExpandButtonExpandedSize;
         }
         mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
         mExpandButton.setColorFilter(mExpandButton.getOriginalNotificationColor());
+
+        // We need to make sure that the expand button is in the linearlayout pushing over the
+        // content when collapsed, but allows the content to flow under it when expanded.
+        if (newContainer != mExpandButtonContainer.getParent()) {
+            ((ViewGroup) mExpandButtonContainer.getParent()).removeView(mExpandButtonContainer);
+            newContainer.addView(mExpandButtonContainer);
+            MarginLayoutParams layoutParams =
+                    (MarginLayoutParams) mExpandButtonContainer.getLayoutParams();
+            layoutParams.height = newContainerHeight;
+            mExpandButtonContainer.setLayoutParams(layoutParams);
+        }
 
         // update if the expand button is centered
         FrameLayout.LayoutParams layoutParams = (LayoutParams) mExpandButton.getLayoutParams();
@@ -733,6 +755,7 @@ public class ConversationLayout extends FrameLayout
         mExpandButton.setLayoutParams(layoutParams);
 
         mExpandButtonContainer.setContentDescription(mContext.getText(contentDescriptionId));
+
     }
 
     public void updateExpandability(boolean expandable, @Nullable OnClickListener onClickListener) {
