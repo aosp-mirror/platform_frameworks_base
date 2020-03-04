@@ -79,10 +79,10 @@ import android.os.BatteryStats;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.PowerWhitelistManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -1009,7 +1009,7 @@ public class AppStandbyController implements AppStandbyInternal {
                 // We allow all whitelisted apps, including those that don't want to be whitelisted
                 // for idle mode, because app idle (aka app standby) is really not as big an issue
                 // for controlling who participates vs. doze mode.
-                if (mInjector.isPowerSaveWhitelistExceptIdleApp(packageName)) {
+                if (mInjector.isNonIdleWhitelisted(packageName)) {
                     return true;
                 }
             } catch (RemoteException re) {
@@ -1636,12 +1636,12 @@ public class AppStandbyController implements AppStandbyInternal {
 
         private final Context mContext;
         private final Looper mLooper;
-        private IDeviceIdleController mDeviceIdleController;
         private IBatteryStats mBatteryStats;
         private BatteryManager mBatteryManager;
         private PackageManagerInternal mPackageManagerInternal;
         private DisplayManager mDisplayManager;
         private PowerManager mPowerManager;
+        private PowerWhitelistManager mPowerWhitelistManager;
         private CrossProfileAppsInternal mCrossProfileAppsInternal;
         int mBootPhase;
         /**
@@ -1665,8 +1665,7 @@ public class AppStandbyController implements AppStandbyInternal {
 
         void onBootPhase(int phase) {
             if (phase == PHASE_SYSTEM_SERVICES_READY) {
-                mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
-                        ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+                mPowerWhitelistManager = mContext.getSystemService(PowerWhitelistManager.class);
                 mBatteryStats = IBatteryStats.Stub.asInterface(
                         ServiceManager.getService(BatteryStats.SERVICE_NAME));
                 mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
@@ -1717,8 +1716,8 @@ public class AppStandbyController implements AppStandbyInternal {
             return mBatteryManager.isCharging();
         }
 
-        boolean isPowerSaveWhitelistExceptIdleApp(String packageName) throws RemoteException {
-            return mDeviceIdleController.isPowerSaveWhitelistExceptIdleApp(packageName);
+        boolean isNonIdleWhitelisted(String packageName) throws RemoteException {
+            return mPowerWhitelistManager.isWhitelisted(packageName, false);
         }
 
         File getDataSystemDirectory() {
