@@ -279,6 +279,7 @@ class PhysicsAnimatorTest : SysuiTestCase() {
 
     @Test
     @Throws(InterruptedException::class)
+    @Ignore("Sporadically flaking.")
     fun testAnimationsUpdatedWhileInMotion_originalListenersStillCalled() {
         PhysicsAnimatorTestUtils.setAllAnimationsBlock(false)
 
