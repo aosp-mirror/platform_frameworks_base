@@ -27,7 +27,6 @@ import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 
@@ -307,27 +306,36 @@ public interface NotificationRecordLogger {
          * @return Small hash of the channel ID, if present, or 0 otherwise.
          */
         int getChannelIdHash() {
-            return smallHash(Objects.hashCode(r.getSbn().getNotification().getChannelId()));
+            return smallHash(r.getSbn().getNotification().getChannelId());
         }
 
         /**
          * @return Small hash of the group ID, respecting group override if present. 0 otherwise.
          */
         int getGroupIdHash() {
-            return smallHash(Objects.hashCode(r.getSbn().getGroup()));
+            return smallHash(r.getSbn().getGroup());
         }
 
-        // "Small" hashes will be in the range [0, MAX_HASH).
-        static final int MAX_HASH = (1 << 13);
-
-        /**
-         * Maps in to the range [0, MAX_HASH), keeping similar values distinct.
-         * @param in An arbitrary integer.
-         * @return in mod MAX_HASH, signs chosen to stay in the range [0, MAX_HASH).
-         */
-        @VisibleForTesting
-        static int smallHash(int in) {
-            return Math.floorMod(in, MAX_HASH);
-        }
     }
+
+    // "Small" hashes will be in the range [0, MAX_HASH).
+    int MAX_HASH = (1 << 13);
+
+    /**
+     * Maps in to the range [0, MAX_HASH), keeping similar values distinct.
+     * @param in An arbitrary integer.
+     * @return in mod MAX_HASH, signs chosen to stay in the range [0, MAX_HASH).
+     */
+    static int smallHash(int in) {
+        return Math.floorMod(in, MAX_HASH);
+    }
+
+    /**
+     * @return Small hash of the string, if non-null, or 0 otherwise.
+     */
+    static int smallHash(@Nullable String in) {
+        return smallHash(Objects.hashCode(in));
+    }
+
+
 }

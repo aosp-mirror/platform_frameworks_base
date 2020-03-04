@@ -489,6 +489,7 @@
     -->
     <dimen name="qs_customize_header_min_height">46dp</dimen>
     <dimen name="qs_tile_margin_top">18dp</dimen>
+    <dimen name="qs_tile_icon_background_stroke_width">-1dp</dimen>
     <dimen name="qs_tile_background_size">44dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
@@ -1222,6 +1223,7 @@
 
     <!-- Home Controls -->
     <dimen name="control_spacing">4dp</dimen>
+    <dimen name="control_list_divider">1dp</dimen>
     <dimen name="control_corner_radius">15dp</dimen>
     <dimen name="control_height">100dp</dimen>
     <dimen name="control_padding">15dp</dimen>

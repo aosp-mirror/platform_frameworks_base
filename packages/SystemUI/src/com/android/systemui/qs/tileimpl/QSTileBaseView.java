@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
@@ -98,6 +99,12 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         PathShape p = new PathShape(path, pathSize, pathSize);
         ShapeDrawable d = new ShapeDrawable(p);
         d.setTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+        float backgroundStrokeWidth = context.getResources()
+                .getDimension(R.dimen.qs_tile_icon_background_stroke_width);
+        if (backgroundStrokeWidth > 0) {
+            d.getPaint().setStyle(Paint.Style.STROKE);
+            d.getPaint().setStrokeWidth(backgroundStrokeWidth);
+        }
         int bgSize = context.getResources().getDimensionPixelSize(R.dimen.qs_tile_background_size);
         d.setIntrinsicHeight(bgSize);
         d.setIntrinsicWidth(bgSize);

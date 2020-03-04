@@ -16,6 +16,7 @@
 
 package com.android.internal.view;
 
+import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
 
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
@@ -27,5 +28,8 @@ import com.android.internal.view.IInlineSuggestionsResponseCallback;
 oneway interface IInlineSuggestionsRequestCallback {
     void onInlineSuggestionsUnsupported();
     void onInlineSuggestionsRequest(in InlineSuggestionsRequest request,
-            in IInlineSuggestionsResponseCallback callback);
+            in IInlineSuggestionsResponseCallback callback, in AutofillId imeFieldId,
+            boolean inputViewStarted);
+    void onInputMethodStartInputView(in AutofillId imeFieldId);
+    void onInputMethodFinishInputView(in AutofillId imeFieldId);
 }

@@ -252,10 +252,23 @@ public class GpsNetInitiatedHandler {
      * @return true if is considered in user initiated emergency mode for NI purposes
      */
     public boolean getInEmergency() {
+        return getInEmergency(mEmergencyExtensionMillis);
+    }
+
+    /**
+     * Determines whether device is in user-initiated emergency session with the given extension
+     * time.
+     *
+     * @return true if is considered in user initiated emergency mode for NI purposes within the
+     * given extension time.
+     *
+     * @see {@link #getInEmergency()}
+     */
+    public boolean getInEmergency(long emergencyExtensionMillis) {
         boolean isInEmergencyExtension =
                 (mCallEndElapsedRealtimeMillis > 0)
-                && ((SystemClock.elapsedRealtime() - mCallEndElapsedRealtimeMillis)
-                        < mEmergencyExtensionMillis);
+                        && ((SystemClock.elapsedRealtime() - mCallEndElapsedRealtimeMillis)
+                        < emergencyExtensionMillis);
         boolean isInEmergencyCallback = mTelephonyManager.getEmergencyCallbackMode();
         boolean isInEmergencySmsMode = mTelephonyManager.isInEmergencySmsMode();
         return mIsInEmergencyCall || isInEmergencyCallback || isInEmergencyExtension

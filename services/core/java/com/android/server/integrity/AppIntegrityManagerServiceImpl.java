@@ -239,23 +239,23 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             Slog.i(TAG, "Received integrity verification intent " + intent.toString());
             Slog.i(TAG, "Extras " + intent.getExtras());
 
-            String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
-
-            PackageInfo packageInfo = getPackageArchiveInfo(intent.getData());
-            if (packageInfo == null) {
-                Slog.w(TAG, "Cannot parse package " + packageName);
-                // We can't parse the package.
-                mPackageManagerInternal.setIntegrityVerificationResult(
-                        verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-                return;
-            }
-
             String installerPackageName = getInstallerPackageName(intent);
 
             // Skip integrity verification if the verifier is doing the install.
             if (!integrityCheckIncludesRuleProvider()
                     && isRuleProvider(installerPackageName)) {
                 Slog.i(TAG, "Verifier doing the install. Skipping integrity check.");
+                mPackageManagerInternal.setIntegrityVerificationResult(
+                        verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
+                return;
+            }
+
+            String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
+
+            PackageInfo packageInfo = getPackageArchiveInfo(intent.getData());
+            if (packageInfo == null) {
+                Slog.w(TAG, "Cannot parse package " + packageName);
+                // We can't parse the package.
                 mPackageManagerInternal.setIntegrityVerificationResult(
                         verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
                 return;
@@ -508,7 +508,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             return PackageInfoUtils.generate(pkg, null, flags, 0, 0, null, new PackageUserState(),
                     UserHandle.getCallingUserId(), null);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Exception reading " + dataUri, e);
+            Slog.w(TAG, "Exception reading " + dataUri, e);
+            return null;
         }
     }
 
@@ -530,12 +531,18 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
                 // If we didn't find a base.apk, then try to parse each apk until we find the one
                 // that succeeds.
-                basePackageInfo =
-                        mContext.getPackageManager()
-                                .getPackageArchiveInfo(
-                                        apkFile.getAbsolutePath(),
-                                        PackageManager.GET_SIGNING_CERTIFICATES
-                                                | PackageManager.GET_META_DATA);
+                try {
+                    basePackageInfo =
+                            mContext.getPackageManager()
+                                    .getPackageArchiveInfo(
+                                            apkFile.getAbsolutePath(),
+                                            PackageManager.GET_SIGNING_CERTIFICATES
+                                                    | PackageManager.GET_META_DATA);
+                } catch (Exception e) {
+                    // Some of the splits may not contain a valid android manifest. It is an
+                    // expected exception. We still log it nonetheless but we should keep looking.
+                    Slog.w(TAG, "Exception reading " + apkFile, e);
+                }
                 if (basePackageInfo != null) {
                     Slog.i(TAG, "Found package info from " + apkFile);
                     break;

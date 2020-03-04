@@ -255,8 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখুন"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ফিচার চালু করুন"</string>
-    <!-- no translation found for enhanced_connectivity (7201127377781666804) -->
-    <skip />
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"কানেক্টিভিটি উন্নত করা হয়েছে"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ব্লুটুথ AVRCP ভার্সন"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ব্লুটুথ AVRCP ভার্সন বেছে নিন"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ব্লুটুথ MAP ভার্সন"</string>
@@ -310,8 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখানো হবে (শুধুমাত্র MAC অ্যাড্রেস)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, ব্লুটুথ চুড়ান্ত ভলিউম বৈশিষ্ট্য অক্ষম করে৷"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ব্লুটুথ Gabeldorche ফিচার স্ট্যাক চালু করে।"</string>
-    <!-- no translation found for enhanced_connectivity_summary (1576414159820676330) -->
-    <skip />
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"কানেক্টিভিটি ফিচার উন্নত করার বিষয়টি চালু করা হয়েছে।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টার্মিনাল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পরীক্ষণ"</string>
@@ -358,9 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"প্রোফাইল HWUI রেন্ডারিং"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ডিবাগ স্তর চালু করুন"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ডিবাগ অ্যাপের জন্য GPU ডিবাগ স্তর লোড হতে দিন"</string>
-    <!-- no translation found for enable_verbose_vendor_logging (1196698788267682072) -->
-    <skip />
-    <!-- no translation found for enable_verbose_vendor_logging_summary (7023960541751826611) -->
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ভারবোস ভেন্ডর লগ-ইন চালু করুন"</string>
+    <!-- no translation found for enable_verbose_vendor_logging_summary (5426292185780393708) -->
     <skip />
     <string name="window_animation_scale_title" msgid="5236381298376812508">"উইন্ডো অ্যানিমেশন স্কেল"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ট্র্যানজিশন অ্যানিমেশন স্কেল"</string>
@@ -509,9 +506,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"প্রতিবার জিজ্ঞেস করা হবে"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"যতক্ষণ না আপনি বন্ধ করছেন"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"এখনই"</string>
-    <!-- no translation found for media_transfer_this_device_name (2716555073132169240) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ফেনের স্পিকার"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"কানেক্ট করতে সমস্যা হচ্ছে। ডিভাইস বন্ধ করে আবার চালু করুন"</string>
-    <!-- no translation found for media_transfer_wired_device_name (4447880899964056007) -->
-    <skip />
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ওয়্যার অডিও ডিভাইস"</string>
 </resources>

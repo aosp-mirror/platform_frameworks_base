@@ -3060,6 +3060,13 @@ public class CarrierConfigManager {
             "ascii_7_bit_support_for_long_message_bool";
 
     /**
+     * Controls whether to show wifi calling icon in statusbar when wifi calling is available.
+     * @hide
+     */
+    public static final String KEY_SHOW_WIFI_CALLING_ICON_IN_STATUS_BAR_BOOL =
+            "show_wifi_calling_icon_in_status_bar_bool";
+
+    /**
      * Controls RSRP threshold at which OpportunisticNetworkService will decide whether
      * the opportunistic network is good enough for internet data.
      */
@@ -3485,7 +3492,7 @@ public class CarrierConfigManager {
      * @hide
      */
     public static final String KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG =
-            "data_switch_validation_min_gap_LONG";
+            "data_switch_validation_min_gap_long";
 
     /**
     * A boolean property indicating whether this subscription should be managed as an opportunistic
@@ -3512,14 +3519,14 @@ public class CarrierConfigManager {
         /**
          * Delay in milliseconds to turn off wifi when IMS is registered over wifi.
          */
-        public static final String KEY_WIFI_OFF_DEFERRING_TIME_INT =
-                KEY_PREFIX + "wifi_off_deferring_time_int";
+        public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT =
+                KEY_PREFIX + "wifi_off_deferring_time_millis_int";
 
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
-            defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_INT, 0);
+            defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT, 4000);
             return defaults;
         }
     }
@@ -4061,6 +4068,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_WIFI_CALLING_ICON_IN_STATUS_BAR_BOOL, false);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
         sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_RSRP_INT, -108);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_MODERATE */

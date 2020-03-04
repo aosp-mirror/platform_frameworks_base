@@ -117,6 +117,13 @@ public abstract class NetworkAgent {
     public static final int EVENT_NETWORK_PROPERTIES_CHANGED = BASE + 3;
 
     /**
+     * Centralize the place where base network score, and network score scaling, will be
+     * stored, so as we can consistently compare apple and oranges, or wifi, ethernet and LTE
+     * @hide
+     */
+    public static final int WIFI_BASE_SCORE = 60;
+
+    /**
      * Sent by the NetworkAgent to ConnectivityService to pass the current
      * network score.
      * obj = network score Integer
@@ -265,13 +272,7 @@ public abstract class NetworkAgent {
      */
     public static final int CMD_REMOVE_KEEPALIVE_PACKET_FILTER = BASE + 17;
 
-    // STOPSHIP (b/148055573) : remove this before R is released.
-    private static NetworkScore makeNetworkScore(int score) {
-        return new NetworkScore.Builder().setLegacyScore(score).build();
-    }
-
     /** @hide TODO: remove and replace usage with the public constructor. */
-    // STOPSHIP (b/148055573) : remove this before R is released.
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
         this(looper, context, logTag, ni, nc, lp, score, null, NetworkProvider.ID_NONE);
@@ -279,7 +280,6 @@ public abstract class NetworkAgent {
     }
 
     /** @hide TODO: remove and replace usage with the public constructor. */
-    // STOPSHIP (b/148055573) : remove this before R is released.
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config) {
         this(looper, context, logTag, ni, nc, lp, score, config, NetworkProvider.ID_NONE);
@@ -287,7 +287,6 @@ public abstract class NetworkAgent {
     }
 
     /** @hide TODO: remove and replace usage with the public constructor. */
-    // STOPSHIP (b/148055573) : remove this before R is released.
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score, int providerId) {
         this(looper, context, logTag, ni, nc, lp, score, null, providerId);
@@ -295,12 +294,10 @@ public abstract class NetworkAgent {
     }
 
     /** @hide TODO: remove and replace usage with the public constructor. */
-    // STOPSHIP (b/148055573) : remove this before R is released.
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score, NetworkAgentConfig config,
             int providerId) {
-        this(looper, context, logTag, nc, lp, makeNetworkScore(score), config, providerId, ni,
-                true /* legacy */);
+        this(looper, context, logTag, nc, lp, score, config, providerId, ni, true /* legacy */);
         register();
     }
 
@@ -326,9 +323,8 @@ public abstract class NetworkAgent {
      * @param provider the {@link NetworkProvider} managing this agent.
      */
     public NetworkAgent(@NonNull Context context, @NonNull Looper looper, @NonNull String logTag,
-            @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp,
-            @NonNull NetworkScore score, @NonNull NetworkAgentConfig config,
-            @Nullable NetworkProvider provider) {
+            @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp, int score,
+            @NonNull NetworkAgentConfig config, @Nullable NetworkProvider provider) {
         this(looper, context, logTag, nc, lp, score, config,
                 provider == null ? NetworkProvider.ID_NONE : provider.getProviderId(),
                 getLegacyNetworkInfo(config), false /* legacy */);
@@ -338,12 +334,12 @@ public abstract class NetworkAgent {
         public final Context context;
         public final NetworkCapabilities capabilities;
         public final LinkProperties properties;
-        public final NetworkScore score;
+        public final int score;
         public final NetworkAgentConfig config;
         public final NetworkInfo info;
         InitialConfiguration(@NonNull Context context, @NonNull NetworkCapabilities capabilities,
-                @NonNull LinkProperties properties, @NonNull NetworkScore score,
-                @NonNull NetworkAgentConfig config, @NonNull NetworkInfo info) {
+                @NonNull LinkProperties properties, int score, @NonNull NetworkAgentConfig config,
+                @NonNull NetworkInfo info) {
             this.context = context;
             this.capabilities = capabilities;
             this.properties = properties;
@@ -355,7 +351,7 @@ public abstract class NetworkAgent {
     private volatile InitialConfiguration mInitialConfiguration;
 
     private NetworkAgent(@NonNull Looper looper, @NonNull Context context, @NonNull String logTag,
-            @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp, NetworkScore score,
+            @NonNull NetworkCapabilities nc, @NonNull LinkProperties lp, int score,
             @NonNull NetworkAgentConfig config, int providerId, @NonNull NetworkInfo ni,
             boolean legacy) {
         mHandler = new NetworkAgentHandler(looper);
@@ -650,8 +646,22 @@ public abstract class NetworkAgent {
      * Must be called by the agent to update the score of this network.
      * @param score the new score.
      */
-    public void sendNetworkScore(@NonNull final NetworkScore score) {
-        queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED, score);
+    public void sendNetworkScore(int score) {
+        if (score < 0) {
+            throw new IllegalArgumentException("Score must be >= 0");
+        }
+        final NetworkScore ns = new NetworkScore();
+        ns.putIntExtension(NetworkScore.LEGACY_SCORE, score);
+        updateScore(ns);
+    }
+
+    /**
+     * Must be called by the agent when it has a new {@link NetworkScore} for this network.
+     * @param ns the new score.
+     * @hide TODO: unhide the NetworkScore class, and rename to sendNetworkScore.
+     */
+    public void updateScore(@NonNull NetworkScore ns) {
+        queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED, new NetworkScore(ns));
     }
 
     /**

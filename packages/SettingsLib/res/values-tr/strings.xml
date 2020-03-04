@@ -255,8 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Adsız Bluetooth cihazlarını göster"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Mutlak sesi iptal et"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche\'yi etkileştir"</string>
-    <!-- no translation found for enhanced_connectivity (7201127377781666804) -->
-    <skip />
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Gelişmiş Bağlantı"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP Sürümü"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Bluetooth AVRCP Sürümünü seçin"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP Sürümü"</string>
@@ -310,8 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Adsız Bluetooth cihazları (yalnızca MAC adresleri) gösterilecek"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Uzak cihazda sesin aşırı yüksek olması veya kontrol edilememesi gibi ses sorunları olması ihtimaline karşı Bluetooh mutlak ses özelliğini iptal eder."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche özellik yığınını etkinleştirir."</string>
-    <!-- no translation found for enhanced_connectivity_summary (1576414159820676330) -->
-    <skip />
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Gelişmiş Bağlantı özelliğini etkinleştirir."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Yerel terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Yerel kabuk erişimi sunan terminal uygulamasını etkinleştir"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP denetimi"</string>
@@ -358,10 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"Profil HWUI oluşturma"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU hata ayıklama katmanlarını etkinleştir"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Hata ayıklama uygulamaları için GPU hata ayıklama katmanlarının yüklenmesine izin ver"</string>
-    <!-- no translation found for enable_verbose_vendor_logging (1196698788267682072) -->
-    <skip />
-    <!-- no translation found for enable_verbose_vendor_logging_summary (7023960541751826611) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ayrıntılı satıcı günlüğünü etkinleştir"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Hata raporlarına cihaza özgü ek satıcı günlükleri ekle. Bu günlükler gizli bilgiler içerebilir, daha fazla pil ve/veya daha fazla depolama alanı kullanabilir."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Pencere animasyonu ölçeği"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Geçiş animasyonu ölçeği"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatör süre ölçeği"</string>
@@ -509,9 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Her zaman sor"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Siz kapatana kadar"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Az önce"</string>
-    <!-- no translation found for media_transfer_this_device_name (2716555073132169240) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefon hoparlörü"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Bağlanırken sorun oluştu. Cihazı kapatıp tekrar açın"</string>
-    <!-- no translation found for media_transfer_wired_device_name (4447880899964056007) -->
-    <skip />
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Kablolu ses cihazı"</string>
 </resources>

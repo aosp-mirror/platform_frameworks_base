@@ -343,5 +343,10 @@ public class BlobStoreManagerServiceTest {
         public Handler initializeMessageHandler() {
             return mHandler;
         }
+
+        @Override
+        public Handler getBackgroundHandler() {
+            return mHandler;
+        }
     }
 }

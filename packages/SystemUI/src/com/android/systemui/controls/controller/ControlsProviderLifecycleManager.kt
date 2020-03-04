@@ -96,29 +96,30 @@ class ControlsProviderLifecycleManager(
     }
 
     private fun bindService(bind: Boolean) {
-        requiresBound = bind
-        if (bind) {
-            if (bindTryCount == MAX_BIND_RETRIES) {
-                return
+        executor.execute {
+            requiresBound = bind
+            if (bind) {
+                if (bindTryCount != MAX_BIND_RETRIES) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Binding service $intent")
+                    }
+                    bindTryCount++
+                    try {
+                        context.bindServiceAsUser(intent, serviceConnection, BIND_FLAGS, user)
+                    } catch (e: SecurityException) {
+                        Log.e(TAG, "Failed to bind to service", e)
+                    }
+                }
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "Unbinding service $intent")
+                }
+                bindTryCount = 0
+                wrapper?.run {
+                    context.unbindService(serviceConnection)
+                }
+                wrapper = null
             }
-            if (DEBUG) {
-                Log.d(TAG, "Binding service $intent")
-            }
-            bindTryCount++
-            try {
-                context.bindServiceAsUser(intent, serviceConnection, BIND_FLAGS, user)
-            } catch (e: SecurityException) {
-                Log.e(TAG, "Failed to bind to service", e)
-            }
-        } else {
-            if (DEBUG) {
-                Log.d(TAG, "Unbinding service $intent")
-            }
-            bindTryCount = 0
-            wrapper?.run {
-                context.unbindService(serviceConnection)
-            }
-            wrapper = null
         }
     }
 
@@ -319,6 +320,9 @@ class ControlsProviderLifecycleManager(
     fun unbindService() {
         onLoadCanceller?.run()
         onLoadCanceller = null
+
+        // just in case this wasn't called already
+        unsubscribe()
 
         bindService(false)
     }

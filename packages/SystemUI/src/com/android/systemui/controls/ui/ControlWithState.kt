@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.ui
 
+import android.content.ComponentName
 import android.service.controls.Control
 
 import com.android.systemui.controls.controller.ControlInfo
@@ -23,9 +24,14 @@ import com.android.systemui.controls.controller.ControlInfo
 /**
  * A container for:
  * <ul>
+ *  <li>ComponentName - Component responsible for this Control
  *  <li>ControlInfo - Basic cached info about a Control
  *  <li>Control - Actual Control parcelable received directly from
  *  the participating application
  * </ul>
  */
-data class ControlWithState(val ci: ControlInfo, val control: Control?)
+data class ControlWithState(
+    val componentName: ComponentName,
+    val ci: ControlInfo,
+    val control: Control?
+)

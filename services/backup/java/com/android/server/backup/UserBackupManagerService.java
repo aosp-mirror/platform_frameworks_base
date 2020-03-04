@@ -157,7 +157,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Random;
@@ -316,7 +315,7 @@ public class UserBackupManagerService {
 
     private final IBackupManager mBackupManagerBinder;
 
-    private boolean mEnabled;   // access to this is synchronized on 'this'
+    private boolean mEnabled;   // writes to this are synchronized on 'this'
     private boolean mSetupComplete;
     private boolean mAutoRestore;
 
@@ -508,6 +507,36 @@ public class UserBackupManagerService {
                 != 0;
     }
 
+    @VisibleForTesting
+    UserBackupManagerService(Context context) {
+        mContext = context;
+
+        mUserId = 0;
+        mRegisterTransportsRequestedTime = 0;
+
+        mBaseStateDir = null;
+        mDataDir = null;
+        mJournalDir = null;
+        mFullBackupScheduleFile = null;
+        mSetupObserver = null;
+        mRunInitReceiver = null;
+        mRunInitIntent = null;
+        mAgentTimeoutParameters = null;
+        mTransportManager = null;
+        mPackageManager = null;
+        mActivityManagerInternal = null;
+        mAlarmManager = null;
+        mConstants = null;
+        mWakelock = null;
+        mBackupHandler = null;
+        mBackupPreferences = null;
+        mBackupPasswordManager = null;
+        mPackageManagerBinder = null;
+        mActivityManager = null;
+        mStorageManager = null;
+        mBackupManagerBinder = null;
+    }
+
     private UserBackupManagerService(
             @UserIdInt int userId,
             Context context,
@@ -627,9 +656,11 @@ public class UserBackupManagerService {
         initPackageTracking();
     }
 
+    @VisibleForTesting
     void initializeBackupEnableState() {
-        boolean isEnabled = UserBackupManagerFilePersistedSettings.readBackupEnableState(mUserId);
-        setBackupEnabled(isEnabled);
+        boolean isEnabled = readEnabledState();
+        // Don't persist value to disk since we just read it from there.
+        setBackupEnabled(isEnabled, /* persistToDisk */ false);
     }
 
     /** Cleans up state when the user of this service is stopped. */
@@ -2855,6 +2886,10 @@ public class UserBackupManagerService {
 
     /** User-configurable enabling/disabling of backups. */
     public void setBackupEnabled(boolean enable) {
+        setBackupEnabled(enable, /* persistToDisk */ true);
+    }
+
+    private void setBackupEnabled(boolean enable, boolean persistToDisk) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupEnabled");
 
@@ -2864,60 +2899,77 @@ public class UserBackupManagerService {
         try {
             boolean wasEnabled = mEnabled;
             synchronized (this) {
-                UserBackupManagerFilePersistedSettings.writeBackupEnableState(mUserId, enable);
+                if (persistToDisk) {
+                    writeEnabledState(enable);
+                }
                 mEnabled = enable;
             }
 
-            synchronized (mQueueLock) {
-                if (enable && !wasEnabled && mSetupComplete) {
-                    // if we've just been enabled, start scheduling backup passes
-                    KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
-                    scheduleNextFullBackupJob(0);
-                } else if (!enable) {
-                    // No longer enabled, so stop running backups
-                    if (MORE_DEBUG) Slog.i(TAG, "Opting out of backup");
-
-                    KeyValueBackupJob.cancel(mUserId, mContext);
-
-                    // This also constitutes an opt-out, so we wipe any data for
-                    // this device from the backend.  We start that process with
-                    // an alarm in order to guarantee wakelock states.
-                    if (wasEnabled && mSetupComplete) {
-                        // NOTE: we currently flush every registered transport, not just
-                        // the currently-active one.
-                        List<String> transportNames = new ArrayList<>();
-                        List<String> transportDirNames = new ArrayList<>();
-                        mTransportManager.forEachRegisteredTransport(
-                                name -> {
-                                    final String dirName;
-                                    try {
-                                        dirName =
-                                                mTransportManager
-                                                        .getTransportDirName(name);
-                                    } catch (TransportNotRegisteredException e) {
-                                        // Should never happen
-                                        Slog.e(TAG, "Unexpected unregistered transport", e);
-                                        return;
-                                    }
-                                    transportNames.add(name);
-                                    transportDirNames.add(dirName);
-                                });
-
-                        // build the set of transports for which we are posting an init
-                        for (int i = 0; i < transportNames.size(); i++) {
-                            recordInitPending(
-                                    true,
-                                    transportNames.get(i),
-                                    transportDirNames.get(i));
-                        }
-                        mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                                mRunInitIntent);
-                    }
-                }
-            }
+            updateStateOnBackupEnabled(wasEnabled, enable);
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
+    }
+
+    @VisibleForTesting
+    void updateStateOnBackupEnabled(boolean wasEnabled, boolean enable) {
+        synchronized (mQueueLock) {
+            if (enable && !wasEnabled && mSetupComplete) {
+                // if we've just been enabled, start scheduling backup passes
+                KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
+                scheduleNextFullBackupJob(0);
+            } else if (!enable) {
+                // No longer enabled, so stop running backups
+                if (MORE_DEBUG) Slog.i(TAG, "Opting out of backup");
+
+                KeyValueBackupJob.cancel(mUserId, mContext);
+
+                // This also constitutes an opt-out, so we wipe any data for
+                // this device from the backend.  We start that process with
+                // an alarm in order to guarantee wakelock states.
+                if (wasEnabled && mSetupComplete) {
+                    // NOTE: we currently flush every registered transport, not just
+                    // the currently-active one.
+                    List<String> transportNames = new ArrayList<>();
+                    List<String> transportDirNames = new ArrayList<>();
+                    mTransportManager.forEachRegisteredTransport(
+                            name -> {
+                                final String dirName;
+                                try {
+                                    dirName =
+                                            mTransportManager
+                                                    .getTransportDirName(name);
+                                } catch (TransportNotRegisteredException e) {
+                                    // Should never happen
+                                    Slog.e(TAG, "Unexpected unregistered transport", e);
+                                    return;
+                                }
+                                transportNames.add(name);
+                                transportDirNames.add(dirName);
+                            });
+
+                    // build the set of transports for which we are posting an init
+                    for (int i = 0; i < transportNames.size(); i++) {
+                        recordInitPending(
+                                true,
+                                transportNames.get(i),
+                                transportDirNames.get(i));
+                    }
+                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                            mRunInitIntent);
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void writeEnabledState(boolean enable) {
+        UserBackupManagerFilePersistedSettings.writeBackupEnableState(mUserId, enable);
+    }
+
+    @VisibleForTesting
+    boolean readEnabledState() {
+        return UserBackupManagerFilePersistedSettings.readBackupEnableState(mUserId);
     }
 
     /** Enable/disable automatic restore of app data at install time. */

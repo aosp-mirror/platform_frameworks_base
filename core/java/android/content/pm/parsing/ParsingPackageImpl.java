@@ -64,6 +64,7 @@ import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringArray;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringList;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringValueMap;
+import com.android.internal.util.Parcelling.BuiltIn.ForStringSet;
 
 import java.security.PublicKey;
 import java.util.Collections;
@@ -87,16 +88,15 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private static final String TAG = "PackageImpl";
 
     public static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
-    public static ForInternedString sForString = Parcelling.Cache.getOrCreate(
+    public static ForInternedString sForInternedString = Parcelling.Cache.getOrCreate(
             ForInternedString.class);
-    public static ForInternedStringArray sForStringArray = Parcelling.Cache.getOrCreate(
+    public static ForInternedStringArray sForInternedStringArray = Parcelling.Cache.getOrCreate(
             ForInternedStringArray.class);
-    public static ForInternedStringList sForStringList = Parcelling.Cache.getOrCreate(
+    public static ForInternedStringList sForInternedStringList = Parcelling.Cache.getOrCreate(
             ForInternedStringList.class);
-    public static ForInternedStringValueMap sForStringValueMap = Parcelling.Cache.getOrCreate(
-            ForInternedStringValueMap.class);
-    public static ForInternedStringSet sForStringSet = Parcelling.Cache.getOrCreate(
-            ForInternedStringSet.class);
+    public static ForInternedStringValueMap sForInternedStringValueMap =
+            Parcelling.Cache.getOrCreate(ForInternedStringValueMap.class);
+    public static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
     protected static ParsedIntentInfo.StringPairListParceler sForIntentInfoPairs =
             Parcelling.Cache.getOrCreate(ParsedIntentInfo.StringPairListParceler.class);
 
@@ -423,8 +423,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     public ParsingPackageImpl(@NonNull String packageName, @NonNull String baseCodePath,
             @NonNull String codePath, @Nullable TypedArray manifestArray) {
         this.packageName = TextUtils.safeIntern(packageName);
-        this.baseCodePath = TextUtils.safeIntern(baseCodePath);
-        this.codePath = TextUtils.safeIntern(codePath);
+        this.baseCodePath = baseCodePath;
+        this.codePath = codePath;
 
         if (manifestArray != null) {
             versionCode = manifestArray.getInteger(R.styleable.AndroidManifest_versionCode, 0);
@@ -505,18 +505,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setVersionName(String versionName) {
-        this.versionName = TextUtils.safeIntern(versionName);
-        return this;
-    }
-
-    @Override
-    public ParsingPackage setCompileSdkVersionCodename(String compileSdkVersionCodename) {
-        this.compileSdkVersionCodeName = TextUtils.safeIntern(compileSdkVersionCodename);
-        return this;
-    }
-
-    @Override
     public Object hideAsParsed() {
         // There is no equivalent for core-only parsing
         throw new UnsupportedOperationException();
@@ -557,15 +545,14 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl addOriginalPackage(String originalPackage) {
-        this.originalPackages = CollectionUtils.add(this.originalPackages,
-                TextUtils.safeIntern(originalPackage));
+        this.originalPackages = CollectionUtils.add(this.originalPackages, originalPackage);
         return this;
     }
 
     @Override
     public ParsingPackage addOverlayable(String overlayableName, String actorName) {
-        this.overlayables = CollectionUtils.add(this.overlayables,
-                TextUtils.safeIntern(overlayableName), TextUtils.safeIntern(actorName));
+        this.overlayables = CollectionUtils.add(this.overlayables, overlayableName,
+                TextUtils.safeIntern(actorName));
         return this;
     }
 
@@ -733,8 +720,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl addQueriesProvider(String authority) {
-        this.queriesProviders = CollectionUtils.add(this.queriesProviders,
-                TextUtils.safeIntern(authority));
+        this.queriesProviders = CollectionUtils.add(this.queriesProviders, authority);
         return this;
     }
 
@@ -799,20 +785,9 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl asSplit(
-            String[] splitNames,
-            String[] splitCodePaths,
-            int[] splitRevisionCodes,
-            SparseArray<int[]> splitDependencies
-    ) {
+    public ParsingPackageImpl asSplit(String[] splitNames, String[] splitCodePaths,
+            int[] splitRevisionCodes, SparseArray<int[]> splitDependencies) {
         this.splitNames = splitNames;
-
-        if (this.splitNames != null) {
-            for (int index = 0; index < this.splitNames.length; index++) {
-                splitNames[index] = TextUtils.safeIntern(splitNames[index]);
-            }
-        }
-
         this.splitCodePaths = splitCodePaths;
         this.splitRevisionCodes = splitRevisionCodes;
         this.splitDependencies = splitDependencies;
@@ -838,26 +813,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setProcessName(String processName) {
-        this.processName = TextUtils.safeIntern(processName);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setRealPackage(@Nullable String realPackage) {
-        this.realPackage = TextUtils.safeIntern(realPackage);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setRestrictedAccountType(@Nullable String restrictedAccountType) {
-        this.restrictedAccountType = TextUtils.safeIntern(restrictedAccountType);
-        return this;
-    }
-
-    @Override
     public ParsingPackageImpl setRequiredAccountType(@Nullable String requiredAccountType) {
-        this.requiredAccountType = TextUtils.nullIfEmpty(TextUtils.safeIntern(requiredAccountType));
+        this.requiredAccountType = TextUtils.nullIfEmpty(requiredAccountType);
         return this;
     }
 
@@ -868,68 +825,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setOverlayTargetName(@Nullable String overlayTargetName) {
-        this.overlayTargetName = TextUtils.safeIntern(overlayTargetName);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setOverlayCategory(@Nullable String overlayCategory) {
-        this.overlayCategory = TextUtils.safeIntern(overlayCategory);
-        return this;
-    }
-
-    @Override
     public ParsingPackageImpl setVolumeUuid(@Nullable String volumeUuid) {
         this.volumeUuid = TextUtils.safeIntern(volumeUuid);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setAppComponentFactory(@Nullable String appComponentFactory) {
-        this.appComponentFactory = TextUtils.safeIntern(appComponentFactory);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setBackupAgentName(@Nullable String backupAgentName) {
-        this.backupAgentName = TextUtils.safeIntern(backupAgentName);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setClassLoaderName(@Nullable String classLoaderName) {
-        this.classLoaderName = TextUtils.safeIntern(classLoaderName);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setClassName(@Nullable String className) {
-        this.className = TextUtils.safeIntern(className);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setManageSpaceActivityName(@Nullable String manageSpaceActivityName) {
-        this.manageSpaceActivityName = TextUtils.safeIntern(manageSpaceActivityName);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setPermission(@Nullable String permission) {
-        this.permission = TextUtils.safeIntern(permission);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setTaskAffinity(@Nullable String taskAffinity) {
-        this.taskAffinity = TextUtils.safeIntern(taskAffinity);
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setZygotePreloadName(@Nullable String zygotePreloadName) {
-        this.zygotePreloadName = TextUtils.safeIntern(zygotePreloadName);
         return this;
     }
 
@@ -1067,27 +964,27 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeInt(this.versionCode);
         dest.writeInt(this.versionCodeMajor);
         dest.writeInt(this.baseRevisionCode);
-        sForString.parcel(this.versionName, dest, flags);
+        sForInternedString.parcel(this.versionName, dest, flags);
         dest.writeInt(this.compileSdkVersion);
-        sForString.parcel(this.compileSdkVersionCodeName, dest, flags);
-        sForString.parcel(this.packageName, dest, flags);
-        sForString.parcel(this.realPackage, dest, flags);
-        sForString.parcel(this.baseCodePath, dest, flags);
+        dest.writeString(this.compileSdkVersionCodeName);
+        sForInternedString.parcel(this.packageName, dest, flags);
+        dest.writeString(this.realPackage);
+        dest.writeString(this.baseCodePath);
         dest.writeBoolean(this.requiredForAllUsers);
-        sForString.parcel(this.restrictedAccountType, dest, flags);
-        sForString.parcel(this.requiredAccountType, dest, flags);
-        sForString.parcel(this.overlayTarget, dest, flags);
-        sForString.parcel(this.overlayTargetName, dest, flags);
-        sForString.parcel(this.overlayCategory, dest, flags);
+        dest.writeString(this.restrictedAccountType);
+        dest.writeString(this.requiredAccountType);
+        sForInternedString.parcel(this.overlayTarget, dest, flags);
+        dest.writeString(this.overlayTargetName);
+        dest.writeString(this.overlayCategory);
         dest.writeInt(this.overlayPriority);
         dest.writeBoolean(this.overlayIsStatic);
-        sForStringValueMap.parcel(this.overlayables, dest, flags);
-        sForString.parcel(this.staticSharedLibName, dest, flags);
+        sForInternedStringValueMap.parcel(this.overlayables, dest, flags);
+        sForInternedString.parcel(this.staticSharedLibName, dest, flags);
         dest.writeLong(this.staticSharedLibVersion);
-        sForStringList.parcel(this.libraryNames, dest, flags);
-        sForStringList.parcel(this.usesLibraries, dest, flags);
-        sForStringList.parcel(this.usesOptionalLibraries, dest, flags);
-        sForStringList.parcel(this.usesStaticLibraries, dest, flags);
+        sForInternedStringList.parcel(this.libraryNames, dest, flags);
+        sForInternedStringList.parcel(this.usesLibraries, dest, flags);
+        sForInternedStringList.parcel(this.usesOptionalLibraries, dest, flags);
+        sForInternedStringList.parcel(this.usesStaticLibraries, dest, flags);
         dest.writeLongArray(this.usesStaticLibrariesVersions);
 
         if (this.usesStaticLibrariesCertDigests == null) {
@@ -1095,23 +992,23 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         } else {
             dest.writeInt(this.usesStaticLibrariesCertDigests.length);
             for (int index = 0; index < this.usesStaticLibrariesCertDigests.length; index++) {
-                sForStringArray.parcel(this.usesStaticLibrariesCertDigests[index], dest, flags);
+                dest.writeStringArray(this.usesStaticLibrariesCertDigests[index]);
             }
         }
 
-        sForString.parcel(this.sharedUserId, dest, flags);
+        sForInternedString.parcel(this.sharedUserId, dest, flags);
         dest.writeInt(this.sharedUserLabel);
         dest.writeTypedList(this.configPreferences);
         dest.writeTypedList(this.reqFeatures);
         dest.writeTypedList(this.featureGroups);
         dest.writeByteArray(this.restrictUpdateHash);
-        sForStringList.parcel(this.originalPackages, dest, flags);
-        sForStringList.parcel(this.adoptPermissions, dest, flags);
-        sForStringList.parcel(this.requestedPermissions, dest, flags);
-        sForStringList.parcel(this.implicitPermissions, dest, flags);
+        dest.writeStringList(this.originalPackages);
+        sForInternedStringList.parcel(this.adoptPermissions, dest, flags);
+        sForInternedStringList.parcel(this.requestedPermissions, dest, flags);
+        sForInternedStringList.parcel(this.implicitPermissions, dest, flags);
         sForStringSet.parcel(this.upgradeKeySets, dest, flags);
         dest.writeMap(this.keySetMapping);
-        sForStringList.parcel(this.protectedBroadcasts, dest, flags);
+        sForInternedStringList.parcel(this.protectedBroadcasts, dest, flags);
         dest.writeTypedList(this.activities);
         dest.writeTypedList(this.receivers);
         dest.writeTypedList(this.services);
@@ -1123,20 +1020,20 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         sForIntentInfoPairs.parcel(this.preferredActivityFilters, dest, flags);
         dest.writeMap(this.processes);
         dest.writeBundle(this.metaData);
-        sForString.parcel(this.volumeUuid, dest, flags);
+        sForInternedString.parcel(this.volumeUuid, dest, flags);
         dest.writeParcelable(this.signingDetails, flags);
-        sForString.parcel(this.codePath, dest, flags);
+        dest.writeString(this.codePath);
         dest.writeBoolean(this.use32BitAbi);
         dest.writeBoolean(this.visibleToInstantApps);
         dest.writeBoolean(this.forceQueryable);
         dest.writeParcelableList(this.queriesIntents, flags);
-        sForStringList.parcel(this.queriesPackages, dest, flags);
-        sForString.parcel(this.appComponentFactory, dest, flags);
-        sForString.parcel(this.backupAgentName, dest, flags);
+        sForInternedStringList.parcel(this.queriesPackages, dest, flags);
+        dest.writeString(this.appComponentFactory);
+        dest.writeString(this.backupAgentName);
         dest.writeInt(this.banner);
         dest.writeInt(this.category);
-        sForString.parcel(this.classLoaderName, dest, flags);
-        sForString.parcel(this.className, dest, flags);
+        dest.writeString(this.classLoaderName);
+        dest.writeString(this.className);
         dest.writeInt(this.compatibleWidthLimitDp);
         dest.writeInt(this.descriptionRes);
         dest.writeBoolean(this.enabled);
@@ -1147,27 +1044,27 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeInt(this.labelRes);
         dest.writeInt(this.largestWidthLimitDp);
         dest.writeInt(this.logo);
-        sForString.parcel(this.manageSpaceActivityName, dest, flags);
+        dest.writeString(this.manageSpaceActivityName);
         dest.writeFloat(this.maxAspectRatio);
         dest.writeFloat(this.minAspectRatio);
         dest.writeInt(this.minSdkVersion);
         dest.writeInt(this.networkSecurityConfigRes);
         dest.writeCharSequence(this.nonLocalizedLabel);
-        sForString.parcel(this.permission, dest, flags);
-        sForString.parcel(this.processName, dest, flags);
+        dest.writeString(this.permission);
+        dest.writeString(this.processName);
         dest.writeInt(this.requiresSmallestWidthDp);
         dest.writeInt(this.roundIconRes);
         dest.writeInt(this.targetSandboxVersion);
         dest.writeInt(this.targetSdkVersion);
-        sForString.parcel(this.taskAffinity, dest, flags);
+        dest.writeString(this.taskAffinity);
         dest.writeInt(this.theme);
         dest.writeInt(this.uiOptions);
-        sForString.parcel(this.zygotePreloadName, dest, flags);
-        sForStringArray.parcel(this.splitClassLoaderNames, dest, flags);
-        sForStringArray.parcel(this.splitCodePaths, dest, flags);
+        dest.writeString(this.zygotePreloadName);
+        dest.writeStringArray(this.splitClassLoaderNames);
+        dest.writeStringArray(this.splitCodePaths);
         dest.writeSparseArray(this.splitDependencies);
         dest.writeIntArray(this.splitFlags);
-        sForStringArray.parcel(this.splitNames, dest, flags);
+        dest.writeStringArray(this.splitNames);
         dest.writeIntArray(this.splitRevisionCodes);
 
         dest.writeBoolean(this.externalStorage);
@@ -1226,50 +1123,51 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.versionCode = in.readInt();
         this.versionCodeMajor = in.readInt();
         this.baseRevisionCode = in.readInt();
-        this.versionName = sForString.unparcel(in);
+        this.versionName = sForInternedString.unparcel(in);
         this.compileSdkVersion = in.readInt();
-        this.compileSdkVersionCodeName = sForString.unparcel(in);
-        this.packageName = sForString.unparcel(in);
-        this.realPackage = sForString.unparcel(in);
-        this.baseCodePath = sForString.unparcel(in);
+        this.compileSdkVersionCodeName = in.readString();
+        this.packageName = sForInternedString.unparcel(in);
+        this.realPackage = in.readString();
+        this.baseCodePath = in.readString();
         this.requiredForAllUsers = in.readBoolean();
-        this.restrictedAccountType = sForString.unparcel(in);
-        this.requiredAccountType = sForString.unparcel(in);
-        this.overlayTarget = sForString.unparcel(in);
-        this.overlayTargetName = sForString.unparcel(in);
-        this.overlayCategory = sForString.unparcel(in);
+        this.restrictedAccountType = in.readString();
+        this.requiredAccountType = in.readString();
+        this.overlayTarget = sForInternedString.unparcel(in);
+        this.overlayTargetName = in.readString();
+        this.overlayCategory = in.readString();
         this.overlayPriority = in.readInt();
         this.overlayIsStatic = in.readBoolean();
-        this.overlayables = sForStringValueMap.unparcel(in);
-        this.staticSharedLibName = sForString.unparcel(in);
+        this.overlayables = sForInternedStringValueMap.unparcel(in);
+        this.staticSharedLibName = sForInternedString.unparcel(in);
         this.staticSharedLibVersion = in.readLong();
-        this.libraryNames = sForStringList.unparcel(in);
-        this.usesLibraries = sForStringList.unparcel(in);
-        this.usesOptionalLibraries = sForStringList.unparcel(in);
-        this.usesStaticLibraries = sForStringList.unparcel(in);
+        this.libraryNames = sForInternedStringList.unparcel(in);
+        this.usesLibraries = sForInternedStringList.unparcel(in);
+        this.usesOptionalLibraries = sForInternedStringList.unparcel(in);
+        this.usesStaticLibraries = sForInternedStringList.unparcel(in);
         this.usesStaticLibrariesVersions = in.createLongArray();
 
         int digestsSize = in.readInt();
         if (digestsSize >= 0) {
             this.usesStaticLibrariesCertDigests = new String[digestsSize][];
             for (int index = 0; index < digestsSize; index++) {
-                this.usesStaticLibrariesCertDigests[index] = sForStringArray.unparcel(in);
+                this.usesStaticLibrariesCertDigests[index] = sForInternedStringArray.unparcel(in);
             }
         }
 
-        this.sharedUserId = sForString.unparcel(in);
+        this.sharedUserId = sForInternedString.unparcel(in);
         this.sharedUserLabel = in.readInt();
         this.configPreferences = in.createTypedArrayList(ConfigurationInfo.CREATOR);
         this.reqFeatures = in.createTypedArrayList(FeatureInfo.CREATOR);
         this.featureGroups = in.createTypedArrayList(FeatureGroupInfo.CREATOR);
         this.restrictUpdateHash = in.createByteArray();
-        this.originalPackages = sForStringList.unparcel(in);
-        this.adoptPermissions = sForStringList.unparcel(in);
-        this.requestedPermissions = sForStringList.unparcel(in);
-        this.implicitPermissions = sForStringList.unparcel(in);
+        this.originalPackages = in.createStringArrayList();
+        this.adoptPermissions = sForInternedStringList.unparcel(in);
+        this.requestedPermissions = sForInternedStringList.unparcel(in);
+        this.implicitPermissions = sForInternedStringList.unparcel(in);
         this.upgradeKeySets = sForStringSet.unparcel(in);
         this.keySetMapping = in.readHashMap(boot);
-        this.protectedBroadcasts = sForStringList.unparcel(in);
+        this.protectedBroadcasts = sForInternedStringList.unparcel(in);
+
         this.activities = in.createTypedArrayList(ParsedActivity.CREATOR);
         this.receivers = in.createTypedArrayList(ParsedActivity.CREATOR);
         this.services = in.createTypedArrayList(ParsedService.CREATOR);
@@ -1281,20 +1179,20 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.preferredActivityFilters = sForIntentInfoPairs.unparcel(in);
         this.processes = in.readHashMap(boot);
         this.metaData = in.readBundle(boot);
-        this.volumeUuid = sForString.unparcel(in);
+        this.volumeUuid = sForInternedString.unparcel(in);
         this.signingDetails = in.readParcelable(boot);
-        this.codePath = sForString.unparcel(in);
+        this.codePath = in.readString();
         this.use32BitAbi = in.readBoolean();
         this.visibleToInstantApps = in.readBoolean();
         this.forceQueryable = in.readBoolean();
         this.queriesIntents = in.createTypedArrayList(Intent.CREATOR);
-        this.queriesPackages = sForStringList.unparcel(in);
-        this.appComponentFactory = sForString.unparcel(in);
-        this.backupAgentName = sForString.unparcel(in);
+        this.queriesPackages = sForInternedStringList.unparcel(in);
+        this.appComponentFactory = in.readString();
+        this.backupAgentName = in.readString();
         this.banner = in.readInt();
         this.category = in.readInt();
-        this.classLoaderName = sForString.unparcel(in);
-        this.className = sForString.unparcel(in);
+        this.classLoaderName = in.readString();
+        this.className = in.readString();
         this.compatibleWidthLimitDp = in.readInt();
         this.descriptionRes = in.readInt();
         this.enabled = in.readBoolean();
@@ -1305,27 +1203,27 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.labelRes = in.readInt();
         this.largestWidthLimitDp = in.readInt();
         this.logo = in.readInt();
-        this.manageSpaceActivityName = sForString.unparcel(in);
+        this.manageSpaceActivityName = in.readString();
         this.maxAspectRatio = in.readFloat();
         this.minAspectRatio = in.readFloat();
         this.minSdkVersion = in.readInt();
         this.networkSecurityConfigRes = in.readInt();
         this.nonLocalizedLabel = in.readCharSequence();
-        this.permission = sForString.unparcel(in);
-        this.processName = sForString.unparcel(in);
+        this.permission = in.readString();
+        this.processName = in.readString();
         this.requiresSmallestWidthDp = in.readInt();
         this.roundIconRes = in.readInt();
         this.targetSandboxVersion = in.readInt();
         this.targetSdkVersion = in.readInt();
-        this.taskAffinity = sForString.unparcel(in);
+        this.taskAffinity = in.readString();
         this.theme = in.readInt();
         this.uiOptions = in.readInt();
-        this.zygotePreloadName = sForString.unparcel(in);
-        this.splitClassLoaderNames = sForStringArray.unparcel(in);
-        this.splitCodePaths = sForStringArray.unparcel(in);
+        this.zygotePreloadName = in.readString();
+        this.splitClassLoaderNames = in.createStringArray();
+        this.splitCodePaths = in.createStringArray();
         this.splitDependencies = in.readSparseArray(boot);
         this.splitFlags = in.createIntArray();
-        this.splitNames = sForStringArray.unparcel(in);
+        this.splitNames = in.createStringArray();
         this.splitRevisionCodes = in.createIntArray();
         this.externalStorage = in.readBoolean();
         this.baseHardwareAccelerated = in.readBoolean();
@@ -1346,7 +1244,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.multiArch = in.readBoolean();
         this.extractNativeLibs = in.readBoolean();
         this.game = in.readBoolean();
-
         this.resizeableActivity = sForBoolean.unparcel(in);
 
         this.staticSharedLibrary = in.readBoolean();
@@ -2611,6 +2508,96 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl setPreserveLegacyExternalStorage(boolean value) {
         preserveLegacyExternalStorage = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setVersionName(String versionName) {
+        this.versionName = versionName;
+        return this;
+    }
+
+    @Override
+    public ParsingPackage setCompileSdkVersionCodename(String compileSdkVersionCodename) {
+        this.compileSdkVersionCodeName = compileSdkVersionCodename;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setProcessName(String processName) {
+        this.processName = processName;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setRealPackage(@Nullable String realPackage) {
+        this.realPackage = realPackage;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setRestrictedAccountType(@Nullable String restrictedAccountType) {
+        this.restrictedAccountType = restrictedAccountType;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setOverlayTargetName(@Nullable String overlayTargetName) {
+        this.overlayTargetName = overlayTargetName;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setOverlayCategory(@Nullable String overlayCategory) {
+        this.overlayCategory = overlayCategory;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setAppComponentFactory(@Nullable String appComponentFactory) {
+        this.appComponentFactory = appComponentFactory;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setBackupAgentName(@Nullable String backupAgentName) {
+        this.backupAgentName = backupAgentName;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setClassLoaderName(@Nullable String classLoaderName) {
+        this.classLoaderName = classLoaderName;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setClassName(@Nullable String className) {
+        this.className = className;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setManageSpaceActivityName(@Nullable String manageSpaceActivityName) {
+        this.manageSpaceActivityName = manageSpaceActivityName;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setPermission(@Nullable String permission) {
+        this.permission = permission;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setTaskAffinity(@Nullable String taskAffinity) {
+        this.taskAffinity = taskAffinity;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setZygotePreloadName(@Nullable String zygotePreloadName) {
+        this.zygotePreloadName = zygotePreloadName;
         return this;
     }
 }

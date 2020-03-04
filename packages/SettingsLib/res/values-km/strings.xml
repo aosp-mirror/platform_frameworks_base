@@ -255,8 +255,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"បង្ហាញ​ឧបករណ៍​ប្ល៊ូធូស​គ្មានឈ្មោះ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"បិទកម្រិតសំឡេងលឺខ្លាំង"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"បើក Gabeldorsche"</string>
-    <!-- no translation found for enhanced_connectivity (7201127377781666804) -->
-    <skip />
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"ការតភ្ជាប់​ដែលបានធ្វើឱ្យប្រសើរឡើង"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"កំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ជ្រើសរើសកំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"កំណែ​ប៊្លូធូស MAP"</string>
@@ -310,8 +309,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"​ឧបករណ៍​ប្ល៊ូធូសគ្មានឈ្មោះ​ (អាសយដ្ឋាន MAC តែប៉ុណ្ណោះ) នឹង​បង្ហាញ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"បិទមុខងារកម្រិតសំឡេងឮខ្លាំងពេលភ្ជាប់ប៊្លូធូសក្នុងករណីមានបញ្ហាជាមួយឧបករណ៍បញ្ជាពីចម្ងាយ ដូចជាកម្រិតសំឡេងឮខ្លាំងដែលមិនអាចទទួលយកបាន ឬខ្វះការគ្រប់គ្រង។"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"បើកជង់​មុខងារ​ប៊្លូធូស Gabeldorsche។"</string>
-    <!-- no translation found for enhanced_connectivity_summary (1576414159820676330) -->
-    <skip />
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"បើក​មុខងារ​ការតភ្ជាប់​ដែលបានធ្វើឱ្យប្រសើរឡើង។"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ស្ថានីយ​មូលដ្ឋាន"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"បើក​កម្មវិធី​ស្ថានីយ​ដែល​ផ្ដល់​ការ​ចូល​សែល​មូលដ្ឋាន"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"ពិនិត្យ HDCP"</string>
@@ -358,10 +356,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"ការបំប្លែង​កម្រងព័ត៌មាន HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"បើក​ស្រទាប់​ជួសជុល GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"អនុញ្ញាតឱ្យ​ផ្ទុក​ស្រទាប់​ជួស​ជុល GPU សម្រាប់​កម្មវិធី​ជួសជុល"</string>
-    <!-- no translation found for enable_verbose_vendor_logging (1196698788267682072) -->
-    <skip />
-    <!-- no translation found for enable_verbose_vendor_logging_summary (7023960541751826611) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"បើកកំណត់ហេតុរៀបរាប់អំពីអ្នកលក់"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"រួមមានកំណត់​ហេតុបន្ថែមអំពី​អ្នកលក់ឧបករណ៍ជាក់លាក់​នៅក្នុងរបាយការណ៍​អំពីបញ្ហា ដែលអាច​មានព័ត៌មាន​ឯកជន ប្រើប្រាស់​ថ្មច្រើនជាងមុន និង/ឬប្រើប្រាស់​ទំហំផ្ទុកច្រើនជាងមុន។"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"មាត្រដ្ឋាន​ចលនា​វិនដូ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"មាត្រដ្ឋាន​ដំណើរ​ផ្លាស់ប្ដូរ​ចលនា"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"មាត្រដ្ឋាន​រយៈពេល​នៃ​កម្មវិធី​ចលនា"</string>
@@ -509,9 +505,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"សួរគ្រប់ពេល"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"រហូតទាល់តែ​អ្នកបិទ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"អម្បាញ់មិញ"</string>
-    <!-- no translation found for media_transfer_this_device_name (2716555073132169240) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ឧបករណ៍​បំពង​សំឡេង​ទូរសព្ទ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"មាន​បញ្ហា​ក្នុងការ​ភ្ជាប់។ បិទ រួច​បើក​ឧបករណ៍​វិញ"</string>
-    <!-- no translation found for media_transfer_wired_device_name (4447880899964056007) -->
-    <skip />
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ឧបករណ៍​សំឡេងប្រើខ្សែ"</string>
 </resources>

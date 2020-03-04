@@ -11415,13 +11415,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Retrieves the single {@link WindowInsetsController} of the window this view is attached to.
      *
-     * @return The {@link WindowInsetsController} or {@code null} if the view isn't attached to a
-     *         a window.
+     * @return The {@link WindowInsetsController} or {@code null} if the view is neither attached to
+     *         a window nor a view tree with a decor.
      * @see Window#getInsetsController()
      */
     public @Nullable WindowInsetsController getWindowInsetsController() {
         if (mAttachInfo != null) {
             return mAttachInfo.mViewRootImpl.getInsetsController();
+        }
+        ViewParent parent = getParent();
+        if (parent instanceof View) {
+            return ((View) parent).getWindowInsetsController();
         }
         return null;
     }

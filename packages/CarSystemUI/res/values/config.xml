@@ -84,5 +84,6 @@
         <item>com.android.systemui.theme.ThemeOverlayController</item>
         <item>com.android.systemui.navigationbar.car.CarNavigationBar</item>
         <item>com.android.systemui.toast.ToastUI</item>
+        <item>com.android.systemui.voicerecognition.car.ConnectedDeviceVoiceRecognitionNotifier</item>
     </string-array>
 </resources>

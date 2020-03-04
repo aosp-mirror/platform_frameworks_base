@@ -186,6 +186,13 @@ public class OverlayConfig {
      */
     @NonNull
     public static OverlayConfig getZygoteInstance() {
+        if (Process.myUid() != Process.ROOT_UID) {
+            // Scan the overlays in the zygote process to generate configuration settings for
+            // overlays on the system image. Do not cache this instance so OverlayConfig will not
+            // be present in applications by default.
+            throw new IllegalStateException("Can only be invoked in the root process");
+        }
+
         Trace.traceBegin(Trace.TRACE_TAG_RRO, "OverlayConfig#getZygoteInstance");
         try {
             return new OverlayConfig(null /* rootDirectory */, OverlayScanner::new,
@@ -202,12 +209,13 @@ public class OverlayConfig {
      */
     @NonNull
     public static OverlayConfig initializeSystemInstance(PackageProvider packageProvider) {
-        Trace.traceBegin(Trace.TRACE_TAG_RRO, "OverlayConfig#initializeSystemInstance");
-        try {
-            sInstance = new OverlayConfig(null, null, packageProvider);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_RRO);
+        if (Process.myUid() != Process.SYSTEM_UID) {
+            throw new IllegalStateException("Can only be invoked in the system process");
         }
+
+        Trace.traceBegin(Trace.TRACE_TAG_RRO, "OverlayConfig#initializeSystemInstance");
+        sInstance = new OverlayConfig(null, null, packageProvider);
+        Trace.traceEnd(Trace.TRACE_TAG_RRO);
         return sInstance;
     }
 
@@ -232,20 +240,26 @@ public class OverlayConfig {
 
     /**
      * Returns whether the overlay is enabled by default.
-     * Overlays that are not configured are disabled by default mutable.
+     * Overlays that are not configured are disabled by default.
+     *
+     * If an immutable overlay has its enabled state change, the new enabled state is applied to the
+     * overlay.
+     *
+     * When a mutable is first seen by the OverlayManagerService, the default-enabled state will be
+     * applied to the overlay. If the configured default-enabled state changes in a subsequent boot,
+     * the default-enabled state will not be applied to the overlay.
+     *
+     * The configured enabled state will only be applied when:
+     * <ul>
+     * <li> The device is factory reset
+     * <li> The overlay is removed from the device and added back to the device in a future OTA
+     * <li> The overlay changes its package name
+     * <li> The overlay changes its target package name or target overlayable name
+     * <li> An immutable overlay becomes mutable
+     * </ul>
      */
     public boolean isEnabled(String packageName) {
         final Configuration config = mConfigurations.get(packageName);
-
-        // STOPSHIP(149499802): Enabling a mutable overlay currently has no effect. Either implement
-        // some behavior for default-enabled, mutable overlays or prevent parsing of the enabled
-        // attribute on overlays that are mutable.
-        if (config != null && config.parsedConfig.mutable) {
-            Log.w(TAG, "Default-enabled configuration for mutable overlay "
-                    + config.parsedConfig.packageName + " has no effect");
-            return OverlayConfigParser.DEFAULT_ENABLED_STATE;
-        }
-
         return config == null? OverlayConfigParser.DEFAULT_ENABLED_STATE
                 : config.parsedConfig.enabled;
     }
@@ -365,6 +379,10 @@ public class OverlayConfig {
      */
     @NonNull
     public String[] createImmutableFrameworkIdmapsInZygote() {
+        if (Process.myUid() != Process.ROOT_UID) {
+            throw new IllegalStateException("This method can only be called from the root process");
+        }
+
         final String targetPath = "/system/framework/framework-res.apk";
         final ArrayList<String> idmapPaths = new ArrayList<>();
         final ArrayList<IdmapInvocation> idmapInvocations =

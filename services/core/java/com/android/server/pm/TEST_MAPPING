@@ -10,7 +10,7 @@
       "name": "CtsCompilationTestCases"
     },
     {
-      "name": "AppEnumerationTests"
+      "name": "CtsAppEnumerationTestCases"
     },
     {
       "name": "CtsMatchFlagTestCases"

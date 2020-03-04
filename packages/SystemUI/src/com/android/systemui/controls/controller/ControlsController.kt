@@ -59,14 +59,15 @@ interface ControlsController : UserAwareController {
     )
 
     /**
-     * Request to subscribe for all favorite controls.
+     * Request to subscribe for favorited controls per structure
      *
+     * @param structureInfo structure to limit the subscription to
      * @see [ControlsBindingController.subscribe]
      */
-    fun subscribeToFavorites()
+    fun subscribeToFavorites(structureInfo: StructureInfo)
 
     /**
-     * Request to unsubscribe to all providers.
+     * Request to unsubscribe to the current provider.
      *
      * @see [ControlsBindingController.unsubscribe]
      */
@@ -75,11 +76,12 @@ interface ControlsController : UserAwareController {
     /**
      * Notify a [ControlsProviderService] that an action has been performed on a [Control].
      *
+     * @param componentName the name of the service that provides the [Control]
      * @param controlInfo information of the [Control] receiving the action
      * @param action action performed on the [Control]
      * @see [ControlsBindingController.action]
      */
-    fun action(controlInfo: ControlInfo, action: ControlAction)
+    fun action(componentName: ComponentName, controlInfo: ControlInfo, action: ControlAction)
 
     /**
      * Refresh the status of a [Control] with information provided from the service.
@@ -107,48 +109,29 @@ interface ControlsController : UserAwareController {
     // FAVORITE MANAGEMENT
 
     /**
-     * Get a list of all favorite controls.
+     * Get all the favorites.
      *
-     * @return a list of [ControlInfo] with persistent information about the controls, including
-     *         their corresponding [ComponentName].
+     * @return a list of the structures that have at least one favorited control
      */
-    fun getFavoriteControls(): List<ControlInfo>
+    fun getFavorites(): List<StructureInfo>
 
     /**
      * Get all the favorites for a given component.
      *
-     * @param componentName the name of the component of the [ControlsProviderService] with
-     *                      which to filter the favorites.
-     * @return a list of the favorite controls for the given service. All the elements of the list
-     *         will have the same [ControlInfo.component] matching the one requested.
+     * @param componentName the name of the service that provides the [Control]
+     * @return a list of the structures that have at least one favorited control
      */
-    fun getFavoritesForComponent(componentName: ComponentName): List<ControlInfo>
+    fun getFavoritesForComponent(componentName: ComponentName): List<StructureInfo>
 
     /**
-     * Replaces the favorites for the given component.
+     * Replaces the favorites for the given structure.
      *
      * Calling this method will eliminate the previous selection of favorites and replace it with a
      * new one.
      *
-     * @param componentName The name of the component for the [ControlsProviderService]
-     * @param favorites a list of [ControlInfo] to replace the previous favorites.
+     * @param structureInfo common structure for all of the favorited controls
      */
-    fun replaceFavoritesForComponent(componentName: ComponentName, favorites: List<ControlInfo>)
-
-    /**
-     * Change the favorite status of a single [Control].
-     *
-     * If the control is added to favorites, it will be added to the end of the list for that
-     * particular component. Matching for removing the control will be done based on
-     * [ControlInfo.component] and [ControlInfo.controlId].
-     *
-     * Trying to add an already favorite control or trying to remove one that is not a favorite is
-     * a no-op.
-     *
-     * @param controlInfo persistent information about the [Control].
-     * @param state `true` to add to favorites and `false` to remove.
-     */
-    fun changeFavoriteStatus(controlInfo: ControlInfo, state: Boolean)
+    fun replaceFavoritesForStructure(structureInfo: StructureInfo)
 
     /**
      * Return the number of favorites for a given component.
@@ -159,14 +142,6 @@ interface ControlsController : UserAwareController {
      * @return the number of current favorites for the given component
      */
     fun countFavoritesForComponent(componentName: ComponentName): Int
-
-    /**
-     * Clears the list of all favorites.
-     *
-     * To clear the list of favorites for a given service, call [replaceFavoritesForComponent] with
-     * an empty list.
-     */
-    fun clearFavorites()
 
     /**
      * Interface for structure to pass data to [ControlsFavoritingActivity].
