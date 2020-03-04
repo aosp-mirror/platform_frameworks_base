@@ -44,7 +44,6 @@ import android.os.BatteryManager;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserManager;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.test.InstrumentationRegistry;
@@ -52,7 +51,6 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
@@ -61,10 +59,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
-import com.android.systemui.statusbar.phone.LockIcon;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
@@ -85,14 +80,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Mock
     private ViewGroup mIndicationArea;
     @Mock
-    private LockIcon mLockIcon;
-    @Mock
-    private LockPatternUtils mLockPatternUtils;
-    @Mock
-    private ShadeController mShadeController;
-    @Mock
-    private AccessibilityController mAccessibilityController;
-    @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private StatusBarStateController mStatusBarStateController;
@@ -111,6 +98,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private KeyguardIndicationTextView mTextView;
 
     private KeyguardIndicationController mController;
+    private WakeLockFake.Builder mWakeLockBuilder;
     private WakeLockFake mWakeLock;
     private Instrumentation mInstrumentation;
 
@@ -131,16 +119,19 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
 
         mWakeLock = new WakeLockFake();
+        mWakeLockBuilder = new WakeLockFake.Builder(mContext);
+        mWakeLockBuilder.setWakeLock(mWakeLock);
     }
 
     private void createController() {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-        mController = new KeyguardIndicationController(mContext, mIndicationArea, mLockIcon,
-                mLockPatternUtils, mWakeLock, mShadeController, mAccessibilityController,
+
+        mController = new KeyguardIndicationController(mContext, mWakeLockBuilder,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mIBatteryStats);
+        mController.setIndicationArea(mIndicationArea);
         mController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         clearInvocations(mIBatteryStats);
     }
@@ -316,26 +307,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 "A message", BiometricSourceType.FACE);
 
         verify(mStatusBarKeyguardViewManager).showBouncerMessage(eq(message), any());
-    }
-
-    @Test
-    public void lockIcon_click() {
-        createController();
-
-        ArgumentCaptor<View.OnLongClickListener> longClickCaptor = ArgumentCaptor.forClass(
-                View.OnLongClickListener.class);
-        ArgumentCaptor<View.OnClickListener> clickCaptor = ArgumentCaptor.forClass(
-                View.OnClickListener.class);
-        verify(mLockIcon).setOnLongClickListener(longClickCaptor.capture());
-        verify(mLockIcon).setOnClickListener(clickCaptor.capture());
-
-        when(mAccessibilityController.isAccessibilityEnabled()).thenReturn(true);
-        clickCaptor.getValue().onClick(mLockIcon);
-        verify(mShadeController).animateCollapsePanels(anyInt(), eq(true));
-
-        longClickCaptor.getValue().onLongClick(mLockIcon);
-        verify(mLockPatternUtils).requireCredentialEntry(anyInt());
-        verify(mKeyguardUpdateMonitor).onLockIconPressed();
     }
 
     @Test
