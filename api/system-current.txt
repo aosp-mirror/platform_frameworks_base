@@ -2018,16 +2018,13 @@ package android.content.pm {
     method @NonNull public final int getType();
   }
 
-  public final class InstallationFile implements android.os.Parcelable {
+  public final class InstallationFile {
     ctor public InstallationFile(int, @NonNull String, long, @Nullable byte[], @Nullable byte[]);
-    method public int describeContents();
     method public long getLengthBytes();
     method public int getLocation();
     method @Nullable public byte[] getMetadata();
     method @NonNull public String getName();
     method @Nullable public byte[] getSignature();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstallationFile> CREATOR;
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {
