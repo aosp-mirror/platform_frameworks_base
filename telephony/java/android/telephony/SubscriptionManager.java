@@ -973,11 +973,15 @@ public class SubscriptionManager {
      * individual records themselves. When a change occurs the onSubscriptionsChanged method of
      * the listener will be invoked immediately if there has been a notification. The
      * onSubscriptionChanged method will also be triggered once initially when calling this
-     * function.
+     * function. The callback will be invoked on the looper specified in the listener's constructor.
      *
      * @param listener an instance of {@link OnSubscriptionsChangedListener} with
      *                 onSubscriptionsChanged overridden.
+     *
+     * @deprecated Will get exception if the parameter listener is not initialized with a Looper.
+     * Use {@link #addOnSubscriptionsChangedListener(Executor, OnSubscriptionsChangedListener)}.
      */
+    @Deprecated
     public void addOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
         if (listener == null) return;
         addOnSubscriptionsChangedListener(listener.mExecutor, listener);
