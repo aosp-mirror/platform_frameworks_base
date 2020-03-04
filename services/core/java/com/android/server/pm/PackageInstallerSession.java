@@ -69,6 +69,7 @@ import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.IPackageInstallerSessionFileSystemConnector;
 import android.content.pm.InstallationFile;
+import android.content.pm.InstallationFileParcel;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -1052,9 +1053,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             IPackageInstallerSessionFileSystemConnector.Stub {
         final Set<String> mAddedFiles = new ArraySet<>();
 
-        FileSystemConnector(List<InstallationFile> addedFiles) {
-            for (InstallationFile file : addedFiles) {
-                mAddedFiles.add(file.getName());
+        FileSystemConnector(List<InstallationFileParcel> addedFiles) {
+            for (InstallationFileParcel file : addedFiles) {
+                mAddedFiles.add(file.name);
             }
         }
 
@@ -2444,14 +2445,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return true;
         }
 
-        final List<InstallationFile> addedFiles = new ArrayList<>(mFiles.size());
+        final List<InstallationFileParcel> addedFiles = new ArrayList<>();
+        final List<String> removedFiles = new ArrayList<>();
+
         for (InstallationFile file : mFiles) {
             if (sAddedFilter.accept(new File(this.stageDir, file.getName()))) {
-                addedFiles.add(file);
+                addedFiles.add(file.getData());
+                continue;
             }
-        }
-        final List<String> removedFiles = new ArrayList<>(mFiles.size());
-        for (InstallationFile file : mFiles) {
             if (sRemovedFilter.accept(new File(this.stageDir, file.getName()))) {
                 String name = file.getName().substring(
                         0, file.getName().length() - REMOVE_MARKER_EXTENSION.length());
@@ -2494,7 +2495,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_STARTED: {
-                            dataLoader.prepareImage(addedFiles, removedFiles);
+                            dataLoader.prepareImage(
+                                    addedFiles.toArray(
+                                            new InstallationFileParcel[addedFiles.size()]),
+                                    removedFiles.toArray(new String[removedFiles.size()]));
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_READY: {
@@ -2547,13 +2551,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         control.callback = connector;
 
         final DataLoaderParams params = this.params.dataLoaderParams;
-
-        Bundle dataLoaderParams = new Bundle();
-        dataLoaderParams.putParcelable("componentName", params.getComponentName());
-        dataLoaderParams.putParcelable("control", control);
-        dataLoaderParams.putParcelable("params", params.getData());
-
-        if (!dataLoaderManager.initializeDataLoader(sessionId, dataLoaderParams, listener)) {
+        if (!dataLoaderManager.initializeDataLoader(
+                sessionId, params.getData(), control, listener)) {
             throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                     "Failed to initialize data loader");
         }
