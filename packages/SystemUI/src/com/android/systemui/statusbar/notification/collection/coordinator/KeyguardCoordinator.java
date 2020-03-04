@@ -87,7 +87,7 @@ public class KeyguardCoordinator implements Coordinator {
     @Override
     public void attach(NotifPipeline pipeline) {
         setupInvalidateNotifListCallbacks();
-        pipeline.addPreRenderFilter(mNotifFilter);
+        pipeline.addFinalizeFilter(mNotifFilter);
     }
 
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {

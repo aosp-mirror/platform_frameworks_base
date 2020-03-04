@@ -228,6 +228,9 @@ applications that come with the platform
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
+        <!-- Permissions required for reading and logging compat changes -->
+        <permission name="android.permission.LOG_COMPAT_CHANGE" />
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.networkstack">
@@ -330,6 +333,7 @@ applications that come with the platform
         <!-- Needed for test only -->
         <permission name="android.permission.READ_PRECISE_PHONE_STATE" />
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+        <permission name="android.permission.READ_WIFI_CREDENTIAL"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.REGISTER_CALL_PROVIDER"/>

@@ -16,7 +16,7 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.parsing.ParsingPackageImpl.sForString;
+import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
 
 import android.annotation.Nullable;
 import android.os.Parcel;
@@ -24,7 +24,6 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide */
@@ -79,7 +78,7 @@ public class ParsedMainComponent extends ParsedComponent {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        sForString.parcel(this.processName, dest, flags);
+        sForInternedString.parcel(this.processName, dest, flags);
         dest.writeBoolean(this.directBootAware);
         dest.writeBoolean(this.enabled);
         dest.writeBoolean(this.exported);
@@ -89,7 +88,7 @@ public class ParsedMainComponent extends ParsedComponent {
 
     protected ParsedMainComponent(Parcel in) {
         super(in);
-        this.processName = sForString.unparcel(in);
+        this.processName = sForInternedString.unparcel(in);
         this.directBootAware = in.readBoolean();
         this.enabled = in.readBoolean();
         this.exported = in.readBoolean();

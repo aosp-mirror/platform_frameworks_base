@@ -2562,22 +2562,28 @@ public class LocationManager {
             mRemoteCancellationSignal = remoteCancellationSignal;
         }
 
-        public synchronized void cancel() {
-            mExecutor = null;
-            mConsumer = null;
+        public void cancel() {
+            ICancellationSignal cancellationSignal;
+            synchronized (this) {
+                mExecutor = null;
+                mConsumer = null;
 
-            if (mAlarmManager != null) {
-                mAlarmManager.cancel(this);
-                mAlarmManager = null;
+                if (mAlarmManager != null) {
+                    mAlarmManager.cancel(this);
+                    mAlarmManager = null;
+                }
+
+                // ensure only one cancel event will go through
+                cancellationSignal = mRemoteCancellationSignal;
+                mRemoteCancellationSignal = null;
             }
 
-            if (mRemoteCancellationSignal != null) {
+            if (cancellationSignal != null) {
                 try {
-                    mRemoteCancellationSignal.cancel();
+                    cancellationSignal.cancel();
                 } catch (RemoteException e) {
                     // ignore
                 }
-                mRemoteCancellationSignal = null;
             }
         }
 
