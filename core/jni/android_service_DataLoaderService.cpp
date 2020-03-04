@@ -50,8 +50,8 @@ static jboolean nativeDestroyDataLoader(JNIEnv* env,
     return DataLoaderService_OnDestroy(env, storageId);
 }
 
-
-static jboolean nativePrepareImage(JNIEnv* env, jobject thiz, jint storageId, jobject addedFiles, jobject removedFiles) {
+static jboolean nativePrepareImage(JNIEnv* env, jobject thiz, jint storageId,
+                                   jobjectArray addedFiles, jobjectArray removedFiles) {
     return DataLoaderService_OnPrepareImage(env, storageId, addedFiles, removedFiles);
 }
 
@@ -75,7 +75,9 @@ static const JNINativeMethod dlc_method_table[] = {
         {"nativeStartDataLoader", "(I)Z", (void*)nativeStartDataLoader},
         {"nativeStopDataLoader", "(I)Z", (void*)nativeStopDataLoader},
         {"nativeDestroyDataLoader", "(I)Z", (void*)nativeDestroyDataLoader},
-        {"nativePrepareImage", "(ILjava/util/List;Ljava/util/List;)Z", (void*)nativePrepareImage},
+        {"nativePrepareImage",
+         "(I[Landroid/content/pm/InstallationFileParcel;[Ljava/lang/String;)Z",
+         (void*)nativePrepareImage},
         {"nativeWriteData", "(JLjava/lang/String;JJLandroid/os/ParcelFileDescriptor;)V",
          (void*)nativeWriteData},
 };
