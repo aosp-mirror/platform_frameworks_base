@@ -293,8 +293,13 @@ class ControlsUiControllerImpl @Inject constructor (
          * for this dialog. Use a textView with the ListPopupWindow to achieve
          * a similar effect
          */
+        val item = adapter.findSelectionItem(selectedStructure) ?: adapter.getItem(0)
         parent.requireViewById<TextView>(R.id.app_or_structure_spinner).apply {
-            setText((adapter.findSelectionItem(selectedStructure) ?: adapter.getItem(0)).getTitle())
+            setText(item.getTitle())
+        }
+        parent.requireViewById<ImageView>(R.id.app_icon).apply {
+            setContentDescription(item.getTitle())
+            setImageDrawable(item.icon)
         }
         val anchor = parent.requireViewById<ViewGroup>(R.id.controls_header)
         anchor.setOnClickListener(object : View.OnClickListener {
@@ -330,11 +335,6 @@ class ControlsUiControllerImpl @Inject constructor (
                 }
             }
         })
-
-        parent.requireViewById<ImageView>(R.id.app_icon).apply {
-            setContentDescription("My Home")
-            setImageDrawable(items[0].icon)
-        }
     }
 
     private fun loadPreference(structures: List<StructureInfo>): StructureInfo {
