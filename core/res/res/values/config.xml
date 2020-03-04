@@ -3651,7 +3651,7 @@
          Example: "com.android.phone,com.android.stk,com.android.providers.telephony"
          (Note: shell is included for testing purposes)
      -->
-    <string name="config_telephonyPackages" translatable="false">"com.android.phone,com.android.stk,com.android.providers.telephony,com.android.ons,com.android.cellbroadcastservice,com.android.cellbroadcastreceiver,com.android.shell"</string>
+    <string name="config_telephonyPackages" translatable="false">"com.android.phone,com.android.stk,com.android.providers.telephony,com.android.ons"</string>
 
     <!-- The component name for the default system attention service.
          This service must be trusted, as it can be activated without explicit consent of the user.
