@@ -18,11 +18,11 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_BUILD_STARTED;
+import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_FINALIZE_FILTERING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_FINALIZING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_GROUPING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_IDLE;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_PRE_GROUP_FILTERING;
-import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_PRE_RENDER_FILTERING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_RESETTING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_SORTING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_TRANSFORMING;
@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
@@ -82,13 +83,15 @@ public class ShadeListBuilder implements Dumpable {
 
     private final List<NotifFilter> mNotifPreGroupFilters = new ArrayList<>();
     private final List<NotifPromoter> mNotifPromoters = new ArrayList<>();
-    private final List<NotifFilter> mNotifPreRenderFilters = new ArrayList<>();
+    private final List<NotifFilter> mNotifFinalizeFilters = new ArrayList<>();
     private final List<NotifComparator> mNotifComparators = new ArrayList<>();
     private final List<NotifSection> mNotifSections = new ArrayList<>();
 
     private final List<OnBeforeTransformGroupsListener> mOnBeforeTransformGroupsListeners =
             new ArrayList<>();
     private final List<OnBeforeSortListener> mOnBeforeSortListeners =
+            new ArrayList<>();
+    private final List<OnBeforeFinalizeFilterListener> mOnBeforeFinalizeFilterListeners =
             new ArrayList<>();
     private final List<OnBeforeRenderListListener> mOnBeforeRenderListListeners =
             new ArrayList<>();
@@ -142,6 +145,13 @@ public class ShadeListBuilder implements Dumpable {
         mOnBeforeSortListeners.add(listener);
     }
 
+    void addOnBeforeFinalizeFilterListener(OnBeforeFinalizeFilterListener listener) {
+        Assert.isMainThread();
+
+        mPipelineState.requireState(STATE_IDLE);
+        mOnBeforeFinalizeFilterListeners.add(listener);
+    }
+
     void addOnBeforeRenderListListener(OnBeforeRenderListListener listener) {
         Assert.isMainThread();
 
@@ -157,12 +167,12 @@ public class ShadeListBuilder implements Dumpable {
         filter.setInvalidationListener(this::onPreGroupFilterInvalidated);
     }
 
-    void addPreRenderFilter(NotifFilter filter) {
+    void addFinalizeFilter(NotifFilter filter) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
 
-        mNotifPreRenderFilters.add(filter);
-        filter.setInvalidationListener(this::onPreRenderFilterInvalidated);
+        mNotifFinalizeFilters.add(filter);
+        filter.setInvalidationListener(this::onFinalizeFilterInvalidated);
     }
 
     void addPromoter(NotifPromoter promoter) {
@@ -237,12 +247,12 @@ public class ShadeListBuilder implements Dumpable {
         rebuildListIfBefore(STATE_SORTING);
     }
 
-    private void onPreRenderFilterInvalidated(NotifFilter filter) {
+    private void onFinalizeFilterInvalidated(NotifFilter filter) {
         Assert.isMainThread();
 
-        mLogger.logPreRenderFilterInvalidated(filter.getName(), mPipelineState.getState());
+        mLogger.logFinalizeFilterInvalidated(filter.getName(), mPipelineState.getState());
 
-        rebuildListIfBefore(STATE_PRE_RENDER_FILTERING);
+        rebuildListIfBefore(STATE_FINALIZE_FILTERING);
     }
 
     private void onNotifComparatorInvalidated(NotifComparator comparator) {
@@ -298,8 +308,9 @@ public class ShadeListBuilder implements Dumpable {
 
         // Step 6: Filter out entries after pre-group filtering, grouping, promoting and sorting
         // Now filters can see grouping information to determine whether to filter or not.
-        mPipelineState.incrementTo(STATE_PRE_RENDER_FILTERING);
-        filterNotifs(mNotifList, mNewNotifList, mNotifPreRenderFilters);
+        dispatchOnBeforeFinalizeFilter(mReadOnlyNotifList);
+        mPipelineState.incrementTo(STATE_FINALIZE_FILTERING);
+        filterNotifs(mNotifList, mNewNotifList, mNotifFinalizeFilters);
         applyNewNotifList();
         pruneIncompleteGroups(mNotifList);
 
@@ -769,6 +780,12 @@ public class ShadeListBuilder implements Dumpable {
     private void dispatchOnBeforeSort(List<ListEntry> entries) {
         for (int i = 0; i < mOnBeforeSortListeners.size(); i++) {
             mOnBeforeSortListeners.get(i).onBeforeSort(entries);
+        }
+    }
+
+    private void dispatchOnBeforeFinalizeFilter(List<ListEntry> entries) {
+        for (int i = 0; i < mOnBeforeFinalizeFilterListeners.size(); i++) {
+            mOnBeforeFinalizeFilterListeners.get(i).onBeforeFinalizeFilter(entries);
         }
     }
 
