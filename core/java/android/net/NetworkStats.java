@@ -18,6 +18,7 @@ package android.net;
 
 import static android.os.Process.CLAT_UID;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -35,6 +36,8 @@ import libcore.util.EmptyArray;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -100,6 +103,19 @@ public final class NetworkStats implements Parcelable {
      */
     public static final int SET_DBG_VPN_OUT = 1002;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "SET_" }, value = {
+            SET_ALL,
+            SET_DEFAULT,
+            SET_FOREGROUND,
+            SET_DEBUG_START,
+            SET_DBG_VPN_IN,
+            SET_DBG_VPN_OUT
+    })
+    public @interface State {
+    }
+
     /**
      * Include all interfaces when filtering
      * @hide
@@ -120,6 +136,17 @@ public final class NetworkStats implements Parcelable {
     /** {@link #metered} value where metered data is accounted. */
     public static final int METERED_YES = 1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "METERED_" }, value = {
+            METERED_ALL,
+            METERED_NO,
+            METERED_YES
+    })
+    public @interface Meteredness {
+    }
+
+
     /**
      * {@link #roaming} value to account for all roaming states.
      * @hide
@@ -129,6 +156,16 @@ public final class NetworkStats implements Parcelable {
     public static final int ROAMING_NO = 0;
     /** {@link #roaming} value where roaming data is accounted. */
     public static final int ROAMING_YES = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "ROAMING_" }, value = {
+            ROAMING_ALL,
+            ROAMING_NO,
+            ROAMING_YES
+    })
+    public @interface Roaming {
+    }
 
     /**
      * {@link #onDefaultNetwork} value to account for all default network states.
@@ -140,6 +177,16 @@ public final class NetworkStats implements Parcelable {
     /** {@link #onDefaultNetwork} value to account for usage while the default network. */
     public static final int DEFAULT_NETWORK_YES = 1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "DEFAULT_NETWORK_" }, value = {
+            DEFAULT_NETWORK_ALL,
+            DEFAULT_NETWORK_NO,
+            DEFAULT_NETWORK_YES
+    })
+    public @interface DefaultNetwork {
+    }
+
     /**
      * Denotes a request for stats at the interface level.
      * @hide
@@ -150,6 +197,15 @@ public final class NetworkStats implements Parcelable {
      * @hide
      */
     public static final int STATS_PER_UID = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "STATS_PER_" }, value = {
+            STATS_PER_IFACE,
+            STATS_PER_UID
+    })
+    public @interface StatsType {
+    }
 
     private static final String CLATD_INTERFACE_PREFIX = "v4-";
     // Delta between IPv4 header (20b) and IPv6 header (40b).
@@ -263,9 +319,9 @@ public final class NetworkStats implements Parcelable {
                     rxBytes, rxPackets, txBytes, txPackets, operations);
         }
 
-        public Entry(@Nullable String iface, int uid, int set, int tag, int metered, int roaming,
-                 int defaultNetwork, long rxBytes, long rxPackets, long txBytes, long txPackets,
-                 long operations) {
+        public Entry(@Nullable String iface, int uid, @State int set, int tag,
+                @Meteredness int metered, @Roaming int roaming, @DefaultNetwork int defaultNetwork,
+                long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
             this.iface = iface;
             this.uid = uid;
             this.set = set;

@@ -996,6 +996,8 @@ public class BatteryStatsImpl extends BatteryStats {
     private int mMinLearnedBatteryCapacity = -1;
     private int mMaxLearnedBatteryCapacity = -1;
 
+    private long mBatteryTimeToFullSeconds = -1;
+
     private long[] mCpuFreqs;
 
     @VisibleForTesting
@@ -12218,7 +12220,7 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void setBatteryStateLocked(final int status, final int health, final int plugType,
             final int level, /* not final */ int temp, final int volt, final int chargeUAh,
-            final int chargeFullUAh) {
+            final int chargeFullUAh, final long chargeTimeToFullSeconds) {
         // Temperature is encoded without the signed bit, so clamp any negative temperatures to 0.
         temp = Math.max(0, temp);
 
@@ -12421,6 +12423,8 @@ public class BatteryStatsImpl extends BatteryStats {
             mMinLearnedBatteryCapacity = Math.min(mMinLearnedBatteryCapacity, chargeFullUAh);
         }
         mMaxLearnedBatteryCapacity = Math.max(mMaxLearnedBatteryCapacity, chargeFullUAh);
+
+        mBatteryTimeToFullSeconds = chargeTimeToFullSeconds;
     }
 
     public static boolean isOnBattery(int plugType, int status) {
@@ -12570,19 +12574,10 @@ public class BatteryStatsImpl extends BatteryStats {
             // Not yet working.
             return -1;
         }
-        /* Broken
-        int curLevel = mCurrentBatteryLevel;
-        int plugLevel = mDischargePlugLevel;
-        if (plugLevel < 0 || curLevel < (plugLevel+1)) {
-            return -1;
+        if (mBatteryTimeToFullSeconds >= 0) {
+            return mBatteryTimeToFullSeconds * (1000 * 1000); // s to us
         }
-        long duration = computeBatteryRealtime(curTime, STATS_SINCE_UNPLUGGED);
-        if (duration < 1000*1000) {
-            return -1;
-        }
-        long usPerLevel = duration/(curLevel-plugLevel);
-        return usPerLevel * (100-curLevel);
-        */
+        // Else use algorithmic approach
         if (mChargeStepTracker.mNumStepDurations < 1) {
             return -1;
         }
@@ -12590,7 +12585,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (msPerLevel <= 0) {
             return -1;
         }
-        return (msPerLevel * (100-mCurrentBatteryLevel)) * 1000;
+        return (msPerLevel * (100 - mCurrentBatteryLevel)) * 1000;
     }
 
     /*@hide */

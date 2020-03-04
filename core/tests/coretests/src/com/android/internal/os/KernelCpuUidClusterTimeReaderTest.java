@@ -27,7 +27,6 @@ import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 
@@ -35,11 +34,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Random;
 
 /**
@@ -48,28 +51,42 @@ import java.util.Random;
  * $ atest FrameworksCoreTests:com.android.internal.os.KernelCpuUidClusterTimeReaderTest
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 public class KernelCpuUidClusterTimeReaderTest {
     private File mTestDir;
     private File mTestFile;
     private KernelCpuUidClusterTimeReader mReader;
+    private KernelCpuUidTestBpfMapReader mBpfMapReader;
     private VerifiableCallback mCallback;
 
     private Random mRand = new Random(12345);
+    protected boolean mUseBpf;
     private final int mCpus = 6;
     private final String mHeadline = "policy0: 4 policy4: 2\n";
+    private final long[] mCores = {4, 2};
     private final int[] mUids = {0, 1, 22, 333, 4444, 55555};
 
     private Context getContext() {
         return InstrumentationRegistry.getContext();
     }
 
+    @Parameters(name="useBpf={0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] { {true}, {false} });
+    }
+
+    public KernelCpuUidClusterTimeReaderTest(boolean useBpf) {
+        mUseBpf = useBpf;
+    }
+
     @Before
     public void setUp() {
         mTestDir = getContext().getDir("test", Context.MODE_PRIVATE);
         mTestFile = new File(mTestDir, "test.file");
+        mBpfMapReader = new KernelCpuUidTestBpfMapReader();
         mReader = new KernelCpuUidClusterTimeReader(
-                new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), false);
+                new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), mBpfMapReader,
+                false);
         mCallback = new VerifiableCallback();
     }
 
@@ -82,7 +99,7 @@ public class KernelCpuUidClusterTimeReaderTest {
     @Test
     public void testReadDelta() throws Exception {
         final long[][] times1 = increaseTime(new long[mUids.length][mCpus]);
-        writeToFile(mHeadline + uidLines(mUids, times1));
+        setCoresAndData(times1);
         mReader.readDelta(mCallback);
         for (int i = 0; i < mUids.length; ++i) {
             mCallback.verify(mUids[i], clusterTime(times1[i]));
@@ -92,7 +109,7 @@ public class KernelCpuUidClusterTimeReaderTest {
         // Verify that a second call will only return deltas.
         mCallback.clear();
         final long[][] times2 = increaseTime(times1);
-        writeToFile(mHeadline + uidLines(mUids, times2));
+        setCoresAndData(times2);
         mReader.readDelta(mCallback);
         for (int i = 0; i < mUids.length; ++i) {
             mCallback.verify(mUids[i], subtract(clusterTime(times2[i]), clusterTime(times1[i])));
@@ -107,7 +124,7 @@ public class KernelCpuUidClusterTimeReaderTest {
         // Verify that calling with a null callback doesn't result in any crashes
         mCallback.clear();
         final long[][] times3 = increaseTime(times2);
-        writeToFile(mHeadline + uidLines(mUids, times3));
+        setCoresAndData(times3);
         mReader.readDelta(null);
         mCallback.verifyNoMoreInteractions();
 
@@ -115,19 +132,19 @@ public class KernelCpuUidClusterTimeReaderTest {
         // the previous call had null callback.
         mCallback.clear();
         final long[][] times4 = increaseTime(times3);
-        writeToFile(mHeadline + uidLines(mUids, times4));
+        setCoresAndData(times4);
         mReader.readDelta(mCallback);
         for (int i = 0; i < mUids.length; ++i) {
             mCallback.verify(mUids[i], subtract(clusterTime(times4[i]), clusterTime(times3[i])));
         }
         mCallback.verifyNoMoreInteractions();
-        assertTrue(mTestFile.delete());
+        clearCoresAndData();
     }
 
     @Test
     public void testReadAbsolute() throws Exception {
         final long[][] times1 = increaseTime(new long[mUids.length][mCpus]);
-        writeToFile(mHeadline + uidLines(mUids, times1));
+        setCoresAndData(times1);
         mReader.readAbsolute(mCallback);
         for (int i = 0; i < mUids.length; i++) {
             mCallback.verify(mUids[i], clusterTime(times1[i]));
@@ -137,19 +154,19 @@ public class KernelCpuUidClusterTimeReaderTest {
         // Verify that a second call should still return absolute values
         mCallback.clear();
         final long[][] times2 = increaseTime(times1);
-        writeToFile(mHeadline + uidLines(mUids, times2));
+        setCoresAndData(times2);
         mReader.readAbsolute(mCallback);
         for (int i = 0; i < mUids.length; i++) {
             mCallback.verify(mUids[i], clusterTime(times2[i]));
         }
         mCallback.verifyNoMoreInteractions();
-        assertTrue(mTestFile.delete());
+        clearCoresAndData();
     }
 
     @Test
     public void testReadDeltaDecreasedTime() throws Exception {
         final long[][] times1 = increaseTime(new long[mUids.length][mCpus]);
-        writeToFile(mHeadline + uidLines(mUids, times1));
+        setCoresAndData(times1);
         mReader.readDelta(mCallback);
 
         // Verify that there should not be a callback for a particular UID if its time decreases.
@@ -157,19 +174,19 @@ public class KernelCpuUidClusterTimeReaderTest {
         final long[][] times2 = increaseTime(times1);
         System.arraycopy(times1[0], 0, times2[0], 0, mCpus);
         times2[0][0] = 100;
-        writeToFile(mHeadline + uidLines(mUids, times2));
+        setCoresAndData(times2);
         mReader.readDelta(mCallback);
         for (int i = 1; i < mUids.length; i++) {
             mCallback.verify(mUids[i], subtract(clusterTime(times2[i]), clusterTime(times1[i])));
         }
         mCallback.verifyNoMoreInteractions();
-        assertTrue(mTestFile.delete());
+        clearCoresAndData();
 
         // Verify that the internal state was not modified.
         mCallback.clear();
         final long[][] times3 = increaseTime(times2);
         times3[0] = increaseTime(times1)[0];
-        writeToFile(mHeadline + uidLines(mUids, times3));
+        setCoresAndData(times3);
         mReader.readDelta(mCallback);
         mCallback.verify(mUids[0], subtract(clusterTime(times3[0]), clusterTime(times1[0])));
         for (int i = 1; i < mUids.length; i++) {
@@ -181,32 +198,54 @@ public class KernelCpuUidClusterTimeReaderTest {
     @Test
     public void testReadDeltaNegativeTime() throws Exception {
         final long[][] times1 = increaseTime(new long[mUids.length][mCpus]);
-        writeToFile(mHeadline + uidLines(mUids, times1));
+        setCoresAndData(times1);
         mReader.readDelta(mCallback);
 
         // Verify that there should not be a callback for a particular UID if its time decreases.
         mCallback.clear();
         final long[][] times2 = increaseTime(times1);
         times2[0][0] *= -1;
-        writeToFile(mHeadline + uidLines(mUids, times2));
+        setCoresAndData(times2);
         mReader.readDelta(mCallback);
         for (int i = 1; i < mUids.length; i++) {
             mCallback.verify(mUids[i], subtract(clusterTime(times2[i]), clusterTime(times1[i])));
         }
         mCallback.verifyNoMoreInteractions();
-        assertTrue(mTestFile.delete());
+        clearCoresAndData();
 
         // Verify that the internal state was not modified.
         mCallback.clear();
         final long[][] times3 = increaseTime(times2);
         times3[0] = increaseTime(times1)[0];
-        writeToFile(mHeadline + uidLines(mUids, times3));
+        setCoresAndData(times3);
         mReader.readDelta(mCallback);
         mCallback.verify(mUids[0], subtract(clusterTime(times3[0]), clusterTime(times1[0])));
         for (int i = 1; i < mUids.length; i++) {
             mCallback.verify(mUids[i], subtract(clusterTime(times3[i]), clusterTime(times2[i])));
         }
         mCallback.verifyNoMoreInteractions();
+    }
+
+    private void setCoresAndData(long[][] times) throws IOException {
+        if (mUseBpf) {
+            mBpfMapReader.setClusterCores(mCores);
+            SparseArray<long[]> data = new SparseArray<>();
+            for (int i = 0; i < mUids.length; i++) {
+                data.put(mUids[i], times[i]);
+            }
+            mBpfMapReader.setData(data);
+        } else {
+            writeToFile(mHeadline + uidLines(mUids, times));
+        }
+    }
+
+    private void clearCoresAndData() {
+        if (mUseBpf) {
+            mBpfMapReader.setClusterCores(null);
+            mBpfMapReader.setData(new SparseArray<>());
+        } else {
+            assertTrue(mTestFile.delete());
+        }
     }
 
     private long[] clusterTime(long[] times) {
@@ -275,6 +314,38 @@ public class KernelCpuUidClusterTimeReaderTest {
 
         public void verifyNoMoreInteractions() {
             assertEquals(0, mData.size());
+        }
+    }
+
+    private class KernelCpuUidTestBpfMapReader extends KernelCpuUidBpfMapReader {
+        private long[] mClusterCores;
+        private SparseArray<long[]> mNewData = new SparseArray<>();
+
+        public void setData(SparseArray<long[]> data) {
+            mNewData = data;
+        }
+
+        public void setClusterCores(long[] cores) {
+            mClusterCores = cores;
+        }
+
+        @Override
+        public final boolean startTrackingBpfTimes() {
+            return true;
+        }
+
+        @Override
+        protected final boolean readBpfData() {
+            if (!mUseBpf) {
+                return false;
+            }
+            mData = mNewData;
+            return true;
+        }
+
+        @Override
+        public final long[] getDataDimensions() {
+            return mClusterCores;
         }
     }
 }

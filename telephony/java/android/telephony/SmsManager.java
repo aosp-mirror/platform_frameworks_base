@@ -2015,8 +2015,12 @@ public final class SmsManager {
 
     /**
      * Gets the total capacity of SMS storage on RUIM and SIM cards
+     * <p>
+     * This is the number of 176 byte EF-SMS records which can be stored on the RUIM or SIM card.
+     * <p>
+     * See 3GPP TS 31.102 - 4.2.25 - EF-SMS for more information
      *
-     * @return the total capacity count of SMS on RUIM and SIM cards
+     * @return the total number of SMS records which can be stored on the RUIM or SIM cards.
      * @hide
      */
     @SystemApi
@@ -2374,14 +2378,18 @@ public final class SmsManager {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      * @throws IllegalArgumentException if contentUri is empty
+     * @deprecated use {@link MmsManager#sendMultimediaMessage} instead.
      */
     public void sendMultimediaMessage(Context context, Uri contentUri, String locationUrl,
             Bundle configOverrides, PendingIntent sentIntent) {
         if (contentUri == null) {
             throw new IllegalArgumentException("Uri contentUri null");
         }
-        MmsManager.getInstance().sendMultimediaMessage(getSubscriptionId(), contentUri,
-                    locationUrl, configOverrides, sentIntent);
+        MmsManager m = (MmsManager) context.getSystemService(Context.MMS_SERVICE);
+        if (m != null) {
+            m.sendMultimediaMessage(getSubscriptionId(), contentUri, locationUrl, configOverrides,
+                    sentIntent);
+        }
     }
 
     /**
@@ -2405,6 +2413,7 @@ public final class SmsManager {
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
+     * @deprecated use {@link MmsManager#downloadMultimediaMessage} instead.
      */
     public void downloadMultimediaMessage(Context context, String locationUrl, Uri contentUri,
             Bundle configOverrides, PendingIntent downloadedIntent) {
@@ -2414,8 +2423,11 @@ public final class SmsManager {
         if (contentUri == null) {
             throw new IllegalArgumentException("Uri contentUri null");
         }
-        MmsManager.getInstance().downloadMultimediaMessage(getSubscriptionId(), locationUrl,
-                contentUri, configOverrides, downloadedIntent);
+        MmsManager m = (MmsManager) context.getSystemService(Context.MMS_SERVICE);
+        if (m != null) {
+            m.downloadMultimediaMessage(getSubscriptionId(), locationUrl, contentUri,
+                    configOverrides, downloadedIntent);
+        }
     }
 
     // MMS send/download failure result codes
@@ -2447,9 +2459,9 @@ public final class SmsManager {
      * </p>
      *
      * @return the bundle key/values pairs that contains MMS configuration values
+     *  or an empty Bundle if they cannot be found.
      */
-    @Nullable
-    public Bundle getCarrierConfigValues() {
+    @NonNull public Bundle getCarrierConfigValues() {
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
@@ -2458,7 +2470,7 @@ public final class SmsManager {
         } catch (RemoteException ex) {
             // ignore it
         }
-        return null;
+        return new Bundle();
     }
 
     /**
@@ -2739,7 +2751,7 @@ public final class SmsManager {
                         getSubscriptionId(), null);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            throw new RuntimeException(ex);
         }
         return smsc;
     }
@@ -2761,7 +2773,8 @@ public final class SmsManager {
      * </p>
      *
      * @param smsc the SMSC address string.
-     * @return true for success, false otherwise.
+     * @return true for success, false otherwise. Failure can be due to caller not having the
+     * appropriate permission, or modem returning an error.
      */
     @SuppressAutoDoc // for carrier privileges and default SMS application.
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -2773,7 +2786,7 @@ public final class SmsManager {
                         smsc, getSubscriptionId(), null);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            throw new RuntimeException(ex);
         }
         return false;
     }

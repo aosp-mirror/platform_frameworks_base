@@ -4515,12 +4515,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_LTE_EARFCN_RSRP_BOOST = "LteEarfcnRsrpBoost";
 
     /**
-     * An parcelable extra used with {@link #ACTION_SERVICE_STATE} representing the service state.
-     * @hide
-     */
-    public static final String EXTRA_SERVICE_STATE = "android.intent.extra.SERVICE_STATE";
-
-    /**
      * The name of the extra used to define the text to be processed, as a
      * CharSequence. Note that this may be a styled CharSequence, so you must use
      * {@link Bundle#getCharSequence(String) Bundle.getCharSequence()} to retrieve it.
@@ -6632,7 +6626,7 @@ public class Intent implements Parcelable, Cloneable {
                     this.mClipData = new ClipData(o.mClipData);
                 }
             } else {
-                if (o.mExtras != null && !o.mExtras.maybeIsEmpty()) {
+                if (o.mExtras != null && !o.mExtras.isDefinitelyEmpty()) {
                     this.mExtras = Bundle.STRIPPED;
                 }
 

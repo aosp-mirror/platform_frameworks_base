@@ -16,8 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7123375275748530234">"Stocare externă"</string>
-    <string name="storage_description" msgid="8541974407321172792">"Stocare locală"</string>
-    <string name="root_internal_storage" msgid="827844243068584127">"Stocare internă"</string>
-    <string name="root_documents" msgid="4051252304075469250">"Documente"</string>
+    <string name="app_label" msgid="748293919008814871">"Stocare externă"</string>
+    <string name="storage_description" msgid="9176081505553938524">"Stocare locală"</string>
+    <string name="root_internal_storage" msgid="4980477711224234931">"Stocare internă"</string>
+    <string name="root_documents" msgid="5695037589229175941">"Documente"</string>
 </resources>

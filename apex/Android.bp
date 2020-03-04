@@ -31,12 +31,12 @@ mainline_stubs_args += "--hide-package com.android.server "
 
 priv_apps = " " +
     "--show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS," +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
     "\\) "
 
 module_libs = " " +
     " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES," +
+        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
     "\\) "
 
 stubs_defaults {
@@ -48,6 +48,7 @@ stubs_defaults {
 stubs_defaults {
     name: "framework-module-stubs-defaults-systemapi",
     args: mainline_stubs_args + priv_apps,
+    srcs: [":framework-annotations"],
     installable: false,
 }
 
@@ -59,11 +60,13 @@ stubs_defaults {
 stubs_defaults {
     name: "framework-module-api-defaults-module_libs_api",
     args: mainline_stubs_args + module_libs,
+    srcs: [":framework-annotations"],
     installable: false,
 }
 
 stubs_defaults {
     name: "framework-module-stubs-defaults-module_libs_api",
     args: mainline_stubs_args + module_libs + priv_apps,
+    srcs: [":framework-annotations"],
     installable: false,
 }

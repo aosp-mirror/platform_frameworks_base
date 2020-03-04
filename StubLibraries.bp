@@ -49,7 +49,6 @@ stubs_defaults {
         ":opt-net-voip-srcs",
         ":core-current-stubs-source",
         ":core_public_api_files",
-        ":ike-api-srcs",
     ],
     libs: ["framework-internal-utils"],
     installable: false,
@@ -193,20 +192,17 @@ droidstubs {
             api_file: "api/module-lib-current.txt",
             removed_api_file: "api/module-lib-removed.txt",
         },
-        // TODO(b/147559833) enable the compatibility check against the last release API
-        // and the API lint
-        //last_released: {
-        //    api_file: ":last-released-module-lib-api",
-        //    removed_api_file: "api/module-lib-removed.txt",
-        //    baseline_file: ":module-lib-api-incompatibilities-with-last-released"
-        //},
-        //api_lint: {
-        //    enabled: true,
-        //    new_since: ":last-released-module-lib-api",
-        //    baseline_file: "api/module-lib-lint-baseline.txt",
-        //},
+        last_released: {
+            api_file: ":last-released-module-lib-api",
+            removed_api_file: "api/module-lib-removed.txt",
+            baseline_file: ":module-lib-api-incompatibilities-with-last-released"
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":last-released-module-lib-api",
+            baseline_file: "api/module-lib-lint-baseline.txt",
+        },
     },
-    //jdiff_enabled: true,
 }
 
 

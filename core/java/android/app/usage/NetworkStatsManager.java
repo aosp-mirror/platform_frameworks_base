@@ -526,15 +526,17 @@ public class NetworkStatsManager {
     }
 
     /**
-     * Registers a custom provider of {@link android.net.NetworkStats} to combine the network
-     * statistics that cannot be seen by the kernel to system. To unregister, invoke
-     * {@link NetworkStatsProviderCallback#unregister()}.
+     * Registers a custom provider of {@link android.net.NetworkStats} to provide network statistics
+     * to the system. To unregister, invoke {@link NetworkStatsProviderCallback#unregister()}.
+     * Note that no de-duplication of statistics between providers is performed, so each provider
+     * must only report network traffic that is not being reported by any other provider.
      *
-     * @param tag a human readable identifier of the custom network stats provider.
-     * @param provider a custom implementation of {@link AbstractNetworkStatsProvider} that needs to
-     *                 be registered to the system.
+     * @param tag a human readable identifier of the custom network stats provider. This is only
+     *            used for debugging.
+     * @param provider the subclass of {@link AbstractNetworkStatsProvider} that needs to be
+     *                 registered to the system.
      * @return a {@link NetworkStatsProviderCallback}, which can be used to report events to the
-     *         system.
+     *         system or unregister the provider.
      * @hide
      */
     @SystemApi

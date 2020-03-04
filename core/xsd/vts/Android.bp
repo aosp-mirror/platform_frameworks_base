@@ -25,10 +25,18 @@ cc_test {
     ],
     shared_libs: [
         "liblog",
-	"libbase",
+        "libbase",
     ],
     cflags: [
         "-Wall",
         "-Werror",
     ],
+    data: [
+        ":permission",
+    ],
+    test_suites: [
+        "general-tests",
+        "vts-core"
+    ],
+    test_config: "vts_permission_validate_test.xml",
 }

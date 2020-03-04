@@ -36,6 +36,7 @@ import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.KeyguardManager;
 import android.app.ProfilerInfo;
+import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
@@ -1708,6 +1709,42 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private boolean switchUserAndWaitForComplete(int userId) throws RemoteException {
+        UserInfo currentUser = mInterface.getCurrentUser();
+        if (currentUser != null && userId == currentUser.id) {
+            // Already switched to the correct user, exit early.
+            return true;
+        }
+
+        // Register switch observer.
+        final CountDownLatch switchLatch = new CountDownLatch(1);
+        mInterface.registerUserSwitchObserver(
+                new UserSwitchObserver() {
+                    @Override
+                    public void onUserSwitchComplete(int newUserId) {
+                        if (userId == newUserId) {
+                            switchLatch.countDown();
+                        }
+                    }
+                }, ActivityManagerShellCommand.class.getName());
+
+        // Switch.
+        boolean switched = mInterface.switchUser(userId);
+        if (!switched) {
+            // Switching failed, don't wait for the user switch observer.
+            return false;
+        }
+
+        // Wait.
+        try {
+            switched = switchLatch.await(USER_OPERATION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            getErrPrintWriter().println("Error: Thread interrupted unexpectedly.");
+        }
+
+        return switched;
+    }
+
     int runSwitchUser(PrintWriter pw) throws RemoteException {
         UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
         final int userSwitchable = userManager.getUserSwitchability();
@@ -1715,9 +1752,30 @@ final class ActivityManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: " + userSwitchable);
             return -1;
         }
-        String user = getNextArgRequired();
-        mInterface.switchUser(Integer.parseInt(user));
-        return 0;
+        boolean wait = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if ("-w".equals(opt)) {
+                wait = true;
+            } else {
+                getErrPrintWriter().println("Error: unknown option: " + opt);
+                return -1;
+            }
+        }
+
+        int userId = Integer.parseInt(getNextArgRequired());
+        boolean switched;
+        if (wait) {
+            switched = switchUserAndWaitForComplete(userId);
+        } else {
+            switched = mInterface.switchUser(userId);
+        }
+        if (switched) {
+            return 0;
+        } else {
+            pw.printf("Error: Failed to switch to user %d\n", userId);
+            return 1;
+        }
     }
 
     int runGetCurrentUser(PrintWriter pw) throws RemoteException {

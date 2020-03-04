@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -58,6 +59,8 @@ public final class TvTrackInfo implements Parcelable {
     private final String mId;
     private final String mLanguage;
     private final CharSequence mDescription;
+    @Nullable
+    private final String mEncoding;
     private final boolean mEncrypted;
     private final int mAudioChannelCount;
     private final int mAudioSampleRate;
@@ -73,14 +76,15 @@ public final class TvTrackInfo implements Parcelable {
     private final Bundle mExtra;
 
     private TvTrackInfo(int type, String id, String language, CharSequence description,
-            boolean encrypted, int audioChannelCount, int audioSampleRate, boolean audioDescription,
-            boolean hardOfHearing, boolean spokenSubtitle, int videoWidth, int videoHeight,
-            float videoFrameRate, float videoPixelAspectRatio, byte videoActiveFormatDescription,
-            Bundle extra) {
+            String encoding, boolean encrypted, int audioChannelCount, int audioSampleRate,
+            boolean audioDescription, boolean hardOfHearing, boolean spokenSubtitle, int videoWidth,
+            int videoHeight, float videoFrameRate, float videoPixelAspectRatio,
+            byte videoActiveFormatDescription, Bundle extra) {
         mType = type;
         mId = id;
         mLanguage = language;
         mDescription = description;
+        mEncoding = encoding;
         mEncrypted = encrypted;
         mAudioChannelCount = audioChannelCount;
         mAudioSampleRate = audioSampleRate;
@@ -100,6 +104,7 @@ public final class TvTrackInfo implements Parcelable {
         mId = in.readString();
         mLanguage = in.readString();
         mDescription = in.readString();
+        mEncoding = in.readString();
         mEncrypted = in.readInt() != 0;
         mAudioChannelCount = in.readInt();
         mAudioSampleRate = in.readInt();
@@ -146,13 +151,26 @@ public final class TvTrackInfo implements Parcelable {
     }
 
     /**
+     * Returns the codec in the form of mime type. If the encoding is unknown or could not be
+     * determined, the corresponding value will be {@code null}.
+     *
+     * <p>For example of broadcast, codec information may be referred to broadcast standard (e.g.
+     * Component Descriptor of ETSI EN 300 468). In the case that track type is subtitle, mime type
+     * could be defined in broadcast standard (e.g. "text/dvb.subtitle" or "text/dvb.teletext" in
+     * ETSI TS 102 812 V1.3.1 section 7.6).
+     */
+    @Nullable
+    public String getEncoding() {
+        return mEncoding;
+    }
+
+    /**
      * Returns {@code true} if the track is encrypted, {@code false} otherwise. If the encryption
      * status is unknown or could not be determined, the corresponding value will be {@code false}.
      *
      * <p>For example: ISO/IEC 13818-1 defines a CA descriptor that can be used to determine the
      * encryption status of some broadcast streams.
      */
-
     public boolean isEncrypted() {
         return mEncrypted;
     }
@@ -323,6 +341,7 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeString(mId);
         dest.writeString(mLanguage);
         dest.writeString(mDescription != null ? mDescription.toString() : null);
+        dest.writeString(mEncoding);
         dest.writeInt(mEncrypted ? 1 : 0);
         dest.writeInt(mAudioChannelCount);
         dest.writeInt(mAudioSampleRate);
@@ -352,6 +371,7 @@ public final class TvTrackInfo implements Parcelable {
         if (!TextUtils.equals(mId, obj.mId) || mType != obj.mType
                 || !TextUtils.equals(mLanguage, obj.mLanguage)
                 || !TextUtils.equals(mDescription, obj.mDescription)
+                || !TextUtils.equals(mEncoding, obj.mEncoding)
                 || mEncrypted != obj.mEncrypted) {
             return false;
         }
@@ -413,6 +433,7 @@ public final class TvTrackInfo implements Parcelable {
         private final int mType;
         private String mLanguage;
         private CharSequence mDescription;
+        private String mEncoding;
         private boolean mEncrypted;
         private int mAudioChannelCount;
         private int mAudioSampleRate;
@@ -464,6 +485,22 @@ public final class TvTrackInfo implements Parcelable {
          */
         public final Builder setDescription(CharSequence description) {
             mDescription = description;
+            return this;
+        }
+
+        /**
+         * Sets the encoding of the track.
+         *
+         * <p>For example of broadcast, codec information may be referred to broadcast standard
+         * (e.g. Component Descriptor of ETSI EN 300 468). In the case that track type is subtitle,
+         * mime type could be defined in broadcast standard (e.g. "text/dvb.subtitle" or
+         * "text/dvb.teletext" in ETSI TS 102 812 V1.3.1 section 7.6).
+         *
+         * @param encoding The encoding of the track in the form of mime type.
+         */
+        @NonNull
+        public Builder setEncoding(@Nullable String encoding) {
+            mEncoding = encoding;
             return this;
         }
 
@@ -672,7 +709,7 @@ public final class TvTrackInfo implements Parcelable {
          * @return The new {@link TvTrackInfo} instance
          */
         public TvTrackInfo build() {
-            return new TvTrackInfo(mType, mId, mLanguage, mDescription, mEncrypted,
+            return new TvTrackInfo(mType, mId, mLanguage, mDescription, mEncoding, mEncrypted,
                     mAudioChannelCount, mAudioSampleRate, mAudioDescription, mHardOfHearing,
                     mSpokenSubtitle, mVideoWidth, mVideoHeight, mVideoFrameRate,
                     mVideoPixelAspectRatio, mVideoActiveFormatDescription, mExtra);

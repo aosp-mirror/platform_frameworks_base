@@ -1,0 +1,29 @@
+// Baseline format: 1.0
+ActionValue: android.net.TetheringConstants#EXTRA_ADD_TETHER_TYPE:
+    Inconsistent extra value; expected `android.net.extra.ADD_TETHER_TYPE`, was `extraAddTetherType`
+ActionValue: android.net.TetheringConstants#EXTRA_PROVISION_CALLBACK:
+    Inconsistent extra value; expected `android.net.extra.PROVISION_CALLBACK`, was `extraProvisionCallback`
+ActionValue: android.net.TetheringConstants#EXTRA_REM_TETHER_TYPE:
+    Inconsistent extra value; expected `android.net.extra.REM_TETHER_TYPE`, was `extraRemTetherType`
+ActionValue: android.net.TetheringConstants#EXTRA_RUN_PROVISION:
+    Inconsistent extra value; expected `android.net.extra.RUN_PROVISION`, was `extraRunProvision`
+ActionValue: android.net.TetheringConstants#EXTRA_SET_ALARM:
+    Inconsistent extra value; expected `android.net.extra.SET_ALARM`, was `extraSetAlarm`
+ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
+    Inconsistent action value; expected `android.net.action.TETHER_STATE_CHANGED`, was `android.net.conn.TETHER_STATE_CHANGED`
+ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ACTIVE_TETHER`, was `tetherArray`
+ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.AVAILABLE_TETHER`, was `availableArray`
+ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ERRORED_TETHER`, was `erroredArray`
+
+
+ManagerConstructor: android.net.TetheringManager#TetheringManager(android.content.Context, java.util.function.Supplier<android.os.IBinder>):
+    Managers must always be obtained from Context; no direct constructors
+
+
+PrivateSuperclass: android.location.GnssAntennaInfo.PhaseCenterVariationCorrections:
+    Public class android.location.GnssAntennaInfo.PhaseCenterVariationCorrections extends private class android.location.GnssAntennaInfo.SphericalCorrections
+PrivateSuperclass: android.location.GnssAntennaInfo.SignalGainCorrections:
+    Public class android.location.GnssAntennaInfo.SignalGainCorrections extends private class android.location.GnssAntennaInfo.SphericalCorrections

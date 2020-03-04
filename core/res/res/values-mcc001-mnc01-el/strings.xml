@@ -20,5 +20,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_illegal_me" msgid="2238090225563073546">"Το τηλέφωνο δεν επιτρέπεται MM#6"</string>
+    <string name="mmcc_illegal_me" msgid="6819499009131365312">"Το τηλέφωνο δεν επιτρέπεται MM#6"</string>
 </resources>

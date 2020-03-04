@@ -29,7 +29,8 @@ java_library_static {
         "android.hardware.tv.cec-V1.0-java",
         "android.hardware.vibrator-java",
         "app-compat-annotations",
-        "framework-tethering",
+        "framework-tethering-stubs",
+        "ike-stubs",
     ],
 
     required: [
@@ -43,6 +44,7 @@ java_library_static {
         "android.hardware.broadcastradio-V2.0-java",
         "android.hardware.health-V1.0-java",
         "android.hardware.health-V2.0-java",
+        "android.hardware.health-V2.1-java",
         "android.hardware.light-java",
         "android.hardware.weaver-V1.0-java",
         "android.hardware.biometrics.face-V1.0-java",
@@ -53,6 +55,10 @@ java_library_static {
         "android.hidl.manager-V1.2-java",
         "dnsresolver_aidl_interface-V2-java",
         "netd_event_listener_interface-java",
+    ],
+
+    plugins: [
+        "compat-changeid-annotation-processor",
     ],
 }
 

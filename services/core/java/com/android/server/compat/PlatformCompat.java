@@ -234,8 +234,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        checkCompatChangeReadAndLogPermission();
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, "platform_compat", pw)) return;
+        checkCompatChangeReadAndLogPermission();
         mCompatConfig.dumpConfig(pw);
     }
 

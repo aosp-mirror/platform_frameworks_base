@@ -22,13 +22,14 @@ apex {
     binaries: [ "derive_sdk" ],
     prebuilts: [ "cur_sdkinfo" ],
     manifest: "manifest.json",
+    min_sdk_version: "current",
 }
 
 apex_defaults {
     name: "com.android.sdkext-defaults",
+    updatable: true,
     java_libs: [ "framework-sdkextensions" ],
     prebuilts: [
-        "com.android.sdkext.ldconfig",
         "derive_sdk.rc",
     ],
     key: "com.android.sdkext.key",
@@ -49,13 +50,6 @@ apex_key {
 android_app_certificate {
     name: "com.android.sdkext.certificate",
     certificate: "com.android.sdkext",
-}
-
-prebuilt_etc {
-    name: "com.android.sdkext.ldconfig",
-    src: "ld.config.txt",
-    filename: "ld.config.txt",
-    installable: false,
 }
 
 python_binary_host {

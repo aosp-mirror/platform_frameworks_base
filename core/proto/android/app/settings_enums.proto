@@ -2437,4 +2437,10 @@ enum PageId {
     //   > Pair device with QR code > Scan QR code > Pairing device dialog
     // CATEGORY: SETTINGS
     ADB_WIRELESS_DEVICE_QR_PAIRING_DIALOG = 1833;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Click on paired device
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_DETAILS = 1836;
 }

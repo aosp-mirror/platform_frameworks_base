@@ -41,12 +41,11 @@ aidl_interface {
 
 java_library {
     name: "framework-tethering",
-    sdk_version: "system_current",
+    sdk_version: "module_current",
     srcs: [
         "src/android/net/TetheredClient.java",
         "src/android/net/TetheringManager.java",
         "src/android/net/TetheringConstants.java",
-        ":framework-tethering-annotations",
     ],
     static_libs: [
         "tethering-aidl-interfaces-java",
@@ -55,18 +54,34 @@ java_library {
     installable: true,
 
     libs: [
-        "android_system_stubs_current",
+        "framework-annotations-lib",
     ],
 
     hostdex: true, // for hiddenapi check
-    visibility: [
-        "//frameworks/base/packages/Tethering:__subpackages__",
-        //TODO(b/147200698) remove below lines when the platform is built with stubs
-        "//frameworks/base",
-        "//frameworks/base/services",
-        "//frameworks/base/services/core",
-    ],
+    visibility: ["//frameworks/base/packages/Tethering:__subpackages__"],
     apex_available: ["com.android.tethering"],
+}
+
+droidstubs {
+    name: "framework-tethering-stubs-sources",
+    defaults: ["framework-module-stubs-defaults-module_libs_api"],
+    srcs: [
+        "src/android/net/TetheredClient.java",
+        "src/android/net/TetheringManager.java",
+        "src/android/net/TetheringConstants.java",
+    ],
+    libs: [
+        "tethering-aidl-interfaces-java",
+        "framework-all",
+    ],
+    sdk_version: "core_platform",
+}
+
+java_library {
+    name: "framework-tethering-stubs",
+    srcs: [":framework-tethering-stubs-sources"],
+    libs: ["framework-all"],
+    sdk_version: "core_platform",
 }
 
 filegroup {

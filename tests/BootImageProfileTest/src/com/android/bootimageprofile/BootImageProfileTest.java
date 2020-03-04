@@ -42,10 +42,9 @@ public class BootImageProfileTest implements IDeviceTest {
     }
 
     /**
-     * Test that the boot image profile properties are set.
+     * Validate that the boot image profile properties are set.
      */
-    @Test
-    public void testProperties() throws Exception {
+    public void validateProperties() throws Exception {
         String res = mTestDevice.getProperty(
                 "persist.device_config.runtime_native_boot.profilebootclasspath");
         assertTrue("profile boot class path not enabled", res != null && res.equals("true"));
@@ -67,13 +66,37 @@ public class BootImageProfileTest implements IDeviceTest {
 
     @Test
     public void testSystemServerProfile() throws Exception {
+        final int numIterations = 20;
+        for (int i = 1; i <= numIterations; ++i) {
+            String res;
+            res = mTestDevice.getProperty(
+                    "persist.device_config.runtime_native_boot.profilebootclasspath");
+            boolean profileBootClassPath = res != null && res.equals("true");
+            res = mTestDevice.getProperty(
+                    "persist.device_config.runtime_native_boot.profilesystemserver");
+            boolean profileSystemServer = res != null && res.equals("true");
+            if (profileBootClassPath && profileSystemServer) {
+                break;
+            }
+            if (i == numIterations) {
+                assertTrue("profile system server not enabled", profileSystemServer);
+                assertTrue("profile boot class path not enabled", profileSystemServer);
+            }
+
+            res = mTestDevice.executeShellCommand(
+                    "device_config put runtime_native_boot profilebootclasspath true");
+            res = mTestDevice.executeShellCommand(
+                    "device_config put runtime_native_boot profilesystemserver true");
+            res = mTestDevice.executeShellCommand("stop");
+            res = mTestDevice.executeShellCommand("start");
+            Thread.sleep(5000);
+        }
         // Trunacte the profile before force it to be saved to prevent previous profiles
         // causing the test to pass.
         String res;
         res = mTestDevice.executeShellCommand("truncate -s 0 " + SYSTEM_SERVER_PROFILE).trim();
         assertTrue(res, res.length() == 0);
         // Wait up to 20 seconds for the profile to be saved.
-        final int numIterations = 20;
         for (int i = 1; i <= numIterations; ++i) {
             // Force save the profile since we truncated it.
             if (forceSaveProfile("system_server")) {
@@ -88,6 +111,9 @@ public class BootImageProfileTest implements IDeviceTest {
 
             // In case the profile is partially saved, wait an extra second.
             Thread.sleep(1000);
+
+            // Validate that properties are still set.
+            validateProperties();
 
             // Validate that the profile is non empty.
             res = mTestDevice.executeShellCommand("profman --dump-only --profile-file="

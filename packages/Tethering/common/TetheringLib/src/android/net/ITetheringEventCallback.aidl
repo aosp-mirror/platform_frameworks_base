@@ -17,6 +17,7 @@
 package android.net;
 
 import android.net.Network;
+import android.net.TetheredClient;
 import android.net.TetheringConfigurationParcel;
 import android.net.TetheringCallbackStartedParcel;
 import android.net.TetherStatesParcel;
@@ -33,4 +34,5 @@ oneway interface ITetheringEventCallback
     void onUpstreamChanged(in Network network);
     void onConfigurationChanged(in TetheringConfigurationParcel config);
     void onTetherStatesChanged(in TetherStatesParcel states);
+    void onTetherClientsChanged(in List<TetheredClient> clients);
 }

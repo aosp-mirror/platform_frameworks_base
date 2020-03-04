@@ -19,8 +19,6 @@ package com.android.internal.os;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.type.DefaultMimeMapFactory;
 import android.os.Build;
@@ -36,7 +34,6 @@ import android.util.Slog;
 import com.android.internal.logging.AndroidConfig;
 import com.android.server.NetworkManagementSocketTagger;
 
-import dalvik.annotation.compat.VersionCodes;
 import dalvik.system.RuntimeHooks;
 import dalvik.system.ThreadPrioritySetter;
 import dalvik.system.VMRuntime;
@@ -67,18 +64,8 @@ public class RuntimeInit {
 
     private static volatile boolean mCrashing = false;
 
-    /**
-     * Native heap allocations will now have a non-zero tag in the most significant byte.
-     * See
-     * <a href="https://source.android.com/devices/tech/debug/tagged-pointers">https://source.android.com/devices/tech/debug/tagged-pointers</a>.
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = VersionCodes.Q)
-    private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
-
     private static final native void nativeFinishInit();
     private static final native void nativeSetExitWithoutCleanup(boolean exitWithoutCleanup);
-    private static native void nativeDisableHeapPointerTagging();
 
     private static int Clog_e(String tag, String msg, Throwable tr) {
         return Log.printlns(Log.LOG_ID_CRASH, Log.ERROR, tag, msg, tr);
@@ -411,20 +398,6 @@ public class RuntimeInit {
         if (DEBUG) Slog.d(TAG, "Leaving RuntimeInit!");
     }
 
-    private static void maybeDisableHeapPointerTagging(long[] disabledCompatChanges) {
-        // Heap tagging needs to be disabled before any additional threads are created, but the
-        // AppCompat framework is not initialized enough at this point.
-        // Check if the change is enabled manually.
-        if (disabledCompatChanges != null) {
-            for (int i = 0; i < disabledCompatChanges.length; i++) {
-                if (disabledCompatChanges[i] == NATIVE_HEAP_POINTER_TAGGING) {
-                    nativeDisableHeapPointerTagging();
-                    break;
-                }
-            }
-        }
-    }
-
     protected static Runnable applicationInit(int targetSdkVersion, long[] disabledCompatChanges,
             String[] argv, ClassLoader classLoader) {
         // If the application calls System.exit(), terminate the process
@@ -436,8 +409,6 @@ public class RuntimeInit {
 
         VMRuntime.getRuntime().setTargetSdkVersion(targetSdkVersion);
         VMRuntime.getRuntime().setDisabledCompatChanges(disabledCompatChanges);
-
-        maybeDisableHeapPointerTagging(disabledCompatChanges);
 
         final Arguments args = new Arguments(argv);
 
