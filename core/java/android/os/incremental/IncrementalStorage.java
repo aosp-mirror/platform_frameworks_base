@@ -424,14 +424,18 @@ public final class IncrementalStorage {
      */
     private static IncrementalSignature parseV4Signature(@Nullable byte[] v4signatureBytes)
             throws IOException {
-        if (v4signatureBytes == null) {
+        if (v4signatureBytes == null || v4signatureBytes.length == 0) {
             return null;
         }
 
         final V4Signature signature;
         try (DataInputStream input = new DataInputStream(
                 new ByteArrayInputStream(v4signatureBytes))) {
-            signature = V4Signature.readFrom(input);
+            try {
+                signature = V4Signature.readFrom(input);
+            } catch (IOException e) {
+                throw new IOException("Failed to read v4 signature:", e);
+            }
         }
 
         if (!signature.isVersionSupported()) {
