@@ -3721,7 +3721,6 @@ package android.telephony {
 
   public final class SmsManager {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int checkSmsShortCodeDestination(String, String);
-    method public void sendMultipartTextMessage(@NonNull String, @Nullable String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String);
     field public static final int SMS_CATEGORY_FREE_SHORT_CODE = 1; // 0x1
     field public static final int SMS_CATEGORY_NOT_SHORT_CODE = 0; // 0x0
     field public static final int SMS_CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE = 3; // 0x3
@@ -3742,9 +3741,10 @@ package android.telephony {
   public class TelephonyManager {
     method public int addDevicePolicyOverrideApn(@NonNull android.content.Context, @NonNull android.telephony.data.ApnSetting);
     method public int checkCarrierPrivilegesForPackage(String);
+    method @Nullable @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public android.content.ComponentName getAndUpdateDefaultRespondViaMessageApplication();
     method public int getCarrierIdListVersion();
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
-    method @Nullable public static android.content.ComponentName getDefaultRespondViaMessageApplication(@NonNull android.content.Context, boolean);
+    method @Nullable @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public android.content.ComponentName getDefaultRespondViaMessageApplication();
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getEmergencyNumberDbVersion();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
