@@ -19,7 +19,6 @@
 #include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 #include <android/content/pm/DataLoaderParamsParcel.h>
-#include <android/os/incremental/IIncrementalManager.h>
 #include <binder/IServiceManager.h>
 #include <utils/String16.h>
 #include <utils/StrongPointer.h>
@@ -220,7 +219,7 @@ private:
 
     // Member variables
     std::unique_ptr<VoldServiceWrapper> mVold;
-    std::unique_ptr<IncrementalManagerWrapper> mIncrementalManager;
+    std::unique_ptr<DataLoaderManagerWrapper> mDataLoaderManager;
     std::unique_ptr<IncFsWrapper> mIncFs;
     const std::string mIncrementalDir;
 
