@@ -20,6 +20,7 @@ option java_multiple_files = true;
 package android.app;
 
 import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/app/appexit_enums.proto";
 
 /**
  * An android.app.ApplicationExitInfo object.
@@ -33,150 +34,9 @@ message ApplicationExitInfoProto {
     optional int32 defining_uid = 4;
     optional string process_name = 5;
     optional int32 connection_group = 6;
-
-    enum ReasonCode {
-        /**
-         * Application process died due to unknown reason.
-         */
-        REASON_UNKNOWN = 0;
-
-        /**
-         * Application process exit normally by itself, for example,
-         * via {@link android.os.Process#exit}; {@link #status} will specify the exit code.
-         *
-         * <p>Applications should normally not do this, as the system has a better knowledge
-         * in terms of process management.</p>
-         */
-        REASON_EXIT_SELF = 1;
-
-        /**
-         * Application process died due to the result of an OS signal; for example,
-         * {@link android.os.Process#SIGNAL_KILL}; {@link #status} will specify the signum.
-         */
-        REASON_SIGNALED = 2;
-
-        /**
-         * Application process was killed by the system low memory killer, meaning the system was
-         * under memory pressure at the time of kill.
-         */
-        REASON_LOW_MEMORY = 3;
-
-        /**
-         * Application process died because of an unhandled exception in Java code.
-         */
-        REASON_CRASH = 4;
-
-        /**
-         * Application process died because it's crashed due to a native code crash.
-         */
-        REASON_CRASH_NATIVE = 5;
-
-        /**
-         * Application process was killed due to being unresponsive (ANR).
-         */
-        REASON_ANR = 6;
-
-        /**
-         * Application process was killed because it took too long to attach to the system
-         * during the start.
-         */
-        REASON_INITIALIZATION_FAILURE = 7;
-
-        /**
-         * Application process was killed because of initialization failure,
-         * for example, it took too long to attach to the system during the start,
-         * or there was an error during initialization.
-         */
-        REASON_PERMISSION_CHANGE = 8;
-
-        /**
-         * Application process was killed by the activity manager due to excessive resource usage.
-         */
-        REASON_EXCESSIVE_RESOURCE_USAGE = 9;
-
-        /**
-         * Application process was killed by the system for various other reasons,
-         * for example, the application package got disabled by the user;
-         * {@link #description} will specify the cause given by the system.
-         */
-        REASON_OTHER = 10;
-
-    }
-    optional ReasonCode reason = 7;
-
-    enum SubReason {
-        /**
-         * Application process kills subReason is unknown.
-         */
-        SUBREASON_UNKNOWN = 0;
-
-        /**
-         * Application process was killed because user quit it on the "wait for debugger" dialog.
-         */
-        SUBREASON_WAIT_FOR_DEBUGGER = 1;
-
-        /**
-         * Application process was killed by the activity manager because there were too many cached
-         * processes.
-         */
-        SUBREASON_TOO_MANY_CACHED = 2;
-
-        /**
-         * Application process was killed by the activity manager because there were too many empty
-         * processes.
-         */
-        SUBREASON_TOO_MANY_EMPTY = 3;
-
-        /**
-         * Application process was killed by the activity manager because there were too many cached
-         * processes and this process had been in empty state for a long time.
-         */
-        SUBREASON_TRIM_EMPTY = 4;
-
-        /**
-         * Application process was killed by the activity manager because system was on
-         * memory pressure and this process took large amount of cached memory.
-         */
-        SUBREASON_LARGE_CACHED = 5;
-
-        /**
-         * Application process was killed by the activity manager because the system was on
-         * low memory pressure for a significant amount of time since last idle.
-         */
-        SUBREASON_MEMORY_PRESSURE = 6;
-
-        /**
-         * Application process was killed by the activity manager due to excessive CPU usage.
-         */
-        SUBREASON_EXCESSIVE_CPU = 7;
-    }
-
-    optional SubReason sub_reason = 8;
-
+    optional AppExitReasonCode reason = 7;
+    optional AppExitSubReasonCode sub_reason = 8;
     optional int32 status = 9;
-
-    enum Importance {
-        option allow_alias = true;
-        /**
-         * Keep sync with the definitions in
-         * {@link android.app.ActivityManager.RunningAppProcessInfo}
-         */
-        IMPORTANCE_FOREGROUND = 100;
-        IMPORTANCE_FOREGROUND_SERVICE = 125;
-        IMPORTANCE_TOP_SLEEPING_PRE_28 = 150;
-        IMPORTANCE_VISIBLE = 200;
-        IMPORTANCE_PERCEPTIBLE_PRE_26 = 130;
-        IMPORTANCE_PERCEPTIBLE = 230;
-        IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170;
-        IMPORTANCE_SERVICE = 300;
-        IMPORTANCE_TOP_SLEEPING = 325;
-        IMPORTANCE_CANT_SAVE_STATE = 350;
-        IMPORTANCE_CACHED = 400;
-        IMPORTANCE_BACKGROUND = 400;
-        IMPORTANCE_EMPTY = 500;
-        IMPORTANCE_GONE = 1000;
-    }
-
     optional Importance importance = 10;
     optional int64 pss = 11;
     optional int64 rss = 12;
