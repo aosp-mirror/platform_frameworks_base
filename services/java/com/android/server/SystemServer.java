@@ -190,12 +190,6 @@ public final class SystemServer {
     private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
     private static final String ENCRYPTED_STATE = "1";
 
-    private static final long SNAPSHOT_INTERVAL = 60 * 60 * 1000; // 1hr
-
-    // The earliest supported time.  We pick one day into 1970, to
-    // give any timezone code room without going into negative time.
-    private static final long EARLIEST_SUPPORTED_TIME = 86400 * 1000;
-
     private static final long SLOW_DISPATCH_THRESHOLD_MS = 100;
     private static final long SLOW_DELIVERY_THRESHOLD_MS = 200;
 
