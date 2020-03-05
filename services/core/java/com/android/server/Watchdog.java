@@ -362,7 +362,8 @@ public class Watchdog extends Thread {
     }
 
     private static boolean isInterestingJavaProcess(String processName) {
-        return processName.equals("com.android.phone");
+        return processName.equals(StorageManagerService.sMediaStoreAuthorityProcessName)
+                || processName.equals("com.android.phone");
     }
 
     /**
