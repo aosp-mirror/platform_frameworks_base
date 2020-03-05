@@ -894,8 +894,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
          * successfully.
          *
          * @param timeout duration in seconds or {@code 0} if user authentication must take place
-         *        for every use of the key. {@code -1} is also accepted for legacy purposes. It is
-         *        functionally the same as {@code 0}.
+         *        for every use of the key.
          * @param type set of authentication types which can authorize use of the key. See
          *        {@link KeyProperties}.{@code AUTH} flags.
          *
@@ -905,12 +904,10 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
          * @see KeyguardManager
          */
         @NonNull
-        public Builder setUserAuthenticationParameters(@IntRange(from = -1) int timeout,
+        public Builder setUserAuthenticationParameters(@IntRange(from = 0) int timeout,
                                                        @KeyProperties.AuthEnum int type) {
-            if (timeout < -1) {
-                throw new IllegalArgumentException("timeout must be -1 or larger");
-            } else if (timeout == -1) {
-                timeout = 0;
+            if (timeout < 0) {
+                throw new IllegalArgumentException("timeout must be 0 or larger");
             }
             mUserAuthenticationValidityDurationSeconds = timeout;
             mUserAuthenticationType = type;
