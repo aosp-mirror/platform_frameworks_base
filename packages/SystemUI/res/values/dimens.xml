@@ -1223,12 +1223,17 @@
 
     <!-- Home Controls -->
     <dimen name="controls_header_side_margin">32dp</dimen>
-    <dimen name="control_header_text">24sp</dimen>
+    <dimen name="controls_header_app_icon_size">40dp</dimen>
+    <dimen name="controls_list_side_margin">16dp</dimen>
+    <dimen name="controls_top_margin">44dp</dimen>
+    <dimen name="control_header_text_size">22sp</dimen>
+    <dimen name="control_text_size">14sp</dimen>
     <dimen name="control_spacing">4dp</dimen>
     <dimen name="control_list_divider">1dp</dimen>
-    <dimen name="control_corner_radius">15dp</dimen>
-    <dimen name="control_height">100dp</dimen>
-    <dimen name="control_padding">15dp</dimen>
+    <dimen name="control_corner_radius">12dp</dimen>
+    <dimen name="control_height">106dp</dimen>
+    <dimen name="control_padding">12dp</dimen>
+    <dimen name="control_padding_adjustment">4dp</dimen>
     <dimen name="control_status_normal">12sp</dimen>
     <dimen name="control_status_expanded">18sp</dimen>
     <dimen name="control_base_item_margin">2dp</dimen>
