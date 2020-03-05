@@ -10912,9 +10912,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void enforcePackageIsSystemPackage(String packageName, int userId)
             throws RemoteException {
-        if (!isSystemApp(mIPackageManager, packageName, userId)) {
-            throw new IllegalArgumentException(
-                    "The provided package is not a system package");
+        boolean isSystem;
+        try {
+            isSystem = isSystemApp(mIPackageManager, packageName, userId);
+        } catch (IllegalArgumentException e) {
+            isSystem = false;
+        }
+        if (!isSystem) {
+            throw new IllegalArgumentException("The provided package is not a system package");
         }
     }
 
