@@ -447,12 +447,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void grantDefaultPermissionsToDefaultUseOpenWifiApp(
             @NonNull String packageName, @UserIdInt int userId);
 
-    /**
-     * Returns whether or not default permission grants have been performed for the given
-     * user since the device booted.
-     */
-    public abstract boolean wereDefaultPermissionsGrantedSinceBoot(@UserIdInt int userId);
-
     /** Called when a new user has been created. */
     public abstract void onNewUserCreated(@UserIdInt int userId);
 }
