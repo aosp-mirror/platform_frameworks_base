@@ -2656,7 +2656,7 @@
              this field is ignored and the display will remain in its current
              mode.
 
-             <p> See {@link android.content.pm.ActivityInfo #preferMinimalPostProcessing} -->
+             <p> See {@link android.content.pm.ActivityInfo#FLAG_PREFER_MINIMAL_POST_PROCESSING} -->
         <attr name="preferMinimalPostProcessing" format="boolean"/>
     </declare-styleable>
 

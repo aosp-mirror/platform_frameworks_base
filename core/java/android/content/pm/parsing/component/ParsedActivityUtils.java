@@ -129,12 +129,12 @@ public class ParsedActivityUtils {
                         | flag(ActivityInfo.FLAG_RESUME_WHILE_PAUSING, R.styleable.AndroidManifestActivity_resumeWhilePausing, sa)
                         | flag(ActivityInfo.FLAG_SHOW_WHEN_LOCKED, R.styleable.AndroidManifestActivity_showWhenLocked, sa)
                         | flag(ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE, R.styleable.AndroidManifestActivity_supportsPictureInPicture, sa)
-                        | flag(ActivityInfo.FLAG_TURN_SCREEN_ON, R.styleable.AndroidManifestActivity_turnScreenOn, sa);
+                        | flag(ActivityInfo.FLAG_TURN_SCREEN_ON, R.styleable.AndroidManifestActivity_turnScreenOn, sa)
+                        | flag(ActivityInfo.FLAG_PREFER_MINIMAL_POST_PROCESSING, R.styleable.AndroidManifestActivity_preferMinimalPostProcessing, sa);
 
                 activity.privateFlags |= flag(ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED, R.styleable.AndroidManifestActivity_inheritShowWhenLocked, sa);
 
                 activity.colorMode = sa.getInt(R.styleable.AndroidManifestActivity_colorMode, ActivityInfo.COLOR_MODE_DEFAULT);
-                activity.preferMinimalPostProcessing = sa.getBoolean(R.styleable.AndroidManifestActivity_preferMinimalPostProcessing, ActivityInfo.MINIMAL_POST_PROCESSING_DEFAULT);
                 activity.documentLaunchMode = sa.getInt(R.styleable.AndroidManifestActivity_documentLaunchMode, ActivityInfo.DOCUMENT_LAUNCH_NONE);
                 activity.launchMode = sa.getInt(R.styleable.AndroidManifestActivity_launchMode, ActivityInfo.LAUNCH_MULTIPLE);
                 activity.lockTaskLaunchMode = sa.getInt(R.styleable.AndroidManifestActivity_lockTaskMode, 0);
