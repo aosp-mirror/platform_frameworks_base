@@ -299,7 +299,7 @@ public abstract class ActivityManagerInternal {
 
     /** Starts a given process. */
     public abstract void startProcess(String processName, ApplicationInfo info,
-            boolean knownToBeDead, String hostingType, ComponentName hostingName);
+            boolean knownToBeDead, boolean isTop, String hostingType, ComponentName hostingName);
 
     /** Starts up the starting activity process for debugging if needed.
      * This function needs to be called synchronously from WindowManager context so the caller
