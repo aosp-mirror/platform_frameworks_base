@@ -764,9 +764,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private @KeyProperties.BlockModeEnum String[] mBlockModes;
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
-        private int mUserAuthenticationValidityDurationSeconds = 0;
-        private @KeyProperties.AuthEnum int mUserAuthenticationType =
-                KeyProperties.AUTH_BIOMETRIC_STRONG;
+        private int mUserAuthenticationValidityDurationSeconds = -1;
+        private @KeyProperties.AuthEnum int mUserAuthenticationType;
         private boolean mUserPresenceRequired = false;
         private byte[] mAttestationChallenge = null;
         private boolean mUniqueIdIncluded = false;
