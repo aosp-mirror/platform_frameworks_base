@@ -56,7 +56,6 @@ android_test {
         // TODO(b/149928788): Remove this when statsd tests move into the statsd dir.
         "framework-statsd",
         "framework",
-        "icing-java-proto-lite",
         "ext",
         "framework-res",
     ],
