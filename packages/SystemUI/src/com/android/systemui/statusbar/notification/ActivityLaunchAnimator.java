@@ -274,8 +274,14 @@ public class ActivityLaunchAnimator {
             Matrix m = new Matrix();
             m.postTranslate(0, (float) (mParams.top - app.position.y));
             mWindowCrop.set(mParams.left, 0, mParams.right, mParams.getHeight());
-            SurfaceParams params = new SurfaceParams(app.leash, 1f /* alpha */, m, mWindowCrop,
-                    app.prefixOrderIndex, mCornerRadius, true /* visible */);
+            SurfaceParams params = new SurfaceParams.Builder(app.leash)
+                    .withAlpha(1f)
+                    .withMatrix(m)
+                    .withWindowCrop(mWindowCrop)
+                    .withLayer(app.prefixOrderIndex)
+                    .withCornerRadius(mCornerRadius)
+                    .withVisibility(true)
+                    .build();
             mSyncRtTransactionApplier.scheduleApply(params);
         }
 

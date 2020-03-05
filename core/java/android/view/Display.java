@@ -580,7 +580,6 @@ public final class Display {
      * @return The display address.
      * @hide
      */
-    @UnsupportedAppUsage
     public DisplayAddress getAddress() {
         return mAddress;
     }

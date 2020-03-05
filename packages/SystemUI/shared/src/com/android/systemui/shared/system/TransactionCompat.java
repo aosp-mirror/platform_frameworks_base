@@ -87,6 +87,12 @@ public class TransactionCompat {
         return this;
     }
 
+    public TransactionCompat setBackgroundBlurRadius(SurfaceControlCompat surfaceControl,
+            int radius) {
+        mTransaction.setBackgroundBlurRadius(surfaceControl.mSurfaceControl, radius);
+        return this;
+    }
+
     public TransactionCompat deferTransactionUntil(SurfaceControlCompat surfaceControl,
             SurfaceControl barrier, long frameNumber) {
         mTransaction.deferTransactionUntil(surfaceControl.mSurfaceControl, barrier,

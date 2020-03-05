@@ -28,7 +28,6 @@ import android.util.ArraySet;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -44,7 +43,6 @@ class RunningTasks {
             (o1, o2) -> Long.signum(o2.lastActiveTime - o1.lastActiveTime);
 
     private final TreeSet<Task> mTmpSortedSet = new TreeSet<>(LAST_ACTIVE_TIME_COMPARATOR);
-    private final ArrayList<Task> mTmpStackTasks = new ArrayList<>();
 
     private int mCallingUid;
     private int mUserId;
@@ -132,8 +130,7 @@ class RunningTasks {
 
     /** Constructs a {@link RunningTaskInfo} from a given {@param task}. */
     private RunningTaskInfo createRunningTaskInfo(Task task) {
-        final RunningTaskInfo rti = new RunningTaskInfo();
-        task.fillTaskInfo(rti);
+        final RunningTaskInfo rti = task.getTaskInfo();
         // Fill in some deprecated values
         rti.id = rti.taskId;
         return rti;

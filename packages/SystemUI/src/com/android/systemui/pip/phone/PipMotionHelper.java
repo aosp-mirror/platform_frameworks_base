@@ -38,7 +38,6 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.SomeArgs;
-import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -546,7 +545,7 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
             case MSG_RESIZE_IMMEDIATE: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 Rect toBounds = (Rect) args.arg1;
-                mPipTaskOrganizer.resizePinnedStack(toBounds, PipAnimationController.DURATION_NONE);
+                mPipTaskOrganizer.resizePip(toBounds);
                 mBounds.set(toBounds);
                 return true;
             }
@@ -564,7 +563,7 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
                         return true;
                     }
 
-                    mPipTaskOrganizer.resizePinnedStack(toBounds, duration);
+                    mPipTaskOrganizer.animateResizePip(toBounds, duration);
                     mBounds.set(toBounds);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Could not animate resize pinned stack to bounds: " + toBounds, e);

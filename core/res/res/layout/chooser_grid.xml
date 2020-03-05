@@ -90,7 +90,7 @@
                 android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-                <com.android.internal.widget.ViewPager
+                <com.android.internal.app.ResolverViewPager
                     android:id="@+id/profile_pager"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>

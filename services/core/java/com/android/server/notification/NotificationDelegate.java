@@ -87,4 +87,6 @@ public interface NotificationDelegate {
      */
     void onNotificationSmartReplySent(String key, int clickedIndex, CharSequence reply,
             int notificationLocation, boolean modifiedBeforeSending);
+
+    void prepareForPossibleShutdown();
 }

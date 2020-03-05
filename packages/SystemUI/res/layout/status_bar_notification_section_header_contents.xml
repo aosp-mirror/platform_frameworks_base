@@ -27,6 +27,7 @@
             android:id="@+id/header_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:forceHasOverlappingRendering="false"
             android:text="@string/notification_section_header_gentle"
         />
 
@@ -41,5 +42,6 @@
         android:tint="?attr/wallpaperTextColor"
         android:tintMode="src_in"
         android:visibility="gone"
+        android:forceHasOverlappingRendering="false"
     />
 </merge>
