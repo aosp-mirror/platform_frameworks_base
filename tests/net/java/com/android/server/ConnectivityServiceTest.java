@@ -6878,14 +6878,15 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testConnectivityDiagnosticsCallbackOnConnectivityReport() throws Exception {
+    public void testConnectivityDiagnosticsCallbackOnConnectivityReportAvailable()
+            throws Exception {
         setUpConnectivityDiagnosticsCallback();
 
         // Block until all other events are done processing.
         HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         // Verify onConnectivityReport fired
-        verify(mConnectivityDiagnosticsCallback).onConnectivityReport(
+        verify(mConnectivityDiagnosticsCallback).onConnectivityReportAvailable(
                 argThat(report -> {
                     final NetworkCapabilities nc = report.getNetworkCapabilities();
                     return nc.getUids() == null
