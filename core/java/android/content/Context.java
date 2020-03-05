@@ -5109,16 +5109,6 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.app.appsearch.AppSearchManager} for
-     * indexing and querying app data managed by the system.
-     *
-     * @see #getSystemService(String)
-     * @hide
-     */
-    public static final String APP_SEARCH_SERVICE = "app_search";
-
-    /**
-     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.content.integrity.AppIntegrityManager}.
      * @hide
      */
