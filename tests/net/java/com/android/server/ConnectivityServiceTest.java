@@ -6744,16 +6744,12 @@ public class ConnectivityServiceTest {
 
         verify(mIBinder).linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
         verify(mConnectivityDiagnosticsCallback).asBinder();
-        assertTrue(
-                mService.mConnectivityDiagnosticsCallbacks.containsKey(
-                        mConnectivityDiagnosticsCallback));
+        assertTrue(mService.mConnectivityDiagnosticsCallbacks.containsKey(mIBinder));
 
         mService.unregisterConnectivityDiagnosticsCallback(mConnectivityDiagnosticsCallback);
         verify(mIBinder, timeout(TIMEOUT_MS))
                 .unlinkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
-        assertFalse(
-                mService.mConnectivityDiagnosticsCallbacks.containsKey(
-                        mConnectivityDiagnosticsCallback));
+        assertFalse(mService.mConnectivityDiagnosticsCallbacks.containsKey(mIBinder));
         verify(mConnectivityDiagnosticsCallback, atLeastOnce()).asBinder();
     }
 
@@ -6771,9 +6767,7 @@ public class ConnectivityServiceTest {
 
         verify(mIBinder).linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
         verify(mConnectivityDiagnosticsCallback).asBinder();
-        assertTrue(
-                mService.mConnectivityDiagnosticsCallbacks.containsKey(
-                        mConnectivityDiagnosticsCallback));
+        assertTrue(mService.mConnectivityDiagnosticsCallbacks.containsKey(mIBinder));
 
         // Register the same callback again
         mService.registerConnectivityDiagnosticsCallback(
@@ -6782,9 +6776,7 @@ public class ConnectivityServiceTest {
         // Block until all other events are done processing.
         HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
-        assertTrue(
-                mService.mConnectivityDiagnosticsCallbacks.containsKey(
-                        mConnectivityDiagnosticsCallback));
+        assertTrue(mService.mConnectivityDiagnosticsCallbacks.containsKey(mIBinder));
     }
 
     @Test

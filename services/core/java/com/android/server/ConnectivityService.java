@@ -653,8 +653,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     final MultipathPolicyTracker mMultipathPolicyTracker;
 
     @VisibleForTesting
-    final Map<IConnectivityDiagnosticsCallback, ConnectivityDiagnosticsCallbackInfo>
-            mConnectivityDiagnosticsCallbacks = new HashMap<>();
+    final Map<IBinder, ConnectivityDiagnosticsCallbackInfo> mConnectivityDiagnosticsCallbacks =
+            new HashMap<>();
 
     /**
      * Implements support for the legacy "one network per network type" model.
@@ -7796,11 +7796,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ensureRunningOnConnectivityServiceThread();
 
         final IConnectivityDiagnosticsCallback cb = cbInfo.mCb;
+        final IBinder iCb = cb.asBinder();
         final NetworkRequestInfo nri = cbInfo.mRequestInfo;
 
         // This means that the client registered the same callback multiple times. Do
         // not override the previous entry, and exit silently.
-        if (mConnectivityDiagnosticsCallbacks.containsKey(cb)) {
+        if (mConnectivityDiagnosticsCallbacks.containsKey(iCb)) {
             if (VDBG) log("Diagnostics callback is already registered");
 
             // Decrement the reference count for this NetworkRequestInfo. The reference count is
@@ -7810,10 +7811,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
-        mConnectivityDiagnosticsCallbacks.put(cb, cbInfo);
+        mConnectivityDiagnosticsCallbacks.put(iCb, cbInfo);
 
         try {
-            cb.asBinder().linkToDeath(cbInfo, 0);
+            iCb.linkToDeath(cbInfo, 0);
         } catch (RemoteException e) {
             cbInfo.binderDied();
             return;
@@ -7850,13 +7851,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void handleUnregisterConnectivityDiagnosticsCallback(
             @NonNull IConnectivityDiagnosticsCallback cb, int uid) {
         ensureRunningOnConnectivityServiceThread();
+        final IBinder iCb = cb.asBinder();
 
-        if (!mConnectivityDiagnosticsCallbacks.containsKey(cb)) {
+        if (!mConnectivityDiagnosticsCallbacks.containsKey(iCb)) {
             if (VDBG) log("Removing diagnostics callback that is not currently registered");
             return;
         }
 
-        final NetworkRequestInfo nri = mConnectivityDiagnosticsCallbacks.get(cb).mRequestInfo;
+        final NetworkRequestInfo nri = mConnectivityDiagnosticsCallbacks.get(iCb).mRequestInfo;
 
         if (uid != nri.mUid) {
             if (VDBG) loge("Different uid than registrant attempting to unregister cb");
@@ -7868,7 +7870,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // enforceRequestCountLimit().
         decrementNetworkRequestPerUidCount(nri);
 
-        cb.asBinder().unlinkToDeath(mConnectivityDiagnosticsCallbacks.remove(cb), 0);
+        final ConnectivityDiagnosticsCallbackInfo cbInfo =
+                mConnectivityDiagnosticsCallbacks.remove(iCb);
+        iCb.unlinkToDeath(cbInfo, 0);
     }
 
     private void handleNetworkTestedWithExtras(
@@ -7943,14 +7947,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private List<IConnectivityDiagnosticsCallback> getMatchingPermissionedCallbacks(
             @NonNull NetworkAgentInfo nai) {
         final List<IConnectivityDiagnosticsCallback> results = new ArrayList<>();
-        for (Entry<IConnectivityDiagnosticsCallback, ConnectivityDiagnosticsCallbackInfo> entry :
+        for (Entry<IBinder, ConnectivityDiagnosticsCallbackInfo> entry :
                 mConnectivityDiagnosticsCallbacks.entrySet()) {
             final ConnectivityDiagnosticsCallbackInfo cbInfo = entry.getValue();
             final NetworkRequestInfo nri = cbInfo.mRequestInfo;
             if (nai.satisfies(nri.request)) {
                 if (checkConnectivityDiagnosticsPermissions(
                         nri.mPid, nri.mUid, nai, cbInfo.mCallingPackageName)) {
-                    results.add(entry.getKey());
+                    results.add(entry.getValue().mCb);
                 }
             }
         }
