@@ -37,6 +37,9 @@ class NotificationConversationTemplateViewWrapper constructor(
 
     private val minHeightWithActions: Int
     private val conversationLayout: ConversationLayout
+    private var conversationIcon: View? = null
+    private var conversationBadge: View? = null
+    private var expandButton: View? = null
     private var messagingLinearLayout: MessagingLinearLayout? = null
 
     init {
@@ -47,6 +50,12 @@ class NotificationConversationTemplateViewWrapper constructor(
 
     private fun resolveViews() {
         messagingLinearLayout = conversationLayout.messagingLinearLayout
+        conversationIcon = conversationLayout.requireViewById(
+                com.android.internal.R.id.conversation_icon)
+        conversationBadge = conversationLayout.requireViewById(
+                com.android.internal.R.id.conversation_icon_badge)
+        expandButton = conversationLayout.requireViewById(
+                com.android.internal.R.id.expand_button)
     }
 
     override fun onContentUpdated(row: ExpandableNotificationRow) {
@@ -59,9 +68,17 @@ class NotificationConversationTemplateViewWrapper constructor(
     override fun updateTransformedTypes() {
         // This also clears the existing types
         super.updateTransformedTypes()
-        if (messagingLinearLayout != null) {
-            mTransformationHelper.addTransformedView(messagingLinearLayout!!.id,
-                    messagingLinearLayout)
+        messagingLinearLayout?.let {
+            mTransformationHelper.addTransformedView(it.id, it)
+        }
+        conversationIcon?.let {
+            mTransformationHelper.addViewTransformingToSimilar(it.id, it)
+        }
+        conversationBadge?.let {
+            mTransformationHelper.addViewTransformingToSimilar(it.id, it)
+        }
+        expandButton?.let {
+            mTransformationHelper.addViewTransformingToSimilar(it.id, it)
         }
     }
 

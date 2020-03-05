@@ -73,7 +73,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private boolean mImagesAtEnd;
     private ViewGroup mImageContainer;
     private MessagingImageMessage mIsolatedMessage;
-    private boolean mTransformingImages;
+    private boolean mClippingDisabled;
     private Point mDisplaySize = new Point();
     private ProgressBar mSendingSpinner;
     private View mSendingSpinnerContainer;
@@ -125,7 +125,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         // We want to clip to the senderName if it's available, otherwise our images will come
         // from a weird position
         Rect clipRect;
-        if (mSenderView.getVisibility() != View.GONE && !mTransformingImages) {
+        if (mSenderView.getVisibility() != View.GONE && !mClippingDisabled) {
             int top;
             if (mSingleLine) {
                 top = 0;
@@ -607,8 +607,8 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         return mSender;
     }
 
-    public void setTransformingImages(boolean transformingImages) {
-        mTransformingImages = transformingImages;
+    public void setClippingDisabled(boolean disabled) {
+        mClippingDisabled = disabled;
     }
 
     public void setDisplayImagesAtEnd(boolean atEnd) {
@@ -639,5 +639,9 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             updateClipRect();
             updateSenderVisibility();
         }
+    }
+
+    public boolean isSingleLine() {
+        return mSingleLine;
     }
 }
