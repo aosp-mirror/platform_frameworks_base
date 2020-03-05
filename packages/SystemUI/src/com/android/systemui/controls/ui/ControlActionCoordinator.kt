@@ -20,6 +20,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.provider.Settings
 import android.service.controls.actions.BooleanAction
+import android.service.controls.actions.CommandAction
 import android.util.Log
 import android.view.HapticFeedbackConstants
 
@@ -34,6 +35,10 @@ object ControlActionCoordinator {
 
         val nextLevel = if (isChecked) MIN_LEVEL else MAX_LEVEL
         cvh.clipLayer.setLevel(nextLevel)
+    }
+
+    fun touch(cvh: ControlViewHolder, templateId: String) {
+        cvh.action(CommandAction(templateId))
     }
 
     fun longPress(cvh: ControlViewHolder) {
