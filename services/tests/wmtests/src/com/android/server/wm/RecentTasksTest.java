@@ -1020,6 +1020,29 @@ public class RecentTasksTest extends ActivityTestsBase {
         verify(controller, times(4)).notifyTaskListUpdated();
     }
 
+    @Test
+    public void testTaskInfo_expectNoExtras() {
+        doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
+        doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
+
+        final Bundle data = new Bundle();
+        data.putInt("key", 100);
+        final Task task1 = createTaskBuilder(".Task").build();
+        final ActivityRecord r1 = new ActivityBuilder(mService)
+                .setTask(task1)
+                .setIntentExtras(data)
+                .build();
+        mRecentTasks.add(r1.getTask());
+
+        final List<RecentTaskInfo> infos = mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
+                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList();
+        assertTrue(infos.size() == 1);
+        for (int i = 0; i < infos.size(); i++)  {
+            final Bundle extras = infos.get(i).baseIntent.getExtras();
+            assertTrue(extras == null || extras.isEmpty());
+        }
+    }
+
     /**
      * Ensures that the raw recent tasks list is in the provided order. Note that the expected tasks
      * should be ordered from least to most recent.
@@ -1040,8 +1063,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
         doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
         List<RecentTaskInfo> infos = mRecentTasks.getRecentTasks(MAX_VALUE, getRecentTaskFlags,
-                true /* getTasksAllowed */, false /* getDetailedTasks */,
-                TEST_USER_0_ID, 0).getList();
+                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList();
         assertTrue(expectedTasks.length == infos.size());
         for (int i = 0; i < infos.size(); i++)  {
             assertTrue(expectedTasks[i].mTaskId == infos.get(i).taskId);
@@ -1329,11 +1351,9 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         @Override
         ParceledListSlice<RecentTaskInfo> getRecentTasks(int maxNum, int flags,
-                boolean getTasksAllowed,
-                boolean getDetailedTasks, int userId, int callingUid) {
+                boolean getTasksAllowed, int userId, int callingUid) {
             mLastAllowed = getTasksAllowed;
-            return super.getRecentTasks(maxNum, flags, getTasksAllowed, getDetailedTasks, userId,
-                    callingUid);
+            return super.getRecentTasks(maxNum, flags, getTasksAllowed, userId, callingUid);
         }
 
         @Override
