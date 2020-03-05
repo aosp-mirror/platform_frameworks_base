@@ -45,6 +45,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +62,8 @@ import java.util.concurrent.Executor;
  * @see MediaSession
  * @see MediaController
  */
-// TODO: (jinpark) Add API for getting and setting session policies from MediaSessionService.
+// TODO: (jinpark) Add API for getting and setting session policies from MediaSessionService once
+//  b/149006225 is fixed.
 @SystemService(Context.MEDIA_SESSION_SERVICE)
 public final class MediaSessionManager {
     private static final String TAG = "SessionManager";
@@ -873,6 +875,40 @@ public final class MediaSessionManager {
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to set media key listener", e);
             }
+        }
+    }
+
+    /**
+     * Set the component name for the custom
+     * {@link com.android.server.media.MediaKeyDispatcher} class. Set to null to restore to the
+     * custom {@link com.android.server.media.MediaKeyDispatcher} class name retrieved from the
+     * config value.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public void setCustomMediaKeyDispatcherForTesting(@Nullable String name) {
+        try {
+            mService.setCustomMediaKeyDispatcherForTesting(name);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set custom media key dispatcher name", e);
+        }
+    }
+
+    /**
+     * Set the component name for the custom
+     * {@link com.android.server.media.SessionPolicyProvider} class. Set to null to restore to the
+     * custom {@link com.android.server.media.SessionPolicyProvider} class name retrieved from the
+     * config value.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public void setCustomSessionPolicyProviderForTesting(@Nullable String name) {
+        try {
+            mService.setCustomSessionPolicyProviderForTesting(name);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set custom session policy provider name", e);
         }
     }
 
