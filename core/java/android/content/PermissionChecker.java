@@ -123,7 +123,7 @@ public final class PermissionChecker {
      * @param uid The uid for which to check.
      * @param packageName The package name for which to check. If null the
      *     the first package for the calling UID will be used.
-     * @param featureId Feature in the package
+     * @param attributionTag attribution tag
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      * @param message A message describing the reason the permission was checked
@@ -133,9 +133,9 @@ public final class PermissionChecker {
     @PermissionResult
     public static int checkPermissionForDataDelivery(@NonNull Context context,
             @NonNull String permission, int pid, int uid, @Nullable String packageName,
-            @Nullable String featureId, @Nullable String message) {
-        return checkPermissionCommon(context, permission, pid, uid, packageName, featureId, message,
-                true /*forDataDelivery*/);
+            @Nullable String attributionTag, @Nullable String message) {
+        return checkPermissionCommon(context, permission, pid, uid, packageName, attributionTag,
+                message, true /*forDataDelivery*/);
     }
 
     /**
@@ -171,8 +171,8 @@ public final class PermissionChecker {
     @PermissionResult
     public static int checkPermissionForPreflight(@NonNull Context context,
             @NonNull String permission, int pid, int uid, @Nullable String packageName) {
-        return checkPermissionCommon(context, permission, pid, uid, packageName, null /*featureId*/,
-                null /*message*/, false /*forDataDelivery*/);
+        return checkPermissionCommon(context, permission, pid, uid, packageName,
+                null /*attributionTag*/, null /*message*/, false /*forDataDelivery*/);
     }
 
     /**
@@ -207,7 +207,7 @@ public final class PermissionChecker {
     public static int checkSelfPermissionForDataDelivery(@NonNull Context context,
             @NonNull String permission, @Nullable String message) {
         return checkPermissionForDataDelivery(context, permission, Process.myPid(),
-                Process.myUid(), context.getPackageName(), context.getFeatureId(), message);
+                Process.myUid(), context.getPackageName(), context.getAttributionTag(), message);
     }
 
     /**
@@ -266,7 +266,7 @@ public final class PermissionChecker {
      * @param permission The permission to check.
      * @param packageName The package name making the IPC. If null the
      *     the first package for the calling UID will be used.
-     * @param featureId The feature inside of the app
+     * @param attributionTag attribution tag
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      * @param message A message describing the reason the permission was checked
@@ -276,12 +276,12 @@ public final class PermissionChecker {
     @PermissionResult
     public static int checkCallingPermissionForDataDelivery(@NonNull Context context,
             @NonNull String permission, @Nullable String packageName,
-            @Nullable String featureId, @Nullable String message) {
+            @Nullable String attributionTag, @Nullable String message) {
         if (Binder.getCallingPid() == Process.myPid()) {
             return PERMISSION_HARD_DENIED;
         }
         return checkPermissionForDataDelivery(context, permission, Binder.getCallingPid(),
-                Binder.getCallingUid(), packageName, featureId, message);
+                Binder.getCallingUid(), packageName, attributionTag, message);
     }
 
     /**
@@ -343,20 +343,20 @@ public final class PermissionChecker {
      * @param permission The permission to check.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
-     * @param featureId feature Id of caller (if not self)
+     * @param attributionTag attribution tag of caller (if not self)
      * @param message A message describing the reason the permission was checked
      *
      * @see #checkCallingOrSelfPermissionForPreflight(Context, String)
      */
     @PermissionResult
     public static int checkCallingOrSelfPermissionForDataDelivery(@NonNull Context context,
-            @NonNull String permission, @Nullable String featureId, @Nullable String message) {
+            @NonNull String permission, @Nullable String attributionTag, @Nullable String message) {
         String packageName = (Binder.getCallingPid() == Process.myPid())
                 ? context.getPackageName() : null;
-        featureId = (Binder.getCallingPid() == Process.myPid())
-                ? context.getFeatureId() : featureId;
+        attributionTag = (Binder.getCallingPid() == Process.myPid())
+                ? context.getAttributionTag() : attributionTag;
         return checkPermissionForDataDelivery(context, permission, Binder.getCallingPid(),
-                Binder.getCallingUid(), packageName, featureId, message);
+                Binder.getCallingUid(), packageName, attributionTag, message);
     }
 
     /**
@@ -395,7 +395,7 @@ public final class PermissionChecker {
     }
 
     static int checkPermissionCommon(@NonNull Context context, @NonNull String permission,
-            int pid, int uid, @Nullable String packageName, @Nullable String featureId,
+            int pid, int uid, @Nullable String packageName, @Nullable String attributionTag,
             @Nullable String message, boolean forDataDelivery) {
         final PermissionInfo permissionInfo;
         try {
@@ -414,18 +414,18 @@ public final class PermissionChecker {
         }
 
         if (permissionInfo.isAppOp()) {
-            return checkAppOpPermission(context, permission, pid, uid, packageName, featureId,
+            return checkAppOpPermission(context, permission, pid, uid, packageName, attributionTag,
                     message, forDataDelivery);
         }
         if (permissionInfo.isRuntime()) {
-            return checkRuntimePermission(context, permission, pid, uid, packageName, featureId,
-                    message, forDataDelivery);
+            return checkRuntimePermission(context, permission, pid, uid, packageName,
+                    attributionTag, message, forDataDelivery);
         }
         return context.checkPermission(permission, pid, uid);
     }
 
     private static int checkAppOpPermission(@NonNull Context context, @NonNull String permission,
-            int pid, int uid, @Nullable String packageName, @Nullable String featureId,
+            int pid, int uid, @Nullable String packageName, @Nullable String attributionTag,
             @Nullable String message, boolean forDataDelivery) {
         final String op = AppOpsManager.permissionToOp(permission);
         if (op == null || packageName == null) {
@@ -434,7 +434,7 @@ public final class PermissionChecker {
 
         final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
         final int opMode = (forDataDelivery)
-                ? appOpsManager.noteProxyOpNoThrow(op, packageName, uid, featureId, message)
+                ? appOpsManager.noteProxyOpNoThrow(op, packageName, uid, attributionTag, message)
                 : appOpsManager.unsafeCheckOpNoThrow(op, uid, packageName);
 
         switch (opMode) {
@@ -453,7 +453,7 @@ public final class PermissionChecker {
     }
 
     private static int checkRuntimePermission(@NonNull Context context, @NonNull String permission,
-            int pid, int uid, @Nullable String packageName, @Nullable String featureId,
+            int pid, int uid, @Nullable String packageName, @Nullable String attributionTag,
             @Nullable String message, boolean forDataDelivery) {
         if (context.checkPermission(permission, pid, uid) == PackageManager.PERMISSION_DENIED) {
             return PERMISSION_HARD_DENIED;
@@ -466,7 +466,7 @@ public final class PermissionChecker {
 
         final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
         final int opMode = (forDataDelivery)
-                ? appOpsManager.noteProxyOpNoThrow(op, packageName, uid, featureId, message)
+                ? appOpsManager.noteProxyOpNoThrow(op, packageName, uid, attributionTag, message)
                 : appOpsManager.unsafeCheckOpNoThrow(op, uid, packageName);
 
         if (opMode == AppOpsManager.MODE_ALLOWED) {

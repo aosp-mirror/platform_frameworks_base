@@ -291,7 +291,7 @@ public class RcsUceAdapter {
 
         try {
             imsRcsController.requestCapabilities(mSubId, mContext.getOpPackageName(),
-                    mContext.getFeatureId(), contactNumbers, internalCallback);
+                    mContext.getAttributionTag(), contactNumbers, internalCallback);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#requestCapabilities", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -352,7 +352,7 @@ public class RcsUceAdapter {
         try {
             // Telephony.SimInfo#IMS_RCS_UCE_ENABLED can also be used to listen to changes to this.
             return imsRcsController.isUceSettingEnabled(mSubId, mContext.getOpPackageName(),
-                    mContext.getFeatureId());
+                    mContext.getAttributionTag());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#isUceSettingEnabled", e);
             throw new ImsException("Remote IMS Service is not available",

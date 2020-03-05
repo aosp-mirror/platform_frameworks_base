@@ -11514,8 +11514,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             "Static shared libs cannot declare permission groups");
                 }
 
-                // Static shared libs cannot declare features
-                if (!pkg.getFeatures().isEmpty()) {
+                // Static shared libs cannot declare attributions
+                if (!pkg.getAttributions().isEmpty()) {
                     throw new PackageManagerException(
                             "Static shared libs cannot declare features");
                 }

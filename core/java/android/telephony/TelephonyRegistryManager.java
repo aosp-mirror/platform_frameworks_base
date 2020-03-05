@@ -116,7 +116,7 @@ public class TelephonyRegistryManager {
         mSubscriptionChangedListenerMap.put(listener, callback);
         try {
             sRegistry.addOnSubscriptionsChangedListener(mContext.getOpPackageName(),
-                    mContext.getFeatureId(), callback);
+                    mContext.getAttributionTag(), callback);
         } catch (RemoteException ex) {
             // system server crash
         }
@@ -175,7 +175,7 @@ public class TelephonyRegistryManager {
         mOpportunisticSubscriptionChangedListenerMap.put(listener, callback);
         try {
             sRegistry.addOnOpportunisticSubscriptionsChangedListener(mContext.getOpPackageName(),
-                    mContext.getFeatureId(), callback);
+                    mContext.getAttributionTag(), callback);
         } catch (RemoteException ex) {
             // system server crash
         }

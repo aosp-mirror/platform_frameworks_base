@@ -43,24 +43,24 @@ public final class SyncNotedAppOp implements Parcelable {
 
     /** op code of synchronous appop noted */
     private final @IntRange(from = 0L, to = AppOpsManager._NUM_OP - 1) int mOpCode;
-    /** featureId of synchronous appop noted */
-    private final @Nullable String mFeatureId;
+    /** attributionTag of synchronous appop noted */
+    private final @Nullable String mAttributionTag;
 
     /**
      * Creates a new SyncNotedAppOp.
      *
      * @param opCode
      *   op code of synchronous appop noted
-     * @param featureId
-     *   featureId of synchronous appop noted
+     * @param attributionTag
+     *   attributionTag of synchronous appop noted
      */
-    public SyncNotedAppOp(@IntRange(from = 0L) int opCode, @Nullable String featureId) {
+    public SyncNotedAppOp(@IntRange(from = 0L) int opCode, @Nullable String attributionTag) {
         this.mOpCode = opCode;
         com.android.internal.util.AnnotationValidations.validate(
                 IntRange.class, null, mOpCode,
                 "from", 0,
                 "to", AppOpsManager._NUM_OP - 1);
-        this.mFeatureId = featureId;
+        this.mAttributionTag = attributionTag;
     }
 
     /**
@@ -84,11 +84,11 @@ public final class SyncNotedAppOp implements Parcelable {
 
 
     /**
-     * featureId of synchronous appop noted
+     * attributionTag of synchronous appop noted
      */
     @DataClass.Generated.Member
-    public @Nullable String getFeatureId() {
-        return mFeatureId;
+    public @Nullable String getAttributionTag() {
+        return mAttributionTag;
     }
 
     @Override
@@ -105,7 +105,7 @@ public final class SyncNotedAppOp implements Parcelable {
         //noinspection PointlessBooleanExpression
         return true
                 && mOpCode == that.mOpCode
-                && java.util.Objects.equals(mFeatureId, that.mFeatureId);
+                && java.util.Objects.equals(mAttributionTag, that.mAttributionTag);
     }
 
     @Override
@@ -116,7 +116,7 @@ public final class SyncNotedAppOp implements Parcelable {
 
         int _hash = 1;
         _hash = 31 * _hash + mOpCode;
-        _hash = 31 * _hash + java.util.Objects.hashCode(mFeatureId);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mAttributionTag);
         return _hash;
     }
 
@@ -127,10 +127,10 @@ public final class SyncNotedAppOp implements Parcelable {
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         byte flg = 0;
-        if (mFeatureId != null) flg |= 0x2;
+        if (mAttributionTag != null) flg |= 0x2;
         dest.writeByte(flg);
         dest.writeInt(mOpCode);
-        if (mFeatureId != null) dest.writeString(mFeatureId);
+        if (mAttributionTag != null) dest.writeString(mAttributionTag);
     }
 
     @Override
@@ -146,14 +146,14 @@ public final class SyncNotedAppOp implements Parcelable {
 
         byte flg = in.readByte();
         int opCode = in.readInt();
-        String featureId = (flg & 0x2) == 0 ? null : in.readString();
+        String attributionTag = (flg & 0x2) == 0 ? null : in.readString();
 
         this.mOpCode = opCode;
         com.android.internal.util.AnnotationValidations.validate(
                 IntRange.class, null, mOpCode,
                 "from", 0,
                 "to", AppOpsManager._NUM_OP - 1);
-        this.mFeatureId = featureId;
+        this.mAttributionTag = attributionTag;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -176,7 +176,7 @@ public final class SyncNotedAppOp implements Parcelable {
             time = 1579188889960L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/app/SyncNotedAppOp.java",
-            inputSignatures = "private final @android.annotation.IntRange(from=0L, to=AppOpsManager._NUM_OP - 1) int mOpCode\nprivate final @android.annotation.Nullable java.lang.String mFeatureId\npublic @android.annotation.NonNull java.lang.String getOp()\npublic @android.annotation.SystemApi int getOpCode()\nclass SyncNotedAppOp extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genConstructor=false)")*/
+            inputSignatures = "private final @android.annotation.IntRange(from=0L, to=AppOpsManager._NUM_OP - 1) int mOpCode\nprivate final @android.annotation.Nullable java.lang.String mAttributionTag\npublic @android.annotation.NonNull java.lang.String getOp()\npublic @android.annotation.SystemApi int getOpCode()\nclass SyncNotedAppOp extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genConstructor=false)")*/
     @Deprecated
     private void __metadata() {}
 
