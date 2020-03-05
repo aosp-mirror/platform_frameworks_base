@@ -1714,6 +1714,13 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    public static boolean isPsTech(int radioTechnology) {
+        return radioTechnology == RIL_RADIO_TECHNOLOGY_LTE ||
+                radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA ||
+                radioTechnology == RIL_RADIO_TECHNOLOGY_NR;
+    }
+
+    /** @hide */
     public static boolean isLte(int radioTechnology) {
         return radioTechnology == RIL_RADIO_TECHNOLOGY_LTE ||
                 radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA;
