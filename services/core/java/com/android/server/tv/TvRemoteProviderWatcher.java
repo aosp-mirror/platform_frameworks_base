@@ -30,6 +30,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -140,7 +142,8 @@ final class TvRemoteProviderWatcher {
         }
     }
 
-    private boolean verifyServiceTrusted(ServiceInfo serviceInfo) {
+    @VisibleForTesting
+    boolean verifyServiceTrusted(ServiceInfo serviceInfo) {
         if (serviceInfo.permission == null || !serviceInfo.permission.equals(
                 Manifest.permission.BIND_TV_REMOTE_SERVICE)) {
             // If the service does not require this permission then any app could
