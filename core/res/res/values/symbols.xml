@@ -3876,6 +3876,7 @@
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionPkgs" />
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionProcStates" />
 
+  <java-symbol type="string" name="conversation_single_line_name_display" />
   <java-symbol type="id" name="conversation_icon" />
   <java-symbol type="id" name="conversation_icon_badge" />
   <java-symbol type="id" name="expand_button_container" />

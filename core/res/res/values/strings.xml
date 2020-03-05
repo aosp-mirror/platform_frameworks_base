@@ -5432,6 +5432,9 @@
     <string name="as_app_forced_to_restricted_bucket">
         <xliff:g id="package_name" example="com.android.example">%1$s</xliff:g> has been put into the RESTRICTED bucket</string>
 
+    <!-- The way a conversation name is displayed when single line. The text will be displayed to the end of this text with some spacing -->
+    <string name="conversation_single_line_name_display"><xliff:g id="sender_name" example="Sara">%1$s</xliff:g>:</string>
+
     <!-- ResolverActivity - profile tabs -->
     <!-- Label of a tab on a screen. A user can tap this tap to switch to the 'Personal' view (that shows their personal content) if they have a work profile on their device. [CHAR LIMIT=NONE] -->
     <string name="resolver_personal_tab">Personal</string>

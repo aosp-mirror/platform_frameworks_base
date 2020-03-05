@@ -158,6 +158,10 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             nameOverride = sender.getName();
         }
         mSenderName = nameOverride;
+        if (mSingleLine && !TextUtils.isEmpty(nameOverride)) {
+            nameOverride = mContext.getResources().getString(
+                    R.string.conversation_single_line_name_display, nameOverride);
+        }
         mSenderView.setText(nameOverride);
         mNeedsGeneratedAvatar = sender.getIcon() == null;
         if (!mNeedsGeneratedAvatar) {
