@@ -19,6 +19,7 @@
 #include "frameworks/base/cmds/statsd/src/shell/shell_config.pb.h"
 #include "frameworks/base/cmds/statsd/src/shell/shell_data.pb.h"
 #include "src/shell/ShellSubscriber.h"
+#include "stats_event.h"
 #include "tests/metrics/metrics_test_helper.h"
 
 #include <stdio.h>
@@ -88,6 +89,7 @@ void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
     // now read from the pipe. firstly read the atom size.
     size_t dataSize = 0;
     EXPECT_EQ((int)sizeof(dataSize), read(fds_data[0], &dataSize, sizeof(dataSize)));
+
     EXPECT_EQ(expected_data_size, (int)dataSize);
 
     // then read that much data which is the atom in proto binary format
@@ -103,32 +105,43 @@ void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
     expectedData.SerializeToArray(&atomBuffer[0], expected_data_size);
     EXPECT_EQ(atomBuffer, dataBuffer);
     close(fds_data[0]);
+
+    if (reader.joinable()) {
+        reader.join();
+    }
 }
 
-// TODO(b/149590301): Update this test to use new socket schema.
-//TEST(ShellSubscriberTest, testPushedSubscription) {
-//    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-//
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    vector<std::shared_ptr<LogEvent>> pushedList;
-//
-//    std::shared_ptr<LogEvent> event1 =
-//            std::make_shared<LogEvent>(29 /*screen_state_atom_id*/, 1000 /*timestamp*/);
-//    event1->write(::android::view::DisplayStateEnum::DISPLAY_STATE_ON);
-//    event1->init();
-//    pushedList.push_back(event1);
-//
-//    // create a simple config to get screen events
-//    ShellSubscription config;
-//    config.add_pushed()->set_atom_id(29);
-//
-//    // this is the expected screen event atom.
-//    ShellData shellData;
-//    shellData.add_atom()->mutable_screen_state_changed()->set_state(
-//            ::android::view::DisplayStateEnum::DISPLAY_STATE_ON);
-//
-//    runShellTest(config, uidMap, pullerManager, pushedList, shellData);
-//}
+TEST(ShellSubscriberTest, testPushedSubscription) {
+    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    vector<std::shared_ptr<LogEvent>> pushedList;
+
+    // Create the LogEvent from an AStatsEvent
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, 29 /*screen_state_atom_id*/);
+    AStatsEvent_overwriteTimestamp(statsEvent, 1000);
+    AStatsEvent_writeInt32(statsEvent, ::android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+    AStatsEvent_build(statsEvent);
+    size_t size;
+    uint8_t* buffer = AStatsEvent_getBuffer(statsEvent, &size);
+    std::shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buffer, size);
+    AStatsEvent_release(statsEvent);
+
+    pushedList.push_back(logEvent);
+
+    // create a simple config to get screen events
+    ShellSubscription config;
+    config.add_pushed()->set_atom_id(29);
+
+    // this is the expected screen event atom.
+    ShellData shellData;
+    shellData.add_atom()->mutable_screen_state_changed()->set_state(
+            ::android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+
+    runShellTest(config, uidMap, pullerManager, pushedList, shellData);
+}
 
 namespace {
 
@@ -159,33 +172,38 @@ ShellSubscription getPulledConfig() {
     return config;
 }
 
+shared_ptr<LogEvent> makeCpuActiveTimeAtom(int32_t uid, int64_t timeMillis) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, 10016);
+    AStatsEvent_overwriteTimestamp(statsEvent, 1111L);
+    AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_writeInt64(statsEvent, timeMillis);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    return logEvent;
+}
+
 }  // namespace
 
-// TODO(b/149590301): Update this test to use new socket schema.
-//TEST(ShellSubscriberTest, testPulledSubscription) {
-//    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-//
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(10016, _))
-//            .WillRepeatedly(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, 1111L);
-//                event->write(kUid1);
-//                event->write(kCpuTime1);
-//                event->init();
-//                data->push_back(event);
-//                // another event
-//                event = make_shared<LogEvent>(tagId, 1111L);
-//                event->write(kUid2);
-//                event->write(kCpuTime2);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//
-//    runShellTest(getPulledConfig(), uidMap, pullerManager, vector<std::shared_ptr<LogEvent>>(),
-//                 getExpectedShellData());
-//}
+TEST(ShellSubscriberTest, testPulledSubscription) {
+    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(10016, _))
+            .WillRepeatedly(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(makeCpuActiveTimeAtom(/*uid=*/kUid1, /*timeMillis=*/kCpuTime1));
+                data->push_back(makeCpuActiveTimeAtom(/*uid=*/kUid2, /*timeMillis=*/kCpuTime2));
+                return true;
+            }));
+    runShellTest(getPulledConfig(), uidMap, pullerManager, vector<std::shared_ptr<LogEvent>>(),
+                 getExpectedShellData());
+}
 
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
