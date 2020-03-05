@@ -75,6 +75,14 @@ struct LnbCallback : public ILnbCallback {
     LnbId mId;
 };
 
+struct Lnb : public RefBase {
+    Lnb(sp<ILnb> sp, jobject obj);
+    ~Lnb();
+    sp<ILnb> getILnb();
+    sp<ILnb> mLnbSp;
+    jweak mLnbObj;
+};
+
 struct DvrCallback : public IDvrCallback {
     virtual Return<void> onRecordStatus(RecordStatus status);
     virtual Return<void> onPlaybackStatus(PlaybackStatus status);
