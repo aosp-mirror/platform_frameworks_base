@@ -18,12 +18,18 @@ package android.app.timezonedetector;
 
 import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcelable;
+import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.os.ShellCommand;
+
 import org.junit.Test;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class TelephonyTimeZoneSuggestionTest {
     private static final int SLOT_INDEX = 99999;
@@ -158,5 +164,58 @@ public class TelephonyTimeZoneSuggestionTest {
         TelephonyTimeZoneSuggestion suggestion1_2 = roundTripParcelable(suggestion1);
         assertEquals(suggestion1, suggestion1_2);
         assertTrue(suggestion1_2.getDebugInfo().contains(debugString));
+    }
+
+    @Test
+    public void testPrintCommandLineOpts() throws Exception {
+        try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
+            TelephonyTimeZoneSuggestion.printCommandLineOpts(pw);
+            assertTrue(sw.getBuffer().length() > 0);
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseCommandLineArg_noArgs() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions("");
+        TelephonyTimeZoneSuggestion.parseCommandLineArg(testShellCommand);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseCommandLineArg_noSlotIndex() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions("--zone_id _");
+        TelephonyTimeZoneSuggestion.parseCommandLineArg(testShellCommand);
+    }
+
+    @Test
+    public void testParseCommandLineArg_validEmptyZoneIdSuggestion() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
+                "--slot_index 0 --zone_id _");
+        TelephonyTimeZoneSuggestion expectedSuggestion =
+                new TelephonyTimeZoneSuggestion.Builder(0).build();
+        TelephonyTimeZoneSuggestion actualSuggestion =
+                TelephonyTimeZoneSuggestion.parseCommandLineArg(testShellCommand);
+        assertEquals(expectedSuggestion, actualSuggestion);
+    }
+
+    @Test
+    public void testParseCommandLineArg_validNonEmptySuggestion() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
+                "--slot_index 0 --zone_id Europe/London --quality single --match_type country");
+        TelephonyTimeZoneSuggestion expectedSuggestion =
+                new TelephonyTimeZoneSuggestion.Builder(0)
+                        .setZoneId("Europe/London")
+                        .setQuality(TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE)
+                        .setMatchType(TelephonyTimeZoneSuggestion.MATCH_TYPE_NETWORK_COUNTRY_ONLY)
+                        .build();
+        TelephonyTimeZoneSuggestion actualSuggestion =
+                TelephonyTimeZoneSuggestion.parseCommandLineArg(testShellCommand);
+        assertEquals(expectedSuggestion, actualSuggestion);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseCommandLineArg_unknownArgument() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
+                "--slot_index 0 --zone_id _ --bad_arg 0");
+        TelephonyTimeZoneSuggestion.parseCommandLineArg(testShellCommand);
     }
 }
