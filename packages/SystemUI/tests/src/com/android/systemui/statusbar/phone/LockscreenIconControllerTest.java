@@ -29,6 +29,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -68,6 +69,9 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
     private NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private DockManager mDockManager;
+
 
     @Before
     public void setUp() {
@@ -77,7 +81,7 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
                 mLockscreenGestureLogger, mKeyguardUpdateMonitor, mLockPatternUtils,
                 mShadeController, mAccessibilityController, mKeyguardIndicationController,
                 mStatusBarStateController, mConfigurationController, mNotificationWakeUpCoordinator,
-                mKeyguardBypassController);
+                mKeyguardBypassController, mDockManager);
 
         mLockIconController.attach(mLockIcon);
     }

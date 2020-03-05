@@ -33,14 +33,11 @@ import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.graphics.ColorUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -66,7 +63,6 @@ public class LockIcon extends KeyguardAffordanceView implements
     private static final int STATE_BIOMETRICS_ERROR = 3;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final AccessibilityController mAccessibilityController;
-    private final DockManager mDockManager;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardBypassController mBypassController;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
@@ -126,18 +122,6 @@ public class LockIcon extends KeyguardAffordanceView implements
                     update();
                 }
             };
-    private final DockManager.DockEventListener mDockEventListener =
-            new DockManager.DockEventListener() {
-                @Override
-                public void onEvent(int event) {
-                    boolean docked = event == DockManager.STATE_DOCKED
-                            || event == DockManager.STATE_DOCKED_HIDE;
-                    if (docked != mDocked) {
-                        mDocked = docked;
-                        update();
-                    }
-        }
-    };
 
     @Inject
     public LockIcon(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -145,7 +129,6 @@ public class LockIcon extends KeyguardAffordanceView implements
             KeyguardBypassController bypassController,
             NotificationWakeUpCoordinator wakeUpCoordinator,
             KeyguardStateController keyguardStateController,
-            @Nullable DockManager dockManager,
             HeadsUpManagerPhone headsUpManager) {
         super(context, attrs);
         mContext = context;
@@ -154,7 +137,6 @@ public class LockIcon extends KeyguardAffordanceView implements
         mBypassController = bypassController;
         mWakeUpCoordinator = wakeUpCoordinator;
         mKeyguardStateController = keyguardStateController;
-        mDockManager = dockManager;
         mHeadsUpManager = headsUpManager;
     }
 
@@ -163,9 +145,6 @@ public class LockIcon extends KeyguardAffordanceView implements
         super.onAttachedToWindow();
         mKeyguardStateController.addCallback(mKeyguardMonitorCallback);
         mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
-        if (mDockManager != null) {
-            mDockManager.addListener(mDockEventListener);
-        }
         update();
     }
 
@@ -173,9 +152,6 @@ public class LockIcon extends KeyguardAffordanceView implements
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mKeyguardStateController.removeCallback(mKeyguardMonitorCallback);
-        if (mDockManager != null) {
-            mDockManager.removeListener(mDockEventListener);
-        }
     }
 
     /**
@@ -413,6 +389,14 @@ public class LockIcon extends KeyguardAffordanceView implements
 
     void setSimLocked(boolean simLocked) {
         mSimLocked = simLocked;
+    }
+
+    /** Set if the device is docked. */
+    public void setDocked(boolean docked) {
+        if (mDocked != docked) {
+            mDocked = docked;
+            update();
+        }
     }
 
     @Retention(RetentionPolicy.SOURCE)

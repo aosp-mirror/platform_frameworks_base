@@ -22,11 +22,14 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -35,6 +38,8 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -53,6 +58,7 @@ public class LockscreenLockIconController {
     private final ConfigurationController mConfigurationController;
     private final NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     private final KeyguardBypassController mKeyguardBypassController;
+    private final Optional<DockManager> mDockManager;
     private LockIcon mLockIcon;
 
     private View.OnAttachStateChangeListener mOnAttachStateChangeListener =
@@ -64,6 +70,8 @@ public class LockscreenLockIconController {
             mNotificationWakeUpCoordinator.addListener(mWakeUpListener);
             mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
 
+            mDockManager.ifPresent(dockManager -> dockManager.addListener(mDockEventListener));
+
             mConfigurationListener.onThemeChanged();
         }
 
@@ -73,6 +81,9 @@ public class LockscreenLockIconController {
             mConfigurationController.removeCallback(mConfigurationListener);
             mNotificationWakeUpCoordinator.removeListener(mWakeUpListener);
             mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
+
+
+            mDockManager.ifPresent(dockManager -> dockManager.removeListener(mDockEventListener));
         }
     };
 
@@ -162,6 +173,10 @@ public class LockscreenLockIconController {
                 }
             };
 
+    private final DockManager.DockEventListener mDockEventListener =
+            event -> mLockIcon.setDocked(event == DockManager.STATE_DOCKED
+                    || event == DockManager.STATE_DOCKED_HIDE);
+
     @Inject
     public LockscreenLockIconController(LockscreenGestureLogger lockscreenGestureLogger,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -172,7 +187,8 @@ public class LockscreenLockIconController {
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
-            KeyguardBypassController keyguardBypassController) {
+            KeyguardBypassController keyguardBypassController,
+            @Nullable DockManager dockManager) {
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
@@ -183,6 +199,7 @@ public class LockscreenLockIconController {
         mConfigurationController = configurationController;
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
         mKeyguardBypassController = keyguardBypassController;
+        mDockManager = dockManager == null ? Optional.empty() : Optional.of(dockManager);
 
         mKeyguardIndicationController.setLockIconController(this);
     }
