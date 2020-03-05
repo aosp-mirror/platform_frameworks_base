@@ -43,6 +43,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseSetArray;
 
 import com.android.internal.R;
@@ -123,6 +124,7 @@ public class AppsFilter {
     }
 
     public interface FeatureConfig {
+
         /** Called when the system is ready and components can be queried. */
         void onSystemReady();
 
@@ -132,11 +134,21 @@ public class AppsFilter {
         /** @return true if the feature is enabled for the given package. */
         boolean packageIsEnabled(AndroidPackage pkg);
 
+        /** @return true if debug logging is enabled for the given package. */
+        boolean isLoggingEnabled(int appId);
+
+        /**
+         * Turns on logging for the given appId
+         * @param enable true if logging should be enabled, false if disabled.
+         */
+        void enableLogging(int appId, boolean enable);
+
         /**
          * Initializes the package enablement state for the given package. This gives opportunity
          * to do any expensive operations ahead of the actual checks.
+         * @param removed true if adding, false if removing
          */
-        void initializePackageState(String packageName);
+        void updatePackageState(PackageSetting setting, boolean removed);
     }
 
     private static class FeatureConfigImpl implements FeatureConfig, CompatChange.ChangeListener {
@@ -146,6 +158,9 @@ public class AppsFilter {
         private volatile boolean mFeatureEnabled =
                 PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT;
         private final ArraySet<String> mDisabledPackages = new ArraySet<>();
+
+        @Nullable
+        private SparseBooleanArray mLoggingEnabled = null;
 
         private FeatureConfigImpl(
                 PackageManagerInternal pmInternal, PackageManagerService.Injector injector) {
@@ -192,38 +207,64 @@ public class AppsFilter {
             }
         }
 
-        private boolean fetchPackageIsEnabled(AndroidPackage pkg) {
+        @Override
+        public boolean isLoggingEnabled(int uid) {
+            return mLoggingEnabled != null && mLoggingEnabled.indexOfKey(uid) >= 0;
+        }
+
+        @Override
+        public void enableLogging(int appId, boolean enable) {
+            if (enable) {
+                if (mLoggingEnabled == null) {
+                    mLoggingEnabled = new SparseBooleanArray();
+                }
+                mLoggingEnabled.put(appId, true);
+            } else {
+                if (mLoggingEnabled != null) {
+                    final int index = mLoggingEnabled.indexOfKey(appId);
+                    if (index >= 0) {
+                        mLoggingEnabled.removeAt(index);
+                        if (mLoggingEnabled.size() == 0) {
+                            mLoggingEnabled = null;
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onCompatChange(String packageName) {
+            updateEnabledState(mPmInternal.getPackage(packageName));
+        }
+
+        private void updateEnabledState(AndroidPackage pkg) {
             final long token = Binder.clearCallingIdentity();
             try {
                 // TODO(b/135203078): Do not use toAppInfo
-                final boolean changeEnabled =
+                final boolean enabled =
                         mInjector.getCompatibility().isChangeEnabled(
                                 PackageManager.FILTER_APPLICATION_QUERY,
                                 pkg.toAppInfoWithoutState());
-                return changeEnabled;
+                if (enabled) {
+                    mDisabledPackages.remove(pkg.getPackageName());
+                } else {
+                    mDisabledPackages.add(pkg.getPackageName());
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public void onCompatChange(String packageName) {
-            final AndroidPackage pkg = mPmInternal.getPackage(packageName);
-            if (pkg == null) {
-                mDisabledPackages.remove(packageName);
-                return;
-            }
-            boolean enabled = fetchPackageIsEnabled(pkg);
-            if (enabled) {
-                mDisabledPackages.remove(packageName);
+        public void updatePackageState(PackageSetting setting, boolean removed) {
+            final boolean enableLogging =
+                    !removed && (setting.pkg.isTestOnly() || setting.pkg.isDebuggable());
+            enableLogging(setting.appId, enableLogging);
+            if (removed) {
+                mDisabledPackages.remove(setting.pkg.getPackageName());
             } else {
-                mDisabledPackages.add(packageName);
+                updateEnabledState(setting.pkg);
             }
-        }
-
-        @Override
-        public void initializePackageState(String packageName) {
-            onCompatChange(packageName);
         }
     }
 
@@ -248,6 +289,10 @@ public class AppsFilter {
         }
         return new AppsFilter(featureConfig, forcedQueryablePackageNames,
                 forceSystemAppsQueryable, null);
+    }
+
+    public FeatureConfig getFeatureConfig() {
+        return mFeatureConfig;
     }
 
     /** Returns true if the querying package may query for the potential target package */
@@ -447,7 +492,7 @@ public class AppsFilter {
                 }
             }
             mOverlayReferenceMapper.addPkg(newPkgSetting.pkg, existingPkgs);
-            mFeatureConfig.initializePackageState(newPkgSetting.pkg.getPackageName());
+            mFeatureConfig.updatePackageState(newPkgSetting, false /*removed*/);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -499,7 +544,7 @@ public class AppsFilter {
         }
 
         mOverlayReferenceMapper.removePkg(setting.name);
-        mFeatureConfig.initializePackageState(setting.pkg.getPackageName());
+        mFeatureConfig.updatePackageState(setting, true /*removed*/);
     }
 
     /**
@@ -516,13 +561,13 @@ public class AppsFilter {
             PackageSetting targetPkgSetting, int userId) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplication");
         try {
-            if (!shouldFilterApplicationInternal(callingUid, callingSetting, targetPkgSetting,
-                    userId)) {
+
+            if (!shouldFilterApplicationInternal(
+                    callingUid, callingSetting, targetPkgSetting, userId)) {
                 return false;
             }
-            if (DEBUG_LOGGING) {
-                log(callingSetting, targetPkgSetting,
-                        DEBUG_ALLOW_ALL ? "ALLOWED" : "BLOCKED", new RuntimeException());
+            if (DEBUG_LOGGING || mFeatureConfig.isLoggingEnabled(UserHandle.getAppId(callingUid))) {
+                log(callingSetting, targetPkgSetting, "BLOCKED");
             }
             return !DEBUG_ALLOW_ALL;
         } finally {
@@ -737,17 +782,11 @@ public class AppsFilter {
         }
     }
 
-    private static void log(SettingBase callingPkgSetting, PackageSetting targetPkgSetting,
+    private static void log(SettingBase callingSetting, PackageSetting targetPkgSetting,
             String description) {
-        log(callingPkgSetting, targetPkgSetting, description, null);
-    }
-
-    private static void log(SettingBase callingPkgSetting, PackageSetting targetPkgSetting,
-            String description, Throwable throwable) {
-        Slog.wtf(TAG,
-                "interaction: " + callingPkgSetting
-                        + " -> " + targetPkgSetting + " "
-                        + description, throwable);
+        Slog.i(TAG,
+                "interaction: " + (callingSetting == null ? "system" : callingSetting) + " -> "
+                        + targetPkgSetting + " " + description);
     }
 
     public void dumpQueries(

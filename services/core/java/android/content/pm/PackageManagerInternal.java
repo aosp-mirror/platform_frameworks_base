@@ -986,4 +986,11 @@ public abstract class PackageManagerInternal {
      * Returns MIME types contained in {@code mimeGroup} from {@code packageName} package
      */
     public abstract List<String> getMimeGroup(String packageName, String mimeGroup);
+
+    /**
+     * Toggles visibility logging to help in debugging the app enumeration feature.
+     * @param packageName the package name that should begin logging
+     * @param enabled true if visibility blocks should be logged
+     */
+    public abstract void setVisibilityLogging(String packageName, boolean enabled);
 }
