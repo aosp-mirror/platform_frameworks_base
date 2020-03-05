@@ -15,13 +15,10 @@
  */
 
 #include "native_writer.h"
-#include "native_writer_q.h"
 #include "utils.h"
 
 namespace android {
 namespace stats_log_api_gen {
-
-#if !defined(STATS_SCHEMA_LEGACY)
 
 static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
         const AtomDecl& attributionDecl, const string& moduleName, const bool supportQ) {
@@ -175,7 +172,6 @@ static void write_native_stats_write_non_chained_methods(FILE* out, const Atoms&
     }
 
 }
-#endif
 
 static void write_native_method_header(
         FILE* out,
@@ -191,12 +187,10 @@ static void write_native_method_header(
         }
         vector<java_type_t> signature = signature_to_modules_it->first;
 
-#if !defined(STATS_SCHEMA_LEGACY)
         // Key value pairs not supported in native.
         if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
             continue;
         }
-#endif
         write_native_method_signature(out, methodName, signature, attributionDecl, ";");
     }
 }
@@ -209,33 +203,17 @@ int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &attributi
     fprintf(out, "\n");
 
     fprintf(out, "#include <%s>\n", importHeader.c_str());
-#if defined(STATS_SCHEMA_LEGACY)
-    (void)supportQ; // Workaround for unused parameter error.
-    write_native_cpp_includes_q(out);
-#else
     if (supportQ) {
         fprintf(out, "#include <StatsEventCompat.h>\n");
     } else {
         fprintf(out, "#include <stats_event.h>\n");
     }
-#endif
 
     fprintf(out, "\n");
     write_namespace(out, cppNamespace);
 
-#if defined(STATS_SCHEMA_LEGACY)
-    write_native_stats_log_cpp_globals_q(out);
-    write_native_get_timestamp_ns_q(out);
-    write_native_try_stats_write_methods_q(out, atoms, attributionDecl, moduleName);
-    write_native_stats_write_methods_q(out, "int stats_write", atoms, attributionDecl, moduleName,
-            "try_stats_write");
-    write_native_try_stats_write_non_chained_methods_q(out, atoms, attributionDecl, moduleName);
-    write_native_stats_write_non_chained_methods_q(out, "int stats_write_non_chained", atoms,
-            attributionDecl, moduleName, "try_stats_write_non_chained");
-#else
     write_native_stats_write_methods(out, atoms, attributionDecl, moduleName, supportQ);
     write_native_stats_write_non_chained_methods(out, atoms, attributionDecl, moduleName);
-#endif
 
     // Print footer
     fprintf(out, "\n");
