@@ -105,11 +105,11 @@ class CredstoreWritableIdentityCredential extends WritableIdentityCredential {
             n++;
         }
 
-        Collection<String> namespaceNames = personalizationData.getNamespaceNames();
+        Collection<String> namespaces = personalizationData.getNamespaces();
 
-        EntryNamespaceParcel[] ensParcels  = new EntryNamespaceParcel[namespaceNames.size()];
+        EntryNamespaceParcel[] ensParcels  = new EntryNamespaceParcel[namespaces.size()];
         n = 0;
-        for (String namespaceName : namespaceNames) {
+        for (String namespaceName : namespaces) {
             PersonalizationData.NamespaceData nsd =
                     personalizationData.getNamespaceData(namespaceName);
 
