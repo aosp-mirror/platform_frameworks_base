@@ -4409,4 +4409,10 @@
         <item>android</item>
         <item>com.android.systemui</item>
     </string-array>
+
+    <!-- Package name of custom media key dispatcher class used by MediaSessionService. -->
+    <string name="config_customMediaKeyDispatcher"></string>
+
+    <!-- Package name of custom session policy provider class used by MediaSessionService. -->
+    <string name="config_customSessionPolicyProvider"></string>
 </resources>

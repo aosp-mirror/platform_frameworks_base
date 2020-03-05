@@ -3910,4 +3910,6 @@
 
   <java-symbol type="string" name="notification_history_title_placeholder" />
 
+  <java-symbol type="string" name="config_customMediaKeyDispatcher" />
+  <java-symbol type="string" name="config_customSessionPolicyProvider" />
 </resources>
