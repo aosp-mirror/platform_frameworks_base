@@ -939,6 +939,12 @@ public class BlobStoreManagerService extends SystemService {
         }
     }
 
+    void runIdleMaintenance() {
+        synchronized (mBlobsLock) {
+            handleIdleMaintenanceLocked();
+        }
+    }
+
     @GuardedBy("mBlobsLock")
     private void dumpSessionsLocked(IndentingPrintWriter fout, DumpArgs dumpArgs) {
         for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {
@@ -1408,9 +1414,7 @@ public class BlobStoreManagerService extends SystemService {
     private class LocalService extends BlobStoreManagerInternal {
         @Override
         public void onIdleMaintenance() {
-            synchronized (mBlobsLock) {
-                handleIdleMaintenanceLocked();
-            }
+            runIdleMaintenance();
         }
     }
 
