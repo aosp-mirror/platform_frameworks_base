@@ -3239,6 +3239,10 @@
   <java-symbol type="string" name="config_defaultAccessibilityService" />
   <java-symbol type="string" name="accessibility_shortcut_spoken_feedback" />
 
+  <java-symbol type="string" name="accessibility_select_shortcut_menu_title" />
+  <java-symbol type="string" name="accessibility_edit_shortcut_menu_button_title" />
+  <java-symbol type="string" name="accessibility_edit_shortcut_menu_volume_title" />
+
   <!-- Accessibility Button -->
   <java-symbol type="layout" name="accessibility_button_chooser_item" />
   <java-symbol type="id" name="accessibility_button_target_icon" />

@@ -4399,6 +4399,21 @@
         accessibility feature.
     </string>
 
+    <!-- Title for accessibility select shortcut menu dialog. [CHAR LIMIT=100] -->
+    <string name="accessibility_select_shortcut_menu_title">Tap the accessibility app you want to use</string>
+
+    <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
+    from accessibility button. [CHAR LIMIT=100] -->
+    <string name="accessibility_edit_shortcut_menu_button_title">Choose apps you want to use with
+        accessibility button
+    </string>
+
+    <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
+    from volume key shortcut. [CHAR LIMIT=100] -->
+    <string name="accessibility_edit_shortcut_menu_volume_title">Choose apps you want to use with
+        volume key shortcut
+    </string>
+
     <!-- Text in button that edit the accessibility shortcut menu, user can delete
     any service item in the menu list. [CHAR LIMIT=100] -->
     <string name="edit_accessibility_shortcut_menu_button">Edit shortcuts</string>
