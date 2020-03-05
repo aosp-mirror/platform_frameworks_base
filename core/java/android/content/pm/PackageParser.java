@@ -4180,7 +4180,6 @@ public class PackageParser {
         a.info.directBootAware = false;
         a.info.rotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
         a.info.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
-        a.info.preferMinimalPostProcessing = ActivityInfo.MINIMAL_POST_PROCESSING_DEFAULT;
         if (hardwareAccelerated) {
             a.info.flags |= ActivityInfo.FLAG_HARDWARE_ACCELERATED;
         }
@@ -4395,9 +4394,10 @@ public class PackageParser {
             a.info.colorMode = sa.getInt(R.styleable.AndroidManifestActivity_colorMode,
                     ActivityInfo.COLOR_MODE_DEFAULT);
 
-            a.info.preferMinimalPostProcessing = sa.getBoolean(
-                    R.styleable.AndroidManifestActivity_preferMinimalPostProcessing,
-                    ActivityInfo.MINIMAL_POST_PROCESSING_DEFAULT);
+            if (sa.getBoolean(
+                        R.styleable.AndroidManifestActivity_preferMinimalPostProcessing, false)) {
+                a.info.flags |= ActivityInfo.FLAG_PREFER_MINIMAL_POST_PROCESSING;
+            }
 
             if (sa.getBoolean(R.styleable.AndroidManifestActivity_showWhenLocked, false)) {
                 a.info.flags |= ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
