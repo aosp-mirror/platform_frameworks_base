@@ -2447,6 +2447,11 @@ public class ChooserActivity extends ResolverActivity implements
                     offset += findViewById(R.id.tabs).getHeight();
                 }
 
+                View tabDivider = findViewById(R.id.resolver_tab_divider);
+                if (tabDivider.getVisibility() == View.VISIBLE) {
+                    offset += tabDivider.getHeight();
+                }
+
                 int directShareHeight = 0;
                 rowsToShow = Math.min(4, rowsToShow);
                 mLastNumberOfChildren = recyclerView.getChildCount();
