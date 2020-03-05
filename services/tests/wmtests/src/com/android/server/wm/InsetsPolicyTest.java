@@ -120,7 +120,6 @@ public class InsetsPolicyTest extends WindowTestsBase {
         assertNull(controls);
     }
 
-    // TODO: adjust this test if we pretend to the app that it's still able to control it.
     @Test
     public void testControlsForDispatch_forceStatusBarVisible() {
         addWindow(TYPE_STATUS_BAR, "statusBar").mAttrs.privateFlags |=
@@ -129,9 +128,9 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
         final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
 
-        // The app must not control the status bar.
+        // The focused app window can control both system bars.
         assertNotNull(controls);
-        assertEquals(1, controls.length);
+        assertEquals(2, controls.length);
     }
 
     @Test
@@ -143,9 +142,9 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
         final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
 
-        // The app must not control the navigation bar.
+        // The focused app window can control both system bars.
         assertNotNull(controls);
-        assertEquals(1, controls.length);
+        assertEquals(2, controls.length);
     }
 
     @Test
