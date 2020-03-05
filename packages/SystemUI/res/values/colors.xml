@@ -223,4 +223,6 @@
     <color name="control_secondary_text">@*android:color/dim_foreground_dark</color>
     <color name="control_default_foreground">@*android:color/foreground_material_dark</color>
     <color name="control_default_background">@*android:color/background_floating_material_dark</color>
+    <color name="control_list_popup_background">@*android:color/background_floating_material_dark</color>
+    <color name="control_spinner_dropdown">@*android:color/foreground_material_dark</color>
 </resources>
