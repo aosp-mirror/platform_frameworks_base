@@ -562,8 +562,9 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         private @KeyProperties.BlockModeEnum String[] mBlockModes;
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
-        private @KeyProperties.AuthEnum int mUserAuthenticationType;
-        private int mUserAuthenticationValidityDurationSeconds = -1;
+        private @KeyProperties.AuthEnum int mUserAuthenticationType =
+                KeyProperties.AUTH_BIOMETRIC_STRONG;
+        private int mUserAuthenticationValidityDurationSeconds = 0;
         private boolean mUserPresenceRequired = false;
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
