@@ -25,6 +25,8 @@ import android.util.Size;
 
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+
 /**
  * Calculates the snap targets and the snap position for the PIP given a position and a velocity.
  * All bounds are relative to the display top/left.
@@ -39,6 +41,7 @@ public class PipSnapAlgorithm {
 
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
+    @Inject
     public PipSnapAlgorithm(Context context) {
         Resources res = context.getResources();
         mContext = context;
