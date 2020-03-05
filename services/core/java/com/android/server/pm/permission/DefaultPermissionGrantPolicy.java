@@ -60,10 +60,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseIntArray;
 import android.util.Xml;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
@@ -226,9 +224,6 @@ public final class DefaultPermissionGrantPolicy {
     private final PackageManagerInternal mServiceInternal;
     private final PermissionManagerService mPermissionManager;
 
-    @GuardedBy("mLock")
-    private SparseIntArray mDefaultPermissionsGrantedUsers = new SparseIntArray();
-
     DefaultPermissionGrantPolicy(Context context, Looper looper,
             @NonNull PermissionManagerService permissionManager) {
         mContext = context;
@@ -297,19 +292,10 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
-    public boolean wereDefaultPermissionsGrantedSinceBoot(int userId) {
-        synchronized (mLock) {
-            return mDefaultPermissionsGrantedUsers.indexOfKey(userId) >= 0;
-        }
-    }
-
     public void grantDefaultPermissions(int userId) {
         grantPermissionsToSysComponentsAndPrivApps(userId);
         grantDefaultSystemHandlerPermissions(userId);
         grantDefaultPermissionExceptions(userId);
-        synchronized (mLock) {
-            mDefaultPermissionsGrantedUsers.put(userId, userId);
-        }
     }
 
     private void grantRuntimePermissionsForSystemPackage(int userId, PackageInfo pkg) {
