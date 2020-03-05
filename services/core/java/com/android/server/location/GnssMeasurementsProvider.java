@@ -19,14 +19,15 @@ package com.android.server.location;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssRequest;
 import android.location.IGnssMeasurementsListener;
+import android.location.util.identity.CallerIdentity;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.location.gnss.GnssListenerManager;
 import com.android.server.location.gnss.GnssManagerService;
-import com.android.server.location.util.listeners.GnssListenerManager;
 
 import java.util.List;
 import java.util.Objects;

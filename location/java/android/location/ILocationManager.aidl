@@ -24,6 +24,7 @@ import android.location.Geofence;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssRequest;
 import android.location.IBatchedLocationCallback;
+import android.location.IGeocodeListener;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
@@ -58,12 +59,12 @@ interface ILocationManager
     void removeGeofence(in Geofence fence, in PendingIntent intent, String packageName);
 
     boolean geocoderIsPresent();
-    String getFromLocation(double latitude, double longitude, int maxResults,
-        in GeocoderParams params, out List<Address> addrs);
-    String getFromLocationName(String locationName,
+    void getFromLocation(double latitude, double longitude, int maxResults,
+        in GeocoderParams params, in IGeocodeListener listener);
+    void getFromLocationName(String locationName,
         double lowerLeftLatitude, double lowerLeftLongitude,
         double upperRightLatitude, double upperRightLongitude, int maxResults,
-        in GeocoderParams params, out List<Address> addrs);
+        in GeocoderParams params, in IGeocodeListener listener);
 
     long getGnssCapabilities();
     int getGnssYearOfHardware();
@@ -95,7 +96,7 @@ interface ILocationManager
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
     ProviderProperties getProviderProperties(String provider);
-    boolean isProviderPackage(String packageName);
+    boolean isProviderPackage(String provider, String packageName);
     List<String> getProviderPackages(String provider);
 
     void setExtraLocationControllerPackage(String packageName);

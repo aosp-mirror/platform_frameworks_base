@@ -324,8 +324,8 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
     private void setInitialStartBounds() {
         // Sets the initial frame area for the mirror and places it in the center of the display.
         int initSize = Math.min(mDisplaySize.x, mDisplaySize.y) / 2 + 2 * mMirrorSurfaceMargin;
-        int initX = mDisplaySize.x / 2 - initSize / 2 - mMirrorSurfaceMargin;
-        int initY = mDisplaySize.y / 2 - initSize / 2 - mMirrorSurfaceMargin;
+        int initX = mDisplaySize.x / 2 - initSize / 2;
+        int initY = mDisplaySize.y / 2 - initSize / 2;
         mMagnificationFrame.set(initX, initY, initX + initSize, initY + initSize);
     }
 
@@ -380,8 +380,9 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
     private void updateMirrorViewLayout() {
         WindowManager.LayoutParams params =
                 (WindowManager.LayoutParams) mMirrorView.getLayoutParams();
-        params.x = mMagnificationFrame.left;
-        params.y = mMagnificationFrame.top;
+        params.x = mMagnificationFrame.left - mMirrorSurfaceMargin;
+        params.y = mMagnificationFrame.top - mMirrorSurfaceMargin;
+
         // Translates MirrorView position to make MirrorSurfaceView that is inside MirrorView
         // able to move close to the screen edges.
         final int maxMirrorViewX = mDisplaySize.x - mMirrorView.getWidth();

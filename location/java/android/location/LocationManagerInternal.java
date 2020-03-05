@@ -18,6 +18,8 @@ package android.location;
 
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.location.util.identity.CallerIdentity;
 
 /**
  * Location manager local system service interface.
@@ -36,13 +38,14 @@ public abstract class LocationManagerInternal {
     public abstract boolean isProviderEnabledForUser(@NonNull String provider, int userId);
 
     /**
-     * Returns true if the given package belongs to a location provider, and so should be afforded
-     * some special privileges.
+     * Returns true if the given identity is a location provider.
      *
-     * @param packageName The package name to check
-     * @return True is the given package belongs to a location provider, false otherwise
+     * @param provider The provider to check, or null to check every provider
+     * @param identity The identity to match
+     * @return True if the given identity matches either the given location provider or any
+     * provider, and false otherwise
      */
-    public abstract boolean isProviderPackage(@NonNull String packageName);
+    public abstract boolean isProvider(@Nullable String provider, @NonNull CallerIdentity identity);
 
     /**
      * Should only be used by GNSS code.

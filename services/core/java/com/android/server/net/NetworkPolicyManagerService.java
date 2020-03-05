@@ -171,7 +171,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
-import android.os.IDeviceIdleController;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
@@ -180,11 +179,11 @@ import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
+import android.os.PowerWhitelistManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -411,7 +410,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private IConnectivityManager mConnManager;
     private PowerManagerInternal mPowerManagerInternal;
-    private IDeviceIdleController mDeviceIdleController;
+    private PowerWhitelistManager mPowerWhitelistManager;
 
     /** Current cached value of the current Battery Saver mode's setting for restrict background. */
     @GuardedBy("mUidRulesFirstLock")
@@ -618,8 +617,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mContext = Objects.requireNonNull(context, "missing context");
         mActivityManager = Objects.requireNonNull(activityManager, "missing activityManager");
         mNetworkManager = Objects.requireNonNull(networkManagement, "missing networkManagement");
-        mDeviceIdleController = IDeviceIdleController.Stub.asInterface(ServiceManager.getService(
-                Context.DEVICE_IDLE_CONTROLLER));
+        mPowerWhitelistManager = mContext.getSystemService(PowerWhitelistManager.class);
         mClock = Objects.requireNonNull(clock, "missing Clock");
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mCarrierConfigManager = mContext.getSystemService(CarrierConfigManager.class);
@@ -651,23 +649,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @GuardedBy("mUidRulesFirstLock")
-    void updatePowerSaveWhitelistUL() {
-        try {
-            int[] whitelist = mDeviceIdleController.getAppIdWhitelistExceptIdle();
-            mPowerSaveWhitelistExceptIdleAppIds.clear();
-            if (whitelist != null) {
-                for (int uid : whitelist) {
-                    mPowerSaveWhitelistExceptIdleAppIds.put(uid, true);
-                }
-            }
-            whitelist = mDeviceIdleController.getAppIdWhitelist();
-            mPowerSaveWhitelistAppIds.clear();
-            if (whitelist != null) {
-                for (int uid : whitelist) {
-                    mPowerSaveWhitelistAppIds.put(uid, true);
-                }
-            }
-        } catch (RemoteException e) {
+    private void updatePowerSaveWhitelistUL() {
+        int[] whitelist = mPowerWhitelistManager.getWhitelistedAppIds(/* includingIdle */ false);
+        mPowerSaveWhitelistExceptIdleAppIds.clear();
+        for (int uid : whitelist) {
+            mPowerSaveWhitelistExceptIdleAppIds.put(uid, true);
+        }
+
+        whitelist = mPowerWhitelistManager.getWhitelistedAppIds(/* includingIdle */ true);
+        mPowerSaveWhitelistAppIds.clear();
+        for (int uid : whitelist) {
+            mPowerSaveWhitelistAppIds.put(uid, true);
         }
     }
 

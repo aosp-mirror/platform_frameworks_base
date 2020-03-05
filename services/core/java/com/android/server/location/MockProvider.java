@@ -27,7 +27,6 @@ import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collections;
 
 /**
  * A mock location provider used by LocationManagerService to implement test providers.
@@ -40,7 +39,7 @@ public class MockProvider extends AbstractLocationProvider {
 
     public MockProvider(ProviderProperties properties) {
         // using a direct executor is ok because this class has no locks that could deadlock
-        super(DIRECT_EXECUTOR, Collections.emptySet());
+        super(DIRECT_EXECUTOR);
         setProperties(properties);
     }
 

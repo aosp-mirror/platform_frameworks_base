@@ -106,7 +106,6 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
         final RecyclerView recyclerView = getItem(pageIndex).recyclerView;
         ChooserActivity.ChooserGridAdapter chooserGridAdapter =
                 getItem(pageIndex).chooserGridAdapter;
-        recyclerView.setAdapter(chooserGridAdapter);
         GridLayoutManager glm = (GridLayoutManager) recyclerView.getLayoutManager();
         glm.setSpanCount(chooserGridAdapter.getMaxTargetsPerRow());
         glm.setSpanSizeLookup(

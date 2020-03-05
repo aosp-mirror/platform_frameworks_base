@@ -233,6 +233,9 @@ applications that come with the platform
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
+        <!-- Permissions required for reading and logging compat changes -->
+        <permission name="android.permission.LOG_COMPAT_CHANGE" />
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.networkstack">
@@ -394,6 +397,8 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_NOTIFICATIONS"/>
         <!-- Permission required for CompanionDeviceManager CTS test. -->
         <permission name="android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS" />
+        <!-- Permission required for testing registering pull atom callbacks. -->
+        <permission name="android.permission.REGISTER_STATS_PULL_ATOM"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -423,5 +428,9 @@ applications that come with the platform
     <privapp-permissions package="com.android.settings">
         <permission name="android.permission.INSTALL_DYNAMIC_SYSTEM"/>
         <permission name="android.permission.BIND_CELL_BROADCAST_SERVICE"/>
+    </privapp-permissions>
+
+    <privapp-permissions package="com.android.bips">
+        <permission name="android.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON"/>
     </privapp-permissions>
 </permissions>

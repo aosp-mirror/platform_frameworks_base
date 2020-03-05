@@ -64,6 +64,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
@@ -163,7 +164,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     private @Mock IBinder mBinder;
     private @Mock AlarmManager mAlarmManager;
     private HandlerThread mHandlerThread;
-    private Handler mHandler;
 
     private NetworkStatsService mService;
     private INetworkStatsSession mSession;
@@ -192,15 +192,11 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         PowerManager.WakeLock wakeLock =
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
-        mService = new NetworkStatsService(
-                mServiceContext, mNetManager, mAlarmManager, wakeLock, mClock,
-                mServiceContext.getSystemService(TelephonyManager.class), mSettings,
-                mStatsFactory, new NetworkStatsObservers(),  mStatsDir, getBaseDir(mStatsDir));
         mHandlerThread = new HandlerThread("HandlerThread");
-        mHandlerThread.start();
-        Handler.Callback callback = new NetworkStatsService.HandlerCallback(mService);
-        mHandler = new Handler(mHandlerThread.getLooper(), callback);
-        mService.setHandler(mHandler, callback);
+        final NetworkStatsService.Dependencies deps = makeDependencies();
+        mService = new NetworkStatsService(mServiceContext, mNetManager, mAlarmManager, wakeLock,
+                mClock, mServiceContext.getSystemService(TelephonyManager.class), mSettings,
+                mStatsFactory, new NetworkStatsObservers(), mStatsDir, getBaseDir(mStatsDir), deps);
 
         mElapsedRealtime = 0L;
 
@@ -217,9 +213,19 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         // catch INetworkManagementEventObserver during systemReady()
         ArgumentCaptor<INetworkManagementEventObserver> networkObserver =
-              ArgumentCaptor.forClass(INetworkManagementEventObserver.class);
+                ArgumentCaptor.forClass(INetworkManagementEventObserver.class);
         verify(mNetManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
+    }
+
+    @NonNull
+    private NetworkStatsService.Dependencies makeDependencies() {
+        return new NetworkStatsService.Dependencies() {
+            @Override
+            public HandlerThread makeHandlerThread() {
+                return mHandlerThread;
+            }
+        };
     }
 
     @After
@@ -234,6 +240,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         mSession.close();
         mService = null;
+
+        mHandlerThread.quitSafely();
     }
 
     @Test
@@ -939,9 +947,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         long minThresholdInBytes = 2 * 1024 * 1024; // 2 MB
         assertEquals(minThresholdInBytes, request.thresholdInBytes);
 
-        // Send dummy message to make sure that any previous message has been handled
-        mHandler.sendMessage(mHandler.obtainMessage(-1));
-        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT);
+        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
 
         // Make sure that the caller binder gets connected
         verify(mBinder).linkToDeath(any(IBinder.DeathRecipient.class), anyInt());
@@ -1077,7 +1083,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         // Simulates alert quota of the provider has been reached.
         cb.onAlertReached();
-        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT);
+        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
 
         // Verifies that polling is triggered by alert reached.
         provider.expectStatsUpdate(0 /* unused */);
@@ -1294,9 +1300,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
     private void forcePollAndWaitForIdle() {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
-        // Send dummy message to make sure that any previous message has been handled
-        mHandler.sendMessage(mHandler.obtainMessage(-1));
-        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT);
+        HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
     }
 
     static class LatchedHandler extends Handler {

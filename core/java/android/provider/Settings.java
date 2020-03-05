@@ -7836,12 +7836,20 @@ public final class Settings {
         public static final String UI_NIGHT_MODE = "ui_night_mode";
 
         /**
-         * The current night mode that has been overrided by the system.  Owned
+         * The current night mode that has been overridden to turn on by the system.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
          * @hide
          */
-        public static final String UI_NIGHT_MODE_OVERRIDE = "ui_night_mode_override";
+        public static final String UI_NIGHT_MODE_OVERRIDE_ON = "ui_night_mode_override_on";
+
+        /**
+         * The current night mode that has been overridden to turn off by the system.  Owned
+         * and controlled by UiModeManagerService.  Constants are as per
+         * UiModeManager.
+         * @hide
+         */
+        public static final String UI_NIGHT_MODE_OVERRIDE_OFF = "ui_night_mode_override_off";
 
         /**
          * Whether screensavers are enabled.

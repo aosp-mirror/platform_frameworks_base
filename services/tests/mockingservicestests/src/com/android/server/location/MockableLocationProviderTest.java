@@ -35,21 +35,18 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.server.location.test.FakeProvider;
+import com.android.server.location.test.ProviderListenerCapture;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.LinkedList;
-import java.util.List;
 
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class MockableLocationProviderTest {
 
-    private Object mLock;
-    private ListenerCapture mListener;
+    private ProviderListenerCapture mListener;
 
     private AbstractLocationProvider mRealProvider;
     private MockProvider mMockProvider;
@@ -58,8 +55,8 @@ public class MockableLocationProviderTest {
 
     @Before
     public void setUp() {
-        mLock = new Object();
-        mListener = new ListenerCapture();
+        Object lock = new Object();
+        mListener = new ProviderListenerCapture(lock);
 
         mRealProvider = spy(new FakeProvider());
         mMockProvider = spy(new MockProvider(new ProviderProperties(
@@ -71,9 +68,10 @@ public class MockableLocationProviderTest {
                 true,
                 true,
                 Criteria.POWER_LOW,
-                Criteria.ACCURACY_FINE)));
+                Criteria.ACCURACY_FINE)
+        ));
 
-        mProvider = new MockableLocationProvider(mLock, mListener);
+        mProvider = new MockableLocationProvider(lock, mListener);
         mProvider.setRealProvider(mRealProvider);
     }
 
@@ -169,35 +167,5 @@ public class MockableLocationProviderTest {
         mRealProvider.reportLocation(realLocation);
         mMockProvider.reportLocation(mockLocation);
         assertThat(mListener.getNextLocation()).isEqualTo(mockLocation);
-    }
-
-    private class ListenerCapture implements AbstractLocationProvider.Listener {
-
-        private final LinkedList<AbstractLocationProvider.State> mNewStates = new LinkedList<>();
-        private final LinkedList<Location> mLocations = new LinkedList<>();
-
-        @Override
-        public void onStateChanged(AbstractLocationProvider.State oldState,
-                AbstractLocationProvider.State newState) {
-            assertThat(Thread.holdsLock(mLock)).isTrue();
-            mNewStates.add(newState);
-        }
-
-        private AbstractLocationProvider.State getNextNewState() {
-            return mNewStates.poll();
-        }
-
-        @Override
-        public void onReportLocation(Location location) {
-            assertThat(Thread.holdsLock(mLock)).isTrue();
-            mLocations.add(location);
-        }
-
-        private Location getNextLocation() {
-            return mLocations.poll();
-        }
-
-        @Override
-        public void onReportLocation(List<Location> locations) {}
     }
 }

@@ -55,6 +55,7 @@ import android.location.IGnssStatusListener;
 import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManagerInternal;
+import android.location.util.identity.CallerIdentity;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -64,7 +65,6 @@ import android.os.RemoteException;
 import com.android.server.LocalServices;
 import com.android.server.location.AppForegroundHelper;
 import com.android.server.location.AppOpsHelper;
-import com.android.server.location.CallerIdentity;
 import com.android.server.location.GnssAntennaInfoProvider;
 import com.android.server.location.GnssAntennaInfoProvider.GnssAntennaInfoProviderNative;
 import com.android.server.location.GnssBatchingProvider;
@@ -148,6 +148,7 @@ public class GnssManagerServiceTest {
         MockitoAnnotations.initMocks(this);
         GnssLocationProvider.setIsSupportedForTest(true);
 
+        when(mMockContext.createFeatureContext(anyString())).thenReturn(mMockContext);
         when(mMockContext.getSystemServiceName(AppOpsManager.class)).thenReturn(
                 Context.APP_OPS_SERVICE);
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(
@@ -158,6 +159,7 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         when(mUserInfoHelper.isCurrentUserId(anyInt())).thenReturn(true);
+        when(mSettingsHelper.isLocationEnabled(anyInt())).thenReturn(true);
         when(mAppOpsHelper.checkLocationAccess(any(CallerIdentity.class))).thenReturn(true);
         when(mAppOpsHelper.noteLocationAccess(any(CallerIdentity.class))).thenReturn(true);
         when(mAppForegroundHelper.isAppForeground(anyInt())).thenReturn(true);
@@ -297,13 +299,19 @@ public class GnssManagerServiceTest {
 
     private void enableLocationPermissions() {
         Mockito.doThrow(new SecurityException()).when(
-                mMockContext).enforceCallingPermission(
+                mMockContext).enforceCallingOrSelfPermission(
                 AdditionalMatchers.and(
                         AdditionalMatchers.not(eq(Manifest.permission.LOCATION_HARDWARE)),
                         AdditionalMatchers.not(eq(Manifest.permission.ACCESS_FINE_LOCATION))),
                 anyString());
         when(mMockContext.checkPermission(
                 eq(android.Manifest.permission.LOCATION_HARDWARE), anyInt(), anyInt())).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
+        when(mMockContext.checkPermission(
+                eq(Manifest.permission.ACCESS_FINE_LOCATION), anyInt(), anyInt())).thenReturn(
+                PackageManager.PERMISSION_GRANTED);
+        when(mMockContext.checkPermission(
+                eq(Manifest.permission.ACCESS_COARSE_LOCATION), anyInt(), anyInt())).thenReturn(
                 PackageManager.PERMISSION_GRANTED);
 
         // AppOpsManager will return true if OP_FINE_LOCATION is checked
@@ -323,6 +331,10 @@ public class GnssManagerServiceTest {
     private void disableLocationPermissions() {
         Mockito.doThrow(new SecurityException()).when(
                 mMockContext).enforceCallingOrSelfPermission(anyString(), nullable(String.class));
+
+        when(mMockContext.checkPermission(
+                anyString(), anyInt(), anyInt())).thenReturn(
+                PackageManager.PERMISSION_DENIED);
 
         when(mAppOpsManager.checkOpNoThrow(anyInt(), anyInt(),
                 anyString())).thenReturn(AppOpsManager.MODE_ERRORED);

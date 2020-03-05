@@ -95,7 +95,48 @@ public class PowerWhitelistManager {
         try {
             mService.addPowerSaveWhitelistApps(packageNames);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get a list of app IDs of app that are whitelisted. This does not include temporarily
+     * whitelisted apps.
+     *
+     * @param includingIdle Set to true if the app should be whitelisted from device idle as well
+     *                      as other power save restrictions
+     * @hide
+     */
+    @NonNull
+    public int[] getWhitelistedAppIds(boolean includingIdle) {
+        try {
+            if (includingIdle) {
+                return mService.getAppIdWhitelist();
+            } else {
+                return mService.getAppIdWhitelistExceptIdle();
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if the app is whitelisted from power save restrictions. This does not include
+     * temporarily whitelisted apps.
+     *
+     * @param includingIdle Set to true if the app should be whitelisted from device
+     *                      idle as well as other power save restrictions
+     * @hide
+     */
+    public boolean isWhitelisted(@NonNull String packageName, boolean includingIdle) {
+        try {
+            if (includingIdle) {
+                return mService.isPowerSaveWhitelistApp(packageName);
+            } else {
+                return mService.isPowerSaveWhitelistExceptIdleApp(packageName);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -112,7 +153,7 @@ public class PowerWhitelistManager {
             mService.addPowerSaveTempWhitelistApp(packageName, durationMs, mContext.getUserId(),
                     reason);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -142,8 +183,7 @@ public class PowerWhitelistManager {
                             packageName, mContext.getUserId(), reason);
             }
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 }

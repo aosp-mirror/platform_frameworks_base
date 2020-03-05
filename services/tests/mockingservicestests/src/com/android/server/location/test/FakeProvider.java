@@ -23,12 +23,11 @@ import com.android.server.location.AbstractLocationProvider;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collections;
 
 public class FakeProvider extends AbstractLocationProvider {
 
     public FakeProvider() {
-        super(Runnable::run, Collections.emptySet());
+        super(Runnable::run);
     }
 
     @Override

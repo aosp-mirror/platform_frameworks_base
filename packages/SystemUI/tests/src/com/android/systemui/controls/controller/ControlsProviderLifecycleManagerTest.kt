@@ -97,19 +97,25 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     @Test
     fun testBindService() {
         manager.bindService()
+        executor.runAllReady()
         assertTrue(mContext.isBound(componentName))
     }
 
     @Test
     fun testUnbindService() {
         manager.bindService()
+        executor.runAllReady()
+
         manager.unbindService()
+        executor.runAllReady()
+
         assertFalse(mContext.isBound(componentName))
     }
 
     @Test
     fun testMaybeBindAndLoad() {
         manager.maybeBindAndLoad(subscriberService)
+        executor.runAllReady()
 
         verify(service).load(subscriberService)
 
@@ -119,14 +125,17 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     @Test
     fun testMaybeUnbind_bindingAndCallback() {
         manager.maybeBindAndLoad(subscriberService)
+        executor.runAllReady()
 
         manager.unbindService()
+        executor.runAllReady()
         assertFalse(mContext.isBound(componentName))
     }
 
     @Test
     fun testMaybeBindAndLoad_timeout() {
         manager.maybeBindAndLoad(subscriberService)
+        executor.runAllReady()
 
         executor.advanceClockToLast()
         executor.runAllReady()
@@ -138,6 +147,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     fun testMaybeBindAndSubscribe() {
         val list = listOf("TEST_ID")
         manager.maybeBindAndSubscribe(list)
+        executor.runAllReady()
 
         assertTrue(mContext.isBound(componentName))
         verify(service).subscribe(list, subscriberService)
@@ -148,6 +158,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
         val controlId = "TEST_ID"
         val action = ControlAction.ERROR_ACTION
         manager.maybeBindAndSendAction(controlId, action)
+        executor.runAllReady()
 
         assertTrue(mContext.isBound(componentName))
         verify(service).action(eq(controlId), capture(wrapperCaptor),
