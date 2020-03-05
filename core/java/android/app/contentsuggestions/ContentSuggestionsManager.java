@@ -45,6 +45,17 @@ import java.util.concurrent.Executor;
  */
 @SystemApi
 public final class ContentSuggestionsManager {
+    /**
+     * Key into the extras Bundle passed to {@link #provideContextImage(int, Bundle)}.
+     * This can be used to provide the bitmap to
+     * {@link android.service.contentsuggestions.ContentSuggestionsService}.
+     * The value must be a {@link android.graphics.Bitmap} with the
+     * config {@link android.graphics.Bitmap.Config.HARDWARE}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_BITMAP = "android.contentsuggestions.extra.BITMAP";
+
     private static final String TAG = ContentSuggestionsManager.class.getSimpleName();
 
     /**
@@ -70,7 +81,7 @@ public final class ContentSuggestionsManager {
      * system content suggestions service.
      *
      * @param taskId of the task to snapshot.
-     * @param imageContextRequestExtras sent with with request to provide implementation specific
+     * @param imageContextRequestExtras sent with request to provide implementation specific
      *                                  extra information.
      */
     public void provideContextImage(

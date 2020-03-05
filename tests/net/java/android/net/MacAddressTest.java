@@ -22,8 +22,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.net.util.MacAddressUtils;
-
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -124,11 +122,11 @@ public class MacAddressTest {
 
         for (MacAddress mac : multicastAddresses) {
             String msg = mac.toString() + " expected to be a multicast address";
-            assertTrue(msg, MacAddressUtils.isMulticastAddress(mac));
+            assertTrue(msg, mac.isMulticastAddress());
         }
         for (MacAddress mac : unicastAddresses) {
             String msg = mac.toString() + " expected not to be a multicast address";
-            assertFalse(msg, MacAddressUtils.isMulticastAddress(mac));
+            assertFalse(msg, mac.isMulticastAddress());
         }
     }
 
@@ -158,7 +156,7 @@ public class MacAddressTest {
     public void testMacAddressConversions() {
         final int iterations = 10000;
         for (int i = 0; i < iterations; i++) {
-            MacAddress mac = MacAddressUtils.createRandomUnicastAddress();
+            MacAddress mac = MacAddress.createRandomUnicastAddress();
 
             String stringRepr = mac.toString();
             byte[] bytesRepr = mac.toByteArray();
@@ -190,7 +188,7 @@ public class MacAddressTest {
         final String expectedLocalOui = "26:5f:78";
         final MacAddress base = MacAddress.fromString(anotherOui + ":0:0:0");
         for (int i = 0; i < iterations; i++) {
-            MacAddress mac = MacAddressUtils.createRandomUnicastAddress(base, r);
+            MacAddress mac = MacAddress.createRandomUnicastAddress(base, r);
             String stringRepr = mac.toString();
 
             assertTrue(stringRepr + " expected to be a locally assigned address",
@@ -201,7 +199,7 @@ public class MacAddressTest {
         }
 
         for (int i = 0; i < iterations; i++) {
-            MacAddress mac = MacAddressUtils.createRandomUnicastAddress();
+            MacAddress mac = MacAddress.createRandomUnicastAddress();
             String stringRepr = mac.toString();
 
             assertTrue(stringRepr + " expected to be a locally assigned address",

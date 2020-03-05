@@ -3356,6 +3356,7 @@ public class ConnectivityManager {
             android.Manifest.permission.NETWORK_FACTORY})
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkAgentConfig config, int providerId) {
+
         try {
             return mService.registerNetworkAgent(messenger, ni, lp, nc, score, config, providerId);
         } catch (RemoteException e) {

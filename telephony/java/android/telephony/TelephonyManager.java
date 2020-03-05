@@ -153,7 +153,7 @@ public class TelephonyManager {
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
-    private static final long CALLBACK_ON_MORE_ERROR_CODE_CHANGE = 130595455L;
+    public static final long CALLBACK_ON_MORE_ERROR_CODE_CHANGE = 130595455L;
 
     /**
      * The key to use when placing the result of {@link #requestModemActivityInfo(ResultReceiver)}

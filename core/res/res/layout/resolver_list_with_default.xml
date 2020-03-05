@@ -29,22 +29,22 @@
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
         android:orientation="vertical"
-        android:background="?attr/colorBackgroundFloating"
-        android:elevation="8dp">
+        android:background="@drawable/bottomsheet_background"
+        android:paddingTop="@dimen/resolver_small_margin"
+        android:elevation="@dimen/resolver_elevation">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:orientation="horizontal">
-
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/resolver_edge_margin"
+            android:paddingEnd="@dimen/resolver_edge_margin">
             <ImageView
                 android:id="@+id/icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="@dimen/resolver_icon_size"
+                android:layout_height="@dimen/resolver_icon_size"
                 android:layout_gravity="start|top"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginStart="@dimen/resolver_icon_margin"
                 android:src="@drawable/resolver_icon_placeholder"
                 android:scaleType="fitCenter" />
 
@@ -52,9 +52,11 @@
                 android:id="@+id/title"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:layout_height="?attr/listPreferredItemHeight"
-                android:layout_marginStart="16dp"
-                android:textAppearance="?attr/textAppearanceMedium"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/resolver_icon_margin"
+                android:textColor="?android:attr/textColorPrimary"
+                android:fontFamily="@android:string/config_headlineFontFamilyMedium"
+                android:textSize="16sp"
                 android:gravity="start|center_vertical"
                 android:paddingEnd="16dp" />
 
@@ -107,21 +109,22 @@
             android:orientation="horizontal"
             android:layoutDirection="locale"
             android:measureWithLargestChild="true"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:elevation="8dp">
+            android:paddingTop="@dimen/resolver_button_bar_spacing"
+            android:paddingBottom="@dimen/resolver_button_bar_spacing"
+            android:paddingStart="@dimen/resolver_edge_margin"
+            android:paddingEnd="@dimen/resolver_small_margin"
+            android:elevation="@dimen/resolver_elevation">
 
             <Button
                 android:id="@+id/button_once"
                 android:layout_width="wrap_content"
                 android:layout_gravity="start"
                 android:maxLines="2"
-                style="?attr/buttonBarNegativeButtonStyle"
-                android:minHeight="@dimen/alert_dialog_button_bar_height"
+                style="?attr/buttonBarButtonStyle"
+                android:fontFamily="@android:string/config_headlineFontFamilyMedium"
                 android:layout_height="wrap_content"
                 android:enabled="false"
+                android:textAllCaps="false"
                 android:text="@string/activity_resolver_use_once"
                 android:onClick="onButtonClick" />
 
@@ -130,29 +133,40 @@
                 android:layout_width="wrap_content"
                 android:layout_gravity="end"
                 android:maxLines="2"
-                android:minHeight="@dimen/alert_dialog_button_bar_height"
-                style="?attr/buttonBarPositiveButtonStyle"
+                style="?attr/buttonBarButtonStyle"
+                android:fontFamily="@android:string/config_headlineFontFamilyMedium"
                 android:layout_height="wrap_content"
                 android:enabled="false"
+                android:textAllCaps="false"
                 android:text="@string/activity_resolver_use_always"
                 android:onClick="onButtonClick" />
         </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?attr/dividerVertical" />
     </LinearLayout>
 
+    <View
+        android:layout_alwaysShow="true"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/colorBackgroundFloating"
+        android:foreground="?attr/dividerVertical" />
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/resolver_list"
         android:clipToPadding="false"
-        android:scrollbarStyle="outsideOverlay"
         android:background="?attr/colorBackgroundFloating"
-        android:elevation="8dp"
+        android:elevation="@dimen/resolver_elevation"
         android:nestedScrollingEnabled="true"
-        android:divider="@null" />
-
+        android:scrollbarStyle="outsideOverlay"
+        android:scrollIndicators="top|bottom"
+        android:divider="?attr/dividerVertical"
+        android:footerDividersEnabled="false"
+        android:headerDividersEnabled="false"
+        android:dividerHeight="1dp" />
+    <View
+        android:layout_alwaysShow="true"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?attr/colorBackgroundFloating"
+        android:foreground="?attr/dividerVertical" />
 </com.android.internal.widget.ResolverDrawerLayout>

@@ -47,6 +47,20 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String NAS_MAX_SUGGESTIONS = "nas_max_suggestions";
 
+    // Flags related to screenshot intelligence
+
+    /**
+     * (bool) Whether to enable smart actions in screenshot notifications.
+     */
+    public static final String ENABLE_SCREENSHOT_NOTIFICATION_SMART_ACTIONS =
+            "enable_screenshot_notification_smart_actions";
+
+    /**
+     * (int) Timeout value in ms to get smart actions for screenshot notification.
+     */
+    public static final String SCREENSHOT_NOTIFICATION_SMART_ACTIONS_TIMEOUT_MS =
+            "screenshot_notification_smart_actions_timeout_ms";
+
     // Flags related to Smart Suggestions - these are read in SmartReplyConstants.
 
     /** (boolean) Whether to enable smart suggestions in notifications. */

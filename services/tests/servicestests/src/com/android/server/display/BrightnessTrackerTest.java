@@ -120,7 +120,7 @@ public class BrightnessTrackerTest {
         assertTrue(mInjector.mIdleScheduled);
         mInjector.sendScreenChange(/*screen on */ true);
         assertNotNull(mInjector.mSensorListener);
-        assertTrue(mInjector.mColorSamplingEnabled);
+        assertEquals(BrightnessTracker.ENABLE_COLOR_SAMPLING, mInjector.mColorSamplingEnabled);
 
         mInjector.sendScreenChange(/*screen on */ false);
         assertNull(mInjector.mSensorListener);
@@ -141,7 +141,7 @@ public class BrightnessTrackerTest {
         // Turn on screen while brightness mode is automatic.
         mInjector.sendScreenChange(/*screen on */ true);
         assertNotNull(mInjector.mSensorListener);
-        assertTrue(mInjector.mColorSamplingEnabled);
+        assertEquals(BrightnessTracker.ENABLE_COLOR_SAMPLING, mInjector.mColorSamplingEnabled);
 
         mTracker.stop();
         assertNull(mInjector.mSensorListener);
@@ -184,6 +184,9 @@ public class BrightnessTrackerTest {
 
     @Test
     public void testColorSampling_FrameRateChange() {
+        if (!BrightnessTracker.ENABLE_COLOR_SAMPLING) {
+            return;
+        }
         startTracker(mTracker);
         assertTrue(mInjector.mColorSamplingEnabled);
         assertNotNull(mInjector.mDisplayListener);
@@ -211,8 +214,10 @@ public class BrightnessTrackerTest {
 
         mInjector.setBrightnessMode(/*isBrightnessModeAutomatic*/ true);
         assertNotNull(mInjector.mSensorListener);
-        assertTrue(mInjector.mColorSamplingEnabled);
-        assertNotNull(mInjector.mDisplayListener);
+        assertEquals(BrightnessTracker.ENABLE_COLOR_SAMPLING, mInjector.mColorSamplingEnabled);
+        if (BrightnessTracker.ENABLE_COLOR_SAMPLING) {
+            assertNotNull(mInjector.mDisplayListener);
+        }
 
         SensorEventListener listener = mInjector.mSensorListener;
         DisplayManager.DisplayListener displayListener = mInjector.mDisplayListener;
@@ -226,8 +231,10 @@ public class BrightnessTrackerTest {
         assertFalse(mInjector.mColorSamplingEnabled);
         assertNull(mInjector.mDisplayListener);
         mInjector.mSensorListener = listener;
-        mInjector.mDisplayListener = displayListener;
-        mInjector.mColorSamplingEnabled = true;
+        if (BrightnessTracker.ENABLE_COLOR_SAMPLING) {
+            mInjector.mDisplayListener = displayListener;
+            mInjector.mColorSamplingEnabled = true;
+        }
 
         mInjector.setBrightnessMode(/*isBrightnessModeAutomatic*/ false);
         assertNull(mInjector.mSensorListener);
@@ -301,8 +308,11 @@ public class BrightnessTrackerTest {
         assertEquals(3333, event.colorTemperature);
         assertEquals("a.package", event.packageName);
         assertEquals(0, event.userId);
-        assertArrayEquals(new long[] {1, 10, 100, 1000, 300, 30, 10, 1}, event.colorValueBuckets);
-        assertEquals(10000, event.colorSampleDuration);
+        if (BrightnessTracker.ENABLE_COLOR_SAMPLING) {
+            assertArrayEquals(new long[]{1, 10, 100, 1000, 300, 30, 10, 1},
+                    event.colorValueBuckets);
+            assertEquals(10000, event.colorSampleDuration);
+        }
 
         assertEquals(1, eventsNoPackage.size());
         assertNull(eventsNoPackage.get(0).packageName);
@@ -559,8 +569,11 @@ public class BrightnessTrackerTest {
         assertEquals(0.5f, event.powerBrightnessFactor, FLOAT_DELTA);
         assertTrue(event.isUserSetBrightness);
         assertFalse(event.isDefaultBrightnessConfig);
-        assertArrayEquals(new long[] {1, 10, 100, 1000, 300, 30, 10, 1}, event.colorValueBuckets);
-        assertEquals(10000, event.colorSampleDuration);
+        if (BrightnessTracker.ENABLE_COLOR_SAMPLING) {
+            assertArrayEquals(new long[]{1, 10, 100, 1000, 300, 30, 10, 1},
+                    event.colorValueBuckets);
+            assertEquals(10000, event.colorSampleDuration);
+        }
     }
 
     @Test
