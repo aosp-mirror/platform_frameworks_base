@@ -93,47 +93,60 @@ private:
     TemporaryFile logFile;
 };
 
-class MockIncrementalManager : public IncrementalManagerWrapper {
+class FakeDataLoader : public IDataLoader {
 public:
-    MOCK_CONST_METHOD5(prepareDataLoader,
-                       binder::Status(int32_t mountId, const FileSystemControlParcel& control,
-                                      const DataLoaderParamsParcel& params,
+    IBinder* onAsBinder() override { return nullptr; }
+    binder::Status create(int32_t, const DataLoaderParamsParcel&, const FileSystemControlParcel&,
+                          const sp<IDataLoaderStatusListener>&) override {
+        return binder::Status::ok();
+    }
+    binder::Status start() override { return binder::Status::ok(); }
+    binder::Status stop() override { return binder::Status::ok(); }
+    binder::Status destroy() override { return binder::Status::ok(); }
+    binder::Status prepareImage(const std::vector<InstallationFileParcel>&,
+                                const std::vector<std::string>&) override {
+        return binder::Status::ok();
+    }
+};
+
+class MockDataLoaderManager : public DataLoaderManagerWrapper {
+public:
+    MOCK_CONST_METHOD5(initializeDataLoader,
+                       binder::Status(int32_t mountId, const DataLoaderParamsParcel& params,
+                                      const FileSystemControlParcel& control,
                                       const sp<IDataLoaderStatusListener>& listener,
                                       bool* _aidl_return));
-    MOCK_CONST_METHOD2(startDataLoader, binder::Status(int32_t mountId, bool* _aidl_return));
+    MOCK_CONST_METHOD2(getDataLoader,
+                       binder::Status(int32_t mountId, sp<IDataLoader>* _aidl_return));
     MOCK_CONST_METHOD1(destroyDataLoader, binder::Status(int32_t mountId));
-    MOCK_CONST_METHOD3(newFileForDataLoader,
-                       binder::Status(int32_t mountId, FileId fileId,
-                                      const ::std::vector<uint8_t>& metadata));
-    MOCK_CONST_METHOD1(showHealthBlockedUI, binder::Status(int32_t mountId));
 
-    binder::Status prepareDataLoaderOk(int32_t mountId, const FileSystemControlParcel& control,
-                                       const DataLoaderParamsParcel& params,
-                                       const sp<IDataLoaderStatusListener>& listener,
-                                       bool* _aidl_return) {
+    binder::Status initializeDataLoaderOk(int32_t mountId, const DataLoaderParamsParcel& params,
+                                          const FileSystemControlParcel& control,
+                                          const sp<IDataLoaderStatusListener>& listener,
+                                          bool* _aidl_return) {
         mId = mountId;
         mListener = listener;
         *_aidl_return = true;
         return binder::Status::ok();
     }
 
-    binder::Status startDataLoaderOk(int32_t mountId, bool* _aidl_return) {
-        *_aidl_return = true;
+    binder::Status getDataLoaderOk(int32_t mountId, sp<IDataLoader>* _aidl_return) {
+        *_aidl_return = mDataLoader;
         return binder::Status::ok();
     }
 
-    void prepareDataLoaderFails() {
-        ON_CALL(*this, prepareDataLoader(_, _, _, _, _))
+    void initializeDataLoaderFails() {
+        ON_CALL(*this, initializeDataLoader(_, _, _, _, _))
                 .WillByDefault(Return(
                         (binder::Status::fromExceptionCode(1, String8("failed to prepare")))));
     }
-    void prepareDataLoaderSuccess() {
-        ON_CALL(*this, prepareDataLoader(_, _, _, _, _))
-                .WillByDefault(Invoke(this, &MockIncrementalManager::prepareDataLoaderOk));
+    void initializeDataLoaderSuccess() {
+        ON_CALL(*this, initializeDataLoader(_, _, _, _, _))
+                .WillByDefault(Invoke(this, &MockDataLoaderManager::initializeDataLoaderOk));
     }
-    void startDataLoaderSuccess() {
-        ON_CALL(*this, startDataLoader(_, _))
-                .WillByDefault(Invoke(this, &MockIncrementalManager::startDataLoaderOk));
+    void getDataLoaderSuccess() {
+        ON_CALL(*this, getDataLoader(_, _))
+                .WillByDefault(Invoke(this, &MockDataLoaderManager::getDataLoaderOk));
     }
     void setDataLoaderStatusNotReady() {
         mListener->onStatusChanged(mId, IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
@@ -145,6 +158,7 @@ public:
 private:
     int mId;
     sp<IDataLoaderStatusListener> mListener;
+    sp<IDataLoader> mDataLoader = sp<IDataLoader>(new FakeDataLoader());
 };
 
 class MockIncFs : public IncFsWrapper {
@@ -197,20 +211,20 @@ public:
 class MockServiceManager : public ServiceManagerWrapper {
 public:
     MockServiceManager(std::unique_ptr<MockVoldService> vold,
-                       std::unique_ptr<MockIncrementalManager> manager,
+                       std::unique_ptr<MockDataLoaderManager> manager,
                        std::unique_ptr<MockIncFs> incfs)
           : mVold(std::move(vold)),
-            mIncrementalManager(std::move(manager)),
+            mDataLoaderManager(std::move(manager)),
             mIncFs(std::move(incfs)) {}
     std::unique_ptr<VoldServiceWrapper> getVoldService() final { return std::move(mVold); }
-    std::unique_ptr<IncrementalManagerWrapper> getIncrementalManager() final {
-        return std::move(mIncrementalManager);
+    std::unique_ptr<DataLoaderManagerWrapper> getDataLoaderManager() final {
+        return std::move(mDataLoaderManager);
     }
     std::unique_ptr<IncFsWrapper> getIncFs() final { return std::move(mIncFs); }
 
 private:
     std::unique_ptr<MockVoldService> mVold;
-    std::unique_ptr<MockIncrementalManager> mIncrementalManager;
+    std::unique_ptr<MockDataLoaderManager> mDataLoaderManager;
     std::unique_ptr<MockIncFs> mIncFs;
 };
 
@@ -221,14 +235,14 @@ public:
     void SetUp() override {
         auto vold = std::make_unique<NiceMock<MockVoldService>>();
         mVold = vold.get();
-        auto incrementalManager = std::make_unique<NiceMock<MockIncrementalManager>>();
-        mIncrementalManager = incrementalManager.get();
+        auto dataloaderManager = std::make_unique<NiceMock<MockDataLoaderManager>>();
+        mDataLoaderManager = dataloaderManager.get();
         auto incFs = std::make_unique<NiceMock<MockIncFs>>();
         mIncFs = incFs.get();
         mIncrementalService =
                 std::make_unique<IncrementalService>(MockServiceManager(std::move(vold),
                                                                         std::move(
-                                                                                incrementalManager),
+                                                                                dataloaderManager),
                                                                         std::move(incFs)),
                                                      mRootDir.path);
         mDataLoaderParcel.packageName = "com.test";
@@ -260,7 +274,7 @@ public:
 protected:
     NiceMock<MockVoldService>* mVold;
     NiceMock<MockIncFs>* mIncFs;
-    NiceMock<MockIncrementalManager>* mIncrementalManager;
+    NiceMock<MockDataLoaderManager>* mDataLoaderManager;
     std::unique_ptr<IncrementalService> mIncrementalService;
     TemporaryDir mRootDir;
     DataLoaderParamsParcel mDataLoaderParcel;
@@ -268,7 +282,7 @@ protected:
 
 TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsFails) {
     mVold->mountIncFsFails();
-    EXPECT_CALL(*mIncrementalManager, prepareDataLoader(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(*mDataLoaderManager, initializeDataLoader(_, _, _, _, _)).Times(0);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
@@ -278,7 +292,7 @@ TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsFails) {
 
 TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsInvalidControlParcel) {
     mVold->mountIncFsInvalidControlParcel();
-    EXPECT_CALL(*mIncrementalManager, prepareDataLoader(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(*mDataLoaderManager, initializeDataLoader(_, _, _, _, _)).Times(0);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
@@ -289,8 +303,8 @@ TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsInvalidControlParcel) 
 TEST_F(IncrementalServiceTest, testCreateStorageMakeFileFails) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileFails();
-    EXPECT_CALL(*mIncrementalManager, prepareDataLoader(_, _, _, _, _)).Times(0);
-    EXPECT_CALL(*mIncrementalManager, destroyDataLoader(_));
+    EXPECT_CALL(*mDataLoaderManager, initializeDataLoader(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_));
     TemporaryDir tempDir;
     int storageId =
@@ -303,8 +317,8 @@ TEST_F(IncrementalServiceTest, testCreateStorageBindMountFails) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileSuccess();
     mVold->bindMountFails();
-    EXPECT_CALL(*mIncrementalManager, prepareDataLoader(_, _, _, _, _)).Times(0);
-    EXPECT_CALL(*mIncrementalManager, destroyDataLoader(_));
+    EXPECT_CALL(*mDataLoaderManager, initializeDataLoader(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_));
     TemporaryDir tempDir;
     int storageId =
@@ -317,8 +331,8 @@ TEST_F(IncrementalServiceTest, testCreateStoragePrepareDataLoaderFails) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileSuccess();
     mVold->bindMountSuccess();
-    mIncrementalManager->prepareDataLoaderFails();
-    EXPECT_CALL(*mIncrementalManager, destroyDataLoader(_));
+    mDataLoaderManager->initializeDataLoaderFails();
+    EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
@@ -331,8 +345,8 @@ TEST_F(IncrementalServiceTest, testDeleteStorageSuccess) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileSuccess();
     mVold->bindMountSuccess();
-    mIncrementalManager->prepareDataLoaderSuccess();
-    EXPECT_CALL(*mIncrementalManager, destroyDataLoader(_));
+    mDataLoaderManager->initializeDataLoaderSuccess();
+    EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
@@ -346,31 +360,31 @@ TEST_F(IncrementalServiceTest, testOnStatusNotReady) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileSuccess();
     mVold->bindMountSuccess();
-    mIncrementalManager->prepareDataLoaderSuccess();
-    EXPECT_CALL(*mIncrementalManager, destroyDataLoader(_));
+    mDataLoaderManager->initializeDataLoaderSuccess();
+    EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
-    mIncrementalManager->setDataLoaderStatusNotReady();
+    mDataLoaderManager->setDataLoaderStatusNotReady();
 }
 
 TEST_F(IncrementalServiceTest, testStartDataLoaderSuccess) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileSuccess();
     mVold->bindMountSuccess();
-    mIncrementalManager->prepareDataLoaderSuccess();
-    mIncrementalManager->startDataLoaderSuccess();
-    EXPECT_CALL(*mIncrementalManager, destroyDataLoader(_));
+    mDataLoaderManager->initializeDataLoaderSuccess();
+    mDataLoaderManager->getDataLoaderSuccess();
+    EXPECT_CALL(*mDataLoaderManager, destroyDataLoader(_));
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
                                                IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
-    mIncrementalManager->setDataLoaderStatusReady();
+    mDataLoaderManager->setDataLoaderStatusReady();
     ASSERT_TRUE(mIncrementalService->startLoading(storageId));
 }
 
@@ -378,8 +392,8 @@ TEST_F(IncrementalServiceTest, testMakeDirectory) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileSuccess();
     mVold->bindMountSuccess();
-    mIncrementalManager->prepareDataLoaderSuccess();
-    mIncrementalManager->startDataLoaderSuccess();
+    mDataLoaderManager->initializeDataLoaderSuccess();
+    mDataLoaderManager->getDataLoaderSuccess();
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
@@ -402,8 +416,8 @@ TEST_F(IncrementalServiceTest, testMakeDirectories) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileSuccess();
     mVold->bindMountSuccess();
-    mIncrementalManager->prepareDataLoaderSuccess();
-    mIncrementalManager->startDataLoaderSuccess();
+    mDataLoaderManager->initializeDataLoaderSuccess();
+    mDataLoaderManager->getDataLoaderSuccess();
     TemporaryDir tempDir;
     int storageId =
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel), {},
