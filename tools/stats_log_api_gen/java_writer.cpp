@@ -59,9 +59,6 @@ static int write_java_methods(
         }
 
         // Print method signature.
-        if (DEFAULT_MODULE_NAME == moduleName) {
-            fprintf(out, "    /** @hide */\n");
-        }
         fprintf(out, "    public static void write(int code");
         vector<java_type_t> signature = signature_to_modules_it->first;
         int argIndex = 1;
@@ -273,9 +270,6 @@ int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attribut
     fprintf(out, "\n");
     fprintf(out, "/**\n");
     fprintf(out, " * Utility class for logging statistics events.\n");
-    if (DEFAULT_MODULE_NAME == moduleName) {
-        fprintf(out, " * @hide\n");
-    }
     fprintf(out, " */\n");
     fprintf(out, "public class %s {\n", javaClass.c_str());
 
