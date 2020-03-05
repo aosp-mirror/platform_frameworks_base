@@ -302,6 +302,7 @@ public class SystemActionPerformer {
                 case AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT:
                     return takeScreenshot();
                 default:
+                    Slog.e(TAG, "Invalid action id: " + actionId);
                     return false;
             }
         } finally {
