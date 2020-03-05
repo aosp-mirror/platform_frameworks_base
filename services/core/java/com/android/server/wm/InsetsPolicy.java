@@ -57,8 +57,10 @@ class InsetsPolicy {
     private final InsetsStateController mStateController;
     private final DisplayContent mDisplayContent;
     private final DisplayPolicy mPolicy;
-    private final TransientControlTarget mTransientControlTarget = new TransientControlTarget();
     private final IntArray mShowingTransientTypes = new IntArray();
+
+    /** For resetting visibilities of insets sources. */
+    private final InsetsControlTarget mDummyControlTarget = new InsetsControlTarget() { };
 
     private WindowState mFocusedWin;
     private BarWindow mStatusBar = new BarWindow(StatusBarManager.WINDOW_STATUS_BAR);
@@ -143,11 +145,14 @@ class InsetsPolicy {
      */
     InsetsState getInsetsForDispatch(WindowState target) {
         InsetsState state = mStateController.getInsetsForDispatch(target);
-        if (mShowingTransientTypes.size() == 0) {
-            return state;
-        }
         for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
             state.setSourceVisible(mShowingTransientTypes.get(i), false);
+        }
+        if (mFocusedWin != null && getStatusControlTarget(mFocusedWin) == mDummyControlTarget) {
+            state.setSourceVisible(ITYPE_STATUS_BAR, mFocusedWin.getRequestedInsetsState());
+        }
+        if (mFocusedWin != null && getNavControlTarget(mFocusedWin) == mDummyControlTarget) {
+            state.setSourceVisible(ITYPE_NAVIGATION_BAR, mFocusedWin.getRequestedInsetsState());
         }
         return state;
     }
@@ -194,71 +199,71 @@ class InsetsPolicy {
 
     private @Nullable InsetsControlTarget getFakeStatusControlTarget(
             @Nullable WindowState focused) {
-        if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
-            return focused;
-        }
-        return null;
+        return getStatusControlTarget(focused) == mDummyControlTarget ? focused : null;
     }
 
     private @Nullable InsetsControlTarget getFakeNavControlTarget(@Nullable WindowState focused) {
-        if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1) {
-            return focused;
-        }
-        return null;
+        return getNavControlTarget(focused) == mDummyControlTarget ? focused : null;
     }
 
     private @Nullable InsetsControlTarget getStatusControlTarget(@Nullable WindowState focusedWin) {
         if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
-            return mTransientControlTarget;
+            return mDummyControlTarget;
         }
         if (focusedWin == mPolicy.getNotificationShade()) {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
-        if (areSystemBarsForciblyVisible() || isKeyguardOrStatusBarForciblyVisible()) {
+        if (forceShowsSystemBarsForWindowingMode()) {
+            // Status bar is forcibly shown for the windowing mode which is a steady state.
+            // We don't want the client to control the status bar, and we will dispatch the real
+            // visibility of status bar to the client.
             return null;
+        }
+        if (forceShowsStatusBarTransiently()) {
+            // Status bar is forcibly shown transiently, and its new visibility won't be
+            // dispatched to the client so that we can keep the layout stable. We will dispatch the
+            // fake control to the client, so that it can re-show the bar during this scenario.
+            return mDummyControlTarget;
         }
         return focusedWin;
     }
 
     private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin) {
         if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1) {
-            return mTransientControlTarget;
+            return mDummyControlTarget;
         }
         if (focusedWin == mPolicy.getNotificationShade()) {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
-        if (areSystemBarsForciblyVisible() || isNavBarForciblyVisible()) {
+        if (forceShowsSystemBarsForWindowingMode()) {
+            // Navigation bar is forcibly shown for the windowing mode which is a steady state.
+            // We don't want the client to control the navigation bar, and we will dispatch the real
+            // visibility of navigation bar to the client.
             return null;
+        }
+        if (forceShowsNavigationBarTransiently()) {
+            // Navigation bar is forcibly shown transiently, and its new visibility won't be
+            // dispatched to the client so that we can keep the layout stable. We will dispatch the
+            // fake control to the client, so that it can re-show the bar during this scenario.
+            return mDummyControlTarget;
         }
         return focusedWin;
     }
 
-    private boolean isKeyguardOrStatusBarForciblyVisible() {
-        final WindowState statusBar = mPolicy.getStatusBar();
-        if (statusBar != null) {
-            // TODO(b/118118435): Pretend to the app that it's still able to control it?
-            if ((statusBar.mAttrs.privateFlags & PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR) != 0) {
-                return true;
-            }
-        }
-        return false;
+    private boolean forceShowsStatusBarTransiently() {
+        final WindowState win = mPolicy.getStatusBar();
+        return win != null && (win.mAttrs.privateFlags & PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR) != 0;
     }
 
-    private boolean isNavBarForciblyVisible() {
-        final WindowState notificationShade = mPolicy.getNotificationShade();
-        if (notificationShade == null) {
-            return false;
-        }
-        if ((notificationShade.mAttrs.privateFlags
-                & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0) {
-            return true;
-        }
-        return false;
+    private boolean forceShowsNavigationBarTransiently() {
+        final WindowState win = mPolicy.getNotificationShade();
+        return win != null
+                && (win.mAttrs.privateFlags & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0;
     }
 
-    private boolean areSystemBarsForciblyVisible() {
+    private boolean forceShowsSystemBarsForWindowingMode() {
         final boolean isDockedStackVisible =
                 mDisplayContent.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         final boolean isFreeformStackVisible =
@@ -279,7 +284,7 @@ class InsetsPolicy {
         for (int i = showingTransientTypes.size() - 1; i >= 0; i--) {
             InsetsSourceProvider provider =
                     mStateController.getSourceProvider(showingTransientTypes.get(i));
-            InsetsSourceControl control = provider.getControl(mTransientControlTarget);
+            InsetsSourceControl control = provider.getControl(mDummyControlTarget);
             if (control == null || control.getLeash() == null) {
                 continue;
             }
@@ -410,13 +415,6 @@ class InsetsPolicy {
                     WindowInsetsAnimation.Bounds bounds,
                     int layoutDuringAnimation) {
             }
-        }
-    }
-
-    private class TransientControlTarget implements InsetsControlTarget {
-
-        @Override
-        public void notifyInsetsControlChanged() {
         }
     }
 }
