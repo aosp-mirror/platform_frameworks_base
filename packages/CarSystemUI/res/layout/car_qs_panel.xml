@@ -33,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/car_user_switcher_container_height">
 
-        <com.android.systemui.statusbar.car.UserGridRecyclerView
+        <com.android.systemui.car.userswitcher.UserGridRecyclerView
             android:id="@+id/user_grid"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
