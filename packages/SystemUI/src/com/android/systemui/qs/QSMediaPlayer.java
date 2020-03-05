@@ -56,15 +56,17 @@ import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.NotificationMediaManager;
 
 import java.util.List;
 
 /**
  * Single media player for carousel in QSPanel
  */
-public class QSMediaPlayer {
+public class QSMediaPlayer implements NotificationMediaManager.MediaListener {
 
     private static final String TAG = "QSMediaPlayer";
+    private final NotificationMediaManager mMediaManager;
 
     private Context mContext;
     private LinearLayout mMediaNotifView;
@@ -76,78 +78,30 @@ public class QSMediaPlayer {
     private ComponentName mRecvComponent;
     private QSPanel mParent;
 
+    // Button IDs for QS controls
+    private static final int[] QS_ACTION_IDS = {
+            R.id.action0,
+            R.id.action1,
+            R.id.action2,
+            R.id.action3,
+            R.id.action4
+    };
+
+    // Button IDs used in notifications
+    private static final int[] NOTIF_ACTION_IDS = {
+            com.android.internal.R.id.action0,
+            com.android.internal.R.id.action1,
+            com.android.internal.R.id.action2,
+            com.android.internal.R.id.action3,
+            com.android.internal.R.id.action4
+    };
+
     private MediaController.Callback mSessionCallback = new MediaController.Callback() {
         @Override
         public void onSessionDestroyed() {
             Log.d(TAG, "session destroyed");
             mController.unregisterCallback(mSessionCallback);
-
-            // Hide all the old buttons
-            final int[] actionIds = {
-                    R.id.action0,
-                    R.id.action1,
-                    R.id.action2,
-                    R.id.action3,
-                    R.id.action4
-            };
-            for (int i = 0; i < actionIds.length; i++) {
-                ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
-                if (thisBtn != null) {
-                    thisBtn.setVisibility(View.GONE);
-                }
-            }
-
-            // Add a restart button
-            ImageButton btn = mMediaNotifView.findViewById(actionIds[0]);
-            btn.setOnClickListener(v -> {
-                Log.d(TAG, "Attempting to restart session");
-                // Send a media button event to previously found receiver
-                if (mRecvComponent != null) {
-                    Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-                    intent.setComponent(mRecvComponent);
-                    int keyCode = KeyEvent.KEYCODE_MEDIA_PLAY;
-                    intent.putExtra(
-                            Intent.EXTRA_KEY_EVENT,
-                            new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
-                    mContext.sendBroadcast(intent);
-                } else {
-                    Log.d(TAG, "No receiver to restart");
-                    // If we don't have a receiver, try relaunching the activity instead
-                    try {
-                        mController.getSessionActivity().send();
-                    } catch (PendingIntent.CanceledException e) {
-                        Log.e(TAG, "Pending intent was canceled");
-                        e.printStackTrace();
-                    }
-                }
-            });
-            btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
-            btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
-            btn.setVisibility(View.VISIBLE);
-
-            // Add long-click option to remove the player
-            ViewGroup mMediaCarousel = (ViewGroup) mMediaNotifView.getParent();
-            mMediaNotifView.setOnLongClickListener(v -> {
-                // Replace player view with delete/cancel view
-                v.setVisibility(View.GONE);
-
-                View options = LayoutInflater.from(mContext).inflate(
-                        R.layout.qs_media_panel_options, null, false);
-                ImageButton btnDelete = options.findViewById(R.id.remove);
-                btnDelete.setOnClickListener(b -> {
-                    mMediaCarousel.removeView(options);
-                    mParent.removeMediaPlayer(QSMediaPlayer.this);
-                });
-                ImageButton btnCancel = options.findViewById(R.id.cancel);
-                btnCancel.setOnClickListener(b -> {
-                    mMediaCarousel.removeView(options);
-                    v.setVisibility(View.VISIBLE);
-                });
-
-                int pos = mMediaCarousel.indexOfChild(v);
-                mMediaCarousel.addView(options, pos, v.getLayoutParams());
-                return true; // consumed click
-            });
+            clearControls();
         }
     };
 
@@ -156,10 +110,11 @@ public class QSMediaPlayer {
      * @param context
      * @param parent
      */
-    public QSMediaPlayer(Context context, ViewGroup parent) {
+    public QSMediaPlayer(Context context, ViewGroup parent, NotificationMediaManager manager) {
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mMediaNotifView = (LinearLayout) inflater.inflate(R.layout.qs_media_panel, parent, false);
+        mMediaManager = manager;
     }
 
     public View getView() {
@@ -232,8 +187,7 @@ public class QSMediaPlayer {
                 // Also close shade
                 mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
             } catch (PendingIntent.CanceledException e) {
-                Log.e(TAG, "Pending intent was canceled");
-                e.printStackTrace();
+                Log.e(TAG, "Pending intent was canceled", e);
             }
         });
 
@@ -266,25 +220,10 @@ public class QSMediaPlayer {
 
         // Media controls
         LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
-        final int[] actionIds = {
-                R.id.action0,
-                R.id.action1,
-                R.id.action2,
-                R.id.action3,
-                R.id.action4
-        };
-        final int[] notifActionIds = {
-                com.android.internal.R.id.action0,
-                com.android.internal.R.id.action1,
-                com.android.internal.R.id.action2,
-                com.android.internal.R.id.action3,
-                com.android.internal.R.id.action4
-        };
-
         int i = 0;
-        for (; i < parentActionsLayout.getChildCount() && i < actionIds.length; i++) {
-            ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
-            ImageButton thatBtn = parentActionsLayout.findViewById(notifActionIds[i]);
+        for (; i < parentActionsLayout.getChildCount() && i < QS_ACTION_IDS.length; i++) {
+            ImageButton thisBtn = mMediaNotifView.findViewById(QS_ACTION_IDS[i]);
+            ImageButton thatBtn = parentActionsLayout.findViewById(NOTIF_ACTION_IDS[i]);
             if (thatBtn == null || thatBtn.getDrawable() == null
                     || thatBtn.getVisibility() != View.VISIBLE) {
                 thisBtn.setVisibility(View.GONE);
@@ -301,10 +240,14 @@ public class QSMediaPlayer {
         }
 
         // Hide any unused buttons
-        for (; i < actionIds.length; i++) {
-            ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
+        for (; i < QS_ACTION_IDS.length; i++) {
+            ImageButton thisBtn = mMediaNotifView.findViewById(QS_ACTION_IDS[i]);
             thisBtn.setVisibility(View.GONE);
         }
+
+        // Ensure is only added once
+        mMediaManager.removeCallback(this);
+        mMediaManager.addCallback(this);
     }
 
     public MediaSession.Token getMediaSessionToken() {
@@ -411,6 +354,63 @@ public class QSMediaPlayer {
             // Reset to default
             iconView.setVisibility(View.GONE);
             deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
+        }
+    }
+
+    /**
+     * Put controls into a resumption state
+     */
+    private void clearControls() {
+        // Hide all the old buttons
+        final int[] actionIds = {
+                R.id.action0,
+                R.id.action1,
+                R.id.action2,
+                R.id.action3,
+                R.id.action4
+        };
+
+        for (int i = 0; i < actionIds.length; i++) {
+            ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
+            if (thisBtn != null) {
+                thisBtn.setVisibility(View.GONE);
+            }
+        }
+
+        // Add a restart button
+        ImageButton btn = mMediaNotifView.findViewById(actionIds[0]);
+        btn.setOnClickListener(v -> {
+            Log.d(TAG, "Attempting to restart session");
+            // Send a media button event to previously found receiver
+            if (mRecvComponent != null) {
+                Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                intent.setComponent(mRecvComponent);
+                int keyCode = KeyEvent.KEYCODE_MEDIA_PLAY;
+                intent.putExtra(
+                        Intent.EXTRA_KEY_EVENT,
+                        new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
+                mContext.sendBroadcast(intent);
+            } else {
+                Log.d(TAG, "No receiver to restart");
+                // If we don't have a receiver, try relaunching the activity instead
+                try {
+                    mController.getSessionActivity().send();
+                } catch (PendingIntent.CanceledException e) {
+                    Log.e(TAG, "Pending intent was canceled");
+                    e.printStackTrace();
+                }
+            }
+        });
+        btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
+        btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
+        btn.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onMetadataOrStateChanged(MediaMetadata metadata, int state) {
+        if (state == PlaybackState.STATE_NONE) {
+            clearControls();
+            mMediaManager.removeCallback(this);
         }
     }
 }

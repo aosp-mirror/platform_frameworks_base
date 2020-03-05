@@ -60,6 +60,7 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
@@ -94,6 +95,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     private final LinearLayout mMediaCarousel;
     private final ArrayList<QSMediaPlayer> mMediaPlayers = new ArrayList<>();
+    private final NotificationMediaManager mNotificationMediaManager;
     private LocalMediaManager mLocalMediaManager;
     private MediaDevice mDevice;
     private boolean mUpdateCarousel = false;
@@ -150,12 +152,14 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             AttributeSet attrs,
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
-            QSLogger qsLogger
+            QSLogger qsLogger,
+            NotificationMediaManager notificationMediaManager
     ) {
         super(context, attrs);
         mContext = context;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
+        mNotificationMediaManager = notificationMediaManager;
 
         setOrientation(VERTICAL);
 
@@ -255,7 +259,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         if (player == null) {
             Log.d(TAG, "creating new player");
-            player = new QSMediaPlayer(mContext, this);
+            player = new QSMediaPlayer(mContext, this, mNotificationMediaManager);
 
             if (player.isPlaying()) {
                 mMediaCarousel.addView(player.getView(), 0, lp); // add in front
