@@ -3287,7 +3287,7 @@ class ActivityStack extends Task {
         if (DisplayContent.alwaysCreateStack(getWindowingMode(), getActivityType())) {
             // This stack will only contain one task, so just return itself since all stacks ara now
             // tasks and all tasks are now stacks.
-            task = reuseAsLeafTask(voiceSession, voiceInteractor, info, activity);
+            task = reuseAsLeafTask(voiceSession, voiceInteractor, intent, info, activity);
         } else {
             // Create child task since this stack can contain multiple tasks.
             final int taskId = activity != null
