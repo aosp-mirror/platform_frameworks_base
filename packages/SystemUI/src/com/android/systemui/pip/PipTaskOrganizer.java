@@ -219,12 +219,28 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
+        final PictureInPictureParams newParams = info.pictureInPictureParams;
+        if (!shouldUpdateDestinationBounds(newParams)) {
+            Log.d(TAG, "Ignored onTaskInfoChanged with PiP param: " + newParams);
+            return;
+        }
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                getAspectRatioOrDefault(info.pictureInPictureParams), null /* bounds */);
+                getAspectRatioOrDefault(newParams), null /* bounds */);
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         animateResizePip(destinationBounds, DURATION_DEFAULT_MS);
     }
 
+    /**
+     * @return {@code true} if the aspect ratio is changed since no other parameters within
+     * {@link PictureInPictureParams} would affect the bounds.
+     */
+    private boolean shouldUpdateDestinationBounds(PictureInPictureParams params) {
+        if (params == null || mTaskInfo.pictureInPictureParams == null) {
+            return params != mTaskInfo.pictureInPictureParams;
+        }
+        return !Objects.equals(mTaskInfo.pictureInPictureParams.getAspectRatioRational(),
+                params.getAspectRatioRational());
+    }
 
     /**
      * Directly perform manipulation/resize on the leash. This will not perform any
