@@ -20,6 +20,9 @@ import static android.view.Gravity.BOTTOM;
 import static android.view.Gravity.LEFT;
 import static android.view.Gravity.RIGHT;
 import static android.view.Gravity.TOP;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -42,13 +45,17 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
+import static org.testng.Assert.expectThrows;
 
 import android.app.WindowConfiguration;
 import android.graphics.Insets;
@@ -151,6 +158,56 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
         assertEquals(0, mWindow.mAttrs.systemUiVisibility);
         assertEquals(0, mWindow.mAttrs.subtreeSystemUiVisibility);
+    }
+
+    @Test
+    public void addingWindow_withInsetsTypes() {
+        WindowState win = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
+        win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_TOP_GESTURES};
+        win.getFrameLw().set(0, 0, 500, 100);
+
+        addWindow(win);
+        InsetsStateController controller = mDisplayContent.getInsetsStateController();
+        controller.onPostLayout();
+
+        InsetsSourceProvider statusBarProvider = controller.getSourceProvider(ITYPE_STATUS_BAR);
+        assertEquals(new Rect(0, 0, 500, 100), statusBarProvider.getSource().getFrame());
+        assertEquals(Insets.of(0, 100, 0, 0),
+                statusBarProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
+                        false /* ignoreVisibility */));
+
+        InsetsSourceProvider topGesturesProvider = controller.getSourceProvider(ITYPE_TOP_GESTURES);
+        assertEquals(new Rect(0, 0, 500, 100), topGesturesProvider.getSource().getFrame());
+        assertEquals(Insets.of(0, 100, 0, 0),
+                topGesturesProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
+                        false /* ignoreVisibility */));
+
+        InsetsSourceProvider navigationBarProvider = controller.getSourceProvider(
+                ITYPE_NAVIGATION_BAR);
+        assertNotEquals(new Rect(0, 0, 500, 100), navigationBarProvider.getSource().getFrame());
+    }
+
+    @Test
+    public void addingWindow_ignoresInsetsTypes_InWindowTypeWithPredefinedInsets() {
+        mDisplayPolicy.removeWindowLw(mStatusBarWindow);  // Removes the existing one.
+        WindowState win = createWindow(null, TYPE_STATUS_BAR, "StatusBar");
+        win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR};
+        win.getFrameLw().set(0, 0, 500, 100);
+
+        addWindow(win);
+        mDisplayContent.getInsetsStateController().onPostLayout();
+
+        InsetsSourceProvider provider =
+                mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR);
+        assertNotEquals(new Rect(0, 0, 500, 100), provider.getSource().getFrame());
+    }
+
+    @Test
+    public void addingWindow_throwsException_WithMultipleInsetTypes() {
+        WindowState win = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
+        win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+
+        expectThrows(IllegalArgumentException.class, () -> addWindow(win));
     }
 
     @Test
