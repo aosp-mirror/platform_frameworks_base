@@ -89,6 +89,9 @@ import static android.service.notification.NotificationListenerService.REASON_SN
 import static android.service.notification.NotificationListenerService.REASON_TIMEOUT;
 import static android.service.notification.NotificationListenerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
+import static android.service.notification.NotificationListenerService.Ranking.RANKING_DEMOTED;
+import static android.service.notification.NotificationListenerService.Ranking.RANKING_PROMOTED;
+import static android.service.notification.NotificationListenerService.Ranking.RANKING_UNCHANGED;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
@@ -8596,7 +8599,10 @@ public class NotificationManagerService extends SystemService {
                     record.canBubble(),
                     record.isInterruptive(),
                     record.isConversation(),
-                    record.getShortcutInfo()
+                    record.getShortcutInfo(),
+                    record.getRankingScore() == 0
+                            ? RANKING_UNCHANGED
+                            : (record.getRankingScore() > 0 ?  RANKING_PROMOTED : RANKING_DEMOTED)
             );
             rankings.add(ranking);
         }

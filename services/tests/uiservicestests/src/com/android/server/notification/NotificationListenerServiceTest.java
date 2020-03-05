@@ -122,6 +122,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(visuallyInterruptive(i), ranking.visuallyInterruptive());
             assertEquals(isConversation(i), ranking.isConversation());
             assertEquals(getShortcutInfo(i).getId(), ranking.getShortcutInfo().getId());
+            assertEquals(getRankingAdjustment(i), ranking.getRankingAdjustment());
         }
     }
 
@@ -191,7 +192,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 tweak.canBubble(),
                 tweak.visuallyInterruptive(),
                 tweak.isConversation(),
-                tweak.getShortcutInfo()
+                tweak.getShortcutInfo(),
+                tweak.getRankingAdjustment()
         );
         assertNotEquals(nru, nru2);
     }
@@ -270,7 +272,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                     canBubble(i),
                     visuallyInterruptive(i),
                     isConversation(i),
-                    getShortcutInfo(i)
+                    getShortcutInfo(i),
+                    getRankingAdjustment(i)
             );
             rankings[i] = ranking;
         }
@@ -392,6 +395,10 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 0, "iconResName", "bitmapPath", 0,
                 null, null);
         return si;
+    }
+
+    private int getRankingAdjustment(int index) {
+        return index % 3 - 1;
     }
 
     private void assertActionsEqual(
