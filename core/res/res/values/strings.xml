@@ -1212,11 +1212,15 @@
     <string name="permdesc_readPhoneNumbers">Allows the app to access the phone numbers of the device.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_wakeLock" product="automotive">keep car screen turned on</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="tablet">prevent tablet from sleeping</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="tv">prevent TV from sleeping</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="default">prevent phone from sleeping</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_wakeLock" product="automotive">Allows the app to keep the car screen turned on.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_wakeLock" product="tablet">Allows the app to prevent the tablet from going to sleep.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
