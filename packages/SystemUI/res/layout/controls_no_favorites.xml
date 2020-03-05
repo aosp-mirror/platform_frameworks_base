@@ -28,6 +28,7 @@
       android:paddingBottom="40dp"
       android:layout_marginLeft="10dp"
       android:layout_marginRight="10dp"
+      android:layout_marginTop="@dimen/controls_top_margin"
       android:background="@drawable/control_no_favorites_background">
 
     <LinearLayout

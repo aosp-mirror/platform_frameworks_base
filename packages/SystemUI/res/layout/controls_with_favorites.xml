@@ -20,7 +20,7 @@
   <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:paddingTop="20dp">
+      android:layout_marginTop="@dimen/controls_top_margin">
 
     <LinearLayout
         android:id="@+id/controls_header"
@@ -38,8 +38,8 @@
       <ImageView
           android:id="@+id/app_icon"
           android:layout_gravity="center"
-          android:layout_width="24dp"
-          android:layout_height="24dp" 
+          android:layout_width="@dimen/controls_header_app_icon_size"
+          android:layout_height="@dimen/controls_header_app_icon_size"
           android:layout_marginEnd="10dp" />
 
       <TextView
@@ -58,5 +58,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="vertical"
-      android:paddingTop="12dp" />
+      android:paddingTop="30dp"
+      android:layout_marginLeft="@dimen/controls_list_side_margin"
+      android:layout_marginRight="@dimen/controls_list_side_margin" />
 </merge>
