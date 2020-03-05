@@ -26,7 +26,6 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.metrics.LogMaker;
 import android.os.Build;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -91,11 +90,6 @@ public class DefaultUiController implements AssistManager.UiController {
         mInvocationLightsView = (InvocationLightsView)
                 LayoutInflater.from(context).inflate(R.layout.invocation_lights, mRoot, false);
         mRoot.addView(mInvocationLightsView);
-    }
-
-    @Override // AssistManager.UiController
-    public void processBundle(Bundle bundle) {
-        Log.e(TAG, "Bundle received but handling is not implemented; ignoring");
     }
 
     @Override // AssistManager.UiController
