@@ -286,7 +286,11 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mServicesStarted) {
-            Dependency.staticOnConfigurationChanged(newConfig);
+            SystemUIFactory
+                    .getInstance()
+                    .getRootComponent()
+                    .getConfigurationController()
+                    .onConfigurationChanged(newConfig);
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
                 if (mServices[i] != null) {
