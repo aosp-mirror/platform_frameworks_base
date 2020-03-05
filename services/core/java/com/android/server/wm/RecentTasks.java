@@ -56,7 +56,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -874,16 +873,16 @@ class RecentTasks {
      * @return the list of recent tasks for presentation.
      */
     ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
-            boolean getTasksAllowed, boolean getDetailedTasks, int userId, int callingUid) {
+            boolean getTasksAllowed, int userId, int callingUid) {
         return new ParceledListSlice<>(getRecentTasksImpl(maxNum, flags, getTasksAllowed,
-                getDetailedTasks, userId, callingUid));
+                userId, callingUid));
     }
 
     /**
      * @return the list of recent tasks for presentation.
      */
     private ArrayList<ActivityManager.RecentTaskInfo> getRecentTasksImpl(int maxNum, int flags,
-            boolean getTasksAllowed, boolean getDetailedTasks, int userId, int callingUid) {
+            boolean getTasksAllowed, int userId, int callingUid) {
         final boolean withExcluded = (flags & RECENT_WITH_EXCLUDED) != 0;
 
         if (!isUserRunning(userId, FLAG_AND_UNLOCKED)) {
@@ -961,12 +960,7 @@ class RecentTasks {
                 continue;
             }
 
-            final ActivityManager.RecentTaskInfo rti = createRecentTaskInfo(task);
-            if (!getDetailedTasks) {
-                rti.baseIntent.replaceExtras((Bundle) null);
-            }
-
-            res.add(rti);
+            res.add(createRecentTaskInfo(task));
         }
         return res;
     }
@@ -1745,8 +1739,7 @@ class RecentTasks {
             // Reset the header flag for the next block
             printedHeader = false;
             ArrayList<ActivityManager.RecentTaskInfo> tasks = getRecentTasksImpl(Integer.MAX_VALUE,
-                    0, true /* getTasksAllowed */, false /* getDetailedTasks */,
-                    mService.getCurrentUserId(), SYSTEM_UID);
+                    0, true /* getTasksAllowed */, mService.getCurrentUserId(), SYSTEM_UID);
             for (int i = 0; i < tasks.size(); i++) {
                 final ActivityManager.RecentTaskInfo taskInfo = tasks.get(i);
                 if (!printedHeader) {

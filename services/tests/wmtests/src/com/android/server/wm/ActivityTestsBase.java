@@ -40,6 +40,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 
@@ -112,6 +113,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         private int mLaunchedFromPid;
         private int mLaunchedFromUid;
         private WindowProcessController mWpc;
+        private Bundle mIntentExtras;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -124,6 +126,11 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
         ActivityBuilder setTargetActivity(String targetActivity) {
             mTargetActivity = targetActivity;
+            return this;
+        }
+
+        ActivityBuilder setIntentExtras(Bundle extras) {
+            mIntentExtras = extras;
             return this;
         }
 
@@ -231,6 +238,9 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
             Intent intent = new Intent();
             intent.setComponent(mComponent);
+            if (mIntentExtras != null) {
+                intent.putExtras(mIntentExtras);
+            }
             final ActivityInfo aInfo = new ActivityInfo();
             aInfo.applicationInfo = new ApplicationInfo();
             aInfo.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
