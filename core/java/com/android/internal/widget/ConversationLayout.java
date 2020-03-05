@@ -113,7 +113,7 @@ public class ConversationLayout extends FrameLayout
     private int mBadgedSideMargins;
     private int mIconSizeBadged;
     private int mIconSizeCentered;
-    private View mIcon;
+    private CachingIconView mIcon;
     private int mExpandedGroupTopMargin;
     private int mExpandButtonExpandedSize;
 
@@ -153,6 +153,11 @@ public class ConversationLayout extends FrameLayout
         mConversationIcon = findViewById(R.id.conversation_icon);
         mIcon = findViewById(R.id.icon);
         mConversationIconBadge = findViewById(R.id.conversation_icon_badge);
+        mIcon.setOnVisibilityChangedListener((visibility) -> {
+            // Always keep the badge visibility in sync with the icon. This is necessary in cases
+            // Where the icon is being hidden externally like in group children.
+            mConversationIconBadge.setVisibility(visibility);
+        });
         mHeaderText = findViewById(R.id.header_text);
         mExpandButtonContainer = findViewById(R.id.expand_button_container);
         mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
