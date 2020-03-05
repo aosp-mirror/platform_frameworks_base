@@ -360,7 +360,7 @@
         <attr name="windowFullscreen" format="boolean" />
         <!-- Flag indicating whether this window should extend into overscan region.  Corresponds
              to {@link android.view.WindowManager.LayoutParams#FLAG_LAYOUT_IN_OVERSCAN}.
-             @deprecated Overscan areas aren't set by any Android product anymore.
+             @deprecated Overscan areas aren't set by any Android product anymore as of Android 11.
              -->
         <attr name="windowOverscan" format="boolean" />
         <!-- Flag indicating whether this is a floating window. -->
