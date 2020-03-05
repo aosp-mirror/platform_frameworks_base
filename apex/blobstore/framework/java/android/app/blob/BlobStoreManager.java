@@ -145,6 +145,9 @@ public class BlobStoreManager {
     /** @hide */
     public static final int INVALID_RES_ID = -1;
 
+    /** @hide */
+    public static final String DESC_RES_TYPE_STRING = "string";
+
     private final Context mContext;
     private final IBlobStoreManager mService;
 
@@ -269,6 +272,9 @@ public class BlobStoreManager {
      * <p> When an app acquires a lease on a blob, the System will try to keep this
      * blob around but note that it can still be deleted if it was requested by the user.
      *
+     * <p> In case the resource name for the {@code descriptionResId} is modified as part of
+     * an app update, apps should re-acquire the lease with the new resource id.
+     *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
      * @param descriptionResId the resource id for a short description string that can be surfaced
@@ -379,6 +385,9 @@ public class BlobStoreManager {
      *
      * <p> When an app acquires a lease on a blob, the System will try to keep this
      * blob around but note that it can still be deleted if it was requested by the user.
+     *
+     * <p> In case the resource name for the {@code descriptionResId} is modified as part of
+     * an app update, apps should re-acquire the lease with the new resource id.
      *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
