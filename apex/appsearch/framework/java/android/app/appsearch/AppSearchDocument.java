@@ -71,7 +71,7 @@ public class AppSearchDocument {
     private final Map<String, Object> mProperties;
 
     /**
-     * Create a new {@link AppSearchDocument}.
+     * Creates a new {@link AppSearchDocument}.
      * @param proto Contains {@link AppSearchDocument} basic information (uri, schemaType etc) and
      *               properties ordered by keys.
      * @param propertiesMap Contains all properties in {@link #mProto} to support get properties
@@ -84,7 +84,7 @@ public class AppSearchDocument {
     }
 
     /**
-     * Create a new {@link AppSearchDocument} from an existing instance.
+     * Creates a new {@link AppSearchDocument} from an existing instance.
      *
      * <p>This method should be only used by constructor of a subclass.
      */
@@ -142,7 +142,7 @@ public class AppSearchDocument {
     }
 
     /**
-     * Get the {@link DocumentProto} of the {@link AppSearchDocument}.
+     * Returns the {@link DocumentProto} of the {@link AppSearchDocument}.
      *
      * <p>The {@link DocumentProto} contains {@link AppSearchDocument}'s basic information and all
      *    properties ordered by keys.
@@ -154,30 +154,21 @@ public class AppSearchDocument {
         return mProto;
     }
 
-    /**
-     * Get the uri of the {@link AppSearchDocument}.
-     *
-     * @hide
-     */
+    /** Returns the URI of the {@link AppSearchDocument}. */
     @NonNull
     public String getUri() {
         return mProto.getUri();
     }
 
-    /**
-     * Get the schema type of the {@link AppSearchDocument}.
-     * @hide
-     */
+    /** Returns the schema type of the {@link AppSearchDocument}. */
     @NonNull
     public String getSchemaType() {
         return mProto.getSchema();
     }
 
     /**
-     * Get the creation timestamp in milliseconds of the {@link AppSearchDocument}. Value will be in
-     * the {@link System#currentTimeMillis()} time base.
-     *
-     * @hide
+     * Returns the creation timestamp in milliseconds of the {@link AppSearchDocument}. Value will
+     * be in the {@link System#currentTimeMillis()} time base.
      */
     @CurrentTimeMillisLong
     public long getCreationTimestampMillis() {
@@ -189,8 +180,6 @@ public class AppSearchDocument {
      *
      * <p>The default value is 0, which means the document is permanent and won't be auto-deleted
      *    until the app is uninstalled.
-     *
-     * @hide
      */
     @DurationMillisLong
     public long getTtlMillis() {
@@ -204,8 +193,6 @@ public class AppSearchDocument {
      * {@link AppSearchDocument}s of the same type.
      *
      * <p>The default value is 0.
-     *
-     * @hide
      */
     public int getScore() {
         return mProto.getScore();
@@ -217,7 +204,6 @@ public class AppSearchDocument {
      * @param key The key to look for.
      * @return The first {@link String} associated with the given key or {@code null} if there
      *         is no such key or the value is of a different type.
-     * @hide
      */
     @Nullable
     public String getPropertyString(@NonNull String key) {
@@ -230,55 +216,49 @@ public class AppSearchDocument {
     }
 
     /**
-     * Retrieve a {@link Long} value by key.
+     * Retrieve a {@code long} value by key.
      *
      * @param key The key to look for.
-     * @return The first {@link Long} associated with the given key or {@code null} if there
-     *         is no such key or the value is of a different type.
-     * @hide
+     * @return The first {@code long} associated with the given key or default value {@code 0} if
+     *         there is no such key or the value is of a different type.
      */
-    @Nullable
-    public Long getPropertyLong(@NonNull String key) {
+    public long getPropertyLong(@NonNull String key) {
         long[] propertyArray = getPropertyLongArray(key);
         if (ArrayUtils.isEmpty(propertyArray)) {
-            return null;
+            return 0;
         }
         warnIfSinglePropertyTooLong("Long", key, propertyArray.length);
         return propertyArray[0];
     }
 
     /**
-     * Retrieve a {@link Double} value by key.
+     * Retrieve a {@code double} value by key.
      *
      * @param key The key to look for.
-     * @return The first {@link Double} associated with the given key or {@code null} if there
-     *         is no such key or the value is of a different type.
-     * @hide
+     * @return The first {@code double} associated with the given key or default value {@code 0.0}
+     *         if there is no such key or the value is of a different type.
      */
-    @Nullable
-    public Double getPropertyDouble(@NonNull String key) {
+    public double getPropertyDouble(@NonNull String key) {
         double[] propertyArray = getPropertyDoubleArray(key);
         // TODO(tytytyww): Add support double array to ArraysUtils.isEmpty().
         if (propertyArray == null || propertyArray.length == 0) {
-            return null;
+            return 0.0;
         }
         warnIfSinglePropertyTooLong("Double", key, propertyArray.length);
         return propertyArray[0];
     }
 
     /**
-     * Retrieve a {@link Boolean} value by key.
+     * Retrieve a {@code boolean} value by key.
      *
      * @param key The key to look for.
-     * @return The first {@link Boolean} associated with the given key or {@code null} if there
-     *         is no such key or the value is of a different type.
-     * @hide
+     * @return The first {@code boolean} associated with the given key or default value
+     *         {@code false} if there is no such key or the value is of a different type.
      */
-    @Nullable
-    public Boolean getPropertyBoolean(@NonNull String key) {
+    public boolean getPropertyBoolean(@NonNull String key) {
         boolean[] propertyArray = getPropertyBooleanArray(key);
         if (ArrayUtils.isEmpty(propertyArray)) {
-            return null;
+            return false;
         }
         warnIfSinglePropertyTooLong("Boolean", key, propertyArray.length);
         return propertyArray[0];
@@ -330,12 +310,11 @@ public class AppSearchDocument {
     }
 
     /**
-     * Retrieve a repeated {@code String} property by key.
+     * Retrieve a repeated {@link String} property by key.
      *
      * @param key The key to look for.
      * @return The {@code String[]} associated with the given key, or {@code null} if no value
      *         is set or the value is of a different type.
-     * @hide
      */
     @Nullable
     public String[] getPropertyStringArray(@NonNull String key) {
@@ -348,7 +327,6 @@ public class AppSearchDocument {
      * @param key The key to look for.
      * @return The {@code long[]} associated with the given key, or {@code null} if no value is
      *         set or the value is of a different type.
-     * @hide
      */
     @Nullable
     public long[] getPropertyLongArray(@NonNull String key) {
@@ -361,7 +339,6 @@ public class AppSearchDocument {
      * @param key The key to look for.
      * @return The {@code double[]} associated with the given key, or {@code null} if no value
      *         is set or the value is of a different type.
-     * @hide
      */
     @Nullable
     public double[] getPropertyDoubleArray(@NonNull String key) {
@@ -374,7 +351,6 @@ public class AppSearchDocument {
      * @param key The key to look for.
      * @return The {@code boolean[]} associated with the given key, or {@code null} if no value
      *         is set or the value is of a different type.
-     * @hide
      */
     @Nullable
     public boolean[] getPropertyBooleanArray(@NonNull String key) {
@@ -453,7 +429,6 @@ public class AppSearchDocument {
      * The builder class for {@link AppSearchDocument}.
      *
      * @param <BuilderType> Type of subclass who extend this.
-     * @hide
      */
     public static class Builder<BuilderType extends Builder> {
 
@@ -462,7 +437,9 @@ public class AppSearchDocument {
         private final BuilderType mBuilderTypeInstance;
 
         /**
-         * Create a new {@link AppSearchDocument.Builder}.
+         * Creates a new {@link AppSearchDocument.Builder}.
+         *
+         * <p>The URI is a unique string opaque to AppSearch.
          *
          * @param uri The uri of {@link AppSearchDocument}.
          * @param schemaType The schema type of the {@link AppSearchDocument}. The passed-in
@@ -470,7 +447,6 @@ public class AppSearchDocument {
          *       to inserting a document of this {@code schemaType} into the AppSearch index using
          *       {@link AppSearchManager#putDocuments(List)}. Otherwise, the document will be
          *       rejected by {@link AppSearchManager#putDocuments(List)}.
-         * @hide
          */
         public Builder(@NonNull String uri, @NonNull String schemaType) {
             mBuilderTypeInstance = (BuilderType) this;
@@ -486,7 +462,6 @@ public class AppSearchDocument {
          * other {@link AppSearchDocument}s of the same type.
          *
          * @throws IllegalArgumentException If the provided value is negative.
-         * @hide
          */
         @NonNull
         public BuilderType setScore(@IntRange(from = 0, to = Integer.MAX_VALUE) int score) {
@@ -500,8 +475,6 @@ public class AppSearchDocument {
         /**
          * Set the creation timestamp in milliseconds of the {@link AppSearchDocument}. Should be
          * set using a value obtained from the {@link System#currentTimeMillis()} time base.
-         *
-         * @hide
          */
         @NonNull
         public BuilderType setCreationTimestampMillis(
@@ -533,7 +506,6 @@ public class AppSearchDocument {
          *
          * @param key The key associated with the {@code values}.
          * @param values The {@code String} values of the property.
-         * @hide
          */
         @NonNull
         public BuilderType setProperty(@NonNull String key, @NonNull String... values) {
@@ -673,10 +645,8 @@ public class AppSearchDocument {
             }
         }
 
-        /**
-         * Builds the {@link AppSearchDocument} object.
-         * @hide
-         */
+        /** Builds the {@link AppSearchDocument} object. */
+        @NonNull
         public AppSearchDocument build() {
             // Build proto by sorting the keys in mProperties to exclude the influence of
             // order. Therefore documents will generate same proto as long as the contents are

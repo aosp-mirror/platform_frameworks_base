@@ -90,6 +90,7 @@ public class AppSearchEmail extends AppSearchDocument {
      * {@link AppSearchDocument}.
      *
      * @param document The {@link AppSearchDocument} containing the email content.
+     * @hide
      */
     public AppSearchEmail(@NonNull AppSearchDocument document) {
         super(document);
