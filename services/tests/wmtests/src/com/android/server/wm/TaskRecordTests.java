@@ -277,8 +277,8 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testFullscreenBoundsForcedOrientation() {
         final Rect fullScreenBounds = new Rect(0, 0, 1920, 1080);
         final Rect fullScreenBoundsPort = new Rect(0, 0, 1080, 1920);
-        DisplayContent display = new TestDisplayContent.Builder(
-                mService, fullScreenBounds.width(), fullScreenBounds.height()).build();
+        final DisplayContent display = new TestDisplayContent.Builder(mService,
+                fullScreenBounds.width(), fullScreenBounds.height()).setCanRotate(false).build();
         assertTrue(mRootWindowContainer.getDisplayContent(display.mDisplayId) != null);
         // Fix the display orientation to landscape which is the natural rotation (0) for the test
         // display.
@@ -396,7 +396,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Setup the display with a top stable inset. The later assertion will ensure the inset is
         // excluded from screenHeightDp.
         final int statusBarHeight = 100;
-        final DisplayContent displayContent = mock(DisplayContent.class);
+        final DisplayContent displayContent = task.mDisplayContent;
         final DisplayPolicy policy = mock(DisplayPolicy.class);
         doAnswer(invocationOnMock -> {
             final Rect insets = invocationOnMock.<Rect>getArgument(0);
@@ -410,9 +410,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Without limiting to be inside the parent bounds, the out screen size should keep relative
         // to the input bounds.
         final ActivityRecord.CompatDisplayInsets compatIntsets =
-                new ActivityRecord.CompatDisplayInsets(displayContent, new Rect(0, 0,
-                        displayContent.mBaseDisplayWidth, displayContent.mBaseDisplayHeight),
-                        false);
+                new ActivityRecord.CompatDisplayInsets(displayContent, task);
         task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatIntsets);
 
         assertEquals((shortSide - statusBarHeight) * DENSITY_DEFAULT / parentConfig.densityDpi,
