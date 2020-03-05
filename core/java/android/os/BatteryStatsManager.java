@@ -350,12 +350,13 @@ public final class BatteryStatsManager {
     /**
      * Indicates that an app has acquired the wifi multicast lock.
      *
-     * @param uid UID of the app that acquired the wifi lock (to be used for battery blaming).
+     * @param ws Worksource with the uid of the app that acquired the wifi lock (to be used for
+     *           battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void reportWifiMulticastEnabled(int uid) {
+    public void reportWifiMulticastEnabled(@NonNull WorkSource ws) {
         try {
-            mBatteryStats.noteWifiMulticastEnabled(uid);
+            mBatteryStats.noteWifiMulticastEnabled(ws.getAttributionUid());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -364,12 +365,13 @@ public final class BatteryStatsManager {
     /**
      * Indicates that an app has released the wifi multicast lock.
      *
-     * @param uid UID of the app that released the wifi lock (to be used for battery blaming).
+     * @param ws Worksource with the uid of the app that released the wifi lock (to be used for
+     *           battery blaming).
      */
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
-    public void reportWifiMulticastDisabled(int uid) {
+    public void reportWifiMulticastDisabled(@NonNull WorkSource ws) {
         try {
-            mBatteryStats.noteWifiMulticastDisabled(uid);
+            mBatteryStats.noteWifiMulticastDisabled(ws.getAttributionUid());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
