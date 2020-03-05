@@ -31,7 +31,7 @@ public:
     BinderIncrementalService(const sp<IServiceManager>& sm);
 
     static BinderIncrementalService* start();
-    static const char16_t* getServiceName() { return u"incremental_service"; }
+    static const char16_t* getServiceName() { return u"incremental"; }
     status_t dump(int fd, const Vector<String16>& args) final;
 
     void onSystemReady();
