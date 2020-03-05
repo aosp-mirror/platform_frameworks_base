@@ -171,22 +171,13 @@ public class SplitDisplayLayout {
     /**
      * Updates the adjustment depending on it's current state.
      */
-    void updateAdjustedBounds(int currImeTop, int startTop, int finalTop) {
-        updateAdjustedBounds(mDisplayLayout, currImeTop, startTop, finalTop, mDividerSize,
+    void updateAdjustedBounds(int currImeTop, int hiddenTop, int shownTop) {
+        adjustForIME(mDisplayLayout, currImeTop, hiddenTop, shownTop, mDividerSize,
                 mDividerSizeInactive, mPrimary, mSecondary);
     }
 
-    /**
-     * Updates the adjustment depending on it's current state.
-     */
-    private void updateAdjustedBounds(DisplayLayout dl, int currImeTop, int startTop, int finalTop,
-            int dividerWidth, int dividerWidthInactive, Rect primaryBounds, Rect secondaryBounds) {
-        adjustForIME(dl, currImeTop, startTop, finalTop, dividerWidth, dividerWidthInactive,
-                primaryBounds, secondaryBounds);
-    }
-
     /** Assumes top/bottom split. Splits are not adjusted for left/right splits. */
-    private void adjustForIME(DisplayLayout dl, int currImeTop, int startTop, int finalTop,
+    private void adjustForIME(DisplayLayout dl, int currImeTop, int hiddenTop, int shownTop,
             int dividerWidth, int dividerWidthInactive, Rect primaryBounds, Rect secondaryBounds) {
         if (mAdjustedPrimary == null) {
             mAdjustedPrimary = new Rect();
@@ -196,11 +187,9 @@ public class SplitDisplayLayout {
         final Rect displayStableRect = new Rect();
         dl.getStableBounds(displayStableRect);
 
-        final boolean showing = finalTop < startTop;
-        final float progress = ((float) (currImeTop - startTop)) / (finalTop - startTop);
-        final float dividerSquish = showing ? progress : 1.f - progress;
+        final float shownFraction = ((float) (currImeTop - hiddenTop)) / (shownTop - hiddenTop);
         final int currDividerWidth =
-                (int) (dividerWidthInactive * dividerSquish + dividerWidth * (1.f - dividerSquish));
+                (int) (dividerWidthInactive * shownFraction + dividerWidth * (1.f - shownFraction));
 
         final int minTopStackBottom = displayStableRect.top
                 + (int) ((mPrimary.bottom - displayStableRect.top) * ADJUSTED_STACK_FRACTION_MIN);
