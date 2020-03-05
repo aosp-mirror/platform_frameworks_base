@@ -24,9 +24,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Interface for customizing {@link MediaSessionService}
+ * Abstract class for customizing how {@link MediaSessionService} handles sessions.
+ *
+ * Note: When instantiating this class, {@link MediaSessionService} will only use the constructor
+ * without any parameters.
  */
-public interface SessionPolicyProvider {
+public abstract class SessionPolicyProvider {
     @IntDef(value = {
             SESSION_POLICY_IGNORE_BUTTON_RECEIVER,
             SESSION_POLICY_IGNORE_BUTTON_SESSION
@@ -40,7 +43,7 @@ public interface SessionPolicyProvider {
      *
      * @see MediaSession#setMediaButtonReceiver
      */
-    int SESSION_POLICY_IGNORE_BUTTON_RECEIVER = 1 << 0;
+    static final int SESSION_POLICY_IGNORE_BUTTON_RECEIVER = 1 << 0;
 
     /**
      * Policy to ignore sessions that should not respond to media key events via
@@ -48,7 +51,11 @@ public interface SessionPolicyProvider {
      * ignore sessions that should not respond to media key events even if their playback state has
      * changed most recently.
      */
-    int SESSION_POLICY_IGNORE_BUTTON_SESSION = 1 << 1;
+    static final int SESSION_POLICY_IGNORE_BUTTON_SESSION = 1 << 1;
+
+    public SessionPolicyProvider() {
+        // Constructor used for reflection
+    }
 
     /**
      * Use this to statically set policies for sessions when they are created.
@@ -59,5 +66,7 @@ public interface SessionPolicyProvider {
      * @param packageName
      * @return list of policies
      */
-    @SessionPolicy int getSessionPoliciesForApplication(int uid, @NonNull String packageName);
+    @SessionPolicy int getSessionPoliciesForApplication(int uid, @NonNull String packageName) {
+        return 0;
+    }
 }
