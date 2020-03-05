@@ -1297,9 +1297,6 @@ public final class SystemServiceRegistry {
                     throws ServiceNotFoundException {
                     return new LightsManager(ctx);
                 }});
-        //TODO(b/136132412): refactor this: 1) merge IIncrementalManager.aidl and
-        //IIncrementalManagerNative.aidl, 2) implement the binder interface in
-        //IncrementalManagerService.java, 3) use JNI to call native functions
         registerService(Context.INCREMENTAL_SERVICE, IncrementalManager.class,
                 new CachedServiceFetcher<IncrementalManager>() {
                     @Override
