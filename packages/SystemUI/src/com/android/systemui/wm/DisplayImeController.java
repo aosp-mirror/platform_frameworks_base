@@ -51,7 +51,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
     public static final int ANIMATION_DURATION_SHOW_MS = 275;
     public static final int ANIMATION_DURATION_HIDE_MS = 340;
-    static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
+    public static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     private static final int DIRECTION_NONE = 0;
     private static final int DIRECTION_SHOW = 1;
     private static final int DIRECTION_HIDE = 2;
@@ -127,20 +127,20 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
-    private void dispatchStartPositioning(int displayId, int imeTop, int finalImeTop,
+    private void dispatchStartPositioning(int displayId, int hiddenTop, int shownTop,
             boolean show, SurfaceControl.Transaction t) {
         synchronized (mPositionProcessors) {
             for (ImePositionProcessor pp : mPositionProcessors) {
-                pp.onImeStartPositioning(displayId, imeTop, finalImeTop, show, t);
+                pp.onImeStartPositioning(displayId, hiddenTop, shownTop, show, t);
             }
         }
     }
 
-    private void dispatchEndPositioning(int displayId, int imeTop, boolean show,
+    private void dispatchEndPositioning(int displayId, boolean cancel,
             SurfaceControl.Transaction t) {
         synchronized (mPositionProcessors) {
             for (ImePositionProcessor pp : mPositionProcessors) {
-                pp.onImeEndPositioning(displayId, imeTop, show, t);
+                pp.onImeEndPositioning(displayId, cancel, t);
             }
         }
     }
@@ -173,6 +173,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         int mAnimationDirection = DIRECTION_NONE;
         ValueAnimator mAnimation = null;
         int mRotation = Surface.ROTATION_0;
+        boolean mImeShowing = false;
 
         PerDisplay(int displayId, int initialRotation) {
             mDisplayId = displayId;
@@ -239,23 +240,39 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             if (imeSource == null || mImeSourceControl == null) {
                 return;
             }
-            if ((mAnimationDirection == DIRECTION_SHOW && show)
-                    || (mAnimationDirection == DIRECTION_HIDE && !show)) {
-                return;
-            }
-            if (mAnimationDirection != DIRECTION_NONE) {
-                mAnimation.end();
-                mAnimationDirection = DIRECTION_NONE;
-            }
-            mAnimationDirection = show ? DIRECTION_SHOW : DIRECTION_HIDE;
             mHandler.post(() -> {
+                if ((mAnimationDirection == DIRECTION_SHOW && show)
+                        || (mAnimationDirection == DIRECTION_HIDE && !show)) {
+                    return;
+                }
+                boolean seek = false;
+                float seekValue = 0;
+                if (mAnimation != null) {
+                    if (mAnimation.isRunning()) {
+                        seekValue = (float) mAnimation.getAnimatedValue();
+                        seek = true;
+                    }
+                    mAnimation.cancel();
+                }
+                mAnimationDirection = show ? DIRECTION_SHOW : DIRECTION_HIDE;
                 final float defaultY = mImeSourceControl.getSurfacePosition().y;
                 final float x = mImeSourceControl.getSurfacePosition().x;
-                final float startY = show ? defaultY + imeSource.getFrame().height() : defaultY;
-                final float endY = show ? defaultY : defaultY + imeSource.getFrame().height();
+                final float hiddenY = defaultY + imeSource.getFrame().height();
+                final float shownY = defaultY;
+                final float startY = show ? hiddenY : shownY;
+                final float endY = show ? shownY : hiddenY;
+                if (mImeShowing && show) {
+                    // IME is already showing, so set seek to end
+                    seekValue = shownY;
+                    seek = true;
+                }
+                mImeShowing = show;
                 mAnimation = ValueAnimator.ofFloat(startY, endY);
                 mAnimation.setDuration(
                         show ? ANIMATION_DURATION_SHOW_MS : ANIMATION_DURATION_HIDE_MS);
+                if (seek) {
+                    mAnimation.setCurrentFraction((seekValue - startY) / (endY - startY));
+                }
 
                 mAnimation.addUpdateListener(animation -> {
                     SurfaceControl.Transaction t = mTransactionPool.acquire();
@@ -267,12 +284,13 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 });
                 mAnimation.setInterpolator(INTERPOLATOR);
                 mAnimation.addListener(new AnimatorListenerAdapter() {
+                    private boolean mCancelled = false;
                     @Override
                     public void onAnimationStart(Animator animation) {
                         SurfaceControl.Transaction t = mTransactionPool.acquire();
                         t.setPosition(mImeSourceControl.getLeash(), x, startY);
-                        dispatchStartPositioning(mDisplayId, imeTop(imeSource, startY),
-                                imeTop(imeSource, endY), mAnimationDirection == DIRECTION_SHOW,
+                        dispatchStartPositioning(mDisplayId, imeTop(imeSource, hiddenY),
+                                imeTop(imeSource, shownY), mAnimationDirection == DIRECTION_SHOW,
                                 t);
                         if (mAnimationDirection == DIRECTION_SHOW) {
                             t.show(mImeSourceControl.getLeash());
@@ -281,12 +299,17 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         mTransactionPool.release(t);
                     }
                     @Override
+                    public void onAnimationCancel(Animator animation) {
+                        mCancelled = true;
+                    }
+                    @Override
                     public void onAnimationEnd(Animator animation) {
                         SurfaceControl.Transaction t = mTransactionPool.acquire();
-                        t.setPosition(mImeSourceControl.getLeash(), x, endY);
-                        dispatchEndPositioning(mDisplayId, imeTop(imeSource, endY),
-                                mAnimationDirection == DIRECTION_SHOW, t);
-                        if (mAnimationDirection == DIRECTION_HIDE) {
+                        if (!mCancelled) {
+                            t.setPosition(mImeSourceControl.getLeash(), x, endY);
+                        }
+                        dispatchEndPositioning(mDisplayId, mCancelled, t);
+                        if (mAnimationDirection == DIRECTION_HIDE && !mCancelled) {
                             t.hide(mImeSourceControl.getLeash());
                         }
                         t.apply();
@@ -317,21 +340,30 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     public interface ImePositionProcessor {
         /**
          * Called when the IME position is starting to animate.
+         *
+         * @param hiddenTop The y position of the top of the IME surface when it is hidden.
+         * @param shownTop The y position of the top of the IME surface when it is shown.
+         * @param showing {@code true} when we are animating from hidden to shown, {@code false}
+         *                            when animating from shown to hidden.
          */
-        default void onImeStartPositioning(int displayId, int imeTop, int finalImeTop,
+        default void onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
                 boolean showing, SurfaceControl.Transaction t) {}
 
         /**
          * Called when the ime position changed. This is expected to be a synchronous call on the
          * animation thread. Operations can be added to the transaction to be applied in sync.
+         *
+         * @param imeTop The current y position of the top of the IME surface.
          */
         default void onImePositionChanged(int displayId, int imeTop,
                 SurfaceControl.Transaction t) {}
 
         /**
          * Called when the IME position is done animating.
+         *
+         * @param cancel {@code true} if this was cancelled. This implies another start is coming.
          */
-        default void onImeEndPositioning(int displayId, int imeTop, boolean showing,
+        default void onImeEndPositioning(int displayId, boolean cancel,
                 SurfaceControl.Transaction t) {}
     }
 }
