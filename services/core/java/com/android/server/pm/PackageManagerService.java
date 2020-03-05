@@ -3364,6 +3364,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // critical part of the core system.
             mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr();
 
+            mSettings.setPermissionControllerVersion(
+                    getPackageInfo(mRequiredPermissionControllerPackage, 0,
+                            UserHandle.USER_SYSTEM).getLongVersionCode());
+
             // Initialize InstantAppRegistry's Instant App list for all users.
             final int[] userIds = UserManagerService.getInstance().getUserIds();
             for (AndroidPackage pkg : mPackages.values()) {
@@ -22668,7 +22672,7 @@ public class PackageManagerService extends IPackageManager.Stub
     boolean readPermissionStateForUser(@UserIdInt int userId) {
         synchronized (mPackages) {
             mSettings.readPermissionStateForUserSyncLPr(userId);
-            return mSettings.areDefaultRuntimePermissionsGrantedLPr(userId);
+            return mPmInternal.isPermissionUpgradeNeeded(userId);
         }
     }
 
@@ -24067,10 +24071,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void setRuntimePermissionsFingerPrint(@NonNull String fingerPrint,
-                @UserIdInt int userId) {
+        public void updateRuntimePermissionsFingerprint(@UserIdInt int userId) {
             synchronized (mLock) {
-                mSettings.setRuntimePermissionsFingerPrintLPr(fingerPrint, userId);
+                mSettings.updateRuntimePermissionsFingerprintLPr(userId);
             }
         }
 
@@ -24122,9 +24125,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public boolean areDefaultRuntimePermissionsGranted(int userId) {
+        public boolean isPermissionUpgradeNeeded(int userId) {
             synchronized (mLock) {
-                return mSettings.areDefaultRuntimePermissionsGrantedLPr(userId);
+                return mSettings.isPermissionUpgradeNeededLPr(userId);
             }
         }
 
