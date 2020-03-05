@@ -229,6 +229,9 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
         }
 
         void remove() {
+            if (mShowingHint != null) {
+                mShowingHint.dismiss();
+            }
             getContext().getSystemService(WindowManager.class).removeViewImmediate(this);
         }
 
