@@ -97,7 +97,8 @@ public class Instrumentation {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({0, UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES})
+    @IntDef({0, UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES,
+            UiAutomation.FLAG_DONT_USE_ACCESSIBILITY})
     public @interface UiAutomationFlags {};
 
 
@@ -2170,7 +2171,8 @@ public class Instrumentation {
      * </p>
      *
      * @param flags The flags to be passed to the UiAutomation, for example
-     *        {@link UiAutomation#FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES}.
+     *        {@link UiAutomation#FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES},
+     *        {@link UiAutomation#FLAG_DONT_USE_ACCESSIBILITY}.
      *
      * @return The UI automation instance.
      *
