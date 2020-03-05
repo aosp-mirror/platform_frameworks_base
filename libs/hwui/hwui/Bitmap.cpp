@@ -33,7 +33,6 @@
 #ifndef _WIN32
 #include <binder/IServiceManager.h>
 #endif
-#include <ui/PixelFormat.h>
 
 #include <SkCanvas.h>
 #include <SkImagePriv.h>
