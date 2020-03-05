@@ -685,6 +685,8 @@ public class Tuner implements AutoCloseable  {
     /**
      * Opens an LNB (low-noise block downconverter) object.
      *
+     * <p>If there is an existing Lnb object, it will be replace by the newly opened one.
+     *
      * @param executor the executor on which callback will be invoked. The default event handler
      * executor is used if it's {@code null}.
      * @param cb the callback to receive notifications from LNB.
