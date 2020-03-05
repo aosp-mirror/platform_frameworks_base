@@ -989,6 +989,8 @@ public class ResolverActivity extends Activity implements
         }
         if (shouldShowEmptyState(listAdapter)) {
             mMultiProfilePagerAdapter.showEmptyState(listAdapter);
+        } else {
+            mMultiProfilePagerAdapter.showListView(listAdapter);
         }
         if (doPostProcessing) {
             if (mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
