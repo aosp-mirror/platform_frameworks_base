@@ -951,18 +951,18 @@ public class Vpn {
                 || isVpnServicePreConsented(context, packageName);
     }
 
-    private int getAppUid(String app, int userHandle) {
+    private int getAppUid(final String app, final int userHandle) {
         if (VpnConfig.LEGACY_VPN.equals(app)) {
             return Process.myUid();
         }
         PackageManager pm = mContext.getPackageManager();
-        int result;
-        try {
-            result = pm.getPackageUidAsUser(app, userHandle);
-        } catch (NameNotFoundException e) {
-            result = -1;
-        }
-        return result;
+        return Binder.withCleanCallingIdentity(() -> {
+            try {
+                return pm.getPackageUidAsUser(app, userHandle);
+            } catch (NameNotFoundException e) {
+                return -1;
+            }
+        });
     }
 
     private boolean doesPackageTargetAtLeastQ(String packageName) {
