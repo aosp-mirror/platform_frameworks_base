@@ -1222,6 +1222,8 @@
     <dimen name="magnifier_up_down_controls_height">40dp</dimen>
 
     <!-- Home Controls -->
+    <dimen name="controls_header_side_margin">32dp</dimen>
+    <dimen name="control_header_text">24sp</dimen>
     <dimen name="control_spacing">4dp</dimen>
     <dimen name="control_list_divider">1dp</dimen>
     <dimen name="control_corner_radius">15dp</dimen>
