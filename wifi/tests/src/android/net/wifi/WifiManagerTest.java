@@ -2349,23 +2349,24 @@ public class WifiManagerTest {
     }
 
     /**
-     * Verify that Wi-Fi connected scorer receives score change callback after registeration.
+     * Verify that Wi-Fi connected scorer receives score update observer after registeration.
      */
     @Test
-    public void verifyScorerReceiveScoreChangeCallbackAfterRegistration() throws Exception {
+    public void verifyScorerReceiveScoreUpdateObserverAfterRegistration() throws Exception {
         mExecutor = new SynchronousExecutor();
         mWifiManager.setWifiConnectedNetworkScorer(mExecutor, mWifiConnectedNetworkScorer);
         ArgumentCaptor<IWifiConnectedNetworkScorer.Stub> scorerCaptor =
                 ArgumentCaptor.forClass(IWifiConnectedNetworkScorer.Stub.class);
         verify(mWifiService).setWifiConnectedNetworkScorer(any(IBinder.class),
                 scorerCaptor.capture());
-        scorerCaptor.getValue().setScoreChangeCallback(any());
+        scorerCaptor.getValue().onSetScoreUpdateObserver(any());
         mLooper.dispatchAll();
-        verify(mWifiConnectedNetworkScorer).setScoreChangeCallback(any());
+        verify(mWifiConnectedNetworkScorer).onSetScoreUpdateObserver(any());
     }
 
     /**
-     * Verify that Wi-Fi connected scorer receives session ID when start/stop methods are called.
+     * Verify that Wi-Fi connected scorer receives session ID when onStart/onStop methods
+     * are called.
      */
     @Test
     public void verifyScorerReceiveSessionIdWhenStartStopIsCalled() throws Exception {
@@ -2375,11 +2376,11 @@ public class WifiManagerTest {
                 ArgumentCaptor.forClass(IWifiConnectedNetworkScorer.Stub.class);
         verify(mWifiService).setWifiConnectedNetworkScorer(any(IBinder.class),
                 callbackCaptor.capture());
-        callbackCaptor.getValue().start(0);
-        callbackCaptor.getValue().stop(10);
+        callbackCaptor.getValue().onStart(0);
+        callbackCaptor.getValue().onStop(10);
         mLooper.dispatchAll();
-        verify(mWifiConnectedNetworkScorer).start(0);
-        verify(mWifiConnectedNetworkScorer).stop(10);
+        verify(mWifiConnectedNetworkScorer).onStart(0);
+        verify(mWifiConnectedNetworkScorer).onStop(10);
     }
 
     @Test
