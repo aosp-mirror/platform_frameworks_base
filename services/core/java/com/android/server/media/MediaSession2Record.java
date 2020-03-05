@@ -142,7 +142,6 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
         return false;
     }
 
-
     @Override
     public int getSessionPolicies() {
         synchronized (mLock) {
