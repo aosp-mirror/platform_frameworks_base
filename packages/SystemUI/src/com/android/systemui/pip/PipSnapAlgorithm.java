@@ -19,14 +19,11 @@ package com.android.systemui.pip;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.Size;
-import android.view.Gravity;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * Calculates the snap targets and the snap position for the PIP given a position and a velocity.
@@ -34,32 +31,11 @@ import java.util.ArrayList;
  */
 public class PipSnapAlgorithm {
 
-    // The below SNAP_MODE_* constants correspond to the config resource value
-    // config_pictureInPictureSnapMode and should not be changed independently.
-    // Allows snapping to the four corners
-    private static final int SNAP_MODE_CORNERS_ONLY = 0;
-    // Allows snapping to the four corners and the mid-points on the long edge in each orientation
-    private static final int SNAP_MODE_CORNERS_AND_SIDES = 1;
-    // Allows snapping to anywhere along the edge of the screen
-    private static final int SNAP_MODE_EDGE = 2;
-    // Allows snapping anywhere along the edge of the screen and magnets towards corners
-    private static final int SNAP_MODE_EDGE_MAGNET_CORNERS = 3;
-    // Allows snapping on the long edge in each orientation and magnets towards corners
-    private static final int SNAP_MODE_LONG_EDGE_MAGNET_CORNERS = 4;
-
-    // Threshold to magnet to a corner
-    private static final float CORNER_MAGNET_THRESHOLD = 0.3f;
-
     private final Context mContext;
-
-    private final ArrayList<Integer> mSnapGravities = new ArrayList<>();
-    private final int mDefaultSnapMode = SNAP_MODE_EDGE_MAGNET_CORNERS;
-    private int mSnapMode = mDefaultSnapMode;
 
     private final float mDefaultSizePercent;
     private final float mMinAspectRatioForMinSize;
     private final float mMaxAspectRatioForMinSize;
-    private final int mFlingDeceleration;
 
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
@@ -71,8 +47,6 @@ public class PipSnapAlgorithm {
         mMaxAspectRatioForMinSize = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
         mMinAspectRatioForMinSize = 1f / mMaxAspectRatioForMinSize;
-        mFlingDeceleration = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.pip_fling_deceleration);
         onConfigurationChanged();
     }
 
@@ -82,144 +56,6 @@ public class PipSnapAlgorithm {
     public void onConfigurationChanged() {
         Resources res = mContext.getResources();
         mOrientation = res.getConfiguration().orientation;
-        mSnapMode = res.getInteger(com.android.internal.R.integer.config_pictureInPictureSnapMode);
-        calculateSnapTargets();
-    }
-
-    /**
-     * @return the closest absolute snap stack bounds for the given {@param stackBounds} moving at
-     * the given {@param velocityX} and {@param velocityY}.  The {@param movementBounds} should be
-     * those for the given {@param stackBounds}.
-     */
-    public Rect findClosestSnapBounds(Rect movementBounds, Rect stackBounds, float velocityX,
-            float velocityY, Point dragStartPosition) {
-        final Rect intersectStackBounds = new Rect(stackBounds);
-        final Point intersect = getEdgeIntersect(stackBounds, movementBounds, velocityX, velocityY,
-                dragStartPosition);
-        intersectStackBounds.offsetTo(intersect.x, intersect.y);
-        return findClosestSnapBounds(movementBounds, intersectStackBounds);
-    }
-
-    /**
-     * @return The point along the {@param movementBounds} that the PIP would intersect with based
-     *         on the provided {@param velX}, {@param velY} along with the position of the PIP when
-     *         the gesture started, {@param dragStartPosition}.
-     */
-    public Point getEdgeIntersect(Rect stackBounds, Rect movementBounds, float velX, float velY,
-            Point dragStartPosition) {
-        final boolean isLandscape = mOrientation == Configuration.ORIENTATION_LANDSCAPE;
-        final int x = stackBounds.left;
-        final int y = stackBounds.top;
-
-        // Find the line of movement the PIP is on. Line defined by: y = slope * x + yIntercept
-        final float slope = velY / velX; // slope = rise / run
-        final float yIntercept = y - slope * x; // rearrange line equation for yIntercept
-        // The PIP can have two intercept points:
-        // 1) Where the line intersects with one of the edges of the screen (vertical line)
-        Point vertPoint = new Point();
-        // 2) Where the line intersects with the top or bottom of the screen (horizontal line)
-        Point horizPoint = new Point();
-
-        // Find the vertical line intersection, x will be one of the edges
-        vertPoint.x = velX > 0 ? movementBounds.right : movementBounds.left;
-        // Sub in x in our line equation to determine y position
-        vertPoint.y = findY(slope, yIntercept, vertPoint.x);
-
-        // Find the horizontal line intersection, y will be the top or bottom of the screen
-        horizPoint.y = velY > 0 ? movementBounds.bottom : movementBounds.top;
-        // Sub in y in our line equation to determine x position
-        horizPoint.x = findX(slope, yIntercept, horizPoint.y);
-
-        // Now pick one of these points -- first determine if we're flinging along the current edge.
-        // Only fling along current edge if it's a direction with space for the PIP to move to
-        int maxDistance;
-        if (isLandscape) {
-            maxDistance = velX > 0
-                    ? movementBounds.right - stackBounds.left
-                    : stackBounds.left - movementBounds.left;
-        } else {
-            maxDistance = velY > 0
-                    ? movementBounds.bottom - stackBounds.top
-                    : stackBounds.top - movementBounds.top;
-        }
-        if (maxDistance > 0) {
-            // Only fling along the current edge if the start and end point are on the same side
-            final int startPoint = isLandscape ? dragStartPosition.y : dragStartPosition.x;
-            final int endPoint = isLandscape ? horizPoint.y : horizPoint.x;
-            final int center = movementBounds.centerX();
-            if ((startPoint < center && endPoint < center)
-                    || (startPoint > center && endPoint > center)) {
-                // We are flinging along the current edge, figure out how far it should travel
-                // based on velocity and assumed deceleration.
-                int distance = (int) (0 - Math.pow(isLandscape ? velX : velY, 2))
-                        / (2 * mFlingDeceleration);
-                distance = Math.min(distance, maxDistance);
-                // Adjust the point for the distance
-                if (isLandscape) {
-                    horizPoint.x = stackBounds.left + (velX > 0 ? distance : -distance);
-                } else {
-                    horizPoint.y = stackBounds.top + (velY > 0 ? distance : -distance);
-                }
-                return horizPoint;
-            }
-        }
-        // If we're not flinging along the current edge, find the closest point instead.
-        final double distanceVert = Math.hypot(vertPoint.x - x, vertPoint.y - y);
-        final double distanceHoriz = Math.hypot(horizPoint.x - x, horizPoint.y - y);
-        return Math.abs(distanceVert) > Math.abs(distanceHoriz) ? horizPoint : vertPoint;
-    }
-
-    private int findY(float slope, float yIntercept, float x) {
-        return (int) ((slope * x) + yIntercept);
-    }
-
-    private int findX(float slope, float yIntercept, float y) {
-        return (int) ((y - yIntercept) / slope);
-    }
-
-    /**
-     * @return the closest absolute snap stack bounds for the given {@param stackBounds}.  The
-     * {@param movementBounds} should be those for the given {@param stackBounds}.
-     */
-    public Rect findClosestSnapBounds(Rect movementBounds, Rect stackBounds) {
-        final Rect pipBounds = new Rect(movementBounds.left, movementBounds.top,
-                movementBounds.right + stackBounds.width(),
-                movementBounds.bottom + stackBounds.height());
-        final Rect newBounds = new Rect(stackBounds);
-        if (mSnapMode == SNAP_MODE_LONG_EDGE_MAGNET_CORNERS
-                || mSnapMode == SNAP_MODE_EDGE_MAGNET_CORNERS) {
-            final Rect tmpBounds = new Rect();
-            final Point[] snapTargets = new Point[mSnapGravities.size()];
-            for (int i = 0; i < mSnapGravities.size(); i++) {
-                Gravity.apply(mSnapGravities.get(i), stackBounds.width(), stackBounds.height(),
-                        pipBounds, 0, 0, tmpBounds);
-                snapTargets[i] = new Point(tmpBounds.left, tmpBounds.top);
-            }
-            Point snapTarget = findClosestPoint(stackBounds.left, stackBounds.top, snapTargets);
-            float distance = distanceToPoint(snapTarget, stackBounds.left, stackBounds.top);
-            final float thresh = Math.max(stackBounds.width(), stackBounds.height())
-                    * CORNER_MAGNET_THRESHOLD;
-            if (distance < thresh) {
-                newBounds.offsetTo(snapTarget.x, snapTarget.y);
-            } else {
-                snapRectToClosestEdge(stackBounds, movementBounds, newBounds);
-            }
-        } else if (mSnapMode == SNAP_MODE_EDGE) {
-            // Find the closest edge to the given stack bounds and snap to it
-            snapRectToClosestEdge(stackBounds, movementBounds, newBounds);
-        } else {
-            // Find the closest snap point
-            final Rect tmpBounds = new Rect();
-            final Point[] snapTargets = new Point[mSnapGravities.size()];
-            for (int i = 0; i < mSnapGravities.size(); i++) {
-                Gravity.apply(mSnapGravities.get(i), stackBounds.width(), stackBounds.height(),
-                        pipBounds, 0, 0, tmpBounds);
-                snapTargets[i] = new Point(tmpBounds.left, tmpBounds.top);
-            }
-            Point snapTarget = findClosestPoint(stackBounds.left, stackBounds.top, snapTargets);
-            newBounds.offsetTo(snapTarget.x, snapTarget.y);
-        }
-        return newBounds;
     }
 
     /**
@@ -356,26 +192,10 @@ public class PipSnapAlgorithm {
     }
 
     /**
-     * @return the closest point in {@param points} to the given {@param x} and {@param y}.
-     */
-    private Point findClosestPoint(int x, int y, Point[] points) {
-        Point closestPoint = null;
-        float minDistance = Float.MAX_VALUE;
-        for (Point p : points) {
-            float distance = distanceToPoint(p, x, y);
-            if (distance < minDistance) {
-                closestPoint = p;
-                minDistance = distance;
-            }
-        }
-        return closestPoint;
-    }
-
-    /**
      * Snaps the {@param stackBounds} to the closest edge of the {@param movementBounds} and writes
      * the new bounds out to {@param boundsOut}.
      */
-    private void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut) {
+    public void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut) {
         final int boundedLeft = Math.max(movementBounds.left, Math.min(movementBounds.right,
                 stackBounds.left));
         final int boundedTop = Math.max(movementBounds.top, Math.min(movementBounds.bottom,
@@ -387,15 +207,7 @@ public class PipSnapAlgorithm {
         final int fromTop = Math.abs(stackBounds.top - movementBounds.top);
         final int fromRight = Math.abs(movementBounds.right - stackBounds.left);
         final int fromBottom = Math.abs(movementBounds.bottom - stackBounds.top);
-        int shortest;
-        if (mSnapMode == SNAP_MODE_LONG_EDGE_MAGNET_CORNERS) {
-            // Only check longest edges
-            shortest = (mOrientation == Configuration.ORIENTATION_LANDSCAPE)
-                    ? Math.min(fromTop, fromBottom)
-                    : Math.min(fromLeft, fromRight);
-        } else {
-            shortest = Math.min(Math.min(fromLeft, fromRight), Math.min(fromTop, fromBottom));
-        }
+        final int shortest = Math.min(Math.min(fromLeft, fromRight), Math.min(fromTop, fromBottom));
         if (shortest == fromLeft) {
             boundsOut.offsetTo(movementBounds.left, boundedTop);
         } else if (shortest == fromTop) {
@@ -407,46 +219,9 @@ public class PipSnapAlgorithm {
         }
     }
 
-    /**
-     * @return the distance between point {@param p} and the given {@param x} and {@param y}.
-     */
-    private float distanceToPoint(Point p, int x, int y) {
-        return PointF.length(p.x - x, p.y - y);
-    }
-
-    /**
-     * Calculate the snap targets for the discrete snap modes.
-     */
-    private void calculateSnapTargets() {
-        mSnapGravities.clear();
-        switch (mSnapMode) {
-            case SNAP_MODE_CORNERS_AND_SIDES:
-                if (mOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mSnapGravities.add(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
-                    mSnapGravities.add(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
-                } else {
-                    mSnapGravities.add(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-                    mSnapGravities.add(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
-                }
-                // Fall through
-            case SNAP_MODE_CORNERS_ONLY:
-            case SNAP_MODE_EDGE_MAGNET_CORNERS:
-            case SNAP_MODE_LONG_EDGE_MAGNET_CORNERS:
-                mSnapGravities.add(Gravity.TOP | Gravity.LEFT);
-                mSnapGravities.add(Gravity.TOP | Gravity.RIGHT);
-                mSnapGravities.add(Gravity.BOTTOM | Gravity.LEFT);
-                mSnapGravities.add(Gravity.BOTTOM | Gravity.RIGHT);
-                break;
-            default:
-                // Skip otherwise
-                break;
-        }
-    }
-
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + PipSnapAlgorithm.class.getSimpleName());
-        pw.println(innerPrefix + "mSnapMode=" + mSnapMode);
         pw.println(innerPrefix + "mOrientation=" + mOrientation);
     }
 }
