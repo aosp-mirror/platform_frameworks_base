@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -73,8 +74,8 @@ class SurfaceFreezer {
         mFreezeBounds.set(startBounds);
 
         mLeash = SurfaceAnimator.createAnimationLeash(mAnimatable, mAnimatable.getSurfaceControl(),
-                t, startBounds.width(), startBounds.height(), startBounds.left, startBounds.top,
-                false /* hidden */);
+                t, ANIMATION_TYPE_SCREEN_ROTATION, startBounds.width(), startBounds.height(),
+                startBounds.left, startBounds.top, false /* hidden */);
         mAnimatable.onAnimationLeashCreated(t, mLeash);
 
         SurfaceControl freezeTarget = mAnimatable.getFreezeSnapshotTarget();

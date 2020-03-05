@@ -36,7 +36,8 @@ public class SyncRtSurfaceTransactionApplier {
     public static final int FLAG_WINDOW_CROP = 1 << 2;
     public static final int FLAG_LAYER = 1 << 3;
     public static final int FLAG_CORNER_RADIUS = 1 << 4;
-    public static final int FLAG_VISIBILITY = 1 << 5;
+    public static final int FLAG_BACKGROUND_BLUR_RADIUS = 1 << 5;
+    public static final int FLAG_VISIBILITY = 1 << 6;
 
     private SurfaceControl mTargetSc;
     private final ViewRootImpl mTargetViewRootImpl;
@@ -108,6 +109,9 @@ public class SyncRtSurfaceTransactionApplier {
         if ((params.flags & FLAG_CORNER_RADIUS) != 0) {
             t.setCornerRadius(params.surface, params.cornerRadius);
         }
+        if ((params.flags & FLAG_BACKGROUND_BLUR_RADIUS) != 0) {
+            t.setBackgroundBlurRadius(params.surface, params.backgroundBlurRadius);
+        }
         if ((params.flags & FLAG_VISIBILITY) != 0) {
             if (params.visible) {
                 t.show(params.surface);
@@ -153,6 +157,7 @@ public class SyncRtSurfaceTransactionApplier {
             int flags;
             float alpha;
             float cornerRadius;
+            int backgroundBlurRadius;
             Matrix matrix;
             Rect windowCrop;
             int layer;
@@ -216,6 +221,16 @@ public class SyncRtSurfaceTransactionApplier {
             }
 
             /**
+             * @param radius the Radius for blur to apply to the background surfaces.
+             * @return this Builder
+             */
+            public Builder withBackgroundBlur(int radius) {
+                this.backgroundBlurRadius = radius;
+                flags |= FLAG_BACKGROUND_BLUR_RADIUS;
+                return this;
+            }
+
+            /**
              * @param visible The visibility to apply to the surface.
              * @return this Builder
              */
@@ -230,12 +245,13 @@ public class SyncRtSurfaceTransactionApplier {
              */
             public SurfaceParams build() {
                 return new SurfaceParams(surface, flags, alpha, matrix, windowCrop, layer,
-                        cornerRadius, visible);
+                        cornerRadius, backgroundBlurRadius, visible);
             }
         }
 
         private SurfaceParams(SurfaceControl surface, int params, float alpha, Matrix matrix,
-                Rect windowCrop, int layer, float cornerRadius, boolean visible) {
+                Rect windowCrop, int layer, float cornerRadius, int backgroundBlurRadius,
+                boolean visible) {
             this.flags = params;
             this.surface = surface;
             this.alpha = alpha;
@@ -243,34 +259,7 @@ public class SyncRtSurfaceTransactionApplier {
             this.windowCrop = new Rect(windowCrop);
             this.layer = layer;
             this.cornerRadius = cornerRadius;
-            this.visible = visible;
-        }
-
-
-        /**
-         * Constructs surface parameters to be applied when the current view state gets pushed to
-         * RenderThread.
-         *
-         * @param surface The surface to modify.
-         * @param alpha Alpha to apply.
-         * @param matrix Matrix to apply.
-         * @param windowCrop Crop to apply.
-         * @param layer The layer to apply.
-         * @param cornerRadius The corner radius to apply.
-         * @param visible The visibility to apply.
-         *
-         * @deprecated Use {@link SurfaceParams.Builder} to create an instance.
-         */
-        @Deprecated
-        public SurfaceParams(SurfaceControl surface, float alpha, Matrix matrix,
-                Rect windowCrop, int layer, float cornerRadius, boolean visible) {
-            this.flags = FLAG_ALL;
-            this.surface = surface;
-            this.alpha = alpha;
-            this.matrix = new Matrix(matrix);
-            this.windowCrop = windowCrop != null ? new Rect(windowCrop) : null;
-            this.layer = layer;
-            this.cornerRadius = cornerRadius;
+            this.backgroundBlurRadius = backgroundBlurRadius;
             this.visible = visible;
         }
 
@@ -283,7 +272,10 @@ public class SyncRtSurfaceTransactionApplier {
         public final float alpha;
 
         @VisibleForTesting
-        final float cornerRadius;
+        public final float cornerRadius;
+
+        @VisibleForTesting
+        public final int backgroundBlurRadius;
 
         @VisibleForTesting
         public final Matrix matrix;

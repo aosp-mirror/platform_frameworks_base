@@ -402,6 +402,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mExtensionController,
                 mUserInfoControllerImpl,
                 mPhoneStatusBarPolicy,
+                mKeyguardIndicationController,
                 mDismissCallbackRegistry,
                 mStatusBarTouchableRegionManager);
 
@@ -856,6 +857,18 @@ public class StatusBarTest extends SysuiTestCase {
                 any(IntentFilter.class),
                 eq(null),
                 any(UserHandle.class));
+    }
+
+    @Test
+    public void testSuppressAmbientDisplay_suppress() {
+        mStatusBar.suppressAmbientDisplay(true);
+        verify(mDozeServiceHost).setDozeSuppressed(true);
+    }
+
+    @Test
+    public void testSuppressAmbientDisplay_unsuppress() {
+        mStatusBar.suppressAmbientDisplay(false);
+        verify(mDozeServiceHost).setDozeSuppressed(false);
     }
 
     public static class TestableNotificationInterruptionStateProvider extends

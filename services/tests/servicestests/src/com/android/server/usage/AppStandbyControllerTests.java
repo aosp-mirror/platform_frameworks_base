@@ -161,7 +161,7 @@ public class AppStandbyControllerTests {
         long mElapsedRealtime;
         boolean mIsAppIdleEnabled = true;
         boolean mIsCharging;
-        List<String> mPowerSaveWhitelistExceptIdle = new ArrayList<>();
+        List<String> mNonIdleWhitelistApps = new ArrayList<>();
         boolean mDisplayOn;
         DisplayManager.DisplayListener mDisplayListener;
         String mBoundWidgetPackage = PACKAGE_EXEMPTED_1;
@@ -203,8 +203,8 @@ public class AppStandbyControllerTests {
         }
 
         @Override
-        boolean isPowerSaveWhitelistExceptIdleApp(String packageName) throws RemoteException {
-            return mPowerSaveWhitelistExceptIdle.contains(packageName);
+        boolean isNonIdleWhitelisted(String packageName) throws RemoteException {
+            return mNonIdleWhitelistApps.contains(packageName);
         }
 
         @Override

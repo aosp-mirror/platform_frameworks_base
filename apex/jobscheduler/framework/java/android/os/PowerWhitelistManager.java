@@ -24,8 +24,6 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 
-import libcore.util.EmptyArray;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
@@ -97,7 +95,7 @@ public class PowerWhitelistManager {
         try {
             mService.addPowerSaveWhitelistApps(packageNames);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -118,8 +116,27 @@ public class PowerWhitelistManager {
                 return mService.getAppIdWhitelistExceptIdle();
             }
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return EmptyArray.INT;
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if the app is whitelisted from power save restrictions. This does not include
+     * temporarily whitelisted apps.
+     *
+     * @param includingIdle Set to true if the app should be whitelisted from device
+     *                      idle as well as other power save restrictions
+     * @hide
+     */
+    public boolean isWhitelisted(@NonNull String packageName, boolean includingIdle) {
+        try {
+            if (includingIdle) {
+                return mService.isPowerSaveWhitelistApp(packageName);
+            } else {
+                return mService.isPowerSaveWhitelistExceptIdleApp(packageName);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -136,7 +153,7 @@ public class PowerWhitelistManager {
             mService.addPowerSaveTempWhitelistApp(packageName, durationMs, mContext.getUserId(),
                     reason);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -166,8 +183,7 @@ public class PowerWhitelistManager {
                             packageName, mContext.getUserId(), reason);
             }
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 }

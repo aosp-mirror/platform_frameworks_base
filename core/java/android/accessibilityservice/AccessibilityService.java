@@ -48,6 +48,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityEvent;
@@ -1831,6 +1832,14 @@ public abstract class AccessibilityService extends Service {
      * Also the service has to opt-in to retrieve the interactive windows by
      * setting the {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS}
      * flag. Otherwise, the search will be performed only in the active window.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> If the view with {@link AccessibilityNodeInfo#FOCUS_INPUT}
+     * is on an embedded view hierarchy which is embedded in a {@link SurfaceView} via
+     * {@link SurfaceView#setChildSurfacePackage}, there is a limitation that this API
+     * won't be able to find the node for the view. It's because views don't know about
+     * the embedded hierarchies. Instead, you could traverse all the nodes to find the
+     * focus.
      * </p>
      *
      * @param focus The focus to find. One of {@link AccessibilityNodeInfo#FOCUS_INPUT} or

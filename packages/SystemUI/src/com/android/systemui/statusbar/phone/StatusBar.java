@@ -678,6 +678,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
+            KeyguardIndicationController keyguardIndicationController,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
         super(context);
@@ -691,6 +692,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardBypassController = keyguardBypassController;
         mKeyguardStateController = keyguardStateController;
         mHeadsUpManager = headsUpManagerPhone;
+        mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mDynamicPrivacyController = dynamicPrivacyController;
         mBypassHeadsUpNotifier = bypassHeadsUpNotifier;
@@ -1049,10 +1051,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             mLockscreenWallpaper = mLockscreenWallpaperLazy.get();
         }
 
-        mKeyguardIndicationController =
-                SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
-                        mNotificationShadeWindowView.findViewById(R.id.keyguard_indication_area),
-                        mNotificationShadeWindowView.findViewById(R.id.lock_icon));
+        mKeyguardIndicationController.setIndicationArea(
+                mNotificationShadeWindowView.findViewById(R.id.keyguard_indication_area));
         mNotificationPanelViewController.setKeyguardIndicationController(
                 mKeyguardIndicationController);
 
@@ -4287,4 +4287,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mTransientShown;
     }
 
+    @Override
+    public void suppressAmbientDisplay(boolean suppressed) {
+        mDozeServiceHost.setDozeSuppressed(suppressed);
+    }
 }

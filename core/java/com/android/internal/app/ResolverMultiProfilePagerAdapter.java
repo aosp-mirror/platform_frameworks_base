@@ -94,6 +94,12 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     }
 
     @Override
+    public ViewGroup instantiateItem(ViewGroup container, int position) {
+        setupListAdapter(position);
+        return super.instantiateItem(container, position);
+    }
+
+    @Override
     @Nullable
     ResolverListAdapter getListAdapterForUserHandle(UserHandle userHandle) {
         if (getActiveListAdapter().getUserHandle() == userHandle) {

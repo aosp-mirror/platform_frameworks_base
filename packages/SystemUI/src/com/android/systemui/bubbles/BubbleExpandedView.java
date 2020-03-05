@@ -308,7 +308,14 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mKeyboardVisible = false;
         mNeedsNewHeight = false;
         if (mActivityView != null) {
-            mActivityView.setForwardedInsets(Insets.of(0, 0, 0, 0));
+            // TODO: Temporary hack to offset the view until we can properly inset Bubbles again.
+            if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
+                mStackView.animate()
+                        .setDuration(100)
+                        .translationY(0);
+            } else {
+                mActivityView.setForwardedInsets(Insets.of(0, 0, 0, 0));
+            }
         }
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
             Log.d(TAG, "onDetachedFromWindow: bubble=" + getBubbleKey());
@@ -351,7 +358,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
             // TODO: Temporary hack to offset the view until we can properly inset Bubbles again.
             if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-                mStackView.animate().translationY(-insetsBottom);
+                mStackView.animate()
+                        .setDuration(100)
+                        .translationY(-insetsBottom)
+                        .withEndAction(() -> mActivityView.onLocationChanged());
             } else {
                 mActivityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
             }
