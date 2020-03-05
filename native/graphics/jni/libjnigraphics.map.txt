@@ -17,7 +17,6 @@ LIBJNIGRAPHICS {
     AImageDecoderHeaderInfo_getHeight; # introduced=30
     AImageDecoderHeaderInfo_getMimeType; # introduced=30
     AImageDecoderHeaderInfo_getAlphaFlags; # introduced=30
-    AImageDecoderHeaderInfo_isAnimated; # introduced=30
     AImageDecoderHeaderInfo_getAndroidBitmapFormat; # introduced=30
     AImageDecoderHeaderInfo_getDataSpace; # introduced=30
     AndroidBitmap_getInfo;
