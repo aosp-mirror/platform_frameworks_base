@@ -139,6 +139,7 @@ public class DynamicSystemInstallationService extends Service
     private long mCurrentPartitionInstalledSize;
 
     private boolean mJustCancelledByUser;
+    private boolean mKeepNotification;
 
     // This is for testing only now
     private boolean mEnableWhenCompleted;
@@ -173,8 +174,11 @@ public class DynamicSystemInstallationService extends Service
         if (cache != null) {
             cache.flush();
         }
-        // Cancel the persistent notification.
-        mNM.cancel(NOTIFICATION_ID);
+
+        if (!mKeepNotification) {
+            // Cancel the persistent notification.
+            mNM.cancel(NOTIFICATION_ID);
+        }
     }
 
     @Override
@@ -227,9 +231,6 @@ public class DynamicSystemInstallationService extends Service
             return;
         }
 
-        // if it's not successful, reset the task and stop self.
-        resetTaskAndStop();
-
         switch (result) {
             case RESULT_CANCELLED:
                 postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
@@ -248,6 +249,9 @@ public class DynamicSystemInstallationService extends Service
                 postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_EXCEPTION, detail);
                 break;
         }
+
+        // if it's not successful, reset the task and stop self.
+        resetTaskAndStop();
     }
 
     private void executeInstallCommand(Intent intent) {
@@ -392,10 +396,10 @@ public class DynamicSystemInstallationService extends Service
     private void resetTaskAndStop() {
         mInstallTask = null;
 
-        stopForeground(true);
-
-        // stop self, but this service is not destroyed yet if it's still bound
-        stopSelf();
+        new Handler().postDelayed(() -> {
+            stopForeground(STOP_FOREGROUND_DETACH);
+            stopSelf();
+        }, 50);
     }
 
     private void prepareNotification() {
@@ -503,6 +507,7 @@ public class DynamicSystemInstallationService extends Service
     private void postStatus(int status, int cause, Throwable detail) {
         String statusString;
         String causeString;
+        mKeepNotification = false;
 
         switch (status) {
             case STATUS_NOT_STARTED:
@@ -531,12 +536,15 @@ public class DynamicSystemInstallationService extends Service
                 break;
             case CAUSE_ERROR_IO:
                 causeString = "ERROR_IO";
+                mKeepNotification = true;
                 break;
             case CAUSE_ERROR_INVALID_URL:
                 causeString = "ERROR_INVALID_URL";
+                mKeepNotification = true;
                 break;
             case CAUSE_ERROR_EXCEPTION:
                 causeString = "ERROR_EXCEPTION";
+                mKeepNotification = true;
                 break;
             default:
                 causeString = "CAUSE_NOT_SPECIFIED";
