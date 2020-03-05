@@ -74,6 +74,7 @@ import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
@@ -83,6 +84,9 @@ import com.android.server.Watchdog.Monitor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -138,6 +142,8 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private SessionPolicyProvider mCustomSessionPolicyProvider;
     private MediaKeyDispatcher mCustomMediaKeyDispatcher;
+    private Method mGetSessionForKeyEventMethod;
+    private Method mGetSessionPoliciesMethod;
 
     public MediaSessionService(Context context) {
         super(context);
@@ -178,8 +184,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         mHasFeatureLeanback = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
 
-        // TODO: (jinpark) check if config value for custom MediaKeyDispatcher and
-        //  SessionPolicyProvider have been overlayed and instantiate using reflection.
+        instantiateCustomProvider(null);
+        instantiateCustomDispatcher(null);
         updateUser();
     }
 
@@ -561,9 +567,18 @@ public class MediaSessionService extends SystemService implements Monitor {
      * 4. It needs to be added to the relevant user record.
      */
     private MediaSessionRecord createSessionInternal(int callerPid, int callerUid, int userId,
-            String callerPackageName, ISessionCallback cb, String tag, Bundle sessionInfo,
-            int policies) {
+            String callerPackageName, ISessionCallback cb, String tag, Bundle sessionInfo) {
         synchronized (mLock) {
+            int policies = 0;
+            if (mCustomSessionPolicyProvider != null && mGetSessionPoliciesMethod != null) {
+                try {
+                    policies = (int) mGetSessionPoliciesMethod.invoke(
+                            mCustomSessionPolicyProvider, callerUid, callerPackageName);
+                } catch (InvocationTargetException | IllegalAccessException e) {
+                    Log.w(TAG, "Encountered problem while using reflection", e);
+                }
+            }
+
             FullUserRecord user = getFullUserRecordLocked(userId);
             if (user == null) {
                 Log.w(TAG, "Request from invalid user: " +  userId + ", pkg=" + callerPackageName);
@@ -744,6 +759,48 @@ public class MediaSessionService extends SystemService implements Monitor {
             return user.mPriorityStack.getMediaSessionRecord(sessionToken);
         }
         return null;
+    }
+
+    private void instantiateCustomDispatcher(String nameFromTesting) {
+        mCustomMediaKeyDispatcher = null;
+        mGetSessionForKeyEventMethod = null;
+
+        String customDispatcherClassName = (nameFromTesting == null)
+                ? mContext.getResources().getString(R.string.config_customMediaKeyDispatcher)
+                : nameFromTesting;
+        try {
+            if (!TextUtils.isEmpty(customDispatcherClassName)) {
+                Class customDispatcherClass = Class.forName(customDispatcherClassName);
+                Constructor constructor = customDispatcherClass.getDeclaredConstructor();
+                mCustomMediaKeyDispatcher = (MediaKeyDispatcher) constructor.newInstance();
+                mGetSessionForKeyEventMethod = customDispatcherClass.getDeclaredMethod(
+                        "getSessionForKeyEvent", KeyEvent.class, int.class, boolean.class);
+            }
+        } catch (ClassNotFoundException | InstantiationException | InvocationTargetException
+                | IllegalAccessException | NoSuchMethodException e) {
+            Log.w(TAG, "Encountered problem while using reflection", e);
+        }
+    }
+
+    private void instantiateCustomProvider(String nameFromTesting) {
+        mCustomSessionPolicyProvider = null;
+        mGetSessionPoliciesMethod = null;
+
+        String customProviderClassName = (nameFromTesting == null)
+                ? mContext.getResources().getString(R.string.config_customSessionPolicyProvider)
+                : nameFromTesting;
+        try {
+            if (!TextUtils.isEmpty(customProviderClassName)) {
+                Class customProviderClass = Class.forName(customProviderClassName);
+                Constructor constructor = customProviderClass.getDeclaredConstructor();
+                mCustomSessionPolicyProvider = (SessionPolicyProvider) constructor.newInstance();
+                mGetSessionPoliciesMethod = customProviderClass.getDeclaredMethod(
+                        "getSessionPoliciesForApplication", int.class, String.class);
+            }
+        } catch (ClassNotFoundException | InstantiationException | InvocationTargetException
+                | IllegalAccessException | NoSuchMethodException e) {
+            Log.w(TAG, "Encountered problem while using reflection", e);
+        }
     }
 
     /**
@@ -1064,11 +1121,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 if (cb == null) {
                     throw new IllegalArgumentException("Controller callback cannot be null");
                 }
-                int policies = (mCustomSessionPolicyProvider != null)
-                        ? mCustomSessionPolicyProvider.getSessionPoliciesForApplication(
-                                uid, packageName) : 0;
                 return createSessionInternal(pid, uid, resolvedUserId, packageName, cb, tag,
-                        sessionInfo, policies).getSessionBinder();
+                        sessionInfo).getSessionBinder();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1909,6 +1963,16 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
         }
 
+        @Override
+        public void setCustomMediaKeyDispatcherForTesting(String name) {
+            instantiateCustomDispatcher(name);
+        }
+
+        @Override
+        public void setCustomSessionPolicyProviderForTesting(String name) {
+            instantiateCustomProvider(name);
+        }
+
         // For MediaSession
         private int verifySessionsRequest(ComponentName componentName, int userId, final int pid,
                 final int uid) {
@@ -2057,11 +2121,15 @@ public class MediaSessionService extends SystemService implements Monitor {
             MediaSessionRecord session = null;
 
             // Retrieve custom session for key event if it exists.
-            if (mCustomMediaKeyDispatcher != null) {
-                MediaSession.Token token =
-                        mCustomMediaKeyDispatcher.getSessionForKeyEvent(keyEvent, asSystemService);
-                if (token != null) {
-                    session = getMediaSessionRecordLocked(token);
+            if (mCustomMediaKeyDispatcher != null && mGetSessionForKeyEventMethod != null) {
+                try {
+                    Object tokenObject = mGetSessionForKeyEventMethod.invoke(
+                            mCustomMediaKeyDispatcher, keyEvent, uid, asSystemService);
+                    if (tokenObject != null) {
+                        session = getMediaSessionRecordLocked((MediaSession.Token) tokenObject);
+                    }
+                } catch (InvocationTargetException | IllegalAccessException e) {
+                    Log.w(TAG, "Encountered problem while using reflection", e);
                 }
             }
 
