@@ -20,6 +20,7 @@ import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -719,9 +720,9 @@ public class SmsMessage {
      *                      23.040 9.2.3.24.16
      * @param languageShiftTable GSM national language shift table to use, specified by 3GPP
      *                           23.040 9.2.3.24.15
-     * @param refNumber parameter to create SmsHeader
-     * @param seqNumber parameter to create SmsHeader
-     * @param msgCount parameter to create SmsHeader
+     * @param refNumber reference number of concatenated SMS, specified by 3GPP 23.040 9.2.3.24.1
+     * @param seqNumber sequence number of concatenated SMS, specified by 3GPP 23.040 9.2.3.24.1
+     * @param msgCount count of messages of concatenated SMS, specified by 3GPP 23.040 9.2.3.24.2
      * @return a byte[] containing the encoded message
      *
      * @hide
@@ -730,11 +731,14 @@ public class SmsMessage {
     @SystemApi
     @NonNull
     public static byte[] getSubmitPduEncodedMessage(boolean isTypeGsm,
-            @NonNull String destinationAddress,
-            @NonNull String message,
-            @EncodingSize int encoding, int languageTable,
-            int languageShiftTable, int refNumber,
-            int seqNumber, int msgCount) {
+                                                    @NonNull String destinationAddress,
+                                                    @NonNull String message,
+                                                    @EncodingSize int encoding,
+                                                    @IntRange(from = 0) int languageTable,
+                                                    @IntRange(from = 0) int languageShiftTable,
+                                                    @IntRange(from = 0, to = 255) int refNumber,
+                                                    @IntRange(from = 1, to = 255) int seqNumber,
+                                                    @IntRange(from = 1, to = 255) int msgCount) {
         byte[] data;
         SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
         concatRef.refNumber = refNumber;
