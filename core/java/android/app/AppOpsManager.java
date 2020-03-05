@@ -16,10 +16,6 @@
 
 package android.app;
 
-import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__DEFAULT;
-import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
-import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM;
-
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -74,6 +70,7 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.ZygoteInit;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DataClass;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Parcelling;
 import com.android.internal.util.Preconditions;
 
@@ -666,15 +663,31 @@ public class AppOpsManager {
         }
     }
 
+    // These constants are redefined here to work around a metalava limitation/bug where
+    // @IntDef is not able to see @hide symbols when they are hidden via package hiding:
+    // frameworks/base/core/java/com/android/internal/package.html
+
+    /** @hide */
+    public static final int SAMPLING_STRATEGY_DEFAULT =
+            FrameworkStatsLog.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__DEFAULT;
+
+    /** @hide */
+    public static final int SAMPLING_STRATEGY_UNIFORM =
+            FrameworkStatsLog.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM;
+
+    /** @hide */
+    public static final int SAMPLING_STRATEGY_RARELY_USED =
+            FrameworkStatsLog.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
+
     /**
      * Strategies used for message sampling
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"RUNTIME_APP_OPS_ACCESS__SAMPLING_STRATEGY__"}, value = {
-            RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__DEFAULT,
-            RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM,
-            RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED
+    @IntDef(prefix = {"SAMPLING_STRATEGY_"}, value = {
+            SAMPLING_STRATEGY_DEFAULT,
+            SAMPLING_STRATEGY_UNIFORM,
+            SAMPLING_STRATEGY_RARELY_USED
     })
     public @interface SamplingStrategy {}
 
