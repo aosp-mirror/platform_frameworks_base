@@ -454,6 +454,29 @@ public class SizeCompatTests extends ActivityTestsBase {
         assertFalse(activity.shouldUseSizeCompatMode());
     }
 
+    @Test
+    public void testLaunchWithFixedRotationTransform() {
+        mService.mWindowManager.mIsFixedRotationTransformEnabled = true;
+        final int dw = 1000;
+        final int dh = 2500;
+        setUpDisplaySizeWithApp(dw, dh);
+        mActivity.mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
+                false /* alwaysKeepCurrent */);
+        mActivity.mDisplayContent.mOpeningApps.add(mActivity);
+        final float maxAspect = 1.8f;
+        prepareUnresizable(maxAspect, SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertFitted();
+        assertTrue(mActivity.isFixedRotationTransforming());
+        // Display keeps in original orientation.
+        assertEquals(Configuration.ORIENTATION_PORTRAIT,
+                mActivity.mDisplayContent.getConfiguration().orientation);
+        // Activity bounds should be [350, 0 - 2150, 1000] in landscape. Its width=1000*1.8=1800.
+        assertEquals((int) (dw * maxAspect), mActivity.getBounds().width());
+        // The bounds should be horizontal centered: (2500-1900)/2=350.
+        assertEquals((dh - mActivity.getBounds().width()) / 2, mActivity.getBounds().left);
+    }
+
     /**
      * Setup {@link #mActivity} as a size-compat-mode-able activity with fixed aspect and/or
      * orientation.
