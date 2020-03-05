@@ -2800,14 +2800,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         userId = handleIncomingUser(Binder.getCallingPid(), callingUid, userId, "getRecentTasks");
         final boolean allowed = isGetTasksAllowed("getRecentTasks", Binder.getCallingPid(),
                 callingUid);
-        final boolean detailed = checkGetTasksPermission(
-                android.Manifest.permission.GET_DETAILED_TASKS, Binder.getCallingPid(),
-                UserHandle.getAppId(callingUid))
-                == PackageManager.PERMISSION_GRANTED;
-
         synchronized (mGlobalLock) {
-            return mRecentTasks.getRecentTasks(maxNum, flags, allowed, detailed, userId,
-                    callingUid);
+            return mRecentTasks.getRecentTasks(maxNum, flags, allowed, userId, callingUid);
         }
     }
 
