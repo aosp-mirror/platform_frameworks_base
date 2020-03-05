@@ -87,7 +87,7 @@ public class ResolverListAdapter extends BaseAdapter {
     private final ResolverListCommunicator mResolverListCommunicator;
     private Runnable mPostListReadyRunnable;
     private final boolean mIsAudioCaptureDevice;
-    private boolean mIsListLoaded;
+    private boolean mIsTabLoaded;
 
     public ResolverListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList,
@@ -192,7 +192,7 @@ public class ResolverListAdapter extends BaseAdapter {
         mLastChosenPosition = -1;
         mAllTargetsAreBrowsers = false;
         mDisplayList.clear();
-        mIsListLoaded = false;
+        mIsTabLoaded = false;
 
         if (mBaseResolveList != null) {
             currentResolveList = mUnfilteredResolveList = new ArrayList<>();
@@ -354,7 +354,7 @@ public class ResolverListAdapter extends BaseAdapter {
 
         mResolverListCommunicator.sendVoiceChoicesIfNeeded();
         postListReadyRunnable(doPostProcessing);
-        mIsListLoaded = true;
+        mIsTabLoaded = true;
     }
 
     /**
@@ -614,8 +614,12 @@ public class ResolverListAdapter extends BaseAdapter {
         return mIntents;
     }
 
-    protected boolean isListLoaded() {
-        return mIsListLoaded;
+    protected boolean isTabLoaded() {
+        return mIsTabLoaded;
+    }
+
+    protected void markTabLoaded() {
+        mIsTabLoaded = true;
     }
 
     /**
