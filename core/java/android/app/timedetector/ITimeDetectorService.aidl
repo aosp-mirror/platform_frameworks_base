@@ -34,7 +34,7 @@ import android.app.timedetector.TelephonyTimeSuggestion;
  * {@hide}
  */
 interface ITimeDetectorService {
-  void suggestManualTime(in ManualTimeSuggestion timeSuggestion);
+  boolean suggestManualTime(in ManualTimeSuggestion timeSuggestion);
   void suggestNetworkTime(in NetworkTimeSuggestion timeSuggestion);
   void suggestTelephonyTime(in TelephonyTimeSuggestion timeSuggestion);
 }
