@@ -93,7 +93,7 @@ public class WorkLockActivityController {
             return mIatm.startActivityAsUser(
                     mContext.getIApplicationThread() /*caller*/,
                     mContext.getBasePackageName() /*callingPackage*/,
-                    mContext.getFeatureId() /*callingFeatureId*/,
+                    mContext.getAttributionTag() /*callingAttributionTag*/,
                     intent /*intent*/,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()) /*resolvedType*/,
                     null /*resultTo*/,

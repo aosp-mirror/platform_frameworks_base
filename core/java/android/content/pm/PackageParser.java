@@ -190,7 +190,7 @@ public class PackageParser {
     public static final String TAG_OVERLAY = "overlay";
     public static final String TAG_PACKAGE = "package";
     public static final String TAG_PACKAGE_VERIFIER = "package-verifier";
-    public static final String TAG_FEATURE = "feature";
+    public static final String TAG_ATTRIBUTION = "attribution";
     public static final String TAG_PERMISSION = "permission";
     public static final String TAG_PERMISSION_GROUP = "permission-group";
     public static final String TAG_PERMISSION_TREE = "permission-tree";

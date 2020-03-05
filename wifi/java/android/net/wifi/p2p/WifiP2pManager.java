@@ -1180,7 +1180,7 @@ public class WifiP2pManager {
                 == AsyncChannel.STATUS_SUCCESSFUL) {
             Bundle bundle = new Bundle();
             bundle.putString(CALLING_PACKAGE, c.mContext.getOpPackageName());
-            bundle.putString(CALLING_FEATURE_ID, c.mContext.getFeatureId());
+            bundle.putString(CALLING_FEATURE_ID, c.mContext.getAttributionTag());
             bundle.putBinder(CALLING_BINDER, binder);
             c.mAsyncChannel.sendMessage(UPDATE_CHANNEL_INFO, 0,
                     c.putListener(null), bundle);

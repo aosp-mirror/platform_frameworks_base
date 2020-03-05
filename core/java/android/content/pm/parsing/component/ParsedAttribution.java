@@ -29,65 +29,65 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A {@link android.R.styleable#AndroidManifestFeature &lt;feature&gt;} tag parsed from the
+ * A {@link android.R.styleable#AndroidManifestAttribution &lt;attribution&gt;} tag parsed from the
  * manifest.
  *
  * @hide
  */
 @DataClass(genAidl = false)
-public class ParsedFeature implements Parcelable {
-    /** Maximum length of featureId */
-    public static final int MAX_FEATURE_ID_LEN = 50;
+public class ParsedAttribution implements Parcelable {
+    /** Maximum length of attribution tag */
+    public static final int MAX_ATTRIBUTION_TAG_LEN = 50;
 
-    /** Maximum amount of features per package */
-    private static final int MAX_NUM_FEATURES = 1000;
+    /** Maximum amount of attributions per package */
+    private static final int MAX_NUM_ATTRIBUTIONS = 1000;
 
-    /** Id of the feature */
-    public final @NonNull String id;
+    /** Tag of the attribution */
+    public final @NonNull String tag;
 
-    /** User visible label fo the feature */
+    /** User visible label fo the attribution */
     public final @StringRes int label;
 
-    /** Ids of previously declared features this feature inherits from */
+    /** Ids of previously declared attributions this attribution inherits from */
     public final @NonNull List<String> inheritFrom;
 
     /**
-     * @return Is this set of features a valid combination for a single package?
+     * @return Is this set of attributions a valid combination for a single package?
      */
-    public static boolean isCombinationValid(@Nullable List<ParsedFeature> features) {
-        if (features == null) {
+    public static boolean isCombinationValid(@Nullable List<ParsedAttribution> attributions) {
+        if (attributions == null) {
             return true;
         }
 
-        ArraySet<String> featureIds = new ArraySet<>(features.size());
-        ArraySet<String> inheritFromFeatureIds = new ArraySet<>();
+        ArraySet<String> attributionTags = new ArraySet<>(attributions.size());
+        ArraySet<String> inheritFromAttributionTags = new ArraySet<>();
 
-        int numFeatures = features.size();
-        if (numFeatures > MAX_NUM_FEATURES) {
+        int numAttributions = attributions.size();
+        if (numAttributions > MAX_NUM_ATTRIBUTIONS) {
             return false;
         }
 
-        for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
-            boolean wasAdded = featureIds.add(features.get(featureNum).id);
+        for (int attributionNum = 0; attributionNum < numAttributions; attributionNum++) {
+            boolean wasAdded = attributionTags.add(attributions.get(attributionNum).tag);
             if (!wasAdded) {
                 // feature id is not unique
                 return false;
             }
         }
 
-        for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
-            ParsedFeature feature = features.get(featureNum);
+        for (int attributionNum = 0; attributionNum < numAttributions; attributionNum++) {
+            ParsedAttribution feature = attributions.get(attributionNum);
 
             int numInheritFrom = feature.inheritFrom.size();
             for (int inheritFromNum = 0; inheritFromNum < numInheritFrom; inheritFromNum++) {
                 String inheritFrom = feature.inheritFrom.get(inheritFromNum);
 
-                if (featureIds.contains(inheritFrom)) {
-                    // Cannot inherit from a feature that is still defined
+                if (attributionTags.contains(inheritFrom)) {
+                    // Cannot inherit from a attribution that is still defined
                     return false;
                 }
 
-                boolean wasAdded = inheritFromFeatureIds.add(inheritFrom);
+                boolean wasAdded = inheritFromAttributionTags.add(inheritFrom);
                 if (!wasAdded) {
                     // inheritFrom is not unique
                     return false;
@@ -106,7 +106,7 @@ public class ParsedFeature implements Parcelable {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/parsing/component/ParsedFeature.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/parsing/component/ParsedAttribution.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -114,8 +114,8 @@ public class ParsedFeature implements Parcelable {
 
 
     @android.annotation.IntDef(prefix = "MAX_", value = {
-        MAX_FEATURE_ID_LEN,
-        MAX_NUM_FEATURES
+        MAX_ATTRIBUTION_TAG_LEN,
+        MAX_NUM_ATTRIBUTIONS
     })
     @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
@@ -124,32 +124,32 @@ public class ParsedFeature implements Parcelable {
     @DataClass.Generated.Member
     public static String maxToString(@Max int value) {
         switch (value) {
-            case MAX_FEATURE_ID_LEN:
-                    return "MAX_FEATURE_ID_LEN";
-            case MAX_NUM_FEATURES:
-                    return "MAX_NUM_FEATURES";
+            case MAX_ATTRIBUTION_TAG_LEN:
+                    return "MAX_ATTRIBUTION_TAG_LEN";
+            case MAX_NUM_ATTRIBUTIONS:
+                    return "MAX_NUM_ATTRIBUTIONS";
             default: return Integer.toHexString(value);
         }
     }
 
     /**
-     * Creates a new ParsedFeature.
+     * Creates a new ParsedAttribution.
      *
-     * @param id
-     *   Id of the feature
+     * @param tag
+     *   Tag of the attribution
      * @param label
-     *   User visible label fo the feature
+     *   User visible label fo the attribution
      * @param inheritFrom
-     *   Ids of previously declared features this feature inherits from
+     *   Ids of previously declared attributions this attribution inherits from
      */
     @DataClass.Generated.Member
-    public ParsedFeature(
-            @NonNull String id,
+    public ParsedAttribution(
+            @NonNull String tag,
             @StringRes int label,
             @NonNull List<String> inheritFrom) {
-        this.id = id;
+        this.tag = tag;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, id);
+                NonNull.class, null, tag);
         this.label = label;
         com.android.internal.util.AnnotationValidations.validate(
                 StringRes.class, null, label);
@@ -166,7 +166,7 @@ public class ParsedFeature implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
-        dest.writeString(id);
+        dest.writeString(tag);
         dest.writeInt(label);
         dest.writeStringList(inheritFrom);
     }
@@ -178,18 +178,18 @@ public class ParsedFeature implements Parcelable {
     /** @hide */
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @DataClass.Generated.Member
-    protected ParsedFeature(@NonNull Parcel in) {
+    protected ParsedAttribution(@NonNull Parcel in) {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
-        String _id = in.readString();
+        String _tag = in.readString();
         int _label = in.readInt();
         List<String> _inheritFrom = new ArrayList<>();
         in.readStringList(_inheritFrom);
 
-        this.id = _id;
+        this.tag = _tag;
         com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, id);
+                NonNull.class, null, tag);
         this.label = _label;
         com.android.internal.util.AnnotationValidations.validate(
                 StringRes.class, null, label);
@@ -201,24 +201,24 @@ public class ParsedFeature implements Parcelable {
     }
 
     @DataClass.Generated.Member
-    public static final @NonNull Parcelable.Creator<ParsedFeature> CREATOR
-            = new Parcelable.Creator<ParsedFeature>() {
+    public static final @NonNull Parcelable.Creator<ParsedAttribution> CREATOR
+            = new Parcelable.Creator<ParsedAttribution>() {
         @Override
-        public ParsedFeature[] newArray(int size) {
-            return new ParsedFeature[size];
+        public ParsedAttribution[] newArray(int size) {
+            return new ParsedAttribution[size];
         }
 
         @Override
-        public ParsedFeature createFromParcel(@NonNull Parcel in) {
-            return new ParsedFeature(in);
+        public ParsedAttribution createFromParcel(@NonNull Parcel in) {
+            return new ParsedAttribution(in);
         }
     };
 
     @DataClass.Generated(
-            time = 1581379861853L,
+            time = 1583436566499L,
             codegenVersion = "1.0.14",
-            sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedFeature.java",
-            inputSignatures = "public static final  int MAX_FEATURE_ID_LEN\nprivate static final  int MAX_NUM_FEATURES\npublic final @android.annotation.NonNull java.lang.String id\npublic final @android.annotation.StringRes int label\npublic final @android.annotation.NonNull java.util.List<java.lang.String> inheritFrom\npublic static  boolean isCombinationValid(java.util.List<android.content.pm.parsing.component.ParsedFeature>)\nclass ParsedFeature extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=false)")
+            sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedAttribution.java",
+            inputSignatures = "public static final  int MAX_ATTRIBUTION_TAG_LEN\nprivate static final  int MAX_NUM_ATTRIBUTIONS\npublic final @android.annotation.NonNull java.lang.String tag\npublic final @android.annotation.StringRes int label\npublic final @android.annotation.NonNull java.util.List<java.lang.String> inheritFrom\npublic static  boolean isCombinationValid(java.util.List<android.content.pm.parsing.component.ParsedAttribution>)\nclass ParsedAttribution extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=false)")
     @Deprecated
     private void __metadata() {}
 
