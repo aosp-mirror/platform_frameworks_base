@@ -16,26 +16,14 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.app.Activity.RESULT_CANCELED;
-import static android.app.Activity.RESULT_OK;
-import static android.app.admin.DevicePolicyManager.STATE_USER_UNMANAGED;
 import static android.content.Intent.ACTION_OVERLAY_CHANGED;
 import static android.content.Intent.ACTION_PREFERRED_ACTIVITY_CHANGED;
-import static android.content.pm.PackageManager.FEATURE_DEVICE_ADMIN;
 import static android.os.UserHandle.USER_CURRENT;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
-import static com.android.systemui.shared.system.QuickStepContract.ACTION_ENABLE_GESTURE_NAV;
-import static com.android.systemui.shared.system.QuickStepContract.ACTION_ENABLE_GESTURE_NAV_RESULT;
-import static com.android.systemui.shared.system.QuickStepContract.EXTRA_RESULT_INTENT;
-
-import android.app.PendingIntent;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,7 +34,6 @@ import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.util.Log;
@@ -87,7 +74,6 @@ public class NavigationModeController implements Dumpable {
 
     private SparseBooleanArray mRestoreGesturalNavBarMode = new SparseBooleanArray();
 
-    private int mMode = NAV_BAR_MODE_3BUTTON;
     private ArrayList<ModeChangedListener> mListeners = new ArrayList<>();
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -142,8 +128,6 @@ public class NavigationModeController implements Dumpable {
                 }
             };
 
-    private BroadcastReceiver mEnableGestureNavReceiver;
-
     @Inject
     public NavigationModeController(Context context,
             DeviceProvisionedController deviceProvisionedController,
@@ -171,18 +155,7 @@ public class NavigationModeController implements Dumpable {
         deferGesturalNavOverlayIfNecessary();
     }
 
-    private void removeEnableGestureNavListener() {
-        if (mEnableGestureNavReceiver != null) {
-            if (DEBUG) {
-                Log.d(TAG, "mEnableGestureNavReceiver unregistered");
-            }
-            mContext.unregisterReceiver(mEnableGestureNavReceiver);
-            mEnableGestureNavReceiver = null;
-        }
-    }
-
     private boolean setGestureModeOverlayForMainLauncher() {
-        removeEnableGestureNavListener();
         if (getCurrentInteractionMode(mCurrentUserContext) == NAV_BAR_MODE_GESTURAL) {
             // Already in gesture mode
             return true;
@@ -196,59 +169,15 @@ public class NavigationModeController implements Dumpable {
         return true;
     }
 
-    private boolean enableGestureNav(Intent intent) {
-        if (!(intent.getParcelableExtra(EXTRA_RESULT_INTENT) instanceof PendingIntent)) {
-            Log.e(TAG, "No callback pending intent was attached");
-            return false;
-        }
-
-        PendingIntent callback = intent.getParcelableExtra(EXTRA_RESULT_INTENT);
-        Intent callbackIntent = callback.getIntent();
-        if (callbackIntent == null
-                || !ACTION_ENABLE_GESTURE_NAV_RESULT.equals(callbackIntent.getAction())) {
-            Log.e(TAG, "Invalid callback intent");
-            return false;
-        }
-        String callerPackage = callback.getCreatorPackage();
-        UserHandle callerUser = callback.getCreatorUserHandle();
-
-        DevicePolicyManager dpm = mCurrentUserContext.getSystemService(DevicePolicyManager.class);
-        ComponentName ownerComponent = dpm.getDeviceOwnerComponentOnCallingUser();
-
-        if (ownerComponent != null) {
-            // Verify that the caller is the owner component
-            if (!ownerComponent.getPackageName().equals(callerPackage)
-                    || !mCurrentUserContext.getUser().equals(callerUser)) {
-                Log.e(TAG, "Callback must be from the device owner");
-                return false;
-            }
-        } else {
-            UserHandle callerParent = mCurrentUserContext.getSystemService(UserManager.class)
-                    .getProfileParent(callerUser);
-            if (callerParent == null || !callerParent.equals(mCurrentUserContext.getUser())) {
-                Log.e(TAG, "Callback must be from a managed user");
-                return false;
-            }
-            ComponentName profileOwner = dpm.getProfileOwnerAsUser(callerUser);
-            if (profileOwner == null || !profileOwner.getPackageName().equals(callerPackage)) {
-                Log.e(TAG, "Callback must be from the profile owner");
-                return false;
-            }
-        }
-
-        return setGestureModeOverlayForMainLauncher();
-    }
-
     public void updateCurrentInteractionMode(boolean notify) {
         mCurrentUserContext = getCurrentUserContext();
         int mode = getCurrentInteractionMode(mCurrentUserContext);
-        mMode = mode;
         mUiBgExecutor.execute(() -> {
             Settings.Secure.putString(mCurrentUserContext.getContentResolver(),
                     Secure.NAVIGATION_MODE, String.valueOf(mode));
         });
         if (DEBUG) {
-            Log.e(TAG, "updateCurrentInteractionMode: mode=" + mMode);
+            Log.e(TAG, "updateCurrentInteractionMode: mode=" + mode);
             dumpAssetPaths(mCurrentUserContext);
         }
 
@@ -272,7 +201,7 @@ public class NavigationModeController implements Dumpable {
         int mode = context.getResources().getInteger(
                 com.android.internal.R.integer.config_navBarInteractionMode);
         if (DEBUG) {
-            Log.d(TAG, "getCurrentInteractionMode: mode=" + mMode
+            Log.d(TAG, "getCurrentInteractionMode: mode=" + mode
                     + " contextUser=" + context.getUserId());
         }
         return mode;
@@ -297,10 +226,6 @@ public class NavigationModeController implements Dumpable {
         }
     }
 
-    private boolean supportsDeviceAdmin() {
-        return mContext.getPackageManager().hasSystemFeature(FEATURE_DEVICE_ADMIN);
-    }
-
     private void deferGesturalNavOverlayIfNecessary() {
         final int userId = mDeviceProvisionedController.getCurrentUser();
         mRestoreGesturalNavBarMode.put(userId, false);
@@ -311,7 +236,6 @@ public class NavigationModeController implements Dumpable {
                 Log.d(TAG, "deferGesturalNavOverlayIfNecessary: device is provisioned and user is "
                         + "setup");
             }
-            removeEnableGestureNavListener();
             return;
         }
 
@@ -327,7 +251,6 @@ public class NavigationModeController implements Dumpable {
                 Log.d(TAG, "deferGesturalNavOverlayIfNecessary: no default gestural overlay, "
                         + "default=" + defaultOverlays);
             }
-            removeEnableGestureNavListener();
             return;
         }
 
@@ -336,23 +259,6 @@ public class NavigationModeController implements Dumpable {
         setModeOverlay(NAV_BAR_MODE_3BUTTON_OVERLAY, USER_CURRENT);
         mRestoreGesturalNavBarMode.put(userId, true);
 
-        if (supportsDeviceAdmin() && mEnableGestureNavReceiver == null) {
-            mEnableGestureNavReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (DEBUG) {
-                        Log.d(TAG, "ACTION_ENABLE_GESTURE_NAV");
-                    }
-                    setResultCode(enableGestureNav(intent) ? RESULT_OK : RESULT_CANCELED);
-                }
-            };
-            // Register for all users so that we can get managed users as well
-            mContext.registerReceiverAsUser(mEnableGestureNavReceiver, UserHandle.ALL,
-                    new IntentFilter(ACTION_ENABLE_GESTURE_NAV), null, null);
-            if (DEBUG) {
-                Log.d(TAG, "mEnableGestureNavReceiver registered");
-            }
-        }
         if (DEBUG) {
             Log.d(TAG, "deferGesturalNavOverlayIfNecessary: setting to 3 button mode");
         }
@@ -366,15 +272,7 @@ public class NavigationModeController implements Dumpable {
         final int userId = mDeviceProvisionedController.getCurrentUser();
         if (mRestoreGesturalNavBarMode.get(userId)) {
             // Restore the gestural state if necessary
-            if (!supportsDeviceAdmin()
-                    || mCurrentUserContext.getSystemService(DevicePolicyManager.class)
-                    .getUserProvisioningState() == STATE_USER_UNMANAGED) {
-                setGestureModeOverlayForMainLauncher();
-            } else {
-                if (DEBUG) {
-                    Log.d(TAG, "Not restoring to gesture nav for managed user");
-                }
-            }
+            setGestureModeOverlayForMainLauncher();
             mRestoreGesturalNavBarMode.put(userId, false);
         }
     }
@@ -396,7 +294,7 @@ public class NavigationModeController implements Dumpable {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NavigationModeController:");
-        pw.println("  mode=" + mMode);
+        pw.println("  mode=" + getCurrentInteractionMode(mCurrentUserContext));
         String defaultOverlays = "";
         try {
             defaultOverlays = String.join(", ", mOverlayManager.getDefaultOverlayPackages());
