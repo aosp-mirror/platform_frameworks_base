@@ -29,22 +29,18 @@
         android:id="@+id/app_icon"
         android:layout_gravity="center"
         android:layout_width="34dp"
-        android:layout_height="24dp" 
+        android:layout_height="24dp"
         android:layout_marginEnd="10dp" />
 
     <TextView
+        style="@style/Control.Spinner.Item"
         android:id="@+id/controls_spinner_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:layout_gravity="center"
-        android:textSize="25sp"
-        android:textColor="@color/control_secondary_text"
-        android:fontFamily="@*android:string/config_headlineFontFamily" />
+        android:layout_gravity="center" />
 
     <Space
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="1dp" />
 </LinearLayout>
-    
