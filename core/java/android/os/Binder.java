@@ -248,6 +248,27 @@ public class Binder implements IBinder {
         }
     }
 
+    static ThreadLocal<Boolean> sWarnOnBlockingOnCurrentThread =
+            ThreadLocal.withInitial(() -> sWarnOnBlocking);
+
+    /**
+     * Allow blocking calls for the current thread.  See {@link #allowBlocking}.
+     *
+     * @hide
+     */
+    public static void allowBlockingForCurrentThread() {
+        sWarnOnBlockingOnCurrentThread.set(false);
+    }
+
+    /**
+     * Reset the current thread to the default blocking behavior.  See {@link #defaultBlocking}.
+     *
+     * @hide
+     */
+    public static void defaultBlockingForCurrentThread() {
+        sWarnOnBlockingOnCurrentThread.set(sWarnOnBlocking);
+    }
+
     /**
      * Raw native pointer to JavaBBinderHolder object. Owned by this Java object. Not null.
      */
