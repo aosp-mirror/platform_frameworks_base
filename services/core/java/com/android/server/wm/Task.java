@@ -3281,8 +3281,8 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
-     * Fills in a {@link TaskInfo} with information from this task.
-     * @param info the {@link TaskInfo} to fill in
+     * Fills in a {@link TaskInfo} with information from this task. Note that the base intent in the
+     * task info will not include any extras or clip data.
      */
     void fillTaskInfo(TaskInfo info) {
         getNumRunningActivities(mReuseActivitiesReport);
@@ -3294,7 +3294,7 @@ class Task extends WindowContainer<WindowContainer> {
         final Intent baseIntent = getBaseIntent();
         // Make a copy of base intent because this is like a snapshot info.
         // Besides, {@link RecentTasks#getRecentTasksImpl} may modify it.
-        info.baseIntent = baseIntent == null ? new Intent() : new Intent(baseIntent);
+        info.baseIntent = baseIntent == null ? new Intent() : baseIntent.cloneFilter();
         info.baseActivity = mReuseActivitiesReport.base != null
                 ? mReuseActivitiesReport.base.intent.getComponent()
                 : null;
