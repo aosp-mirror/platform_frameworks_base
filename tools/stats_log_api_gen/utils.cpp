@@ -286,9 +286,6 @@ void write_java_atom_codes(FILE* out, const Atoms& atoms, const string& moduleNa
         if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
             write_java_usage(out, "write_non_chained", constant, *non_chained_decl->second);
         }
-        if (moduleName == DEFAULT_MODULE_NAME) {
-            fprintf(out, "     * @hide\n");
-        }
         fprintf(out, "     */\n");
         fprintf(out, "    public static final int %s = %d;\n", constant.c_str(), atom->code);
     }
@@ -310,9 +307,6 @@ void write_java_enum_values(FILE* out, const Atoms& atoms, const string& moduleN
                     field->name.c_str());
                 for (map<int, string>::const_iterator value = field->enumValues.begin();
                     value != field->enumValues.end(); value++) {
-                    if (moduleName == DEFAULT_MODULE_NAME) {
-                        fprintf(out, "    /** @hide */\n");
-                    }
                     fprintf(out, "    public static final int %s__%s__%s = %d;\n",
                         make_constant_name(atom->message).c_str(),
                         make_constant_name(field->name).c_str(),
@@ -357,9 +351,6 @@ int write_java_non_chained_methods(
         }
 
         // Print method signature.
-        if (DEFAULT_MODULE_NAME == moduleName) {
-            fprintf(out, "    /** @hide */\n");
-        }
         fprintf(out, "    public static void write_non_chained(int code");
         vector<java_type_t> signature = signature_to_modules_it->first;
         int argIndex = 1;
@@ -434,9 +425,6 @@ int write_java_work_source_methods(
 
         fprintf(out, "\n");
         // Method header (signature)
-        if (DEFAULT_MODULE_NAME == moduleName) {
-            fprintf(out, "    /** @hide */\n");
-        }
         fprintf(out, "    public static void write(int code");
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature.begin();
