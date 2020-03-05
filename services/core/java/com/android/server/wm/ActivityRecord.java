@@ -6190,7 +6190,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         density than its parent or its bounds don't fit in parent naturally.
      */
     boolean inSizeCompatMode() {
-        if (mCompatDisplayInsets == null || !shouldUseSizeCompatMode()) {
+        if (mCompatDisplayInsets == null || !shouldUseSizeCompatMode()
+                // The orientation is different from parent when transforming.
+                || isFixedRotationTransforming()) {
             return false;
         }
         final Rect appBounds = getConfiguration().windowConfiguration.getAppBounds();
@@ -6347,7 +6349,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // can use the resolved configuration directly. Otherwise (e.g. fixed aspect ratio),
             // the rotated configuration is used as parent configuration to compute the actual
             // resolved configuration. It is like putting the activity in a rotated container.
-            mTmpConfig.setTo(resolvedConfig);
+            mTmpConfig.setTo(newParentConfiguration);
+            mTmpConfig.updateFrom(resolvedConfig);
             newParentConfiguration = mTmpConfig;
         }
         if (mCompatDisplayInsets != null) {
@@ -6373,7 +6376,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Exclude the horizontal decor area because the activity will be centered
                 // horizontally in parent's app bounds to balance the visual appearance.
                 resolvedBounds.left = parentAppBounds.left;
-                task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration);
+                task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
+                        getFixedRotationTransformDisplayInfo());
                 final int offsetX = getHorizontalCenterOffset(
                         parentAppBounds.width(), resolvedBounds.width());
                 if (offsetX > 0) {
