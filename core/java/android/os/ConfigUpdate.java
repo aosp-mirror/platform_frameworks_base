@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 
 /**
@@ -114,19 +115,35 @@ public final class ConfigUpdate {
             = "android.os.action.UPDATE_CARRIER_ID_DB";
 
     /**
-    * Broadcast intent action indicating that the updated emergency number database is available.
-    * <p>Extra: "VERSION" the numeric version of the new data. Devices should only install if the
-    * update version is newer than the current one.
-    * <p>Extra: "REQUIRED_HASH" the hash of the current update data.
-    * <p>Input: {@link android.content.Intent#getData} is URI of downloaded emergency number file.
-    * Devices should pick up the downloaded file and persist to the database
-    * {@code com.android.internal.telephony.emergency.EmergencyNumberTracker}.
+    * Update the emergency number database into the devices.
+    * <p>Extra: {@link #EXTRA_VERSION} the numeric version of the database.
+    * <p>Extra: {@link #EXTRA_REQUIRED_HASH} the hash of the database.
+    * <p>Input: {@link android.content.Intent#getData} the URI to download emergency number
+    * database.
     *
     * @hide
     */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_CONFIG)
     public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB =
             "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
+
+    /**
+     * An integer to indicate the numeric version of the new data. Devices should only install
+     * if the update version is newer than the current one.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_VERSION = "android.os.extra.VERSION";
+
+    /**
+     * A string to indicate the hash of the data.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_REQUIRED_HASH = "android.os.extra.REQUIRED_HASH";
 
     private ConfigUpdate() {
     }
