@@ -53,6 +53,13 @@ public class WifiP2pConfigTest {
             fail("Unexpected IllegalArgumentException");
         }
 
+        // sunny case with maximum bytes for the network name
+        try {
+            b.setNetworkName("DIRECT-abcdefghijklmnopqrstuvwxy");
+        } catch (IllegalArgumentException e) {
+            fail("Unexpected IllegalArgumentException");
+        }
+
         // less than 9 characters.
         try {
             b.setNetworkName("DIRECT-z");
@@ -75,6 +82,12 @@ public class WifiP2pConfigTest {
         // numbers.
         try {
             b.setNetworkName("direct-a?");
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) { }
+
+        // over maximum bytes
+        try {
+            b.setNetworkName("DIRECT-abcdefghijklmnopqrstuvwxyz");
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException e) { }
     }

@@ -392,13 +392,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"Antaa sovelluksen lähettää lähetyksiä, jotka jäävät voimaan lähetyksen päätyttyä. Ominaisuuden liiallinen käyttö voi saada television toimimaan hitaammin tai epävakaammin liiallisen muistinkäytön myötä."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"Antaa sovelluksen lähettää pysyviä lähetyksiä, jotka säilyvät lähetyksen päätyttyä. Liiallinen käyttö voi tehdä puhelimesta hitaan tai epävakaan kasvattamalla sen muistinkäyttöä liikaa."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"lue yhteystietoja"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"Antaa sovelluksen lukea tablet-laitteeseesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"Antaa sovelluksen lukea televisioosi tallennettuja kontaktitietoja sekä tarkastella sitä, kuinka usein olet soitellut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"Antaa sovelluksen lukea puhelimeesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"Antaa sovelluksen lukea tabletille tallennettujen kontaktien tietoja. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"Antaa sovelluksen lukea televisioon tallennettujen kontaktien tietoja. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"Antaa sovelluksen lukea puhelimelle tallennettujen kontaktien tietoja. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"muokkaa yhteystietoja"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"Antaa sovelluksen muokata tablet-laitteeseesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"Antaa sovelluksen muokata televisioosi tallennettuja kontaktitietoja sekä tarkastella sitä, kuinka usein olet soitellut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"Antaa sovelluksen muokata puhelimeesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"Antaa sovelluksen muokata tabletille tallennettujen kontaktien tietoja. Käyttöluvan saaneet sovellukset voivat myös poistaa kontaktitietoja."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"Antaa sovelluksen muokata televisioon tallennettujen kontaktien tietoja. Käyttöluvan saaneet sovellukset voivat myös poistaa kontaktitietoja."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Antaa sovelluksen muokata puhelimelle tallennettujen kontaktien tietoja. Käyttöluvan saaneet sovellukset voivat myös poistaa kontaktitietoja."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"lue puhelulokia"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Tämä sovellus voi lukea puheluhistoriaasi."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"kirjoita puhelulokiin"</string>
@@ -422,6 +422,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"käyttää karkeaa verkkoon perustuvaa sijaintia vain etualalla"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella vain jos sovellus on etualalla. Näiden sijaintipalveluiden tulee olla päällä ja käytettävissä tabletilla, jotta sovellus voi käyttää niitä."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella vain jos sovellus on etualalla. Näiden sijaintipalveluiden tulee olla päällä ja käytettävissä televisiossa, jotta sovellus voi käyttää niitä."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Tämä sovellus saa likimääräisen sijaintisi käyttöönsä vain ollessaan etualalla. Näiden sijaintipalveluiden tulee olla käytössä ja käytettävissä autossasi, jotta sovellus voi käyttää niitä."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella vain jos sovellus on etualalla. Näiden sijaintipalveluiden tulee olla päällä ja käytettävissä puhelimessa, jotta sovellus voi käyttää niitä."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"käytä sijaintia taustalla"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Jos tämä myönnetään karkean tai tarkan sijainnin käyttöoikeuden lisäksi, sovellus voi käyttää sijaintia toimiessaan taustalla."</string>
@@ -1243,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Hälytysäänet"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Ilmoitusäänet"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Tuntematon"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Ei yhteyttä: <xliff:g id="SSID">%1$s</xliff:g>"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Napauta muuttaaksesi yksityisyysasetusta ja yritä uudelleen"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Muutetaanko yksityisyysasetus?"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> halua mahdollisesti yhdistää laitteen MAC-osoitteen, eli yksilöllisen tunnisteen, kautta. Tämä voi antaa lähellä olevien laitteiden seurata laitteesi sijaintia. \n\nJos jatkat, <xliff:g id="SSID_1">%1$s</xliff:g> muuttaa yksityisyysasetustasi ja yrittää yhdistää uudelleen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Muuta asetusta"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Asetus päivitetty. Yritä muodostaa yhteys uudelleen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Yksityisyysasetusta ei voi muuttaa"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"Verkkoa ei löydy"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">Wi-Fi-verkkoja käytettävissä</item>
       <item quantity="one">Wi-Fi-verkko käytettävissä</item>
@@ -1811,8 +1820,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Järjestelmänvalvoja päivitti tämän."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Järjestelmänvalvoja poisti tämän."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2923798442660964928">"Virransäästö poistaa käytöstä taustatoiminnot, joitakin visuaalisia tehosteita ja muita virtaa runsaasti kuluttavia ominaisuuksia tai rajoittaa niitä akunkeston pidentämiseksi. "<annotation id="url">"Lue lisää"</annotation></string>
-    <string name="battery_saver_description" msgid="2500910959722815154">"Virransäästö poistaa käytöstä taustatoiminnot, joitakin visuaalisia tehosteita ja muita virtaa runsaasti kuluttavia ominaisuuksia tai rajoittaa niitä akunkeston pidentämiseksi."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Parantaakseen akunkestoa virransäästö\n·ottaa tumman teeman käyttöön\n·poistaa käytöstä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Hei Google).\n\n"<annotation id="url">"Lue lisää"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Parantaakseen akunkestoa virransäästö\n·ottaa tumman teeman käyttöön\n·poistaa käytöstä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Hei Google)."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Otetaanko Data Saver käyttöön?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ota käyttöön"</string>
@@ -1915,6 +1924,8 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Avaa profiili koskettamalla."</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> yhdistetty"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Näytä tiedostot koskettamalla"</string>
+    <string name="pin_target" msgid="8036028973110156895">"Kiinnitä"</string>
+    <string name="unpin_target" msgid="3963318576590204447">"Irrota"</string>
     <string name="app_info" msgid="6113278084877079851">"Sovelluksen tiedot"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Aloitetaan esittelyä…"</string>

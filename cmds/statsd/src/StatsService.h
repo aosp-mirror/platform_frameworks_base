@@ -199,7 +199,9 @@ public:
     virtual Status sendWatchdogRollbackOccurredAtom(
             const int32_t rollbackTypeIn,
             const android::String16& packageNameIn,
-            const int64_t packageVersionCodeIn) override;
+            const int64_t packageVersionCodeIn,
+            const int32_t rollbackReasonIn,
+            const android::String16& failingPackageNameIn) override;
 
     /**
      * Binder call to get registered experiment IDs.
@@ -376,6 +378,10 @@ private:
 
     sp<ShellSubscriber> mShellSubscriber;
 
+    /**
+     * Mutex for setting the shell subscriber
+     */
+    mutable mutex mShellSubscriberMutex;
     std::shared_ptr<LogEventQueue> mEventQueue;
 
     FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);

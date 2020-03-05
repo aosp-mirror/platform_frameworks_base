@@ -45,9 +45,7 @@ public interface BatteryController extends DemoMode, Dumpable,
     /**
      * Returns {@code true} if AOD was disabled by power saving policies.
      */
-    default boolean isAodPowerSave() {
-        return isPowerSave();
-    }
+    boolean isAodPowerSave();
 
     /**
      * A listener that will be notified whenever a change in battery level or power save mode has

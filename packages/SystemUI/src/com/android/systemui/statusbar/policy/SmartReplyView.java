@@ -22,6 +22,7 @@ import android.text.TextPaint;
 import android.text.method.TransformationMethod;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -238,13 +239,15 @@ public class SmartReplyView extends ViewGroup {
     public List<Button> inflateSmartActions(Context packageContext,
             @NonNull SmartActions smartActions, SmartReplyController smartReplyController,
             NotificationEntry entry, HeadsUpManager headsUpManager, boolean delayOnClickListener) {
+        Context themedPackageContext = new ContextThemeWrapper(packageContext, mContext.getTheme());
         List<Button> buttons = new ArrayList<>();
         int numSmartActions = smartActions.actions.size();
         for (int n = 0; n < numSmartActions; n++) {
             Notification.Action action = smartActions.actions.get(n);
             if (action.actionIntent != null) {
                 buttons.add(inflateActionButton(
-                        this, getContext(), packageContext, n, smartActions, smartReplyController,
+                        this, getContext(), themedPackageContext, n, smartActions,
+                        smartReplyController,
                         entry, headsUpManager, delayOnClickListener));
             }
         }

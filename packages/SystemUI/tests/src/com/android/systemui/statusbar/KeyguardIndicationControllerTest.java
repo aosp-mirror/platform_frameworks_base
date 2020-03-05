@@ -35,8 +35,11 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
 import android.graphics.Color;
+import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Looper;
+import android.os.UserManager;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -47,12 +50,15 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.util.wakelock.WakeLockFake;
@@ -61,6 +67,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -92,6 +99,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock
+    private UserManager mUserManager;
+    @Mock
+    private DockManager mDockManager;
+    @Captor
+    private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     private KeyguardIndicationTextView mTextView;
 
     private KeyguardIndicationController mController;
@@ -105,14 +120,18 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mTextView = new KeyguardIndicationTextView(mContext);
 
         mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
+        mContext.addMockSystemService(UserManager.class, mUserManager);
         mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
         mDisclosureWithOrganization = mContext.getString(R.string.do_disclosure_with_name,
                 ORGANIZATION_NAME);
 
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
         when(mIndicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure))
                 .thenReturn(mDisclosure);
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
+        when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
 
         mWakeLock = new WakeLockFake();
     }
@@ -123,7 +142,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         }
         mController = new KeyguardIndicationController(mContext, mIndicationArea, mLockIcon,
                 mLockPatternUtils, mWakeLock, mShadeController, mAccessibilityController,
-                mUnlockMethodCache, mStatusBarStateController, mKeyguardUpdateMonitor);
+                mUnlockMethodCache, mStatusBarStateController, mKeyguardUpdateMonitor,
+                mDockManager);
+        mController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
     }
 
     @Test
@@ -193,6 +214,74 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void createController_addsAlignmentListener() {
+        createController();
+
+        verify(mDockManager).addAlignmentStateListener(
+                any(DockManager.AlignmentStateListener.class));
+    }
+
+    @Test
+    public void onAlignmentStateChanged_showsSlowChargingIndication() {
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
+
+        mAlignmentListener.getValue().onAlignmentStateChanged(
+                DockManager.ALIGN_STATE_POOR);
+
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getResources().getString(R.string.dock_alignment_slow_charging));
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
+                Utils.getColorError(mContext).getDefaultColor());
+    }
+
+    @Test
+    public void onAlignmentStateChanged_showsNotChargingIndication() {
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
+
+        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getResources().getString(R.string.dock_alignment_not_charging));
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
+                Utils.getColorError(mContext).getDefaultColor());
+    }
+
+    @Test
+    public void onAlignmentStateChanged_whileDozing_showsSlowChargingIndication() {
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
+        mController.setDozing(true);
+
+        mAlignmentListener.getValue().onAlignmentStateChanged(
+                DockManager.ALIGN_STATE_POOR);
+
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getResources().getString(R.string.dock_alignment_slow_charging));
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
+                Utils.getColorError(mContext).getDefaultColor());
+    }
+
+    @Test
+    public void onAlignmentStateChanged_whileDozing_showsNotChargingIndication() {
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
+        mController.setDozing(true);
+
+        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getResources().getString(R.string.dock_alignment_not_charging));
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
+                Utils.getColorError(mContext).getDefaultColor());
+    }
+
+    @Test
     public void transientIndication_holdsWakeLock_whenDozing() {
         createController();
 
@@ -242,6 +331,49 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         assertThat(mTextView.getText()).isEqualTo("Test");
         assertThat(mTextView.getCurrentTextColor()).isEqualTo(Color.WHITE);
         assertThat(mTextView.getAlpha()).isEqualTo(1f);
+    }
+
+    @Test
+    public void transientIndication_visibleWhenDozing_unlessSwipeUp_fromHelp() {
+        createController();
+        String message = "A message";
+
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricHelp(
+                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, message,
+                BiometricSourceType.FACE);
+        assertThat(mTextView.getText()).isEqualTo(message);
+        mController.setDozing(true);
+
+        assertThat(mTextView.getText()).isNotEqualTo(message);
+    }
+
+    @Test
+    public void transientIndication_visibleWhenDozing_unlessSwipeUp_fromError() {
+        createController();
+        String message = mContext.getString(R.string.keyguard_unlock);
+
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
+                "A message", BiometricSourceType.FACE);
+
+        assertThat(mTextView.getText()).isEqualTo(message);
+        mController.setDozing(true);
+
+        assertThat(mTextView.getText()).isNotEqualTo(message);
+    }
+
+    @Test
+    public void transientIndication_swipeUpToRetry() {
+        createController();
+        String message = mContext.getString(R.string.keyguard_retry);
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
+
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
+                "A message", BiometricSourceType.FACE);
+
+        verify(mStatusBarKeyguardViewManager).showBouncerMessage(eq(message), any());
     }
 
     @Test
