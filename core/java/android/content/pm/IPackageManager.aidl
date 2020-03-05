@@ -748,5 +748,4 @@ interface IPackageManager {
     void clearMimeGroup(String packageName, String group);
 
     List<String> getMimeGroup(String packageName, String group);
-
 }
