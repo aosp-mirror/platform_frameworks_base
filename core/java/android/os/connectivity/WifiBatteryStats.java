@@ -215,7 +215,7 @@ public final class WifiBatteryStats implements Parcelable {
      * Returns the number of bytes transmitted over wifi within
      * {@link #getLoggingDurationMillis()}.
      *
-     * @return Number of packets received.
+     * @return Number of bytes transmitted.
      */
     public long getNumBytesTx() {
         return mNumBytesTx;
@@ -225,7 +225,7 @@ public final class WifiBatteryStats implements Parcelable {
      * Returns the number of packets received over wifi within
      * {@link #getLoggingDurationMillis()}.
      *
-     * @return Number of bytes transmitted.
+     * @return Number of packets received.
      */
     public long getNumPacketsRx() {
         return mNumPacketsRx;
