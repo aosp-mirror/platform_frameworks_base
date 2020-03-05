@@ -65,7 +65,6 @@ public class PipResizeGestureHandler {
     private final PointF mDownPoint = new PointF();
     private final Point mMaxSize = new Point();
     private final Point mMinSize = new Point();
-    private final Rect mLastResizeBounds = new Rect();
     private final Rect mTmpBounds = new Rect();
     private final int mDelta;
 
@@ -194,7 +193,11 @@ public class PipResizeGestureHandler {
             }
 
         } else if (mAllowGesture) {
-
+            final Rect currentPipBounds = mMotionHelper.getBounds();
+            Rect newSize = TaskResizingAlgorithm.resizeDrag(ev.getX(), ev.getY(), mDownPoint.x,
+                    mDownPoint.y, currentPipBounds, mCtrlType, mMinSize.x, mMinSize.y, mMaxSize,
+                    true, true);
+            mPipBoundsHandler.transformBoundsToAspectRatio(newSize);
             switch (action) {
                 case MotionEvent.ACTION_POINTER_DOWN:
                     // We do not support multi touch for resizing via drag
@@ -203,18 +206,12 @@ public class PipResizeGestureHandler {
                 case MotionEvent.ACTION_MOVE:
                     // Capture inputs
                     mInputMonitor.pilferPointers();
-                    final Rect currentPipBounds = mMotionHelper.getBounds();
-                    mLastResizeBounds.set(TaskResizingAlgorithm.resizeDrag(ev.getX(), ev.getY(),
-                            mDownPoint.x, mDownPoint.y, currentPipBounds, mCtrlType, mMinSize.x,
-                            mMinSize.y, mMaxSize, true, true));
-                    mPipBoundsHandler.transformBoundsToAspectRatio(mLastResizeBounds);
-                    mPipTaskOrganizer.resizePip(mLastResizeBounds);
-
+                    //TODO: Actually do resize here.
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    mPipTaskOrganizer.finishResize(mLastResizeBounds);
-                    mLastResizeBounds.setEmpty();
+                    //TODO: Finish resize operation here.
+                    mMotionHelper.synchronizePinnedStackBounds();
                     mCtrlType = CTRL_NONE;
                     mAllowGesture = false;
                     break;
@@ -226,7 +223,7 @@ public class PipResizeGestureHandler {
         mMaxSize.set(maxX, maxY);
     }
 
-    void updateMinSize(int minX, int minY) {
+    void updateMiniSize(int minX, int minY) {
         mMinSize.set(minX, minY);
     }
 
