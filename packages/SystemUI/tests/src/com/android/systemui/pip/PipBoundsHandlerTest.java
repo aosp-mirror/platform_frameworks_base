@@ -58,7 +58,7 @@ public class PipBoundsHandlerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         initializeMockResources();
-        mPipBoundsHandler = new PipBoundsHandler(mContext);
+        mPipBoundsHandler = new PipBoundsHandler(mContext, new PipSnapAlgorithm(mContext));
 
         mPipBoundsHandler.onDisplayInfoChanged(mDefaultDisplayInfo);
     }
