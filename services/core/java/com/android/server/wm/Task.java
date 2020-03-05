@@ -581,10 +581,10 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     Task reuseAsLeafTask(IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
-            ActivityInfo info, ActivityRecord activity) {
+            Intent intent, ActivityInfo info, ActivityRecord activity) {
         voiceSession = _voiceSession;
         voiceInteractor = _voiceInteractor;
-        setIntent(activity);
+        setIntent(activity, intent, info);
         setMinDimensions(info);
         return this;
     }
@@ -919,12 +919,23 @@ class Task extends WindowContainer<WindowContainer> {
         return SystemClock.elapsedRealtime() - lastActiveTime;
     }
 
-    /** Sets the original intent, and the calling uid and package. */
+    /** @see #setIntent(ActivityRecord, Intent, ActivityInfo) */
     void setIntent(ActivityRecord r) {
+        setIntent(r, null /* intent */, null /* info */);
+    }
+
+    /**
+     * Sets the original intent, and the calling uid and package.
+     *
+     * @param r The activity that started the task
+     * @param intent The task info which could be different from {@code r.intent} if set.
+     * @param info The activity info which could be different from {@code r.info} if set.
+     */
+    void setIntent(ActivityRecord r, @Nullable Intent intent, @Nullable ActivityInfo info) {
         mCallingUid = r.launchedFromUid;
         mCallingPackage = r.launchedFromPackage;
         mCallingFeatureId = r.launchedFromFeatureId;
-        setIntent(r.intent, r.info);
+        setIntent(intent != null ? intent : r.intent, info != null ? info : r.info);
         setLockTaskAuth(r);
 
         final WindowContainer parent = getParent();
