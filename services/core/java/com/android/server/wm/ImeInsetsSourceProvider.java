@@ -64,13 +64,14 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
             ProtoLog.d(WM_DEBUG_IME, "Run showImeRunner");
             // Target should still be the same.
             if (isImeTargetFromDisplayContentAndImeSame()) {
+                final InsetsControlTarget target = mDisplayContent.mInputMethodControlTarget;
                 ProtoLog.d(WM_DEBUG_IME, "call showInsets(ime) on %s",
-                        mDisplayContent.mInputMethodControlTarget.getWindow().getName());
-                mDisplayContent.mInputMethodControlTarget.showInsets(
-                        WindowInsets.Type.ime(), true /* fromIme */);
+                        target.getWindow() != null ? target.getWindow().getName() : "");
+                target.showInsets(WindowInsets.Type.ime(), true /* fromIme */);
             }
             abortShowImePostLayout();
         };
+        mDisplayContent.mWmService.requestTraversal();
     }
 
     void checkShowImePostLayout() {
