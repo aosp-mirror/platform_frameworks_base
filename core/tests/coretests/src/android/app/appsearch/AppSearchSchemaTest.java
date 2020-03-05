@@ -36,14 +36,14 @@ import org.junit.Test;
 public class AppSearchSchemaTest {
     @Test
     public void testGetProto_Email() {
-        AppSearchSchema emailSchema = AppSearchSchema.newBuilder("Email")
-                .addProperty(AppSearchSchema.newPropertyBuilder("subject")
+        AppSearchSchema emailSchema = new AppSearchSchema.Builder("Email")
+                .addProperty(new AppSearchSchema.PropertyConfig.Builder("subject")
                         .setDataType(PropertyConfig.DATA_TYPE_STRING)
                         .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
                         .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
                         .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
                         .build()
-                ).addProperty(AppSearchSchema.newPropertyBuilder("body")
+                ).addProperty(new AppSearchSchema.PropertyConfig.Builder("body")
                         .setDataType(PropertyConfig.DATA_TYPE_STRING)
                         .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
                         .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
@@ -78,14 +78,14 @@ public class AppSearchSchemaTest {
 
     @Test
     public void testGetProto_MusicRecording() {
-        AppSearchSchema musicRecordingSchema = AppSearchSchema.newBuilder("MusicRecording")
-                .addProperty(AppSearchSchema.newPropertyBuilder("artist")
+        AppSearchSchema musicRecordingSchema = new AppSearchSchema.Builder("MusicRecording")
+                .addProperty(new AppSearchSchema.PropertyConfig.Builder("artist")
                         .setDataType(PropertyConfig.DATA_TYPE_STRING)
                         .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
                         .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
                         .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
                         .build()
-                ).addProperty(AppSearchSchema.newPropertyBuilder("pubDate")
+                ).addProperty(new AppSearchSchema.PropertyConfig.Builder("pubDate")
                         .setDataType(PropertyConfig.DATA_TYPE_INT64)
                         .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
                         .setIndexingType(PropertyConfig.INDEXING_TYPE_NONE)
@@ -120,14 +120,14 @@ public class AppSearchSchemaTest {
 
     @Test
     public void testInvalidEnums() {
-        PropertyConfig.Builder builder = AppSearchSchema.newPropertyBuilder("test");
+        PropertyConfig.Builder builder = new AppSearchSchema.PropertyConfig.Builder("test");
         assertThrows(IllegalArgumentException.class, () -> builder.setDataType(99));
         assertThrows(IllegalArgumentException.class, () -> builder.setCardinality(99));
     }
 
     @Test
     public void testMissingFields() {
-        PropertyConfig.Builder builder = AppSearchSchema.newPropertyBuilder("test");
+        PropertyConfig.Builder builder = new AppSearchSchema.PropertyConfig.Builder("test");
         Exception e = expectThrows(IllegalSchemaException.class, builder::build);
         assertThat(e).hasMessageThat().contains("Missing field: dataType");
 
@@ -145,14 +145,14 @@ public class AppSearchSchemaTest {
 
     @Test
     public void testDuplicateProperties() {
-        AppSearchSchema.Builder builder = AppSearchSchema.newBuilder("Email")
-                .addProperty(AppSearchSchema.newPropertyBuilder("subject")
+        AppSearchSchema.Builder builder = new AppSearchSchema.Builder("Email")
+                .addProperty(new AppSearchSchema.PropertyConfig.Builder("subject")
                         .setDataType(PropertyConfig.DATA_TYPE_STRING)
                         .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
                         .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
                         .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
                         .build()
-                ).addProperty(AppSearchSchema.newPropertyBuilder("subject")
+                ).addProperty(new AppSearchSchema.PropertyConfig.Builder("subject")
                         .setDataType(PropertyConfig.DATA_TYPE_STRING)
                         .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
                         .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
