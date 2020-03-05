@@ -34,8 +34,6 @@ const string DEFAULT_MODULE_NAME = "DEFAULT";
 const string DEFAULT_CPP_NAMESPACE = "android,util";
 const string DEFAULT_CPP_HEADER_IMPORT = "statslog.h";
 const string DEFAULT_ATOMS_INFO_CPP_HEADER_IMPORT = "atoms_info.h";
-const string DEFAULT_JAVA_PACKAGE = "android.util";
-const string DEFAULT_JAVA_CLASS = "StatsLogInternal";
 
 const int JAVA_MODULE_REQUIRES_FLOAT = 0x01;
 const int JAVA_MODULE_REQUIRES_ATTRIBUTION = 0x02;
