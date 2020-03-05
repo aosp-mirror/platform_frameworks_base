@@ -962,7 +962,7 @@ please see themes_device_defaults.xml.
          the entire screen and extends into the display overscan region.  This theme
          sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
          to true.
-         @deprecated Overscan areas aren't set by any Android product anymore.
+         @deprecated Overscan areas aren't set by any Android product anymore as of Android 11.
          -->
     <style name="Theme.Material.NoActionBar.Overscan">
         <item name="windowFullscreen">true</item>
@@ -996,7 +996,7 @@ please see themes_device_defaults.xml.
          the entire screen and extends into the display overscan region.  This theme
          sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
          to true.
-         @deprecated Overscan areas aren't set by any Android product anymore.
+         @deprecated Overscan areas aren't set by any Android product anymore as of Android 11.
          -->
     <style name="Theme.Material.Light.NoActionBar.Overscan">
         <item name="windowFullscreen">true</item>

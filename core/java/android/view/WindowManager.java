@@ -1587,7 +1587,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@sample development/samples/ApiDemos/res/layout/overscan_activity.xml complete}
          *
-         * @deprecated Overscan areas aren't set by any Android product anymore.
+         * @deprecated Overscan areas aren't set by any Android product anymore as of Android 11.
          */
         @Deprecated
         public static final int FLAG_LAYOUT_IN_OVERSCAN = 0x02000000;
