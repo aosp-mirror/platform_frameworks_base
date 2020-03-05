@@ -328,7 +328,8 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
      * Animates the PiP to the closest snap target.
      */
     void animateToClosestSnapTarget() {
-        final Rect newBounds = mSnapAlgorithm.findClosestSnapBounds(mMovementBounds, mBounds);
+        final Rect newBounds = new Rect();
+        mSnapAlgorithm.snapRectToClosestEdge(mBounds, mMovementBounds, newBounds);
         animateToBounds(newBounds, mSpringConfig);
     }
 
