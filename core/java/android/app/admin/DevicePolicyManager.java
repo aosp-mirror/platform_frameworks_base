@@ -7071,7 +7071,6 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @SystemApi
     public boolean hasDeviceIdentifierAccess(@NonNull String packageName, int pid, int uid) {
         throwIfParentInstance("hasDeviceIdentifierAccess");
         if (packageName == null) {

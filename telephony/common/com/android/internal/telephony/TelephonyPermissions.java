@@ -20,7 +20,6 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -28,6 +27,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
+import android.permission.PermissionManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -303,14 +303,10 @@ public final class TelephonyPermissions {
             String message, boolean allowCarrierPrivilegeOnAnySub) {
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
-        // Allow system and root access to the device identifiers.
-        final int appId = UserHandle.getAppId(uid);
-        if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
-            return true;
-        }
-        // Allow access to packages that have the READ_PRIVILEGED_PHONE_STATE permission.
-        if (context.checkPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, pid,
-                uid) == PackageManager.PERMISSION_GRANTED) {
+        PermissionManager permissionManager = (PermissionManager) context.getSystemService(
+                Context.PERMISSION_SERVICE);
+        if (permissionManager.checkDeviceIdentifierAccess(callingPackage, message, callingFeatureId,
+                pid, uid) == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
 
@@ -323,30 +319,6 @@ public final class TelephonyPermissions {
             return true;
         }
 
-        // if the calling package is not null then perform the DevicePolicyManager device /
-        // profile owner and Appop checks.
-        if (callingPackage != null) {
-            // Allow access to an app that has been granted the READ_DEVICE_IDENTIFIERS app op.
-            long token = Binder.clearCallingIdentity();
-            AppOpsManager appOpsManager = (AppOpsManager) context.getSystemService(
-                    Context.APP_OPS_SERVICE);
-            try {
-                if (appOpsManager.noteOpNoThrow(AppOpsManager.OPSTR_READ_DEVICE_IDENTIFIERS, uid,
-                        callingPackage, callingFeatureId, null) == AppOpsManager.MODE_ALLOWED) {
-                    return true;
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-            // Allow access to a device / profile owner app.
-            DevicePolicyManager devicePolicyManager =
-                    (DevicePolicyManager) context.getSystemService(
-                            Context.DEVICE_POLICY_SERVICE);
-            if (devicePolicyManager != null && devicePolicyManager.hasDeviceIdentifierAccess(
-                    callingPackage, pid, uid)) {
-                return true;
-            }
-        }
         return reportAccessDeniedToReadIdentifiers(context, subId, pid, uid, callingPackage,
                 message);
     }
