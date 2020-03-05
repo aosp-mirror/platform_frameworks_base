@@ -80,6 +80,21 @@ public final class ShortcutConstants {
     }
 
     /**
+     * Annotation for different shortcut target.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            TargetType.ACCESSIBILITY_SERVICE,
+            TargetType.ACCESSIBILITY_ACTIVITY,
+            TargetType.WHITE_LISTING,
+    })
+    public @interface TargetType {
+        int ACCESSIBILITY_SERVICE = 0;
+        int ACCESSIBILITY_ACTIVITY = 1;
+        int WHITE_LISTING = 2;
+    }
+
+    /**
      * Annotation for different shortcut menu mode.
      *
      * {@code LAUNCH} for clicking list item to trigger the service callback.
