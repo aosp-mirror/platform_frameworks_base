@@ -28,6 +28,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -61,6 +62,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.security.FileIntegrityManager;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -96,6 +98,9 @@ public class AppIntegrityManagerServiceImplTest {
     private static final String TEST_APP_TWO_CERT_PATH =
             "AppIntegrityManagerServiceImplTest/DummyAppTwoCerts.apk";
 
+    private static final String TEST_APP_SOURCE_STAMP_PATH =
+            "AppIntegrityManagerServiceImplTest/SourceStampTestApk.apk";
+
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
     private static final String VERSION = "version";
     private static final String TEST_FRAMEWORK_PACKAGE = "com.android.frameworks.servicestests";
@@ -111,6 +116,8 @@ public class AppIntegrityManagerServiceImplTest {
     // We use SHA256 for package names longer than 32 characters.
     private static final String INSTALLER_SHA256 =
             "30F41A7CBF96EE736A54DD6DF759B50ED3CC126ABCEF694E167C324F5976C227";
+    private static final String SOURCE_STAMP_CERTIFICATE_HASH =
+            "681B0E56A796350C08647352A4DB800CC44B2ADC8F4C72FA350BD05D4D50264D";
 
     private static final String DUMMY_APP_TWO_CERTS_CERT_1 =
             "C0369C2A1096632429DFA8433068AECEAD00BAC337CA92A175036D39CC9AFE94";
@@ -121,27 +128,22 @@ public class AppIntegrityManagerServiceImplTest {
     private static final String ADB_INSTALLER = "adb";
     private static final String PLAY_STORE_CERT = "play_store_cert";
 
-    @org.junit.Rule
-    public MockitoRule mMockitoRule = MockitoJUnit.rule();
+    @org.junit.Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
 
-    @Mock
-    PackageManagerInternal mPackageManagerInternal;
-    @Mock
-    Context mMockContext;
-    @Mock
-    Resources mMockResources;
-    @Mock
-    RuleEvaluationEngine mRuleEvaluationEngine;
-    @Mock
-    IntegrityFileManager mIntegrityFileManager;
-    @Mock
-    Handler mHandler;
+    @Mock PackageManagerInternal mPackageManagerInternal;
+    @Mock Context mMockContext;
+    @Mock Resources mMockResources;
+    @Mock RuleEvaluationEngine mRuleEvaluationEngine;
+    @Mock IntegrityFileManager mIntegrityFileManager;
+    @Mock Handler mHandler;
+    FileIntegrityManager mFileIntegrityManager;
 
     private final Context mRealContext = InstrumentationRegistry.getTargetContext();
 
     private PackageManager mSpyPackageManager;
     private File mTestApk;
     private File mTestApkTwoCerts;
+    private File mTestApkSourceStamp;
 
     // under test
     private AppIntegrityManagerServiceImpl mService;
@@ -158,19 +160,28 @@ public class AppIntegrityManagerServiceImplTest {
             Files.copy(inputStream, mTestApkTwoCerts.toPath(), REPLACE_EXISTING);
         }
 
+        mTestApkSourceStamp = File.createTempFile("AppIntegritySourceStamp", ".apk");
+        try (InputStream inputStream = mRealContext.getAssets().open(TEST_APP_SOURCE_STAMP_PATH)) {
+            Files.copy(inputStream, mTestApkSourceStamp.toPath(), REPLACE_EXISTING);
+        }
+
+        mFileIntegrityManager =
+                (FileIntegrityManager)
+                        mRealContext.getSystemService(Context.FILE_INTEGRITY_SERVICE);
         mService =
                 new AppIntegrityManagerServiceImpl(
                         mMockContext,
                         mPackageManagerInternal,
                         mRuleEvaluationEngine,
                         mIntegrityFileManager,
+                        mFileIntegrityManager,
                         mHandler);
 
         mSpyPackageManager = spy(mRealContext.getPackageManager());
         // setup mocks to prevent NPE
         when(mMockContext.getPackageManager()).thenReturn(mSpyPackageManager);
         when(mMockContext.getResources()).thenReturn(mMockResources);
-        when(mMockResources.getStringArray(anyInt())).thenReturn(new String[]{});
+        when(mMockResources.getStringArray(anyInt())).thenReturn(new String[] {});
         when(mIntegrityFileManager.initialized()).thenReturn(true);
         // These are needed to override the Settings.Global.get result.
         when(mMockContext.getContentResolver()).thenReturn(mRealContext.getContentResolver());
@@ -181,6 +192,7 @@ public class AppIntegrityManagerServiceImplTest {
     public void tearDown() throws Exception {
         mTestApk.delete();
         mTestApkTwoCerts.delete();
+        mTestApkSourceStamp.delete();
     }
 
     @Test
@@ -241,7 +253,8 @@ public class AppIntegrityManagerServiceImplTest {
         IntentSender mockReceiver = mock(IntentSender.class);
         List<Rule> rules =
                 Arrays.asList(
-                        new Rule(IntegrityFormula.Application.packageNameEquals(PACKAGE_NAME),
+                        new Rule(
+                                IntegrityFormula.Application.packageNameEquals(PACKAGE_NAME),
                                 Rule.DENY));
 
         mService.updateRuleSet(VERSION, new ParceledListSlice<>(rules), mockReceiver);
@@ -261,7 +274,8 @@ public class AppIntegrityManagerServiceImplTest {
         IntentSender mockReceiver = mock(IntentSender.class);
         List<Rule> rules =
                 Arrays.asList(
-                        new Rule(IntegrityFormula.Application.packageNameEquals(PACKAGE_NAME),
+                        new Rule(
+                                IntegrityFormula.Application.packageNameEquals(PACKAGE_NAME),
                                 Rule.DENY));
 
         mService.updateRuleSet(VERSION, new ParceledListSlice<>(rules), mockReceiver);
@@ -305,8 +319,7 @@ public class AppIntegrityManagerServiceImplTest {
 
         ArgumentCaptor<AppInstallMetadata> metadataCaptor =
                 ArgumentCaptor.forClass(AppInstallMetadata.class);
-        verify(mRuleEvaluationEngine)
-                .evaluate(metadataCaptor.capture());
+        verify(mRuleEvaluationEngine).evaluate(metadataCaptor.capture());
         AppInstallMetadata appInstallMetadata = metadataCaptor.getValue();
         assertEquals(PACKAGE_NAME, appInstallMetadata.getPackageName());
         assertThat(appInstallMetadata.getAppCertificates()).containsExactly(APP_CERT);
@@ -341,8 +354,33 @@ public class AppIntegrityManagerServiceImplTest {
                 ArgumentCaptor.forClass(AppInstallMetadata.class);
         verify(mRuleEvaluationEngine).evaluate(metadataCaptor.capture());
         AppInstallMetadata appInstallMetadata = metadataCaptor.getValue();
-        assertThat(appInstallMetadata.getAppCertificates()).containsExactly(
-                DUMMY_APP_TWO_CERTS_CERT_1, DUMMY_APP_TWO_CERTS_CERT_2);
+        assertThat(appInstallMetadata.getAppCertificates())
+                .containsExactly(DUMMY_APP_TWO_CERTS_CERT_1, DUMMY_APP_TWO_CERTS_CERT_2);
+    }
+
+    @Test
+    public void handleBroadcast_correctArgs_sourceStamp() throws Exception {
+        whitelistUsAsRuleProvider();
+        makeUsSystemApp();
+        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mMockContext)
+                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
+        Intent intent = makeVerificationIntent();
+        intent.setDataAndType(Uri.fromFile(mTestApkSourceStamp), PACKAGE_MIME_TYPE);
+        when(mRuleEvaluationEngine.evaluate(any())).thenReturn(IntegrityCheckResult.allow());
+
+        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
+        runJobInHandler();
+
+        ArgumentCaptor<AppInstallMetadata> metadataCaptor =
+                ArgumentCaptor.forClass(AppInstallMetadata.class);
+        verify(mRuleEvaluationEngine).evaluate(metadataCaptor.capture());
+        AppInstallMetadata appInstallMetadata = metadataCaptor.getValue();
+        assertTrue(appInstallMetadata.isStampPresent());
+        assertTrue(appInstallMetadata.isStampVerified());
+        assertFalse(appInstallMetadata.isStampTrusted());
+        assertEquals(SOURCE_STAMP_CERTIFICATE_HASH, appInstallMetadata.getStampCertificateHash());
     }
 
     @Test
@@ -445,7 +483,7 @@ public class AppIntegrityManagerServiceImplTest {
     private void whitelistUsAsRuleProvider() {
         Resources mockResources = mock(Resources.class);
         when(mockResources.getStringArray(R.array.config_integrityRuleProviderPackages))
-                .thenReturn(new String[]{TEST_FRAMEWORK_PACKAGE});
+                .thenReturn(new String[] {TEST_FRAMEWORK_PACKAGE});
         when(mMockContext.getResources()).thenReturn(mockResources);
     }
 
@@ -478,8 +516,8 @@ public class AppIntegrityManagerServiceImplTest {
         PackageInfo packageInfo =
                 mRealContext
                         .getPackageManager()
-                        .getPackageInfo(TEST_FRAMEWORK_PACKAGE,
-                                PackageManager.GET_SIGNING_CERTIFICATES);
+                        .getPackageInfo(
+                                TEST_FRAMEWORK_PACKAGE, PackageManager.GET_SIGNING_CERTIFICATES);
         doReturn(packageInfo).when(mSpyPackageManager).getPackageInfo(eq(INSTALLER), anyInt());
         doReturn(1).when(mSpyPackageManager).getPackageUid(eq(INSTALLER), anyInt());
         return makeVerificationIntent(INSTALLER);
@@ -501,10 +539,16 @@ public class AppIntegrityManagerServiceImplTest {
 
     private void setIntegrityCheckIncludesRuleProvider(boolean shouldInclude) throws Exception {
         int value = shouldInclude ? 1 : 0;
-        Settings.Global.putInt(mRealContext.getContentResolver(),
-                Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER, value);
-        assertThat(Settings.Global.getInt(mRealContext.getContentResolver(),
-                Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER, -1) == 1).isEqualTo(
-                shouldInclude);
+        Settings.Global.putInt(
+                mRealContext.getContentResolver(),
+                Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
+                value);
+        assertThat(
+                        Settings.Global.getInt(
+                                        mRealContext.getContentResolver(),
+                                        Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
+                                        -1)
+                                == 1)
+                .isEqualTo(shouldInclude);
     }
 }
