@@ -27,6 +27,7 @@
 #include "DamageAccumulator.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #endif
+#include "utils/FatVector.h"
 #include "utils/MathUtils.h"
 #include "utils/StringUtils.h"
 #include "utils/TraceUtils.h"
@@ -36,7 +37,6 @@
 #include <atomic>
 #include <sstream>
 #include <string>
-#include <ui/FatVector.h>
 
 namespace android {
 namespace uirenderer {
