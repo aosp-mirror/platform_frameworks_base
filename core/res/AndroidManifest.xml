@@ -5003,16 +5003,17 @@
     <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
                 android:protectionLevel="signature|appPredictor" />
 
-    <!-- Feature Id for Country Detector. -->
-    <feature android:featureId="CountryDetector" android:label="@string/country_detector"/>
-    <!-- Feature Id for Location service. -->
-    <feature android:featureId="LocationService" android:label="@string/location_service"/>
-    <!-- Feature Id for Gnss service. -->
-    <feature android:featureId="GnssService" android:label="@string/gnss_service"/>
-    <!-- Feature Id for Sensor Notification service. -->
-    <feature android:featureId="SensorNotificationService" android:label="@string/sensor_notification_service"/>
-    <!-- Feature Id for Twilight service. -->
-    <feature android:featureId="TwilightService" android:label="@string/twilight_service"/>
+    <!-- Attribution for Country Detector. -->
+    <attribution android:tag="CountryDetector" android:label="@string/country_detector"/>
+    <!-- Attribution for Location service. -->
+    <attribution android:tag="LocationService" android:label="@string/location_service"/>
+    <!-- Attribution for Gnss service. -->
+    <attribution android:tag="GnssService" android:label="@string/gnss_service"/>
+    <!-- Attribution for Sensor Notification service. -->
+    <attribution android:tag="SensorNotificationService"
+             android:label="@string/sensor_notification_service"/>
+    <!-- Attribution for Twilight service. -->
+    <attribution android:tag="TwilightService" android:label="@string/twilight_service"/>
 
     <application android:process="system"
                  android:persistent="true"

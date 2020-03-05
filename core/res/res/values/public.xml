@@ -3004,6 +3004,7 @@
       <public name="animatedImageDrawable"/>
       <public name="htmlDescription"/>
       <public name="preferMinimalPostProcessing"/>
+      <!-- @removed -->
       <public name="featureId" />
       <public name="supportsInlineSuggestions" />
       <public name="crossProfile" />

@@ -147,7 +147,7 @@ public class AppOpsServiceTest {
         AndroidPackage mockMyPkg = mock(AndroidPackage.class);
         when(mockMyPkg.isPrivileged()).thenReturn(false);
         when(mockMyPkg.getUid()).thenReturn(mMyUid);
-        when(mockMyPkg.getFeatures()).thenReturn(Collections.emptyList());
+        when(mockMyPkg.getAttributions()).thenReturn(Collections.emptyList());
 
         when(mockPackageManagerInternal.getPackage(sMyPackageName)).thenReturn(mockMyPkg);
         doReturn(mockPackageManagerInternal).when(

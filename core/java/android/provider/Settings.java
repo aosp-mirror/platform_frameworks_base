@@ -2626,7 +2626,7 @@ public final class Settings {
                     arg.putBoolean(CALL_METHOD_OVERRIDEABLE_BY_RESTORE_KEY, true);
                 }
                 IContentProvider cp = mProviderHolder.getProvider(cr);
-                cp.call(cr.getPackageName(), cr.getFeatureId(),
+                cp.call(cr.getPackageName(), cr.getAttributionTag(),
                         mProviderHolder.mUri.getAuthority(), mCallSetCommand, name, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't set key " + name + " in " + mUri, e);
@@ -2646,7 +2646,7 @@ public final class Settings {
                 args.putString(CALL_METHOD_PREFIX_KEY, prefix);
                 args.putSerializable(CALL_METHOD_FLAGS_KEY, keyValues);
                 IContentProvider cp = mProviderHolder.getProvider(cr);
-                Bundle bundle = cp.call(cr.getPackageName(), cr.getFeatureId(),
+                Bundle bundle = cp.call(cr.getPackageName(), cr.getAttributionTag(),
                         mProviderHolder.mUri.getAuthority(),
                         mCallSetAllCommand, null, args);
                 return bundle.getBoolean(KEY_CONFIG_SET_RETURN);
@@ -2721,14 +2721,14 @@ public final class Settings {
                     if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            b = cp.call(cr.getPackageName(), cr.getFeatureId(),
+                            b = cp.call(cr.getPackageName(), cr.getAttributionTag(),
                                     mProviderHolder.mUri.getAuthority(), mCallGetCommand, name,
                                     args);
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }
                     } else {
-                        b = cp.call(cr.getPackageName(), cr.getFeatureId(),
+                        b = cp.call(cr.getPackageName(), cr.getAttributionTag(),
                                 mProviderHolder.mUri.getAuthority(), mCallGetCommand, name, args);
                     }
                     if (b != null) {
@@ -2798,13 +2798,13 @@ public final class Settings {
                 if (Settings.isInSystemServer() && Binder.getCallingUid() != Process.myUid()) {
                     final long token = Binder.clearCallingIdentity();
                     try {
-                        c = cp.query(cr.getPackageName(), cr.getFeatureId(), mUri,
+                        c = cp.query(cr.getPackageName(), cr.getAttributionTag(), mUri,
                                 SELECT_VALUE_PROJECTION, queryArgs, null);
                     } finally {
                         Binder.restoreCallingIdentity(token);
                     }
                 } else {
-                    c = cp.query(cr.getPackageName(), cr.getFeatureId(), mUri,
+                    c = cp.query(cr.getPackageName(), cr.getAttributionTag(), mUri,
                             SELECT_VALUE_PROJECTION, queryArgs, null);
                 }
                 if (c == null) {
@@ -2897,7 +2897,7 @@ public final class Settings {
                 }
 
                 // Fetch all flags for the namespace at once for caching purposes
-                Bundle b = cp.call(cr.getPackageName(), cr.getFeatureId(),
+                Bundle b = cp.call(cr.getPackageName(), cr.getAttributionTag(),
                         mProviderHolder.mUri.getAuthority(), mCallListCommand, null, args);
                 if (b == null) {
                     // Invalid response, return an empty map
@@ -5542,7 +5542,7 @@ public final class Settings {
                 }
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, mode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), resolver.getFeatureId(),
+                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
                         sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_SECURE, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset do defaults for " + CONTENT_URI, e);
@@ -13383,7 +13383,7 @@ public final class Settings {
                 }
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, mode);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), resolver.getFeatureId(),
+                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
                         sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_GLOBAL, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset do defaults for " + CONTENT_URI, e);
@@ -14358,7 +14358,7 @@ public final class Settings {
                     arg.putString(Settings.CALL_METHOD_PREFIX_KEY, createPrefix(namespace));
                 }
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), resolver.getFeatureId(),
+                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
                         sProviderHolder.mUri.getAuthority(), CALL_METHOD_RESET_CONFIG, null, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset to defaults for " + DeviceConfig.CONTENT_URI, e);
@@ -14387,7 +14387,7 @@ public final class Settings {
                 arg.putInt(CALL_METHOD_USER_KEY, userHandle);
                 arg.putParcelable(CALL_METHOD_MONITOR_CALLBACK_KEY, callback);
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                cp.call(resolver.getPackageName(), resolver.getFeatureId(),
+                cp.call(resolver.getPackageName(), resolver.getAttributionTag(),
                         sProviderHolder.mUri.getAuthority(),
                         CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG, null, arg);
             } catch (RemoteException e) {
