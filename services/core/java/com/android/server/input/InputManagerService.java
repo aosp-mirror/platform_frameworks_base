@@ -76,7 +76,6 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
-import android.view.InputWindowHandle;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -221,8 +220,7 @@ public class InputManagerService extends IInputManager.Stub
             int policyFlags);
     private static native VerifiedInputEvent nativeVerifyInputEvent(long ptr, InputEvent event);
     private static native void nativeToggleCapsLock(long ptr, int deviceId);
-    private static native void nativeSetInputWindows(long ptr, InputWindowHandle[] windowHandles,
-            int displayId);
+    private static native void nativeDisplayRemoved(long ptr, int displayId);
     private static native void nativeSetInputDispatchMode(long ptr, boolean enabled, boolean frozen);
     private static native void nativeSetSystemUiVisibility(long ptr, int visibility);
     private static native void nativeSetFocusedApplication(long ptr,
@@ -1536,7 +1534,7 @@ public class InputManagerService extends IInputManager.Stub
 
     /** Clean up input window handles of the given display. */
     public void onDisplayRemoved(int displayId) {
-        nativeSetInputWindows(mPtr, null /* windowHandles */, displayId);
+        nativeDisplayRemoved(mPtr, displayId);
     }
 
     @Override
