@@ -58,7 +58,6 @@ int register_android_server_am_CachedAppOptimizer(JNIEnv* env);
 int register_android_server_am_LowMemDetector(JNIEnv* env);
 int register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(
         JNIEnv* env);
-int register_android_server_incremental_IncrementalManagerService(JNIEnv* env);
 int register_android_server_com_android_server_pm_PackageManagerShellCommandDataLoader(JNIEnv* env);
 int register_android_server_stats_pull_StatsPullAtomService(JNIEnv* env);
 int register_android_server_AdbDebuggingManager(JNIEnv* env);
@@ -113,7 +112,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_am_LowMemDetector(env);
     register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(
             env);
-    register_android_server_incremental_IncrementalManagerService(env);
     register_android_server_com_android_server_pm_PackageManagerShellCommandDataLoader(env);
     register_android_server_stats_pull_StatsPullAtomService(env);
     register_android_server_AdbDebuggingManager(env);
