@@ -21,33 +21,38 @@ import android.os.HandlerThread;
 
 /**
  * Similar to {@link com.android.internal.os.BackgroundThread}, this is a shared singleton
- * foreground thread for each process.
+ * foreground thread for each process for updating PIP.
  */
-public final class ForegroundThread extends HandlerThread {
-    private static ForegroundThread sInstance;
+public final class PipUpdateThread extends HandlerThread {
+    private static PipUpdateThread sInstance;
     private static Handler sHandler;
 
-    private ForegroundThread() {
-        super("recents.fg");
+    private PipUpdateThread() {
+        super("pip");
     }
 
     private static void ensureThreadLocked() {
         if (sInstance == null) {
-            sInstance = new ForegroundThread();
+            sInstance = new PipUpdateThread();
             sInstance.start();
             sHandler = new Handler(sInstance.getLooper());
         }
     }
 
-    public static ForegroundThread get() {
-        synchronized (ForegroundThread.class) {
+    /**
+     * @return the static update thread instance
+     */
+    public static PipUpdateThread get() {
+        synchronized (PipUpdateThread.class) {
             ensureThreadLocked();
             return sInstance;
         }
     }
-
+    /**
+     * @return the static update thread handler instance
+     */
     public static Handler getHandler() {
-        synchronized (ForegroundThread.class) {
+        synchronized (PipUpdateThread.class) {
             ensureThreadLocked();
             return sHandler;
         }

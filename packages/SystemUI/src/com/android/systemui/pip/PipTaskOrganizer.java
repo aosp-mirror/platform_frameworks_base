@@ -30,6 +30,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.DisplayInfo;
@@ -38,9 +39,13 @@ import android.view.IWindowContainer;
 import android.view.SurfaceControl;
 import android.view.WindowContainerTransaction;
 
+import com.android.internal.os.SomeArgs;
+import com.android.systemui.pip.phone.PipUpdateThread;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Manages PiP tasks such as resize and offset.
@@ -56,7 +61,13 @@ import java.util.Objects;
 public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
 
+    private static final int MSG_RESIZE_IMMEDIATE = 1;
+    private static final int MSG_RESIZE_ANIMATE = 2;
+    private static final int MSG_OFFSET_ANIMATE = 3;
+    private static final int MSG_FINISH_RESIZE = 4;
+
     private final Handler mMainHandler;
+    private final Handler mUpdateHandler;
     private final ITaskOrganizerController mTaskOrganizerController;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipAnimationController mPipAnimationController;
@@ -64,11 +75,11 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     private final Rect mDisplayBounds = new Rect();
     private final Rect mLastReportedBounds = new Rect();
 
+    // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
         @Override
-        public void onPipAnimationStart(IWindowContainer wc,
-                PipAnimationController.PipTransitionAnimator animator) {
+        public void onPipAnimationStart(PipAnimationController.PipTransitionAnimator animator) {
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                     final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
@@ -78,7 +89,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         }
 
         @Override
-        public void onPipAnimationEnd(IWindowContainer wc, SurfaceControl.Transaction tx,
+        public void onPipAnimationEnd(SurfaceControl.Transaction tx,
                 PipAnimationController.PipTransitionAnimator animator) {
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
@@ -86,13 +97,11 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
                     callback.onPipTransitionFinished();
                 }
             });
-            final Rect destinationBounds = animator.getDestinationBounds();
-            finishResizeInternal(destinationBounds, wc, tx, animator.shouldScheduleFinishPip());
+            finishResize(animator.getDestinationBounds(), tx, animator.shouldScheduleFinishPip());
         }
 
         @Override
-        public void onPipAnimationCancel(IWindowContainer wc,
-                PipAnimationController.PipTransitionAnimator animator) {
+        public void onPipAnimationCancel(PipAnimationController.PipTransitionAnimator animator) {
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                     final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
@@ -102,28 +111,75 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         }
     };
 
+    private Handler.Callback mUpdateCallbacks = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            SomeArgs args = (SomeArgs) msg.obj;
+            Consumer<Rect> updateBoundsCallback = (Consumer<Rect>) args.arg1;
+            switch (msg.what) {
+                case MSG_RESIZE_IMMEDIATE: {
+                    Rect toBounds = (Rect) args.arg2;
+                    resizePip(toBounds);
+                    if (updateBoundsCallback != null) {
+                        updateBoundsCallback.accept(toBounds);
+                    }
+                    break;
+                }
+                case MSG_RESIZE_ANIMATE: {
+                    Rect currentBounds = (Rect) args.arg2;
+                    Rect toBounds = (Rect) args.arg3;
+                    boolean scheduleFinishPip = args.argi1 != 0;
+                    int duration = args.argi2;
+                    animateResizePip(scheduleFinishPip, currentBounds, toBounds, duration);
+                    if (updateBoundsCallback != null) {
+                        updateBoundsCallback.accept(toBounds);
+                    }
+                    break;
+                }
+                case MSG_OFFSET_ANIMATE: {
+                    Rect originalBounds = (Rect) args.arg2;
+                    final int offset = args.argi1;
+                    final int duration = args.argi2;
+                    offsetPip(originalBounds, 0 /* xOffset */, offset, duration);
+                    Rect toBounds = new Rect(originalBounds);
+                    toBounds.offset(0, offset);
+                    if (updateBoundsCallback != null) {
+                        updateBoundsCallback.accept(toBounds);
+                    }
+                    break;
+                }
+                case MSG_FINISH_RESIZE: {
+                    SurfaceControl.Transaction tx = (SurfaceControl.Transaction) args.arg2;
+                    Rect toBounds = (Rect) args.arg3;
+                    boolean scheduleFinishPip = args.argi1 != 0;
+                    finishResize(toBounds, tx, scheduleFinishPip);
+                    if (updateBoundsCallback != null) {
+                        updateBoundsCallback.accept(toBounds);
+                    }
+                    break;
+                }
+            }
+            args.recycle();
+            return true;
+        }
+    };
+
     private ActivityManager.RunningTaskInfo mTaskInfo;
+    private IWindowContainer mToken;
+    private SurfaceControl mLeash;
+    private boolean mInPip;
     private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
 
     public PipTaskOrganizer(Context context, @NonNull PipBoundsHandler boundsHandler) {
         mMainHandler = new Handler(Looper.getMainLooper());
+        mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
         mTaskOrganizerController = ActivityTaskManager.getTaskOrganizerController();
         mPipBoundsHandler = boundsHandler;
         mPipAnimationController = new PipAnimationController(context);
     }
 
-    /**
-     * Offset the PiP window, animate if the given duration is not {@link #DURATION_NONE}
-     */
-    public void offsetPinnedStack(Rect originalBounds, int xOffset, int yOffset, int durationMs) {
-        if (mTaskInfo == null) {
-            Log.w(TAG, "mTaskInfo is not set");
-            return;
-        }
-        final Rect destinationBounds = new Rect(originalBounds);
-        destinationBounds.offset(xOffset, yOffset);
-        animateResizePipInternal(mTaskInfo.token, false /* scheduleFinishPip*/,
-                originalBounds, destinationBounds, durationMs);
+    public Handler getUpdateHandler() {
+        return mUpdateHandler;
     }
 
     /**
@@ -171,7 +227,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         try {
             mLastReportedBounds.set(destinationBounds);
             final WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.setBounds(mTaskInfo.token, destinationBounds);
+            wct.setBounds(mToken, destinationBounds);
             mTaskOrganizerController.applyContainerTransaction(wct, null /* ITaskOrganizer */);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to apply window container transaction", e);
@@ -185,13 +241,20 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
                 getAspectRatioOrDefault(info.pictureInPictureParams), null /* bounds */);
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         mTaskInfo = info;
+        mToken = mTaskInfo.token;
+        mInPip = true;
+        try {
+            mLeash = mToken.getLeash();
+        } catch (RemoteException e) {
+            throw new RuntimeException("Unable to get leash", e);
+        }
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
-            animateResizePipInternal(mTaskInfo.token, true /* scheduleFinishPip */,
-                    currentBounds, destinationBounds, DURATION_DEFAULT_MS);
+            scheduleAnimateResizePip(true /* scheduleFinishPip */,
+                    currentBounds, destinationBounds, DURATION_DEFAULT_MS, null);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
-            mMainHandler.post(() -> mPipAnimationController
-                    .getAnimator(mTaskInfo.token, true /* scheduleFinishPip */,
+            mUpdateHandler.post(() -> mPipAnimationController
+                    .getAnimator(mLeash, true /* scheduleFinishPip */,
                             destinationBounds, 0f, 1f)
                     .setPipAnimationCallback(mPipAnimationCallback)
                     .setDuration(DURATION_DEFAULT_MS)
@@ -205,12 +268,12 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     @Override
     public void taskVanished(IWindowContainer token) {
         Objects.requireNonNull(token, "Requires valid IWindowContainer");
-        if (token.asBinder() != mTaskInfo.token.asBinder()) {
+        if (token.asBinder() != mToken.asBinder()) {
             Log.wtf(TAG, "Unrecognized token: " + token);
             return;
         }
-        animateResizePipInternal(token, false /* scheduleFinishPip */,
-                mLastReportedBounds, mDisplayBounds, DURATION_DEFAULT_MS);
+        scheduleAnimateResizePip(mDisplayBounds, DURATION_DEFAULT_MS, null);
+        mInPip = false;
     }
 
     @Override
@@ -227,7 +290,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
                 getAspectRatioOrDefault(newParams), null /* bounds */);
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
-        animateResizePip(destinationBounds, DURATION_DEFAULT_MS);
+        scheduleAnimateResizePip(destinationBounds, DURATION_DEFAULT_MS, null);
     }
 
     /**
@@ -243,101 +306,157 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     /**
-     * Directly perform manipulation/resize on the leash. This will not perform any
-     * {@link WindowContainerTransaction} until {@link #finishResize} is called.
+     * Animates resizing of the pinned stack given the duration.
      */
-    public void resizePip(Rect destinationBounds) {
-        Objects.requireNonNull(mTaskInfo, "Requires valid IWindowContainer");
-        resizePipInternal(mTaskInfo.token, destinationBounds);
+    public void scheduleAnimateResizePip(Rect toBounds, int duration,
+            Consumer<Rect> updateBoundsCallback) {
+        scheduleAnimateResizePip(false /* scheduleFinishPip */,
+                mLastReportedBounds, toBounds, duration, updateBoundsCallback);
     }
 
-    private void resizePipInternal(IWindowContainer wc,
-            Rect destinationBounds) {
-        Objects.requireNonNull(mTaskInfo, "Requires valid IWindowContainer");
-        try {
-            // Could happen when dismissPip
-            if (wc == null || wc.getLeash() == null) {
-                Log.w(TAG, "Abort animation, invalid leash");
-                return;
-            }
-            final SurfaceControl leash = wc.getLeash();
-            new SurfaceControl.Transaction()
-                    .setPosition(leash, destinationBounds.left, destinationBounds.top)
-                    .setWindowCrop(leash, destinationBounds.width(), destinationBounds.height())
-                    .apply();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Abort animation, invalid window container", e);
-        } catch (Exception e) {
-            Log.e(TAG, "Should not reach here, terrible thing happened", e);
+    private void scheduleAnimateResizePip(boolean scheduleFinishPip,
+            Rect currentBounds, Rect destinationBounds, int durationMs,
+            Consumer<Rect> updateBoundsCallback) {
+        Objects.requireNonNull(mToken, "Requires valid IWindowContainer");
+        if (!mInPip) {
+            // Ignore animation when we are no longer in PIP
+            return;
         }
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = updateBoundsCallback;
+        args.arg2 = currentBounds;
+        args.arg3 = destinationBounds;
+        args.argi1 = scheduleFinishPip ? 1 : 0;
+        args.argi2 = durationMs;
+        mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_RESIZE_ANIMATE, args));
+    }
+
+    /**
+     * Directly perform manipulation/resize on the leash. This will not perform any
+     * {@link WindowContainerTransaction} until {@link #scheduleFinishResizePip} is called.
+     */
+    public void scheduleResizePip(Rect toBounds, Consumer<Rect> updateBoundsCallback) {
+        Objects.requireNonNull(mToken, "Requires valid IWindowContainer");
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = updateBoundsCallback;
+        args.arg2 = toBounds;
+        mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_RESIZE_IMMEDIATE, args));
     }
 
     /**
      * Finish a intermediate resize operation. This is expected to be called after
-     * {@link #resizePip}.
+     * {@link #scheduleResizePip}.
      */
-    public void finishResize(Rect destinationBounds) {
-        try {
-            final IWindowContainer wc = mTaskInfo.token;
-            SurfaceControl.Transaction tx = new SurfaceControl.Transaction()
-                    .setPosition(wc.getLeash(), destinationBounds.left,
-                            destinationBounds.top)
-                    .setWindowCrop(wc.getLeash(), destinationBounds.width(),
-                            destinationBounds.height());
-            finishResizeInternal(destinationBounds, wc, tx, false);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to obtain leash");
-        }
+    public void scheduleFinishResizePip(Rect destinationBounds) {
+        Objects.requireNonNull(mToken, "Requires valid IWindowContainer");
+        SurfaceControl.Transaction tx = new SurfaceControl.Transaction()
+                .setPosition(mLeash, destinationBounds.left, destinationBounds.top)
+                .setWindowCrop(mLeash, destinationBounds.width(), destinationBounds.height());
+        scheduleFinishResizePip(tx, destinationBounds, false /* scheduleFinishPip */,
+                null);
     }
 
-    private void finishResizeInternal(Rect destinationBounds, IWindowContainer wc,
-            SurfaceControl.Transaction tx, boolean shouldScheduleFinishPip) {
+    private void scheduleFinishResizePip(SurfaceControl.Transaction tx,
+            Rect destinationBounds, boolean scheduleFinishPip,
+            Consumer<Rect> updateBoundsCallback) {
+        Objects.requireNonNull(mToken, "Requires valid IWindowContainer");
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = updateBoundsCallback;
+        args.arg2 = tx;
+        args.arg3 = destinationBounds;
+        args.argi1 = scheduleFinishPip ? 1 : 0;
+        mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_FINISH_RESIZE, args));
+    }
+
+    /**
+     * Offset the PiP window, animate if the given duration is not {@link #DURATION_NONE}
+     */
+    public void scheduleOffsetPip(Rect originalBounds, int offset, int duration,
+            Consumer<Rect> updateBoundsCallback) {
+        if (!mInPip) {
+            // Ignore offsets when we are no longer in PIP
+            return;
+        }
+        Objects.requireNonNull(mToken, "Requires valid IWindowContainer");
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = updateBoundsCallback;
+        args.arg2 = originalBounds;
+        // offset would be zero if triggered from screen rotation.
+        args.argi1 = offset;
+        args.argi2 = duration;
+        mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_OFFSET_ANIMATE, args));
+    }
+
+    private void offsetPip(Rect originalBounds, int xOffset, int yOffset, int durationMs) {
+        if (Looper.myLooper() != mUpdateHandler.getLooper()) {
+            throw new RuntimeException("Callers should call scheduleOffsetPip() instead of this "
+                    + "directly");
+        }
+        if (mTaskInfo == null) {
+            Log.w(TAG, "mTaskInfo is not set");
+            return;
+        }
+        final Rect destinationBounds = new Rect(originalBounds);
+        destinationBounds.offset(xOffset, yOffset);
+        animateResizePip(false /* scheduleFinishPip*/, originalBounds, destinationBounds,
+                durationMs);
+    }
+
+    private void resizePip(Rect destinationBounds) {
+        if (Looper.myLooper() != mUpdateHandler.getLooper()) {
+            throw new RuntimeException("Callers should call scheduleResizePip() instead of this "
+                    + "directly");
+        }
+        Objects.requireNonNull(mToken, "Requires valid IWindowContainer");
+        // Could happen when dismissPip
+        if (mToken == null || mLeash == null) {
+            Log.w(TAG, "Abort animation, invalid leash");
+            return;
+        }
+        new SurfaceControl.Transaction()
+                .setPosition(mLeash, destinationBounds.left, destinationBounds.top)
+                .setWindowCrop(mLeash, destinationBounds.width(), destinationBounds.height())
+                .apply();
+    }
+
+    private void finishResize(Rect destinationBounds, SurfaceControl.Transaction tx,
+            boolean shouldScheduleFinishPip) {
+        if (Looper.myLooper() != mUpdateHandler.getLooper()) {
+            throw new RuntimeException("Callers should call scheduleResizePip() instead of this "
+                    + "directly");
+        }
         mLastReportedBounds.set(destinationBounds);
         try {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             if (shouldScheduleFinishPip) {
-                wct.scheduleFinishEnterPip(wc, destinationBounds);
+                wct.scheduleFinishEnterPip(mToken, destinationBounds);
             } else {
-                wct.setBounds(wc, destinationBounds);
+                wct.setBounds(mToken, destinationBounds);
             }
-            wct.setBoundsChangeTransaction(mTaskInfo.token, tx);
+            wct.setBoundsChangeTransaction(mToken, tx);
             mTaskOrganizerController.applyContainerTransaction(wct, null /* ITaskOrganizer */);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to apply container transaction", e);
         }
     }
 
-    /**
-     * Animates resizing of the pinned stack given the duration.
-     */
-    public void animateResizePip(Rect destinationBounds, int durationMs) {
-        Objects.requireNonNull(mTaskInfo, "Requires valid IWindowContainer");
-        animateResizePipInternal(mTaskInfo.token, false, mLastReportedBounds,
-                destinationBounds, durationMs);
-    }
-
-    private void animateResizePipInternal(IWindowContainer wc, boolean scheduleFinishPip,
-            Rect currentBounds, Rect destinationBounds, int durationMs) {
-        try {
-            // Could happen when dismissPip
-            if (wc == null || wc.getLeash() == null) {
-                Log.w(TAG, "Abort animation, invalid leash");
-                return;
-            }
-            final SurfaceControl leash = wc.getLeash();
-
-            mMainHandler.post(() -> mPipAnimationController
-                    .getAnimator(wc, scheduleFinishPip, currentBounds, destinationBounds)
-                    .setPipAnimationCallback(mPipAnimationCallback)
-                    .setDuration(durationMs)
-                    .start());
-        } catch (RemoteException e) {
-            Log.w(TAG, "Abort animation, invalid window container", e);
-        } catch (Exception e) {
-            Log.e(TAG, "Should not reach here, terrible thing happened", e);
+    private void animateResizePip(boolean scheduleFinishPip, Rect currentBounds,
+            Rect destinationBounds, int durationMs) {
+        if (Looper.myLooper() != mUpdateHandler.getLooper()) {
+            throw new RuntimeException("Callers should call scheduleAnimateResizePip() instead of "
+                    + "this directly");
         }
+        // Could happen when dismissPip
+        if (mToken == null || mLeash == null) {
+            Log.w(TAG, "Abort animation, invalid leash");
+            return;
+        }
+        mUpdateHandler.post(() -> mPipAnimationController
+                .getAnimator(mLeash, scheduleFinishPip, currentBounds, destinationBounds)
+                .setPipAnimationCallback(mPipAnimationCallback)
+                .setDuration(durationMs)
+                .start());
     }
-
 
     private float getAspectRatioOrDefault(@Nullable PictureInPictureParams params) {
         return params == null

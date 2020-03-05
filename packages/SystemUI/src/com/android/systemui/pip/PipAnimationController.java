@@ -19,11 +19,8 @@ package com.android.systemui.pip;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
-import android.annotation.MainThread;
 import android.content.Context;
 import android.graphics.Rect;
-import android.os.RemoteException;
-import android.view.IWindowContainer;
 import android.view.SurfaceControl;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -61,31 +58,30 @@ public class PipAnimationController {
                 com.android.internal.R.interpolator.fast_out_slow_in);
     }
 
-    @MainThread
-    PipTransitionAnimator getAnimator(IWindowContainer wc, boolean scheduleFinishPip,
+    PipTransitionAnimator getAnimator(SurfaceControl leash, boolean scheduleFinishPip,
             Rect destinationBounds, float alphaStart, float alphaEnd) {
         if (mCurrentAnimator == null) {
             mCurrentAnimator = setupPipTransitionAnimator(
-                    PipTransitionAnimator.ofAlpha(wc, scheduleFinishPip,
-                            destinationBounds, alphaStart, alphaEnd));
+                    PipTransitionAnimator.ofAlpha(leash, scheduleFinishPip, destinationBounds,
+                            alphaStart, alphaEnd));
         } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_ALPHA
                 && mCurrentAnimator.isRunning()) {
             mCurrentAnimator.updateEndValue(alphaEnd);
         } else {
             mCurrentAnimator.cancel();
             mCurrentAnimator = setupPipTransitionAnimator(
-                    PipTransitionAnimator.ofAlpha(wc, scheduleFinishPip,
-                            destinationBounds, alphaStart, alphaEnd));
+                    PipTransitionAnimator.ofAlpha(leash, scheduleFinishPip, destinationBounds,
+                            alphaStart, alphaEnd));
         }
         return mCurrentAnimator;
     }
 
-    @MainThread
-    PipTransitionAnimator getAnimator(IWindowContainer wc, boolean scheduleFinishPip,
+    PipTransitionAnimator getAnimator(SurfaceControl leash, boolean scheduleFinishPip,
             Rect startBounds, Rect endBounds) {
         if (mCurrentAnimator == null) {
             mCurrentAnimator = setupPipTransitionAnimator(
-                    PipTransitionAnimator.ofBounds(wc, scheduleFinishPip, startBounds, endBounds));
+                    PipTransitionAnimator.ofBounds(leash, scheduleFinishPip,
+                            startBounds, endBounds));
         } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_BOUNDS
                 && mCurrentAnimator.isRunning()) {
             mCurrentAnimator.setDestinationBounds(endBounds);
@@ -94,7 +90,8 @@ public class PipAnimationController {
         } else {
             mCurrentAnimator.cancel();
             mCurrentAnimator = setupPipTransitionAnimator(
-                    PipTransitionAnimator.ofBounds(wc, scheduleFinishPip, startBounds, endBounds));
+                    PipTransitionAnimator.ofBounds(leash, scheduleFinishPip,
+                            startBounds, endBounds));
         }
         return mCurrentAnimator;
     }
@@ -116,18 +113,18 @@ public class PipAnimationController {
         /**
          * Called when PiP animation is started.
          */
-        public void onPipAnimationStart(IWindowContainer wc, PipTransitionAnimator animator) {}
+        public void onPipAnimationStart(PipTransitionAnimator animator) {}
 
         /**
          * Called when PiP animation is ended.
          */
-        public void onPipAnimationEnd(IWindowContainer wc, SurfaceControl.Transaction tx,
+        public void onPipAnimationEnd(SurfaceControl.Transaction tx,
                 PipTransitionAnimator animator) {}
 
         /**
          * Called when PiP animation is cancelled.
          */
-        public void onPipAnimationCancel(IWindowContainer wc, PipTransitionAnimator animator) {}
+        public void onPipAnimationCancel(PipTransitionAnimator animator) {}
     }
 
     /**
@@ -137,7 +134,6 @@ public class PipAnimationController {
     public abstract static class PipTransitionAnimator<T> extends ValueAnimator implements
             ValueAnimator.AnimatorUpdateListener,
             ValueAnimator.AnimatorListener {
-        private final IWindowContainer mWindowContainer;
         private final boolean mScheduleFinishPip;
         private final SurfaceControl mLeash;
         private final @AnimationType int mAnimationType;
@@ -149,23 +145,18 @@ public class PipAnimationController {
         private PipAnimationCallback mPipAnimationCallback;
         private SurfaceControlTransactionFactory mSurfaceControlTransactionFactory;
 
-        private PipTransitionAnimator(IWindowContainer wc, boolean scheduleFinishPip,
+        private PipTransitionAnimator(SurfaceControl leash, boolean scheduleFinishPip,
                 @AnimationType int animationType, Rect destinationBounds,
                 T startValue, T endValue) {
-            mWindowContainer = wc;
             mScheduleFinishPip = scheduleFinishPip;
-            try {
-                mLeash = wc.getLeash();
-                mAnimationType = animationType;
-                mDestinationBounds.set(destinationBounds);
-                mStartValue = startValue;
-                mEndValue = endValue;
-                addListener(this);
-                addUpdateListener(this);
-                mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
+            mLeash = leash;
+            mAnimationType = animationType;
+            mDestinationBounds.set(destinationBounds);
+            mStartValue = startValue;
+            mEndValue = endValue;
+            addListener(this);
+            addUpdateListener(this);
+            mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         }
 
         @Override
@@ -173,7 +164,7 @@ public class PipAnimationController {
             mCurrentValue = mStartValue;
             applySurfaceControlTransaction(mLeash, newSurfaceControlTransaction(), FRACTION_START);
             if (mPipAnimationCallback != null) {
-                mPipAnimationCallback.onPipAnimationStart(mWindowContainer, this);
+                mPipAnimationCallback.onPipAnimationStart(this);
             }
         }
 
@@ -189,14 +180,14 @@ public class PipAnimationController {
             final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
             applySurfaceControlTransaction(mLeash, tx, FRACTION_END);
             if (mPipAnimationCallback != null) {
-                mPipAnimationCallback.onPipAnimationEnd(mWindowContainer, tx, this);
+                mPipAnimationCallback.onPipAnimationEnd(tx, this);
             }
         }
 
         @Override
         public void onAnimationCancel(Animator animation) {
             if (mPipAnimationCallback != null) {
-                mPipAnimationCallback.onPipAnimationCancel(mWindowContainer, this);
+                mPipAnimationCallback.onPipAnimationCancel(this);
             }
         }
 
@@ -260,9 +251,9 @@ public class PipAnimationController {
         abstract void applySurfaceControlTransaction(SurfaceControl leash,
                 SurfaceControl.Transaction tx, float fraction);
 
-        static PipTransitionAnimator<Float> ofAlpha(IWindowContainer wc, boolean scheduleFinishPip,
+        static PipTransitionAnimator<Float> ofAlpha(SurfaceControl leash, boolean scheduleFinishPip,
                 Rect destinationBounds, float startValue, float endValue) {
-            return new PipTransitionAnimator<Float>(wc, scheduleFinishPip, ANIM_TYPE_ALPHA,
+            return new PipTransitionAnimator<Float>(leash, scheduleFinishPip, ANIM_TYPE_ALPHA,
                     destinationBounds, startValue, endValue) {
                 @Override
                 void applySurfaceControlTransaction(SurfaceControl leash,
@@ -281,10 +272,10 @@ public class PipAnimationController {
             };
         }
 
-        static PipTransitionAnimator<Rect> ofBounds(IWindowContainer wc, boolean scheduleFinishPip,
+        static PipTransitionAnimator<Rect> ofBounds(SurfaceControl leash, boolean scheduleFinishPip,
                 Rect startValue, Rect endValue) {
             // construct new Rect instances in case they are recycled
-            return new PipTransitionAnimator<Rect>(wc, scheduleFinishPip, ANIM_TYPE_BOUNDS,
+            return new PipTransitionAnimator<Rect>(leash, scheduleFinishPip, ANIM_TYPE_BOUNDS,
                     endValue, new Rect(startValue), new Rect(endValue)) {
                 private final Rect mTmpRect = new Rect();
 
