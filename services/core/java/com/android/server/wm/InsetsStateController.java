@@ -61,8 +61,7 @@ class InsetsStateController {
             w.notifyInsetsChanged();
         }
     };
-    private final InsetsControlTarget mEmptyImeControlTarget = () -> {
-    };
+    private final InsetsControlTarget mEmptyImeControlTarget = new InsetsControlTarget() { };
 
     InsetsStateController(DisplayContent displayContent) {
         mDisplayContent = displayContent;

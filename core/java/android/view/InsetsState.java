@@ -342,6 +342,20 @@ public class InsetsState implements Parcelable {
         }
     }
 
+    /**
+     * A shortcut for setting the visibility of the source.
+     *
+     * @param type The {@link InternalInsetsType} of the source to set the visibility
+     * @param referenceState The {@link InsetsState} for reference
+     */
+    public void setSourceVisible(@InternalInsetsType int type, InsetsState referenceState) {
+        InsetsSource source = mSources.get(type);
+        InsetsSource referenceSource = referenceState.mSources.get(type);
+        if (source != null && referenceSource != null) {
+            source.setVisible(referenceSource.isVisible());
+        }
+    }
+
     public void set(InsetsState other) {
         set(other, false /* copySources */);
     }
