@@ -23,7 +23,7 @@ using namespace std::literals;
 namespace android::os::incremental {
 
 static constexpr auto kVoldServiceName = "vold"sv;
-static constexpr auto kIncrementalManagerName = "incremental"sv;
+static constexpr auto kDataLoaderManagerName = "dataloader_manager"sv;
 
 RealServiceManager::RealServiceManager(sp<IServiceManager> serviceManager)
       : mServiceManager(std::move(serviceManager)) {}
@@ -46,11 +46,11 @@ std::unique_ptr<VoldServiceWrapper> RealServiceManager::getVoldService() {
     return nullptr;
 }
 
-std::unique_ptr<IncrementalManagerWrapper> RealServiceManager::getIncrementalManager() {
-    sp<IIncrementalManager> manager =
-            RealServiceManager::getRealService<IIncrementalManager>(kIncrementalManagerName);
+std::unique_ptr<DataLoaderManagerWrapper> RealServiceManager::getDataLoaderManager() {
+    sp<IDataLoaderManager> manager =
+            RealServiceManager::getRealService<IDataLoaderManager>(kDataLoaderManagerName);
     if (manager) {
-        return std::make_unique<RealIncrementalManager>(manager);
+        return std::make_unique<RealDataLoaderManager>(manager);
     }
     return nullptr;
 }
