@@ -63,6 +63,7 @@ import com.android.server.LocalServices;
 import com.android.server.PackageWatchdog;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
+import com.android.server.pm.ApexManager;
 import com.android.server.pm.Installer;
 
 import java.io.File;
@@ -485,6 +486,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             }
 
             latch.countDown();
+
+            destroyCeSnapshotsForExpiredRollbacks(userId);
         });
 
         try {
@@ -492,6 +495,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         } catch (InterruptedException ie) {
             throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
         }
+    }
+
+    @WorkerThread
+    private void destroyCeSnapshotsForExpiredRollbacks(int userId) {
+        int[] rollbackIds = new int[mRollbacks.size()];
+        for (int i = 0; i < rollbackIds.length; i++) {
+            rollbackIds[i] = mRollbacks.get(i).info.getRollbackId();
+        }
+        ApexManager.getInstance().destroyCeSnapshotsNotSpecified(userId, rollbackIds);
     }
 
     @WorkerThread
