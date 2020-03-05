@@ -116,16 +116,17 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 /**
- * Helper to show the global actions dialog.  Each item is an {@link Action} that
- * may show depending on whether the keyguard is showing, and whether the device
- * is provisioned.
+ * Helper to show the global actions dialog.  Each item is an {@link Action} that may show depending
+ * on whether the keyguard is showing, and whether the device is provisioned.
  */
 public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
-        DialogInterface.OnShowListener, ConfigurationController.ConfigurationListener {
+        DialogInterface.OnShowListener,
+        ConfigurationController.ConfigurationListener,
+        GlobalActionsPanelPlugin.Callbacks {
 
-    static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
-    static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
-    static public final String SYSTEM_DIALOG_REASON_DREAM = "dream";
+    public static final String SYSTEM_DIALOG_REASON_KEY = "reason";
+    public static final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
+    public static final String SYSTEM_DIALOG_REASON_DREAM = "dream";
 
     private static final String TAG = "GlobalActionsDialog";
 
@@ -271,8 +272,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             @Override
             public void onUnlockedChanged() {
                 if (mDialog != null && mDialog.mPanelController != null) {
-                    boolean locked = !keyguardStateController.canDismissLockScreen();
-                    mDialog.mPanelController.onDeviceLockStateChanged(locked);
+                    boolean unlocked = keyguardStateController.isUnlocked()
+                            || keyguardStateController.canDismissLockScreen();
+                    mDialog.mPanelController.onDeviceLockStateChanged(unlocked);
                 }
             }
         });
@@ -386,7 +388,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mItems.add(getSettingsAction());
             } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
                 if (Settings.Secure.getIntForUser(mContentResolver,
-                            Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0, getCurrentUser().id) != 0
+                        Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0, getCurrentUser().id) != 0
                         && shouldDisplayLockdown()) {
                     mItems.add(getLockdownAction());
                 }
@@ -420,26 +422,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mAdapter = new MyAdapter();
 
-        GlobalActionsPanelPlugin.PanelViewController panelViewController =
-                mPanelPlugin != null
-                        ? mPanelPlugin.onPanelShown(
-                                new GlobalActionsPanelPlugin.Callbacks() {
-                                    @Override
-                                    public void dismissGlobalActionsMenu() {
-                                        dismissDialog();
-                                    }
-
-                                    @Override
-                                    public void startPendingIntentDismissingKeyguard(
-                                            PendingIntent intent) {
-                                        mActivityStarter
-                                                .startPendingIntentDismissingKeyguard(intent);
-                                    }
-                                },
-                                !mKeyguardStateController.isUnlocked())
-                        : null;
-
-        ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController,
+        ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, getWalletPanelViewController(),
                 mDepthController, mSysuiColorExtractor, mStatusBarService,
                 mNotificationShadeWindowController,
                 shouldShowControls() ? mControlsUiController : null, mBlurUtils);
@@ -475,6 +458,33 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     public void destroy() {
         mConfigurationController.removeCallback(this);
+    }
+
+    @Nullable
+    private GlobalActionsPanelPlugin.PanelViewController getWalletPanelViewController() {
+        if (mPanelPlugin == null) {
+            return null;
+        }
+        return mPanelPlugin.onPanelShown(this, !mKeyguardStateController.isUnlocked());
+    }
+
+    /**
+     * Implements {@link GlobalActionsPanelPlugin.Callbacks#dismissGlobalActionsMenu()}, which is
+     * called when the quick access wallet requests dismissal.
+     */
+    @Override
+    public void dismissGlobalActionsMenu() {
+        dismissDialog();
+    }
+
+    /**
+     * Implements {@link GlobalActionsPanelPlugin.Callbacks#dismissGlobalActionsMenu()}, which is
+     * called when the quick access wallet requests that an intent be started (with lock screen
+     * shown first if needed).
+     */
+    @Override
+    public void startPendingIntentDismissingKeyguard(PendingIntent pendingIntent) {
+        mActivityStarter.startPendingIntentDismissingKeyguard(pendingIntent);
     }
 
     private final class PowerAction extends SinglePressAction implements LongPressAction {
@@ -919,7 +929,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void onDismiss(DialogInterface dialog) {
         if (mDialog == dialog) {
             mDialog = null;
@@ -935,17 +947,19 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void onShow(DialogInterface dialog) {
         mMetricsLogger.visible(MetricsEvent.POWER_MENU);
     }
 
     /**
-     * The adapter used for the list within the global actions dialog, taking
-     * into account whether the keyguard is showing via
-     * {@link com.android.systemui.globalactions.GlobalActionsDialog#mKeyguardShowing} and whether
-     * the device is provisioned
-     * via {@link com.android.systemui.globalactions.GlobalActionsDialog#mDeviceProvisioned}.
+     * The adapter used for the list within the global actions dialog, taking into account whether
+     * the keyguard is showing via
+     * {@link com.android.systemui.globalactions.GlobalActionsDialog#mKeyguardShowing}
+     * and whether the device is provisioned via
+     * {@link com.android.systemui.globalactions.GlobalActionsDialog#mDeviceProvisioned}.
      */
     public class MyAdapter extends MultiListAdapter {
         private int countItems(boolean separated) {
@@ -1076,8 +1090,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     public interface Action {
         /**
-         * @return Text that will be announced when dialog is created.  null
-         * for none.
+         * @return Text that will be announced when dialog is created.  null for none.
          */
         CharSequence getLabelForAccessibility(Context context);
 
@@ -1086,15 +1099,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         void onPress();
 
         /**
-         * @return whether this action should appear in the dialog when the keygaurd
-         * is showing.
+         * @return whether this action should appear in the dialog when the keygaurd is showing.
          */
         boolean showDuringKeyguard();
 
         /**
-         * @return whether this action should appear in the dialog before the
-         * device is provisioned.onlongpress
-         *
+         * @return whether this action should appear in the dialog before the device is
+         * provisioned.onlongpress
          */
         boolean showBeforeProvisioning();
 
@@ -1113,8 +1124,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     /**
-     * A single press action maintains no state, just responds to a press
-     * and takes an action.
+     * A single press action maintains no state, just responds to a press and takes an action.
      */
 
     private abstract class SinglePressAction implements Action {
@@ -1188,8 +1198,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     /**
-     * A toggle action knows whether it is on or off, and displays an icon
-     * and status message accordingly.
+     * A toggle action knows whether it is on or off, and displays an icon and status message
+     * accordingly.
      */
     private static abstract class ToggleAction implements Action {
 
@@ -1239,8 +1249,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         /**
-         * Override to make changes to resource IDs just before creating the
-         * View.
+         * Override to make changes to resource IDs just before creating the View.
          */
         void willCreate() {
 
@@ -1296,9 +1305,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         /**
-         * Implementations may override this if their state can be in on of the intermediate
-         * states until some notification is received (e.g airplane mode is 'turning off' until
-         * we know the wireless connections are back online
+         * Implementations may override this if their state can be in on of the intermediate states
+         * until some notification is received (e.g airplane mode is 'turning off' until we know the
+         * wireless connections are back online
          *
          * @param buttonOn Whether the button was turned on or off
          */
@@ -1316,12 +1325,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private class AirplaneModeAction extends ToggleAction {
         AirplaneModeAction() {
             super(
-                R.drawable.ic_lock_airplane_mode,
-                R.drawable.ic_lock_airplane_mode_off,
-                R.string.global_actions_toggle_airplane_mode,
-                R.string.global_actions_airplane_mode_on_status,
-                R.string.global_actions_airplane_mode_off_status);
+                    R.drawable.ic_lock_airplane_mode,
+                    R.drawable.ic_lock_airplane_mode_off,
+                    R.string.global_actions_toggle_airplane_mode,
+                    R.string.global_actions_airplane_mode_on_status,
+                    R.string.global_actions_airplane_mode_off_status);
         }
+
         void onToggle(boolean on) {
             if (mHasTelephony && TelephonyProperties.in_ecm_mode().orElse(false)) {
                 mIsWaitingForEcmExit = true;
@@ -1607,11 +1617,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
             window.addFlags(
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
-                    | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                    | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                            | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+                            | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                            | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                            | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
             window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
             window.getAttributes().setFitInsetsTypes(0 /* types */);
             setTitle(R.string.global_actions);
@@ -1755,7 +1765,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         /**
          * Updates background and system bars according to current GradientColors.
-         * @param colors Colors and hints to use.
+         *
+         * @param colors  Colors and hints to use.
          * @param animate Interpolates gradient if true, just sets otherwise.
          */
         private void updateColors(GradientColors colors, boolean animate) {
@@ -1921,8 +1932,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     /**
-     * Determines whether or not the Global Actions menu should be forced to
-     * use the newer grid-style layout.
+     * Determines whether or not the Global Actions menu should be forced to use the newer
+     * grid-style layout.
      */
     private static boolean isForceGridEnabled(Context context) {
         return isPanelDebugModeEnabled(context);
