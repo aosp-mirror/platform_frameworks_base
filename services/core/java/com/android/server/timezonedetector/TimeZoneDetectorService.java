@@ -24,6 +24,7 @@ import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -95,11 +96,16 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     }
 
     @Override
-    public void suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
+    public boolean suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
         enforceSuggestManualTimeZonePermission();
         Objects.requireNonNull(timeZoneSuggestion);
 
-        mHandler.post(() -> mTimeZoneDetectorStrategy.suggestManualTimeZone(timeZoneSuggestion));
+        long token = Binder.clearCallingIdentity();
+        try {
+            return mTimeZoneDetectorStrategy.suggestManualTimeZone(timeZoneSuggestion);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override

@@ -53,12 +53,16 @@ public interface TimeDetector {
     void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);
 
     /**
-     * Suggests the user's manually entered current time to the detector.
+     * Suggests the current time, determined from the user's manually entered information, to
+     * the detector. Returns {@code false} if the suggestion was invalid, or the device
+     * configuration prevented the suggestion being used, {@code true} if the suggestion was
+     * accepted. A suggestion that is valid but does not change the time because it matches the
+     * current device time is considered accepted.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE)
-    void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
+    boolean suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
 
     /**
      * Suggests the time according to a network time source like NTP.

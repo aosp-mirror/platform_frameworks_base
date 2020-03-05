@@ -128,15 +128,15 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @Override
-    public synchronized void suggestManualTime(@NonNull ManualTimeSuggestion suggestion) {
+    public synchronized boolean suggestManualTime(@NonNull ManualTimeSuggestion suggestion) {
         final TimestampedValue<Long> newUtcTime = suggestion.getUtcTime();
 
         if (!validateSuggestionTime(newUtcTime, suggestion)) {
-            return;
+            return false;
         }
 
         String cause = "Manual time suggestion received: suggestion=" + suggestion;
-        setSystemClockIfRequired(ORIGIN_MANUAL, newUtcTime, cause);
+        return setSystemClockIfRequired(ORIGIN_MANUAL, newUtcTime, cause);
     }
 
     @Override
@@ -453,7 +453,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @GuardedBy("this")
-    private void setSystemClockIfRequired(
+    private boolean setSystemClockIfRequired(
             @Origin int origin, @NonNull TimestampedValue<Long> time, @NonNull String cause) {
 
         boolean isOriginAutomatic = isOriginAutomatic(origin);
@@ -465,7 +465,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                             + ", time=" + time
                             + ", cause=" + cause);
                 }
-                return;
+                return false;
             }
         } else {
             if (mCallback.isAutoTimeDetectionEnabled()) {
@@ -475,13 +475,13 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                             + ", time=" + time
                             + ", cause=" + cause);
                 }
-                return;
+                return false;
             }
         }
 
         mCallback.acquireWakeLock();
         try {
-            setSystemClockUnderWakeLock(origin, time, cause);
+            return setSystemClockUnderWakeLock(origin, time, cause);
         } finally {
             mCallback.releaseWakeLock();
         }
@@ -492,7 +492,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @GuardedBy("this")
-    private void setSystemClockUnderWakeLock(
+    private boolean setSystemClockUnderWakeLock(
             int origin, @NonNull TimestampedValue<Long> newTime, @NonNull Object cause) {
 
         long elapsedRealtimeMillis = mCallback.elapsedRealtimeMillis();
@@ -536,7 +536,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                         + " systemClockUpdateThreshold=" + systemClockUpdateThreshold
                         + " absTimeDifference=" + absTimeDifference);
             }
-            return;
+            return true;
         }
 
         mCallback.setSystemClock(newSystemClockMillis);
@@ -556,6 +556,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         } else {
             mLastAutoSystemClockTimeSet = null;
         }
+        return true;
     }
 
     /**
