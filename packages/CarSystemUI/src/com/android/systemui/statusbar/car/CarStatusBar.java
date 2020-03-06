@@ -67,7 +67,6 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedListener;
 import com.android.systemui.car.CarServiceProvider;
-import com.android.systemui.car.SystemUIPrimaryWindowController;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -95,7 +94,6 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
-import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -181,14 +179,13 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private Drawable mNotificationPanelBackground;
 
     private final Object mQueueLock = new Object();
-    private final SystemUIPrimaryWindowController mSystemUIPrimaryWindowController;
     private final CarNavigationBarController mCarNavigationBarController;
     private final FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
     private final Lazy<PowerManagerHelper> mPowerManagerHelperLazy;
-    private final FullscreenUserSwitcher mFullscreenUserSwitcher;
     private final ShadeController mShadeController;
     private final CarServiceProvider mCarServiceProvider;
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
+    private final ScreenLifecycle mScreenLifecycle;
 
     private boolean mDeviceIsSetUpForUser = true;
     private boolean mIsUserSetupInProgress = false;
@@ -196,7 +193,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private FlingAnimationUtils mFlingAnimationUtils;
     private NotificationDataManager mNotificationDataManager;
     private NotificationClickHandlerFactory mNotificationClickHandlerFactory;
-    private ScreenLifecycle mScreenLifecycle;
 
     // The container for the notifications.
     private CarNotificationView mNotificationView;
@@ -333,8 +329,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             /* Car Settings injected components. */
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
-            FullscreenUserSwitcher fullscreenUserSwitcher,
-            SystemUIPrimaryWindowController systemUIPrimaryWindowController,
             CarNavigationBarController carNavigationBarController,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder) {
         super(
@@ -423,28 +417,15 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mShadeController = shadeController;
         mCarServiceProvider = carServiceProvider;
         mPowerManagerHelperLazy = powerManagerHelperLazy;
-        mFullscreenUserSwitcher = fullscreenUserSwitcher;
-        mSystemUIPrimaryWindowController = systemUIPrimaryWindowController;
         mCarNavigationBarController = carNavigationBarController;
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
+        mScreenLifecycle = screenLifecycle;
     }
 
     @Override
     public void start() {
         mDeviceIsSetUpForUser = mCarDeviceProvisionedController.isCurrentUserSetup();
         mIsUserSetupInProgress = mCarDeviceProvisionedController.isCurrentUserSetupInProgress();
-
-        // Need to initialize screen lifecycle before calling super.start - before switcher is
-        // created.
-        mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
-        mScreenLifecycle.addObserver(mScreenObserver);
-
-        // TODO: Remove the setup of user switcher from Car Status Bar.
-        mSystemUIPrimaryWindowController.attach();
-        mFullscreenUserSwitcher.setStatusBar(this);
-        mFullscreenUserSwitcher.setContainer(
-                mSystemUIPrimaryWindowController.getBaseLayout().findViewById(
-                        R.id.fullscreen_user_switcher_stub));
 
         // Notification bar related setup.
         mInitialBackgroundAlpha = (float) mContext.getResources().getInteger(
@@ -963,49 +944,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         if (!mUserSwitcherController.useFullscreenUserSwitcher()) {
             super.createUserSwitcher();
         }
-    }
-
-    @Override
-    public void setLockscreenUser(int newUserId) {
-        super.setLockscreenUser(newUserId);
-        // Try to dismiss the keyguard after every user switch.
-        dismissKeyguardWhenUserSwitcherNotDisplayed();
-    }
-
-    @Override
-    public void onStateChanged(int newState) {
-        super.onStateChanged(newState);
-
-        if (newState != StatusBarState.FULLSCREEN_USER_SWITCHER) {
-            mFullscreenUserSwitcher.hide();
-        } else {
-            dismissKeyguardWhenUserSwitcherNotDisplayed();
-        }
-    }
-
-    final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
-        @Override
-        public void onScreenTurnedOn() {
-            dismissKeyguardWhenUserSwitcherNotDisplayed();
-        }
-    };
-
-    // We automatically dismiss keyguard unless user switcher is being shown on the keyguard.
-    private void dismissKeyguardWhenUserSwitcherNotDisplayed() {
-        if (!mUserSwitcherController.useFullscreenUserSwitcher()) {
-            return; // Not using the full screen user switcher.
-        }
-
-        if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER
-                && !mFullscreenUserSwitcher.isVisible()) {
-            // Current execution path continues to set state after this, thus we deffer the
-            // dismissal to the next execution cycle.
-            postDismissKeyguard(); // Dismiss the keyguard if switcher is not visible.
-        }
-    }
-
-    public void postDismissKeyguard() {
-        mHandler.post(this::dismissKeyguard);
     }
 
     /**

@@ -58,6 +58,11 @@
         to a constant alpha percent value using the initial alpha. -->
     <integer name="config_finalNotificationBackgroundAlpha">100</integer>
 
+    <!-- Car System UI's OverlayViewsMediator-->
+    <string-array name="config_carSystemUIOverlayViewsMediators" translatable="false">
+        <item>com.android.systemui.car.userswitcher.FullscreenUserSwitcherViewMediator</item>
+    </string-array>
+
     <!-- SystemUI Services: The classes of the stuff to start. -->
     <string-array name="config_systemUIServiceComponents" translatable="false">
         <item>com.android.systemui.util.NotificationChannels</item>
@@ -85,5 +90,6 @@
         <item>com.android.systemui.navigationbar.car.CarNavigationBar</item>
         <item>com.android.systemui.toast.ToastUI</item>
         <item>com.android.systemui.voicerecognition.car.ConnectedDeviceVoiceRecognitionNotifier</item>
+        <item>com.android.systemui.window.SystemUIOverlayWindowManager</item>
     </string-array>
 </resources>
