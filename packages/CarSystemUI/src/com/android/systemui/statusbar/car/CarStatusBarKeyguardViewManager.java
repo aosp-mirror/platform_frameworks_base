@@ -33,6 +33,9 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -42,7 +45,7 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
 
     protected boolean mShouldHideNavBar;
     private final CarNavigationBarController mCarNavigationBarController;
-    private final FullscreenUserSwitcher mFullscreenUserSwitcher;
+    private Set<OnKeyguardCancelClickedListener> mKeygaurdCancelClickedListenerSet;
 
     @Inject
     public CarStatusBarKeyguardViewManager(Context context,
@@ -56,8 +59,7 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
             NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController,
             NotificationMediaManager notificationMediaManager,
-            CarNavigationBarController carNavigationBarController,
-            FullscreenUserSwitcher fullscreenUserSwitcher) {
+            CarNavigationBarController carNavigationBarController) {
         super(context, callback, lockPatternUtils, sysuiStatusBarStateController,
                 configurationController, keyguardUpdateMonitor, navigationModeController,
                 dockManager, notificationShadeWindowController, keyguardStateController,
@@ -65,7 +67,7 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
         mShouldHideNavBar = context.getResources()
                 .getBoolean(R.bool.config_hideNavWhenKeyguardBouncerShown);
         mCarNavigationBarController = carNavigationBarController;
-        mFullscreenUserSwitcher = fullscreenUserSwitcher;
+        mKeygaurdCancelClickedListenerSet = new HashSet<>();
     }
 
     @Override
@@ -95,7 +97,7 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
      */
     @Override
     public void onCancelClicked() {
-        mFullscreenUserSwitcher.show();
+        mKeygaurdCancelClickedListenerSet.forEach(OnKeyguardCancelClickedListener::onCancelClicked);
     }
 
     /**
@@ -105,4 +107,31 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
      */
     @Override
     public void onDensityOrFontScaleChanged() {  }
+
+    /**
+     * Add listener for keyguard cancel clicked.
+     */
+    public void addOnKeyguardCancelClickedListener(
+            OnKeyguardCancelClickedListener keyguardCancelClickedListener) {
+        mKeygaurdCancelClickedListenerSet.add(keyguardCancelClickedListener);
+    }
+
+    /**
+     * Remove listener for keyguard cancel clicked.
+     */
+    public void removeOnKeyguardCancelClickedListener(
+            OnKeyguardCancelClickedListener keyguardCancelClickedListener) {
+        mKeygaurdCancelClickedListenerSet.remove(keyguardCancelClickedListener);
+    }
+
+
+    /**
+     * Defines a callback for keyguard cancel button clicked listeners.
+     */
+    public interface OnKeyguardCancelClickedListener {
+        /**
+         * Called when keyguard cancel button is clicked.
+         */
+        void onCancelClicked();
+    }
 }

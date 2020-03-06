@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.car;
+package com.android.systemui.car.userswitcher;
 
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
@@ -45,7 +45,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -114,8 +113,6 @@ public class UserGridRecyclerView extends RecyclerView {
 
     /**
      * Initializes the adapter that populates the grid layout
-     *
-     * @return the adapter
      */
     public void buildAdapter() {
         List<UserRecord> userRecords = createUserRecords(getUsersForUserGrid());
@@ -236,10 +233,16 @@ public class UserGridRecyclerView extends RecyclerView {
             mNewUserName = mRes.getString(R.string.car_new_user);
         }
 
+        /**
+         * Clears list of user records.
+         */
         public void clearUsers() {
             mUsers.clear();
         }
 
+        /**
+         * Updates list of user records.
+         */
         public void updateUsers(List<UserRecord> users) {
             mUsers = users;
         }
@@ -483,6 +486,10 @@ public class UserGridRecyclerView extends RecyclerView {
             return mUsers.size();
         }
 
+        /**
+         * An extension of {@link RecyclerView.ViewHolder} that also houses the user name and the
+         * user avatar.
+         */
         public class UserAdapterViewHolder extends RecyclerView.ViewHolder {
 
             public ImageView mUserAvatarImageView;
