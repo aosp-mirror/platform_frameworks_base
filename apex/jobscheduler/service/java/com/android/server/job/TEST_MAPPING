@@ -1,6 +1,13 @@
 {
     "presubmit": [
         {
+            "name": "CtsJobSchedulerTestCases",
+            "options": [
+                {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+                {"exclude-annotation": "androidx.test.filters.LargeTest"}
+            ]
+        },
+        {
             "name": "FrameworksMockingServicesTests",
             "options": [
                 {"include-filter": "com.android.server.job"},
