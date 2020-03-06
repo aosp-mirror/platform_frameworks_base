@@ -463,8 +463,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         int configMask = change.getConfigSetMask();
         int windowMask = change.getWindowSetMask();
         configMask &= ActivityInfo.CONFIG_WINDOW_CONFIGURATION
-                | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
-        windowMask &= WindowConfiguration.WINDOW_CONFIG_BOUNDS;
+                | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE;
+        windowMask &= (WindowConfiguration.WINDOW_CONFIG_BOUNDS
+                | WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS);
         int effects = 0;
         if (configMask != 0) {
             Configuration c = new Configuration(container.getRequestedOverrideConfiguration());
