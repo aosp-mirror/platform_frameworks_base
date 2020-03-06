@@ -6172,6 +6172,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public boolean hasResumedActivity(int uid) {
+            synchronized (mGlobalLock) {
+                final ArraySet<WindowProcessController> processes = mProcessMap.getProcesses(uid);
+                for (int i = 0, n = processes.size(); i < n; i++) {
+                    final WindowProcessController process = processes.valueAt(i);
+                    if (process.hasResumedActivity()) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
         public int startActivitiesAsPackage(String packageName, @Nullable String featureId,
                 int userId, Intent[] intents, Bundle bOptions) {
             Objects.requireNonNull(intents, "intents");

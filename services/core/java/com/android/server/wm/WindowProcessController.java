@@ -751,6 +751,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return false;
     }
 
+    boolean hasResumedActivity() {
+        for (int i = mActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord activity = mActivities.get(i);
+            if (activity.isState(RESUMED)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     void updateIntentForHeavyWeightActivity(Intent intent) {
         if (mActivities.isEmpty()) {

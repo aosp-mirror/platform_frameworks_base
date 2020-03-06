@@ -169,6 +169,11 @@ public abstract class ActivityTaskManagerInternal {
     public abstract List<IBinder> getTopVisibleActivities();
 
     /**
+     * Returns whether {@code uid} has any resumed activity.
+     */
+    public abstract boolean hasResumedActivity(int uid);
+
+    /**
      * Notify listeners that contents are drawn for the first time on a single task display.
      *
      * @param displayId An ID of the display on which contents are drawn.
