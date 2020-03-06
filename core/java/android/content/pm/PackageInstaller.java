@@ -2323,6 +2323,7 @@ public class PackageInstaller {
 
         /**
          * Get the value set in {@link SessionParams#setOriginatingUri(Uri)}.
+         * Note: This value will only be non-null for the owner of the session.
          */
         public @Nullable Uri getOriginatingUri() {
             return originatingUri;
@@ -2337,6 +2338,7 @@ public class PackageInstaller {
 
         /**
          * Get the value set in {@link SessionParams#setReferrerUri(Uri)}
+         * Note: This value will only be non-null for the owner of the session.
          */
         public @Nullable Uri getReferrerUri() {
             return referrerUri;

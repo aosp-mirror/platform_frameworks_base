@@ -805,26 +805,30 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     public SessionInfo getSessionInfo(int sessionId) {
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
-            return session != null ? session.generateInfo() : null;
+
+            return session != null
+                    ? session.generateInfoForCaller(true /*withIcon*/, Binder.getCallingUid())
+                    : null;
         }
     }
 
     @Override
     public ParceledListSlice<SessionInfo> getStagedSessions() {
-        return mStagingManager.getSessions();
+        return mStagingManager.getSessions(Binder.getCallingUid());
     }
 
     @Override
     public ParceledListSlice<SessionInfo> getAllSessions(int userId) {
+        final int callingUid = Binder.getCallingUid();
         mPermissionManager.enforceCrossUserPermission(
-                Binder.getCallingUid(), userId, true, false, "getAllSessions");
+                callingUid, userId, true, false, "getAllSessions");
 
         final List<SessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
                 if (session.userId == userId && !session.hasParentSessionId()) {
-                    result.add(session.generateInfo(false));
+                    result.add(session.generateInfoForCaller(false, callingUid));
                 }
             }
         }
@@ -842,7 +846,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
 
-                SessionInfo info = session.generateInfo(false);
+                SessionInfo info =
+                        session.generateInfoForCaller(false /*withIcon*/, Process.SYSTEM_UID);
                 if (Objects.equals(info.getInstallerPackageName(), installerPackageName)
                         && session.userId == userId && !session.hasParentSessionId()) {
                     result.add(info);
@@ -1302,7 +1307,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             session.markUpdated();
             writeSessionsAsync();
             if (mOkToSendBroadcasts) {
-                mPm.sendSessionUpdatedBroadcast(session.generateInfo(false),
+                // we don't scrub the data here as this is sent only to the installer several
+                // privileged system packages
+                mPm.sendSessionUpdatedBroadcast(
+                        session.generateInfoForCaller(false/*icon*/, Process.SYSTEM_UID),
                         session.userId);
             }
         }
