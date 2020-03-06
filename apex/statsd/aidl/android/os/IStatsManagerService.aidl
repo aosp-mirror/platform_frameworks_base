@@ -128,7 +128,7 @@ interface IStatsManagerService {
     void removeConfiguration(in long configId, in String packageName);
 
     /** Tell StatsManagerService to register a puller for the given atom tag with statsd. */
-    oneway void registerPullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
+    oneway void registerPullAtomCallback(int atomTag, long coolDownMillis, long timeoutMillis,
             in int[] additiveFields, IPullAtomCallback pullerCallback);
 
     /** Tell StatsManagerService to unregister the pulller for the given atom tag from statsd. */
