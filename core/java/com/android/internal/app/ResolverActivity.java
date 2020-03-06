@@ -163,7 +163,7 @@ public class ResolverActivity extends Activity implements
      * TODO(arangelov): Remove a couple of weeks after work/personal tabs are finalized.
      */
     @VisibleForTesting
-    public static boolean ENABLE_TABBED_VIEW = false;
+    public static boolean ENABLE_TABBED_VIEW = true;
     private static final String TAB_TAG_PERSONAL = "personal";
     private static final String TAB_TAG_WORK = "work";
 
