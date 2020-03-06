@@ -20,9 +20,7 @@ import android.app.Notification
 import android.content.Context
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
-import android.content.pm.ShortcutInfo
 import android.content.pm.UserInfo
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.UserManager
 import android.service.notification.NotificationListenerService
@@ -45,6 +43,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.notification.NotificationEntryListener
 import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
 import com.android.systemui.statusbar.policy.ExtensionController
 import java.util.ArrayDeque
 import java.util.concurrent.Executor
@@ -79,7 +78,7 @@ class NotificationPersonExtractorPluginBoundary @Inject constructor(
 
     override fun extractPerson(sbn: StatusBarNotification) =
             plugin?.extractPerson(sbn)?.run {
-                PersonModel(key, name, avatar, clickRunnable, sbn.user.identifier)
+                PersonModel(key, sbn.user.identifier, name, avatar, clickRunnable)
             }
 
     override fun extractPersonKey(sbn: StatusBarNotification) = plugin?.extractPersonKey(sbn)
@@ -90,26 +89,35 @@ class NotificationPersonExtractorPluginBoundary @Inject constructor(
 
 @Singleton
 class PeopleHubDataSourceImpl @Inject constructor(
-        private val notificationEntryManager: NotificationEntryManager,
-        private val extractor: NotificationPersonExtractor,
-        private val userManager: UserManager,
-        private val launcherApps: LauncherApps,
-        private val packageManager: PackageManager,
-        private val c: Context,
-        private val notificationListener: NotificationListener,
-        @Background private val bgExecutor: Executor,
-        @Main private val mainExecutor: Executor,
-        private val notifLockscreenUserMgr: NotificationLockscreenUserManager,
-        private val peopleNotificationIdentifier: PeopleNotificationIdentifier
-        ) : DataSource<PeopleHubModel> {
+    private val notificationEntryManager: NotificationEntryManager,
+    private val extractor: NotificationPersonExtractor,
+    private val userManager: UserManager,
+    launcherApps: LauncherApps,
+    packageManager: PackageManager,
+    context: Context,
+    private val notificationListener: NotificationListener,
+    @Background private val bgExecutor: Executor,
+    @Main private val mainExecutor: Executor,
+    private val notifLockscreenUserMgr: NotificationLockscreenUserManager,
+    private val peopleNotificationIdentifier: PeopleNotificationIdentifier
+) : DataSource<PeopleHubModel> {
 
     private var userChangeSubscription: Subscription? = null
     private val dataListeners = mutableListOf<DataListener<PeopleHubModel>>()
     private val peopleHubManagerForUser = SparseArray<PeopleHubManager>()
-    val context: Context = c.applicationContext
-    val iconFactory = ConversationIconFactory(context, launcherApps, packageManager,
-            IconDrawableFactory.newInstance(context), context.resources.getDimensionPixelSize(
-            R.dimen.notification_guts_conversation_icon_size))
+
+    private val iconFactory = run {
+        val appContext = context.applicationContext
+        ConversationIconFactory(
+                appContext,
+                launcherApps,
+                packageManager,
+                IconDrawableFactory.newInstance(appContext),
+                appContext.resources.getDimensionPixelSize(
+                        R.dimen.notification_guts_conversation_icon_size
+                )
+        )
+    }
 
     private val notificationEntryListener = object : NotificationEntryListener {
         override fun onEntryInflated(entry: NotificationEntry) = addVisibleEntry(entry)
@@ -206,7 +214,8 @@ class PeopleHubDataSourceImpl @Inject constructor(
     }
 
     private fun NotificationEntry.extractPerson(): PersonModel? {
-        if (!peopleNotificationIdentifier.isPeopleNotification(sbn, ranking)) {
+        val type = peopleNotificationIdentifier.getPeopleNotificationType(sbn, ranking)
+        if (type == TYPE_NON_PERSON) {
             return null
         }
         val clickRunnable = Runnable { notificationListener.unsnoozeNotification(key) }
@@ -215,23 +224,34 @@ class PeopleHubDataSourceImpl @Inject constructor(
                 ?: extras.getString(Notification.EXTRA_CONVERSATION_TITLE)
                 ?: extras.getString(Notification.EXTRA_TITLE)
                 ?: return null
-        val drawable = ranking.shortcutInfo?.getIcon(iconFactory, sbn, ranking)
-                ?: iconFactory.getConversationDrawable(extractAvatarFromRow(this), sbn.packageName,
-                        sbn.uid, ranking.channel.isImportantConversation)
-
-        return PersonModel(key, name, drawable, clickRunnable, sbn.user.identifier)
+        val drawable = ranking.getIcon(iconFactory, sbn)
+                ?: iconFactory.getConversationDrawable(
+                        extractAvatarFromRow(this),
+                        sbn.packageName,
+                        sbn.uid,
+                        ranking.channel.isImportantConversation
+                )
+        return PersonModel(key, sbn.user.identifier, name, drawable, clickRunnable)
     }
 
-    private fun ShortcutInfo.getIcon(iconFactory: ConversationIconFactory,
-                                     sbn: StatusBarNotification,
-                                     ranking: NotificationListenerService.Ranking): Drawable? {
-        return iconFactory.getConversationDrawable(ranking.shortcutInfo, sbn.packageName, sbn.uid,
-                ranking.channel.isImportantConversation)
-    }
+    private fun NotificationListenerService.Ranking.getIcon(
+        iconFactory: ConversationIconFactory,
+        sbn: StatusBarNotification
+    ): Drawable? =
+            shortcutInfo?.let { shortcutInfo ->
+                iconFactory.getConversationDrawable(
+                        shortcutInfo,
+                        sbn.packageName,
+                        sbn.uid,
+                        channel.isImportantConversation
+                )
+            }
 
-    private fun NotificationEntry.extractPersonKey(): PersonKey? =
-            // TODO migrate to shortcut id when snoozing is conversation wide
-            if (peopleNotificationIdentifier.isPeopleNotification(sbn, ranking)) key else null
+    private fun NotificationEntry.extractPersonKey(): PersonKey? {
+        // TODO migrate to shortcut id when snoozing is conversation wide
+        val type = peopleNotificationIdentifier.getPeopleNotificationType(sbn, ranking)
+        return if (type != TYPE_NON_PERSON) key else null
+    }
 }
 
 private fun NotificationLockscreenUserManager.registerListener(
@@ -303,4 +323,3 @@ fun extractAvatarFromRow(entry: NotificationEntry): Drawable? =
                             ?.drawable
                 }
                 ?.firstOrNull()
-
