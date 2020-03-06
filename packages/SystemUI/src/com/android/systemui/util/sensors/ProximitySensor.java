@@ -170,7 +170,11 @@ public class ProximitySensor {
             return false;
         }
 
-        mListeners.add(listener);
+        if (mListeners.contains(listener)) {
+            Log.d(TAG, "ProxListener registered multiple times: " + listener);
+        } else {
+            mListeners.add(listener);
+        }
         registerInternal();
 
         return true;
