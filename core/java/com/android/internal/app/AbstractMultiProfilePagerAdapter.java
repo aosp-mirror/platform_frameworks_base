@@ -388,6 +388,8 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         Button button = emptyStateView.findViewById(R.id.resolver_empty_state_button);
         button.setVisibility(buttonOnClick != null ? View.VISIBLE : View.GONE);
         button.setOnClickListener(buttonOnClick);
+
+        activeListAdapter.markTabLoaded();
     }
 
     private void showSpinner(View emptyStateView) {
