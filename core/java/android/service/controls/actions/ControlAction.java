@@ -22,7 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.service.controls.Control;
-import android.service.controls.IControlsActionCallback;
+import android.service.controls.ControlsProviderService;
 import android.service.controls.templates.ControlTemplate;
 import android.util.Log;
 
@@ -34,8 +34,15 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * An abstract action indicating a user interaction with a {@link Control}.
  *
- * The action may have a value to authenticate the input, when the provider has requested it to
- * complete the action.
+ * In some cases, an action needs to be validated by the user, using a password, PIN or simple
+ * acknowledgment. For those cases, an optional (nullable) parameter can be passed to send the user
+ * input. This <b>challenge value</b> will be requested from the user and sent as part
+ * of a {@link ControlAction} only if the service has responded to an action with one of:
+ * <ul>
+ *     <li> {@link #RESPONSE_CHALLENGE_ACK}
+ *     <li> {@link #RESPONSE_CHALLENGE_PIN}
+ *     <li> {@link #RESPONSE_CHALLENGE_PASSPHRASE}
+ * </ul>
  */
 public abstract class ControlAction {
 
@@ -53,7 +60,6 @@ public abstract class ControlAction {
             TYPE_ERROR,
             TYPE_BOOLEAN,
             TYPE_FLOAT,
-            TYPE_MULTI_FLOAT,
             TYPE_MODE,
             TYPE_COMMAND
     })
@@ -61,6 +67,7 @@ public abstract class ControlAction {
 
     /**
      * Object returned when there is an unparcelling error.
+     * @hide
      */
     public static final @NonNull ControlAction ERROR_ACTION = new ControlAction() {
         @Override
@@ -70,7 +77,7 @@ public abstract class ControlAction {
     };
 
     /**
-     * The identifier of {@link #ERROR_ACTION}
+     * The identifier of the action returned by {@link #getErrorAction}.
      */
     public static final @ActionType int TYPE_ERROR = -1;
 
@@ -83,11 +90,6 @@ public abstract class ControlAction {
      * The identifier of {@link FloatAction}.
      */
     public static final @ActionType int TYPE_FLOAT = 2;
-
-    /**
-     * The identifier of {@link MultiFloatAction}.
-     */
-    public static final @ActionType int TYPE_MULTI_FLOAT = 3;
 
     /**
      * The identifier of {@link ModeAction}.
@@ -121,28 +123,32 @@ public abstract class ControlAction {
     public static final @ResponseResult int RESPONSE_UNKNOWN = 0;
 
     /**
-     * Response code for {@link IControlsActionCallback#accept} indicating that
-     * the action has been performed. The action may still fail later and the state may not change.
+     * Response code for the {@code consumer} in
+     * {@link ControlsProviderService#performControlAction} indicating that the action has been
+     * performed. The action may still fail later and the state may not change.
      */
     public static final @ResponseResult int RESPONSE_OK = 1;
     /**
-     * Response code for {@link IControlsActionCallback#accept} indicating that
-     * the action has failed.
+     * Response code for the {@code consumer} in
+     * {@link ControlsProviderService#performControlAction} indicating that the action has failed.
      */
     public static final @ResponseResult int RESPONSE_FAIL = 2;
     /**
-     * Response code for {@link IControlsActionCallback#accept} indicating that
-     * in order for the action to be performed, acknowledgment from the user is required.
+     * Response code for the {@code consumer} in
+     * {@link ControlsProviderService#performControlAction} indicating that in order for the action
+     * to be performed, acknowledgment from the user is required.
      */
     public static final @ResponseResult int RESPONSE_CHALLENGE_ACK = 3;
     /**
-     * Response code for {@link IControlsActionCallback#accept} indicating that
-     * in order for the action to be performed, a PIN is required.
+     * Response code for the {@code consumer} in
+     * {@link ControlsProviderService#performControlAction} indicating that in order for the action
+     * to be performed, a PIN is required.
      */
     public static final @ResponseResult int RESPONSE_CHALLENGE_PIN = 4;
     /**
-     * Response code for {@link IControlsActionCallback#accept} indicating that
-     * in order for the action to be performed, an alphanumeric passphrase is required.
+     * Response code for the {@code consumer} in
+     * {@link ControlsProviderService#performControlAction} indicating that in order for the action
+     * to be performed, an alphanumeric passphrase is required.
      */
     public static final @ResponseResult int RESPONSE_CHALLENGE_PASSPHRASE = 5;
 
@@ -228,8 +234,6 @@ public abstract class ControlAction {
                     return new BooleanAction(bundle);
                 case TYPE_FLOAT:
                     return new FloatAction(bundle);
-                case TYPE_MULTI_FLOAT:
-                    return new MultiFloatAction(bundle);
                 case TYPE_MODE:
                     return new ModeAction(bundle);
                 case TYPE_COMMAND:
@@ -242,5 +246,13 @@ public abstract class ControlAction {
             Log.e(TAG, "Error creating action", e);
             return ERROR_ACTION;
         }
+    }
+
+    /**
+     * Returns a singleton {@link ControlAction} used for indicating an error in unparceling.
+     */
+    @NonNull
+    public static ControlAction getErrorAction() {
+        return ERROR_ACTION;
     }
 }

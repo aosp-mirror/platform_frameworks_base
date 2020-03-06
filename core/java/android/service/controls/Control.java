@@ -395,7 +395,7 @@ public final class Control implements Parcelable {
      * {@link ControlsProviderService#createPublisherForAllAvailable}:
      * <ul>
      *     <li> Status: {@link Status#STATUS_UNKNOWN}
-     *     <li> Control template: {@link ControlTemplate#NO_TEMPLATE}
+     *     <li> Control template: {@link ControlTemplate#getNoTemplateObject}
      *     <li> Status text: {@code ""}
      * </ul>
      */
@@ -593,7 +593,7 @@ public final class Control implements Parcelable {
      *     <li> Title: {@code ""}
      *     <li> Subtitle: {@code ""}
      *     <li> Status: {@link Status#STATUS_UNKNOWN}
-     *     <li> Control template: {@link ControlTemplate#NO_TEMPLATE}
+     *     <li> Control template: {@link ControlTemplate#getNoTemplateObject}
      *     <li> Status text: {@code ""}
      * </ul>
      */
