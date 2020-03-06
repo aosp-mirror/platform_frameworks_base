@@ -1572,6 +1572,24 @@ public class LockSettingsService extends ILockSettings.Stub {
                     "This operation requires secure lock screen feature");
         }
         checkWritePermission(userId);
+
+        // When changing credential for profiles with unified challenge, some callers
+        // will pass in empty credential while others will pass in the credential of
+        // the parent user. setLockCredentialInternal() handles the formal case (empty
+        // credential) correctly but not the latter. As a stopgap fix, convert the latter
+        // case to the formal. The long-term fix would be fixing LSS such that it should
+        // accept only the parent user credential on its public API interfaces, swap it
+        // with the profile's random credential at that API boundary (i.e. here) and make
+        // sure LSS internally does not special case profile with unififed challenge: b/80170828.
+        if (!savedCredential.isNone() && isManagedProfileWithUnifiedLock(userId)) {
+            // Verify the parent credential again, to make sure we have a fresh enough
+            // auth token such that getDecryptedPasswordForTiedProfile() inside
+            // setLockCredentialInternal() can function correctly.
+            verifyCredential(savedCredential, /* challenge */ 0,
+                    mUserManager.getProfileParent(userId).id);
+            savedCredential.zeroize();
+            savedCredential = LockscreenCredential.createNone();
+        }
         synchronized (mSeparateChallengeLock) {
             if (!setLockCredentialInternal(credential, savedCredential,
                     userId, /* isLockTiedToParent= */ false)) {
@@ -1627,6 +1645,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // get credential from keystore when managed profile has unified lock
             if (savedCredential.isNone()) {
                 try {
+                    //TODO: remove as part of b/80170828
                     savedCredential = getDecryptedPasswordForTiedProfile(userId);
                 } catch (FileNotFoundException e) {
                     Slog.i(TAG, "Child profile key not found");
@@ -2876,6 +2895,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (savedCredential.isNone() && isManagedProfileWithUnifiedLock(userId)) {
             // get credential from keystore when managed profile has unified lock
             try {
+                //TODO: remove as part of b/80170828
                 savedCredential = getDecryptedPasswordForTiedProfile(userId);
             } catch (FileNotFoundException e) {
                 Slog.i(TAG, "Child profile key not found");
