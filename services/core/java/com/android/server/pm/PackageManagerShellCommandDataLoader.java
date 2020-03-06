@@ -91,7 +91,7 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
 
     static DataLoaderParams getIncrementalDataLoaderParams(ShellCommand shellCommand) {
         return DataLoaderParams.forIncremental(new ComponentName(PACKAGE, CLASS),
-                getDataLoaderParamsArgs(shellCommand), null);
+                getDataLoaderParamsArgs(shellCommand));
     }
 
     private static int extractShellCommandId(String args) {
