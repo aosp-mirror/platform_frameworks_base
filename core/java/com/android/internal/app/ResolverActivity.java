@@ -1339,9 +1339,12 @@ public class ResolverActivity extends Activity implements
                     + "cannot be null.");
         }
         // We partially rebuild the inactive adapter to determine if we should auto launch
-        boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
+        // isTabLoaded will be true here if the empty state screen is shown instead of the list.
+        boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true)
+                || mMultiProfilePagerAdapter.getActiveListAdapter().isTabLoaded();
         if (shouldShowTabs()) {
-            boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false);
+            boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false)
+                    || mMultiProfilePagerAdapter.getInactiveListAdapter().isTabLoaded();
             rebuildCompleted = rebuildCompleted && rebuildInactiveCompleted;
         }
 
@@ -1401,8 +1404,8 @@ public class ResolverActivity extends Activity implements
         if (numberOfProfiles == 1 && maybeAutolaunchIfSingleTarget()) {
             return true;
         } else if (numberOfProfiles == 2
-                && mMultiProfilePagerAdapter.getActiveListAdapter().isListLoaded()
-                && mMultiProfilePagerAdapter.getInactiveListAdapter().isListLoaded()
+                && mMultiProfilePagerAdapter.getActiveListAdapter().isTabLoaded()
+                && mMultiProfilePagerAdapter.getInactiveListAdapter().isTabLoaded()
                 && (maybeAutolaunchIfNoAppsOnInactiveTab()
                         || maybeAutolaunchIfCrossProfileSupported())) {
             return true;
