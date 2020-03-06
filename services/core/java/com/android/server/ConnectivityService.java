@@ -7918,8 +7918,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull ConnectivityReportEvent reportEvent, @NonNull PersistableBundle extras) {
         final NetworkAgentInfo nai = reportEvent.mNai;
         final NetworkCapabilities networkCapabilities =
-                new NetworkCapabilities(nai.networkCapabilities);
-        clearNetworkCapabilitiesUids(networkCapabilities);
+                getNetworkCapabilitiesWithoutUids(nai.networkCapabilities);
         final ConnectivityReport report =
                 new ConnectivityReport(
                         reportEvent.mNai.network,
@@ -7943,8 +7942,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull NetworkAgentInfo nai, long timestampMillis, int detectionMethod,
             @NonNull PersistableBundle extras) {
         final NetworkCapabilities networkCapabilities =
-                new NetworkCapabilities(nai.networkCapabilities);
-        clearNetworkCapabilitiesUids(networkCapabilities);
+                getNetworkCapabilitiesWithoutUids(nai.networkCapabilities);
         final DataStallReport report =
                 new DataStallReport(
                         nai.network,
@@ -7977,10 +7975,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void clearNetworkCapabilitiesUids(@NonNull NetworkCapabilities nc) {
-        nc.setUids(null);
-        nc.setAdministratorUids(new int[0]);
-        nc.setOwnerUid(Process.INVALID_UID);
+    private NetworkCapabilities getNetworkCapabilitiesWithoutUids(@NonNull NetworkCapabilities nc) {
+        final NetworkCapabilities sanitized = new NetworkCapabilities(nc);
+        sanitized.setUids(null);
+        sanitized.setAdministratorUids(new int[0]);
+        sanitized.setOwnerUid(Process.INVALID_UID);
+        return sanitized;
     }
 
     private List<IConnectivityDiagnosticsCallback> getMatchingPermissionedCallbacks(
