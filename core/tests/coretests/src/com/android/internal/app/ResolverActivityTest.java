@@ -624,7 +624,7 @@ public class ResolverActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_turn_on_work_apps))
+        onView(withText(R.string.resolver_turn_on_work_apps_view))
                 .check(matches(isDisplayed()));
     }
 
