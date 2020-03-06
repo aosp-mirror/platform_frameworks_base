@@ -118,9 +118,9 @@ public class SeamlessRotator {
         finish(t, win);
         if (win.mWinAnimator.mSurfaceController != null && !timeout) {
             t.deferTransactionUntil(win.mSurfaceControl,
-                    win.getDeferTransactionBarrier(), win.getFrameNumber());
+                    win.getClientViewRootSurface(), win.getFrameNumber());
             t.deferTransactionUntil(win.mWinAnimator.mSurfaceController.mSurfaceControl,
-                    win.getDeferTransactionBarrier(), win.getFrameNumber());
+                    win.getClientViewRootSurface(), win.getFrameNumber());
         }
     }
 
