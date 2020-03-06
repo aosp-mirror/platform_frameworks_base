@@ -2266,9 +2266,9 @@
              a newer platform that supports more screens. -->
         <attr name="resizeable" format="boolean" />
         <!-- Indicates whether the application can accommodate any screen
-             density.  Older applications are assumed to not be able to,
-             new ones able to.  You can explicitly supply your abilities
-             here. -->
+             density. This is assumed true if targetSdkVersion is 4 or higher.
+             @deprecated Should always be true by default and not overridden.
+              -->
         <attr name="anyDensity" format="boolean" />
     </declare-styleable>
 
