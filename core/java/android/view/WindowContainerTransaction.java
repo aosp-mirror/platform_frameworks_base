@@ -72,6 +72,33 @@ public class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Resize a container's app bounds. This is the bounds used to report appWidth/Height to an
+     * app's DisplayInfo. It is derived by subtracting the overlapping portion of the navbar from
+     * the full bounds.
+     */
+    public WindowContainerTransaction setAppBounds(IWindowContainer container, Rect appBounds) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mConfiguration.windowConfiguration.setAppBounds(appBounds);
+        chg.mConfigSetMask |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+        chg.mWindowSetMask |= WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
+        return this;
+    }
+
+    /**
+     * Resize a container's configuration size. The configuration size is what gets reported to the
+     * app via screenWidth/HeightDp and influences which resources get loaded. This size is
+     * derived by subtracting the overlapping portions of both the statusbar and the navbar from
+     * the full bounds.
+     */
+    public WindowContainerTransaction setScreenSizeDp(IWindowContainer container, int w, int h) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mConfiguration.screenWidthDp = w;
+        chg.mConfiguration.screenHeightDp = h;
+        chg.mConfigSetMask |= ActivityInfo.CONFIG_SCREEN_SIZE;
+        return this;
+    }
+
+    /**
      * Notify activies within the hiearchy of a container that they have entered picture-in-picture
      * mode with the given bounds.
      */
@@ -161,7 +188,8 @@ public class WindowContainerTransaction implements Parcelable {
 
     @Override
     public String toString() {
-        return "WindowContainerTransaction { changes = " + mChanges + " }";
+        return "WindowContainerTransaction { changes = " + mChanges + " hops = " + mHierarchyOps
+                + " }";
     }
 
     @Override
@@ -269,6 +297,11 @@ public class WindowContainerTransaction implements Parcelable {
                     (mConfigSetMask & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0
                             && ((mWindowSetMask & WindowConfiguration.WINDOW_CONFIG_BOUNDS)
                                     != 0);
+            final boolean changesAppBounds =
+                    (mConfigSetMask & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0
+                            && ((mWindowSetMask & WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS)
+                                    != 0);
+            final boolean changesSs = (mConfigSetMask & ActivityInfo.CONFIG_SCREEN_SIZE) != 0;
             final boolean changesSss =
                     (mConfigSetMask & ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE) != 0;
             StringBuilder sb = new StringBuilder();
@@ -276,8 +309,15 @@ public class WindowContainerTransaction implements Parcelable {
             if (changesBounds) {
                 sb.append("bounds:" + mConfiguration.windowConfiguration.getBounds() + ",");
             }
+            if (changesAppBounds) {
+                sb.append("appbounds:" + mConfiguration.windowConfiguration.getAppBounds() + ",");
+            }
             if (changesSss) {
                 sb.append("ssw:" + mConfiguration.smallestScreenWidthDp + ",");
+            }
+            if (changesSs) {
+                sb.append("sw/h:" + mConfiguration.screenWidthDp + "x"
+                        + mConfiguration.screenHeightDp + ",");
             }
             if ((mChangeMask & CHANGE_FOCUSABLE) != 0) {
                 sb.append("focusable:" + mFocusable + ",");
