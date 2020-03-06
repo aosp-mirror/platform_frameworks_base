@@ -4418,6 +4418,11 @@
         volume key shortcut
     </string>
 
+    <!-- Text for showing the warning to user when uncheck the legacy app item in the accessibility
+    shortcut menu, user can aware the service to be disabled. [CHAR LIMIT=100] -->
+    <string name="accessibility_uncheck_legacy_item_warning">
+        <xliff:g id="service_name" example="TalkBack">%s</xliff:g> has been turned off</string>
+
     <!-- Text in button that edit the accessibility shortcut menu, user can delete
     any service item in the menu list. [CHAR LIMIT=100] -->
     <string name="edit_accessibility_shortcut_menu_button">Edit shortcuts</string>

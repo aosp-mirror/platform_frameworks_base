@@ -28,8 +28,6 @@ public final class ShortcutConstants {
     private ShortcutConstants() {}
 
     public static final char SERVICES_SEPARATOR = ':';
-    public static final float DISABLED_ALPHA = 0.5f;
-    public static final float ENABLED_ALPHA = 1.0f;
 
     /**
      * Annotation for different user shortcut type UI type.

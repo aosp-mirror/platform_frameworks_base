@@ -3240,6 +3240,7 @@
   <java-symbol type="string" name="accessibility_select_shortcut_menu_title" />
   <java-symbol type="string" name="accessibility_edit_shortcut_menu_button_title" />
   <java-symbol type="string" name="accessibility_edit_shortcut_menu_volume_title" />
+  <java-symbol type="string" name="accessibility_uncheck_legacy_item_warning" />
 
   <!-- Accessibility Button -->
   <java-symbol type="layout" name="accessibility_button_chooser_item" />
