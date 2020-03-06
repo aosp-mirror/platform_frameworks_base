@@ -56,11 +56,24 @@ private:
 };
 
 /**
- * Forks and exec a command with two pipes, one connects stdin for input,
- * one connects stdout for output. It returns the pid of the child.
- * Input pipe can be NULL to indicate child process doesn't read stdin.
+ * Forks and exec a command with two pipes and returns the pid of the child, or -1 when it fails.
+ *
+ * input connects stdin for input. output connects stdout for output. input can be nullptr to
+ * indicate that child process doesn't read stdin. This function will close in and out fds upon
+ * success. If status is not NULL, the status information will be stored in the int to which it
+ * points.
  */
-pid_t fork_execute_cmd(char* const argv[], Fpipe* input, Fpipe* output);
+pid_t fork_execute_cmd(char* const argv[], Fpipe* input, Fpipe* output, int* status = nullptr);
+
+/**
+ * Forks and exec a command that reads from in fd and writes to out fd and returns the pid of the
+ * child, or -1 when it fails.
+ *
+ * in can be -1 to indicate that child process doesn't read stdin. This function will close in and
+ * out fds upon success. If status is not NULL, the status information will be stored in the int
+ * to which it points.
+ */
+pid_t fork_execute_cmd(char* const argv[], int in, int out, int* status = nullptr);
 
 /**
  * Grabs varargs from stack and stores them in heap with NULL-terminated array.
@@ -76,7 +89,7 @@ uint64_t Nanotime();
  * Methods to wait or kill child process, return exit status code.
  */
 status_t kill_child(pid_t pid);
-status_t wait_child(pid_t pid);
+status_t wait_child(pid_t pid, int timeout_ms = 1000);
 
 status_t start_detached_thread(const function<void ()>& func);
 
