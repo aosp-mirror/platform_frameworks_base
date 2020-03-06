@@ -21,6 +21,9 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.view.Choreographer
 import android.view.View
+import androidx.dynamicanimation.animation.FloatPropertyCompat
+import androidx.dynamicanimation.animation.SpringAnimation
+import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.Interpolators
@@ -59,6 +62,16 @@ class NotificationShadeWindowBlurController @Inject constructor(
     private var notificationAnimator: Animator? = null
     private var updateScheduled: Boolean = false
     private var shadeExpansion = 1.0f
+    private val shadeSpring = SpringAnimation(this, object :
+            FloatPropertyCompat<NotificationShadeWindowBlurController>("shadeBlurRadius") {
+        override fun setValue(rect: NotificationShadeWindowBlurController?, value: Float) {
+            shadeBlurRadius = value.toInt()
+        }
+
+        override fun getValue(rect: NotificationShadeWindowBlurController?): Float {
+            return shadeBlurRadius.toFloat()
+        }
+    })
     private var shadeBlurRadius = 0
         set(value) {
             if (field == value) return
@@ -135,6 +148,9 @@ class NotificationShadeWindowBlurController @Inject constructor(
         if (WAKE_UP_ANIMATION_ENABLED) {
             keyguardStateController.addCallback(keyguardStateCallback)
         }
+        shadeSpring.spring = SpringForce(0.0f)
+        shadeSpring.spring.dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
+        shadeSpring.spring.stiffness = SpringForce.STIFFNESS_LOW
     }
 
     /**
@@ -153,8 +169,7 @@ class NotificationShadeWindowBlurController @Inject constructor(
         if (shadeBlurRadius == newBlur) {
             return
         }
-        shadeBlurRadius = newBlur
-        scheduleUpdate()
+        shadeSpring.animateToFinalPosition(newBlur.toFloat())
     }
 
     private fun scheduleUpdate() {
