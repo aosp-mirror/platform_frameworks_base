@@ -4394,6 +4394,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(mAppUsageStats, times(1)).reportInterruptiveNotification(
                 anyString(), anyString(), anyInt());
+        verify(mHistoryManager, times(1)).addNotification(any());
     }
 
     @Test
