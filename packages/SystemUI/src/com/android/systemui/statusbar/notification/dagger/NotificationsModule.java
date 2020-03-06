@@ -21,6 +21,8 @@ import android.os.Handler;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -153,6 +155,13 @@ public interface NotificationsModule {
                 entryManager,
                 statusBarStateController,
                 expansionStateLogger);
+    }
+
+    /** Provides an instance of {@link com.android.internal.logging.UiEventLogger} */
+    @Singleton
+    @Provides
+    static UiEventLogger provideUiEventLogger() {
+        return new UiEventLoggerImpl();
     }
 
     /** Provides an instance of {@link NotificationBlockingHelperManager} */
