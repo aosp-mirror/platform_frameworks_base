@@ -17,6 +17,8 @@
 package com.android.systemui.stackdivider;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.animation.Animator;
@@ -214,8 +216,22 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                     if (mTargetAdjusted) {
                         mSplitLayout.updateAdjustedBounds(mShownTop, mHiddenTop, mShownTop);
                         wct.setBounds(mSplits.mSecondary.token, mSplitLayout.mAdjustedSecondary);
+                        // "Freeze" the configuration size so that the app doesn't get a config
+                        // or relaunch. This is required because normally nav-bar contributes
+                        // to configuration bounds (via nondecorframe).
+                        Rect adjustAppBounds = new Rect(mSplits.mSecondary.configuration
+                                .windowConfiguration.getAppBounds());
+                        adjustAppBounds.offset(0, mSplitLayout.mAdjustedSecondary.top
+                                - mSplitLayout.mSecondary.top);
+                        wct.setAppBounds(mSplits.mSecondary.token, adjustAppBounds);
+                        wct.setScreenSizeDp(mSplits.mSecondary.token,
+                                mSplits.mSecondary.configuration.screenWidthDp,
+                                mSplits.mSecondary.configuration.screenHeightDp);
                     } else {
                         wct.setBounds(mSplits.mSecondary.token, mSplitLayout.mSecondary);
+                        wct.setAppBounds(mSplits.mSecondary.token, null);
+                        wct.setScreenSizeDp(mSplits.mSecondary.token,
+                                SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
                     }
                     try {
                         ActivityTaskManager.getTaskOrganizerController()
