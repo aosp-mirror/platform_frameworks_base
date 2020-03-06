@@ -34,8 +34,9 @@ public class ImsManager {
     private Context mContext;
 
     /**
-     * <p>Broadcast Action: Indicates that an IMS operation was rejected by the network due to it
-     * not being authorized on the network.
+     * <p>Broadcast Action: Indicates that a previously allowed IMS operation was rejected by the
+     * network due to the network returning a "forbidden" response. This may be due to a
+     * provisioning change from the network.
      * May include the {@link SubscriptionManager#EXTRA_SUBSCRIPTION_INDEX} extra to also specify
      * which subscription the operation was rejected for.
      * <p class="note">

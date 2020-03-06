@@ -10432,8 +10432,8 @@ package android.telephony.ims {
     field public static final int KEY_RCS_CAPABILITY_DISCOVERY_ENABLED = 17; // 0x11
     field public static final int KEY_RCS_CAPABILITY_POLL_LIST_SUB_EXP_SEC = 23; // 0x17
     field public static final int KEY_RCS_MAX_NUM_ENTRIES_IN_RCL = 22; // 0x16
+    field public static final int KEY_RCS_PUBLISH_OFFLINE_AVAILABILITY_TIMER_SEC = 16; // 0x10
     field public static final int KEY_RCS_PUBLISH_SOURCE_THROTTLE_MS = 21; // 0x15
-    field public static final int KEY_RCS_PUBLISH_TIMER_EXTENDED_SEC = 16; // 0x10
     field public static final int KEY_RCS_PUBLISH_TIMER_SEC = 15; // 0xf
     field public static final int KEY_REGISTRATION_DOMAIN_NAME = 12; // 0xc
     field public static final int KEY_REGISTRATION_RETRY_BASE_TIME_SEC = 33; // 0x21
