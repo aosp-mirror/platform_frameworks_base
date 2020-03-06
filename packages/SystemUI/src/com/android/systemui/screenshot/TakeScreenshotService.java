@@ -16,10 +16,6 @@
 
 package com.android.systemui.screenshot;
 
-import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
-
-import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_CORNER_FLOW;
-
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -33,7 +29,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.UserManager;
-import android.provider.DeviceConfig;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -70,8 +65,7 @@ public class TakeScreenshotService extends Service {
             }
 
             // TODO (mkephart): clean up once notifications flow is fully deprecated
-            boolean useCornerFlow = DeviceConfig.getBoolean(
-                    NAMESPACE_SYSTEMUI, SCREENSHOT_CORNER_FLOW, true);
+            boolean useCornerFlow = true;
             switch (msg.what) {
                 case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
                     if (useCornerFlow) {
