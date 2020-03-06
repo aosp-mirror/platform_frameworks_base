@@ -584,6 +584,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             final String localPackageName = packageName;
             final int localForegroundId = foregroundId;
             final Notification _foregroundNoti = foregroundNoti;
+            final ServiceRecord record = this;
             ams.mHandler.post(new Runnable() {
                 public void run() {
                     NotificationManagerInternal nm = LocalServices.getService(
@@ -682,10 +683,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         Slog.w(TAG, "Error showing notification for service", e);
                         // If it gave us a garbage notification, it doesn't
                         // get to be foreground.
-                        ams.setServiceForeground(name, ServiceRecord.this,
-                                0, null, 0);
-                        ams.crashApplication(appUid, appPid, localPackageName, -1,
-                                "Bad notification for startForeground: " + e);
+                        ams.mServices.killMisbehavingService(record,
+                                appUid, appPid, localPackageName);
                     }
                 }
             });
