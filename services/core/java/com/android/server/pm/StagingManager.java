@@ -95,11 +95,12 @@ public class StagingManager {
         }
     }
 
-    ParceledListSlice<PackageInstaller.SessionInfo> getSessions() {
+    ParceledListSlice<PackageInstaller.SessionInfo> getSessions(int callingUid) {
         final List<PackageInstaller.SessionInfo> result = new ArrayList<>();
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
-                result.add(mStagedSessions.valueAt(i).generateInfo(false));
+                final PackageInstallerSession stagedSession = mStagedSessions.valueAt(i);
+                result.add(stagedSession.generateInfoForCaller(false /*icon*/, callingUid));
             }
         }
         return new ParceledListSlice<>(result);
