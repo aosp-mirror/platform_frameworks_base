@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.car;
+package com.android.systemui.window;
 
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
@@ -41,7 +41,7 @@ import javax.inject.Singleton;
  * this window for the notification panel.
  */
 @Singleton
-public class SystemUIPrimaryWindowController implements
+public class SystemUIOverlayWindowController implements
         ConfigurationController.ConfigurationListener {
 
     private final Context mContext;
@@ -57,7 +57,7 @@ public class SystemUIPrimaryWindowController implements
     private boolean mIsAttached = false;
 
     @Inject
-    public SystemUIPrimaryWindowController(
+    public SystemUIOverlayWindowController(
             Context context,
             @Main Resources resources,
             WindowManager windowManager,
@@ -77,7 +77,7 @@ public class SystemUIPrimaryWindowController implements
 
         mLpChanged = new WindowManager.LayoutParams();
         mBaseLayout = (ViewGroup) LayoutInflater.from(context)
-                .inflate(R.layout.sysui_primary_window, /* root= */ null, false);
+                .inflate(R.layout.sysui_overlay_window, /* root= */ null, false);
 
         configurationController.addCallback(this);
     }
@@ -115,7 +115,7 @@ public class SystemUIPrimaryWindowController implements
         mLp.gravity = Gravity.TOP;
         mLp.setFitInsetsTypes(/* types= */ 0);
         mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-        mLp.setTitle("SystemUIPrimaryWindow");
+        mLp.setTitle("SystemUIOverlayWindow");
         mLp.packageName = mContext.getPackageName();
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 

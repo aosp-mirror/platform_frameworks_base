@@ -39,6 +39,8 @@ import com.android.systemui.toast.ToastUI;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.voicerecognition.car.ConnectedDeviceVoiceRecognitionNotifier;
 import com.android.systemui.volume.VolumeUI;
+import com.android.systemui.window.OverlayWindowModule;
+import com.android.systemui.window.SystemUIOverlayWindowManager;
 
 import dagger.Binds;
 import dagger.Module;
@@ -47,7 +49,7 @@ import dagger.multibindings.IntoMap;
 
 /** Binder for car specific {@link SystemUI} modules. */
 @Module(includes = {RecentsModule.class, CarStatusBarModule.class, NotificationsModule.class,
-        BubbleModule.class, KeyguardModule.class})
+        BubbleModule.class, KeyguardModule.class, OverlayWindowModule.class})
 public abstract class CarSystemUIBinder {
     /** Inject into AuthController. */
     @Binds
@@ -182,4 +184,10 @@ public abstract class CarSystemUIBinder {
     @ClassKey(ConnectedDeviceVoiceRecognitionNotifier.class)
     public abstract SystemUI bindConnectedDeviceVoiceRecognitionNotifier(
             ConnectedDeviceVoiceRecognitionNotifier sysui);
+
+    /** Inject into SystemUIOverlayWindowManager. */
+    @Binds
+    @IntoMap
+    @ClassKey(SystemUIOverlayWindowManager.class)
+    public abstract SystemUI bindSystemUIPrimaryWindowManager(SystemUIOverlayWindowManager sysui);
 }
