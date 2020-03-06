@@ -697,4 +697,7 @@
         <!-- used to override dark/light theming -->
         <item name="*android:colorPopupBackground">@color/control_list_popup_background</item>
     </style>
+
+    <style name="Theme.ControlsRequestDialog" parent="@style/Theme.SystemUI.MediaProjectionAlertDialog"/>
+
 </resources>

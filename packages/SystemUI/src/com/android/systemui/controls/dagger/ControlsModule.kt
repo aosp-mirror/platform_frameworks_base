@@ -26,6 +26,7 @@ import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsListingControllerImpl
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
+import com.android.systemui.controls.management.ControlsRequestDialog
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.ControlsUiControllerImpl
 import dagger.Binds
@@ -68,5 +69,12 @@ abstract class ControlsModule {
     @ClassKey(ControlsFavoritingActivity::class)
     abstract fun provideControlsFavoritingActivity(
         activity: ControlsFavoritingActivity
+    ): Activity
+
+    @Binds
+    @IntoMap
+    @ClassKey(ControlsRequestDialog::class)
+    abstract fun provideControlsRequestDialog(
+        activity: ControlsRequestDialog
     ): Activity
 }
