@@ -271,7 +271,6 @@ filegroup {
 
         // etc.
         ":framework-javastream-protos",
-        ":framework-statslog-gen", // StatsLogInternal.java
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
 
         // telephony annotations
@@ -607,13 +606,6 @@ java_library {
     srcs: [
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
-}
-
-genrule {
-    name: "framework-statslog-gen",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out) --worksource",
-    out: ["android/util/StatsLogInternal.java"],
 }
 
 genrule {
