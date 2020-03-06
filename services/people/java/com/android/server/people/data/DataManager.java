@@ -198,13 +198,13 @@ public class DataManager {
         DataMaintenanceService.scheduleJob(mContext, userId);
     }
 
-    /** This method is called when a user is stopped. */
-    public void onUserStopped(int userId) {
+    /** This method is called when a user is stopping. */
+    public void onUserStopping(int userId) {
         if (mUserDataArray.indexOfKey(userId) >= 0) {
             mUserDataArray.get(userId).setUserStopped();
         }
         if (mUsageStatsQueryFutures.indexOfKey(userId) >= 0) {
-            mUsageStatsQueryFutures.valueAt(userId).cancel(true);
+            mUsageStatsQueryFutures.get(userId).cancel(true);
         }
         if (mBroadcastReceivers.indexOfKey(userId) >= 0) {
             mContext.unregisterReceiver(mBroadcastReceivers.get(userId));
