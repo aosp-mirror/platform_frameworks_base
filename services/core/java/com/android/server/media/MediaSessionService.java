@@ -1973,6 +1973,34 @@ public class MediaSessionService extends SystemService implements Monitor {
             instantiateCustomProvider(name);
         }
 
+        @Override
+        public int getSessionPolicies(MediaSession.Token token) {
+            synchronized (mLock) {
+                MediaSessionRecord record = getMediaSessionRecordLocked(token);
+                if (record != null) {
+                    return record.getSessionPolicies();
+                }
+            }
+            return 0;
+        }
+
+        @Override
+        public void setSessionPolicies(MediaSession.Token token, int policies) {
+            final long callingIdentityToken = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    MediaSessionRecord record = getMediaSessionRecordLocked(token);
+                    FullUserRecord user = getFullUserRecordLocked(record.getUserId());
+                    if (record != null && user != null) {
+                        record.setSessionPolicies(policies);
+                        user.mPriorityStack.updateMediaButtonSessionIfNeeded();
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentityToken);
+            }
+        }
+
         // For MediaSession
         private int verifySessionsRequest(ComponentName componentName, int userId, final int pid,
                 final int uid) {

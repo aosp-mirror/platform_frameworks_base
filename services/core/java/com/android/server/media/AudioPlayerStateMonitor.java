@@ -166,7 +166,7 @@ class AudioPlayerStateMonitor {
      * Cleans up the sorted list of audio playback client UIDs with given {@param
      * mediaButtonSessionUid}.
      * <p>UIDs whose audio playback are inactive and have started before the media button session's
-     * audio playback cannot be the lastly played media app. So they won't needed anymore.
+     * audio playback cannot be the lastly played media app. So they won't be needed anymore.
      *
      * @param mediaButtonSessionUid UID of the media button session.
      */

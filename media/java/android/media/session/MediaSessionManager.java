@@ -913,6 +913,34 @@ public final class MediaSessionManager {
     }
 
     /**
+     * Get session policies of the specified {@link MediaSession.Token}.
+     *
+     * @hide
+     */
+    @Nullable
+    public int getSessionPolicies(@NonNull MediaSession.Token token) {
+        try {
+            return mService.getSessionPolicies(token);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get session policies", e);
+        }
+        return 0;
+    }
+
+    /**
+     * Set new session policies to the specified {@link MediaSession.Token}.
+     *
+     * @hide
+     */
+    public void setSessionPolicies(@NonNull MediaSession.Token token, @Nullable int policies) {
+        try {
+            mService.setSessionPolicies(token, policies);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set session policies", e);
+        }
+    }
+
+    /**
      * Listens for changes to the list of active sessions. This can be added
      * using {@link #addOnActiveSessionsChangedListener}.
      */
