@@ -3899,7 +3899,6 @@
   <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />
   <java-symbol type="dimen" name="resolver_max_collapsed_height_with_tabs" />
   <java-symbol type="bool" name="sharesheet_show_content_preview" />
-  <java-symbol type="dimen" name="resolver_tab_divider_bottom_padding" />
 
   <!-- Toast message for background started foreground service while-in-use permission restriction feature -->
   <java-symbol type="string" name="allow_while_in_use_permission_in_fgs" />
