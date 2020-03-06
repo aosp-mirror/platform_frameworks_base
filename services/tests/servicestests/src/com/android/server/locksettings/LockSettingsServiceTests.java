@@ -236,6 +236,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     @Test
     public void testSetLockCredential_forProfileWithSeparateChallenge_updatesCredentials()
             throws Exception {
+        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, true, null);
         initializeStorageWithCredential(
                 MANAGED_PROFILE_USER_ID,
                 newPattern("12345"),
