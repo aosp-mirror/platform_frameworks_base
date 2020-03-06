@@ -56,6 +56,7 @@ import com.android.server.net.NetworkPolicyManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -108,13 +109,13 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
     public void notifyChangeToContentObserver(Uri uri, int userHandle) {
         ContentObserver co = mMockInjector.mContentObservers.get(new Pair<>(uri, userHandle));
         if (co != null) {
-            co.onChange(false, uri, userHandle); // notify synchronously
+            co.onChange(false, Arrays.asList(uri), 0, userHandle); // notify synchronously
         }
 
         // Notify USER_ALL observer too.
         co = mMockInjector.mContentObservers.get(new Pair<>(uri, UserHandle.USER_ALL));
         if (co != null) {
-            co.onChange(false, uri, userHandle); // notify synchronously
+            co.onChange(false, Arrays.asList(uri), 0, userHandle); // notify synchronously
         }
     }
 

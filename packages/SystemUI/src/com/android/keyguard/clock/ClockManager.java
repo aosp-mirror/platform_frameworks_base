@@ -74,8 +74,9 @@ public final class ClockManager {
     private final ContentObserver mContentObserver =
             new ContentObserver(mMainHandler) {
                 @Override
-                public void onChange(boolean selfChange, Uri uri, int userId) {
-                    super.onChange(selfChange, uri, userId);
+                public void onChange(boolean selfChange, Iterable<Uri> uris,
+                        int flags, int userId) {
+                    super.onChange(selfChange, uris, userId);
                     if (Objects.equals(userId,
                             mCurrentUserObservable.getCurrentUser().getValue())) {
                         reload();

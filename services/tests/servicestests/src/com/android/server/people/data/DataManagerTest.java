@@ -366,7 +366,8 @@ public final class DataManagerTest {
 
         ContentObserver contentObserver = mDataManager.getContactsContentObserverForTesting(
                 USER_ID_PRIMARY);
-        contentObserver.onChange(false, ContactsContract.Contacts.CONTENT_URI, USER_ID_PRIMARY);
+        contentObserver.onChange(false, Arrays.asList(ContactsContract.Contacts.CONTENT_URI), 0,
+                USER_ID_PRIMARY);
 
         List<ConversationInfo> conversations = getConversationsInPrimary();
         assertEquals(1, conversations.size());
