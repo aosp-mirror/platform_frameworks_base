@@ -180,6 +180,8 @@
 
     <!-- Adding Controls to SystemUI -->
     <uses-permission android:name="android.permission.BIND_CONTROLS" />
+    <!-- Check foreground controls applications -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
     <!-- Quick Settings tile: Night Mode / Dark Theme -->
     <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE" />
@@ -685,6 +687,25 @@
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
         </activity>
+
+        <receiver android:name=".controls.management.ControlsRequestReceiver">
+            <intent-filter>
+                <action android:name="android.service.controls.action.ADD_CONTROL" />
+            </intent-filter>
+        </receiver>
+
+        <!-- started from ControlsFavoritingActivity -->
+        <activity
+            android:name=".controls.management.ControlsRequestDialog"
+            android:exported="true"
+            android:theme="@style/Theme.ControlsRequestDialog"
+            android:finishOnCloseSystemDialogs="true"
+            android:showForAllUsers="true"
+            android:clearTaskOnLaunch="true"
+            android:launchMode="singleTask"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:visibleToInstantApps="true"/>
 
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
