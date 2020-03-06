@@ -351,5 +351,7 @@ public class NotificationHistoryTest {
             HistoricalNotification postParcelNotification = parceledHistory.getNextNotification();
             assertThat(postParcelNotification).isEqualTo(expectedEntries.get(i));
         }
+        assertThat(parceledHistory.hasNextNotification()).isFalse();
+        assertThat(parceledHistory.getNextNotification()).isNull();
     }
 }

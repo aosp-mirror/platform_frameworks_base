@@ -31,7 +31,6 @@ import android.app.NotificationHistory;
 import android.app.NotificationHistory.HistoricalNotification;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Icon;
-import android.os.Handler;
 import android.os.UserManager;
 import android.provider.Settings;
 
@@ -40,7 +39,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,9 +56,9 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     UserManager mUserManager;
     @Mock
     NotificationHistoryDatabase mDb;
-    @Mock
-    Handler mHandler;
     List<UserInfo> mUsers;
+    int[] mProfiles;
+    int mProfileId = 11;
 
     NotificationHistoryManager mHistoryManager;
 
@@ -98,26 +96,32 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         UserInfo userSystem = new UserInfo();
         userSystem.id = USER_SYSTEM;
         mUsers.add(userSystem);
-        UserInfo userAll = new UserInfo();
-        userAll.id = MIN_SECONDARY_USER_ID;
-        mUsers.add(userAll);
-        mUsers.add(userAll);
+        UserInfo userFullSecondary = new UserInfo();
+        userFullSecondary.id = MIN_SECONDARY_USER_ID;
+        mUsers.add(userFullSecondary);
+        UserInfo userProfile = new UserInfo();
+        userProfile.id = mProfileId;
+        mUsers.add(userProfile);
         when(mUserManager.getUsers()).thenReturn(mUsers);
+
+        mProfiles = new int[] {userSystem.id, userProfile.id};
+        when(mUserManager.getProfileIds(userSystem.id, true)).thenReturn(mProfiles);
+        when(mUserManager.getProfileIds(userFullSecondary.id, true))
+                .thenReturn(new int[] {userFullSecondary.id});
+        when(mUserManager.getProfileIds(userProfile.id, true))
+                .thenReturn(new int[] {userProfile.id});
+
+        when(mUserManager.getProfileParent(userProfile.id)).thenReturn(userSystem);
+
+        NotificationHistoryDatabaseFactory.setTestingNotificationHistoryDatabase(mDb);
+
+        mHistoryManager = new NotificationHistoryManager(getContext(), null);
 
         for (UserInfo info : mUsers) {
             Settings.Secure.putIntForUser(getContext().getContentResolver(),
                     Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 1, info.id);
+            mHistoryManager.mSettingsObserver.update(null, info.id);
         }
-
-        NotificationHistoryDatabaseFactory.setTestingNotificationHistoryDatabase(mDb);
-
-        mHistoryManager = new NotificationHistoryManager(getContext(), mHandler);
-        mHistoryManager.onBootPhaseAppsCanStart();
-    }
-
-    @After
-    public void tearDown() {
-        mHistoryManager.onDestroy();
     }
 
     @Test
@@ -151,6 +155,31 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testOnUserUnlocked_historyDisabled_withProfile() {
+        // create a history
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isTrue();
+        mHistoryManager.onUserUnlocked(mProfileId);
+        assertThat(mHistoryManager.doesHistoryExistForUser(mProfileId)).isTrue();
+        // lock user
+        mHistoryManager.onUserStopped(USER_SYSTEM);
+        mHistoryManager.onUserStopped(mProfileId);
+
+        // turn off history
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+
+        // unlock user, verify that history is disabled for self and profile
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        mHistoryManager.onUserUnlocked(mProfileId);
+
+        assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isFalse();
+        assertThat(mHistoryManager.doesHistoryExistForUser(mProfileId)).isFalse();
+        verify(mDb, times(2)).disableHistory();
+    }
+
+    @Test
     public void testOnUserUnlocked_historyDisabledThenEnabled() {
         // create a history
         mHistoryManager.onUserUnlocked(USER_SYSTEM);
@@ -173,6 +202,37 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         mHistoryManager.onUserUnlocked(USER_SYSTEM);
 
         assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isTrue();
+        verify(mDb, never()).disableHistory();
+    }
+
+    @Test
+    public void testOnUserUnlocked_historyDisabledThenEnabled_multiProfile() {
+        // create a history
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isTrue();
+        mHistoryManager.onUserUnlocked(mProfileId);
+        assertThat(mHistoryManager.doesHistoryExistForUser(mProfileId)).isTrue();
+
+        // lock user
+        mHistoryManager.onUserStopped(USER_SYSTEM);
+        mHistoryManager.onUserStopped(mProfileId);
+
+        // turn off history
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+
+        // turn on history
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 1, USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+
+        // unlock user, verify that history is NOT disabled
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        mHistoryManager.onUserUnlocked(mProfileId);
+
+        assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isTrue();
+        assertThat(mHistoryManager.doesHistoryExistForUser(mProfileId)).isTrue();
         verify(mDb, never()).disableHistory();
     }
 
