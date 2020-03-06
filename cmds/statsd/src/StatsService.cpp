@@ -1196,13 +1196,14 @@ Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
     return Status::ok();
 }
 
-Status StatsService::registerPullAtomCallback(int32_t uid, int32_t atomTag, int64_t coolDownNs,
-                                    int64_t timeoutNs, const std::vector<int32_t>& additiveFields,
-                                    const shared_ptr<IPullAtomCallback>& pullerCallback) {
+Status StatsService::registerPullAtomCallback(int32_t uid, int32_t atomTag, int64_t coolDownMillis,
+                                              int64_t timeoutMillis,
+                                              const std::vector<int32_t>& additiveFields,
+                                              const shared_ptr<IPullAtomCallback>& pullerCallback) {
     ENFORCE_UID(AID_SYSTEM);
-
     VLOG("StatsService::registerPullAtomCallback called.");
-    mPullerManager->RegisterPullAtomCallback(uid, atomTag, coolDownNs, timeoutNs, additiveFields,
+    mPullerManager->RegisterPullAtomCallback(uid, atomTag, MillisToNano(coolDownMillis),
+                                             MillisToNano(timeoutMillis), additiveFields,
                                              pullerCallback);
     return Status::ok();
 }
