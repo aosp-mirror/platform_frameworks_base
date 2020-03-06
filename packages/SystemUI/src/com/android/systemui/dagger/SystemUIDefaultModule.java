@@ -23,6 +23,7 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
+import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -41,6 +42,7 @@ import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.ShadeControllerImpl;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryControllerImpl;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -124,4 +126,8 @@ public abstract class SystemUIDefaultModule {
     @Binds
     abstract DeviceProvisionedController bindDeviceProvisionedController(
             DeviceProvisionedControllerImpl deviceProvisionedController);
+
+    @Binds
+    abstract KeyguardViewController bindKeyguardViewController(
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager);
 }
