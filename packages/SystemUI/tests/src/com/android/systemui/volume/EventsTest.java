@@ -102,9 +102,9 @@ public class EventsTest extends SysuiTestCase {
                 assertEquals(mExpectedMetrics[1], logs.remove().getCategory());
             }
         }
-        Queue<UiEventLoggerFake.FakeUiEvent> events = mUiEventLogger.getLogs();
         if (mUiEvent != null) {
-            assertEquals(mUiEvent.getId(), events.remove().eventId);
+            assertEquals(1, mUiEventLogger.numLogs());
+            assertEquals(mUiEvent.getId(), mUiEventLogger.eventId(0));
         }
     }
 

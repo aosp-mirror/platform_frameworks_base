@@ -20,7 +20,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 
 import java.util.LinkedList;
-import java.util.Queue;
+import java.util.List;
 
 /**
  * Fake logger that queues up logged events for inspection.
@@ -52,10 +52,23 @@ public class UiEventLoggerFake implements UiEventLogger {
         }
     }
 
-    private Queue<FakeUiEvent> mLogs = new LinkedList<>();
+    private List<FakeUiEvent> mLogs = new LinkedList<>();
 
-    public Queue<FakeUiEvent> getLogs() {
+    /** Returns list of all logging events recorded. */
+    public List<FakeUiEvent> getLogs() {
         return mLogs;
+    }
+    /** Returns number of logging events recorded. */
+    public int numLogs() {
+        return mLogs.size();
+    }
+    /** Returns a particular logging event. */
+    public FakeUiEvent get(int index) {
+        return mLogs.get(index);
+    }
+    /** Returns event id (as integer) of a particular logging event. */
+    public int eventId(int index) {
+        return mLogs.get(index).eventId;
     }
 
     @Override
@@ -67,7 +80,7 @@ public class UiEventLoggerFake implements UiEventLogger {
     public void log(UiEventEnum event, int uid, String packageName) {
         final int eventId = event.getId();
         if (eventId > 0) {
-            mLogs.offer(new FakeUiEvent(eventId, uid, packageName));
+            mLogs.add(new FakeUiEvent(eventId, uid, packageName));
         }
     }
 
@@ -76,7 +89,7 @@ public class UiEventLoggerFake implements UiEventLogger {
             InstanceId instance) {
         final int eventId = event.getId();
         if (eventId > 0) {
-            mLogs.offer(new FakeUiEvent(eventId, uid, packageName, instance));
+            mLogs.add(new FakeUiEvent(eventId, uid, packageName, instance));
         }
     }
 }
