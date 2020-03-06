@@ -104,10 +104,7 @@ public final class AppSearchSchema {
      * a property.
      */
     public static final class PropertyConfig {
-        /**
-         * Physical data-types of the contents of the property.
-         * @hide
-         */
+        /** Physical data-types of the contents of the property. */
         // NOTE: The integer values of these constants must match the proto enum constants in
         // com.google.android.icing.proto.PropertyConfigProto.DataType.Code.
         @IntDef(prefix = {"DATA_TYPE_"}, value = {
@@ -136,10 +133,7 @@ public final class AppSearchSchema {
          */
         public static final int DATA_TYPE_DOCUMENT = 6;
 
-        /**
-         * The cardinality of the property (whether it is required, optional or repeated).
-         * @hide
-         */
+        /** The cardinality of the property (whether it is required, optional or repeated). */
         // NOTE: The integer values of these constants must match the proto enum constants in
         // com.google.android.icing.proto.PropertyConfigProto.Cardinality.Code.
         @IntDef(prefix = {"CARDINALITY_"}, value = {
@@ -159,10 +153,7 @@ public final class AppSearchSchema {
         /** Exactly one value [1]. */
         public static final int CARDINALITY_REQUIRED = 3;
 
-        /**
-         * Encapsulates the configurations on how AppSearch should query/index these terms.
-         * @hide
-         */
+        /** Encapsulates the configurations on how AppSearch should query/index these terms. */
         @IntDef(prefix = {"INDEXING_TYPE_"}, value = {
                 INDEXING_TYPE_NONE,
                 INDEXING_TYPE_EXACT_TERMS,
@@ -197,10 +188,7 @@ public final class AppSearchSchema {
          */
         public static final int INDEXING_TYPE_PREFIXES = 2;
 
-        /**
-         * Configures how tokens should be extracted from this property.
-         * @hide
-         */
+        /** Configures how tokens should be extracted from this property. */
         // NOTE: The integer values of these constants must match the proto enum constants in
         // com.google.android.icing.proto.IndexingConfig.TokenizerType.Code.
         @IntDef(prefix = {"TOKENIZER_TYPE_"}, value = {
