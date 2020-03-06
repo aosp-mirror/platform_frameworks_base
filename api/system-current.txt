@@ -5086,6 +5086,7 @@ package android.media.tv.tuner.filter {
     field public static final int TYPE_MMTP = 2; // 0x2
     field public static final int TYPE_TLV = 8; // 0x8
     field public static final int TYPE_TS = 1; // 0x1
+    field public static final int TYPE_UNDEFINED = 0; // 0x0
   }
 
   public interface FilterCallback {
