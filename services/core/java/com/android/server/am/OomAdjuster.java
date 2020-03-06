@@ -75,7 +75,6 @@ import android.app.ActivityManager;
 import android.app.ApplicationExitInfo;
 import android.app.usage.UsageEvents;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
@@ -149,12 +148,13 @@ public final class OomAdjuster {
      * capabilities.
      */
     @ChangeId
-    //TODO: change to @EnabledAfter when enforcing the feature.
-    @Disabled
+    @EnabledAfter(targetSdkVersion=android.os.Build.VERSION_CODES.Q)
     static final long CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID = 136219221L;
 
     //TODO: remove this when development is done.
     private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 31;
+    private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_CAMERA = 1 << 30;
+    private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 29;
 
     /**
      * For some direct access we need to power manager.
@@ -1513,10 +1513,12 @@ public final class OomAdjuster {
                     if (enabled) {
                         capabilityFromFGS |=
                                 (fgsType & FOREGROUND_SERVICE_TYPE_CAMERA)
-                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA : 0;
+                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                                        : TEMP_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
                         capabilityFromFGS |=
                                 (fgsType & FOREGROUND_SERVICE_TYPE_MICROPHONE)
-                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE : 0;
+                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
+                                        : TEMP_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
                     } else {
                         capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_CAMERA
                                 | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
