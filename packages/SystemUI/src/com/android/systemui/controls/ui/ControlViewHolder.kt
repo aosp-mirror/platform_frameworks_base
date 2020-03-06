@@ -25,7 +25,6 @@ import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.TemperatureControlTemplate
-import android.service.controls.templates.ThumbnailTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
 import android.util.Log
@@ -125,7 +124,6 @@ class ControlViewHolder(
             template is ToggleTemplate -> ToggleBehavior::class
             template is ToggleRangeTemplate -> ToggleRangeBehavior::class
             template is TemperatureControlTemplate -> TemperatureControlBehavior::class
-            template is ThumbnailTemplate -> StaticBehavior::class
             else -> DefaultBehavior::class
         }
     }
