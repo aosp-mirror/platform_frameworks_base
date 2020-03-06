@@ -233,6 +233,7 @@ public abstract class MediaRoute2ProviderService extends Service {
         String sessionId = sessionInfo.getId();
         synchronized (mSessionLock) {
             if (mSessionInfo.containsKey(sessionId)) {
+                // TODO: Notify failure to the requester, and throw exception if needed.
                 Log.w(TAG, "Ignoring duplicate session id.");
                 return;
             }
@@ -249,24 +250,6 @@ public abstract class MediaRoute2ProviderService extends Service {
             mRemoteCallback.notifySessionCreated(sessionInfo, requestId);
         } catch (RemoteException ex) {
             Log.w(TAG, "Failed to notify session created.");
-        }
-    }
-
-    /**
-     * Notifies clients of that the session could not be created.
-     *
-     * @param requestId id of the previous request to create the session provided in
-     *                  {@link #onCreateSession(long, String, String, Bundle)}.
-     * @see #onCreateSession(long, String, String, Bundle)
-     */
-    public final void notifySessionCreationFailed(long requestId) {
-        if (mRemoteCallback == null) {
-            return;
-        }
-        try {
-            mRemoteCallback.notifySessionCreationFailed(requestId);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Failed to notify session creation failed.");
         }
     }
 
@@ -364,7 +347,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * {@link Bundle} which contains how to control the session.
      * <p>
      * If you can't create the session or want to reject the request, call
-     * {@link #notifySessionCreationFailed(long)} with the given {@code requestId}.
+     * {@link #notifyRequestFailed(long, int)} with the given {@code requestId}.
      *
      * @param requestId the id of this request
      * @param packageName the package name of the application that selected the route
