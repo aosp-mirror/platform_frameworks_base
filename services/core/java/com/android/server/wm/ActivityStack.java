@@ -1469,11 +1469,11 @@ class ActivityStack extends Task {
 
         if (resumeNext) {
             final ActivityStack topStack = mRootWindowContainer.getTopDisplayFocusedStack();
-            if (!topStack.shouldSleepOrShutDownActivities()) {
+            if (topStack != null && !topStack.shouldSleepOrShutDownActivities()) {
                 mRootWindowContainer.resumeFocusedStacksTopActivities(topStack, prev, null);
             } else {
                 checkReadyForSleep();
-                ActivityRecord top = topStack.topRunningActivity();
+                final ActivityRecord top = topStack != null ? topStack.topRunningActivity() : null;
                 if (top == null || (prev != null && top != prev)) {
                     // If there are no more activities available to run, do resume anyway to start
                     // something. Also if the top activity on the stack is not the just paused

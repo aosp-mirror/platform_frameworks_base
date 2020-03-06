@@ -1104,8 +1104,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // If this is coming from the currently resumed activity, it is
             // effectively saying that app switches are allowed at this point.
             final ActivityStack stack = getTopDisplayFocusedStack();
-            if (stack.mResumedActivity != null &&
-                    stack.mResumedActivity.info.applicationInfo.uid == Binder.getCallingUid()) {
+            if (stack != null && stack.mResumedActivity != null
+                    && stack.mResumedActivity.info.applicationInfo.uid == Binder.getCallingUid()) {
                 mAppSwitchesAllowedTime = 0;
             }
         }
@@ -1951,8 +1951,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isTopActivityImmersive() {
         enforceNotIsolatedCaller("isTopActivityImmersive");
         synchronized (mGlobalLock) {
-            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivity();
-            return (r != null) ? r.immersive : false;
+            final ActivityStack topFocusedStack = getTopDisplayFocusedStack();
+            if (topFocusedStack == null) {
+                return false;
+            }
+
+            final ActivityRecord r = topFocusedStack.topRunningActivity();
+            return r != null && r.immersive;
         }
     }
 
@@ -1981,7 +1986,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public int getFrontActivityScreenCompatMode() {
         enforceNotIsolatedCaller("getFrontActivityScreenCompatMode");
         synchronized (mGlobalLock) {
-            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivity();
+            final ActivityStack stack = getTopDisplayFocusedStack();
+            final ActivityRecord r = stack != null ? stack.topRunningActivity() : null;
             if (r == null) {
                 return ActivityManager.COMPAT_MODE_UNKNOWN;
             }
@@ -1995,7 +2001,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "setFrontActivityScreenCompatMode");
         ApplicationInfo ai;
         synchronized (mGlobalLock) {
-            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivity();
+            final ActivityStack stack = getTopDisplayFocusedStack();
+            final ActivityRecord r = stack != null ? stack.topRunningActivity() : null;
             if (r == null) {
                 Slog.w(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
                 return;
@@ -2383,7 +2390,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                getTopDisplayFocusedStack().unhandledBackLocked();
+                final ActivityStack topFocusedStack = getTopDisplayFocusedStack();
+                if (topFocusedStack != null) {
+                    topFocusedStack.unhandledBackLocked();
+                }
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -3616,7 +3626,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "enqueueAssistContext()");
 
         synchronized (mGlobalLock) {
-            ActivityRecord activity = getTopDisplayFocusedStack().getTopNonFinishingActivity();
+            final ActivityStack stack = getTopDisplayFocusedStack();
+            ActivityRecord activity = stack != null ? stack.getTopNonFinishingActivity() : null;
             if (activity == null) {
                 Slog.w(TAG, "getAssistContextExtras failed: no top activity");
                 return null;
@@ -7037,9 +7048,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     mRootWindowContainer.dumpDisplayConfigs(pw, "  ");
                 }
                 if (dumpAll) {
-                    if (dumpPackage == null) {
-                        pw.println("  mConfigWillChange: "
-                                + getTopDisplayFocusedStack().mConfigWillChange);
+                    final ActivityStack topFocusedStack = getTopDisplayFocusedStack();
+                    if (dumpPackage == null && topFocusedStack != null) {
+                        pw.println("  mConfigWillChange: " + topFocusedStack.mConfigWillChange);
                     }
                     if (mCompatModePackages.getPackages().size() > 0) {
                         boolean printed = false;
@@ -7120,7 +7131,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 if (dumpPackage == null) {
                     getGlobalConfiguration().dumpDebug(proto, GLOBAL_CONFIGURATION);
-                    proto.write(CONFIG_WILL_CHANGE, getTopDisplayFocusedStack().mConfigWillChange);
+                    final ActivityStack topFocusedStack = getTopDisplayFocusedStack();
+                    if (topFocusedStack != null) {
+                        proto.write(CONFIG_WILL_CHANGE, topFocusedStack.mConfigWillChange);
+                    }
                     writeSleepStateToProto(proto, wakeFullness, testPssMode);
                     if (mRunningVoice != null) {
                         final long vrToken = proto.start(
