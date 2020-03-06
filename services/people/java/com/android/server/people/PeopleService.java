@@ -72,13 +72,13 @@ public class PeopleService extends SystemService {
     }
 
     @Override
-    public void onUserUnlocking(@NonNull TargetUser targetUser) {
-        mDataManager.onUserUnlocked(targetUser.getUserIdentifier());
+    public void onUserUnlocked(@NonNull TargetUser user) {
+        mDataManager.onUserUnlocked(user.getUserIdentifier());
     }
 
     @Override
-    public void onUserStopping(@NonNull TargetUser targetUser) {
-        mDataManager.onUserStopped(targetUser.getUserIdentifier());
+    public void onUserStopping(@NonNull TargetUser user) {
+        mDataManager.onUserStopping(user.getUserIdentifier());
     }
 
     @VisibleForTesting
