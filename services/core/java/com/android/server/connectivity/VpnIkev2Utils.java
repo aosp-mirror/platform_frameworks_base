@@ -85,16 +85,12 @@ import java.util.List;
 public class VpnIkev2Utils {
     static IkeSessionParams buildIkeSessionParams(
             @NonNull Context context, @NonNull Ikev2VpnProfile profile, @NonNull Network network) {
-        // TODO(b/149356682): Update this based on new IKE API. Only numeric addresses supported
-        //                    until then. All others throw IAE (caught by caller).
-        final InetAddress serverAddr = InetAddresses.parseNumericAddress(profile.getServerAddr());
         final IkeIdentification localId = parseIkeIdentification(profile.getUserIdentity());
         final IkeIdentification remoteId = parseIkeIdentification(profile.getServerAddr());
 
-        // TODO(b/149356682): Update this based on new IKE API.
         final IkeSessionParams.Builder ikeOptionsBuilder =
                 new IkeSessionParams.Builder(context)
-                        .setServerAddress(serverAddr)
+                        .setServerHostname(profile.getServerAddr())
                         .setNetwork(network)
                         .setLocalIdentification(localId)
                         .setRemoteIdentification(remoteId);
