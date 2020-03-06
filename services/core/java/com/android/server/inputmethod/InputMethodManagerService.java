@@ -2480,6 +2480,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     void onSessionCreated(IInputMethod method, IInputMethodSession session,
             InputChannel channel) {
         synchronized (mMethodMap) {
+            if (mUserSwitchHandlerTask != null) {
+                // We have a pending user-switching task so it's better to just ignore this session.
+                channel.dispose();
+                return;
+            }
             if (mCurMethod != null && method != null
                     && mCurMethod.asBinder() == method.asBinder()) {
                 if (mCurClient != null) {
