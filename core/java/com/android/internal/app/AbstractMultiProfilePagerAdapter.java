@@ -327,7 +327,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
                 return false;
             }
         }
-        showListView(activeListAdapter);
         return activeListAdapter.rebuildList(doPostProcessing);
     }
 
@@ -408,7 +407,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         emptyStateView.findViewById(R.id.resolver_empty_state_progress).setVisibility(View.GONE);
     }
 
-    private void showListView(ResolverListAdapter activeListAdapter) {
+    protected void showListView(ResolverListAdapter activeListAdapter) {
         ProfileDescriptor descriptor = getItem(
                 userHandleToPageIndex(activeListAdapter.getUserHandle()));
         descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.VISIBLE);
