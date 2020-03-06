@@ -23,6 +23,18 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Device types for {@link Control}.
+ *
+ * Each {@link Control} declares a type for the device they represent. This type will be used to
+ * determine icons and colors.
+ * <p>
+ * The type of the device may change on status updates of the {@link Control}. For example, a
+ * device of {@link #TYPE_OUTLET} could be determined by the {@link ControlsProviderService} to be
+ * a {@link #TYPE_COFFEE_MAKER} and change the type for that {@link Control}, therefore possibly
+ * changing icon and color.
+ * <p>
+ * In case the device type is not know by the application but the basic function is, or there is no
+ * provided type, one of the generic types (those starting with {@code TYPE_GENERIC}) can be used.
+ * These will provide an identifiable icon based on the basic function of the device.
  */
 public class DeviceTypes {
 
