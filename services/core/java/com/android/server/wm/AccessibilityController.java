@@ -1392,7 +1392,7 @@ final class AccessibilityController {
                     tempWindowStatesList.add(w);
                 }
             }, false /* traverseTopToBottom */);
-            // Insert the re-parented windows in another display on top of their parents in
+            // Insert the re-parented windows in another display below their parents in
             // default display.
             mService.mRoot.forAllWindows(w -> {
                 final WindowState parentWindow = findRootDisplayParentWindow(w);
