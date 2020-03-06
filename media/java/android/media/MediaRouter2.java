@@ -429,11 +429,11 @@ public class MediaRouter2 {
         if (stub != null) {
             try {
                 mMediaRouterService.requestCreateSessionWithRouter2(
-                        stub, route, requestId, controllerHints);
+                        stub, requestId, route, controllerHints);
             } catch (RemoteException ex) {
                 Log.e(TAG, "transfer: Unable to request to create controller.", ex);
                 mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
-                        MediaRouter2.this, null, requestId));
+                        MediaRouter2.this, requestId, null));
             }
         }
     }
@@ -559,7 +559,7 @@ public class MediaRouter2 {
      * <p>
      * Pass {@code null} to sessionInfo for the failure case.
      */
-    void createControllerOnHandler(@Nullable RoutingSessionInfo sessionInfo, int requestId) {
+    void createControllerOnHandler(int requestId, @Nullable RoutingSessionInfo sessionInfo) {
         ControllerCreationRequest matchingRequest = null;
         for (ControllerCreationRequest request : mControllerCreationRequests) {
             if (request.mRequestId == requestId) {
@@ -1378,9 +1378,9 @@ public class MediaRouter2 {
         }
 
         @Override
-        public void notifySessionCreated(@Nullable RoutingSessionInfo sessionInfo, int requestId) {
+        public void notifySessionCreated(int requestId, @Nullable RoutingSessionInfo sessionInfo) {
             mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
-                    MediaRouter2.this, sessionInfo, requestId));
+                    MediaRouter2.this, requestId, sessionInfo));
         }
 
         @Override

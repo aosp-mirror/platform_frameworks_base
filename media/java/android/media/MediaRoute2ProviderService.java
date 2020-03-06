@@ -78,11 +78,11 @@ public abstract class MediaRoute2ProviderService extends Service {
     public static final String SERVICE_INTERFACE = "android.media.MediaRoute2ProviderService";
 
     /**
-     * The request ID to pass {@link #notifySessionCreated(RoutingSessionInfo, long)}
+     * The request ID to pass {@link #notifySessionCreated(long, RoutingSessionInfo)}
      * when {@link MediaRoute2ProviderService} created a session although there was no creation
      * request.
      *
-     * @see #notifySessionCreated(RoutingSessionInfo, long)
+     * @see #notifySessionCreated(long, RoutingSessionInfo)
      */
     public static final long REQUEST_ID_NONE = 0;
 
@@ -218,16 +218,16 @@ public abstract class MediaRoute2ProviderService extends Service {
      * If this session is created without any creation request, use {@link #REQUEST_ID_NONE}
      * as the request ID.
      *
-     * @param sessionInfo information of the new session.
-     *                    The {@link RoutingSessionInfo#getId() id} of the session must be unique.
      * @param requestId id of the previous request to create this session provided in
      *                  {@link #onCreateSession(long, String, String, Bundle)}. Can be
      *                  {@link #REQUEST_ID_NONE} if this session is created without any request.
+     * @param sessionInfo information of the new session.
+     *                    The {@link RoutingSessionInfo#getId() id} of the session must be unique.
      * @see #onCreateSession(long, String, String, Bundle)
      * @see #getSessionInfo(String)
      */
-    public final void notifySessionCreated(@NonNull RoutingSessionInfo sessionInfo,
-            long requestId) {
+    public final void notifySessionCreated(long requestId,
+            @NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
         String sessionId = sessionInfo.getId();
@@ -247,7 +247,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             // TODO: Calling binder calls in multiple thread may cause timing issue.
             //       Consider to change implementations to avoid the problems.
             //       For example, post binder calls, always send all sessions at once, etc.
-            mRemoteCallback.notifySessionCreated(sessionInfo, requestId);
+            mRemoteCallback.notifySessionCreated(requestId, sessionInfo);
         } catch (RemoteException ex) {
             Log.w(TAG, "Failed to notify session created.");
         }
@@ -337,7 +337,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      * Called when the service receives a request to create a session.
      * <p>
      * You should create and maintain your own session and notifies the client of
-     * session info. Call {@link #notifySessionCreated(RoutingSessionInfo, long)}
+     * session info. Call {@link #notifySessionCreated(long, RoutingSessionInfo)}
      * with the given {@code requestId} to notify the information of a new session.
      * The created session must have the same route feature and must include the given route
      * specified by {@code routeId}.
@@ -504,7 +504,7 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void setRouteVolume(String routeId, int volume, long requestId) {
+        public void setRouteVolume(long requestId, String routeId, int volume) {
             if (!checkCallerisSystem()) {
                 return;
             }
@@ -513,7 +513,7 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void requestCreateSession(String packageName, String routeId, long requestId,
+        public void requestCreateSession(long requestId, String packageName, String routeId,
                 @Nullable Bundle requestCreateSession) {
             if (!checkCallerisSystem()) {
                 return;
@@ -524,7 +524,7 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void selectRoute(String sessionId, String routeId, long requestId) {
+        public void selectRoute(long requestId, String sessionId, String routeId) {
             if (!checkCallerisSystem()) {
                 return;
             }
@@ -537,7 +537,7 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void deselectRoute(String sessionId, String routeId, long requestId) {
+        public void deselectRoute(long requestId, String sessionId, String routeId) {
             if (!checkCallerisSystem()) {
                 return;
             }
@@ -550,7 +550,7 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void transferToRoute(String sessionId, String routeId, long requestId) {
+        public void transferToRoute(long requestId, String sessionId, String routeId) {
             if (!checkCallerisSystem()) {
                 return;
             }
@@ -563,7 +563,7 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void setSessionVolume(String sessionId, int volume, long requestId) {
+        public void setSessionVolume(long requestId, String sessionId, int volume) {
             if (!checkCallerisSystem()) {
                 return;
             }
@@ -572,7 +572,7 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void releaseSession(String sessionId, long requestId) {
+        public void releaseSession(long requestId, String sessionId) {
             if (!checkCallerisSystem()) {
                 return;
             }
