@@ -1138,9 +1138,10 @@ public class BiometricService extends SystemService {
 
             biometricStatus = result.second;
 
-            Slog.d(TAG, "Authenticator ID: " + authenticator.id
+            Slog.d(TAG, "Package: " + opPackageName
+                    + " Authenticator ID: " + authenticator.id
                     + " Modality: " + authenticator.modality
-                    + " ReportedModality: " + result.first
+                    + " Reported Modality: " + result.first
                     + " Status: " + biometricStatus);
 
             if (firstBiometricModality == TYPE_NONE) {
