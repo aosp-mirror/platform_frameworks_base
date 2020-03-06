@@ -645,7 +645,7 @@ public class ResolverActivity extends Activity implements
 
         final DisplayResolveInfo dri =
                 mMultiProfilePagerAdapter.getActiveListAdapter().getOtherProfile();
-        if (dri != null && !ENABLE_TABBED_VIEW) {
+        if (dri != null && !shouldShowTabs()) {
             mProfileView.setVisibility(View.VISIBLE);
             View text = mProfileView.findViewById(R.id.profile_button);
             if (!(text instanceof TextView)) {
@@ -854,6 +854,11 @@ public class ResolverActivity extends Activity implements
 
     private void setAlwaysButtonEnabled(boolean hasValidSelection, int checkedPos,
             boolean filtered) {
+        if (mMultiProfilePagerAdapter.getCurrentUserHandle() != getUser()) {
+            // Never allow the inactive profile to always open an app.
+            mAlwaysButton.setEnabled(false);
+            return;
+        }
         boolean enabled = false;
         ResolveInfo ri = null;
         if (hasValidSelection) {
@@ -877,19 +882,21 @@ public class ResolverActivity extends Activity implements
             }
         }
 
-        ActivityInfo activityInfo = ri.activityInfo;
+        if (ri != null) {
+            ActivityInfo activityInfo = ri.activityInfo;
 
-        boolean hasRecordPermission =
-                mPm.checkPermission(android.Manifest.permission.RECORD_AUDIO,
-                        activityInfo.packageName)
-                    == android.content.pm.PackageManager.PERMISSION_GRANTED;
+            boolean hasRecordPermission =
+                    mPm.checkPermission(android.Manifest.permission.RECORD_AUDIO,
+                            activityInfo.packageName)
+                            == android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-        if (!hasRecordPermission) {
-            // OK, we know the record permission, is this a capture device
-            boolean hasAudioCapture =
-                    getIntent().getBooleanExtra(
-                            ResolverActivity.EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
-            enabled = !hasAudioCapture;
+            if (!hasRecordPermission) {
+                // OK, we know the record permission, is this a capture device
+                boolean hasAudioCapture =
+                        getIntent().getBooleanExtra(
+                                ResolverActivity.EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
+                enabled = !hasAudioCapture;
+            }
         }
         mAlwaysButton.setEnabled(enabled);
     }
@@ -1331,7 +1338,7 @@ public class ResolverActivity extends Activity implements
         }
         // We partially rebuild the inactive adapter to determine if we should auto launch
         boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
-        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+        if (shouldShowTabs()) {
             boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false);
             rebuildCompleted = rebuildCompleted && rebuildInactiveCompleted;
         }
@@ -1567,8 +1574,24 @@ public class ResolverActivity extends Activity implements
 
         viewPager.setVisibility(View.VISIBLE);
         tabHost.setCurrentTab(mMultiProfilePagerAdapter.getCurrentPage());
-        mMultiProfilePagerAdapter.setOnProfileSelectedListener(tabHost::setCurrentTab);
+        mMultiProfilePagerAdapter.setOnProfileSelectedListener(
+                index -> {
+                    tabHost.setCurrentTab(index);
+                    resetButtonBar();
+                    resetCheckedItem();
+                });
         findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
+    }
+
+    private void resetCheckedItem() {
+        if (!isIntentPicker()) {
+            return;
+        }
+        mLastSelected = ListView.INVALID_POSITION;
+        ListView inactiveListView = (ListView) mMultiProfilePagerAdapter.getInactiveAdapterView();
+        if (inactiveListView.getCheckedItemCount() > 0) {
+            inactiveListView.setItemChecked(inactiveListView.getCheckedItemPosition(), false);
+        }
     }
 
     private void resetTabsHeaderStyle(TabWidget tabWidget) {
@@ -1677,6 +1700,10 @@ public class ResolverActivity extends Activity implements
     }
 
     private void resetAlwaysOrOnceButtonBar() {
+        // Disable both buttons initially
+        setAlwaysButtonEnabled(false, ListView.INVALID_POSITION, false);
+        mOnceButton.setEnabled(false);
+
         int filteredPosition = mMultiProfilePagerAdapter.getActiveListAdapter()
                 .getFilteredPosition();
         if (useLayoutWithDefault() && filteredPosition != ListView.INVALID_POSITION) {

@@ -38,7 +38,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="14dp"
         android:layout_weight="1"
-        android:textColor="?attr/textColorPrimary"/>
+        android:textSize="20sp"
+        android:textColor="?attr/textColorPrimary"
+        android:fontFamily="sans-serif-medium"/>
 
     <FrameLayout
         android:id="@+id/accessibility_button_target_item_container"

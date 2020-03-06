@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,6 +28,7 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.media.PlaybackParams;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -56,6 +58,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Central system API to the overall TV input framework (TIF) architecture, which arbitrates
@@ -1743,8 +1746,8 @@ public final class TvInputManager {
      * <p>Otherwise default priority will be applied.
      *
      * @param deviceId The device ID to acquire Hardware for.
-     * @param callback A callback to receive updates on Hardware.
      * @param info The TV input which will use the acquired Hardware.
+     * @param callback A callback to receive updates on Hardware.
      * @return Hardware on success, {@code null} otherwise.
      *
      * @hide
@@ -1755,8 +1758,12 @@ public final class TvInputManager {
             @NonNull final HardwareCallback callback) {
         Preconditions.checkNotNull(info);
         Preconditions.checkNotNull(callback);
-        return acquireTvInputHardwareInternal(deviceId, info, callback, null,
-                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_LIVE);
+        return acquireTvInputHardwareInternal(deviceId, info, null,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_LIVE, new Executor() {
+                    public void execute(Runnable r) {
+                        r.run();
+                    }
+                }, callback);
     }
 
     /**
@@ -1767,12 +1774,13 @@ public final class TvInputManager {
      * request.
      *
      * @param deviceId The device ID to acquire Hardware for.
-     * @param callback A callback to receive updates on Hardware.
      * @param info The TV input which will use the acquired Hardware.
      * @param tvInputSessionId a String returned to TIS when the session was created.
      *        {@see TvInputService#onCreateSession(String, String)}. If null, the client will be
      *        treated as a background app.
      * @param priorityHint The use case of the client. {@see TvInputService#PriorityHintUseCaseType}
+     * @param executor the executor on which the listener would be invoked.
+     * @param callback A callback to receive updates on Hardware.
      * @return Hardware on success, {@code null} otherwise. When the TRM decides to not grant
      *         resource, null is returned and the {@link IllegalStateException} is thrown with
      *         "No enough resources".
@@ -1783,28 +1791,40 @@ public final class TvInputManager {
     @Nullable
     @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
     public Hardware acquireTvInputHardware(int deviceId, @NonNull TvInputInfo info,
-            @NonNull final HardwareCallback callback,
             @Nullable String tvInputSessionId,
-            @TvInputService.PriorityHintUseCaseType int priorityHint) {
+            @TvInputService.PriorityHintUseCaseType int priorityHint,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull final HardwareCallback callback) {
         Preconditions.checkNotNull(info);
         Preconditions.checkNotNull(callback);
-        return acquireTvInputHardwareInternal(deviceId, info, callback,
-                tvInputSessionId, priorityHint);
+        return acquireTvInputHardwareInternal(deviceId, info, tvInputSessionId, priorityHint,
+                executor, callback);
     }
 
     private Hardware acquireTvInputHardwareInternal(int deviceId, TvInputInfo info,
-             final HardwareCallback callback, String tvInputSessionId, int priorityHint) {
+            String tvInputSessionId, int priorityHint,
+            Executor executor, final HardwareCallback callback) {
         try {
             return new Hardware(
                     mService.acquireTvInputHardware(deviceId, new ITvInputHardwareCallback.Stub() {
                 @Override
                 public void onReleased() {
-                    callback.onReleased();
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onReleased());
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                 }
 
                 @Override
                 public void onStreamConfigChanged(TvStreamConfig[] configs) {
-                    callback.onStreamConfigChanged(configs);
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onStreamConfigChanged(configs));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                 }
                     }, info, mUserId, tvInputSessionId, priorityHint));
         } catch (RemoteException e) {

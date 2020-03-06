@@ -81,11 +81,6 @@ public class AssistManager {
         void onGestureCompletion(float velocity);
 
         /**
-         * Called with the Bundle from VoiceInteractionSessionListener.onSetUiHints.
-         */
-        void processBundle(Bundle hints);
-
-        /**
          * Hides any SysUI for the assistant, but _does not_ close the assistant itself.
          */
         void hide();

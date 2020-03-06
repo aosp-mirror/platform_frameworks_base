@@ -656,27 +656,45 @@
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
-    <style name="Control.Spinner.Header" parent="@*android:style/Widget.DeviceDefault.Spinner.DropDown">
-        <item name="android:textSize">25sp</item>
+    <style name="Control" />
+
+    <style name="Control.Spinner">
+        <item name="android:textSize">@dimen/control_header_text_size</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="Control.Spinner.Header">
+        <item name="android:background">@drawable/control_spinner_background</item>
         <item name="android:textColor">@color/control_primary_text</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="Control.Spinner.Item">
+        <item name="android:textColor">@color/control_secondary_text</item>
     </style>
 
     <style name="TextAppearance.Control.Status">
-        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:textSize">@dimen/control_text_size</item>
         <item name="android:textColor">@color/control_primary_text</item>
     </style>
 
     <style name="TextAppearance.Control.Title">
-        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:textSize">@dimen/control_text_size</item>
+        <item name="android:lineSpacingExtra">6sp</item>
         <item name="android:textColor">@color/control_primary_text</item>
     </style>
     <style name="TextAppearance.Control.Subtitle">
-        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:textSize">@dimen/control_text_size</item>
         <item name="android:textColor">@color/control_secondary_text</item>
     </style>
-    <style name="Control.ListPopupWindow" parent="@android:style/Widget.ListPopupWindow">
+    <style name="Control.ListPopupWindow" parent="@*android:style/Widget.DeviceDefault.ListPopupWindow">
         <item name="android:overlapAnchor">true</item>
+
+        <!-- used to override dark/light theming -->
+        <item name="*android:colorPopupBackground">@color/control_list_popup_background</item>
     </style>
-    
 </resources>

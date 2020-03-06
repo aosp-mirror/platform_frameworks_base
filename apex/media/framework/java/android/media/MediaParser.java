@@ -54,6 +54,7 @@ import com.google.android.exoplayer2.video.ColorInfo;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashMap;
@@ -119,7 +120,7 @@ import java.util.Map;
  *
  *     &#64;Override
  *     public void onSampleData(int trackIndex, &#64;NonNull InputReader inputReader)
- *         throws IOException, InterruptedException {
+ *         throws IOException {
  *       int numberOfBytesToRead = (int) inputReader.getLength();
  *       if (videoTrackIndex != trackIndex) {
  *         // Discard contents.
@@ -310,8 +311,7 @@ public final class MediaParser {
          *     of the input has been reached.
          * @throws java.io.IOException If an error occurs reading from the source.
          */
-        int read(@NonNull byte[] buffer, int offset, int readLength)
-                throws IOException, InterruptedException;
+        int read(@NonNull byte[] buffer, int offset, int readLength) throws IOException;
 
         /** Returns the current read position (byte offset) in the stream. */
         long getPosition();
@@ -373,11 +373,8 @@ public final class MediaParser {
          * @param trackIndex The index of the track to which the sample data corresponds.
          * @param inputReader The {@link InputReader} from which to read the data.
          * @throws IOException If an exception occurs while reading from {@code inputReader}.
-         * @throws InterruptedException If an interruption occurs while reading from {@code
-         *     inputReader}.
          */
-        void onSampleData(int trackIndex, @NonNull InputReader inputReader)
-                throws IOException, InterruptedException;
+        void onSampleData(int trackIndex, @NonNull InputReader inputReader) throws IOException;
 
         /**
          * Called once all the data of a sample has been passed to {@link #onSampleData}.
@@ -717,8 +714,7 @@ public final class MediaParser {
      * @throws UnrecognizedInputFormatException If the format cannot be recognized by any of the
      *     underlying parser implementations.
      */
-    public boolean advance(@NonNull SeekableInputReader seekableInputReader)
-            throws IOException, InterruptedException {
+    public boolean advance(@NonNull SeekableInputReader seekableInputReader) throws IOException {
         if (mExtractorInput == null) {
             // TODO: For efficiency, the same implementation should be used, by providing a
             // clearBuffers() method, or similar.
@@ -748,8 +744,10 @@ public final class MediaParser {
                         }
                     } catch (EOFException e) {
                         // Do nothing.
-                    } catch (IOException | InterruptedException e) {
-                        throw new IllegalStateException(e);
+                    } catch (InterruptedException e) {
+                        // TODO: Remove this exception replacement once we update the ExoPlayer
+                        // version.
+                        throw new InterruptedIOException();
                     } finally {
                         mExtractorInput.resetPeekPosition();
                     }
@@ -767,7 +765,13 @@ public final class MediaParser {
         }
 
         mPositionHolder.position = seekableInputReader.getPosition();
-        int result = mExtractor.read(mExtractorInput, mPositionHolder);
+        int result = 0;
+        try {
+            result = mExtractor.read(mExtractorInput, mPositionHolder);
+        } catch (InterruptedException e) {
+            // TODO: Remove this exception replacement once we update the ExoPlayer version.
+            throw new InterruptedIOException();
+        }
         if (result == Extractor.RESULT_END_OF_INPUT) {
             return false;
         }
@@ -853,13 +857,7 @@ public final class MediaParser {
 
         @Override
         public int read(byte[] buffer, int offset, int readLength) throws IOException {
-            // TODO: Reevaluate interruption in Input.
-            try {
-                return mInputReader.read(buffer, offset, readLength);
-            } catch (InterruptedException e) {
-                // TODO: Remove.
-                throw new RuntimeException();
-            }
+            return mInputReader.read(buffer, offset, readLength);
         }
 
         @Override
@@ -926,7 +924,7 @@ public final class MediaParser {
 
         @Override
         public int sampleData(ExtractorInput input, int length, boolean allowEndOfInput)
-                throws IOException, InterruptedException {
+                throws IOException {
             mScratchExtractorInputAdapter.setExtractorInput(input, length);
             long positionBeforeReading = mScratchExtractorInputAdapter.getPosition();
             mOutputConsumer.onSampleData(mTrackIndex, mScratchExtractorInputAdapter);
@@ -938,7 +936,7 @@ public final class MediaParser {
             mScratchParsableByteArrayAdapter.resetWithByteArray(data, length);
             try {
                 mOutputConsumer.onSampleData(mTrackIndex, mScratchParsableByteArrayAdapter);
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 // Unexpected.
                 throw new RuntimeException(e);
             }
@@ -967,9 +965,14 @@ public final class MediaParser {
         // Input implementation.
 
         @Override
-        public int read(byte[] buffer, int offset, int readLength)
-                throws IOException, InterruptedException {
-            int readBytes = mExtractorInput.read(buffer, offset, readLength);
+        public int read(byte[] buffer, int offset, int readLength) throws IOException {
+            int readBytes = 0;
+            try {
+                readBytes = mExtractorInput.read(buffer, offset, readLength);
+            } catch (InterruptedException e) {
+                // TODO: Remove this exception replacement once we update the ExoPlayer version.
+                throw new InterruptedIOException();
+            }
             mCurrentPosition += readBytes;
             return readBytes;
         }

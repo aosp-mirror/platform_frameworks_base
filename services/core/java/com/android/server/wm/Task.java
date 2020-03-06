@@ -2120,8 +2120,29 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
+            @NonNull Configuration parentConfig, @Nullable DisplayInfo overrideDisplayInfo) {
+        if (overrideDisplayInfo != null) {
+            // Make sure the screen related configs can be computed by the provided display info.
+            inOutConfig.windowConfiguration.setAppBounds(null);
+            inOutConfig.screenLayout = Configuration.SCREENLAYOUT_UNDEFINED;
+            inOutConfig.screenWidthDp = Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+            inOutConfig.screenHeightDp = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+        }
+        computeConfigResourceOverrides(inOutConfig, parentConfig, overrideDisplayInfo,
+                null /* compatInsets */);
+    }
+
+    void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig) {
-        computeConfigResourceOverrides(inOutConfig, parentConfig, null /* compatInsets */);
+        computeConfigResourceOverrides(inOutConfig, parentConfig, null /* overrideDisplayInfo */,
+                null /* compatInsets */);
+    }
+
+    void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
+            @NonNull Configuration parentConfig,
+            @Nullable ActivityRecord.CompatDisplayInsets compatInsets) {
+        computeConfigResourceOverrides(inOutConfig, parentConfig, null /* overrideDisplayInfo */,
+                compatInsets);
     }
 
     /**
@@ -2133,7 +2154,7 @@ class Task extends WindowContainer<WindowContainer> {
      * just be inherited from the parent configuration.
      **/
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
-            @NonNull Configuration parentConfig,
+            @NonNull Configuration parentConfig, @Nullable DisplayInfo overrideDisplayInfo,
             @Nullable ActivityRecord.CompatDisplayInsets compatInsets) {
         int windowingMode = inOutConfig.windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
@@ -2176,9 +2197,11 @@ class Task extends WindowContainer<WindowContainer> {
             if (insideParentBounds && WindowConfiguration.isFloating(windowingMode)) {
                 mTmpNonDecorBounds.set(mTmpFullBounds);
                 mTmpStableBounds.set(mTmpFullBounds);
-            } else if (insideParentBounds && getDisplayContent() != null) {
-                final DisplayInfo di = new DisplayInfo();
-                getDisplayContent().mDisplay.getDisplayInfo(di);
+            } else if (insideParentBounds
+                    && (overrideDisplayInfo != null || getDisplayContent() != null)) {
+                final DisplayInfo di = overrideDisplayInfo != null
+                        ? overrideDisplayInfo
+                        : getDisplayContent().getDisplayInfo();
 
                 // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen
                 // area, i.e. the screen area without the system bars.
@@ -2195,7 +2218,7 @@ class Task extends WindowContainer<WindowContainer> {
                 if (rotation != ROTATION_UNDEFINED && compatInsets != null) {
                     mTmpNonDecorBounds.set(mTmpFullBounds);
                     mTmpStableBounds.set(mTmpFullBounds);
-                    compatInsets.getDisplayBoundsByRotation(mTmpBounds, rotation);
+                    compatInsets.getBoundsByRotation(mTmpBounds, rotation);
                     intersectWithInsetsIfFits(mTmpNonDecorBounds, mTmpBounds,
                             compatInsets.mNonDecorInsets[rotation]);
                     intersectWithInsetsIfFits(mTmpStableBounds, mTmpBounds,
@@ -3096,6 +3119,11 @@ class Task extends WindowContainer<WindowContainer> {
             RemoteAnimationController.RemoteAnimationRecord record) {
         final ActivityRecord activity = getTopMostActivity();
         return activity != null ? activity.createRemoteAnimationTarget(record) : null;
+    }
+
+    @Override
+    boolean canCreateRemoteAnimationTarget() {
+        return true;
     }
 
     WindowState getTopVisibleAppMainWindow() {

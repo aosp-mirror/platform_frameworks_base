@@ -41,6 +41,7 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
+import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -168,7 +169,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 // bounds. We want to restore to the unexpanded bounds when re-entering pip,
                 // so we save the bounds before expansion (normal) instead of the current
                 // bounds.
-                mReentryBounds.set(mTouchHandler.getMinBounds());
+                mReentryBounds.set(mTouchHandler.getNormalBounds());
                 // Apply the snap fraction of the current bounds to the normal bounds.
                 float snapFraction = mPipBoundsHandler.getSnapFraction(bounds);
                 mPipBoundsHandler.applySnapFraction(mReentryBounds, snapFraction);
@@ -205,7 +206,9 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
             DisplayController displayController,
             FloatingContentCoordinator floatingContentCoordinator,
-            DeviceConfigProxy deviceConfig) {
+            DeviceConfigProxy deviceConfig,
+            PipBoundsHandler pipBoundsHandler,
+            PipSnapAlgorithm pipSnapAlgorithm) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -218,7 +221,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
         final IActivityTaskManager activityTaskManager = ActivityTaskManager.getService();
-        mPipBoundsHandler = new PipBoundsHandler(context);
+        mPipBoundsHandler = pipBoundsHandler;
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
@@ -227,7 +230,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager, activityTaskManager,
                 mMenuController, mInputConsumerController, mPipBoundsHandler, mPipTaskOrganizer,
-                floatingContentCoordinator, deviceConfig);
+                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);

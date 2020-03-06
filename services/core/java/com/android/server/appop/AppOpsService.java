@@ -29,6 +29,8 @@ import static android.app.AppOpsManager.KEY_BG_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.KEY_FG_SERVICE_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.KEY_TOP_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_FOREGROUND;
+import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.NoteOpEvent;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
@@ -38,6 +40,8 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OpEventProxyInfo;
+import static android.app.AppOpsManager.SAMPLING_STRATEGY_RARELY_USED;
+import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
@@ -58,8 +62,6 @@ import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
-import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
-import static android.util.StatsLogInternal.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM;
 
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
@@ -515,12 +517,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         int evalMode(int op, int mode) {
-            if (mode == AppOpsManager.MODE_FOREGROUND) {
+            if (mode == MODE_FOREGROUND) {
                 if (appWidgetVisible) {
                     return MODE_ALLOWED;
                 } else if (state <= UID_STATE_TOP) {
-                    // process is in foreground.
-                    return AppOpsManager.MODE_ALLOWED;
+                    // process is in TOP.
+                    return MODE_ALLOWED;
                 } else if (state <= AppOpsManager.resolveFirstUnrestrictedUidState(op)) {
                     // process is in foreground, check its capability.
                     switch (op) {
@@ -529,53 +531,53 @@ public class AppOpsService extends IAppOpsService.Stub {
                         case AppOpsManager.OP_MONITOR_LOCATION:
                         case AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION:
                             if ((capability & PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0) {
-                                return AppOpsManager.MODE_ALLOWED;
+                                return MODE_ALLOWED;
                             } else if ((capability
                                     & TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0) {
                                 // The FGS has the location capability, but due to FGS BG start
                                 // restriction it lost the capability, use temp location capability
                                 // to mark this case.
                                 maybeShowWhileInUseDebugToast(op, mode);
-                                return AppOpsManager.MODE_IGNORED;
+                                return MODE_IGNORED;
                             } else {
-                                return AppOpsManager.MODE_IGNORED;
+                                return MODE_IGNORED;
                             }
                         case OP_CAMERA:
                             if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
-                                return AppOpsManager.MODE_ALLOWED;
+                                return MODE_ALLOWED;
                             } else {
                                 maybeShowWhileInUseDebugToast(op, mode);
-                                return AppOpsManager.MODE_IGNORED;
+                                return MODE_IGNORED;
                             }
                         case OP_RECORD_AUDIO:
                             if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
-                                return AppOpsManager.MODE_ALLOWED;
+                                return MODE_ALLOWED;
                             } else {
                                 maybeShowWhileInUseDebugToast(op, mode);
-                                return AppOpsManager.MODE_IGNORED;
+                                return MODE_IGNORED;
                             }
                         default:
-                            return AppOpsManager.MODE_ALLOWED;
+                            return MODE_ALLOWED;
                     }
                 } else {
                     // process is not in foreground.
-                    return AppOpsManager.MODE_IGNORED;
+                    return MODE_IGNORED;
                 }
-            } else if (mode == AppOpsManager.MODE_ALLOWED) {
+            } else if (mode == MODE_ALLOWED) {
                 switch (op) {
                     case OP_CAMERA:
                         if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
-                            return AppOpsManager.MODE_ALLOWED;
+                            return MODE_ALLOWED;
                         } else {
                             maybeShowWhileInUseDebugToast(op, mode);
-                            return AppOpsManager.MODE_IGNORED;
+                            return MODE_IGNORED;
                         }
                     case OP_RECORD_AUDIO:
                         if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
-                            return AppOpsManager.MODE_ALLOWED;
+                            return MODE_ALLOWED;
                         } else {
                             maybeShowWhileInUseDebugToast(op, mode);
-                            return AppOpsManager.MODE_IGNORED;
+                            return MODE_IGNORED;
                         }
                     default:
                         return MODE_ALLOWED;
@@ -5681,7 +5683,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (mRarelyUsedPackages.contains(packageName)) {
             mRarelyUsedPackages.remove(packageName);
             if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
-                mSamplingStrategy = RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
+                mSamplingStrategy = SAMPLING_STRATEGY_RARELY_USED;
                 resampleAppOpForPackageLocked(packageName);
             }
         }
@@ -5690,7 +5692,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     /** Resamples package and appop to watch from the list provided. */
     private void resamplePackageAndAppOpLocked(@NonNull List<String> packageNames) {
         if (!packageNames.isEmpty()) {
-            mSamplingStrategy = RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM;
+            mSamplingStrategy = SAMPLING_STRATEGY_UNIFORM;
             resampleAppOpForPackageLocked(packageNames.get(
                     ThreadLocalRandom.current().nextInt(packageNames.size())));
         }

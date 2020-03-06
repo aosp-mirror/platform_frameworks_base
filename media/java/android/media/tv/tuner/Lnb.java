@@ -154,6 +154,8 @@ public class Lnb implements AutoCloseable {
     private native int nativeSendDiseqcMessage(byte[] message);
     private native int nativeClose();
 
+    private long mNativeContext;
+
     Lnb(int id) {
         mId = id;
     }

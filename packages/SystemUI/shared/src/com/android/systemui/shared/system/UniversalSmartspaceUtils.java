@@ -18,49 +18,26 @@ package com.android.systemui.shared.system;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.view.SurfaceControl;
 import android.view.SurfaceView;
 
 /** Utility class that is shared between SysUI and Launcher for Universal Smartspace features. */
 public final class UniversalSmartspaceUtils {
     public static final String ACTION_REQUEST_SMARTSPACE_VIEW =
             "com.android.systemui.REQUEST_SMARTSPACE_VIEW";
+    public static final String INTENT_BUNDLE_KEY = "bundle_key";
 
     private static final String SYSUI_PACKAGE = "com.android.systemui";
-    private static final String INTENT_KEY_INPUT_BUNDLE = "input_bundle";
-    private static final String BUNDLE_KEY_INPUT_TOKEN = "input_token";
-    private static final String INTENT_KEY_SURFACE_CONTROL = "surface_control";
 
     /** Creates an intent to request that sysui draws the Smartspace to the SurfaceView. */
     public static Intent createRequestSmartspaceIntent(SurfaceView surfaceView) {
         Intent intent = new Intent(ACTION_REQUEST_SMARTSPACE_VIEW);
 
-        Bundle inputBundle = new Bundle();
-        inputBundle.putBinder(BUNDLE_KEY_INPUT_TOKEN, surfaceView.getHostToken());
+        Bundle bundle = SurfaceViewRequestUtils.createSurfaceBundle(surfaceView);
         return intent
-                .putExtra(INTENT_KEY_SURFACE_CONTROL, surfaceView.getSurfaceControl())
-                .putExtra(INTENT_KEY_INPUT_BUNDLE, inputBundle)
+                .putExtra(INTENT_BUNDLE_KEY, bundle)
                 .setPackage(SYSUI_PACKAGE)
                 .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                         | Intent.FLAG_RECEIVER_FOREGROUND);
-    }
-
-    /**
-     * Retrieves the SurfaceControl from an Intent created by
-     * {@link #createRequestSmartspaceIntent(SurfaceView)}.
-     **/
-    public static SurfaceControl getSurfaceControl(Intent intent) {
-        return intent.getParcelableExtra(INTENT_KEY_SURFACE_CONTROL);
-    }
-
-    /**
-     * Retrieves the input token from an Intent created by
-     * {@link #createRequestSmartspaceIntent(SurfaceView)}.
-     **/
-    public static IBinder getInputToken(Intent intent) {
-        Bundle inputBundle = intent.getBundleExtra(INTENT_KEY_INPUT_BUNDLE);
-        return inputBundle == null ? null : inputBundle.getBinder(BUNDLE_KEY_INPUT_TOKEN);
     }
 
     private UniversalSmartspaceUtils() {}

@@ -155,7 +155,7 @@ std::string makeBindMdName() {
 } // namespace
 
 IncrementalService::IncFsMount::~IncFsMount() {
-    incrementalService.mIncrementalManager->destroyDataLoader(mountId);
+    incrementalService.mDataLoaderManager->destroyDataLoader(mountId);
     control.reset();
     LOG(INFO) << "Unmounting and cleaning up mount " << mountId << " with root '" << root << '\'';
     for (auto&& [target, _] : bindPoints) {
@@ -229,14 +229,14 @@ void IncrementalService::IncFsMount::cleanupFilesystem(std::string_view root) {
 
 IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_view rootDir)
       : mVold(sm.getVoldService()),
-        mIncrementalManager(sm.getIncrementalManager()),
+        mDataLoaderManager(sm.getDataLoaderManager()),
         mIncFs(sm.getIncFs()),
         mIncrementalDir(rootDir) {
     if (!mVold) {
         LOG(FATAL) << "Vold service is unavailable";
     }
-    if (!mIncrementalManager) {
-        LOG(FATAL) << "IncrementalManager service is unavailable";
+    if (!mDataLoaderManager) {
+        LOG(FATAL) << "DataLoaderManagerService is unavailable";
     }
     mountExistingImages();
 }
@@ -921,7 +921,6 @@ bool IncrementalService::startLoading(StorageId storage) const {
     if (!ifs) {
         return false;
     }
-    bool started = false;
     std::unique_lock l(ifs->lock);
     if (ifs->dataLoaderStatus != IDataLoaderStatusListener::DATA_LOADER_CREATED) {
         if (ifs->dataLoaderReady.wait_for(l, Seconds(5)) == std::cv_status::timeout) {
@@ -929,11 +928,19 @@ bool IncrementalService::startLoading(StorageId storage) const {
             return false;
         }
     }
-    auto status = mIncrementalManager->startDataLoader(ifs->mountId, &started);
+    sp<IDataLoader> dataloader;
+    auto status = mDataLoaderManager->getDataLoader(ifs->mountId, &dataloader);
     if (!status.isOk()) {
         return false;
     }
-    return started;
+    if (!dataloader) {
+        return false;
+    }
+    status = dataloader->start();
+    if (!status.isOk()) {
+        return false;
+    }
+    return true;
 }
 
 void IncrementalService::mountExistingImages() {
@@ -1086,8 +1093,8 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
     sp<IncrementalDataLoaderListener> listener =
             new IncrementalDataLoaderListener(*this, *externalListener);
     bool created = false;
-    auto status = mIncrementalManager->prepareDataLoader(ifs.mountId, fsControlParcel, *dlp,
-                                                         listener, &created);
+    auto status = mDataLoaderManager->initializeDataLoader(ifs.mountId, *dlp, fsControlParcel,
+                                                           listener, &created);
     if (!status.isOk() || !created) {
         LOG(ERROR) << "Failed to create a data loader for mount " << ifs.mountId;
         return false;
@@ -1229,16 +1236,7 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
     ifs->dataLoaderStatus = newStatus;
     switch (newStatus) {
         case IDataLoaderStatusListener::DATA_LOADER_NO_CONNECTION: {
-            auto now = Clock::now();
-            if (ifs->connectionLostTime.time_since_epoch().count() == 0) {
-                ifs->connectionLostTime = now;
-                break;
-            }
-            auto duration =
-                    std::chrono::duration_cast<Seconds>(now - ifs->connectionLostTime).count();
-            if (duration >= 10) {
-                incrementalService.mIncrementalManager->showHealthBlockedUI(mountId);
-            }
+            // TODO(b/150411019): handle data loader connection loss
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_CONNECTION_OK: {

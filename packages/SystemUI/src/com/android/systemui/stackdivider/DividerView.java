@@ -935,6 +935,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     public void setAdjustedForIme(boolean adjustedForIme, long animDuration) {
+        if (mAdjustedForIme == adjustedForIme) {
+            return;
+        }
         updateDockSide();
         mHandle.animate()
                 .setInterpolator(IME_ADJUST_INTERPOLATOR)

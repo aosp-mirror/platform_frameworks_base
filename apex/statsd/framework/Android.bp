@@ -43,6 +43,7 @@ filegroup {
     ],
     visibility: [
         "//frameworks/base", // For the "global" stubs.
+        "//frameworks/base/apex/statsd:__subpackages__",
     ],
 }
 
@@ -74,8 +75,6 @@ java_library {
     hostdex: true, // for hiddenapi check
     visibility: [
         "//frameworks/base/apex/statsd:__subpackages__",
-        // TODO(b/149928788): Remove when tests are moved.
-        "//frameworks/base/core/tests/coretests:__pkg__",
     ],
     apex_available: [
         "com.android.os.statsd",
@@ -164,3 +163,26 @@ java_library {
         "//frameworks/opt/net/wifi/service" // wifi service
     ]
 }
+
+android_test {
+    name: "FrameworkStatsdTest",
+    platform_apis: true,
+    srcs: [
+        // TODO(b/147705194): Use framework-statsd as a lib dependency instead.
+        ":framework-statsd-sources",
+        "test/**/*.java",
+    ],
+    manifest: "test/AndroidManifest.xml",
+    static_libs: [
+        "androidx.test.rules",
+        "truth-prebuilt",
+    ],
+    libs: [
+        "android.test.runner.stubs",
+        "android.test.base.stubs",
+    ],
+    test_suites: [
+        "device-tests",
+    ],
+}
+
