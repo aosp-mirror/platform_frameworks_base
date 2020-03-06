@@ -878,9 +878,10 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         private final List<Rect> mBounds = new ArrayList();
         private final Rect mBoundingRect = new Rect();
         private final Path mBoundingPath = new Path();
-        // Don't initialize these because they are cached elsewhere and may not exist
+        // Don't initialize these yet because they may never exist
         private Rect mProtectionRect;
         private Path mProtectionPath;
+        private Path mProtectionPathOrig;
         private Rect mTotalBounds = new Rect();
         // Whether or not to show the cutout protection path
         private boolean mShowProtection = false;
@@ -969,7 +970,11 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         }
 
         void setProtection(Path protectionPath, Rect pathBounds) {
-            mProtectionPath = protectionPath;
+            if (mProtectionPathOrig == null) {
+                mProtectionPathOrig = new Path();
+                mProtectionPath = new Path();
+            }
+            mProtectionPathOrig.set(protectionPath);
             mProtectionRect = pathBounds;
         }
 
@@ -1053,7 +1058,9 @@ public class ScreenDecorations extends SystemUI implements Tunable,
             Matrix m = new Matrix();
             transformPhysicalToLogicalCoordinates(mInfo.rotation, dw, dh, m);
             mBoundingPath.transform(m);
-            if (mProtectionPath != null) {
+            if (mProtectionPathOrig != null) {
+                // Reset the protection path so we don't aggregate rotations
+                mProtectionPath.set(mProtectionPathOrig);
                 mProtectionPath.transform(m);
             }
         }
