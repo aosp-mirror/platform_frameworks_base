@@ -271,7 +271,6 @@ filegroup {
 
         // etc.
         ":framework-javastream-protos",
-        ":framework-statslog-gen", // StatsLogInternal.java
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
 
         // telephony annotations
@@ -282,7 +281,6 @@ filegroup {
 filegroup {
     name: "framework-updatable-sources",
     srcs: [
-        ":framework-appsearch-sources",
         ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
         ":framework-tethering-srcs",
@@ -468,7 +466,6 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
     libs: [
-        "framework-appsearch-stubs",
         "framework-sdkextensions-stubs-systemapi",
         "framework-statsd-stubs-module_libs_api",
         "framework-permission-stubs-systemapi",
@@ -494,7 +491,6 @@ java_library {
     visibility: [
         "//frameworks/base",
         // TODO(b/147128803) remove the below lines
-        "//frameworks/base/apex/appsearch/framework",
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
         "//frameworks/base/packages/Tethering/tests/unit",
@@ -516,7 +512,6 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
-        "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
         "framework-media-stubs-systemapi",
         "framework-mediaprovider-stubs-systemapi",
         "framework-permission-stubs-systemapi",
@@ -541,7 +536,6 @@ java_library {
         "exoplayer2-extractor",
         "android.hardware.wifi-V1.0-java-constants",
     ],
-    libs: ["icing-java-proto-lite"],
     apex_available: ["//apex_available:platform"],
     visibility: [
         // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
@@ -562,7 +556,6 @@ java_library {
     libs: [
         "app-compat-annotations",
         "ext",
-        "icing-java-proto-lite",
         "unsupportedappusage",
     ],
 
@@ -614,13 +607,6 @@ java_library {
     srcs: [
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
-}
-
-genrule {
-    name: "framework-statslog-gen",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out) --worksource",
-    out: ["android/util/StatsLogInternal.java"],
 }
 
 genrule {
@@ -981,7 +967,6 @@ filegroup {
 filegroup {
     name: "incremental_manager_aidl",
     srcs: [
-        "core/java/android/os/incremental/IIncrementalManager.aidl",
         "core/java/android/os/incremental/IIncrementalService.aidl",
         "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
         "core/java/android/os/incremental/IncrementalSignature.aidl",

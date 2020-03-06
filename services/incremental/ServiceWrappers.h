@@ -20,9 +20,10 @@
 #include <android-base/unique_fd.h>
 #include <android/content/pm/DataLoaderParamsParcel.h>
 #include <android/content/pm/FileSystemControlParcel.h>
+#include <android/content/pm/IDataLoader.h>
+#include <android/content/pm/IDataLoaderManager.h>
 #include <android/content/pm/IDataLoaderStatusListener.h>
 #include <android/os/IVold.h>
-#include <android/os/incremental/IIncrementalManager.h>
 #include <binder/IServiceManager.h>
 #include <incfs.h>
 
@@ -50,17 +51,16 @@ public:
                                      const std::string& targetDir) const = 0;
 };
 
-class IncrementalManagerWrapper {
+class DataLoaderManagerWrapper {
 public:
-    virtual ~IncrementalManagerWrapper() = default;
-    virtual binder::Status prepareDataLoader(MountId mountId,
-                                             const FileSystemControlParcel& control,
-                                             const DataLoaderParamsParcel& params,
-                                             const sp<IDataLoaderStatusListener>& listener,
-                                             bool* _aidl_return) const = 0;
-    virtual binder::Status startDataLoader(MountId mountId, bool* _aidl_return) const = 0;
+    virtual ~DataLoaderManagerWrapper() = default;
+    virtual binder::Status initializeDataLoader(MountId mountId,
+                                                const DataLoaderParamsParcel& params,
+                                                const FileSystemControlParcel& control,
+                                                const sp<IDataLoaderStatusListener>& listener,
+                                                bool* _aidl_return) const = 0;
+    virtual binder::Status getDataLoader(MountId mountId, sp<IDataLoader>* _aidl_return) const = 0;
     virtual binder::Status destroyDataLoader(MountId mountId) const = 0;
-    virtual binder::Status showHealthBlockedUI(MountId mountId) const = 0;
 };
 
 class IncFsWrapper {
@@ -82,7 +82,7 @@ class ServiceManagerWrapper {
 public:
     virtual ~ServiceManagerWrapper() = default;
     virtual std::unique_ptr<VoldServiceWrapper> getVoldService() = 0;
-    virtual std::unique_ptr<IncrementalManagerWrapper> getIncrementalManager() = 0;
+    virtual std::unique_ptr<DataLoaderManagerWrapper> getDataLoaderManager() = 0;
     virtual std::unique_ptr<IncFsWrapper> getIncFs() = 0;
 };
 
@@ -109,29 +109,26 @@ private:
     sp<os::IVold> mInterface;
 };
 
-class RealIncrementalManager : public IncrementalManagerWrapper {
+class RealDataLoaderManager : public DataLoaderManagerWrapper {
 public:
-    RealIncrementalManager(const sp<os::incremental::IIncrementalManager> manager)
+    RealDataLoaderManager(const sp<content::pm::IDataLoaderManager> manager)
           : mInterface(manager) {}
-    ~RealIncrementalManager() = default;
-    binder::Status prepareDataLoader(MountId mountId, const FileSystemControlParcel& control,
-                                     const DataLoaderParamsParcel& params,
-                                     const sp<IDataLoaderStatusListener>& listener,
-                                     bool* _aidl_return) const override {
-        return mInterface->prepareDataLoader(mountId, control, params, listener, _aidl_return);
+    ~RealDataLoaderManager() = default;
+    binder::Status initializeDataLoader(MountId mountId, const DataLoaderParamsParcel& params,
+                                        const FileSystemControlParcel& control,
+                                        const sp<IDataLoaderStatusListener>& listener,
+                                        bool* _aidl_return) const override {
+        return mInterface->initializeDataLoader(mountId, params, control, listener, _aidl_return);
     }
-    binder::Status startDataLoader(MountId mountId, bool* _aidl_return) const override {
-        return mInterface->startDataLoader(mountId, _aidl_return);
+    binder::Status getDataLoader(MountId mountId, sp<IDataLoader>* _aidl_return) const override {
+        return mInterface->getDataLoader(mountId, _aidl_return);
     }
     binder::Status destroyDataLoader(MountId mountId) const override {
         return mInterface->destroyDataLoader(mountId);
     }
-    binder::Status showHealthBlockedUI(MountId mountId) const override {
-        return mInterface->showHealthBlockedUI(mountId);
-    }
 
 private:
-    sp<os::incremental::IIncrementalManager> mInterface;
+    sp<content::pm::IDataLoaderManager> mInterface;
 };
 
 class RealServiceManager : public ServiceManagerWrapper {
@@ -139,7 +136,7 @@ public:
     RealServiceManager(sp<IServiceManager> serviceManager);
     ~RealServiceManager() = default;
     std::unique_ptr<VoldServiceWrapper> getVoldService() override;
-    std::unique_ptr<IncrementalManagerWrapper> getIncrementalManager() override;
+    std::unique_ptr<DataLoaderManagerWrapper> getDataLoaderManager() override;
     std::unique_ptr<IncFsWrapper> getIncFs() override;
 
 private:

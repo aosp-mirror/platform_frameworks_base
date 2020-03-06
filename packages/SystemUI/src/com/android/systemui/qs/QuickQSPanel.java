@@ -35,7 +35,6 @@ import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils;
@@ -73,10 +72,9 @@ public class QuickQSPanel extends QSPanel {
             AttributeSet attrs,
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
-            QSLogger qsLogger,
-            NotificationMediaManager notificationMediaManager
+            QSLogger qsLogger
     ) {
-        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, notificationMediaManager);
+        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
@@ -95,8 +93,7 @@ public class QuickQSPanel extends QSPanel {
             mHorizontalLinearLayout.setClipToPadding(false);
 
             int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
-            mMediaPlayer = new QuickQSMediaPlayer(mContext, mHorizontalLinearLayout,
-                    notificationMediaManager);
+            mMediaPlayer = new QuickQSMediaPlayer(mContext, mHorizontalLinearLayout);
             LayoutParams lp2 = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
             lp2.setMarginEnd(marginSize);
             lp2.setMarginStart(0);

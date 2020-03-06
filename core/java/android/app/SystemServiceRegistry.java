@@ -23,7 +23,6 @@ import android.annotation.SystemApi;
 import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
-import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
@@ -1297,9 +1296,6 @@ public final class SystemServiceRegistry {
                     throws ServiceNotFoundException {
                     return new LightsManager(ctx);
                 }});
-        //TODO(b/136132412): refactor this: 1) merge IIncrementalManager.aidl and
-        //IIncrementalManagerNative.aidl, 2) implement the binder interface in
-        //IncrementalManagerService.java, 3) use JNI to call native functions
         registerService(Context.INCREMENTAL_SERVICE, IncrementalManager.class,
                 new CachedServiceFetcher<IncrementalManager>() {
                     @Override
@@ -1346,7 +1342,6 @@ public final class SystemServiceRegistry {
             JobSchedulerFrameworkInitializer.registerServiceWrappers();
             BlobStoreManagerFrameworkInitializer.initialize();
             TelephonyFrameworkInitializer.registerServiceWrappers();
-            AppSearchManagerFrameworkInitializer.initialize();
             WifiFrameworkInitializer.registerServiceWrappers();
             StatsFrameworkInitializer.registerServiceWrappers();
         } finally {

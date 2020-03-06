@@ -379,8 +379,10 @@ class SurfaceAnimator {
         final SurfaceControl.Builder builder = animatable.makeAnimationLeash()
                 .setParent(animatable.getAnimationLeashParent())
                 .setHidden(hidden)
-                .setName(surface + " - animation-leash");
+                .setName(surface + " - animation-leash")
+                .setColorLayer();
         final SurfaceControl leash = builder.build();
+        t.unsetColor(leash);
         t.setWindowCrop(leash, width, height);
         t.setPosition(leash, x, y);
         t.show(leash);

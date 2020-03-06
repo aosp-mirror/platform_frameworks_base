@@ -49,9 +49,5 @@ int write_stats_log_java_q_for_module(FILE* out, const Atoms& atoms,
         const AtomDecl &attributionDecl, const string& moduleName, const string& javaClass,
         const string& javaPackage, const bool supportWorkSource);
 
-#if defined(STATS_SCHEMA_LEGACY)
-int write_stats_log_java_q(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
-                           const bool supportWorkSource);
-#endif
 }  // namespace stats_log_api_gen
 }  // namespace android

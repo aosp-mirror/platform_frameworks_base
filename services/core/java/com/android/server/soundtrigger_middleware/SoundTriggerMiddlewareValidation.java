@@ -203,15 +203,18 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         checkPreemptPermissions();
         // Input validation (always valid).
 
-        synchronized (this) {
-            // State validation (always valid).
+        // State validation (always valid).
 
-            // From here on, every exception isn't client's fault.
-            try {
-                mDelegate.setExternalCaptureState(active);
-            } catch (Exception e) {
-                throw handleException(e);
-            }
+        // Normally, we would acquire a lock here. However, we do not access any state here so it
+        // is safe to not lock. This call is typically done from a different context than all the
+        // other calls and may result in a deadlock if we lock here (between the audio server and
+        // the system server).
+
+        // From here on, every exception isn't client's fault.
+        try {
+            mDelegate.setExternalCaptureState(active);
+        } catch (Exception e) {
+            throw handleException(e);
         }
     }
 

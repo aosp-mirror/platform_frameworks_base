@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -121,11 +122,30 @@ public final class ApplicationExitInfo implements Parcelable {
     public static final int REASON_EXCESSIVE_RESOURCE_USAGE = 9;
 
     /**
-     * Application process was killed by the system for various other reasons,
-     * for example, the application package got disabled by the user;
-     * {@link #getDescription} will specify the cause given by the system.
+     * Application process was killed because of the user request, for example,
+     * user clicked the "Force stop" button of the application in the Settings,
+     * or removed the application away from Recents.
      */
-    public static final int REASON_OTHER = 10;
+    public static final int REASON_USER_REQUESTED = 10;
+
+    /**
+     * Application process was killed, because the user it is running as on devices
+     * with mutlple users, was stopped.
+     */
+    public static final int REASON_USER_STOPPED = 11;
+
+    /**
+     * Application process was killed because its dependency was going away, for example,
+     * a stable content provider connection's client will be killed if the provider is killed.
+     */
+    public static final int REASON_DEPENDENCY_DIED = 12;
+
+    /**
+     * Application process was killed by the system for various other reasons which are
+     * not by problems in apps and not actionable by apps, for example, the system just
+     * finished updates; {@link #getDescription} will specify the cause given by the system.
+     */
+    public static final int REASON_OTHER = 13;
 
     /**
      * Application process kills subreason is unknown.
@@ -202,6 +222,105 @@ public final class ApplicationExitInfo implements Parcelable {
     public static final int SUBREASON_EXCESSIVE_CPU = 7;
 
     /**
+     * System update has done (so the system update process should be killed);
+     * this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_SYSTEM_UPDATE_DONE = 8;
+
+    /**
+     * Kill all foreground services, for now it only occurs when enabling the quiet
+     * mode for the managed profile;
+     * this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_KILL_ALL_FG = 9;
+
+    /**
+     * All background processes except certain ones were killed, for now it only occurs
+     * when the density of the default display is changed;
+     * this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_KILL_ALL_BG_EXCEPT = 10;
+
+    /**
+     * The process associated with the UID was explicitly killed, for example,
+     * it could be because of platform compatibility overrides;
+     * this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_KILL_UID = 11;
+
+    /**
+     * The process was explicitly killed with its PID, typically because of
+     * the low memory for surfaces;
+     * this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_KILL_PID = 12;
+
+    /**
+     * The start of the process was invalid;
+     * this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_INVALID_START = 13;
+
+    /**
+     * The process was killed because it's in an invalid state, typically
+     * it's triggered from SHELL;
+     * this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_INVALID_STATE = 14;
+
+    /**
+     * The process was killed when it's imperceptible to user, because it was
+     * in a bad state;
+     * this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_IMPERCEPTIBLE = 15;
+
+    /**
+     * The process was killed because it's being moved out from LRU list;
+     * this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_REMOVE_LRU = 16;
+
+    /**
+     * The process was killed because it's isolated and was in a cached state;
+     * this would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_ISOLATED_NOT_NEEDED = 17;
+
+    // If there is any OEM code which involves additional app kill reasons, it should
+    // be categorized in {@link #REASON_OTHER}, with subreason code starting from 1000.
+
+    /**
      * @see {@link #getPid}
      */
     private int mPid;
@@ -254,7 +373,7 @@ public final class ApplicationExitInfo implements Parcelable {
     /**
      * @see {@link #getTimestamp}
      */
-    private long mTimestamp;
+    private @CurrentTimeMillisLong long mTimestamp;
 
     /**
      * @see {@link #getDescription}
@@ -293,6 +412,9 @@ public final class ApplicationExitInfo implements Parcelable {
         REASON_INITIALIZATION_FAILURE,
         REASON_PERMISSION_CHANGE,
         REASON_EXCESSIVE_RESOURCE_USAGE,
+        REASON_USER_REQUESTED,
+        REASON_USER_STOPPED,
+        REASON_DEPENDENCY_DIED,
         REASON_OTHER,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -308,6 +430,16 @@ public final class ApplicationExitInfo implements Parcelable {
         SUBREASON_LARGE_CACHED,
         SUBREASON_MEMORY_PRESSURE,
         SUBREASON_EXCESSIVE_CPU,
+        SUBREASON_SYSTEM_UPDATE_DONE,
+        SUBREASON_KILL_ALL_FG,
+        SUBREASON_KILL_ALL_BG_EXCEPT,
+        SUBREASON_KILL_UID,
+        SUBREASON_KILL_PID,
+        SUBREASON_INVALID_START,
+        SUBREASON_INVALID_STATE,
+        SUBREASON_IMPERCEPTIBLE,
+        SUBREASON_REMOVE_LRU,
+        SUBREASON_ISOLATED_NOT_NEEDED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SubReason {}
@@ -403,7 +535,7 @@ public final class ApplicationExitInfo implements Parcelable {
      * The timestamp of the process's death, in milliseconds since the epoch,
      * as returned by {@link System#currentTimeMillis System.currentTimeMillis()}.
      */
-    public long getTimestamp() {
+    public @CurrentTimeMillisLong long getTimestamp() {
         return mTimestamp;
     }
 
@@ -564,7 +696,7 @@ public final class ApplicationExitInfo implements Parcelable {
      *
      * @hide
      */
-    public void setTimestamp(final long timestamp) {
+    public void setTimestamp(final @CurrentTimeMillisLong long timestamp) {
         mTimestamp = timestamp;
     }
 
@@ -656,6 +788,8 @@ public final class ApplicationExitInfo implements Parcelable {
         mRss = other.mRss;
         mTimestamp = other.mTimestamp;
         mDescription = other.mDescription;
+        mPackageName = other.mPackageName;
+        mPackageList = other.mPackageList;
     }
 
     private ApplicationExitInfo(@NonNull Parcel in) {
@@ -748,6 +882,12 @@ public final class ApplicationExitInfo implements Parcelable {
                 return "PERMISSION CHANGE";
             case REASON_EXCESSIVE_RESOURCE_USAGE:
                 return "EXCESSIVE RESOURCE USAGE";
+            case REASON_USER_REQUESTED:
+                return "USER REQUESTED";
+            case REASON_USER_STOPPED:
+                return "USER STOPPED";
+            case REASON_DEPENDENCY_DIED:
+                return "DEPENDENCY DIED";
             case REASON_OTHER:
                 return "OTHER KILLS BY SYSTEM";
             default:
@@ -772,6 +912,26 @@ public final class ApplicationExitInfo implements Parcelable {
                 return "MEMORY PRESSURE";
             case SUBREASON_EXCESSIVE_CPU:
                 return "EXCESSIVE CPU USAGE";
+            case SUBREASON_SYSTEM_UPDATE_DONE:
+                return "SYSTEM UPDATE_DONE";
+            case SUBREASON_KILL_ALL_FG:
+                return "KILL ALL FG";
+            case SUBREASON_KILL_ALL_BG_EXCEPT:
+                return "KILL ALL BG EXCEPT";
+            case SUBREASON_KILL_UID:
+                return "KILL UID";
+            case SUBREASON_KILL_PID:
+                return "KILL PID";
+            case SUBREASON_INVALID_START:
+                return "INVALID START";
+            case SUBREASON_INVALID_STATE:
+                return "INVALID STATE";
+            case SUBREASON_IMPERCEPTIBLE:
+                return "IMPERCEPTIBLE";
+            case SUBREASON_REMOVE_LRU:
+                return "REMOVE LRU";
+            case SUBREASON_ISOLATED_NOT_NEEDED:
+                return "ISOLATED NOT NEEDED";
             default:
                 return "UNKNOWN";
         }

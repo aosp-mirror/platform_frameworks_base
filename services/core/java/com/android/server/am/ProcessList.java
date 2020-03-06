@@ -2378,7 +2378,7 @@ public final class ProcessList {
             killProcessQuiet(pid);
             Process.killProcessGroup(app.uid, app.pid);
             noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
-                    ApplicationExitInfo.SUBREASON_UNKNOWN, reason);
+                    ApplicationExitInfo.SUBREASON_INVALID_START, reason);
             return false;
         }
         mService.mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
@@ -2396,9 +2396,7 @@ public final class ProcessList {
             // Ignore
         }
 
-        if (app.isPersistent()) {
-            Watchdog.getInstance().processStarted(app.processName, pid);
-        }
+        Watchdog.getInstance().processStarted(app.processName, pid);
 
         checkSlow(app.startTime, "startProcess: building log message");
         StringBuilder buf = mStringBuilder;
@@ -2465,7 +2463,7 @@ public final class ProcessList {
                         killProcessQuiet(app.pid);
                         ProcessList.killProcessGroup(app.uid, app.pid);
                         noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
-                                ApplicationExitInfo.SUBREASON_UNKNOWN, "hasn't been killed");
+                                ApplicationExitInfo.SUBREASON_REMOVE_LRU, "hasn't been killed");
                     } else {
                         app.pendingStart = false;
                     }
@@ -2483,10 +2481,11 @@ public final class ProcessList {
 
     @GuardedBy("mService")
     boolean killPackageProcessesLocked(String packageName, int appId, int userId, int minOomAdj,
-            String reason) {
+            int reasonCode, int subReason, String reason) {
         return killPackageProcessesLocked(packageName, appId, userId, minOomAdj,
                 false /* callerWillRestart */, true /* allowRestart */, true /* doit */,
-                false /* evenPersistent */, false /* setRemoved */, reason);
+                false /* evenPersistent */, false /* setRemoved */, reasonCode,
+                subReason, reason);
     }
 
     @GuardedBy("mService")
@@ -2519,7 +2518,8 @@ public final class ProcessList {
     @GuardedBy("mService")
     final boolean killPackageProcessesLocked(String packageName, int appId,
             int userId, int minOomAdj, boolean callerWillRestart, boolean allowRestart,
-            boolean doit, boolean evenPersistent, boolean setRemoved, String reason) {
+            boolean doit, boolean evenPersistent, boolean setRemoved, int reasonCode,
+            int subReason, String reason) {
         ArrayList<ProcessRecord> procs = new ArrayList<>();
 
         // Remove all processes this package may have touched: all with the
@@ -2591,7 +2591,8 @@ public final class ProcessList {
 
         int N = procs.size();
         for (int i=0; i<N; i++) {
-            removeProcessLocked(procs.get(i), callerWillRestart, allowRestart, reason);
+            removeProcessLocked(procs.get(i), callerWillRestart, allowRestart,
+                    reasonCode, subReason, reason);
         }
         killAppZygotesLocked(packageName, appId, userId, false /* force */);
         mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
@@ -2600,13 +2601,14 @@ public final class ProcessList {
 
     @GuardedBy("mService")
     boolean removeProcessLocked(ProcessRecord app,
-            boolean callerWillRestart, boolean allowRestart, String reason) {
-        return removeProcessLocked(app, callerWillRestart, allowRestart, reason,
-                ApplicationExitInfo.REASON_OTHER);
+            boolean callerWillRestart, boolean allowRestart, int reasonCode, String reason) {
+        return removeProcessLocked(app, callerWillRestart, allowRestart, reasonCode,
+                ApplicationExitInfo.SUBREASON_UNKNOWN, reason);
     }
 
-    boolean removeProcessLocked(ProcessRecord app,
-            boolean callerWillRestart, boolean allowRestart, String reason, int reasonCode) {
+    @GuardedBy("mService")
+    boolean removeProcessLocked(ProcessRecord app, boolean callerWillRestart,
+            boolean allowRestart, int reasonCode, int subReason, String reason) {
         final String name = app.processName;
         final int uid = app.uid;
         if (DEBUG_PROCESSES) Slog.d(TAG_PROCESSES,
@@ -2642,7 +2644,7 @@ public final class ProcessList {
                     needRestart = true;
                 }
             }
-            app.kill(reason, reasonCode, true);
+            app.kill(reason, reasonCode, subReason, true);
             mService.handleAppDiedLocked(app, willRestart, allowRestart);
             if (willRestart) {
                 removeLruProcessLocked(app);
@@ -2840,7 +2842,8 @@ public final class ProcessList {
 
         final int N = procs.size();
         for (int i = 0; i < N; i++) {
-            removeProcessLocked(procs.get(i), false, true, "kill all background except");
+            removeProcessLocked(procs.get(i), false, true, ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_KILL_ALL_BG_EXCEPT, "kill all background except");
         }
     }
 
@@ -3769,6 +3772,7 @@ public final class ProcessList {
             Slog.i(TAG, "note: " + app + " died, saving the exit info");
         }
 
+        Watchdog.getInstance().processDied(app.processName, app.pid);
         mAppExitInfoTracker.scheduleNoteProcessDiedLocked(app);
     }
 
@@ -4005,7 +4009,8 @@ public final class ProcessList {
                 return false;
             }
 
-            app.kill(reason, ApplicationExitInfo.REASON_OTHER, true);
+            app.kill(reason, ApplicationExitInfo.REASON_OTHER,
+                    ApplicationExitInfo.SUBREASON_IMPERCEPTIBLE, true);
 
             if (!app.isolated) {
                 mLastProcessKillTimes.put(app.processName, app.uid, SystemClock.uptimeMillis());

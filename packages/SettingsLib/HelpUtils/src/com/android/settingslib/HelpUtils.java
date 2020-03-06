@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.net.Uri;
 import android.provider.Settings.Global;
 import android.text.TextUtils;
@@ -63,7 +62,6 @@ public class HelpUtils {
     // Constants for help intents.
     private static final String EXTRA_CONTEXT = "EXTRA_CONTEXT";
     private static final String EXTRA_THEME = "EXTRA_THEME";
-    private static final String EXTRA_PRIMARY_COLOR = "EXTRA_PRIMARY_COLOR";
     private static final String EXTRA_BACKUP_URI = "EXTRA_BACKUP_URI";
 
     /**
@@ -216,10 +214,7 @@ public class HelpUtils {
             intent.putExtra(feedbackIntentExtraKey, packageNameKey);
             intent.putExtra(feedbackIntentNameKey, packageNameValue);
         }
-        intent.putExtra(EXTRA_THEME, 0 /* Light theme */);
-        TypedArray array = context.obtainStyledAttributes(new int[]{android.R.attr.colorPrimary});
-        intent.putExtra(EXTRA_PRIMARY_COLOR, array.getColor(0, 0));
-        array.recycle();
+        intent.putExtra(EXTRA_THEME, 3 /* System Default theme */);
     }
 
     /**

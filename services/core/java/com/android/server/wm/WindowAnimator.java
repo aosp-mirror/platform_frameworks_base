@@ -164,6 +164,8 @@ public class WindowAnimator {
                     }
                 }
 
+                cancelAnimation();
+
                 if (mService.mWatermark != null) {
                     mService.mWatermark.drawIfNeeded();
                 }

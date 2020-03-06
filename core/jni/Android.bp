@@ -1,13 +1,4 @@
 
-genrule {
-    name: "android_util_StatsLogInternal.cpp",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --jni $(genDir)/android_util_StatsLogInternal.cpp",
-    out: [
-        "android_util_StatsLogInternal.cpp",
-    ],
-}
-
 cc_library_shared {
     name: "libandroid_runtime",
     host_supported: true,
@@ -149,6 +140,7 @@ cc_library_shared {
                 "android_media_AudioEffectDescriptor.cpp",
                 "android_media_AudioRecord.cpp",
                 "android_media_AudioSystem.cpp",
+                "android_media_AudioTrackCallback.cpp",
                 "android_media_AudioTrack.cpp",
                 "android_media_AudioAttributes.cpp",
                 "android_media_AudioProductStrategies.cpp",
@@ -277,7 +269,6 @@ cc_library_shared {
                 // our headers include libnativewindow's public headers
                 "libnativewindow",
             ],
-            generated_sources: ["android_util_StatsLogInternal.cpp"],
             header_libs: ["bionic_libc_platform_headers"],
         },
         host: {

@@ -921,14 +921,6 @@ package android.app.admin {
 
 }
 
-package android.app.appsearch {
-
-  public class AppSearchManagerFrameworkInitializer {
-    method public static void initialize();
-  }
-
-}
-
 package android.app.assist {
 
   public static class AssistStructure.ViewNode {
@@ -1469,16 +1461,16 @@ package android.app.usage {
 package android.bluetooth {
 
   public final class BluetoothA2dp implements android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void disableOptionalCodecs(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void enableOptionalCodecs(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void disableOptionalCodecs(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void enableOptionalCodecs(@NonNull android.bluetooth.BluetoothDevice);
     method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH) public android.bluetooth.BluetoothDevice getActiveDevice();
-    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH) public android.bluetooth.BluetoothCodecStatus getCodecStatus(@Nullable android.bluetooth.BluetoothDevice);
+    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH) public android.bluetooth.BluetoothCodecStatus getCodecStatus(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public int getOptionalCodecsEnabled(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void setCodecConfigPreference(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothCodecConfig);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public int isOptionalCodecsEnabled(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public int isOptionalCodecsSupported(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void setCodecConfigPreference(@NonNull android.bluetooth.BluetoothDevice, @NonNull android.bluetooth.BluetoothCodecConfig);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void setOptionalCodecsEnabled(@Nullable android.bluetooth.BluetoothDevice, int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public int supportsOptionalCodecs(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void setOptionalCodecsEnabled(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final int OPTIONAL_CODECS_NOT_SUPPORTED = 0; // 0x0
     field public static final int OPTIONAL_CODECS_PREF_DISABLED = 0; // 0x0
     field public static final int OPTIONAL_CODECS_PREF_ENABLED = 1; // 0x1
@@ -4730,7 +4722,7 @@ package android.media.tv {
 
   public final class TvInputManager {
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, @NonNull android.media.tv.TvInputInfo, @NonNull android.media.tv.TvInputManager.HardwareCallback);
-    method @Nullable @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, @NonNull android.media.tv.TvInputInfo, @NonNull android.media.tv.TvInputManager.HardwareCallback, @Nullable String, int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, @NonNull android.media.tv.TvInputInfo, @Nullable String, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.TvInputManager.HardwareCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void addBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean captureFrame(String, android.view.Surface, android.media.tv.TvStreamConfig);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
@@ -5000,6 +4992,11 @@ package android.media.tv.tuner.filter {
     field public static final int LENGTH_TYPE_UNDEFINED = 0; // 0x0
     field public static final int LENGTH_TYPE_WITHOUT_ADDITIONAL_HEADER = 1; // 0x1
     field public static final int LENGTH_TYPE_WITH_ADDITIONAL_HEADER = 2; // 0x2
+    field public static final int PACKET_TYPE_COMPRESSED = 2; // 0x2
+    field public static final int PACKET_TYPE_EXTENSION = 6; // 0x6
+    field public static final int PACKET_TYPE_IPV4 = 0; // 0x0
+    field public static final int PACKET_TYPE_MPEG2_TS = 7; // 0x7
+    field public static final int PACKET_TYPE_SIGNALING = 4; // 0x4
   }
 
   public static class AlpFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.AlpFilterConfiguration.Builder> {
@@ -5090,9 +5087,6 @@ package android.media.tv.tuner.filter {
   public abstract class FilterConfiguration {
     method @Nullable public android.media.tv.tuner.filter.Settings getSettings();
     method public abstract int getType();
-    field public static final int PACKET_TYPE_COMPRESSED = 2; // 0x2
-    field public static final int PACKET_TYPE_IPV4 = 0; // 0x0
-    field public static final int PACKET_TYPE_SIGNALING = 4; // 0x4
   }
 
   public abstract static class FilterConfiguration.Builder<T extends android.media.tv.tuner.filter.FilterConfiguration.Builder<T>> {
@@ -5290,6 +5284,11 @@ package android.media.tv.tuner.filter {
     method public int getType();
     method public boolean isCompressedIpPacket();
     method public boolean isPassthrough();
+    field public static final int PACKET_TYPE_COMPRESSED = 3; // 0x3
+    field public static final int PACKET_TYPE_IPV4 = 1; // 0x1
+    field public static final int PACKET_TYPE_IPV6 = 2; // 0x2
+    field public static final int PACKET_TYPE_NULL = 255; // 0xff
+    field public static final int PACKET_TYPE_SIGNALING = 254; // 0xfe
   }
 
   public static class TlvFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.TlvFilterConfiguration.Builder> {
@@ -8140,8 +8139,8 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockReleasedFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiBatchedScanStartedFromSource(@NonNull android.os.WorkSource, @IntRange(from=0) int);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiBatchedScanStoppedFromSource(@NonNull android.os.WorkSource);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiMulticastDisabled(int);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiMulticastEnabled(int);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiMulticastDisabled(@NonNull android.os.WorkSource);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiMulticastEnabled(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiOff();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiOn();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiRssiChanged(@IntRange(from=0xffffff81, to=0) int);
@@ -11523,7 +11522,7 @@ package android.telephony {
   public class SmsMessage {
     method @Nullable public static android.telephony.SmsMessage createFromNativeSmsSubmitPdu(@NonNull byte[], boolean);
     method @Nullable public static android.telephony.SmsMessage.SubmitPdu getSmsPdu(int, int, @Nullable String, @NonNull String, @NonNull String, long);
-    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static byte[] getSubmitPduEncodedMessage(boolean, @NonNull String, @NonNull String, int, int, int, int, int, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static byte[] getSubmitPduEncodedMessage(boolean, @NonNull String, @NonNull String, int, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0, to=255) int, @IntRange(from=1, to=255) int, @IntRange(from=1, to=255) int);
   }
 
   public class SubscriptionInfo implements android.os.Parcelable {

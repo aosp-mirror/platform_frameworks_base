@@ -40,17 +40,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.NotificationMediaManager;
 
 import java.util.List;
 
 /**
  * QQS mini media player
  */
-public class QuickQSMediaPlayer implements NotificationMediaManager.MediaListener {
+public class QuickQSMediaPlayer {
 
     private static final String TAG = "QQSMediaPlayer";
-    private final NotificationMediaManager mMediaManager;
 
     private Context mContext;
     private LinearLayout mMediaNotifView;
@@ -59,24 +57,48 @@ public class QuickQSMediaPlayer implements NotificationMediaManager.MediaListene
     private int mForegroundColor;
     private ComponentName mRecvComponent;
 
-    // Button IDs for QS controls
-    private static final int[] QQS_ACTION_IDS = {R.id.action0, R.id.action1, R.id.action2};
-
-    // Button IDs used in notifications
-    private static final int[] NOTIF_ACTION_IDS = {
-            com.android.internal.R.id.action0,
-            com.android.internal.R.id.action1,
-            com.android.internal.R.id.action2,
-            com.android.internal.R.id.action3,
-            com.android.internal.R.id.action4
-    };
-
     private MediaController.Callback mSessionCallback = new MediaController.Callback() {
         @Override
         public void onSessionDestroyed() {
             Log.d(TAG, "session destroyed");
             mController.unregisterCallback(mSessionCallback);
-            clearControls();
+
+            // Hide all the old buttons
+            final int[] actionIds = {R.id.action0, R.id.action1, R.id.action2};
+            for (int i = 0; i < actionIds.length; i++) {
+                ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
+                if (thisBtn != null) {
+                    thisBtn.setVisibility(View.GONE);
+                }
+            }
+
+            // Add a restart button
+            ImageButton btn = mMediaNotifView.findViewById(actionIds[0]);
+            btn.setOnClickListener(v -> {
+                Log.d(TAG, "Attempting to restart session");
+                // Send a media button event to previously found receiver
+                if (mRecvComponent != null) {
+                    Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                    intent.setComponent(mRecvComponent);
+                    int keyCode = KeyEvent.KEYCODE_MEDIA_PLAY;
+                    intent.putExtra(
+                            Intent.EXTRA_KEY_EVENT,
+                            new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
+                    mContext.sendBroadcast(intent);
+                } else {
+                    Log.d(TAG, "No receiver to restart");
+                    // If we don't have a receiver, try relaunching the activity instead
+                    try {
+                        mController.getSessionActivity().send();
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.e(TAG, "Pending intent was canceled");
+                        e.printStackTrace();
+                    }
+                }
+            });
+            btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
+            btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
+            btn.setVisibility(View.VISIBLE);
         }
     };
 
@@ -85,11 +107,10 @@ public class QuickQSMediaPlayer implements NotificationMediaManager.MediaListene
      * @param context
      * @param parent
      */
-    public QuickQSMediaPlayer(Context context, ViewGroup parent, NotificationMediaManager manager) {
+    public QuickQSMediaPlayer(Context context, ViewGroup parent) {
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mMediaNotifView = (LinearLayout) inflater.inflate(R.layout.qqs_media_panel, parent, false);
-        mMediaManager = manager;
     }
 
     public View getView() {
@@ -167,14 +188,26 @@ public class QuickQSMediaPlayer implements NotificationMediaManager.MediaListene
         titleText.setText(songName);
         titleText.setTextColor(mForegroundColor);
 
+        // Buttons we can display
+        final int[] actionIds = {R.id.action0, R.id.action1, R.id.action2};
+
+        // Existing buttons in the notification
         LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
+        final int[] notifActionIds = {
+                com.android.internal.R.id.action0,
+                com.android.internal.R.id.action1,
+                com.android.internal.R.id.action2,
+                com.android.internal.R.id.action3,
+                com.android.internal.R.id.action4
+        };
+
         int i = 0;
         if (actionsToShow != null) {
             int maxButtons = Math.min(actionsToShow.length, parentActionsLayout.getChildCount());
-            maxButtons = Math.min(maxButtons, QQS_ACTION_IDS.length);
+            maxButtons = Math.min(maxButtons, actionIds.length);
             for (; i < maxButtons; i++) {
-                ImageButton thisBtn = mMediaNotifView.findViewById(QQS_ACTION_IDS[i]);
-                int thatId = NOTIF_ACTION_IDS[actionsToShow[i]];
+                ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
+                int thatId = notifActionIds[actionsToShow[i]];
                 ImageButton thatBtn = parentActionsLayout.findViewById(thatId);
                 if (thatBtn == null || thatBtn.getDrawable() == null
                         || thatBtn.getVisibility() != View.VISIBLE) {
@@ -192,14 +225,10 @@ public class QuickQSMediaPlayer implements NotificationMediaManager.MediaListene
         }
 
         // Hide any unused buttons
-        for (; i < QQS_ACTION_IDS.length; i++) {
-            ImageButton thisBtn = mMediaNotifView.findViewById(QQS_ACTION_IDS[i]);
+        for (; i < actionIds.length; i++) {
+            ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
             thisBtn.setVisibility(View.GONE);
         }
-
-        // Ensure is only added once
-        mMediaManager.removeCallback(this);
-        mMediaManager.addCallback(this);
     }
 
     public MediaSession.Token getMediaSessionToken() {
@@ -229,55 +258,5 @@ public class QuickQSMediaPlayer implements NotificationMediaManager.MediaListene
      */
     public boolean hasMediaSession() {
         return mController != null && mController.getPlaybackState() != null;
-    }
-
-    /**
-     * Put controls into a resumption state
-     */
-    public void clearControls() {
-        // Hide all the old buttons
-        final int[] actionIds = {R.id.action0, R.id.action1, R.id.action2};
-        for (int i = 0; i < actionIds.length; i++) {
-            ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
-            if (thisBtn != null) {
-                thisBtn.setVisibility(View.GONE);
-            }
-        }
-
-        // Add a restart button
-        ImageButton btn = mMediaNotifView.findViewById(actionIds[0]);
-        btn.setOnClickListener(v -> {
-            Log.d(TAG, "Attempting to restart session");
-            // Send a media button event to previously found receiver
-            if (mRecvComponent != null) {
-                Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-                intent.setComponent(mRecvComponent);
-                int keyCode = KeyEvent.KEYCODE_MEDIA_PLAY;
-                intent.putExtra(
-                        Intent.EXTRA_KEY_EVENT,
-                        new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
-                mContext.sendBroadcast(intent);
-            } else {
-                Log.d(TAG, "No receiver to restart");
-                // If we don't have a receiver, try relaunching the activity instead
-                try {
-                    mController.getSessionActivity().send();
-                } catch (PendingIntent.CanceledException e) {
-                    Log.e(TAG, "Pending intent was canceled", e);
-                }
-            }
-        });
-        btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
-        btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
-        btn.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onMetadataOrStateChanged(MediaMetadata metadata, int state) {
-        if (state == PlaybackState.STATE_NONE) {
-            Log.d(TAG, "clearing controls because state none");
-            clearControls();
-            mMediaManager.removeCallback(this);
-        }
     }
 }

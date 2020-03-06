@@ -295,6 +295,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runRollbackApp();
                 case "get-moduleinfo":
                     return runGetModuleInfo();
+                case "log-visibility":
+                    return runLogVisibility();
                 default: {
                     String nextArg = getNextArg();
                     if (nextArg == null) {
@@ -355,6 +357,36 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         } catch (RemoteException e) {
             pw.println("Failure [" + e.getClass().getName() + " - " + e.getMessage() + "]");
+            return -1;
+        }
+        return 1;
+    }
+
+    private int runLogVisibility() {
+        final PrintWriter pw = getOutPrintWriter();
+        boolean enable = true;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--disable":
+                    enable = false;
+                    break;
+                case "--enable":
+                    enable = true;
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return -1;
+            }
+        }
+
+        String packageName = getNextArg();
+        if (packageName != null) {
+            LocalServices.getService(PackageManagerInternal.class)
+                    .setVisibilityLogging(packageName, enable);
+        } else {
+            getErrPrintWriter().println("Error: no package specified");
             return -1;
         }
         return 1;
@@ -3714,6 +3746,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    By default, without any argument only installed modules are shown.");
         pw.println("      --all: show all module info");
         pw.println("      --installed: show only installed modules");
+        pw.println("");
+        pw.println("  log-visibility [--enable|--disable] <PACKAGE>");
+        pw.println("    Turns on debug logging when visibility is blocked for the given package.");
+        pw.println("      --enable: turn on debug logging (default)");
+        pw.println("      --disable: turn off debug logging");
         pw.println("");
         Intent.printIntentArgsHelp(pw , "");
     }
