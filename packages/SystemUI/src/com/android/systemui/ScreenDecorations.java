@@ -28,6 +28,9 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.Dimension;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -714,6 +717,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     public static class DisplayCutoutView extends View implements DisplayManager.DisplayListener,
             RegionInterceptableView {
 
+        private static final float HIDDEN_CAMERA_PROTECTION_SCALE = 0.5f;
+
         private final DisplayInfo mInfo = new DisplayInfo();
         private final Paint mPaint = new Paint();
         private final List<Rect> mBounds = new ArrayList();
@@ -732,6 +737,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         private int mRotation;
         private int mInitialPosition;
         private int mPosition;
+        private float mCameraProtectionProgress = HIDDEN_CAMERA_PROTECTION_SCALE;
+        private ValueAnimator mCameraProtectionAnimator;
 
         public DisplayCutoutView(Context context, @BoundsPosition int pos,
                 ScreenDecorations decorations) {
@@ -770,16 +777,17 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             getLocationOnScreen(mLocation);
             canvas.translate(-mLocation[0], -mLocation[1]);
 
-            if (mShowProtection && !mProtectionRect.isEmpty()) {
-                mPaint.setColor(mColor);
-                mPaint.setStyle(Paint.Style.FILL);
-                mPaint.setAntiAlias(true);
-                canvas.drawPath(mProtectionPath, mPaint);
-            } else if (!mBoundingPath.isEmpty()) {
+            if (!mBoundingPath.isEmpty()) {
                 mPaint.setColor(mColor);
                 mPaint.setStyle(Paint.Style.FILL);
                 mPaint.setAntiAlias(true);
                 canvas.drawPath(mBoundingPath, mPaint);
+            }
+            if (mCameraProtectionProgress > HIDDEN_CAMERA_PROTECTION_SCALE
+                    && !mProtectionRect.isEmpty()) {
+                canvas.scale(mCameraProtectionProgress, mCameraProtectionProgress,
+                        mProtectionRect.centerX(), mProtectionRect.centerY());
+                canvas.drawPath(mProtectionPath, mPaint);
             }
         }
 
@@ -815,8 +823,31 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
             mShowProtection = shouldShow;
             updateBoundingPath();
-            requestLayout();
-            invalidate();
+            // Delay the relayout until the end of the animation when hiding the cutout,
+            // otherwise we'd clip it.
+            if (mShowProtection) {
+                requestLayout();
+            }
+            if (mCameraProtectionAnimator != null) {
+                mCameraProtectionAnimator.cancel();
+            }
+            mCameraProtectionAnimator = ValueAnimator.ofFloat(mCameraProtectionProgress,
+                    mShowProtection ? 1.0f : HIDDEN_CAMERA_PROTECTION_SCALE).setDuration(750);
+            mCameraProtectionAnimator.setInterpolator(Interpolators.DECELERATE_QUINT);
+            mCameraProtectionAnimator.addUpdateListener(animation -> {
+                mCameraProtectionProgress = (float) animation.getAnimatedValue();
+                invalidate();
+            });
+            mCameraProtectionAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mCameraProtectionAnimator = null;
+                    if (!mShowProtection) {
+                        requestLayout();
+                    }
+                }
+            });
+            mCameraProtectionAnimator.start();
         }
 
         private void update() {
