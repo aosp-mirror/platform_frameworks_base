@@ -2592,7 +2592,7 @@ public final class OomAdjuster {
         if (app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ && !app.frozen) {
             mCachedAppOptimizer.freezeAppAsync(app);
         } else if (app.setAdj < ProcessList.CACHED_APP_MIN_ADJ && app.frozen) {
-            mCachedAppOptimizer.unfreezeAppAsync(app);
+            mCachedAppOptimizer.unfreezeAppLocked(app);
         }
     }
 }
