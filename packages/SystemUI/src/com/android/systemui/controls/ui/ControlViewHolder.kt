@@ -28,6 +28,7 @@ import android.service.controls.templates.TemperatureControlTemplate
 import android.service.controls.templates.ThumbnailTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -97,15 +98,8 @@ class ControlViewHolder(
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
-        val text = when (response) {
-            ControlAction.RESPONSE_OK -> "Success"
-            ControlAction.RESPONSE_FAIL -> "Error"
-            else -> ""
-        }
-
-        if (!text.isEmpty()) {
-            setTransientStatus(text)
-        }
+        // TODO: b/150931809 - handle response codes
+        Log.d(ControlsUiController.TAG, "Received response code: $response")
     }
 
     fun setTransientStatus(tempStatus: String) {
