@@ -32,7 +32,7 @@
 #include "../statscompanion_util.h"
 #include "StatsCallbackPuller.h"
 #include "TrainInfoPuller.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 
 using std::shared_ptr;
 using std::vector;
@@ -47,7 +47,7 @@ const int64_t NO_ALARM_UPDATE = INT64_MAX;
 StatsPullerManager::StatsPullerManager()
     : kAllPullAtomInfo({
               // TrainInfo.
-              {{.atomTag = android::util::TRAIN_INFO}, new TrainInfoPuller()},
+              {{.atomTag = util::TRAIN_INFO}, new TrainInfoPuller()},
       }),
       mNextPullTimeNs(NO_ALARM_UPDATE) {
 }
