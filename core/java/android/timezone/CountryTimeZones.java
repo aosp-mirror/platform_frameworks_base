@@ -158,7 +158,7 @@ public final class CountryTimeZones {
      * supplied.
      */
     public boolean matchesCountryCode(@NonNull String countryIso) {
-        return mDelegate.isForCountryCode(countryIso);
+        return mDelegate.matchesCountryCode(countryIso);
     }
 
     /**
