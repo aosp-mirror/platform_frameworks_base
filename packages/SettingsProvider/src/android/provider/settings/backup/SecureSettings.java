@@ -162,5 +162,6 @@ public class SecureSettings {
         Settings.Secure.AWARE_TAP_PAUSE_TOUCH_COUNT,
         Settings.Secure.PEOPLE_STRIP,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
+        Settings.Secure.ACCESSIBILITY_BUTTON_LONG_PRESS_TARGETS,
     };
 }
