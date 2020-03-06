@@ -147,9 +147,19 @@ data class FieldInfo(
     val sParcelling by lazy { customParcellingClass?.let { "sParcellingFor$NameUpperCamel" } }
 
     val SetterParamType = if (isArray) "$FieldInnerType..." else Type
-    val annotatedTypeForSetterParam by lazy {
-        (annotationsNoInternal + SetterParamType).joinToString(" ")
+    val annotationsForSetterParam by lazy {
+        buildList<String> {
+            addAll(annotationsNoInternal)
+            classPrinter {
+                if ("@$Nullable" in annotations
+                        && "@$MaySetToNull" !in annotations) {
+                    remove("@$Nullable")
+                    add("@$NonNull")
+                }
+            }
+        }.joinToString(" ")
     }
+    val annotatedTypeForSetterParam by lazy { "$annotationsForSetterParam $SetterParamType" }
 
     // Utilities
 
