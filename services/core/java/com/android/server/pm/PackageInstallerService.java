@@ -667,21 +667,25 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     public SessionInfo getSessionInfo(int sessionId) {
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
-            return session != null ? session.generateInfo() : null;
+
+            return session != null
+                    ? session.generateInfoForCaller(true /*withIcon*/, Binder.getCallingUid())
+                    : null;
         }
     }
 
     @Override
     public ParceledListSlice<SessionInfo> getAllSessions(int userId) {
+        final int callingUid = Binder.getCallingUid();
         mPermissionManager.enforceCrossUserPermission(
-                Binder.getCallingUid(), userId, true, false, "getAllSessions");
+                callingUid, userId, true, false, "getAllSessions");
 
         final List<SessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
                 if (session.userId == userId) {
-                    result.add(session.generateInfo(false));
+                    result.add(session.generateInfoForCaller(false, callingUid));
                 }
             }
         }
@@ -699,7 +703,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
 
-                SessionInfo info = session.generateInfo(false);
+                SessionInfo info =
+                        session.generateInfoForCaller(false /*withIcon*/, Process.SYSTEM_UID);
                 if (Objects.equals(info.getInstallerPackageName(), installerPackageName)
                         && session.userId == userId) {
                     result.add(info);
