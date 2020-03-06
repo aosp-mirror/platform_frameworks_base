@@ -315,7 +315,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                     mNotificationActivityStarter.startNotificationGutsIntent(intent, sbn.getUid(),
                             row);
                 };
-        boolean isForBlockingHelper = row.isBlockingHelperShowing();
 
         if (!userHandle.equals(UserHandle.ALL)
                 || mLockscreenUserManager.getCurrentUserId() == UserHandle.USER_SYSTEM) {
@@ -335,13 +334,10 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 row.getEntry().getChannel(),
                 row.getUniqueChannels(),
                 row.getEntry(),
-                mCheckSaveListener,
                 onSettingsClick,
                 onAppSettingsClick,
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 row.getIsNonblockable(),
-                isForBlockingHelper,
-                row.getEntry().getImportance(),
                 mHighPriorityProvider.isHighPriority(row.getEntry()));
     }
 
