@@ -344,11 +344,9 @@ public final class Bitmap implements Parcelable {
      * Sets the nine patch chunk.
      *
      * @param chunk The definition of the nine patch
-     *
-     * @hide
      */
     @UnsupportedAppUsage
-    public void setNinePatchChunk(byte[] chunk) {
+    private void setNinePatchChunk(byte[] chunk) {
         mNinePatchChunk = chunk;
     }
 
