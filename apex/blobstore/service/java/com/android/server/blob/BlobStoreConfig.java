@@ -32,8 +32,9 @@ class BlobStoreConfig {
     public static final int XML_VERSION_INIT = 1;
     // Added a string variant of lease description.
     public static final int XML_VERSION_ADD_STRING_DESC = 2;
+    public static final int XML_VERSION_ADD_DESC_RES_NAME = 3;
 
-    public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_STRING_DESC;
+    public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_DESC_RES_NAME;
 
     private static final String ROOT_DIR_NAME = "blobstore";
     private static final String BLOBS_DIR_NAME = "blobs";

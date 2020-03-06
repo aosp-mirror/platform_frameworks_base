@@ -54,6 +54,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageStats;
 import android.content.res.ResourceId;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -1187,8 +1188,12 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            acquireLeaseInternal(blobHandle, descriptionResId, description, leaseExpiryTimeMillis,
-                    callingUid, packageName);
+            try {
+                acquireLeaseInternal(blobHandle, descriptionResId, description,
+                        leaseExpiryTimeMillis, callingUid, packageName);
+            } catch (Resources.NotFoundException e) {
+                throw new IllegalArgumentException(e);
+            }
         }
 
         @Override
