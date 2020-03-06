@@ -127,7 +127,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     @Override
     public void requestCreateSession(String packageName, String routeId, long requestId,
             Bundle sessionHints) {
-        // Do nothing
+        // Handle it as an internal transfer.
+        transferToRoute(SYSTEM_SESSION_ID, routeId, requestId);
     }
 
     @Override
