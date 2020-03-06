@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.IWindowContainer;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
@@ -51,7 +50,7 @@ public class PipAnimationControllerTest extends SysuiTestCase {
     private PipAnimationController mPipAnimationController;
 
     @Mock
-    private IWindowContainer mWindowContainer;
+    private SurfaceControl mLeash;
 
     @Mock
     private PipAnimationController.PipAnimationCallback mPipAnimationCallback;
@@ -65,8 +64,7 @@ public class PipAnimationControllerTest extends SysuiTestCase {
     @Test
     public void getAnimator_withAlpha_returnFloatAnimator() {
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
-                .getAnimator(mWindowContainer, true /* scheduleFinishPip */,
-                        new Rect(), 0f, 1f);
+                .getAnimator(mLeash, true /* scheduleFinishPip */, new Rect(), 0f, 1f);
 
         assertEquals("Expect ANIM_TYPE_ALPHA animation",
                 animator.getAnimationType(), PipAnimationController.ANIM_TYPE_ALPHA);
@@ -75,8 +73,7 @@ public class PipAnimationControllerTest extends SysuiTestCase {
     @Test
     public void getAnimator_withBounds_returnBoundsAnimator() {
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
-                .getAnimator(mWindowContainer, true /* scheduleFinishPip */,
-                        new Rect(), new Rect());
+                .getAnimator(mLeash, true /* scheduleFinishPip */, new Rect(), new Rect());
 
         assertEquals("Expect ANIM_TYPE_BOUNDS animation",
                 animator.getAnimationType(), PipAnimationController.ANIM_TYPE_BOUNDS);
@@ -88,14 +85,12 @@ public class PipAnimationControllerTest extends SysuiTestCase {
         final Rect endValue1 = new Rect(100, 100, 200, 200);
         final Rect endValue2 = new Rect(200, 200, 300, 300);
         final PipAnimationController.PipTransitionAnimator oldAnimator = mPipAnimationController
-                .getAnimator(mWindowContainer, true /* scheduleFinishPip */,
-                        startValue, endValue1);
+                .getAnimator(mLeash, true /* scheduleFinishPip */, startValue, endValue1);
         oldAnimator.setSurfaceControlTransactionFactory(DummySurfaceControlTx::new);
         oldAnimator.start();
 
         final PipAnimationController.PipTransitionAnimator newAnimator = mPipAnimationController
-                .getAnimator(mWindowContainer, true /* scheduleFinishPip */,
-                        startValue, endValue2);
+                .getAnimator(mLeash, true /* scheduleFinishPip */, startValue, endValue2);
 
         assertEquals("getAnimator with same type returns same animator",
                 oldAnimator, newAnimator);
@@ -106,13 +101,11 @@ public class PipAnimationControllerTest extends SysuiTestCase {
     @Test
     public void getAnimator_scheduleFinishPip() {
         PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
-                .getAnimator(mWindowContainer, true /* scheduleFinishPip */,
-                        new Rect(), 0f, 1f);
+                .getAnimator(mLeash, true /* scheduleFinishPip */, new Rect(), 0f, 1f);
         assertTrue("scheduleFinishPip is true", animator.shouldScheduleFinishPip());
 
         animator = mPipAnimationController
-                .getAnimator(mWindowContainer, false /* scheduleFinishPip */,
-                        new Rect(), 0f, 1f);
+                .getAnimator(mLeash, false /* scheduleFinishPip */, new Rect(), 0f, 1f);
         assertFalse("scheduleFinishPip is false", animator.shouldScheduleFinishPip());
     }
 
@@ -122,8 +115,7 @@ public class PipAnimationControllerTest extends SysuiTestCase {
         final Rect endValue1 = new Rect(100, 100, 200, 200);
         final Rect endValue2 = new Rect(200, 200, 300, 300);
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
-                .getAnimator(mWindowContainer, true /* scheduleFinishPip */,
-                        startValue, endValue1);
+                .getAnimator(mLeash, true /* scheduleFinishPip */, startValue, endValue1);
 
         animator.updateEndValue(endValue2);
 
@@ -135,24 +127,23 @@ public class PipAnimationControllerTest extends SysuiTestCase {
         final Rect startValue = new Rect(0, 0, 100, 100);
         final Rect endValue = new Rect(100, 100, 200, 200);
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
-                .getAnimator(mWindowContainer, true /* scheduleFinishPip */,
-                        startValue, endValue);
+                .getAnimator(mLeash, true /* scheduleFinishPip */, startValue, endValue);
         animator.setSurfaceControlTransactionFactory(DummySurfaceControlTx::new);
 
         animator.setPipAnimationCallback(mPipAnimationCallback);
 
         // onAnimationStart triggers onPipAnimationStart
         animator.onAnimationStart(animator);
-        verify(mPipAnimationCallback).onPipAnimationStart(mWindowContainer, animator);
+        verify(mPipAnimationCallback).onPipAnimationStart(animator);
 
         // onAnimationCancel triggers onPipAnimationCancel
         animator.onAnimationCancel(animator);
-        verify(mPipAnimationCallback).onPipAnimationCancel(mWindowContainer, animator);
+        verify(mPipAnimationCallback).onPipAnimationCancel(animator);
 
         // onAnimationEnd triggers onPipAnimationEnd
         animator.onAnimationEnd(animator);
-        verify(mPipAnimationCallback).onPipAnimationEnd(eq(mWindowContainer),
-                any(SurfaceControl.Transaction.class), eq(animator));
+        verify(mPipAnimationCallback).onPipAnimationEnd(any(SurfaceControl.Transaction.class),
+                eq(animator));
     }
 
     /**
