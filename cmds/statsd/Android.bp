@@ -164,10 +164,6 @@ cc_library_static {
     export_generated_headers: [
         "atoms_info.h",
     ],
-    shared_libs: [
-        "libcutils",
-        "libstatslog",
-    ],
     apex_available: [
         //TODO(b/149782403): Remove this once statsd no longer links against libstatsmetadata
         "com.android.os.statsd",
