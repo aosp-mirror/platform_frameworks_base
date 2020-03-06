@@ -216,8 +216,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
             @Nullable Bundle sessionHints) {
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null || TextUtils.equals(ROUTE_ID3_SESSION_CREATION_FAILED, routeId)) {
-            // Tell the router that session cannot be created by passing null as sessionInfo.
-            notifySessionCreationFailed(requestId);
+            notifyRequestFailed(requestId, REASON_UNKNOWN_ERROR);
             return;
         }
         maybeDeselectRoute(routeId);
