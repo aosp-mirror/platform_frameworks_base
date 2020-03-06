@@ -70,8 +70,11 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap
     LOG(ERROR) << "failed to load IDMAP " << idmap_path;
     return {};
   }
-  return LoadImpl({} /*fd*/, loaded_idmap->OverlayApkPath(), std::move(idmap_asset),
-                  std::move(loaded_idmap), system, false /*load_as_shared_library*/);
+  auto apkPath = loaded_idmap->OverlayApkPath();
+  return LoadImpl({} /*fd*/, apkPath,
+                  std::move(idmap_asset),
+                  std::move(loaded_idmap),
+                  system, false /*load_as_shared_library*/);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadFromFd(unique_fd fd,
