@@ -29,9 +29,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
-import android.hardware.biometrics.BiometricNativeHandleUtils;
 import android.hardware.biometrics.CryptoObject;
-import android.hardware.biometrics.IBiometricNativeHandle;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.os.Binder;
 import android.os.CancellationSignal;
@@ -40,13 +38,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Looper;
-import android.os.NativeHandle;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
+import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
@@ -251,15 +249,14 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
     /**
      * Defaults to {@link FaceManager#enroll(int, byte[], CancellationSignal, EnrollmentCallback,
-     * int[], NativeHandle)} with {@code windowId} set to null.
+     * int[], Surface)} with {@code surface} set to null.
      *
-     * @see FaceManager#enroll(int, byte[], CancellationSignal, EnrollmentCallback, int[],
-     * NativeHandle)
+     * @see FaceManager#enroll(int, byte[], CancellationSignal, EnrollmentCallback, int[], Surface)
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void enroll(int userId, byte[] token, CancellationSignal cancel,
             EnrollmentCallback callback, int[] disabledFeatures) {
-        enroll(userId, token, cancel, callback, disabledFeatures, null /* windowId */);
+        enroll(userId, token, cancel, callback, disabledFeatures, null /* surface */);
     }
 
     /**
@@ -277,13 +274,13 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @param flags    optional flags
      * @param userId   the user to whom this face will belong to
      * @param callback an object to receive enrollment events
-     * @param windowId optional ID of a camera preview window for a single-camera device. Must be
-     *                 null if not used.
+     * @param surface  optional camera preview surface for a single-camera device. Must be null if
+     *                 not used.
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void enroll(int userId, byte[] token, CancellationSignal cancel,
-            EnrollmentCallback callback, int[] disabledFeatures, @Nullable NativeHandle windowId) {
+            EnrollmentCallback callback, int[] disabledFeatures, @Nullable Surface surface) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
@@ -298,12 +295,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
 
         if (mService != null) {
-            IBiometricNativeHandle handle = BiometricNativeHandleUtils.dup(windowId);
             try {
                 mEnrollmentCallback = callback;
                 Trace.beginSection("FaceManager#enroll");
                 mService.enroll(userId, mToken, token, mServiceReceiver,
-                        mContext.getOpPackageName(), disabledFeatures, handle);
+                        mContext.getOpPackageName(), disabledFeatures, surface);
             } catch (RemoteException e) {
                 Log.w(TAG, "Remote exception in enroll: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or
@@ -313,7 +309,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                                 0 /* vendorCode */));
             } finally {
                 Trace.endSection();
-                BiometricNativeHandleUtils.close(handle);
             }
         }
     }

@@ -32,9 +32,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
-import android.hardware.biometrics.BiometricNativeHandleUtils;
 import android.hardware.biometrics.BiometricPrompt;
-import android.hardware.biometrics.IBiometricNativeHandle;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.os.Binder;
 import android.os.CancellationSignal;
@@ -43,12 +41,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Looper;
-import android.os.NativeHandle;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.security.identity.IdentityCredential;
 import android.util.Slog;
+import android.view.Surface;
 
 import java.security.Signature;
 import java.util.List;
@@ -419,17 +417,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
 
     /**
      * Defaults to {@link FingerprintManager#authenticate(CryptoObject, CancellationSignal, int,
-     * AuthenticationCallback, Handler, int, NativeHandle)} with {@code windowId} set to null.
+     * AuthenticationCallback, Handler, int, Surface)} with {@code surface} set to null.
      *
      * @see FingerprintManager#authenticate(CryptoObject, CancellationSignal, int,
-     * AuthenticationCallback, Handler, int, NativeHandle)
+     * AuthenticationCallback, Handler, int, Surface)
      *
      * @hide
      */
     @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             int flags, @NonNull AuthenticationCallback callback, Handler handler, int userId) {
-        authenticate(crypto, cancel, flags, callback, handler, userId, null /* windowId */);
+        authenticate(crypto, cancel, flags, callback, handler, userId, null /* surface */);
     }
 
     /**
@@ -437,14 +435,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * CancellationSignal, int, AuthenticationCallback, Handler)}. This version does not
      * display the BiometricPrompt.
      * @param userId the user ID that the fingerprint hardware will authenticate for.
-     * @param windowId for optical fingerprint sensors that require active illumination by the OLED
+     * @param surface for optical fingerprint sensors that require active illumination by the OLED
      *        display. Should be null for devices that don't require illumination.
      * @hide
      */
     @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             int flags, @NonNull AuthenticationCallback callback, Handler handler, int userId,
-            @Nullable NativeHandle windowId) {
+            @Nullable Surface surface) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
@@ -459,14 +457,13 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
 
         if (mService != null) {
-            IBiometricNativeHandle handle = BiometricNativeHandleUtils.dup(windowId);
             try {
                 useHandler(handler);
                 mAuthenticationCallback = callback;
                 mCryptoObject = crypto;
                 long sessionId = crypto != null ? crypto.getOpId() : 0;
                 mService.authenticate(mToken, sessionId, userId, mServiceReceiver, flags,
-                        mContext.getOpPackageName(), handle);
+                        mContext.getOpPackageName(), surface);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception while authenticating: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or try
@@ -474,25 +471,23 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 callback.onAuthenticationError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
                         getErrorString(mContext, FINGERPRINT_ERROR_HW_UNAVAILABLE,
                                 0 /* vendorCode */));
-            } finally {
-                BiometricNativeHandleUtils.close(handle);
             }
         }
     }
 
     /**
      * Defaults to {@link FingerprintManager#enroll(byte[], CancellationSignal, int, int,
-     * EnrollmentCallback, NativeHandle)} with {@code windowId} set to null.
+     * EnrollmentCallback, Surface)} with {@code surface} set to null.
      *
      * @see FingerprintManager#enroll(byte[], CancellationSignal, int, int, EnrollmentCallback,
-     * NativeHandle)
+     * Surface)
      *
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void enroll(byte [] token, CancellationSignal cancel, int flags,
             int userId, EnrollmentCallback callback) {
-        enroll(token, cancel, flags, userId, callback, null /* windowId */);
+        enroll(token, cancel, flags, userId, callback, null /* surface */);
     }
 
     /**
@@ -513,7 +508,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void enroll(byte [] token, CancellationSignal cancel, int flags,
-            int userId, EnrollmentCallback callback, @Nullable NativeHandle windowId) {
+            int userId, EnrollmentCallback callback, @Nullable Surface surface) {
         if (userId == UserHandle.USER_CURRENT) {
             userId = getCurrentUserId();
         }
@@ -531,11 +526,10 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
 
         if (mService != null) {
-            IBiometricNativeHandle handle = BiometricNativeHandleUtils.dup(windowId);
             try {
                 mEnrollmentCallback = callback;
                 mService.enroll(mToken, token, userId, mServiceReceiver, flags,
-                        mContext.getOpPackageName(), handle);
+                        mContext.getOpPackageName(), surface);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enroll: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or try
@@ -543,8 +537,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 callback.onEnrollmentError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
                         getErrorString(mContext, FINGERPRINT_ERROR_HW_UNAVAILABLE,
                                 0 /* vendorCode */));
-            } finally {
-                BiometricNativeHandleUtils.close(handle);
             }
         }
     }

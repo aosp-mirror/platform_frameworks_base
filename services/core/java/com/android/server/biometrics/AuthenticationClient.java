@@ -20,14 +20,12 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.IBiometricNativeHandle;
 import android.os.IBinder;
-import android.os.NativeHandle;
 import android.os.RemoteException;
 import android.security.KeyStore;
 import android.util.Slog;
+import android.view.Surface;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -44,7 +42,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public static final int LOCKOUT_PERMANENT = 2;
 
     private final boolean mRequireConfirmation;
-    private final NativeHandle mWindowId;
+    private final Surface mSurface;
 
     // We need to track this state since it's possible for applications to request for
     // authentication while the device is already locked out. In that case, the client is created
@@ -74,24 +72,12 @@ public abstract class AuthenticationClient extends ClientMonitor {
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int targetUserId, int groupId, long opId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation,
-            IBiometricNativeHandle windowId) {
+            Surface surface) {
         super(context, constants, daemon, halDeviceId, token, listener, targetUserId, groupId,
                 restricted, owner, cookie);
         mOpId = opId;
         mRequireConfirmation = requireConfirmation;
-        mWindowId = Utils.dupNativeHandle(windowId);
-    }
-
-    @Override
-    public void destroy() {
-        if (mWindowId != null && mWindowId.getFileDescriptors() != null) {
-            try {
-                mWindowId.close();
-            } catch (IOException e) {
-                Slog.e(getLogTag(), "Failed to close windowId NativeHandle: ", e);
-            }
-        }
-        super.destroy();
+        mSurface = surface;
     }
 
     protected long getStartTimeMs() {
@@ -251,7 +237,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         onStart();
         try {
             mStartTimeMs = System.currentTimeMillis();
-            final int result = getDaemonWrapper().authenticate(mOpId, getGroupId(), mWindowId);
+            final int result = getDaemonWrapper().authenticate(mOpId, getGroupId(), mSurface);
             if (result != 0) {
                 Slog.w(getLogTag(), "startAuthentication failed, result=" + result);
                 mMetricsLogger.histogram(mConstants.tagAuthStartError(), result);

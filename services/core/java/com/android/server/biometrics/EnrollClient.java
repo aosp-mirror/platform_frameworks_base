@@ -20,13 +20,11 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.IBiometricNativeHandle;
 import android.os.IBinder;
-import android.os.NativeHandle;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.Surface;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -38,7 +36,7 @@ public abstract class EnrollClient extends ClientMonitor {
     private final BiometricUtils mBiometricUtils;
     private final int[] mDisabledFeatures;
     private final int mTimeoutSec;
-    private final NativeHandle mWindowId;
+    private final Surface mSurface;
 
     private long mEnrollmentStartTimeMs;
 
@@ -48,26 +46,14 @@ public abstract class EnrollClient extends ClientMonitor {
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int userId, int groupId,
             byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils,
-            final int[] disabledFeatures, int timeoutSec, IBiometricNativeHandle windowId) {
+            final int[] disabledFeatures, int timeoutSec, Surface surface) {
         super(context, constants, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */);
         mBiometricUtils = utils;
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
         mTimeoutSec = timeoutSec;
-        mWindowId = Utils.dupNativeHandle(windowId);
-    }
-
-    @Override
-    public void destroy() {
-        if (mWindowId != null && mWindowId.getFileDescriptors() != null) {
-            try {
-                mWindowId.close();
-            } catch (IOException e) {
-                Slog.e(getLogTag(), "Failed to close windowId NativeHandle: ", e);
-            }
-        }
-        super.destroy();
+        mSurface = surface;
     }
 
     @Override
@@ -119,7 +105,7 @@ public abstract class EnrollClient extends ClientMonitor {
             }
 
             final int result = getDaemonWrapper().enroll(mCryptoToken, getGroupId(), mTimeoutSec,
-                    disabledFeatures, mWindowId);
+                    disabledFeatures, mSurface);
             if (result != 0) {
                 Slog.w(getLogTag(), "startEnroll failed, result=" + result);
                 mMetricsLogger.histogram(mConstants.tagEnrollStartError(), result);

@@ -15,11 +15,11 @@
  */
 package android.hardware.face;
 
-import android.hardware.biometrics.IBiometricNativeHandle;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
+import android.view.Surface;
 
 /**
  * Communication channel from client to the face service. These methods are all require the
@@ -52,7 +52,7 @@ interface IFaceService {
 
     // Start face enrollment
     void enroll(int userId, IBinder token, in byte [] cryptoToken, IFaceServiceReceiver receiver,
-            String opPackageName, in int [] disabledFeatures, in IBiometricNativeHandle windowId);
+            String opPackageName, in int [] disabledFeatures, in Surface surface);
 
     // Start remote face enrollment
     void enrollRemotely(int userId, IBinder token, in byte [] cryptoToken, IFaceServiceReceiver receiver,
