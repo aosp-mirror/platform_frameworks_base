@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification;
+package com.android.systemui.statusbar.notification.interruption;
 
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
@@ -27,6 +27,9 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -39,7 +42,7 @@ public class NotificationAlertingManager {
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final VisualStabilityManager mVisualStabilityManager;
     private final StatusBarStateController mStatusBarStateController;
-    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
+    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final NotificationListener mNotificationListener;
 
     private HeadsUpManager mHeadsUpManager;
@@ -52,13 +55,13 @@ public class NotificationAlertingManager {
             NotificationRemoteInputManager remoteInputManager,
             VisualStabilityManager visualStabilityManager,
             StatusBarStateController statusBarStateController,
-            NotificationInterruptionStateProvider notificationInterruptionStateProvider,
+            NotificationInterruptStateProvider notificationInterruptionStateProvider,
             NotificationListener notificationListener,
             HeadsUpManager headsUpManager) {
         mRemoteInputManager = remoteInputManager;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarStateController = statusBarStateController;
-        mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
+        mNotificationInterruptStateProvider = notificationInterruptionStateProvider;
         mNotificationListener = notificationListener;
         mHeadsUpManager = headsUpManager;
 
@@ -94,7 +97,7 @@ public class NotificationAlertingManager {
         if (entry.getRow().getPrivateLayout().getHeadsUpChild() != null) {
             // Possible for shouldHeadsUp to change between the inflation starting and ending.
             // If it does and we no longer need to heads up, we should free the view.
-            if (mNotificationInterruptionStateProvider.shouldHeadsUp(entry)) {
+            if (mNotificationInterruptStateProvider.shouldHeadsUp(entry)) {
                 mHeadsUpManager.showNotification(entry);
                 if (!mStatusBarStateController.isDozing()) {
                     // Mark as seen immediately
@@ -109,7 +112,7 @@ public class NotificationAlertingManager {
     private void updateAlertState(NotificationEntry entry) {
         boolean alertAgain = alertAgain(entry, entry.getSbn().getNotification());
         // includes check for whether this notification should be filtered:
-        boolean shouldAlert = mNotificationInterruptionStateProvider.shouldHeadsUp(entry);
+        boolean shouldAlert = mNotificationInterruptStateProvider.shouldHeadsUp(entry);
         final boolean wasAlerting = mHeadsUpManager.isAlerting(entry.getKey());
         if (wasAlerting) {
             if (shouldAlert) {
