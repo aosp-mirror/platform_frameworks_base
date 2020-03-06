@@ -321,6 +321,8 @@ public class PackageSetting extends PackageSettingBase {
 
         Set<String> mimeGroupNames = other.mimeGroups != null ? other.mimeGroups.keySet() : null;
         updateMimeGroups(mimeGroupNames);
+
+        getPkgState().updateFrom(other.getPkgState());
     }
 
     @NonNull
