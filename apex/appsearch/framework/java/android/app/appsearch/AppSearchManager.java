@@ -75,9 +75,7 @@ public class AppSearchManager {
      *             REPEATED} property.
      * </ul>
      *
-     * <p>The following types of schema changes are not backwards-compatible. Supplying a schema
-     * with such changes will result in this call throwing an {@link IllegalSchemaException}
-     * describing the incompatibility, and the previously set schema will remain active:
+     * <p>The following types of schema changes are not backwards-compatible:
      * <ul>
      *     <li>Removal of an existing type
      *     <li>Removal of a property from a type
@@ -93,6 +91,10 @@ public class AppSearchManager {
      *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED
      *             REQUIRED} property.
      * </ul>
+     * <p>Supplying a schema with such changes will result in this call returning an
+     * {@link AppSearchResult} with a code of {@link AppSearchResult#RESULT_INVALID_SCHEMA} and an
+     * error message describing the incompatibility. In this case the previously set schema will
+     * remain active.
      *
      * <p>If you need to make non-backwards-compatible changes as described above, instead use the
      * {@link #setSchema(List, boolean)} method with the {@code forceOverride} parameter set to
@@ -102,13 +104,13 @@ public class AppSearchManager {
      * efficiently.
      *
      * @param schemas The schema configs for the types used by the calling app.
-     * @throws IllegalSchemaException If the provided schema is invalid, or is incompatible with the
-     *     previous schema.
+     * @return the result of performing this operation.
      *
      * @hide
      */
-    public void setSchema(@NonNull AppSearchSchema... schemas) {
-        setSchema(Arrays.asList(schemas), /*forceOverride=*/false);
+    @NonNull
+    public AppSearchResult<Void> setSchema(@NonNull AppSearchSchema... schemas) {
+        return setSchema(Arrays.asList(schemas), /*forceOverride=*/false);
     }
 
     /**
@@ -116,20 +118,22 @@ public class AppSearchManager {
      *
      * <p>This method is similar to {@link #setSchema(AppSearchSchema...)}, except for the
      * {@code forceOverride} parameter. If a backwards-incompatible schema is specified but the
-     * {@code forceOverride} parameter is set to {@code true}, instead of throwing an
-     * {@link IllegalSchemaException}, all documents which are not compatible with the new schema
-     * will be deleted and the incompatible schema will be applied.
+     * {@code forceOverride} parameter is set to {@code true}, instead of returning an
+     * {@link AppSearchResult} with the {@link AppSearchResult#RESULT_INVALID_SCHEMA} code, all
+     * documents which are not compatible with the new schema will be deleted and the incompatible
+     * schema will be applied.
      *
      * @param schemas The schema configs for the types used by the calling app.
      * @param forceOverride Whether to force the new schema to be applied even if there are
      *     incompatible changes versus the previously set schema. Documents which are incompatible
      *     with the new schema will be deleted.
-     * @throws IllegalSchemaException If the provided schema is invalid, or is incompatible with the
-     *     previous schema and the {@code forceOverride} parameter is set to {@code false}.
+     * @return the result of performing this operation.
      *
      * @hide
      */
-    public void setSchema(@NonNull List<AppSearchSchema> schemas, boolean forceOverride) {
+    @NonNull
+    public AppSearchResult<Void> setSchema(
+            @NonNull List<AppSearchSchema> schemas, boolean forceOverride) {
         // Prepare the merged schema for transmission.
         SchemaProto.Builder schemaProtoBuilder = SchemaProto.newBuilder();
         for (AppSearchSchema schema : schemas) {
@@ -140,13 +144,13 @@ public class AppSearchManager {
         // TODO: This should use com.android.internal.infra.RemoteStream or another mechanism to
         //  avoid binder limits.
         byte[] schemaBytes = schemaProtoBuilder.build().toByteArray();
-        AndroidFuture<Void> future = new AndroidFuture<>();
+        AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
         try {
             mService.setSchema(schemaBytes, forceOverride, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
-        getFutureOrThrow(future);
+        return getFutureOrThrow(future);
     }
 
     /**
