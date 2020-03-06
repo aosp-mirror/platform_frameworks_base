@@ -59,7 +59,7 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
         mUserSetupUri = Secure.getUriFor(Secure.USER_SETUP_COMPLETE);
         mSettingsObserver = new ContentObserver(mainHandler) {
             @Override
-            public void onChange(boolean selfChange, Uri uri, int userId) {
+            public void onChange(boolean selfChange, Uri uri, int flags) {
                 Log.d(TAG, "Setting change: " + uri);
                 if (mUserSetupUri.equals(uri)) {
                     notifySetupChanged();
