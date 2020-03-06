@@ -34,11 +34,11 @@ import java.util.Map;
  * @hide
  */
 public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
-    @NonNull private final Map<KeyType, AppSearchResult<ValueType>> mSuccesses;
+    @NonNull private final Map<KeyType, ValueType> mSuccesses;
     @NonNull private final Map<KeyType, AppSearchResult<ValueType>> mFailures;
 
     private AppSearchBatchResult(
-            @NonNull Map<KeyType, AppSearchResult<ValueType>> successes,
+            @NonNull Map<KeyType, ValueType> successes,
             @NonNull Map<KeyType, AppSearchResult<ValueType>> failures) {
         mSuccesses = successes;
         mFailures = failures;
@@ -61,13 +61,13 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
     }
 
     /**
-     * Returns a {@link Map} of all successful keys mapped to the successful
-     * {@link AppSearchResult}s they produced.
+     * Returns a {@link Map} of all successful keys mapped to the successful {@link ValueType}
+     * values they produced.
      *
      * <p>The values of the {@link Map} will not be {@code null}.
      */
     @NonNull
-    public Map<KeyType, AppSearchResult<ValueType>> getSuccesses() {
+    public Map<KeyType, ValueType> getSuccesses() {
         return mSuccesses;
     }
 
@@ -110,7 +110,7 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
      * @hide
      */
     public static final class Builder<KeyType, ValueType> {
-        private final Map<KeyType, AppSearchResult<ValueType>> mSuccesses = new ArrayMap<>();
+        private final Map<KeyType, ValueType> mSuccesses = new ArrayMap<>();
         private final Map<KeyType, AppSearchResult<ValueType>> mFailures = new ArrayMap<>();
 
         /** Creates a new {@link Builder} for this {@link AppSearchBatchResult}. */
@@ -126,6 +126,18 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
         }
 
         /**
+         * Associates the {@code key} with the given failure code and error message.
+         *
+         * <p>Any previous mapping for a key, whether success or failure, is deleted.
+         */
+        public Builder setFailure(
+                @NonNull KeyType key,
+                @AppSearchResult.ResultCode int resultCode,
+                @Nullable String errorMessage) {
+            return setResult(key, AppSearchResult.newFailedResult(resultCode, errorMessage));
+        }
+
+        /**
          * Associates the {@code key} with the given {@code result}.
          *
          * <p>Any previous mapping for a key, whether success or failure, is deleted.
@@ -133,7 +145,7 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
         @NonNull
         public Builder setResult(@NonNull KeyType key, @NonNull AppSearchResult<ValueType> result) {
             if (result.isSuccess()) {
-                mSuccesses.put(key, result);
+                mSuccesses.put(key, result.getResultValue());
                 mFailures.remove(key);
             } else {
                 mFailures.put(key, result);

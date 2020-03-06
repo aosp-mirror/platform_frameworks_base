@@ -56,7 +56,6 @@ public class AppSearchResult<ValueType> implements Parcelable {
     /**
      * An internal error occurred within AppSearch, which the caller cannot address.
      *
-     *
      * This error may be considered similar to {@link IllegalStateException}
      */
     public static final int RESULT_INTERNAL_ERROR = 2;

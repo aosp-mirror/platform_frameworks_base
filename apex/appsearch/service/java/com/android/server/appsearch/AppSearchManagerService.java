@@ -37,7 +37,6 @@ import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.protobuf.InvalidProtocolBufferException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -112,7 +111,8 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void getDocuments(String[] uris, AndroidFuture callback) {
+        public void getDocuments(
+                @NonNull List<String> uris, @NonNull AndroidFuture<AppSearchBatchResult> callback) {
             Preconditions.checkNotNull(uris);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
@@ -120,13 +120,23 @@ public class AppSearchManagerService extends SystemService {
             long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                // Contains serialized DocumentProto. byte[][] is not transmissible via Binder.
-                List<byte[]> results = new ArrayList<>(uris.length);
-                for (String uri : uris) {
-                    DocumentProto result = impl.getDocument(callingUid, uri);
-                    results.add(result.toByteArray());
+                AppSearchBatchResult.Builder<String, byte[]> resultBuilder =
+                        new AppSearchBatchResult.Builder<>();
+                for (int i = 0; i < uris.size(); i++) {
+                    String uri = uris.get(i);
+                    try {
+                        DocumentProto document = impl.getDocument(callingUid, uri);
+                        if (document == null) {
+                            resultBuilder.setFailure(
+                                    uri, AppSearchResult.RESULT_NOT_FOUND, /*errorMessage=*/ null);
+                        } else {
+                            resultBuilder.setSuccess(uri, document.toByteArray());
+                        }
+                    } catch (Throwable t) {
+                        resultBuilder.setResult(uri, throwableToFailedResult(t));
+                    }
                 }
-                callback.complete(results);
+                callback.complete(resultBuilder.build());
             } catch (Throwable t) {
                 callback.completeExceptionally(t);
             } finally {
