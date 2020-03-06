@@ -299,11 +299,8 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
                     .createEvent(DevicePolicyEnums.RESOLVER_EMPTY_STATE_WORK_APPS_DISABLED)
                     .setStrings(getMetricsCategory())
                     .write();
-            showEmptyState(activeListAdapter,
-                    R.drawable.ic_work_apps_off,
-                    R.string.resolver_turn_on_work_apps,
-                    R.string.resolver_turn_on_work_apps_explanation,
-                    (View.OnClickListener) v -> {
+            showWorkProfileOffEmptyState(activeListAdapter,
+                    v -> {
                         ProfileDescriptor descriptor = getItem(
                                 userHandleToPageIndex(activeListAdapter.getUserHandle()));
                         showSpinner(descriptor.getEmptyStateView());
@@ -319,19 +316,13 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
                                 DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL)
                             .setStrings(getMetricsCategory())
                             .write();
-                    showEmptyState(activeListAdapter,
-                            R.drawable.ic_sharing_disabled,
-                            R.string.resolver_cant_share_with_personal_apps,
-                            R.string.resolver_cant_share_cross_profile_explanation);
+                    showNoWorkToPersonalIntentsEmptyState(activeListAdapter);
                 } else {
                     DevicePolicyEventLogger.createEvent(
                             DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_WORK)
                             .setStrings(getMetricsCategory())
                             .write();
-                    showEmptyState(activeListAdapter,
-                            R.drawable.ic_sharing_disabled,
-                            R.string.resolver_cant_share_with_work_apps,
-                            R.string.resolver_cant_share_cross_profile_explanation);
+                    showNoPersonalToWorkIntentsEmptyState(activeListAdapter);
                 }
                 return false;
             }
@@ -339,6 +330,15 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         showListView(activeListAdapter);
         return activeListAdapter.rebuildList(doPostProcessing);
     }
+
+    protected abstract void showWorkProfileOffEmptyState(
+            ResolverListAdapter activeListAdapter, View.OnClickListener listener);
+
+    protected abstract void showNoPersonalToWorkIntentsEmptyState(
+            ResolverListAdapter activeListAdapter);
+
+    protected abstract void showNoWorkToPersonalIntentsEmptyState(
+            ResolverListAdapter activeListAdapter);
 
     void showEmptyState(ResolverListAdapter listAdapter) {
         UserHandle listUserHandle = listAdapter.getUserHandle();
@@ -353,16 +353,16 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
             showEmptyState(listAdapter,
                     R.drawable.ic_no_apps,
                     R.string.resolver_no_apps_available,
-                    R.string.resolver_no_apps_available_explanation);
+                    /* subtitleRes */ 0);
         }
     }
 
-    private void showEmptyState(ResolverListAdapter activeListAdapter,
+    protected void showEmptyState(ResolverListAdapter activeListAdapter,
             @DrawableRes int iconRes, @StringRes int titleRes, @StringRes int subtitleRes) {
         showEmptyState(activeListAdapter, iconRes, titleRes, subtitleRes, /* buttonOnClick */ null);
     }
 
-    private void showEmptyState(ResolverListAdapter activeListAdapter,
+    protected void showEmptyState(ResolverListAdapter activeListAdapter,
             @DrawableRes int iconRes, @StringRes int titleRes, @StringRes int subtitleRes,
             View.OnClickListener buttonOnClick) {
         ProfileDescriptor descriptor = getItem(
@@ -379,7 +379,12 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         title.setText(titleRes);
 
         TextView subtitle = emptyStateView.findViewById(R.id.resolver_empty_state_subtitle);
-        subtitle.setText(subtitleRes);
+        if (subtitleRes != 0) {
+            subtitle.setVisibility(View.VISIBLE);
+            subtitle.setText(subtitleRes);
+        } else {
+            subtitle.setVisibility(View.GONE);
+        }
 
         Button button = emptyStateView.findViewById(R.id.resolver_empty_state_button);
         button.setVisibility(buttonOnClick != null ? View.VISIBLE : View.GONE);
