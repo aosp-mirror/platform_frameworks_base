@@ -47,6 +47,7 @@ message ConfigSettingsProto {
   repeated SettingProto systemui_settings = 20;
   repeated SettingProto telephony_settings = 21;
   repeated SettingProto textclassifier_settings = 22;
+  repeated SettingProto blobstore_settings = 23;
 
   message NamespaceProto {
     optional string namespace = 1;
