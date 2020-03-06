@@ -54,7 +54,9 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
+import android.text.BidiFormatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,6 +64,7 @@ import android.view.Window;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -73,6 +76,7 @@ import com.android.internal.R;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Activity used to display and persist a service or feature target for the Accessibility button.
@@ -84,6 +88,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
     private int mShortcutUserType;
     private final List<AccessibilityButtonTarget> mTargets = new ArrayList<>();
     private AlertDialog mAlertDialog;
+    private AlertDialog mEnableDialog;
     private TargetAdapter mTargetAdapter;
     private AccessibilityButtonTarget mCurrentCheckedTarget;
 
@@ -570,6 +575,18 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
     private void onTargetChecked(AdapterView<?> parent, View view, int position, long id) {
         mCurrentCheckedTarget = mTargets.get(position);
+
+        if ((mCurrentCheckedTarget.getType() == TargetType.ACCESSIBILITY_SERVICE)
+                && !mCurrentCheckedTarget.isChecked()) {
+            mEnableDialog = new AlertDialog.Builder(this)
+                    .setView(createEnableDialogContentView(this, mCurrentCheckedTarget,
+                            this::onPermissionAllowButtonClicked,
+                            this::onPermissionDenyButtonClicked))
+                    .create();
+            mEnableDialog.show();
+            return;
+        }
+
         onTargetChecked(mCurrentCheckedTarget, !mCurrentCheckedTarget.isChecked());
     }
 
@@ -692,5 +709,63 @@ public class AccessibilityButtonChooserActivity extends Activity {
         final AccessibilityManager ams = context.getSystemService(AccessibilityManager.class);
         final List<String> requiredTargets = ams.getAccessibilityShortcutTargets(sShortcutType);
         return requiredTargets.contains(id);
+    }
+
+    private void onPermissionAllowButtonClicked(View view) {
+        if (mCurrentCheckedTarget.getFragmentType() != AccessibilityServiceFragmentType.LEGACY) {
+            updateValueToSettings(mCurrentCheckedTarget.getId(), /* checked= */ true);
+        }
+        onTargetChecked(mCurrentCheckedTarget, /* checked= */ true);
+        mEnableDialog.dismiss();
+    }
+
+    private void onPermissionDenyButtonClicked(View view) {
+        mEnableDialog.dismiss();
+    }
+
+    private static View createEnableDialogContentView(Context context,
+            AccessibilityButtonTarget target, View.OnClickListener allowListener,
+            View.OnClickListener denyListener) {
+        final LayoutInflater inflater = (LayoutInflater) context.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+
+        final View content = inflater.inflate(
+                R.layout.accessibility_enable_service_encryption_warning, /* root= */ null);
+
+        final TextView encryptionWarningView = (TextView) content.findViewById(
+                R.id.accessibility_encryption_warning);
+        if (StorageManager.isNonDefaultBlockEncrypted()) {
+            final String text = context.getString(
+                    R.string.accessibility_enable_service_encryption_warning,
+                    getServiceName(context, target.getLabel()));
+            encryptionWarningView.setText(text);
+            encryptionWarningView.setVisibility(View.VISIBLE);
+        } else {
+            encryptionWarningView.setVisibility(View.GONE);
+        }
+
+        final ImageView permissionDialogIcon = content.findViewById(
+                R.id.accessibility_permissionDialog_icon);
+        permissionDialogIcon.setImageDrawable(target.getDrawable());
+
+        final TextView permissionDialogTitle = content.findViewById(
+                R.id.accessibility_permissionDialog_title);
+        permissionDialogTitle.setText(context.getString(R.string.accessibility_enable_service_title,
+                getServiceName(context, target.getLabel())));
+
+        final Button permissionAllowButton = content.findViewById(
+                R.id.accessibility_permission_enable_allow_button);
+        final Button permissionDenyButton = content.findViewById(
+                R.id.accessibility_permission_enable_deny_button);
+        permissionAllowButton.setOnClickListener(allowListener);
+        permissionDenyButton.setOnClickListener(denyListener);
+
+        return content;
+    }
+
+    // Gets the service name and bidi wrap it to protect from bidi side effects.
+    private static CharSequence getServiceName(Context context, CharSequence label) {
+        final Locale locale = context.getResources().getConfiguration().getLocales().get(0);
+        return BidiFormatter.getInstance(locale).unicodeWrap(label);
     }
 }
