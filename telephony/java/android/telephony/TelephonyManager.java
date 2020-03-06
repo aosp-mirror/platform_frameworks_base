@@ -12656,7 +12656,8 @@ public class TelephonyManager {
      * {@hide}
      */
     @SystemApi
-    public boolean isCurrentSimOperator(@NonNull String mccmnc, @MvnoType int mvnoType,
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean matchesCurrentSimOperator(@NonNull String mccmnc, @MvnoType int mvnoType,
             @Nullable String mvnoMatchData) {
         try {
             if (!mccmnc.equals(getSimOperator())) {
