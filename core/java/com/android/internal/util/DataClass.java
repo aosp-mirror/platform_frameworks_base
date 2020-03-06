@@ -15,7 +15,13 @@
  */
 package com.android.internal.util;
 
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -241,6 +247,13 @@ public @interface DataClass {
     @interface Suppress {
         String[] value();
     }
+
+    /**
+     * Mark that the field should have a {@link Nullable} argument for its setter.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({FIELD})
+    @interface MaySetToNull {}
 
     /**
      * Callback used by {@link #genForEachField}.
