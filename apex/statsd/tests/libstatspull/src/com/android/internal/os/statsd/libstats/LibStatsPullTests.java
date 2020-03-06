@@ -229,7 +229,7 @@ public class LibStatsPullTests {
         // Let the current bucket finish.
         Thread.sleep(LONG_SLEEP_MILLIS);
         List<Atom> data = StatsConfigUtils.getGaugeMetricDataList(statsManager, sConfigId);
-        statsManager.unregisterPullAtomCallback(PULL_ATOM_TAG);
+        unregisterStatsPuller(PULL_ATOM_TAG);
         assertThat(data.size()).isEqualTo(sAtomsPerPull);
 
         for (int i = 0; i < data.size(); i++) {
