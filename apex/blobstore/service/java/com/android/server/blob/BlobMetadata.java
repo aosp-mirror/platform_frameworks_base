@@ -15,8 +15,9 @@
  */
 package com.android.server.blob;
 
+import static android.app.blob.BlobStoreManager.DESC_RES_TYPE_STRING;
 import static android.app.blob.XmlTags.ATTR_DESCRIPTION;
-import static android.app.blob.XmlTags.ATTR_DESCRIPTION_RES_ID;
+import static android.app.blob.XmlTags.ATTR_DESCRIPTION_RES_NAME;
 import static android.app.blob.XmlTags.ATTR_EXPIRY_TIME;
 import static android.app.blob.XmlTags.ATTR_ID;
 import static android.app.blob.XmlTags.ATTR_PACKAGE;
@@ -29,7 +30,9 @@ import static android.app.blob.XmlTags.TAG_LEASEE;
 import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.O_RDONLY;
 
+import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.TAG;
+import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_DESC_RES_NAME;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_STRING_DESC;
 
 import android.annotation.NonNull;
@@ -154,7 +157,7 @@ class BlobMetadata {
         synchronized (mMetadataLock) {
             // We need to override the leasee data, so first remove any existing
             // leasee before adding the new one.
-            final Leasee leasee = new Leasee(callingPackage, callingUid,
+            final Leasee leasee = new Leasee(mContext, callingPackage, callingUid,
                     descriptionResId, description, leaseExpiryTimeMillis);
             mLeasees.remove(leasee);
             mLeasees.add(leasee);
@@ -459,59 +462,123 @@ class BlobMetadata {
     }
 
     static final class Leasee extends Accessor {
-        public final int descriptionResId;
+        public final String descriptionResEntryName;
         public final CharSequence description;
         public final long expiryTimeMillis;
 
-        Leasee(String packageName, int uid, int descriptionResId, CharSequence description,
-                long expiryTimeMillis) {
+        Leasee(@NonNull Context context, @NonNull String packageName,
+                int uid, int descriptionResId,
+                @Nullable CharSequence description, long expiryTimeMillis) {
             super(packageName, uid);
-            this.descriptionResId = descriptionResId;
+            final Resources packageResources = getPackageResources(context, packageName,
+                    UserHandle.getUserId(uid));
+            this.descriptionResEntryName = getResourceEntryName(packageResources, descriptionResId);
+            this.expiryTimeMillis = expiryTimeMillis;
+            this.description = description == null
+                    ? getDescription(packageResources, descriptionResId)
+                    : description;
+        }
+
+        Leasee(String packageName, int uid, @Nullable String descriptionResEntryName,
+                @Nullable CharSequence description, long expiryTimeMillis) {
+            super(packageName, uid);
+            this.descriptionResEntryName = descriptionResEntryName;
             this.expiryTimeMillis = expiryTimeMillis;
             this.description = description;
+        }
+
+        @Nullable
+        private static String getResourceEntryName(@Nullable Resources packageResources,
+                int resId) {
+            if (!ResourceId.isValid(resId) || packageResources == null) {
+                return null;
+            }
+            return packageResources.getResourceEntryName(resId);
+        }
+
+        @Nullable
+        private static String getDescription(@NonNull Context context,
+                @NonNull String descriptionResEntryName, @NonNull String packageName, int userId) {
+            if (descriptionResEntryName == null || descriptionResEntryName.isEmpty()) {
+                return null;
+            }
+            final Resources resources = getPackageResources(context, packageName, userId);
+            if (resources == null) {
+                return null;
+            }
+            try {
+                final int resId = resources.getIdentifier(descriptionResEntryName,
+                        DESC_RES_TYPE_STRING, packageName);
+                return resId <= 0 ? null : resources.getString(resId);
+            } catch (Resources.NotFoundException e) {
+                if (LOGV) {
+                    Slog.w(TAG, "Description resource not found", e);
+                }
+                return null;
+            }
+        }
+
+        @Nullable
+        private static String getDescription(@Nullable Resources packageResources,
+                int descriptionResId) {
+            if (!ResourceId.isValid(descriptionResId) || packageResources == null) {
+                return null;
+            }
+            return packageResources.getString(descriptionResId);
         }
 
         boolean isStillValid() {
             return expiryTimeMillis == 0 || expiryTimeMillis <= System.currentTimeMillis();
         }
 
-        void dump(Context context, IndentingPrintWriter fout) {
+        void dump(@NonNull Context context, @NonNull IndentingPrintWriter fout) {
             fout.println("desc: " + getDescriptionToDump(context));
             fout.println("expiryMs: " + expiryTimeMillis);
         }
 
-        private String getDescriptionToDump(Context context) {
-            String desc = null;
-            if (ResourceId.isValid(descriptionResId)) {
-                try {
-                    final Resources leaseeRes = context.getPackageManager()
-                            .getResourcesForApplicationAsUser(
-                                    packageName, UserHandle.getUserId(uid));
-                    desc = leaseeRes.getString(descriptionResId);
-                } catch (PackageManager.NameNotFoundException e) {
-                    Slog.d(TAG, "Unknown package in user " + UserHandle.getUserId(uid) + ": "
-                            + packageName, e);
-                    desc = "<none>";
-                }
-            } else {
+        @NonNull
+        private String getDescriptionToDump(@NonNull Context context) {
+            String desc = getDescription(context, descriptionResEntryName, packageName,
+                    UserHandle.getUserId(uid));
+            if (desc == null) {
                 desc = description.toString();
             }
-            return desc;
+            return desc == null ? "<none>" : desc;
+        }
+
+        @Nullable
+        private static Resources getPackageResources(@NonNull Context context,
+                @NonNull String packageName, int userId) {
+            try {
+                return context.getPackageManager()
+                        .getResourcesForApplicationAsUser(packageName, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.d(TAG, "Unknown package in user " + userId + ": "
+                        + packageName, e);
+                return null;
+            }
         }
 
         void writeToXml(@NonNull XmlSerializer out) throws IOException {
             XmlUtils.writeStringAttribute(out, ATTR_PACKAGE, packageName);
             XmlUtils.writeIntAttribute(out, ATTR_UID, uid);
-            XmlUtils.writeIntAttribute(out, ATTR_DESCRIPTION_RES_ID, descriptionResId);
+            XmlUtils.writeStringAttribute(out, ATTR_DESCRIPTION_RES_NAME, descriptionResEntryName);
             XmlUtils.writeLongAttribute(out, ATTR_EXPIRY_TIME, expiryTimeMillis);
             XmlUtils.writeStringAttribute(out, ATTR_DESCRIPTION, description);
         }
 
         @NonNull
-        static Leasee createFromXml(@NonNull XmlPullParser in, int version) throws IOException {
+        static Leasee createFromXml(@NonNull XmlPullParser in, int version)
+                throws IOException {
             final String packageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
             final int uid = XmlUtils.readIntAttribute(in, ATTR_UID);
-            final int descriptionResId = XmlUtils.readIntAttribute(in, ATTR_DESCRIPTION_RES_ID);
+            final String descriptionResEntryName;
+            if (version >= XML_VERSION_ADD_DESC_RES_NAME) {
+                descriptionResEntryName = XmlUtils.readStringAttribute(
+                        in, ATTR_DESCRIPTION_RES_NAME);
+            } else {
+                descriptionResEntryName = null;
+            }
             final long expiryTimeMillis = XmlUtils.readLongAttribute(in, ATTR_EXPIRY_TIME);
             final CharSequence description;
             if (version >= XML_VERSION_ADD_STRING_DESC) {
@@ -520,7 +587,8 @@ class BlobMetadata {
                 description = null;
             }
 
-            return new Leasee(packageName, uid, descriptionResId, description, expiryTimeMillis);
+            return new Leasee(packageName, uid, descriptionResEntryName,
+                    description, expiryTimeMillis);
         }
     }
 
