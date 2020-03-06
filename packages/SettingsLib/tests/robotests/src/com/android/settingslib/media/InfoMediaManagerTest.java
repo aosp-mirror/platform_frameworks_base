@@ -460,4 +460,37 @@ public class InfoMediaManagerTest {
 
         assertThat(mInfoMediaManager.releaseSession()).isTrue();
     }
+
+    @Test
+    public void getSessionName_packageNameIsNull_returnNull() {
+        mInfoMediaManager.mPackageName = null;
+
+        assertThat(mInfoMediaManager.getSessionName()).isNull();
+    }
+
+    @Test
+    public void getSessionName_notContainPackageName_returnNull() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn("com.fake.packagename");
+        when(info.getName()).thenReturn(TEST_NAME);
+
+        assertThat(mInfoMediaManager.getSessionName()).isNull();
+    }
+
+    @Test
+    public void getSessionName_containPackageName_returnName() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(info.getName()).thenReturn(TEST_NAME);
+
+        assertThat(mInfoMediaManager.getSessionName()).isEqualTo(TEST_NAME);
+    }
 }

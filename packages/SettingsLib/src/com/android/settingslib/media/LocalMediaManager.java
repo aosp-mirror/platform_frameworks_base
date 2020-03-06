@@ -324,6 +324,15 @@ public class LocalMediaManager implements BluetoothCallback {
         return mInfoMediaManager.getSessionVolume();
     }
 
+    /**
+     * Gets the user-visible name of the {@link android.media.RoutingSessionInfo}.
+     *
+     * @return current name of the session, and return {@code null} if not found.
+     */
+    public CharSequence getSessionName() {
+        return mInfoMediaManager.getSessionName();
+    }
+
     private MediaDevice updateCurrentConnectedDevice() {
         MediaDevice phoneMediaDevice = null;
         for (MediaDevice device : mMediaDevices) {
