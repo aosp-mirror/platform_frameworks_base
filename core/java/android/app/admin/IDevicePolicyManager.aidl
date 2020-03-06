@@ -467,9 +467,9 @@ interface IDevicePolicyManager {
 
     boolean setKeyGrantForApp(in ComponentName admin, String callerPackage, String alias, String packageName, boolean hasGrant);
 
-    void setProtectedPackages(in ComponentName admin, in List<String> packages);
+    void setUserControlDisabledPackages(in ComponentName admin, in List<String> packages);
 
-    List<String> getProtectedPackages(in ComponentName admin);
+    List<String> getUserControlDisabledPackages(in ComponentName admin);
 
     void setCommonCriteriaModeEnabled(in ComponentName admin, boolean enabled);
     boolean isCommonCriteriaModeEnabled(in ComponentName admin);

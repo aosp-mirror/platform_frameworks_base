@@ -11824,18 +11824,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by Device owner to set packages as protected. User will not be able to clear app
-     * data or force-stop protected packages.
+     * Called by Device owner to disable user control over apps. User will not be able to clear
+     * app data or force-stop packages.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
-     * @param packages The package names to protect.
+     * @param packages The package names for the apps.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public void setProtectedPackages(@NonNull ComponentName admin, @NonNull List<String> packages) {
-        throwIfParentInstance("setProtectedPackages");
+    public void setUserControlDisabledPackages(@NonNull ComponentName admin,
+            @NonNull List<String> packages) {
+        throwIfParentInstance("setUserControlDisabledPackages");
         if (mService != null) {
             try {
-                mService.setProtectedPackages(admin, packages);
+                mService.setUserControlDisabledPackages(admin, packages);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -11843,16 +11844,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the list of packages protected by the device owner.
+     * Returns the list of packages over which user control is disabled by the device owner.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public @NonNull List<String> getProtectedPackages(@NonNull ComponentName admin) {
-        throwIfParentInstance("getProtectedPackages");
+    public @NonNull List<String> getUserControlDisabledPackages(@NonNull ComponentName admin) {
+        throwIfParentInstance("getUserControlDisabledPackages");
         if (mService != null) {
             try {
-                return mService.getProtectedPackages(admin);
+                return mService.getUserControlDisabledPackages(admin);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
