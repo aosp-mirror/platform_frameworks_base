@@ -16,10 +16,10 @@
 
 #include "Log.h"
 
-#include "WorkDirectory.h"
-
+#include "incidentd_util.h"
 #include "proto_util.h"
 #include "PrivacyFilter.h"
+#include "WorkDirectory.h"
 
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <private/android_filesystem_config.h>
@@ -67,6 +67,9 @@ const ComponentName DROPBOX_SENTINEL("android", "DROPBOX");
 
 /** metadata field id in IncidentProto */
 const int FIELD_ID_INCIDENT_METADATA = 2;
+
+// Args for exec gzip
+static const char* GZIP[] = {"/system/bin/gzip", NULL};
 
 /**
  * Read a protobuf from disk into the message.
@@ -292,6 +295,7 @@ void ReportFile::addReport(const IncidentReportArgs& args) {
         report->set_cls(args.receiverCls());
         report->set_privacy_policy(args.getPrivacyPolicy());
         report->set_all_sections(args.all());
+        report->set_gzip(args.gzip());
         for (int section: args.sections()) {
             report->add_section(section);
         }
@@ -417,6 +421,24 @@ status_t ReportFile::startFilteringData(int writeFd, const IncidentReportArgs& a
         return BAD_VALUE;
     }
 
+    pid_t zipPid = 0;
+    if (args.gzip()) {
+        Fpipe zipPipe;
+        if (!zipPipe.init()) {
+            ALOGE("[ReportFile] Failed to setup pipe for gzip");
+            close(writeFd);
+            return -errno;
+        }
+        int status = 0;
+        zipPid = fork_execute_cmd((char* const*)GZIP, zipPipe.readFd().release(), writeFd, &status);
+        close(writeFd);
+        if (zipPid < 0 || status != 0) {
+            ALOGE("[ReportFile] Failed to fork and exec gzip");
+            return status;
+        }
+        writeFd = zipPipe.writeFd().release();
+    }
+
     status_t err;
 
     for (const auto& report : mEnvelope.report()) {
@@ -437,6 +459,13 @@ status_t ReportFile::startFilteringData(int writeFd, const IncidentReportArgs& a
     }
 
     close(writeFd);
+    if (zipPid > 0) {
+        status_t err = wait_child(zipPid, /* timeout_ms= */ 10 * 1000);
+        if (err != 0) {
+            ALOGE("[ReportFile] abnormal child process: %s", strerror(-err));
+        }
+        return err;
+    }
     return NO_ERROR;
 }
 
@@ -621,7 +650,7 @@ void WorkDirectory::commitAll(const string& pkg) {
 
     map<string,WorkDirectoryEntry> files;
     get_directory_contents_locked(&files, 0);
-    
+
     for (map<string,WorkDirectoryEntry>::iterator it = files.begin();
             it != files.end(); it++) {
         sp<ReportFile> reportFile = new ReportFile(this, it->second.timestampNs,
@@ -815,6 +844,7 @@ void get_args_from_report(IncidentReportArgs* out, const ReportFileProto_Report&
     out->setAll(report.all_sections());
     out->setReceiverPkg(report.pkg());
     out->setReceiverCls(report.cls());
+    out->setGzip(report.gzip());
 
     const int sectionCount = report.section_size();
     for (int i = 0; i < sectionCount; i++) {
