@@ -111,6 +111,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_AUTOFILL = "autofill";
 
     /**
+     * Namespace for blobstore feature that allows apps to share data blobs.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_BLOBSTORE = "blobstore";
+
+    /**
      * Namespace for all networking connectivity related features.
      *
      * @hide
