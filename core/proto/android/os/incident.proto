@@ -376,8 +376,7 @@ message IncidentProto {
     optional bytes system_trace = 3026 [
         (section).type = SECTION_FILE,
         (section).args = "/data/misc/perfetto-traces/incident-trace",
-        (privacy).dest = DEST_AUTOMATIC,
-        (section).userdebug_and_eng_only = true
+        (privacy).dest = DEST_AUTOMATIC
     ];
 
     // Dropbox entries split by tags.
