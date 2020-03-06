@@ -19,16 +19,12 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
 
 import android.app.ActivityThread;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
@@ -37,7 +33,6 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -294,12 +289,6 @@ final class ActivityManagerConstants extends ContentObserver {
     // started, the restriction is on while-in-use permissions.)
     volatile boolean mFlagBackgroundFgsStartRestrictionEnabled = true;
 
-    /**
-     * UserId to Assistant ComponentName mapping.
-     * Per user Assistant ComponentName is from {@link android.provider.Settings.Secure#ASSISTANT}
-     */
-    SparseArray<ComponentName> mAssistants = new SparseArray<>();
-
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -375,8 +364,6 @@ final class ActivityManagerConstants extends ContentObserver {
                 Settings.Global.getUriFor(
                         Settings.Global.FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED);
 
-    private static final Uri ASSISTANT_URI = Settings.Secure.getUriFor(Settings.Secure.ASSISTANT);
-
     private static final Uri ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI =
             Settings.Global.getUriFor(Settings.Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS);
 
@@ -443,8 +430,6 @@ final class ActivityManagerConstants extends ContentObserver {
         mResolver.registerContentObserver(ACTIVITY_STARTS_LOGGING_ENABLED_URI, false, this);
         mResolver.registerContentObserver(FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED_URI,
                 false, this);
-        mResolver.registerContentObserver(ASSISTANT_URI, false, this,
-                UserHandle.USER_ALL);
         if (mSystemServerAutomaticHeapDumpEnabled) {
             mResolver.registerContentObserver(ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI,
                     false, this);
@@ -460,7 +445,6 @@ final class ActivityManagerConstants extends ContentObserver {
         // The following read from Settings.
         updateActivityStartsLoggingEnabled();
         updateForegroundServiceStartsLoggingEnabled();
-        updateAssistant();
     }
 
     private void loadDeviceConfigConstants() {
@@ -492,8 +476,6 @@ final class ActivityManagerConstants extends ContentObserver {
             updateForegroundServiceStartsLoggingEnabled();
         } else if (ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI.equals(uri)) {
             updateEnableAutomaticSystemServerHeapDumps();
-        } else if (ASSISTANT_URI.equals(uri)) {
-            updateAssistant();
         }
     }
 
@@ -590,32 +572,6 @@ final class ActivityManagerConstants extends ContentObserver {
         mFlagForegroundServiceStartsLoggingEnabled = Settings.Global.getInt(mResolver,
                 Settings.Global.FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED, 1) == 1;
     }
-
-    private void updateAssistant() {
-        final List<UserInfo> users =
-                mService.mContext.getSystemService(UserManager.class).getUsers();
-        SparseArray<ComponentName> componentNames = new SparseArray<>();
-        for (int i = 0; i < users.size(); i++) {
-            final int userId = users.get(i).id;
-            final String str = Settings.Secure.getStringForUser(mResolver,
-                    Settings.Secure.ASSISTANT, userId);
-            if (!TextUtils.isEmpty(str)) {
-                componentNames.put(userId, ComponentName.unflattenFromString(str));
-            }
-        }
-        synchronized (mService) {
-            for (int i = 0; i < mAssistants.size(); i++) {
-                mService.mServices.mWhiteListAllowWhileInUsePermissionInFgs.remove(
-                        mAssistants.valueAt(i).getPackageName());
-            }
-            mAssistants = componentNames;
-            for (int i = 0; i < mAssistants.size(); i++) {
-                mService.mServices.mWhiteListAllowWhileInUsePermissionInFgs.add(
-                        mAssistants.valueAt(i).getPackageName());
-            }
-        }
-    }
-
     private void updateBackgroundFgsStartsRestriction() {
         mFlagBackgroundFgsStartRestrictionEnabled = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
