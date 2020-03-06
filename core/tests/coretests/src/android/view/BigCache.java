@@ -17,8 +17,8 @@
 package android.view;
 
 import android.app.Activity;
+import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Size;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
@@ -39,9 +39,9 @@ public class BigCache extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         final int cacheSize = ViewConfiguration.getMaximumDrawingCacheSize();
-        final Size windowSize = getWindowManager().getCurrentWindowMetrics().getSize();
-        final int screenWidth = windowSize.getWidth();
-        final int screenHeight = windowSize.getHeight();
+        final Rect windowBounds = getWindowManager().getCurrentWindowMetrics().getBounds();
+        final int screenWidth = windowBounds.width();
+        final int screenHeight = windowBounds.height();
 
         final View tiny = new View(this);
         tiny.setId(R.id.a);

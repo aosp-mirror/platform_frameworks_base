@@ -28,11 +28,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Size;
 import android.util.Slog;
 import android.view.Display;
 import android.view.ViewGroup;
@@ -134,8 +134,8 @@ public class FakeApp extends Application {
         }
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-        Size maxWindowSize = wm.getMaximumWindowMetrics().getSize();
-        int maxSize = Math.max(maxWindowSize.getWidth(), maxWindowSize.getHeight());
+        Rect maxWindowBounds = wm.getMaximumWindowMetrics().getBounds();
+        int maxSize = Math.max(maxWindowBounds.width(), maxWindowBounds.height());
         maxSize *= 2;
         lp.x = maxSize;
         lp.y = maxSize;

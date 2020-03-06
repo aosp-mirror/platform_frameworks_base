@@ -111,7 +111,7 @@ public class ListOfInternalSelectionViews extends Activity {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        mScreenHeight = getWindowManager().getCurrentWindowMetrics().getSize().getHeight();
+        mScreenHeight = getWindowManager().getCurrentWindowMetrics().getBounds().height();
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {

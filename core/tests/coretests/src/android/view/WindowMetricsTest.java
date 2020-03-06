@@ -22,10 +22,10 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
-import android.util.Size;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
@@ -87,10 +87,12 @@ public class WindowMetricsTest {
 
     private static void verifyMetricsSanity(WindowMetrics currentMetrics,
             WindowMetrics maxMetrics) {
-        Size currentSize = currentMetrics.getSize();
-        Size maxSize = maxMetrics.getSize();
+        Rect currentBounds = currentMetrics.getBounds();
+        Rect maxBounds = maxMetrics.getBounds();
 
-        assertTrue(maxSize.getWidth() >= currentSize.getWidth());
-        assertTrue(maxSize.getHeight() >= currentSize.getHeight());
+        assertTrue(maxBounds.width() >= currentBounds.width());
+        assertTrue(maxBounds.height() >= currentBounds.height());
+        assertTrue(maxBounds.left >= 0);
+        assertTrue(maxBounds.top >= 0);
     }
 }

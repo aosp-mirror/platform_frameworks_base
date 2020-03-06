@@ -306,7 +306,7 @@ public abstract class ListScenario extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 
-        mScreenHeight = getWindowManager().getCurrentWindowMetrics().getSize().getHeight();
+        mScreenHeight = getWindowManager().getCurrentWindowMetrics().getBounds().height();
 
         final Params params = createParams();
         init(params);

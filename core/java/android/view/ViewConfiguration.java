@@ -23,11 +23,11 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.Size;
 import android.util.SparseArray;
 import android.util.TypedValue;
 
@@ -410,8 +410,8 @@ public class ViewConfiguration {
 
         // Size of the screen in bytes, in ARGB_8888 format
         final WindowManager windowManager = context.getSystemService(WindowManager.class);
-        final Size maxWindowSize = windowManager.getMaximumWindowMetrics().getSize();
-        mMaximumDrawingCacheSize = 4 * maxWindowSize.getWidth() * maxWindowSize.getHeight();
+        final Rect maxWindowBounds = windowManager.getMaximumWindowMetrics().getBounds();
+        mMaximumDrawingCacheSize = 4 * maxWindowBounds.width() * maxWindowBounds.height();
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
