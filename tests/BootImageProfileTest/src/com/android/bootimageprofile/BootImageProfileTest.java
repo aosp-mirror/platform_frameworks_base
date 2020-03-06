@@ -78,13 +78,12 @@ public class BootImageProfileTest implements IDeviceTest {
             return false;
         }
         String res = mTestDevice.executeShellCommand("kill -s SIGUSR1 " + pid).trim();
-        assertTrue("kill SIGUSR1: " + res, res.length() == 0);
-        return true;
+        return res.length() == 0;
     }
 
     @Test
     public void testSystemServerProfile() throws Exception {
-        final int numIterations = 20;
+        final int numIterations = 30;
         String res;
         // Set properties and wait for them to be readable.
         for (int i = 1; i <= numIterations; ++i) {
