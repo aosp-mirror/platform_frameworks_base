@@ -31,7 +31,6 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.car.CarServiceProvider;
-import com.android.systemui.car.SystemUIPrimaryWindowController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -205,8 +204,6 @@ public class CarStatusBarModule {
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
-            FullscreenUserSwitcher fullscreenUserSwitcher,
-            SystemUIPrimaryWindowController systemUIPrimaryWindowController,
             CarNavigationBarController carNavigationBarController,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder) {
         return new CarStatusBar(
@@ -288,8 +285,6 @@ public class CarStatusBarModule {
                 statusBarTouchableRegionManager,
                 carServiceProvider,
                 powerManagerHelperLazy,
-                fullscreenUserSwitcher,
-                systemUIPrimaryWindowController,
                 carNavigationBarController,
                 flingAnimationUtilsBuilder);
     }

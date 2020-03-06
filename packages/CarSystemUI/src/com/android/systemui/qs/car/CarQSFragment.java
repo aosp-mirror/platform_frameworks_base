@@ -35,9 +35,9 @@ import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.android.systemui.R;
+import com.android.systemui.car.userswitcher.UserGridRecyclerView;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFooter;
-import com.android.systemui.statusbar.car.UserGridRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
