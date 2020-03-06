@@ -114,4 +114,16 @@ interface IRecentsAnimationController {
      * animation is cancelled through fail safe mechanism.
      */
     void setWillFinishToHome(boolean willFinishToHome);
+
+    /**
+     * Stops controlling a task that is currently controlled by this recents animation.
+     *
+     * This method should be called when a task that has been received via {@link #onAnimationStart}
+     * or {@link #onTaskAppeared} is no longer needed.  After calling this method, the task will
+     * either disappear from the screen, or jump to its final position in case it was the top task.
+     *
+     * @param taskId Id of the Task target to remove
+     * @return {@code true} when target removed successfully, {@code false} otherwise.
+     */
+    boolean removeTask(int taskId);
 }
