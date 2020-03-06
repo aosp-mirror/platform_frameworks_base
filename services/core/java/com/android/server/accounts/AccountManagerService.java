@@ -584,6 +584,7 @@ public class AccountManagerService
             Log.d(TAG, "Visibility was not initialized");
             accountVisibility = new HashMap<>();
             accounts.visibilityCache.put(account, accountVisibility);
+            AccountManager.invalidateLocalAccountsDataCaches();
         }
         return accountVisibility;
     }
@@ -871,6 +872,7 @@ public class AccountManagerService
         Map<String, Integer> accountVisibility =
             getPackagesAndVisibilityForAccountLocked(account, accounts);
         accountVisibility.put(packageName, newVisibility);
+        AccountManager.invalidateLocalAccountsDataCaches();
         return true;
     }
 
@@ -1241,6 +1243,7 @@ public class AccountManagerService
                         accounts.accountCache.put(accountType, accountsForType);
                     }
                     accounts.visibilityCache.putAll(accountsDb.findAllVisibilityValues());
+                    AccountManager.invalidateLocalAccountsDataCaches();
                 } finally {
                     if (accountDeleted) {
                         sendAccountsChangedBroadcast(accounts.userId);
@@ -1325,6 +1328,7 @@ public class AccountManagerService
                 accounts = new UserAccounts(mContext, userId, preNDbFile, deDbFile);
                 mUsers.append(userId, accounts);
                 purgeOldGrants(accounts);
+                AccountManager.invalidateLocalAccountsDataCaches();
                 validateAccounts = true;
             }
             // open CE database if necessary
@@ -1406,6 +1410,7 @@ public class AccountManagerService
                                         getPackagesAndVisibilityForAccountLocked(account, accounts);
                                 accountVisibility.remove(packageName);
                             }
+                            AccountManager.invalidateLocalAccountsDataCaches();
                         }
                     }
               }
@@ -1419,6 +1424,7 @@ public class AccountManagerService
             accounts = mUsers.get(userId);
             mUsers.remove(userId);
             mLocalUnlockedUsers.delete(userId);
+            AccountManager.invalidateLocalAccountsDataCaches();
         }
         if (accounts != null) {
             synchronized (accounts.dbLock) {
@@ -2121,6 +2127,7 @@ public class AccountManagerService
                     sendAccountRemovedBroadcast(accountToRename, packageName, accounts.userId);
                 }
 
+                AccountManager.invalidateLocalAccountsDataCaches();
                 AccountManager.invalidateLocalAccountUserDataCaches();
             }
         }
@@ -5838,6 +5845,8 @@ public class AccountManagerService
         accounts.authTokenCache.remove(account);
         accounts.previousNameCache.remove(account);
         accounts.visibilityCache.remove(account);
+
+        AccountManager.invalidateLocalAccountsDataCaches();
     }
 
     /**
@@ -5857,6 +5866,7 @@ public class AccountManagerService
                 : UUID.randomUUID().toString();
         newAccountsForType[oldLength] = new Account(account, token);
         accounts.accountCache.put(account.type, newAccountsForType);
+        AccountManager.invalidateLocalAccountsDataCaches();
         return newAccountsForType[oldLength];
     }
 

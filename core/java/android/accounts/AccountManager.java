@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -338,7 +339,60 @@ public class AccountManager {
 
     /**
      * @hide
-     */
+    */
+    public static final String CACHE_KEY_ACCOUNTS_DATA_PROPERTY = "cache_key.system_server.accounts_data";
+
+    /**
+     * @hide
+    */
+    public static final int CACHE_ACCOUNTS_DATA_SIZE = 4;
+
+    private static final class UserIdPackage
+    {
+        public int userId;
+        public String packageName;
+
+        public UserIdPackage(int UserId, String PackageName) {
+            this.userId = UserId;
+            this.packageName = PackageName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
+            if (o == this) {
+                return true;
+            }
+            if (o.getClass() != getClass()) {
+                return false;
+            }
+            UserIdPackage e = (UserIdPackage) o;
+            return e.userId == userId && e.packageName.equals(packageName);
+        }
+
+        @Override
+        public int hashCode() {
+            return userId ^ packageName.hashCode();
+        }
+    }
+
+    PropertyInvalidatedCache<UserIdPackage, Account[]> mAccountsForUserCache =
+        new PropertyInvalidatedCache<UserIdPackage, Account[]>(CACHE_ACCOUNTS_DATA_SIZE, CACHE_KEY_ACCOUNTS_DATA_PROPERTY) {
+        @Override
+        protected Account[] recompute(UserIdPackage userAndPackage) {
+            try {
+                return mService.getAccountsAsUser(null, userAndPackage.userId, userAndPackage.packageName);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    };
+
+    /**
+     * @hide
+    */
     public static final String CACHE_KEY_USER_DATA_PROPERTY = "cache_key.system_server.account_user_data";
 
     /**
@@ -660,11 +714,8 @@ public class AccountManager {
      */
     @NonNull
     public Account[] getAccountsAsUser(int userId) {
-        try {
-            return mService.getAccountsAsUser(null, userId, mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        UserIdPackage userAndPackage = new UserIdPackage(userId, mContext.getOpPackageName());
+        return mAccountsForUserCache.query(userAndPackage);
     }
 
     /**
@@ -3392,6 +3443,23 @@ public class AccountManager {
         }
     }
 
+    /**
+     * @hide
+     * Calling this will invalidate Local Accounts Data Cache which
+     * forces the next query in any process to recompute the cache
+    */
+    public static void invalidateLocalAccountsDataCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_ACCOUNTS_DATA_PROPERTY);
+    }
+
+    /**
+     * @hide
+     * Calling this will disable account data caching.
+    */
+    public void disableLocalAccountCaches() {
+        mAccountsForUserCache.disableLocal();
+    }
+    
     /**
      * @hide
      * Calling this will invalidate Local Account User Data Cache which
