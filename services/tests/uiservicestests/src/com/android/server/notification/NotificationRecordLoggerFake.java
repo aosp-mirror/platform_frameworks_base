@@ -31,24 +31,28 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
         // The following fields are only relevant to maybeLogNotificationPosted() calls.
         static final int INVALID = -1;
         public int position = INVALID, buzzBeepBlink = INVALID;
-        public boolean shouldLogReported;
+        public boolean wasLogged;
 
         CallRecord(NotificationRecord r, NotificationRecord old, int position,
                 int buzzBeepBlink) {
             super(r, old);
             this.position = position;
             this.buzzBeepBlink = buzzBeepBlink;
-            shouldLogReported = shouldLogReported(buzzBeepBlink);
-            event = shouldLogReported ? NotificationReportedEvent.fromRecordPair(this) : null;
+            wasLogged = shouldLogReported(buzzBeepBlink);
+            event = wasLogged ? NotificationReportedEvent.fromRecordPair(this) : null;
         }
 
         CallRecord(NotificationRecord r, UiEventLogger.UiEventEnum event) {
             super(r, null);
-            shouldLogReported = false;
+            wasLogged = true;
             this.event = event;
         }
     }
     private List<CallRecord> mCalls = new ArrayList<>();
+
+    public int numCalls() {
+        return mCalls.size();
+    }
 
     List<CallRecord> getCalls() {
         return mCalls;
@@ -56,6 +60,9 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
 
     CallRecord get(int index) {
         return mCalls.get(index);
+    }
+    UiEventLogger.UiEventEnum event(int index) {
+        return mCalls.get(index).event;
     }
 
     @Override
@@ -65,13 +72,12 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
     }
 
     @Override
-    public void logNotificationCancelled(NotificationRecord r, int reason, int dismissalSurface) {
-        mCalls.add(new CallRecord(r,
-                NotificationCancelledEvent.fromCancelReason(reason, dismissalSurface)));
+    public void log(UiEventLogger.UiEventEnum event, NotificationRecord r) {
+        mCalls.add(new CallRecord(r, event));
     }
 
     @Override
-    public void logNotificationVisibility(NotificationRecord r, boolean visible) {
-        mCalls.add(new CallRecord(r, NotificationEvent.fromVisibility(visible)));
+    public void log(UiEventLogger.UiEventEnum event) {
+        mCalls.add(new CallRecord(null, event));
     }
 }

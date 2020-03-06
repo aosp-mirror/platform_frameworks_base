@@ -35,10 +35,13 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * Interface for writing NotificationReported atoms to statsd log.
+ * Interface for writing NotificationReported atoms to statsd log. Use NotificationRecordLoggerImpl
+ * in production.  Use NotificationRecordLoggerFake for testing.
  * @hide
  */
 public interface NotificationRecordLogger {
+
+    // The high-level interface used by clients.
 
     /**
      * May log a NotificationReported atom reflecting the posting or update of a notification.
@@ -58,9 +61,11 @@ public interface NotificationRecordLogger {
      * @param reason The reason the notification was canceled.
      * @param dismissalSurface The surface the notification was dismissed from.
      */
-    void logNotificationCancelled(@Nullable NotificationRecord r,
+    default void logNotificationCancelled(@Nullable NotificationRecord r,
             @NotificationListenerService.NotificationCancelReason int reason,
-            @NotificationStats.DismissalSurface int dismissalSurface);
+            @NotificationStats.DismissalSurface int dismissalSurface) {
+        log(NotificationCancelledEvent.fromCancelReason(reason, dismissalSurface), r);
+    }
 
     /**
      * Logs a notification visibility change event using UiEventReported (event ids from the
@@ -68,7 +73,17 @@ public interface NotificationRecordLogger {
      * @param r The NotificationRecord. If null, no action is taken.
      * @param visible True if the notification became visible.
      */
-    void logNotificationVisibility(@Nullable NotificationRecord r, boolean visible);
+    default void logNotificationVisibility(@Nullable NotificationRecord r, boolean visible) {
+        log(NotificationEvent.fromVisibility(visible), r);
+    }
+
+    // The UiEventReported logging methods are implemented in terms of this lower-level interface.
+
+    /** Logs a UiEventReported event for the given notification. */
+    void log(UiEventLogger.UiEventEnum event, NotificationRecord r);
+
+    /** Logs a UiEventReported event that is not associated with any notification. */
+    void log(UiEventLogger.UiEventEnum event);
 
     /**
      * The UiEvent enums that this class can log.
@@ -205,7 +220,30 @@ public interface NotificationRecordLogger {
         @UiEvent(doc = "Notification became visible.")
         NOTIFICATION_OPEN(197),
         @UiEvent(doc = "Notification stopped being visible.")
-        NOTIFICATION_CLOSE(198);
+        NOTIFICATION_CLOSE(198),
+        @UiEvent(doc = "Notification was snoozed.")
+        NOTIFICATION_SNOOZED(317),
+        @UiEvent(doc = "Notification was not posted because its app is snoozed.")
+        NOTIFICATION_NOT_POSTED_SNOOZED(319),
+        @UiEvent(doc = "Notification was clicked.")
+        NOTIFICATION_CLICKED(320),
+        @UiEvent(doc = "Notification action was clicked.")
+        NOTIFICATION_ACTION_CLICKED(321),
+        @UiEvent(doc = "Notification detail was expanded due to non-user action.")
+        NOTIFICATION_DETAIL_OPEN_SYSTEM(327),
+        @UiEvent(doc = "Notification detail was collapsed due to non-user action.")
+        NOTIFICATION_DETAIL_CLOSE_SYSTEM(328),
+        @UiEvent(doc = "Notification detail was expanded due to user action.")
+        NOTIFICATION_DETAIL_OPEN_USER(329),
+        @UiEvent(doc = "Notification detail was collapsed due to user action.")
+        NOTIFICATION_DETAIL_CLOSE_USER(330),
+        @UiEvent(doc = "Notification direct reply action was used.")
+        NOTIFICATION_DIRECT_REPLIED(331),
+        @UiEvent(doc = "Notification smart reply action was used.")
+        NOTIFICATION_SMART_REPLIED(332),
+        @UiEvent(doc = "Notification smart reply action was visible.")
+        NOTIFICATION_SMART_REPLY_VISIBLE(333),
+        ;
 
         private final int mId;
         NotificationEvent(int id) {
@@ -218,7 +256,29 @@ public interface NotificationRecordLogger {
         public static NotificationEvent fromVisibility(boolean visible) {
             return visible ? NOTIFICATION_OPEN : NOTIFICATION_CLOSE;
         }
+        public static NotificationEvent fromExpanded(boolean expanded, boolean userAction) {
+            if (userAction) {
+                return expanded ? NOTIFICATION_DETAIL_OPEN_USER : NOTIFICATION_DETAIL_CLOSE_USER;
+            }
+            return expanded ? NOTIFICATION_DETAIL_OPEN_SYSTEM : NOTIFICATION_DETAIL_CLOSE_SYSTEM;
+        }
     }
+
+    enum NotificationPanelEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Notification panel became visible.")
+        NOTIFICATION_PANEL_OPEN(325),
+        @UiEvent(doc = "Notification panel stopped being visible.")
+        NOTIFICATION_PANEL_CLOSE(326);
+
+        private final int mId;
+        NotificationPanelEvent(int id) {
+            mId = id;
+        }
+        @Override public int getId() {
+            return mId;
+        }
+    }
+
     /**
      * A helper for extracting logging information from one or two NotificationRecords.
      */

@@ -65,20 +65,16 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
     }
 
     @Override
-    public void logNotificationCancelled(NotificationRecord r, int reason, int dismissalSurface) {
-        log(NotificationCancelledEvent.fromCancelReason(reason, dismissalSurface), r);
-    }
-
-    @Override
-    public void logNotificationVisibility(NotificationRecord r, boolean visible) {
-        log(NotificationEvent.fromVisibility(visible), r);
-    }
-
-    void log(UiEventLogger.UiEventEnum event, NotificationRecord r) {
+    public void log(UiEventLogger.UiEventEnum event, NotificationRecord r) {
         if (r == null) {
             return;
         }
         mUiEventLogger.logWithInstanceId(event, r.getUid(), r.getSbn().getPackageName(),
                 r.getSbn().getInstanceId());
+    }
+
+    @Override
+    public void log(UiEventLogger.UiEventEnum event) {
+        mUiEventLogger.log(event);
     }
 }
