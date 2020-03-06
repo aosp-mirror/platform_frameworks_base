@@ -18562,9 +18562,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.d(TAG, "Updating package:" + ps.name + " install state for user:"
                         + nextUserId);
             }
-
-            destroyAppDataLIF(pkg, nextUserId,
-                    FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
+            if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
+                destroyAppDataLIF(pkg, nextUserId,
+                        FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
+            }
             clearDefaultBrowserIfNeededForUser(ps.name, nextUserId);
             removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId, ps.appId);
             clearPackagePreferredActivities(ps.name, nextUserId);
