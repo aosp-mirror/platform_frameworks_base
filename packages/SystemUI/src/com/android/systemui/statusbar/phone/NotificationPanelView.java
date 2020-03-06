@@ -588,7 +588,7 @@ public class NotificationPanelView extends PanelView implements
         if (STATUS_BAR_QUICK_QS_PULLDOWN.equals(key)) {
             mOneFingerQuickSettingsIntercept = newValue == null ? 1 : Integer.parseInt(newValue);
         } else if (DOUBLE_TAP_SLEEP_GESTURE.equals(key)) {
-            mDoubleTapToSleepEnabled = newValue == null || Integer.parseInt(newValue) == 1;
+            mDoubleTapToSleepEnabled = newValue != null && Integer.parseInt(newValue) == 1;
         }
     }
 
