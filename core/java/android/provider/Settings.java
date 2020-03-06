@@ -6608,6 +6608,18 @@ public final class Settings {
                 "accessibility_button_target_component";
 
         /**
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via the long press accessibility button in the navigation bar.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
+         * accessibility feature.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_BUTTON_LONG_PRESS_TARGETS =
+                "accessibility_button_long_press_targets";
+
+        /**
          * The system class name of magnification controller which is a target to be toggled via
          * accessibility shortcut or accessibility button.
          *
