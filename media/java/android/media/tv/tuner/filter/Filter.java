@@ -45,6 +45,10 @@ public class Filter implements AutoCloseable {
     public @interface Type {}
 
     /**
+     * Undefined filter type.
+     */
+    public static final int TYPE_UNDEFINED = 0;
+    /**
      * TS filter type.
      */
     public static final int TYPE_TS = Constants.DemuxFilterMainType.TS;
@@ -248,7 +252,6 @@ public class Filter implements AutoCloseable {
     /**
      * Gets the filter Id.
      */
-    @Result
     public int getId() {
         return nativeGetId();
     }
@@ -273,6 +276,8 @@ public class Filter implements AutoCloseable {
     /**
      * Starts filtering data.
      *
+     * <p>Does nothing if the filter is already started.
+     *
      * @return result status of the operation.
      */
     @Result
@@ -283,6 +288,8 @@ public class Filter implements AutoCloseable {
 
     /**
      * Stops filtering data.
+     *
+     * <p>Does nothing if the filter is stopped or not started.
      *
      * @return result status of the operation.
      */
@@ -312,14 +319,13 @@ public class Filter implements AutoCloseable {
      * @param size the maximum number of bytes to read.
      * @return the number of bytes read.
      */
-    @Result
     public int read(@NonNull byte[] buffer, @BytesLong long offset, @BytesLong long size) {
         size = Math.min(size, buffer.length - offset);
         return nativeRead(buffer, offset, size);
     }
 
     /**
-     * Releases the Filter instance.
+     * Stops filtering data and releases the Filter instance.
      */
     @Override
     public void close() {
