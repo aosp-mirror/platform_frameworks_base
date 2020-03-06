@@ -122,7 +122,6 @@ cc_defaults {
         "libbinder_ndk",
         "libincident",
         "liblog",
-        "libstatssocket",
         "statsd-aidl-ndk_platform",
     ],
 }
@@ -215,7 +214,10 @@ cc_binary {
         type: "lite",
     },
 
-    shared_libs: ["libgtest_prod"],
+    shared_libs: [
+        "libgtest_prod",
+        "libstatssocket",
+    ],
 
     apex_available: [
         "com.android.os.statsd",
