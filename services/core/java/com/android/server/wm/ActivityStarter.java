@@ -615,12 +615,15 @@ class ActivityStarter {
 
             int res;
             synchronized (mService.mGlobalLock) {
-                final ActivityStack stack = mRootWindowContainer.getTopDisplayFocusedStack();
-                stack.mConfigWillChange = mRequest.globalConfig != null
+                final boolean globalConfigWillChange = mRequest.globalConfig != null
                         && mService.getGlobalConfiguration().diff(mRequest.globalConfig) != 0;
+                final ActivityStack stack = mRootWindowContainer.getTopDisplayFocusedStack();
+                if (stack != null) {
+                    stack.mConfigWillChange = globalConfigWillChange;
+                }
                 if (DEBUG_CONFIGURATION) {
                     Slog.v(TAG_CONFIGURATION, "Starting activity when config will change = "
-                            + stack.mConfigWillChange);
+                            + globalConfigWillChange);
                 }
 
                 final long origId = Binder.clearCallingIdentity();
@@ -633,7 +636,7 @@ class ActivityStarter {
 
                 Binder.restoreCallingIdentity(origId);
 
-                if (stack.mConfigWillChange) {
+                if (globalConfigWillChange) {
                     // If the caller also wants to switch to a new configuration, do so now.
                     // This allows a clean switch, as we are waiting for the current activity
                     // to pause (so we will not destroy it), and have not yet started the
@@ -641,7 +644,9 @@ class ActivityStarter {
                     mService.mAmInternal.enforceCallingPermission(
                             android.Manifest.permission.CHANGE_CONFIGURATION,
                             "updateConfiguration()");
-                    stack.mConfigWillChange = false;
+                    if (stack != null) {
+                        stack.mConfigWillChange = false;
+                    }
                     if (DEBUG_CONFIGURATION) {
                         Slog.v(TAG_CONFIGURATION,
                                 "Updating to new configuration after starting activity.");
@@ -1536,9 +1541,11 @@ class ActivityStarter {
         // If the activity being launched is the same as the one currently at the top, then
         // we need to check if it should only be launched once.
         final ActivityStack topStack = mRootWindowContainer.getTopDisplayFocusedStack();
-        startResult = deliverToCurrentTopIfNeeded(topStack);
-        if (startResult != START_SUCCESS) {
-            return startResult;
+        if (topStack != null) {
+            startResult = deliverToCurrentTopIfNeeded(topStack);
+            if (startResult != START_SUCCESS) {
+                return startResult;
+            }
         }
 
         if (mTargetStack == null) {
@@ -2126,10 +2133,13 @@ class ActivityStarter {
         if ((startFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
             ActivityRecord checkedCaller = sourceRecord;
             if (checkedCaller == null) {
-                checkedCaller = mRootWindowContainer.getTopDisplayFocusedStack()
-                        .topRunningNonDelayedActivityLocked(mNotTop);
+                ActivityStack topFocusedStack = mRootWindowContainer.getTopDisplayFocusedStack();
+                if (topFocusedStack != null) {
+                    checkedCaller = topFocusedStack.topRunningNonDelayedActivityLocked(mNotTop);
+                }
             }
-            if (!checkedCaller.mActivityComponent.equals(r.mActivityComponent)) {
+            if (checkedCaller == null
+                    || !checkedCaller.mActivityComponent.equals(r.mActivityComponent)) {
                 // Caller is not the same as launcher, so always needed.
                 mStartFlags &= ~START_FLAG_ONLY_IF_NEEDED;
             }
