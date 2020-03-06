@@ -316,74 +316,9 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testInitializeNotificationInfoView_showBlockingHelper() throws Exception {
-        NotificationInfo notificationInfoView = mock(NotificationInfo.class);
-        ExpandableNotificationRow row = spy(mHelper.createRow());
-        row.setBlockingHelperShowing(true);
-        modifyRanking(row.getEntry())
-                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
-                .build();
-        when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getEntry().getSbn();
-        NotificationEntry entry = row.getEntry();
-
-        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
-
-        verify(notificationInfoView).bindNotification(
-                any(PackageManager.class),
-                any(INotificationManager.class),
-                eq(mVisualStabilityManager),
-                eq(statusBarNotification.getPackageName()),
-                any(NotificationChannel.class),
-                anySet(),
-                eq(entry),
-                any(NotificationInfo.CheckSaveListener.class),
-                any(NotificationInfo.OnSettingsClickListener.class),
-                any(NotificationInfo.OnAppSettingsClickListener.class),
-                eq(false),
-                eq(false),
-                eq(true) /* isForBlockingHelper */,
-                eq(0),
-                eq(false) /* wasShownHighPriority */);
-    }
-
-    @Test
-    public void testInitializeNotificationInfoView_dontShowBlockingHelper() throws Exception {
-        NotificationInfo notificationInfoView = mock(NotificationInfo.class);
-        ExpandableNotificationRow row = spy(mHelper.createRow());
-        row.setBlockingHelperShowing(false);
-        modifyRanking(row.getEntry())
-                .setUserSentiment(USER_SENTIMENT_NEGATIVE)
-                .build();
-        when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getEntry().getSbn();
-        NotificationEntry entry = row.getEntry();
-
-        mGutsManager.initializeNotificationInfo(row, notificationInfoView);
-
-        verify(notificationInfoView).bindNotification(
-                any(PackageManager.class),
-                any(INotificationManager.class),
-                eq(mVisualStabilityManager),
-                eq(statusBarNotification.getPackageName()),
-                any(NotificationChannel.class),
-                anySet(),
-                eq(entry),
-                any(NotificationInfo.CheckSaveListener.class),
-                any(NotificationInfo.OnSettingsClickListener.class),
-                any(NotificationInfo.OnAppSettingsClickListener.class),
-                eq(false),
-                eq(false),
-                eq(false) /* isForBlockingHelper */,
-                eq(0),
-                eq(false) /* wasShownHighPriority */);
-    }
-
-    @Test
     public void testInitializeNotificationInfoView_highPriority() throws Exception {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
-        row.setBlockingHelperShowing(true);
         final NotificationEntry entry = row.getEntry();
         modifyRanking(entry)
                 .setUserSentiment(USER_SENTIMENT_NEGATIVE)
@@ -403,13 +338,10 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(NotificationChannel.class),
                 anySet(),
                 eq(entry),
-                any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
                 eq(false),
                 eq(false),
-                eq(true) /* isForBlockingHelper */,
-                eq(IMPORTANCE_HIGH),
                 eq(true) /* wasShownHighPriority */);
     }
 
@@ -437,13 +369,10 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(NotificationChannel.class),
                 anySet(),
                 eq(entry),
-                any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
                 eq(true),
                 eq(false),
-                eq(false) /* isForBlockingHelper */,
-                eq(0),
                 eq(false) /* wasShownHighPriority */);
     }
 
@@ -469,13 +398,10 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(NotificationChannel.class),
                 anySet(),
                 eq(entry),
-                any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
                 eq(false),
                 eq(false),
-                eq(true) /* isForBlockingHelper */,
-                eq(0),
                 eq(false) /* wasShownHighPriority */);
     }
 
